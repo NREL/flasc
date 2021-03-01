@@ -2,7 +2,7 @@ import copy
 import datetime
 import numpy as np
 from scipy import stats as spst
-
+import pandas as pd
 import floris_scada as fsc
 
 
@@ -49,7 +49,7 @@ def find_bias_x(x_1, y_1, x_2, y_2, search_range, search_dx):
 
 class bias_estimation():
     def __init__(self, fs, test_turbines_subset, ref_turbine_maxrange,
-                 ws_range, sliding_window_width, eo_ws_step=5.0, eo_wd_step=2.0):
+                 ws_range, sliding_window_lb_ub, eo_ws_step=5.0, eo_wd_step=2.0):
         printnow('Initializing the bias_correction() class from floris_scada.')
         self.fs = fs
         self.fi = fs.fi_array[0]
@@ -69,11 +69,11 @@ class bias_estimation():
         self._get_ref_turbs_floris(wd_step=self.eo_wd_step)
 
         printnow('  Initializing sliding window')
-        time_array = list(fs.df.time)
+        time_array = list(pd.to_datetime(fs.df.time))
         self.sw_time_array = time_array
         self.sw_current_time = time_array[0]
-        self.sw_width = sliding_window_width
-        dt_array = [(time_array[i+1] - time_array[i])/datetime.timedelta(seconds=1) for i in range(5000)]
+        self.sw_lb_ub = sliding_window_lb_ub
+        dt_array = [(time_array[i+1] - time_array[i])/datetime.timedelta(seconds=1) for i in range(np.min([5000, len(time_array)-1]))]
         self.sw_time_array_dt = datetime.timedelta(seconds=np.nanmin(dt_array))
         printnow('  Estimated the data to be sampled at %.1f seconds.' % (self.sw_time_array_dt.seconds))
 
@@ -152,15 +152,15 @@ class bias_estimation():
         current_time = self.sw_current_time
         time_array = self.sw_time_array
         dt = self.sw_time_array_dt
-        sliding_window_width = self.sw_width
+        sliding_window_lb_ub = self.sw_lb_ub
 
         # Create sliding window
         sliding_window_stepsize_didx = int(timestep / dt)
-        sliding_window_width_didx = int(sliding_window_width / dt)
+        sliding_window_width_didx = int((sliding_window_lb_ub[1]-sliding_window_lb_ub[0]) / dt)
 
         # Find corresponding index to time_array_60s
-        window_time_min = current_time - sliding_window_width/2.
-        window_time_max = current_time + sliding_window_width/2.
+        window_time_min = current_time + sliding_window_lb_ub[0]
+        window_time_max = current_time + sliding_window_lb_ub[1]
 
         # Do _min first
         if window_time_min <= time_array[0]:
@@ -257,21 +257,25 @@ class bias_estimation():
                                             full_filter_all=full_filter_all,
                                             do_prints=False)
 
-        eo.df['control_mode'] = 'baseline'
-        eo.df['category'] = 'baseline'
+        if eo.df.shape[0] <= 0:
+            result = []
+            result_floris = []
+        else:
+            eo.df['control_mode'] = 'baseline'
+            eo.df['category'] = 'baseline'
 
-        # Make an Energy Analysis class for floris
-        eo_floris = copy.deepcopy(eo)
-        eo_floris.df['ref_power'] = eo_floris.df[['floris_original_%03d' % t for t in ref_turbines]].mean(axis=1)
-        eo_floris.df['test_power'] = eo_floris.df[['floris_original_%03d' % t for t in test_turbines]].mean(axis=1)
+            # Make an Energy Analysis class for floris
+            eo_floris = copy.deepcopy(eo)
+            eo_floris.df['ref_power'] = eo_floris.df[['floris_original_%03d' % t for t in ref_turbines]].mean(axis=1)
+            eo_floris.df['test_power'] = eo_floris.df[['floris_original_%03d' % t for t in test_turbines]].mean(axis=1)
 
-        # Set the energy frames
-        eo.get_energy_ratio_frame(self.ws_range, wd_range, ['baseline'])
-        eo_floris.get_energy_ratio_frame(self.ws_range, wd_range, ['baseline'])
+            # Set the energy frames
+            eo.get_energy_ratio_frame(self.ws_range, wd_range, ['baseline'])
+            eo_floris.get_energy_ratio_frame(self.ws_range, wd_range, ['baseline'])
 
-        # Get the analysis results
-        result = eo.energy_frame.get_1_cat_energy_ratio_array_with_range(N=1)
-        result_floris = eo_floris.energy_frame.get_1_cat_energy_ratio_array_with_range(N=1)
+            # Get the analysis results
+            result = eo.energy_frame.get_1_cat_energy_ratio_array_with_range(N=1)
+            result_floris = eo_floris.energy_frame.get_1_cat_energy_ratio_array_with_range(N=1)
 
         return result, result_floris
 
@@ -303,9 +307,10 @@ class bias_estimation():
                                                             ref_turbines=ref_turbines,
                                                             wd_range=wd_range)
 
-                    er_result_wd[ii].extend(result.wd_bin)
-                    er_result_scada[ii].extend(result.baseline)
-                    er_result_floris[ii].extend(result_floris.baseline)
+                    if len(result) > 0:
+                        er_result_wd[ii].extend(result.wd_bin)
+                        er_result_scada[ii].extend(result.baseline)
+                        er_result_floris[ii].extend(result_floris.baseline)
 
         self.energy_ratio_wd_total = er_result_wd
         self.energy_ratio_scada_total = er_result_scada
