@@ -80,31 +80,30 @@ if __name__ == '__main__':
     fi = wfct.floris_interface.FlorisInterface(fi_path)
 
     # Generate local wind direction measurements
-    print('Formatting the dataframe...')
+    print('Formatting the dataframe with met mast data...')
     time_array = df['DATE (MM/DD/YYYY)'] + ' ' + df['MST'] + ':00'
     time_array = pd.to_datetime(time_array)
     time_array = [t.tz_localize(pytz.timezone('MST')) for t in time_array]
     df['time'] = time_array
-    df.drop(columns=['DATE (MM/DD/YYYY)', 'MST'], inplace=True)
-    df.rename(columns={'Avg Wind Speed @ 80m [m/s]': 'ws',
-                       'Avg Wind Direction @ 80m [deg]': 'wd',
-                       'Turbulence Intensity @ 80m': 'ti'}, inplace=True)
+    df = df.drop(columns=['DATE (MM/DD/YYYY)', 'MST'])
+    df = df.rename(columns={'Avg Wind Speed @ 80m [m/s]': 'ws',
+                            'Avg Wind Direction @ 80m [deg]': 'wd',
+                            'Turbulence Intensity @ 80m': 'ti'})
 
     # Calculate 'true' solutions
-    # df_fi = ftls.calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=0.03)
-    df_fi = ftls.calc_floris_approx(df, fi, ws_step=5.0, wd_step=20.0, ti_step=0.10)
+    df_fi = ftls.calc_floris_approx(df, fi, ws_step=1.0, wd_step=2.0, ti_step=0.03)
 
     # Add noise and bias per turbine
-    np.random.seed(123)  # Fixed seed for every user
+    np.random.seed(123)  # Fixed seed for reproducability
     for ti in range(len(fi.layout_x)):
-        df_fi['pow_%03d' % ti] *= 1 + .03 * np.random.randn(df_fi.shape[0])
-        df_fi['wd_%03d' % ti] += 3.0 * np.random.randn(df_fi.shape[0])
+        df_fi['pow_%03d' % ti] *= 1. + .03 * np.random.randn(df_fi.shape[0])
+        df_fi['wd_%03d' % ti] += 3. * np.random.randn(df_fi.shape[0])
         df_fi['ws_%03d' % ti] += 0.2 * np.random.randn(df_fi.shape[0])
         df_fi['ti_%03d' % ti] += 0.01 * np.random.randn(df_fi.shape[0])
         df_fi['wd_%03d' % ti] += 10. * (np.random.rand() - 0.50)  # Bias
 
     # Drop true 'wd', 'ws' and 'ti' channels
-    df_fi.drop(columns=['wd', 'ws', 'ti'], inplace=True)
+    df_fi = df_fi.drop(columns=['wd', 'ws', 'ti'])
 
     root_dir = os.path.dirname(os.path.abspath(__file__))
     fout = os.path.join(root_dir, 'demo_dataset_60s.ftr')

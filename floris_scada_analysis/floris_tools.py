@@ -31,7 +31,7 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
     num_turbines = len(fi.layout_x)
 
     # Start by ensuring simple index for df
-    df.reset_index(drop=True, inplace=True)
+    df = df.reset_index(drop=True)
 
     # Derive bins from wd_array and ws_array
     ws_array = df['ws']
@@ -91,7 +91,7 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
 
         for ti in range(num_turbines):
             df_approx.loc[idx, 'pow_%03d' % ti] = np.array(fi.get_turbine_power())[ti]/1000.
-            df_approx.loc[idx, 'wd_%03d' % ti] = df_approx.loc[idx, 'wd']  # Assume constant for now
+            df_approx.loc[idx, 'wd_%03d' % ti] = df_approx.loc[idx, 'wd']  # Assume uniform for now
             df_approx.loc[idx, 'ws_%03d' % ti] = fi.floris.farm.turbines[ti].average_velocity
             df_approx.loc[idx, 'ti_%03d' % ti] = fi.floris.farm.turbines[ti]._turbulence_intensity
 
@@ -123,7 +123,7 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
     else:
         df_out['ti'] = np.nan
 
-    # Only updating values of interpolant to avoid recalculating Delaunay
+    # Use interpolant to determine values for all turbines and variables
     for varname in ['pow', 'wd', 'ws', 'ti']:
         print('     Interpolating ' + varname + ' for all turbines...')
         for ti in range(num_turbines):
