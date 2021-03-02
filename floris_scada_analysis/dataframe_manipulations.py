@@ -14,8 +14,160 @@
 import datetime
 import numpy as np
 import pandas as pd
+import warnings
+
+from floris_scada_analysis.circular_statistics import wrap_360_deg
+
+# Functions related to wind farm analysis for df
+def filter_df_by_ws(df, ws_range):
+    df = df[df['ws'] > ws_range[0]]
+    df = df[df['ws'] <= ws_range[1]]
+    return df
 
 
+def filter_df_by_wd(df, wd_range):
+    df = df[df['wd'] > wd_range[0]]
+    df = df[df['wd'] <= wd_range[1]]
+    return df
+
+
+def filter_df_by_ti(df, ti_range):
+    df = df[df['ti'] > ti_range[0]]
+    df = df[df['ti'] <= ti_range[1]]
+    return df
+
+
+def get_num_turbines(df):
+    # Let's assume that the format of variables is ws_%03d, wd_%03d, and so on
+    num_turbines = len([c for c in df.columns if 'ws_' in c and len(c) == 6])
+    return num_turbines
+
+
+def get_column_mean(df, col_prefix='pow', turbine_list=None,
+                    circular_mean=False):
+    if turbine_list is None:
+        turbine_list = range(get_num_turbines(df))  # Assume all turbines
+
+    col_names = [col_prefix + '_%03d' % ti for ti in turbine_list]
+    array = df[col_names]
+
+    if circular_mean:
+        # Use unit vectors to calculate the mean
+        dir_x = np.cos(array * np.pi / 180.).sum(axis=1)
+        dir_y = np.sin(array * np.pi / 180.).sum(axis=1)
+
+        mean_dirs = np.arctan2(dir_y, dir_x)
+        mean_out = wrap_360_deg(mean_dirs * 180. / np.pi)
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            mean_out = np.nanmean(array, axis=1)
+
+    return mean_out
+
+
+def set_wd_by_turbines(df, turbine_numbers):
+    # wd_turbines = df[['wd_%03d' % ti for ti in turbine_numbers]]
+
+    # # Use unit vectors to calculate the mean
+    # wd_x = np.cos(wd_turbines * np.pi / 180.).sum(axis=1)
+    # wd_y = np.sin(wd_turbines * np.pi / 180.).sum(axis=1)
+
+    # mean_wds = np.arctan2(wd_y, wd_x)
+    # mean_wds = wrap_360_deg(mean_wds * 180. / np.pi)
+
+    df['wd'] = get_column_mean(df, col_prefix='wd', circular_mean=True)
+    return df
+
+
+def set_wd_by_all_turbines(df):
+    num_turbines = get_num_turbines(df)
+    return set_wd_by_turbines(df, range(num_turbines))
+
+
+def set_wd_by_radius_from_turbine(df, turb_no, x_turbs, y_turbs,
+                                  max_radius, include_itself=True):
+
+    turbs_within_radius = get_turbs_in_radius(
+        x_turbs=x_turbs, y_turbs=y_turbs, turb_no=turb_no,
+        max_radius=max_radius, include_itself=include_itself)
+
+    if len(turbs_within_radius) < 1:
+        print('No turbines within proximity. Try to increase radius.')
+        return None
+
+    return set_wd_by_turbines(df, turbs_within_radius)
+
+
+def set_ws_by_turbines(df, turbine_numbers):
+    ws_turbines = df[['ws_%03d' % ti for ti in turbine_numbers]]
+    df['ws'] = np.nanmean(ws_turbines, axis=1)
+    return df
+
+
+def set_ws_by_all_turbines(df):
+    num_turbines = get_num_turbines(df)
+    return set_ws_by_turbines(range(num_turbines))
+
+
+def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
+    # Can get df_upsteam using floris_tools.get_upstream_turbs_floris()
+    df['ws'] = np.nan
+    for i in range(df_upstream.shape[0]):
+        wd_min = df_upstream.loc[i, 'wd_min']
+        wd_max = df_upstream.loc[i, 'wd_max']
+        upstr_turbs = df_upstream.loc[i, 'turbines']
+
+        # Exclude particular turbines
+        upstr_turbs = [ti for ti in upstr_turbs if ti not in exclude_turbs]
+
+        if wd_min > wd_max:  # Wrap around
+            ids = [a or b for a, b in zip(df['wd'] > wd_min, df['wd'] <= wd_max)]
+        else:
+            ids = [a and b for a, b in zip(df['wd'] > wd_min, df['wd'] <= wd_max)]
+
+        ws_mean = get_column_mean(df.loc[ids, :], col_prefix='ws',
+                                  turbine_list=upstr_turbs)
+        df.loc[ids, 'ws'] = ws_mean
+
+    return df
+
+
+def set_ti_by_turbines(df, turbine_numbers):
+    ti_turbines = df[['ti_%03d' % ti for ti in turbine_numbers]]
+    df['ti'] = np.nanmean(ti_turbines, axis=1)
+    return df
+
+
+def set_ti_by_all_turbines(df):
+    num_turbines = get_num_turbines(df)
+    return set_ti_by_turbines(range(num_turbines))
+
+
+def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
+    # Can get df_upsteam using floris_tools.get_upstream_turbs_floris()
+    df['ti'] = np.nan
+    for i in range(df_upstream.shape[0]):
+        wd_min = df_upstream.loc[i, 'wd_min']
+        wd_max = df_upstream.loc[i, 'wd_max']
+        upstr_turbs = df_upstream.loc[i, 'turbines']
+
+        # Exclude particular turbines
+        upstr_turbs = [ti for ti in upstr_turbs if ti not in exclude_turbs]
+
+        if wd_min > wd_max:  # Wrap around
+            ids = [a or b for a, b in zip(df['wd'] > wd_min, df['wd'] <= wd_max)]
+        else:
+            ids = [a and b for a, b in zip(df['wd'] > wd_min, df['wd'] <= wd_max)]
+
+        ti_mean = get_column_mean(df.loc[ids, :], col_prefix='ti',
+                                  turbine_list=upstr_turbs)
+        df.loc[ids, 'ti'] = ti_mean
+
+    return df
+
+
+# Functions used for dataframe processing specifically
 def df_drop_nan_rows(df, verbose=False):
     """Remove entries in dataframe where all rows (besides 'time')
     have nan values.
@@ -91,12 +243,6 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer_s=10.):
     df = df.reset_index().drop(columns='index')  # Reset index
 
     return df
-
-
-def get_num_turbines(df):
-    # Let's assume that the format of variables is ws_%03d, wd_%03d, and so on
-    num_turbines = len([c for c in df.columns if 'ws_' in c and len(c) == 6])
-    return num_turbines
 
 
 def df_sort_and_find_duplicates(df):
