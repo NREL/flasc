@@ -14,7 +14,7 @@
 import datetime
 import numpy as np
 import pandas as pd
-from floris_scada_analysis.wd_statistics import calculate_wd_statistics
+from floris_scada_analysis.circular_statistics import calculate_wd_statistics
 
 
 def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
