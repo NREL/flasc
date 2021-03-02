@@ -1,8 +1,22 @@
+# Copyright 2021 NREL
+
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+
 import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-def get_turbine_cutin_ws(fCpInterp):
+
+def _get_turbine_cutin_ws(fCpInterp):
     dx = np.diff(fCpInterp.x)
     dx = np.median(dx)
     ws_cutin_ti = fCpInterp.x[0] - dx
@@ -14,7 +28,7 @@ def get_turbine_cutin_ws(fCpInterp):
     return ws_cutin_ti
 
 
-def get_turbine_cutout_ws(fCpInterp):
+def _get_turbine_cutout_ws(fCpInterp):
     dx = np.diff(fCpInterp.x)
     dx = np.median(dx)
     ws_cutout_ti = fCpInterp.x[-1] + dx
@@ -28,6 +42,31 @@ def get_turbine_cutout_ws(fCpInterp):
 
 # Define an approximate calc_floris() function
 def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='linear'):
+    """Calculate the FLORIS predictions for a particular wind direction, wind speed
+    and turbulence intensity set. This function approximates the exact solutions
+    by binning the wd, ws and ti, calculating floris for the mean of those bins,
+    and then finally mapping those solutions using linear/nearest-neighbor
+    interpolation.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with at least the columns 'time', 'wd' 
+        and 'ws'. Can optionally also have the column 'ti' and 'time'. Any
+        other column will be ignored.
+        fi ([FlorisInterface]): Floris object for the wind farm of interest
+        ws_step (float, optional): Wind speed bin width in m/s. Defaults to 0.5.
+        wd_step (float, optional): Wind direction bin width in deg. Defaults to 1.0.
+        ti_step ([type], optional): Turbulence intensity bin width in [-]. Should be 
+        a value between 0 and 1.0. If left empty, will assume one fixed value for TI
+        and not bin over various options. This significantly speeds up calculations.
+        Defaults to None.
+        method (str, optional): Interpolation method. Options are 'linear' and
+        'nearest'. Nearest is faster but linear is more accurate. Defaults to
+        'linear'.
+
+    Returns:
+        [type]: [description]
+    """
+
     num_turbines = len(fi.layout_x)
 
     # Start by ensuring simple index for df
@@ -44,9 +83,9 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
     wd_min = np.max([np.min(wd_array), 0.0])
     wd_max = np.min([np.max(wd_array), 360.0])
 
-    ws_cutin = [get_turbine_cutin_ws(t.fCpInterp) for t in fi.floris.farm.turbines]
+    ws_cutin = [_get_turbine_cutin_ws(t.fCpInterp) for t in fi.floris.farm.turbines]
     ws_cutin = np.min(ws_cutin)  # Take the minimum of all
-    ws_cutout = [get_turbine_cutout_ws(t.fCpInterp) for t in fi.floris.farm.turbines]
+    ws_cutout = [_get_turbine_cutout_ws(t.fCpInterp) for t in fi.floris.farm.turbines]
     ws_cutout = np.max(ws_cutout)
     ws_min = np.max([np.min(ws_array), ws_cutin]) 
     ws_max = np.min([np.max(ws_array), ws_cutout])

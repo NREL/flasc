@@ -1,7 +1,19 @@
-import numpy as np
-import datetime
+# Copyright 2021 NREL
 
-# Define additional function: assign angles to [0, 360] range
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+
+import numpy as np
+
+
 def wrap_360_deg(angles_in):
     if isinstance(angles_in, float) or isinstance(angles_in, int):
         angles_in = [angles_in]
@@ -25,38 +37,13 @@ def calc_wd_mean_radial(angles_array_deg):
     return mean_wd
 
 
-def calc_wd_mean_linear(angles_array_deg):
-    # Determine the mean sequentially
-    mean_wd = angles_array_deg[0]
-    n_entries = 1
-    for i in angles_array_deg[1::]:
-        diff_value_options = [mean_wd - i, mean_wd - i - 360., mean_wd - i + 360.]
-        smallest_diff = np.where(np.min(np.abs(diff_value_options))==np.abs(diff_value_options))[0][0]
-        new_entry = mean_wd - diff_value_options[smallest_diff]  # Closest to mean
-        mean_wd = (mean_wd*n_entries + new_entry) / (1.+n_entries)  # Update mean
-        mean_wd = wrap_360_deg(mean_wd)
-        n_entries += 1
-
-    return mean_wd
-
-
-def calculate_wd_statistics(angles_array_deg, method='radial'):
+def calculate_wd_statistics(angles_array_deg):
     """Determine statistical properties of an array of wind directions.
     This includes the mean of the array, the median, the standard deviation,
-    the minimum value and the maximum value. This method follows a linear
-    approach rather than a radial/unit vector approach in which the mean
-    of various angles would not equal to np.mean(). Here, if an array of
-    angles is provided without any 360 deg wrapping, then the outputs of
-    this function will equal those of np.mean(), np.median(), np.std(),
-    np.min() and np.max().
+    the minimum value and the maximum value.
 
     Args:
         angles_array_deg ([float/int]): Array of angles in degrees
-        method (str, optional): Method applied. Defaults to 'linear'.
-
-    Raises:
-        NotImplementedError: The only method available is 'linear'. If a
-        different method is specified, returns a NotImplementedError.
 
     Returns:
         mean_wd (float): Mean wind direction in [0, 360] deg
@@ -65,14 +52,15 @@ def calculate_wd_statistics(angles_array_deg, method='radial'):
         min_wd (float): Minimum wind direction in [0, 360] deg
         max_wd (float): Maximum wind direction in [0, 360] deg
     """
-    # Preprocessing   
+
+    # Preprocessing
     angles_array_deg = wrap_360_deg(angles_array_deg)
     angles_array_deg = angles_array_deg[~np.isnan(angles_array_deg)]
 
     # Check for unique cases
     if angles_array_deg.shape[0] <= 0:
         return np.nan, np.nan, np.nan, np.nan, np.nan
-    
+
     if np.unique(angles_array_deg).shape[0] == 1:
         mean_wd = angles_array_deg[0]
         median_wd = angles_array_deg[0]
@@ -80,14 +68,9 @@ def calculate_wd_statistics(angles_array_deg, method='radial'):
         min_wd = angles_array_deg[0]
         max_wd = angles_array_deg[0]
         return mean_wd, median_wd, std_wd, min_wd, max_wd
-    
-    # Otherwise, use method of choice to determine the mean
-    if method == 'linear':
-        mean_wd = calc_wd_mean_linear(angles_array_deg)
-    elif method == 'radial':
-        mean_wd = calc_wd_mean_radial(angles_array_deg)
-    else:
-        raise NotImplementedError('Couldnt not find specified method: ' + str(method) + ' for the calculation of angular statistics.')
+
+    # Calculate the mean
+    mean_wd = calc_wd_mean_radial(angles_array_deg)
 
     # Calculate the standard deviation
     var_wd_lin = np.abs(angles_array_deg-mean_wd)
@@ -109,7 +92,7 @@ def calculate_wd_statistics(angles_array_deg, method='radial'):
         min_wd = np.min(min_range)
         max_range = np.append(angles_array_deg[angles_array_deg > mean_wd], 360. + angles_array_deg[angles_array_deg < mean_wd - 180.])
         max_wd = np.max(max_range)
-        
+
     # Wrap to [0, 360] deg
     min_wd = wrap_360_deg(min_wd)
     max_wd = wrap_360_deg(max_wd)
@@ -132,11 +115,5 @@ def calculate_wd_statistics(angles_array_deg, method='radial'):
 
     # Wrap median to [0, 360]
     median_wd = wrap_360_deg(median_wd)
-    
-    # print('Mean value (' + method + '): ' + str(mean_wd) + ' deg')
-    # print('Median value (' + method + '): ' + str(median_wd) + ' deg')
-    # print('Standard deviation (' + method + '): ' + str(std_wd) + ' deg')
-    # print('Minimum value (' + method + '): ' + str(min_wd) + ' deg')
-    # print('Maximum value (' + method + '): ' + str(max_wd) + ' deg')
 
     return mean_wd, median_wd, std_wd, min_wd, max_wd

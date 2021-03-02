@@ -481,7 +481,6 @@ class Energy_Column():
         if randomize_df:
             df = df.sample(frac=1,replace=True)
 
-
         # Remove bins with unmatched categories
         for ws in ws_bin:
             for cg_idx, cg in enumerate(category):
@@ -489,7 +488,7 @@ class Energy_Column():
                     # print('Cat: %s is missing %d m/s, removing' % (cg, ws))
                     df = df[df.ws_bin!=ws]
                     df_freq = df_freq[df_freq.ws_bin!=ws]
-        
+
         # Check for empty frame
         if df.shape[0]==0:
             return np.zeros(len(category)) * np.nan

@@ -111,8 +111,8 @@ class Floris_Scada():
 
             #  For now just do the baseline
             floris_pow = np.zeros([self.get_num_samples(), self.num_turbines])
-            ws_array = self.df['ws'] 
-            wd_array = self.df['wd'] 
+            ws_array = self.df['ws']
+            wd_array = self.df['wd']
 
             # Calculate the yaw angle as the difference from the corrected
             # Yaw position and the farm wind direction
@@ -141,7 +141,7 @@ class Floris_Scada():
                 self.df[prefix + '%03d' % t] = floris_pow[:,t]
 
     # Define an approximate calc_floris() function
-    def calc_floris_approx(self, ws_step=0.5, wd_step=1.0):
+    def calc_floris_approx(self, ws_step=0.5, wd_step=1.0, ti_step=None):
         # Start by ensuring simple index for df
         self.df = self.df.reset_index(drop=True)
 
@@ -266,7 +266,7 @@ class Floris_Scada():
         return self.df[self.get_column_list('status',turbine_list)].min(axis=1) == 1
 
     def get_self_status_mask(self, turbine_list):
-        return self.df[self.get_column_list('self_status',turbine_list)].min(axis=1) == 1
+        return self.df[self.get_column_list('self_status', turbine_list)].min(axis=1) == 1
 
     def get_column_mean_for_turbine_list(self, column_prefix, turbine_list):
         return self.df[self.get_column_list(column_prefix,turbine_list)].mean(axis=1)
