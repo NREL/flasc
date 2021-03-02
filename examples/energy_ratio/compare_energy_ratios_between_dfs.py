@@ -35,7 +35,9 @@ fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.json")
 fi = wfct.floris_interface.FlorisInterface(fi_path)
 fi.vis_layout()
 
-# Preprocess dataframes using floris
+# Preprocess dataframes using floris: namely, every df passed to
+# the scada_analysis() class must contain the rows 'wd' and 'ws',
+# which are the representative 'wd' and 'ws' for the farm.
 df = dfm.set_wd_by_all_turbines(df)
 df_upstream = fsatools.get_upstream_turbs_floris(fi, wd_step=5.0)
 df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
@@ -49,6 +51,7 @@ df2['wd'] = wrap_360(df2['wd'] + 7.5)
 fsc = sca.scada_analysis()
 fsc.add_df(df, 'Original data')
 fsc.add_df(df2, 'Data with wd bias of 7.5 degrees')
+fsc.set_turbine_names(turbine_names=['WTG_%03d' % ti for ti in range(7)])
 fsc.print_dfs()
 
 # look at one test-ref turbines set
@@ -61,6 +64,6 @@ fsc.plot_energy_ratios(superimpose=True)
 # look at another test-ref turbines set for same ws/wd/ti mask
 fsc.get_energy_ratios(test_turbines=[5], ref_turbines=[2,3,4],
                       dep_turbines=[], wd_step=2.0,
-                      ws_step=1.0, N=5, verbose=False)
+                      ws_step=1.0, N=20, verbose=False)
 fsc.plot_energy_ratios(superimpose=True)
 plt.show()

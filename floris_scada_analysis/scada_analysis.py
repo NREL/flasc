@@ -31,6 +31,7 @@ class scada_analysis():
                  ti_range=[0., 0.50], verbose=False):
         self.df_list = []
         self.num_turbines = []
+        self.turbine_names = []
 
         self.ws_range = ws_range
         self.wd_range = wd_range
@@ -49,6 +50,7 @@ class scada_analysis():
         num_turbines = dfm.get_num_turbines(df)
         if len(self.df_list) < 1:
             self.num_turbines = num_turbines
+            self.turbine_names = [str(i) for i in range(num_turbines)]
 
         if self.num_turbines != num_turbines:
             print('Added dataframe seems to have a different number of turbines than the existing dataframe(s). Skipping addition.')
@@ -108,6 +110,9 @@ class scada_analysis():
                   %(ii, self.df_list[ii]['df_subset'].shape[0],
                     self.df_list[ii]['df'].shape[0]))
 
+    def set_turbine_names(self, turbine_names):
+        self.turbine_names = turbine_names
+
     def clear_energy_ratio_results(self, ii):
         self.self.df_list[ii].pop('er_results')
         self.self.df_list[ii].pop('er_test_turbines')
@@ -154,15 +159,19 @@ class scada_analysis():
             result = self.df_list[ii]['er_results']
             data_name = self.df_list[ii]['name']
             categories = self.df_list[0]['categories']
+            test_turbine_names = [self.turbine_names[i] for i in self.df_list[ii]['er_test_turbines']]
+            ref_turbine_names = [self.turbine_names[i] for i in self.df_list[ii]['er_ref_turbines']]
+            dep_turbine_names = [self.turbine_names[i] for i in  self.df_list[ii]['er_dep_turbines']]
+
             ax.plot(result.wd_bin, result.baseline, label=data_name+': '+categories[0])
             ax.fill_between(result.wd_bin, result.baseline_l, result.baseline_u, alpha=0.15)
             if 'controlled' in result.columns:
                 ax.plot(result.wd_bin, result.controlled, label=data_name+': '+categories[1])
                 ax.fill_between(result.wd_bin, result.controlled_l, result.controlled_u, alpha=0.15)
             ax.legend()
-            plt.title(str(['Test turbines:', self.df_list[ii]['er_test_turbines'],
-                      'Ref. turbines:', self.df_list[ii]['er_ref_turbines'],
-                      'Dep. turbines:', self.df_list[ii]['er_dep_turbines']])[1:-1])
+            plt.title(str(['Test turbines:', test_turbine_names,
+                           'Ref. turbines:', ref_turbine_names,
+                           'Dep. turbines:', dep_turbine_names])[1:-1])
             plt.xlabel('Wind direction (degrees)')
             plt.ylabel('Energy ratio (-)')
             plt.grid(True)
