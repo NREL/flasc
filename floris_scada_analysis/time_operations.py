@@ -154,10 +154,10 @@ def estimate_dt(time_array):
 def find_window_in_time_array(time_array_src, seek_time_windows):
     """This function will look through time_array_src and return the indices
     of each of the entries of time_array_src that are within the region
-    seek_times_min < time_array_src[..] <= seek_times_max, for an array of
-    times to find. This can be used to figure out which entries of
-    time_array_src belong to a certain time period, such that it can be used
-    for downsampling.
+    seek_time_windows[..][0] < time_array_src[..] <= seek_time_windows[..][1],
+    for an array of times to find. This can be used to figure out which
+    entries of time_array_src belong to a certain time period, such that
+    it can be used for downsampling.
 
     Args:
         time_array_src ([list]): List of timesteps from the original dataset
@@ -171,7 +171,8 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
 
     Returns:
         [type]: [description]
-    """    
+    """
+
     dt_src = estimate_dt(time_array_src)
 
     time_array_src = list(time_array_src)
