@@ -93,6 +93,12 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer_s=10.):
     return df
 
 
+def get_num_turbines(df):
+    # Let's assume that the format of variables is ws_%03d, wd_%03d, and so on
+    num_turbines = len([c for c in df.columns if 'ws_' in c and len(c) == 6])
+    return num_turbines
+
+
 def df_sort_and_find_duplicates(df):
     """This function sorts the dataframe and finds rows with equal time index.
 
