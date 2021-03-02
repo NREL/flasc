@@ -232,6 +232,15 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
     return df_out
 
 
+def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius, include_itself):
+    dr_turb = np.sqrt((x_turbs - x_turbs[turb_no])**2.0 + (y_turbs - y_turbs[turb_no])**2.0)
+    turbs_within_radius = np.where(dr_turb <= max_radius)[0]
+    if not include_itself:
+        turbs_within_radius = [ti for ti in turbs_within_radius if not ti == turb_no]
+
+    return turbs_within_radius
+
+
 def get_upstream_turbs_floris(fi, wd_step=1.0):
     print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' %(wd_step))
     upstream_turbs_ids = []  # turbine numbers that are freestream
@@ -268,7 +277,7 @@ def get_upstream_turbs_floris(fi, wd_step=1.0):
 if __name__ == '__main__':
     import os
     import floris.tools as wfct
-    
+
     # Initialize the FLORIS interface fi
     print('Initializing the FLORIS object for our demo wind farm')
     file_path = os.path.dirname(os.path.abspath(__file__))
