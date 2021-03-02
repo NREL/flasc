@@ -13,6 +13,8 @@
 
 import numpy as np
 
+from floris_scada_analysis.floris_tools import get_turbs_in_radius
+
 
 def wrap_360_deg(angles_in):
     if isinstance(angles_in, float) or isinstance(angles_in, int):
