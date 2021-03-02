@@ -69,7 +69,8 @@ class scada_analysis():
         self._apply_df_mask(-1)  # Last entry
 
     def remove_df(self, index):
-        print("Removing dataframe with name '" + self.df_list[index]['name'] + "'.")
+        if self.verbose:
+            print("Removing dataframe with name '" + self.df_list[index]['name'] + "'.")
         self.df_list.pop(index)
 
         if len(self.df_list) < 1:
@@ -96,7 +97,8 @@ class scada_analysis():
         self.df_list[ii]['df_subset'] = df
 
     def set_masks(self, ws_range=None, wd_range=None, ti_range=None):
-        print("Applying a mask over the dataframes and adding 'df_subset")
+        if self.verbose:
+            print("Applying a mask over the dataframes and adding 'df_subset")
         if ws_range is not None:
             self.ws_range = ws_range
         if wd_range is not None:
@@ -106,9 +108,10 @@ class scada_analysis():
 
         for ii in range(len(self.df_list)):
             self._apply_df_mask(ii)
-            print('df_subset[%d] is %d rows (df is %d rows).'
-                  %(ii, self.df_list[ii]['df_subset'].shape[0],
-                    self.df_list[ii]['df'].shape[0]))
+            if self.verbose:
+                print('df_subset[%d] is %d rows (df is %d rows).'
+                    %(ii, self.df_list[ii]['df_subset'].shape[0],
+                        self.df_list[ii]['df'].shape[0]))
 
     def set_turbine_names(self, turbine_names):
         self.turbine_names = turbine_names

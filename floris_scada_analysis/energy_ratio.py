@@ -49,6 +49,7 @@ class energy_ratio:
         ws_step=1.0,
         verbose=False,
     ):
+        self.verbose = verbose
 
         self._set_df(df)
         self.num_turbines = dfm.get_num_turbines(self.df)
@@ -62,21 +63,23 @@ class energy_ratio:
 
         self.filter_df_by_status()
         self.set_ref_test_power()
-
-        self.verbose = verbose
+        
 
     def _set_df(self, df):
         if 'category' not in df.columns:
-            print("Did not find 'category' column. Adding one with all values 'baseline'.")
+            if self.verbose:
+                print("Did not find 'category' column. Adding one with all values 'baseline'.")
             df['category'] = 'baseline'
         if 'status' not in df.columns:
-            print("Did not find 'status_' columns in df. Will assume all measurements are correct.")
+            if self.verbose:
+                print("Did not find 'status_' columns in df. Will assume all measurements are correct.")
 
         self.categories = list(np.unique(df['category']))
         if len(self.categories) > 2:
             raise KeyError('Cannot have more than 2 categories in your dataframe.')
         else:
-            print('Your dataframe has categories', self.categories)
+            if self.verbose:
+                print('Your dataframe has categories', self.categories)
         self.df = df
 
     def _set_turbines_all(self):
@@ -213,11 +216,13 @@ class energy_ratio:
         self.df_freq = df_freq
 
     def get_energy_ratio(self, N=1):
-        print('Calculating energy ratio with N = %d.' % N)
+        if self.verbose:
+            print('Calculating energy ratio with N = %d.' % N)
         if 'ws_bin' not in self.df.columns:
-            print('  df has not yet been binned. Binning data first...')
+            if self.verbose:
+                print('  df has not yet been binned. Binning data first...')
             self.setup_directions_and_frequencies()
-        else:
+        elif self.verbose:
             print('  df has already been binned. Loading existing bins.')
 
         # Extract the interesting parts for the energy ratio frame

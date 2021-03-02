@@ -49,7 +49,7 @@ era = er.energy_ratio(df=df,
                       ws_step=1.0,
                       verbose=True)
 
-era.get_energy_ratio()
+era.get_energy_ratio(N=1)
 era.plot_energy_ratio()
 
 # Calculate energy ratio for two category df
