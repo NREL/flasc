@@ -43,7 +43,7 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
     """
 
     # Convert input into datetime.timedelta if necessary
-    if (type(target_dt) == type(0.0)) or (type(target_dt) == type(1)):
+    if isinstance(target_dt, float) or isinstance(target_dt, int):
         target_dt = datetime.timedelta(seconds=target_dt)
 
     # Estimate sampling time of source dataset
@@ -52,10 +52,10 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
 
     if target_dt < 2 * dt_src:
         raise UserWarning(
-            "Not recommended to downsample with less than twice the original dt."
+            "Not recommended to downsample with < 2x the original dt."
         )
 
-    # Set up new dataframes: current time should correspond to averaged over past target_dt time
+    # Set up new dataframes: values are based on past [target_dt] time
     time_array_target = np.arange(
         np.min(time_array_src) + target_dt,
         np.max(time_array_src) + target_dt,
@@ -84,9 +84,15 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
                 + " to %.0f s using regular statistics."
                 % (target_dt / datetime.timedelta(seconds=1))
             )
-        df_res[c + "_mean"] = [np.nanmean(np.array(df[c])[i]) for i in tids_array]
-        df_res[c + "_median"] = [np.nanmedian(np.array(df[c])[i]) for i in tids_array]
-        df_res[c + "_std"] = [np.nanstd(np.array(df[c])[i]) for i in tids_array]
+        df_res[c + "_mean"] = [
+            np.nanmean(np.array(df[c])[i]) for i in tids_array
+        ]
+        df_res[c + "_median"] = [
+            np.nanmedian(np.array(df[c])[i]) for i in tids_array
+        ]
+        df_res[c + "_std"] = [
+            np.nanstd(np.array(df[c])[i]) for i in tids_array
+        ]
         df_res[c + "_min"] = [
             np.min(np.array(df[c])[tids_array[i]], initial=df_res[c + "_mean"][i])
             for i in range(len(tids_array))
@@ -233,10 +239,11 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
 
         # Make a guess and step forward exactly this much
         i += -1
-        di = int((seek_times_min_remaining[0] - time_array_src[i]) / dt_src + 1)
+        di = int((seek_times_min_remaining[0]-time_array_src[i]) / dt_src + 1)
         if di < 0:
             raise ValueError(
-                "Data does not seem to be sorted. Please only use time-ascending data with this function."
+                "Data does not seem to be sorted." +
+                "Please only use time-ascending data with this function."
             )
 
         i += di

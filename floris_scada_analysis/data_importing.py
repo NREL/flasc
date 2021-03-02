@@ -1,5 +1,6 @@
 import re
 
+
 def fix_csv_contents(csv_contents, line_format_str):
     """Check the contents of the raw database .csv file and ensure each row
        fits a predefined formatting. This can pick out irregularities in rows,
