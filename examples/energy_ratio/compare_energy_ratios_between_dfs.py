@@ -12,7 +12,6 @@
 
 
 import matplotlib.pyplot as plt
-import numpy as np
 import os
 import pandas as pd
 
@@ -51,9 +50,17 @@ fsc = sca.scada_analysis()
 fsc.add_df(df, 'Original data')
 fsc.add_df(df2, 'Data with wd bias of 7.5 degrees')
 fsc.print_dfs()
+
+# look at one test-ref turbines set
 fsc.set_masks(wd_range=[70., 110.], ti_range=[0., 0.25])
-fsc.get_energy_ratios(test_turbines=[1], ref_turbines=[0],
+fsc.get_energy_ratios(test_turbines=[1], ref_turbines=[2],
                       dep_turbines=[], wd_step=2.0,
-                      ws_step=1.0, N=1, verbose=False)
-fsc.print_dfs()
+                      ws_step=1.0, N=5, verbose=False)
 fsc.plot_energy_ratios(superimpose=True)
+
+# look at another test-ref turbines set for same ws/wd/ti mask
+fsc.get_energy_ratios(test_turbines=[5], ref_turbines=[2,3,4],
+                      dep_turbines=[], wd_step=2.0,
+                      ws_step=1.0, N=5, verbose=False)
+fsc.plot_energy_ratios(superimpose=True)
+plt.show()

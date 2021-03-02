@@ -94,7 +94,7 @@ class scada_analysis():
         self.df_list[ii]['df_subset'] = df
 
     def set_masks(self, ws_range=None, wd_range=None, ti_range=None):
-        print("'Applying a mask over the dataframes and adding 'df_subset'")
+        print("Applying a mask over the dataframes and adding 'df_subset")
         if ws_range is not None:
             self.ws_range = ws_range
         if wd_range is not None:
@@ -105,8 +105,8 @@ class scada_analysis():
         for ii in range(len(self.df_list)):
             self._apply_df_mask(ii)
             print('df_subset[%d] is %d rows (df is %d rows).'
-                  %(ii, self.df_list[ii]['df'].shape[0],
-                    self.df_list[ii]['df_subset'].shape[0]))
+                  %(ii, self.df_list[ii]['df_subset'].shape[0],
+                    self.df_list[ii]['df'].shape[0]))
 
     def clear_energy_ratio_results(self, ii):
         self.self.df_list[ii].pop('er_results')
@@ -145,25 +145,24 @@ class scada_analysis():
 
     def plot_energy_ratios(self, superimpose=True):
         if superimpose:
-            fig, ax = plt.subplots()
+            _, ax = plt.subplots()
 
         for ii in range(len(self.df_list)):
             if not superimpose:
-                fig, ax = plt.subplots()
+                _, ax = plt.subplots()
 
             result = self.df_list[ii]['er_results']
             data_name = self.df_list[ii]['name']
             categories = self.df_list[0]['categories']
-            ax.plot(result.wd_bin, result.baseline, label=data_name+categories[0])
+            ax.plot(result.wd_bin, result.baseline, label=data_name+': '+categories[0])
             ax.fill_between(result.wd_bin, result.baseline_l, result.baseline_u, alpha=0.15)
             if 'controlled' in result.columns:
-                ax.plot(result.wd_bin, result.controlled, label=data_name+categories[1])
+                ax.plot(result.wd_bin, result.controlled, label=data_name+': '+categories[1])
                 ax.fill_between(result.wd_bin, result.controlled_l, result.controlled_u, alpha=0.15)
-
             ax.legend()
             plt.title(str(['Test turbines:', self.df_list[ii]['er_test_turbines'],
                       'Ref. turbines:', self.df_list[ii]['er_ref_turbines'],
-                      'Dep. turbines:', self.df_list[ii]['er_def_turbines']])[1:-1])
+                      'Dep. turbines:', self.df_list[ii]['er_dep_turbines']])[1:-1])
             plt.xlabel('Wind direction (degrees)')
             plt.ylabel('Energy ratio (-)')
             plt.grid(True)
