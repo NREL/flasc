@@ -123,7 +123,7 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
     num_turbines = len(fi.layout_x)
 
     # Start by ensuring simple index for df
-    df = df.reset_index(drop=True)
+    df = df.reset_index(drop=('time' in df.columns))
 
     # Derive bins from wd_array and ws_array
     ws_array = df['ws']
@@ -191,7 +191,7 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
     print("  Creating a gridded interpolant with interpolation method '" + method + "'.")
 
     # Create interpolant
-    if len(ti_array_approx) <= 1:
+    if xyz_grid.shape[3]==1:
         print('    Performing 2D interpolation')
         shape_y = [len(wd_array_approx), len(ws_array_approx)]
         values = np.reshape(np.array(df_approx['pow_000']), shape_y)
@@ -207,7 +207,7 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
                                             fill_value=np.nan)
 
     # Create a new dataframe based on df
-    df_out = df[['time', 'wd', 'ws']]
+    df_out = df[['time', 'wd', 'ws']].copy()
     if 'ti' in df.columns:
         df_out['ti'] = df['ti']
     else:
@@ -219,7 +219,10 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
         for ti in range(num_turbines):
             colname = varname + '_%03d' % ti
             f.values = np.reshape(np.array(df_approx[colname]), shape_y)
-            df_out[colname] = f(df[['wd', 'ws', 'ti']])
+            if xyz_grid.shape[3]==1:
+                df_out[colname] = f(df[['wd', 'ws']])
+            else:
+                df_out[colname] = f(df[['wd', 'ws', 'ti']])
 
     # Overwrite the np.nan values for entries where ws < ws_cutin
     idxs_lowws = (df_out['ws'] < ws_cutin)
@@ -241,8 +244,9 @@ def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius, include_itself):
     return turbs_within_radius
 
 
-def get_upstream_turbs_floris(fi, wd_step=1.0):
-    print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' %(wd_step))
+def get_upstream_turbs_floris(fi, wd_step=1.0, verbose=False):
+    if verbose:
+        print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' %(wd_step))
     upstream_turbs_ids = []  # turbine numbers that are freestream
     upstream_turbs_wds = []  # lower bound of bin
     for wd in np.arange(0., 360., wd_step):

@@ -32,7 +32,7 @@ def compute_expectation(fx, p_X):
             (anon) - float - Expected value of f(X)
         """
         p_X = p_X/p_X.sum() # Make sure distribution is valid
-
+        
         return fx @ p_X
 
 
@@ -63,7 +63,7 @@ class energy_ratio:
 
         self.filter_df_by_status()
         self.set_ref_test_power()
-        
+
 
     def _set_df(self, df):
         if 'category' not in df.columns:
@@ -127,12 +127,13 @@ class energy_ratio:
         status_cols = ["status_%03d" % ti for ti in self.turbines_all]
         for c in status_cols:
             if not (c in self.df.columns):
-                print(
-                    "Column "
-                    + c
-                    + " does not exist or was already"
-                    + " filtered. Assuming all values are 1 (good). "
-                )
+                if self.verbose:
+                    print(
+                        "Column "
+                        + c
+                        + " does not exist or was already"
+                        + " filtered. Assuming all values are 1 (good). "
+                    )
                 self.df[c] = int(1)
 
         all_status_okay = self.df[status_cols].sum(axis=1) == len(self.turbines_all)
@@ -143,10 +144,10 @@ class energy_ratio:
         # Define some local values
         ws_step = self.ws_step
         wd_step = self.wd_step
-        wd_min = np.min(self.df["wd"])
-        wd_max = np.max(self.df["wd"])
-        ws_min = np.min(self.df["ws"])
-        ws_max = np.max(self.df["ws"])
+        wd_min = np.min(self.df["wd"]) - 1.0e-6
+        wd_max = np.max(self.df["wd"]) + 1.0e-6
+        ws_min = np.min(self.df["ws"]) - 1.0e-6
+        ws_max = np.max(self.df["ws"]) + 1.0e-6
 
         ws_edges = np.arange(ws_min, ws_max + ws_step, ws_step)
         ws_labels = ws_edges[:-1] + ws_step / 2.0  # Bin means
@@ -216,6 +217,10 @@ class energy_ratio:
         self.df_freq = df_freq
 
     def get_energy_ratio(self, N=1):
+        if self.df.shape[0] < 1:
+            result = pd.DataFrame()
+            return None
+
         if self.verbose:
             print('Calculating energy ratio with N = %d.' % N)
         if 'ws_bin' not in self.df.columns:
@@ -285,6 +290,9 @@ class Energy_Frame:
         # Save some relevent info
         self.wd_bin = np.array(sorted(df.wd_bin.unique()))
         self.ws_bin = np.array(sorted(df.ws_bin.unique()))
+        # self.wd_bin = np.array(sorted(df_freq.wd_bin.unique()))
+        # self.ws_bin = np.array(sorted(df_freq.ws_bin.unique()))
+
         self.category = category
 
     def get_column(self, wd):
@@ -403,6 +411,27 @@ class Energy_Column:
             .groupby(["ws_bin"])
             .sum()
         )
+
+        # # Ensure that dimensions match
+        # ws_bins_ref = np.array(df_ref.reset_index()['ws_bin'])
+        # ws_bins_test = np.array(df_ref.reset_index()['ws_bin'])
+        # ws_bins_freq = np.array(df_freq.reset_index()['ws_bin'])
+        # if (not all(ws_bins_ref==ws_bins_test) or
+        #     not all(ws_bins_ref==ws_bins_freq)):
+        #     ws_bins_array = np.concatenate([ws_bins_ref, ws_bins_test, ws_bins_freq])
+        #     ws_bins_array = np.unique(ws_bins_array)
+        #     for i in ws_bins_array:
+        #         if i not in list(df_ref.reset_index()['ws_bin']):
+        #             df_ref = df_ref.reset_index()
+        #             df_ref = df_ref.append({'ws_bin': i, 'baseline': np.nan}, ignore_index=True)
+        #             df_ref = df_ref.set_index('ws_bin').sort_index()
+        #         if i not in list(df_test.reset_index()['ws_bin']):
+        #             df_test = df_test.reset_index()
+        #             df_test = df_test.append({'ws_bin': i, 'baseline': np.nan}, ignore_index=True)
+        #             df_test = df_test.set_index('ws_bin').sort_index()
+        #         if i not in list(df_test.reset_index()['ws_bin']):
+        #             df_freq = df_freq.append({'ws_bin': i, 'observed_freq': np.nan, 'annual_freq': np.nan}, ignore_index=True)
+        #             df_freq = df_freq.sort(by='ws_bin')
 
         results = np.zeros(len(category))
         if use_observed_freq:

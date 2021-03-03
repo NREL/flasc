@@ -44,8 +44,7 @@ class scada_analysis():
 
     def add_df(self, df, name):
         if not ('wd' in df.columns and 'ws' in df.columns):
-            print("Could not find all columns. Ensure that you have columns 'wd' and 'ws' in your df. Skipping addition.")
-            return None
+            raise ImportError("Could not find all columns. Ensure that you have columns 'wd' and 'ws' in your df.")
 
         num_turbines = dfm.get_num_turbines(df)
         if len(self.df_list) < 1:
@@ -61,7 +60,8 @@ class scada_analysis():
                 raise KeyError('More than 2 different category values are found. Please limit yourself to 2.')
         else:
             print("No 'category' column found in df. Adding column with all values 'baseline'.")
-            df['category'] = 'baseline'
+            df = df.copy()
+            df.loc[:, 'category'] = 'baseline'
 
         categories = np.unique(df['category'])
         new_entry = dict({'df': df, 'name': name, 'categories': categories})
@@ -93,7 +93,8 @@ class scada_analysis():
         df = self.df_list[ii]['df'].copy()
         df = dfm.filter_df_by_ws(df, self.ws_range)
         df = dfm.filter_df_by_wd(df, self.wd_range)
-        df = dfm.filter_df_by_ti(df, self.ti_range)
+        if 'ti' in df.columns:
+            df = dfm.filter_df_by_ti(df, self.ti_range)
         self.df_list[ii]['df_subset'] = df
 
     def set_masks(self, ws_range=None, wd_range=None, ti_range=None):
@@ -110,8 +111,8 @@ class scada_analysis():
             self._apply_df_mask(ii)
             if self.verbose:
                 print('df_subset[%d] is %d rows (df is %d rows).'
-                    %(ii, self.df_list[ii]['df_subset'].shape[0],
-                        self.df_list[ii]['df'].shape[0]))
+                      %(ii, self.df_list[ii]['df_subset'].shape[0],
+                          self.df_list[ii]['df'].shape[0]))
 
     def set_turbine_names(self, turbine_names):
         self.turbine_names = turbine_names
@@ -133,7 +134,7 @@ class scada_analysis():
                           wd_step, ws_step, N=1, verbose=False):
 
         for ii in range(len(self.df_list)):
-            df = self.df_list[ii]['df_subset']
+            df = self.df_list[ii]['df_subset'].copy()
             era = er.energy_ratio(df=df,
                                   test_turbines=test_turbines,
                                   ref_turbines=ref_turbines,
