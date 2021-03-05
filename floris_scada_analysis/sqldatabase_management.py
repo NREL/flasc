@@ -11,9 +11,14 @@
 # the License.
 
 
+import datetime
+import numpy as np
 import os
 import pandas as pd
-from datetime import datetime
+import re
+import warnings
+
+from floris_scada_analysis import dataframe_manipulations as dfm
 
 
 def generate_models_py(table_names, table_upsampling, fn_channel_defs,
@@ -44,7 +49,7 @@ def generate_models_py(table_names, table_upsampling, fn_channel_defs,
     modelspy_str = \
     '''
     # AUTOMATICALLY GENERATED FUNCTION BY 'GENERATE_MODELSPY.PY'
-    #      DATE: ''' + datetime.now().strftime('%H:%M:%S on %A, %B the %dth, %Y') + ''''
+    #      DATE: ''' + datetime.datetime.now().strftime('%H:%M:%S on %A, %B the %dth, %Y') + ''''
 
     from sqlalchemy import create_engine
     from sqlalchemy import Table, Column, String, Integer, DateTime, UniqueConstraint, REAL
@@ -189,3 +194,194 @@ def generate_models_py(table_names, table_upsampling, fn_channel_defs,
     print("Finished writing 'models.py' to " + fout + ".")
 
     return None
+
+
+def get_latest_time(filelist):
+    time_latest = None
+    for fi in filelist:
+        df = pd.read_feather(fi)
+        time_array = df['time']
+        if not all(np.isnan(time_array)):
+            tmp_time_max = np.max(df['time'])
+            if time_latest is None:
+                time_latest = tmp_time_max
+            else:
+                if tmp_time_max > time_latest:
+                    time_latest = tmp_time_max
+
+    return time_latest
+
+
+def browse_datafiles(data_path, scada_table=''):
+    if scada_table == '':
+        fn_pattern = re.compile('\d\d\d\d-\d\d_.*.ftr')  # Import all
+    else:
+        fn_pattern = re.compile('\d\d\d\d-\d\d_' + scada_table + '.ftr')
+
+    files_list = []
+
+    for root, _, files in os.walk(data_path):
+        for name in files:
+            fn_item = fn_pattern.findall(name)
+            if len(fn_item) > 0:
+                fn_item = fn_item[0]
+                fn_path = os.path.join(root, fn_item)
+                files_list.append(fn_path)
+
+    if len(files_list) == 0:
+        print('No data files found in ' + data_path)
+
+    return files_list
+
+
+def sqldb_get_min_time(dbc, table_name):
+    query_string = 'SELECT time FROM ' + table_name + ' ORDER BY time asc LIMIT 1'
+    df_time = pd.read_sql_query(query_string, dbc.engine)
+    start_time = df_time['time'][0]
+
+    return start_time
+
+
+def sqldb_get_max_time(dbc, table_name):
+    query_string = 'SELECT time FROM ' + table_name + ' ORDER BY time desc LIMIT 1'
+    df_time = pd.read_sql_query(query_string, dbc.engine)
+    end_time = df_time['time'][0]
+
+    return end_time
+
+
+# Formerly a_00_initial_download.py
+def batch_download_data_from_sql(dbc, destination_path,
+                                 df_table_name='scada_data_60s'):
+    print("Batch downloading data from table '"
+          + df_table_name + "'...")
+
+    # Check current start and end time of database
+    db_end_time = sqldb_get_max_time(dbc, df_table_name)
+    db_end_time = db_end_time + datetime.timedelta(minutes=10)
+
+    # Check for past files and continue download or start a fresh download
+    files_result = browse_datafiles(destination_path,
+                                    scada_table=df_table_name)
+    print('A total of %d existing files found.' % len(files_result))
+
+    latest_timestamp = get_latest_time(files_result)
+    # Next timestamp is going to be next first of the month
+    if latest_timestamp is None:
+        db_start_time = sqldb_get_min_time(dbc, df_table_name)
+        db_start_time = db_start_time - datetime.timedelta(minutes=10)
+        current_timestamp = db_start_time
+    elif latest_timestamp.month == 12:
+        current_timestamp = pd.to_datetime(
+            str(latest_timestamp.year+1)+'-01-01')
+    else:
+        current_timestamp = pd.to_datetime(
+            str(latest_timestamp.year)+ '-' + 
+            str(latest_timestamp.month+1) + '-01')
+
+    print('Continuing import from timestep: ', current_timestamp)
+    while current_timestamp <= db_end_time:
+        print('Importing data for ' + 
+              str(current_timestamp.strftime("%B")) +
+              ', ' + str(current_timestamp.year) + '.')
+        if current_timestamp.month == 12:
+            next_timestamp = current_timestamp.replace(
+                year=current_timestamp.year+1, month=1)
+        else:
+            next_timestamp = current_timestamp.replace(
+                month=current_timestamp.month+1)
+
+        df_table = dbc.get_table_data_from_db_wide(
+            table_name=df_table_name,
+            start_time=current_timestamp,
+            end_time=next_timestamp
+            )
+
+        # Drop NaN rows
+        df_table = dfm.df_drop_nan_rows(df_table)
+
+        # Save dataset as a .p file
+        fout = os.path.join(destination_path, 
+                            current_timestamp.strftime("%Y-%m")
+                            + "_" + df_table_name + ".ftr")
+        df_table = df_table.reset_index(drop=True)
+        df_table.to_feather(fout)
+        print('Data for ' + df_table_name +
+              ' saved to .ftr files for ' +
+              str(current_timestamp.strftime("%B")) +
+              ', ' + str(current_timestamp.year) + '.')
+
+        # Update start_time
+        current_timestamp = next_timestamp
+        print(' ')  # Blank line for log clarity
+
+
+# Formerly a_01_structure_data.py
+def _restructure_single_df(df, column_mapping_dict,
+                           powmedian_min=50,
+                           wsmedian_range=[4., 16.]):
+    print('  Processing dataset...')
+
+    if df.shape[0] < 1:
+        return None
+
+    # Drop NaN rows and get basic df info
+    df = dfm.df_drop_nan_rows(df)
+    no_rows = df.shape[0]
+
+    # Build up the new data frame
+    df_structured = pd.DataFrame({'time': df.time})
+    col_names_target = list(column_mapping_dict.keys())
+    col_names_original = list(column_mapping_dict.values())
+
+    # Map columns of interest
+    for i in range(len(col_names_original)):
+        cn_original = col_names_original[i]
+        cn_target = col_names_target[i]
+        df_structured[cn_target] = df[cn_original]
+    print('    Copied the columns to the new dataframe with the appropriate naming.')
+
+    # Essential filtering: remove very low power situations
+    num_turbines = dfm.get_num_turbines(df_structured)
+    pow_col_names = ['pow_%03d' % ti for ti in range(num_turbines)]
+    ws_col_names = ['ws_%03d' % ti for ti in range(num_turbines)]
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        power_medians = np.nanmedian(
+            df_structured[pow_col_names].astype(float), axis=1)
+    df_structured = df_structured[power_medians >= powmedian_min]  # Only keep >= 50 kW nanmedian
+    print("    Essential filtering (median power minimum) reduced rows from " +
+          str(no_rows) + " to " + str(df_structured.shape[0]) + ".")
+
+    # Essential filtering: remove WS lower than 4 m/s and higher than 16 m/s
+    no_rows = df_structured.shape[0]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        ws_medians = np.nanmedian(
+            df_structured[ws_col_names].astype(float), axis=1)
+    df_structured = df_structured[[a or b for a, b in
+                                   zip(ws_medians >= wsmedian_range[0],
+                                       ws_medians <= wsmedian_range[1])]]
+    print("    Essential filtering (median ws range) reduced rows from " +
+          str(no_rows) + " to " + str(df_structured.shape[0]) + ".")
+
+    return df_structured
+
+
+def restructure_df_files(df_table_name, column_mapping_dict,
+                         data_path, target_path):
+    print('Loading, processing and saving dataframes for '+df_table_name+'.')
+    if not os.path.exists(target_path):
+        os.mkdir(target_path)
+
+    files_result = browse_datafiles(data_path, scada_table=df_table_name)
+    files_result = np.sort(files_result)
+    for fi in files_result:
+        print('  Reading ' + fi + '.')
+        df_in = pd.read_feather(fi)  # Read
+        df_out = _restructure_single_df(df_in, column_mapping_dict)
+        if df_out is not None:
+            if df_out.shape[0] > 0:
+                fout = os.path.join(target_path, os.path.basename(fi))
+                df_out.reset_index(drop=True).to_feather(fout)
