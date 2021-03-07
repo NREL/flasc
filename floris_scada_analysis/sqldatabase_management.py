@@ -228,6 +228,10 @@ def browse_datafiles(data_path, scada_table=''):
                 fn_path = os.path.join(root, fn_item)
                 files_list.append(fn_path)
 
+    # Sort alphabetically/numerically
+    files_list = list(np.sort(files_list))
+    files_list = [str(f) for f in files_list]
+
     if len(files_list) == 0:
         print('No data files found in ' + data_path)
 
@@ -316,10 +320,19 @@ def batch_download_data_from_sql(dbc, destination_path,
         print(' ')  # Blank line for log clarity
 
 
+def batch_load_and_concat_dfs(df_filelist):
+    df_array = []
+    for dfn in df_filelist:
+        df_array.append(pd.read_feather(dfn))
+
+    df_out = pd.concat(df_array, ignore_index=True)
+    df_out = df_out.reset_index(drop=('time' in df_out.columns))
+    df_out = df_out.sort_values(by='time')
+    return df_out
+
+
 # Formerly a_01_structure_data.py
-def _restructure_single_df(df, column_mapping_dict,
-                           powmedian_min=50,
-                           wsmedian_range=[4., 16.]):
+def _restructure_single_df(df, column_mapping_dict):
     print('  Processing dataset...')
 
     if df.shape[0] < 1:
@@ -327,7 +340,7 @@ def _restructure_single_df(df, column_mapping_dict,
 
     # Drop NaN rows and get basic df info
     df = dfm.df_drop_nan_rows(df)
-    no_rows = df.shape[0]
+    # no_rows = df.shape[0]
 
     # Build up the new data frame
     df_structured = pd.DataFrame({'time': df.time})
@@ -341,30 +354,30 @@ def _restructure_single_df(df, column_mapping_dict,
         df_structured[cn_target] = df[cn_original]
     print('    Copied the columns to the new dataframe with the appropriate naming.')
 
-    # Essential filtering: remove very low power situations
-    num_turbines = dfm.get_num_turbines(df_structured)
-    pow_col_names = ['pow_%03d' % ti for ti in range(num_turbines)]
-    ws_col_names = ['ws_%03d' % ti for ti in range(num_turbines)]
+    # # Essential filtering: remove very low power situations
+    # num_turbines = dfm.get_num_turbines(df_structured)
+    # pow_col_names = ['pow_%03d' % ti for ti in range(num_turbines)]
+    # ws_col_names = ['ws_%03d' % ti for ti in range(num_turbines)]
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        power_medians = np.nanmedian(
-            df_structured[pow_col_names].astype(float), axis=1)
-    df_structured = df_structured[power_medians >= powmedian_min]  # Only keep >= 50 kW nanmedian
-    print("    Essential filtering (median power minimum) reduced rows from " +
-          str(no_rows) + " to " + str(df_structured.shape[0]) + ".")
+    # with warnings.catch_warnings():
+    #     warnings.simplefilter("ignore", category=RuntimeWarning)
+    #     power_medians = np.nanmedian(
+    #         df_structured[pow_col_names].astype(float), axis=1)
+    # df_structured = df_structured[power_medians >= powmedian_min]  # Only keep >= 50 kW nanmedian
+    # print("    Essential filtering (median power minimum) reduced rows from " +
+    #       str(no_rows) + " to " + str(df_structured.shape[0]) + ".")
 
-    # Essential filtering: remove WS lower than 4 m/s and higher than 16 m/s
-    no_rows = df_structured.shape[0]
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        ws_medians = np.nanmedian(
-            df_structured[ws_col_names].astype(float), axis=1)
-    df_structured = df_structured[[a or b for a, b in
-                                   zip(ws_medians >= wsmedian_range[0],
-                                       ws_medians <= wsmedian_range[1])]]
-    print("    Essential filtering (median ws range) reduced rows from " +
-          str(no_rows) + " to " + str(df_structured.shape[0]) + ".")
+    # # Essential filtering: remove WS lower than 4 m/s and higher than 16 m/s
+    # no_rows = df_structured.shape[0]
+    # with warnings.catch_warnings():
+    #     warnings.simplefilter("ignore", category=RuntimeWarning)
+    #     ws_medians = np.nanmedian(
+    #         df_structured[ws_col_names].astype(float), axis=1)
+    # df_structured = df_structured[[a or b for a, b in
+    #                                zip(ws_medians >= wsmedian_range[0],
+    #                                    ws_medians <= wsmedian_range[1])]]
+    # print("    Essential filtering (median ws range) reduced rows from " +
+    #       str(no_rows) + " to " + str(df_structured.shape[0]) + ".")
 
     return df_structured
 

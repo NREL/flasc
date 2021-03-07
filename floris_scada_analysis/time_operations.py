@@ -15,6 +15,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from floris_scada_analysis.circular_statistics import calculate_wd_statistics
+from pandas.core.base import DataError
 
 
 def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
@@ -147,12 +148,16 @@ def estimate_dt(time_array):
         dt ([datetime.timedelta]): Timestep in dt.timedelta format
     """
 
-    # Base estimation on first 5000 entries of the time_array
-    dt_array = [
-        (time_array[i + 1] - time_array[i]) / datetime.timedelta(seconds=1)
-        for i in range(np.min([5000, len(time_array) - 1]))
-    ]
-    dt = datetime.timedelta(seconds=np.nanmin(dt_array))
+    if len(time_array) < 2:
+        # Assume arbitrary value
+        return datetime.timedelta(seconds=0)
+
+    dt = np.min(np.diff(time_array))
+    dt = datetime.timedelta(seconds=dt.astype(float)/1e9)
+
+    # Check if data is all ascending
+    if dt <= datetime.timedelta(0):
+        raise DataError('Please only insert time ascending data.')
 
     return dt
 
@@ -189,6 +194,12 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
     # Adress behavior at lower end (0)
     i = 0
     idxs_out = []
+    # Deal with situations in which entire range is out of array
+    while time_array_src[0] > seek_times_max_remaining[0]:
+        idxs_out_array.append([])
+        seek_times_min_remaining.pop(0)
+        seek_times_max_remaining.pop(0)
+
     if time_array_src[0] > seek_times_min_remaining[0]:
         while time_array_src[i] <= seek_times_max_remaining[0]:
             idxs_out.append(i)
@@ -197,6 +208,9 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
         seek_times_min_remaining.pop(0)
         seek_times_max_remaining.pop(0)
 
+    if len(seek_times_min_remaining) < 1:
+        return idxs_out_array
+
     # Adress behavior at higher end (-1)
     idxs_out_array_end = []
     # Deal with situations in which entire range is out of array
@@ -204,6 +218,10 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
         idxs_out_array_end.insert(0, [])  # Prepend
         seek_times_min_remaining.pop(-1)
         seek_times_max_remaining.pop(-1)
+        if len(seek_times_min_remaining) < 1:
+            idxs_out_array = idxs_out_array.extend(idxs_out_array_end)
+            return idxs_out_array
+
     # Deal with situations in which upper part of range is out of array
     while time_array_src[-1] < seek_times_max_remaining[-1]:
         i = len(time_array_src) - 1
@@ -213,6 +231,13 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
         idxs_out_array_end.insert(0, idxs_out)  # Prepend
         seek_times_min_remaining.pop(-1)
         seek_times_max_remaining.pop(-1)
+        if len(seek_times_min_remaining) < 1:
+            idxs_out_array = idxs_out_array.extend(idxs_out_array_end)
+            return idxs_out_array
+
+    if len(seek_times_min_remaining) < 1:
+        idxs_out_array = idxs_out_array.extend(idxs_out_array_end)
+        return idxs_out_array
 
     # Adress all other situations
     i = 1
@@ -242,7 +267,7 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
         di = int((seek_times_min_remaining[0]-time_array_src[i]) / dt_src + 1)
         if di < 0:
             raise ValueError(
-                "Data does not seem to be sorted." +
+                "Data does not seem to be sorted. " +
                 "Please only use time-ascending data with this function."
             )
 
