@@ -44,38 +44,40 @@ df_upstream = fsatools.get_upstream_turbs_floris(fi, wd_step=5.0)
 df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
 df = dfm.set_ti_by_upstream_turbines(df, df_upstream)
 
+# limit df to narrow wind direction region
+df = df[df['wd'] > 70.]
+df = df[df['wd'] < 120.]
+df = df.reset_index(drop=True)
+
 # Calculate energy ratio for single category df
 era = er.energy_ratio(df=df,
-                      test_turbines=[0],
-                      ref_turbines=[1],
+                      test_turbines=[5],
+                      ref_turbines=[4],
                       dep_turbines=[],
                       wd_step=2.0,
                       ws_step=1.0,
                       verbose=True)
 
-era.get_energy_ratio(N=1)
+era.get_energy_ratio(N=1) # No bootstrapping
 era.plot_energy_ratio()
 
 # Calculate energy ratio for two category df
 df['category'] = 'baseline'
-ids_opt = np.arange(0, df.shape[0], 60)
+# Increase pow of turbine 1 on/off every 30 minutes
+ids_opt = np.arange(0, df.shape[0]-60, 60)
 ids_opt = [np.arange(i, i+30, 1) for i in ids_opt]
 ids_opt = np.array(ids_opt).flatten()
 df.loc[ids_opt, 'pow_001'] = df.loc[ids_opt, 'pow_001'] * 1.20
 df.loc[ids_opt, 'category'] = 'optimized'
 
-# limit df to narrow wind direction region
-df = df[df['wd'] > 70.]
-df = df[df['wd'] < 120.]
-
 era = er.energy_ratio(df=df,
                       test_turbines=[1],
-                      ref_turbines=[0],
+                      ref_turbines=[3],
                       dep_turbines=[],
                       wd_step=2.0,
                       ws_step=1.0,
                       verbose=True)
 
-era.get_energy_ratio(N=10)
+era.get_energy_ratio(N=10) # With bootstrapping
 era.plot_energy_ratio()
 plt.show()
