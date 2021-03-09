@@ -302,19 +302,13 @@ class ws_pw_curve_filtering():
                     time_array_src=time_array_target,
                     seek_time_windows=stws)
 
-                if bad_ids is None:
-                    return df_target
-
-                bad_ids_filt = []
-                for i in bad_ids:
-                    if isinstance(i, list):
-                        bad_ids_filt.extend(i)
-                    else:
-                        bad_ids_filt.extend([i])
                 df_target['status_%03d' % ti] = int(1)
-                df_target.loc[bad_ids_filt, 'status_%03d' % ti] = int(0)
+                if bad_ids is not None:
+                    bad_ids = np.concatenate(bad_ids)
+                    df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
+                nbad = np.sum(1-df_target['status_%03d' % ti])
                 print('  Mapping yields %d entries (%d %%) flagged as bad for ti = %d.'
-                      % (len(bad_ids_filt), 100. * len(bad_ids_filt) / df_target.shape[0], ti))
+                      % (nbad, 100. * nbad / df_target.shape[0], ti))
 
         status_cols = [('status_%03d' % ti) for ti in range(self.num_turbines)]
         df_target['status_all'] = df_target[status_cols].min(axis=1)
