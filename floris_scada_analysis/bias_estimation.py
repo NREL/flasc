@@ -31,8 +31,10 @@ def printnow(text):
 
 class bias_estimation():
     def __init__(self, df, df_fi, fi, test_turbines_subset, ref_turbine_maxrange,
-                 sliding_window_lb_ub, eo_ws_step=5.0, eo_wd_step=2.0):
+                 sliding_window_lb_ub, eo_ws_step=5.0, eo_wd_step=2.0, verbose=False):
         printnow('Initializing the bias_correction() class from floris_scada_analysis.')
+
+        self.verbose = verbose
 
         # Check format of dataframes based on first 100 rows
         if df.shape[0] != df_fi.shape[0]:
@@ -202,7 +204,7 @@ class bias_estimation():
         wd_step = self.eo_wd_step
         ws_step = self.eo_ws_step
 
-        fsc = sca.scada_analysis()
+        fsc = sca.scada_analysis(verbose=self.verbose)
         fsc.add_df(self.df_subset, 'Measurement data')
         fsc.add_df(self.df_fi_subset, 'FLORIS predictions')
         fsc.set_turbine_names(turbine_names=['WTG_%03d' % ti for ti in range(7)])
@@ -224,23 +226,26 @@ class bias_estimation():
                     fsc.set_masks(wd_range=wd_range)
                     fsc.get_energy_ratios(test_turbines=[ti], ref_turbines=ref_turbines,
                                           dep_turbines=[], wd_step=wd_step,
-                                          ws_step=ws_step, N=1, verbose=False)
+                                          ws_step=ws_step, N=1)
                     result = fsc.df_list[0]['er_results']
                     result_floris = fsc.df_list[1]['er_results']
 
-                    if result is not None:
+                    if (result is not None and result_floris is not None):
                         if not (len(result) == len(result_floris)):
                             breakpoint()
                         if len(result) > 0:
                             er_result_wd[ii].extend(result.wd_bin)
                             er_result_scada[ii].extend(result.baseline)
                             er_result_floris[ii].extend(result_floris.baseline)
+                    elif self.verbose:
+                        print('Issue with processing bin for wd_range ' +
+                              '(%d deg, %d deg).' % (wd_range[0], wd_range[1]))
 
         self.energy_ratio_wd_total = er_result_wd
         self.energy_ratio_scada_total = er_result_scada
         self.energy_ratio_floris_total = er_result_floris
 
-    def plot_energy_ratios(self):
+    def plot_energy_ratios(self, save_path=None):
         import matplotlib.pyplot as plt
 
         wd_arrays = self.energy_ratio_wd_total
@@ -257,4 +262,6 @@ class bias_estimation():
                 ax.plot(wd_arrays[ii] - self.opt_wd_bias, er_result_scada[ii], color='blue', label='SCADA data (corrected)')
             ax.plot(wd_arrays[ii], er_result_floris[ii], ls = '--', color='orange', label='FLORIS')
             plt.title('Turbine %d' % ti)
-        plt.legend()
+            plt.legend()
+            if save_path is not None:
+                plt.savefig(save_path + '_%03d.png' % ti)
