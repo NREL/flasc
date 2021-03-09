@@ -153,7 +153,8 @@ def estimate_dt(time_array):
         return datetime.timedelta(seconds=0)
 
     dt = np.min(np.diff(time_array))
-    dt = datetime.timedelta(seconds=dt.astype(float)/1e9)
+    if not isinstance(dt, datetime.timedelta):
+        dt = datetime.timedelta(seconds=dt.astype(float)/1e9)
 
     # Check if data is all ascending
     if dt <= datetime.timedelta(0):
