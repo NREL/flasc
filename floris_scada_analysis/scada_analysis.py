@@ -27,15 +27,18 @@ class scada_analysis():
     """
     """
 
-    def __init__(self, ws_range=[0., 50.], wd_range=[0., 360.],
-                 ti_range=[0., 0.50], verbose=False):
+    def __init__(self,
+                 ws_range_filter=None,
+                 wd_range_filter=None,
+                 ti_range_filter=None,
+                 verbose=False):
         self.df_list = []
         self.num_turbines = []
         self.turbine_names = []
 
-        self.ws_range = ws_range
-        self.wd_range = wd_range
-        self.ti_range = ti_range
+        self.ws_range = ws_range_filter
+        self.wd_range = wd_range_filter
+        self.ti_range = ti_range_filter
 
         self.verbose = verbose
 
@@ -91,10 +94,13 @@ class scada_analysis():
 
     def _apply_df_mask(self, ii):
         df = self.df_list[ii]['df'].copy()
-        df = dfm.filter_df_by_ws(df, self.ws_range)
-        df = dfm.filter_df_by_wd(df, self.wd_range)
-        if 'ti' in df.columns:
-            df = dfm.filter_df_by_ti(df, self.ti_range)
+        if self.ws_range is not None:
+            df = dfm.filter_df_by_ws(df, self.ws_range)
+        if self.wd_range is not None:
+            df = dfm.filter_df_by_wd(df, self.wd_range)
+        if self.ti_range is not None:
+            if 'ti' in df.columns:
+                df = dfm.filter_df_by_ti(df, self.ti_range)
         self.df_list[ii]['df_subset'] = df
 
     def set_masks(self, ws_range=None, wd_range=None, ti_range=None):
@@ -141,7 +147,7 @@ class scada_analysis():
                                   dep_turbines=dep_turbines,
                                   wd_step=wd_step,
                                   ws_step=ws_step,
-                                  verbose=verbose)
+                                  verbose=self.verbose)
             er_result = era.get_energy_ratio(N=N)
 
             self.df_list[ii]['er_results'] = er_result
