@@ -23,6 +23,7 @@ from floris_scada_analysis import bias_estimation as best
 from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import floris_tools as ftools
 
+
 # Load dataframe with scada data
 root_dir = os.path.dirname(os.path.abspath(__file__))
 ftr_path = os.path.join(root_dir, '../demo_dataset/demo_dataset_60s.ftr')
@@ -37,9 +38,9 @@ print('Initializing the FLORIS object for our demo wind farm')
 file_path = os.path.dirname(os.path.abspath(__file__))
 fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.json")
 fi = wfct.floris_interface.FlorisInterface(fi_path)
-# fi.vis_layout()
+fi.vis_layout()
 
-# Offset scada dataset with a 7.5 degree bias on WD measurements
+# Add an artificial 7.5 deg bias on the turbine WD measurements
 col_names = ['wd_%03d' % ti for ti in range(len(fi.layout_x))]
 df[col_names] = wrap_360(df[col_names] + 7.5)
 

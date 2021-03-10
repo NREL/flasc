@@ -59,14 +59,14 @@ fsc.set_turbine_names(turbine_names=['WTG_%03d' % ti for ti in range(7)])
 fsc.print_dfs()
 
 # # look at one test-ref turbines set
-fsc.set_masks(wd_range=[70., 110.], ti_range=[0., 0.25])
-fsc.get_energy_ratios(test_turbines=[1], ref_turbines=[2],
+fsc.set_masks(wd_range=[20., 90.], ti_range=[0., 0.25])
+fsc.get_energy_ratios(test_turbines=[1], ref_turbines=[0, 6],
                       dep_turbines=[], wd_step=2.0,
                       ws_step=1.0, N=10, verbose=False)
 fsc.plot_energy_ratios(superimpose=True)
 
 # look at another test-ref turbines set for same ws/wd/ti mask
-fsc.get_energy_ratios(test_turbines=[5], ref_turbines=[2, 3, 4],
+fsc.get_energy_ratios(test_turbines=[3], ref_turbines=[0, 6],
                       dep_turbines=[], wd_step=2.0,
                       ws_step=1.0, N=10, verbose=False)
 fsc.plot_energy_ratios(superimpose=True)
