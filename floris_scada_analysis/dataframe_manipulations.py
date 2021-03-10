@@ -291,19 +291,28 @@ def df_sort_and_fix_duplicates(df):
         # Check if any conflicting entries exist within duplicate rows
         column_list = [c for c in df.columns if (c != 'time' and c != 'index')]
         for c in column_list:
-            if (
-                not np.isnan(df_subset.iloc[0, :][c]) and
-                not np.isnan(df_subset.iloc[1, :][c])
-               ):
+            is_faulty = False
+            x1 = df_subset.iloc[0, :][c]
+            x2 = df_subset.iloc[1, :][c]
+            if not type(x1) == type(x2):
+                is_faulty = True
+            elif isinstance(x1, str):
+                is_faulty = (not (x1 == x2))
+            elif isinstance(x1, float) | isinstance(x1, int):
+                is_faulty = not np.array_equal(x1, x2, equal_nan=True)
+            else:
+                is_faulty = (not (x1 == x2))
+            if is_faulty:
                 import warnings
-                warnings.warn('Found conflicting data entries for timestamp:' + str(df_subset.iloc[0,0]))
+                warnings.warn('Found conflicting data entries for timestamp:' +
+                              str(df_subset.iloc[0]['time']))
                 print(df_subset[c])
                 print('Setting value to np.nan as a safety measure...')
                 c_indx = np.where([c == df_subset.columns])[1][0]
                 df_subset.iloc[0, c_indx] = np.nan
                 df_subset.iloc[1, c_indx] = np.nan
 
-        # If no conflicts found, merge data
+        # Now merge data
         df_subset = df_subset.reset_index(drop=('time' in df_subset.columns))
         df_merged = df_subset.head(1).fillna(df_subset.tail(1))
         df = df.reset_index().drop([di, di+1])  # Remove dupl. rows

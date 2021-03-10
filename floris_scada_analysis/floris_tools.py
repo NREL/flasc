@@ -167,24 +167,8 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
         return calc_floris(df, fi)
 
     # Calculate approximate solutions
-    print('Reducing calculations from ' + str(df.shape[0]) + ' to ' + str(df_approx.shape[0]) + ' cases.')
+    print('Reducing calculations from ' + str(df.shape[0]) + ' to ' + str(df_approx.shape[0]) + ' cases using calc_floris_approx() over calc_floris().')
     df_approx = calc_floris(df_approx, fi)
-
-    # for idx in range(df_approx.shape[0]):
-    #     if (np.remainder(idx, 100) == 0) or idx == df_approx.shape[0]-1:  # Print output every 100 steps:
-    #         print('  Progress: finished %.1f percent (%d/%d cases).'
-    #               % (100.*idx/df_approx.shape[0], idx, df_approx.shape[0]))
-
-    #     fi.reinitialize_flow_field(wind_speed=df_approx.loc[idx, 'ws'],
-    #                                wind_direction=df_approx.loc[idx, 'wd'],
-    #                                turbulence_intensity=df_approx.loc[idx, 'ti'])
-    #     fi.calculate_wake()
-
-    #     for ti in range(num_turbines):
-    #         df_approx.loc[idx, 'pow_%03d' % ti] = np.array(fi.get_turbine_power())[ti]/1000.
-    #         df_approx.loc[idx, 'wd_%03d' % ti] = df_approx.loc[idx, 'wd']  # Assume uniform for now
-    #         df_approx.loc[idx, 'ws_%03d' % ti] = fi.floris.farm.turbines[ti].average_velocity
-    #         df_approx.loc[idx, 'ti_%03d' % ti] = fi.floris.farm.turbines[ti]._turbulence_intensity
 
     # Map individual data entries to full DataFrame
     print('Now mapping the precalculated solutions from FLORIS to the dataframe entries...')
@@ -276,17 +260,3 @@ def get_upstream_turbs_floris(fi, wd_step=1.0, verbose=False):
                                 'turbines': upstream_turbs_ids})
 
     return df_upstream
-
-
-if __name__ == '__main__':
-    import os
-    import floris.tools as wfct
-
-    # Initialize the FLORIS interface fi
-    print('Initializing the FLORIS object for our demo wind farm')
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../examples/demo_dataset/demo_floris_input.json")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
-
-    df_upstream = get_upstream_turbs_floris(fi)
-    print(df_upstream)

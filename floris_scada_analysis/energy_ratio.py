@@ -412,26 +412,25 @@ class Energy_Column:
             .sum()
         )
 
-        # # Ensure that dimensions match
-        # ws_bins_ref = np.array(df_ref.reset_index()['ws_bin'])
-        # ws_bins_test = np.array(df_ref.reset_index()['ws_bin'])
-        # ws_bins_freq = np.array(df_freq.reset_index()['ws_bin'])
-        # if (not all(ws_bins_ref==ws_bins_test) or
-        #     not all(ws_bins_ref==ws_bins_freq)):
-        #     ws_bins_array = np.concatenate([ws_bins_ref, ws_bins_test, ws_bins_freq])
-        #     ws_bins_array = np.unique(ws_bins_array)
-        #     for i in ws_bins_array:
-        #         if i not in list(df_ref.reset_index()['ws_bin']):
-        #             df_ref = df_ref.reset_index()
-        #             df_ref = df_ref.append({'ws_bin': i, 'baseline': np.nan}, ignore_index=True)
-        #             df_ref = df_ref.set_index('ws_bin').sort_index()
-        #         if i not in list(df_test.reset_index()['ws_bin']):
-        #             df_test = df_test.reset_index()
-        #             df_test = df_test.append({'ws_bin': i, 'baseline': np.nan}, ignore_index=True)
-        #             df_test = df_test.set_index('ws_bin').sort_index()
-        #         if i not in list(df_test.reset_index()['ws_bin']):
-        #             df_freq = df_freq.append({'ws_bin': i, 'observed_freq': np.nan, 'annual_freq': np.nan}, ignore_index=True)
-        #             df_freq = df_freq.sort(by='ws_bin')
+        # Ensure that dimensions match
+        ws_bins_ref = np.array(df_ref.reset_index()['ws_bin'])
+        ws_bins_test = np.array(df_ref.reset_index()['ws_bin'])
+        ws_bins_freq = np.array(df_freq.reset_index()['ws_bin'])
+        if (not np.array_equal(ws_bins_ref, ws_bins_test) or
+            not np.array_equal(ws_bins_ref, ws_bins_freq)):
+            ws_bins_array = np.concatenate([ws_bins_ref, ws_bins_test, ws_bins_freq])
+            ws_bins_array = np.unique(ws_bins_array)
+
+            y = np.interp(ws_bins_array, df_ref.index, df_ref['baseline'])
+            df_ref = pd.DataFrame({'ws_bin': ws_bins_array, 'baseline': y})
+            df_ref = df_ref.set_index('ws_bin')
+
+            y = np.interp(ws_bins_array, df_test.index, df_test['baseline'])
+            df_test = pd.DataFrame({'ws_bin': ws_bins_array, 'baseline': y})
+            df_test = df_test.set_index('ws_bin')
+
+            # df_freq = df_freq.append({'ws_bin': i, 'observed_freq': np.nan, 'annual_freq': np.nan}, ignore_index=True)
+            # df_freq = df_freq.sort(by='ws_bin')
 
         results = np.zeros(len(category))
         if use_observed_freq:

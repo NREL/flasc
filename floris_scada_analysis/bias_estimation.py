@@ -39,6 +39,8 @@ class bias_estimation():
         # Check format of dataframes based on first 100 rows
         if df.shape[0] != df_fi.shape[0]:
             raise DataError('Please ensure df_fi and df have the same number of entries.')
+        if not (list(df.iloc[0:100]['time'])==list(df_fi.iloc[0:100]['time'])):
+            raise DataError("The columns 'time' should be identical between df and df_fi.")
         if not (list(df.iloc[0:100]['wd'])==list(df_fi.iloc[0:100]['wd'])):
             raise DataError("The columns 'wd' should be identical between df and df_fi.")
         if not (list(df.iloc[0:100]['ws'])==list(df_fi.iloc[0:100]['ws'])):

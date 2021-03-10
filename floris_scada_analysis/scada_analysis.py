@@ -11,13 +11,10 @@
 # the License.
 
 
-# import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-# from floris.utilities import wrap_180, wrap_360
-# from floris import tools as wfct
+from pandas.core.base import DataError
 
 from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import energy_ratio as er
@@ -47,7 +44,8 @@ class scada_analysis():
 
     def add_df(self, df, name):
         if not ('wd' in df.columns and 'ws' in df.columns):
-            raise ImportError("Could not find all columns. Ensure that you have columns 'wd' and 'ws' in your df.")
+            raise ImportError("Could not find all columns. Ensure that" +
+                              "you have columns 'wd' and 'ws' in your df.")
 
         num_turbines = dfm.get_num_turbines(df)
         if len(self.df_list) < 1:
@@ -55,14 +53,18 @@ class scada_analysis():
             self.turbine_names = [str(i) for i in range(num_turbines)]
 
         if self.num_turbines != num_turbines:
-            print('Added dataframe seems to have a different number of turbines than the existing dataframe(s). Skipping addition.')
+            print('Added dataframe seems to have a different number of ' +
+                  'turbines than the existing dataframe(s). Skipping ' + 
+                  'addition.')
             return None
 
         if 'category' in df:
             if len(np.unique(df['category'])) > 2:
-                raise KeyError('More than 2 different category values are found. Please limit yourself to 2.')
+                raise KeyError('More than 2 different category values ' + 
+                               'are found. Please limit yourself to 2.')
         else:
-            print("No 'category' column found in df. Adding column with all values 'baseline'.")
+            print("No 'category' column found in df. Adding column with " +
+                  "all values 'baseline'.")
             df = df.copy()
             df.loc[:, 'category'] = 'baseline'
 
@@ -73,7 +75,8 @@ class scada_analysis():
 
     def remove_df(self, index):
         if self.verbose:
-            print("Removing dataframe with name '" + self.df_list[index]['name'] + "'.")
+            print("Removing dataframe with name '" +
+                  self.df_list[index]['name'] + "'.")
         self.df_list.pop(index)
 
         if len(self.df_list) < 1:
@@ -87,7 +90,8 @@ class scada_analysis():
             for c in keys:
                 var = self.df_list[ii][c]
                 if isinstance(var, pd.DataFrame):
-                    print('  [' + str(ii) + '] '+ c + ': pd.Dataframe() with shape ', var.shape)
+                    print('  [' + str(ii) + '] '+ c + ': ' +
+                          'pd.Dataframe() with shape ', var.shape)
                 else:
                     print('  [' + str(ii) + '] '+ c + ': ', var)
             print(' ')
@@ -121,6 +125,11 @@ class scada_analysis():
                           self.df_list[ii]['df'].shape[0]))
 
     def set_turbine_names(self, turbine_names):
+        if not len(turbine_names) == self.num_turbines:
+            raise DataError(
+                'The length of turbine_names is incorrect.'
+                'Length should  be %d (specified: %d).' % 
+                (self.num_turbines, len(turbine_names)))
         self.turbine_names = turbine_names
 
     def clear_energy_ratio_results(self, ii):
@@ -169,15 +178,22 @@ class scada_analysis():
             result = self.df_list[ii]['er_results']
             data_name = self.df_list[ii]['name']
             categories = self.df_list[0]['categories']
-            test_turbine_names = [self.turbine_names[i] for i in self.df_list[ii]['er_test_turbines']]
-            ref_turbine_names = [self.turbine_names[i] for i in self.df_list[ii]['er_ref_turbines']]
-            dep_turbine_names = [self.turbine_names[i] for i in  self.df_list[ii]['er_dep_turbines']]
+            test_turbine_names = [self.turbine_names[i] for i in
+                                  self.df_list[ii]['er_test_turbines']]
+            ref_turbine_names = [self.turbine_names[i] for i in
+                                 self.df_list[ii]['er_ref_turbines']]
+            dep_turbine_names = [self.turbine_names[i] for i in
+                                 self.df_list[ii]['er_dep_turbines']]
 
-            ax.plot(result.wd_bin, result.baseline, label=data_name+': '+categories[0])
-            ax.fill_between(result.wd_bin, result.baseline_l, result.baseline_u, alpha=0.15)
+            ax.plot(result.wd_bin, result.baseline, 
+                    label=data_name+': '+categories[0])
+            ax.fill_between(result.wd_bin, result.baseline_l,
+                            result.baseline_u, alpha=0.15)
             if 'controlled' in result.columns:
-                ax.plot(result.wd_bin, result.controlled, label=data_name+': '+categories[1])
-                ax.fill_between(result.wd_bin, result.controlled_l, result.controlled_u, alpha=0.15)
+                ax.plot(result.wd_bin, result.controlled,
+                        label=data_name+': '+categories[1])
+                ax.fill_between(result.wd_bin, result.controlled_l,
+                                result.controlled_u, alpha=0.15)
             ax.legend()
             plt.title(str(['Test turbines:', test_turbine_names,
                            'Ref. turbines:', ref_turbine_names,
