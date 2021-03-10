@@ -10,12 +10,15 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-import os
+
+import matplotlib.pyplot as plt
 import numpy as np
+import os
 import pandas as pd
 import pytz
 
 import floris.tools as wfct
+from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import floris_tools as ftls
 
 
@@ -31,11 +34,13 @@ def get_wind_data_from_nwtc():
     import urllib.request
     print('Beginning file download with urllib2...')
 
-    url='https://midcdmz.nrel.gov/apps/plot.pl?site=NWTC&start=2001082' + \
-        '4&edy=28&emo=2&eyr=2021&year=2019&month=1&day=1&endyear=2020&' + \
-        'endmonth=1&endday=1&time=0&inst=21&inst=39&inst=58&type=data&' + \
-        'wrlevel=2&preset=0&first=3&math=0&second=-1&value=0.0&user=0&' + \
+    url = (
+        'https://midcdmz.nrel.gov/apps/plot.pl?site=NWTC&start=2001082' +
+        '4&edy=28&emo=2&eyr=2021&year=2019&month=1&day=1&endyear=2020&' +
+        'endmonth=1&endday=1&time=0&inst=21&inst=39&inst=58&type=data&' +
+        'wrlevel=2&preset=0&first=3&math=0&second=-1&value=0.0&user=0&' +
         'axis=1'
+        )
 
     root_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(root_dir, 'tmp_nwtc_2019.csv')
@@ -47,51 +52,40 @@ def get_wind_data_from_nwtc():
     return df
 
 
-# def generate_bias_timeseries(time_array, max_bias=10.):
-#     """Functions to generate a timeseries representing a bias. This bias
-#     changes N_jumps times over the prespecified time_array with values
-#     between -max_bias and +max_bias.
-
-#     Args:
-#         time_array ([np.array; list]): Time series to calculate bias over
-#         max_bias ([float; int], optional): Maximum bias. Defaults to 10.
-#     """
-
-#     N_jumps = np.random.randint(3, 10)
-
-#     time_bias = time_array[np.sort(np.random.randint(0, len(time_array), N_jumps))]
-#     time_bias = np.append(time_array[0], list(time_bias))  # Add t0
-#     magn_bias = max_bias * 2. * (np.random.random(N_jumps+1) - 0.5)
-
-#     bias_timeseries = np.repeat(magn_bias[-1], len(time_array))
-#     for ti in range(len(time_bias)-1, -1, -1):
-#         bias_timeseries[time_array < time_bias[ti]] = magn_bias[ti]
-
-
 if __name__ == '__main__':
     # Determine a wind rose based on met mast data from NWTC
     print('Downloading and importing met mast data from the NWTC website...')
     df = get_wind_data_from_nwtc()
+
+    # Filter to ensure ascending time and no time duplicates
+    time_array = df['DATE (MM/DD/YYYY)'] + ' ' + df['MST'] + ':00'
+    time_array = pd.to_datetime(time_array)
+    time_array = [t.tz_localize(pytz.timezone('MST')) for t in time_array]
+    df['time'] = time_array
+
+    # Sort dataframe by time and fix duplicates
+    df = dfm.df_sort_and_fix_duplicates(df)
 
     # Initialize the FLORIS interface fi
     print('Initializing the FLORIS object for our demo wind farm')
     file_path = os.path.dirname(os.path.abspath(__file__))
     fi_path = os.path.join(file_path, "demo_floris_input.json")
     fi = wfct.floris_interface.FlorisInterface(fi_path)
+    fi.vis_layout()
+    plt.show()
 
     # Generate local wind direction measurements
     print('Formatting the dataframe with met mast data...')
-    time_array = df['DATE (MM/DD/YYYY)'] + ' ' + df['MST'] + ':00'
-    time_array = pd.to_datetime(time_array)
-    time_array = [t.tz_localize(pytz.timezone('MST')) for t in time_array]
-    df['time'] = time_array
     df = df.drop(columns=['DATE (MM/DD/YYYY)', 'MST'])
     df = df.rename(columns={'Avg Wind Speed @ 80m [m/s]': 'ws',
                             'Avg Wind Direction @ 80m [deg]': 'wd',
                             'Turbulence Intensity @ 80m': 'ti'})
 
     # Calculate 'true' solutions
-    df_fi = ftls.calc_floris_approx(df, fi, ws_step=1.0, wd_step=2.0, ti_step=0.03)
+    df_fi = ftls.calc_floris_approx(df, fi,
+                                    ws_step=1.0,
+                                    wd_step=2.0,
+                                    ti_step=0.03)
 
     # Add noise and bias per turbine
     np.random.seed(123)  # Fixed seed for reproducability

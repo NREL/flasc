@@ -1,23 +1,19 @@
 {
-  "description": "Example FLORIS Input file",
+  "description": "Example FLORIS Input file for FSA",
   "farm": {
-    "description": "Example Wind Farm, irregular layout with 7 turbines",
-    "name": "farm_example_fsa",
+    "description": "An example wind farm based on the U.S. onshore WED Plainfield wind farm with 7 Vensys 120/3000 wind turbines, resized to NREL 5MW turbines. Information about the farm was derived from the U.S. Wind Turbine Database (USWTDB), https://eerscmap.usgs.gov/uswtdb/viewer/#14.08/41.79589/-71.5389.",
+    "name": "example_plainfield_fsa",
     "properties": {
       "__comment__": "specified_wind_height of -1 uses the first turbine's hub height; After initialization, specified_wind_height is a free parameter.",
       "air_density": 1.225,
-      "layout_x": [
-        0.0, 660.0, 1020.0, 1008.0, 1236.0, 708.0, 276.0
-      ],
-      "layout_y": [
-        0.0, 50.0, 46.0, 396.0, 720.0, 740.0, 540.0
-      ],
+      "layout_x": [1630.222, 1176.733, 816.389, 755.938, 0.000, 1142.240, 1553.102],
+      "layout_y": [0.000, 297.357, 123.431, 575.544, 647.779, 772.262, 504.711],
       "specified_wind_height": -1,
       "turbulence_intensity": [
-        0.06
+        0.08
       ],
       "wind_direction": [
-        270.0
+        90.0
       ],
       "wind_shear": 0.12,
       "wind_speed": [
