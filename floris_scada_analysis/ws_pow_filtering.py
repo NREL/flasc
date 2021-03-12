@@ -77,16 +77,30 @@ class ws_pw_curve_filtering():
         # Setup windows
         self.window_list = []
 
-        # Default settings
+        # Derive information from turbine 0 in dataset
+        for ti in [0]:
+            est_ratedpw = np.median(
+                df.loc[df['ws_%03d' % ti] > 15., 'pow_%03d' % (ti)])
+            if est_ratedpw < 20.0:
+                est_ratedpw = np.round(est_ratedpw, 1)  # MW
+            elif est_ratedpw < 20.0e3:
+                est_ratedpw = np.round(est_ratedpw/1e3, 1)*1e3  # kW
+            else:
+                est_ratedpw = np.round(est_ratedpw/1e6, 1)*1e6  # W
+        est_ratedpw = float(est_ratedpw)
+        print('Estimated rated power of turbines in this dataset' +
+              ' to be %.1f' % est_ratedpw)
+
+        # Derive default settings
         default_pow_step = 50
         default_ws_dev = 2.0
-        default_max_pow_bin = 1900
+        default_max_pow_bin = 0.95 * est_ratedpw
         default_w0_ws = (3.5, 13.0)
-        default_w0_pw = (00.0, 1970.0)
+        default_w0_pw = (00.0, 0.98 * est_ratedpw)
         default_w1_ws = (0.0, 25.0)
-        default_w1_pw = (50.0, 2030.0)
+        default_w1_pw = (50.0, 1.02 * est_ratedpw)
         default_w2_ws = (13.0, 25.0)
-        default_w2_pw = (1970.0, 2030.0)
+        default_w2_pw = (0.98 * est_ratedpw, 1.02 * est_ratedpw)
 
         # Setup windows and binning properties
         self.window_add(default_w0_ws, default_w0_pw, axis=1)
@@ -128,7 +142,10 @@ class ws_pw_curve_filtering():
         for i in range(len(self.window_list)):
             self.window_list[i]['idx'] = i
 
-    def window_list_all(self):
+    def window_remove_all(self):
+        self.window_list = []
+
+    def window_print_all(self):
         for i in range(len(self.window_list)):
             window = self.window_list[i]
             for k in window.keys():
@@ -215,12 +232,16 @@ class ws_pw_curve_filtering():
     def plot(self, draw_windows=True, confirm_plot=True, save_path=None):
         df = self.df
 
+        fig_list = []
         for ti in range(self.num_turbines):
             print('Generating ws-power plot for turbine %03d' % ti)
             if confirm_plot:
                 fig, ax = plt.subplots(1, 2, figsize=(14, 5))
             else:
                 fig, ax = plt.subplots(1, 1, figsize=(14, 5))
+                ax = [ax]
+
+            fig_list.append(fig)
 
             # Show the acceptable points
             oowsdev = self.df_out_of_ws_dev[ti]
@@ -266,6 +287,8 @@ class ws_pw_curve_filtering():
 
             if save_path is not None:
                 plt.savefig(save_path + '/%03d.png' % ti)
+            
+        return fig_list
 
     def apply_filtering_to_other_df(self, df_target, threshold=.999, fout=None):
 
