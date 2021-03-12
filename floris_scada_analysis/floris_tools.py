@@ -228,16 +228,18 @@ def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius, include_itself):
     return turbs_within_radius
 
 
-def get_upstream_turbs_floris(fi, wd_step=1.0, verbose=False):
+def get_upstream_turbs_floris(fi, wd_step=3.0, verbose=False):
     if verbose:
-        print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' %(wd_step))
+        print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' % (wd_step))
     upstream_turbs_ids = []  # turbine numbers that are freestream
     upstream_turbs_wds = []  # lower bound of bin
     for wd in np.arange(0., 360., wd_step):
         fi.reinitialize_flow_field(wind_direction=wd, wind_speed=8.0)
-        fi.calculate_wake()
-        power_out = np.array(fi.get_turbine_power())
-        power_wake_loss = np.max(power_out) - power_out
+        fi.calculate_wake(no_wake=True)
+        power_out_nowake = np.array(fi.get_turbine_power())
+        fi.calculate_wake(no_wake=False)
+        power_out_wake = np.array(fi.get_turbine_power())
+        power_wake_loss = power_out_nowake - power_out_wake
         turbs_freestream = list(np.where(power_wake_loss < 0.01)[0])
         if len(upstream_turbs_wds) == 0:
             upstream_turbs_ids.append(turbs_freestream)
