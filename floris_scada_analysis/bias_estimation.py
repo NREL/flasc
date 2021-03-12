@@ -16,7 +16,6 @@ import numpy as np
 import pandas as pd
 from pandas.core.base import DataError
 
-from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import floris_tools as ftools
 from floris_scada_analysis import optimization as opt
 from floris_scada_analysis import scada_analysis as sca
@@ -31,7 +30,8 @@ def printnow(text):
 
 class bias_estimation():
     def __init__(self, df, df_fi, fi, test_turbines_subset, ref_turbine_maxrange,
-                 sliding_window_lb_ub, eo_ws_step=5.0, eo_wd_step=2.0, verbose=False):
+                 sliding_window_lb_ub, df_upstream=None, eo_ws_step=5.0, eo_wd_step=2.0,
+                 verbose=False):
         printnow('Initializing the bias_correction() class from floris_scada_analysis.')
 
         self.verbose = verbose
@@ -66,7 +66,8 @@ class bias_estimation():
         self.opt_search_range = (-50., 50.)
         self.opt_search_dx = 0.10
 
-        self._get_ref_turbs_floris(wd_step=self.eo_wd_step)
+        self.df_upstream = df_upstream
+        self._get_ref_turbs_floris()
 
         printnow('  Initializing sliding window')
         time_array = list(pd.to_datetime(df.time))
@@ -95,7 +96,8 @@ class bias_estimation():
         printnow('Estimating the wind direction bias')
         self._get_energy_ratios_allbins()
 
-        printnow('  Combining %d turbine energy ratios into single curve' % len(self.test_turbines_subset))
+        printnow('  Combining %d turbine energy ratios into single curve'
+                 % len(self.test_turbines_subset))
         x_array = []
         y_scada = []
         y_floris = []
@@ -172,15 +174,18 @@ class bias_estimation():
                  current_time.strftime('%Y-%m-%d %H:%M:%S') + ').')
 
     # Determine which turbines are freestream for certain WD
-    def _get_ref_turbs_floris(self, wd_step, include_itself=False):
-        printnow('  Determining upstream turbines per wind direction using FLORIS for wd_step = %.1f deg.' % (wd_step))
+    def _get_ref_turbs_floris(self, include_itself=False):
         fi = self.fi
-        df_upstream = ftools.get_upstream_turbs_floris(fi, wd_step=1.0)
+        df_upstream = self.df_upstream
+        if df_upstream is None:
+            printnow('  Determining upstream turbines per wind direction using FLORIS for wd_step = 5.0 deg.')
+            df_upstream = ftools.get_upstream_turbs_floris(fi, wd_step=5.0)
+            self.df_upstream = df_upstream
+
         self.upstream_turbs_wds = [
             [df_upstream.loc[i, 'wd_min'], df_upstream.loc[i, 'wd_max']]
             for i in range(df_upstream.shape[0])]
         self.upstream_turbs_ids = list(df_upstream.turbines)
-        self.df_upstream = df_upstream
 
         # Now mapping upstream turbine ids to test turbines
         x_turbs = fi.layout_x
@@ -209,7 +214,6 @@ class bias_estimation():
         fsc = sca.scada_analysis(verbose=self.verbose)
         fsc.add_df(self.df_subset, 'Measurement data')
         fsc.add_df(self.df_fi_subset, 'FLORIS predictions')
-        fsc.set_turbine_names(turbine_names=['WTG_%03d' % ti for ti in range(7)])
 
         test_turbines = self.test_turbines_subset
         er_result_wd = [[] for _ in test_turbines]
