@@ -99,13 +99,6 @@ for i in range(len(window_list)):
 # Filter data using default settings
 ws_pow_filtering.apply_filters()
 
-# Plot and save data for current dataframe
-st.markdown('## Filtering results')
-figs = ws_pow_filtering.plot(draw_windows=True,
-                             confirm_plot=cfmplots)
-for f in figs:
-    st.write(f)
-
 # Saving dataframe
 st.sidebar.markdown('## Export filtered dataframe')
 savepath = st.sidebar.text_input(
@@ -113,3 +106,10 @@ savepath = st.sidebar.text_input(
 if st.sidebar.button('Save'):
     ws_pow_filtering.df.to_feather(savepath)
     st.sidebar.write('Saved dataframe to %s.' % savepath)
+
+# Plot and save data for current dataframe
+st.markdown('## Filtering results')
+figs = ws_pow_filtering.plot(draw_windows=True,
+                             confirm_plot=cfmplots)
+for f in figs:
+    st.write(f)
