@@ -58,6 +58,24 @@ def plot_df_filtering(df, save_path_and_prefix=None):
             plt.savefig(fout)
 
 
+def plot_redzone(ax, x0, y0, dx, dy, text, fontsize=24, ii=0):
+    plotcolors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    clr = plotcolors[ii]
+
+    r = ax.add_patch(
+        patches.Rectangle((x0, y0), dx, dy,
+                          linewidth=1, edgecolor=clr,
+                          facecolor=clr, alpha=0.1))
+
+    ax.add_artist(r)
+    ax.annotate(text, (x0 + dx / 2., y0 + dy / 2.),
+                color=clr, weight='bold',
+                fontsize=fontsize, ha='center',
+                va='center')
+
+    return ax
+
+
 class ws_pw_curve_filtering():
     def __init__(self, df, single_turbine_mode=False):
         # Check format of df
@@ -236,7 +254,7 @@ class ws_pw_curve_filtering():
         for ti in range(self.num_turbines):
             print('Generating ws-power plot for turbine %03d' % ti)
             if confirm_plot:
-                fig, ax = plt.subplots(1, 2, figsize=(14, 5))
+                fig, ax = plt.subplots(1, 2, figsize=(28, 5))
             else:
                 fig, ax = plt.subplots(1, 1, figsize=(14, 5))
                 ax = [ax]
@@ -269,17 +287,40 @@ class ws_pw_curve_filtering():
                     'o', color='purple', markersize=5)
 
             if draw_windows:
+                xlim = (0., 30.) #ax[0].get_xlim()
+                ylim = ax[0].get_ylim()
                 for window in self.window_list:
                     ws_range = window['ws_range']
                     pow_range = window['pow_range']
-                    rect = patches.Rectangle((ws_range[0],pow_range[0]),
-                                             ws_range[1] - ws_range[0],
-                                             pow_range[1] - pow_range[0],
-                                             linewidth=1, edgecolor='r',
-                                             facecolor='none')
-                    ax[0].add_patch(rect)
+                    axis = window['axis']
+                    idx = window['idx']
 
-            ax[0].set_xlim([0., 30.])
+                    if axis == 1:
+                        # Filtered region left of curve
+                        plot_redzone(ax[0], xlim[0], pow_range[0],
+                                     ws_range[0] - xlim[0],
+                                     pow_range[1] - pow_range[0],
+                                     '%d' % idx, ii=idx)
+                        # Filtered region right of curve
+                        plot_redzone(ax[0], ws_range[1], pow_range[0],
+                                     xlim[1] - ws_range[1],
+                                     pow_range[1] - pow_range[0],
+                                     '%d' % idx, ii=idx)
+                    else:
+                        # Filtered region above curve
+                        plot_redzone(ax[0], ws_range[0], pow_range[1],
+                                     ws_range[1] - ws_range[0],
+                                     ylim[1] - pow_range[1],
+                                     '%d' % idx, ii=idx)
+                        # Filtered region below curve
+                        plot_redzone(ax[0], ws_range[0], ylim[0],
+                                     ws_range[1] - ws_range[0],
+                                     pow_range[0] - ylim[0],
+                                     '%d' % idx, ii=idx)
+                    # ax[0].add_patch(rect)
+
+            ax[0].set_xlim(xlim)
+            ax[0].set_ylim(ylim)
             ax[0].legend(['Filtered data', 'Self-flagged data', 'Window outliers', 'WS deviation outliers'])
 
             if confirm_plot:
@@ -287,7 +328,7 @@ class ws_pw_curve_filtering():
 
             if save_path is not None:
                 plt.savefig(save_path + '/%03d.png' % ti)
-            
+
         return fig_list
 
     def apply_filtering_to_other_df(self, df_target, threshold=.999, fout=None):
@@ -392,5 +433,3 @@ if __name__ == '__main__':
                                     os.path.basename(df_fn) + '_plot')
         plot_df_filtering(df_1s, save_path_and_prefix=fig_save_path_and_prefix)
         plt.close('all')
-
-    # plt.show()
