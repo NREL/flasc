@@ -18,16 +18,32 @@ import streamlit as st
 
 from floris_scada_analysis import ws_pow_filtering as wspcf
 
+
+# Use the full page for figures
+st.set_page_config(layout="wide")
+
 @st.cache()
 def load_data():
     print("Loading .ftr data.")
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    fn = os.path.join(root_path, '../demo_dataset/demo_dataset_60s.ftr')
-    df_60s = pd.read_feather(fn)
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    ftr_path = os.path.join(root_dir, '../demo_dataset/demo_dataset_60s.ftr')
+    if not os.path.exists(ftr_path):
+        raise FileNotFoundError('Please run ./examples/demo_dataset/' +
+                                'generate_demo_dataset.py before try' +
+                                'ing any of the other examples.')
+    df_60s = pd.read_feather(ftr_path)
     return df_60s
 
-# Load dataset
-df_full = load_data()
+@st.cache(allow_output_mutation=True)
+def load_class():
+    df_60s = load_data()
+    ws_pow_filtering = wspcf.ws_pw_curve_filtering(
+        df=df_60s, single_turbine_mode=True)
+    return df_60s, ws_pow_filtering
+
+# Load dataset and initialize class
+df_full, ws_pow_filtering = load_class()
+
 t0 = min(pd.to_datetime(df_full.time))
 t1 = max(pd.to_datetime(df_full.time))
 
@@ -53,8 +69,7 @@ cfmplots = st.sidebar.selectbox(label='Generate confirmation plots',
 df = df_full.copy()
 df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) >= pd.to_datetime(time_start)]
 df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) <= pd.to_datetime(time_end)]
-ws_pow_filtering = wspcf.ws_pw_curve_filtering(
-        df=df, single_turbine_mode=stm)
+ws_pow_filtering.df = df  # Overwrite
 window_list = ws_pow_filtering.window_list
 
 # Add new window
