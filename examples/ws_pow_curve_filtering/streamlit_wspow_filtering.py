@@ -65,6 +65,9 @@ stm = st.sidebar.selectbox(label='Single turbine analysis',
 cfmplots = st.sidebar.selectbox(label='Generate confirmation plots',
                            options=[True, False], index=1)
 
+# Set turbine analysis mode
+ws_pow_filtering.set_turbine_mode(single_turbine_mode=stm)
+
 # Cut data down to time region
 df = df_full.copy()
 df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) >= pd.to_datetime(time_start)]
