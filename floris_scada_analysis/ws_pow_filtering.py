@@ -121,9 +121,9 @@ class ws_pw_curve_filtering():
         default_w2_pw = (0.98 * est_ratedpw, 1.02 * est_ratedpw)
 
         # Setup windows and binning properties
-        self.window_add(default_w0_ws, default_w0_pw, axis=1)
-        self.window_add(default_w1_ws, default_w1_pw, axis=0)
-        self.window_add(default_w2_ws, default_w2_pw, axis=0)
+        self.window_add(default_w0_ws, default_w0_pw, axis=0)
+        self.window_add(default_w1_ws, default_w1_pw, axis=1)
+        self.window_add(default_w2_ws, default_w2_pw, axis=1)
         self.set_binning_properties(pow_step=default_pow_step,
                                     ws_dev=default_ws_dev,
                                     max_pow_bin=default_max_pow_bin,
@@ -190,21 +190,21 @@ class ws_pw_curve_filtering():
                 axis = window['axis']
                 if axis == 0:
                     ii_out_of_window = (
-                        filters.window_range_flag(df['ws_%03d' % ti],
-                                                  ws_range[0],
-                                                  ws_range[1],
-                                                  df['pow_%03d' % ti],
-                                                  pow_range[0],
-                                                  pow_range[1])
-                        )
-                else:
-                    ii_out_of_window = (
                         filters.window_range_flag(df['pow_%03d' % ti],
                                                   pow_range[0],
                                                   pow_range[1],
                                                   df['ws_%03d' % ti],
                                                   ws_range[0],
                                                   ws_range[1])
+                        )
+                else:
+                    ii_out_of_window = (
+                        filters.window_range_flag(df['ws_%03d' % ti],
+                                                  ws_range[0],
+                                                  ws_range[1],
+                                                  df['pow_%03d' % ti],
+                                                  pow_range[0],
+                                                  pow_range[1])
                         )
 
                 # Merge findings from all windows
@@ -213,7 +213,7 @@ class ws_pw_curve_filtering():
                     % (int(sum(ii_out_of_window)), idx))
 
             print('Removed a total of %d outliers using the %d windows.'
-                  %(int(sum(out_of_window_ids)), len(self.window_list)))
+                  % (int(sum(out_of_window_ids)), len(self.window_list)))
             self.df_out_of_windows.append([bool(i) for i in out_of_window_ids])
 
             # Filter by standard deviation for the reduced dataset
@@ -262,32 +262,33 @@ class ws_pw_curve_filtering():
             fig_list.append(fig)
 
             # Show the acceptable points
+            alpha = 0.2
             oowsdev = self.df_out_of_ws_dev[ti]
             oow = self.df_out_of_windows[ti]
             good_ids = [not(a) and not(b) for a, b in zip(oow, oowsdev)]
             ax[0].plot(df.loc[good_ids, 'ws_%03d' % ti],
                     df.loc[good_ids, 'pow_%03d' % ti],
-                    'o', color='k', markersize=3)
+                    'o', color='k', markersize=3, alpha=alpha)
             ax[0].set_title('Turbine %03d, 60 s sampled data' % ti)
 
             # Show the points self-screened
             self_not_ok = [not bool(i) for i in df['self_status_%03d' % ti]]
             ax[0].plot(df.loc[self_not_ok, 'ws_%03d' % ti],
                     df.loc[self_not_ok,'pow_%03d' % ti],
-                    'o', markerfacecolor='r', markersize=2)
+                    'o', markerfacecolor='r', markersize=2, alpha=alpha)
 
             # Show the points screened out of window
             ax[0].plot(df.loc[oow, 'ws_%03d' % ti],
                     df.loc[oow, 'pow_%03d' % ti],
-                    'o', color='orange', markersize=5)
+                    'o', color='orange', markersize=5, alpha=alpha)
 
             # Show the points screened using ws_dev
             ax[0].plot(df.loc[oowsdev, 'ws_%03d' % ti],
                     df.loc[oowsdev, 'pow_%03d' % ti],
-                    'o', color='purple', markersize=5)
+                    'o', color='purple', markersize=5, alpha=alpha)
 
             if draw_windows:
-                xlim = (0., 30.) #ax[0].get_xlim()
+                xlim = (0., 30.)  #ax[0].get_xlim()
                 ylim = ax[0].get_ylim()
                 for window in self.window_list:
                     ws_range = window['ws_range']
@@ -295,7 +296,7 @@ class ws_pw_curve_filtering():
                     axis = window['axis']
                     idx = window['idx']
 
-                    if axis == 1:
+                    if axis == 0:
                         # Filtered region left of curve
                         plot_redzone(ax[0], xlim[0], pow_range[0],
                                      ws_range[0] - xlim[0],
