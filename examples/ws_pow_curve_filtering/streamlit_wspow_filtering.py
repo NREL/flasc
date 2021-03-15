@@ -56,8 +56,7 @@ time_end = st.sidebar.date_input('End date', value=t1, min_value=time_start, max
 df = df_full.copy()
 df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) >= pd.to_datetime(time_start)]
 df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) <= pd.to_datetime(time_end)]
-df = df.reset_index(drop=('time' in df.columns))
-ws_pow_filtering.df = df  # Overwrite
+ws_pow_filtering.set_df(df)
 
 # Generalized settings
 st.sidebar.markdown('## General filter settings')

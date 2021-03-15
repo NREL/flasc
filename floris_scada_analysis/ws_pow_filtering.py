@@ -85,9 +85,8 @@ class ws_pw_curve_filtering():
             for ti in range(num_turbines):
                 df['self_status_%03d' % ti] = int(1)
 
-        # Make sure dataframe index is uniformly ascending and save
-        self.df = df.reset_index(drop=('time' in df.columns))
-        self.dt = fsato.estimate_dt(self.df['time'])
+        # Assign dataframe to self
+        self.set_df(df)
 
         # Set self.num_turbines to 1 or to all turbines
         self.set_turbine_mode(single_turbine_mode)
@@ -128,6 +127,11 @@ class ws_pw_curve_filtering():
                                     ws_dev=default_ws_dev,
                                     max_pow_bin=default_max_pow_bin,
                                    )
+
+    def set_df(self, df):
+        # Make sure dataframe index is uniformly ascending and save
+        self.df = df.reset_index(drop=('time' in df.columns))
+        self.dt = fsato.estimate_dt(self.df['time'])
 
     def set_turbine_mode(self, single_turbine_mode):
         if single_turbine_mode:
