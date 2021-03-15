@@ -52,6 +52,13 @@ st.sidebar.markdown('## Dataset selection')
 time_start = st.sidebar.date_input('Start date', value=t0, min_value=t0, max_value=t1)
 time_end = st.sidebar.date_input('End date', value=t1, min_value=time_start, max_value=t1)
 
+# Cut data down to time region
+df = df_full.copy()
+df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) >= pd.to_datetime(time_start)]
+df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) <= pd.to_datetime(time_end)]
+df = df.reset_index(drop=('time' in df.columns))
+ws_pow_filtering.df = df  # Overwrite
+
 # Generalized settings
 st.sidebar.markdown('## General filter settings')
 pow_step = st.sidebar.slider('Discretization step in power direction (kW)', 5., 250.,
@@ -67,12 +74,6 @@ cfmplots = st.sidebar.selectbox(label='Generate confirmation plots',
 
 # Set turbine analysis mode
 ws_pow_filtering.set_turbine_mode(single_turbine_mode=stm)
-
-# Cut data down to time region
-df = df_full.copy()
-df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) >= pd.to_datetime(time_start)]
-df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) <= pd.to_datetime(time_end)]
-ws_pow_filtering.df = df  # Overwrite
 window_list = ws_pow_filtering.window_list
 
 # Add new window
