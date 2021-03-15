@@ -76,6 +76,26 @@ def plot_redzone(ax, x0, y0, dx, dy, text, fontsize=24, ii=0):
     return ax
 
 
+def plot_filtering_distribution(N, N_oow, N_oowsdev):
+    fig, ax = plt.subplots(figsize=(10, 0.5))
+    N_clean = N-N_oow-N_oowsdev
+    plt.barh(0, N_clean/N, left=0, color='black')
+    plt.barh(0, N_oow/N, left=N_clean/N, color='orange')
+    plt.barh(0, N_oowsdev/N, left=(N-N_oowsdev)/N, color='purple')
+
+    ax.text(N_clean/(2*N), 0, '%d valid datapoints (%.1f %%)'
+            % (N_clean, N_clean*100/N), ha='center', va='center',
+            color='white')
+    ax.text(N_clean/N + N_oow/(2*N), 0, '%.1f%%' % (N_oow*100/N),
+            ha='center', va='center', color='w')
+    ax.text(N_clean/N + N_oow/N + N_oowsdev/(2*N), 0,
+            '%.1f%%' % (N_oowsdev*100/N), ha='center',
+            va='center', color='w')
+    ax.axis('off')
+
+    return fig
+
+
 class ws_pw_curve_filtering():
     def __init__(self, df, single_turbine_mode=False):
         # Check format of df
@@ -116,13 +136,10 @@ class ws_pw_curve_filtering():
         default_w0_pw = (00.0, 0.98 * est_ratedpw)
         default_w1_ws = (0.0, 25.0)
         default_w1_pw = (50.0, 1.02 * est_ratedpw)
-        default_w2_ws = (13.0, 25.0)
-        default_w2_pw = (0.98 * est_ratedpw, 1.02 * est_ratedpw)
 
         # Setup windows and binning properties
         self.window_add(default_w0_ws, default_w0_pw, axis=0)
         self.window_add(default_w1_ws, default_w1_pw, axis=1)
-        self.window_add(default_w2_ws, default_w2_pw, axis=1)
         self.set_binning_properties(pow_step=default_pow_step,
                                     ws_dev=default_ws_dev,
                                     max_pow_bin=default_max_pow_bin,

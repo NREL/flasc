@@ -129,5 +129,15 @@ if st.sidebar.button('Save'):
 st.markdown('## Filtering results')
 figs = ws_pow_filtering.plot(draw_windows=True,
                              confirm_plot=cfmplots)
-for f in figs:
+for idx, f in enumerate(figs):
+    st.write('Turbine %03d' % idx)
     st.write(f)
+
+    N=ws_pow_filtering.df.shape[0]
+    N_oow=sum(ws_pow_filtering.df_out_of_windows[idx])
+    N_oowsdev=sum(ws_pow_filtering.df_out_of_ws_dev[idx])
+
+    # Plot point distribution/filtered
+    fd = wspcf.plot_filtering_distribution(
+        N=N, N_oow=N_oow, N_oowsdev=N_oowsdev)
+    st.write(fd)
