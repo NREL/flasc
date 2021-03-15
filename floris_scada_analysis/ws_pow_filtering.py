@@ -283,7 +283,7 @@ class ws_pw_curve_filtering():
             fig_list.append(fig)
 
             # Show the acceptable points
-            alpha = 0.2
+            alpha = 0.05
             oowsdev = self.df_out_of_ws_dev[ti]
             oow = self.df_out_of_windows[ti]
             good_ids = [not(a) and not(b) for a, b in zip(oow, oowsdev)]
