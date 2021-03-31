@@ -11,6 +11,7 @@
 # the License.
 
 
+from floris_scada_analysis.dataframe_manipulations import df_drop_nan_rows
 import numpy as np
 import os
 import pandas as pd
@@ -23,7 +24,7 @@ from floris_scada_analysis import ws_pow_filtering as wspcf
 st.set_page_config(layout="wide")
 
 @st.cache()
-def load_data():
+def load_data():    
     print("Loading .ftr data.")
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(root_dir, '../demo_dataset/demo_dataset_60s.ftr')
@@ -41,9 +42,9 @@ def load_class():
         df=df_60s, single_turbine_mode=True)
     return df_60s, ws_pow_filtering
 
+
 # Load dataset and initialize class
 df_full, ws_pow_filtering = load_class()
-
 t0 = min(pd.to_datetime(df_full.time))
 t1 = max(pd.to_datetime(df_full.time))
 
