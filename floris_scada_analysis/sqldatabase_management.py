@@ -290,10 +290,12 @@ def batch_download_data_from_sql(dbc, destination_path,
               ', ' + str(current_timestamp.year) + '.')
         if current_timestamp.month == 12:
             next_timestamp = current_timestamp.replace(
-                year=current_timestamp.year+1, month=1)
+                year=current_timestamp.year+1, month=1,
+                day=1, hour=0, minute=0, second=0)
         else:
             next_timestamp = current_timestamp.replace(
-                month=current_timestamp.month+1)
+                month=current_timestamp.month+1,
+                day=1, hour=0, minute=0, second=0)
 
         df_table = dbc.get_table_data_from_db_wide(
             table_name=df_table_name,
