@@ -262,12 +262,18 @@ class bias_estimation():
         printnow('  Wind direction bias: %.1f deg' % (self.opt_wd_bias))
         for ii in range(len(self.test_turbines_subset)):
             ti = self.test_turbines_subset[ii]
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=(10, 5))
             ax.plot(wd_arrays[ii], er_result_scada[ii], color='k', label='SCADA data')
             if not np.isnan(self.opt_wd_bias):
                 ax.plot(wd_arrays[ii] - self.opt_wd_bias, er_result_scada[ii], color='blue', label='SCADA data (corrected)')
             ax.plot(wd_arrays[ii], er_result_floris[ii], ls = '--', color='orange', label='FLORIS')
             plt.title('Turbine %d' % ti)
+            plt.ylabel('Energy ratio (-)')
+            plt.xlabel('Wind direction (deg)')
+            plt.grid(b=True, which='major', axis='both', color='gray')
+            plt.minorticks_on()
+            plt.grid(b=True, which='minor', axis='both', color='lightgray')
             plt.legend()
+
             if save_path is not None:
-                plt.savefig(save_path + '_%03d.png' % ti)
+                plt.savefig(save_path + '_%03d.pdf' % ti)
