@@ -201,10 +201,13 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
         seek_times_min_remaining.pop(0)
         seek_times_max_remaining.pop(0)
 
+    # Deal with first entry, partially covered by seek_times[0]
     if time_array_src[0] > seek_times_min_remaining[0]:
         while time_array_src[i] <= seek_times_max_remaining[0]:
             idxs_out.append(i)
             i += 1
+            if i == len(time_array_src):
+                break
         idxs_out_array.append(idxs_out)
         seek_times_min_remaining.pop(0)
         seek_times_max_remaining.pop(0)
