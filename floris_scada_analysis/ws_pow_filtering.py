@@ -181,16 +181,6 @@ def plot_filtering_distribution(N, N_oow, N_oowsdev):
 class ws_pw_curve_filtering():
     def __init__(self, df, single_turbine_mode=False,
                  add_default_windows=True):
-        # Check format of df
-        if 'self_status_000' not in df.columns:
-            print('No self_status flags found. Assuming self_status_1 unless ws_ or pow_ is NaN.')
-            num_turbines = dfm.get_num_turbines(df)
-            for ti in range(num_turbines):
-                df['self_status_%03d' % ti] = 1
-                df.loc[np.isnan(df['ws_%03d' % ti]),
-                       'self_status_%03d' % ti] = 0
-                df.loc[np.isnan(df['pow_%03d' % ti]),
-                       'self_status_%03d' % ti] = 0
 
         # Assign dataframe to self
         self.set_df(df)
@@ -205,9 +195,13 @@ class ws_pw_curve_filtering():
         self.pw_curve_df = None
 
         # Derive information from turbine 0 in dataset
+        df = self.df  # Load from self after processing
         for ti in [0]:
-            est_ratedpw = np.median(
-                df.loc[df['ws_%03d' % ti] > 15., 'pow_%03d' % (ti)])
+            is_ok = (df['self_status_%03d' % ti] == 1)
+            is_above_rated = (df['ws_%03d' % ti] > 15.)
+            rated_ids = (is_ok & is_above_rated)
+            est_ratedpw = np.nanmedian(
+                df.loc[rated_ids, 'pow_%03d' % (ti)])
             if est_ratedpw < 20.0:
                 est_ratedpw = np.round(est_ratedpw, 1)  # MW
             elif est_ratedpw < 20.0e3:
@@ -237,6 +231,20 @@ class ws_pw_curve_filtering():
                                     max_pow_bin=default_max_pow_bin)
 
     def set_df(self, df):
+        # Check format of df
+        num_turbines = dfm.get_num_turbines(df)
+        if 'self_status_000' not in df.columns:
+            print('No self_status flags found.')
+            print('Assuming self_status == 1 for all non-NaN entries.')
+            for ti in range(num_turbines):
+                df['self_status_%03d' % ti] = 1
+
+        for ti in range(num_turbines):
+            nans = (np.isnan(df[['ws_%03d' % ti, 'pow_%03d' % ti]]).sum(axis=1) > 0)
+            df.loc[nans, 'self_status_%03d' % ti] = 0
+            print('Self-flagged %d entries for turbine %d due to NaN values.'
+                  % (np.sum(nans), ti))
+
         # Make sure dataframe index is uniformly ascending and save
         self.df = df.reset_index(drop=('time' in df.columns))
         self.dt = fsato.estimate_dt(self.df['time'])
@@ -310,11 +318,10 @@ class ws_pw_curve_filtering():
         self.df_out_of_ws_dev = []
         for ti in range(self.num_turbines):
             # Filter by self flag
-            df = self.df.copy()
-            is_ok = (df['self_status_%03d' % ti].values == 1)
-            df = df.loc[is_ok]
+            is_ok = (self.df['self_status_%03d' % ti].values == 1)
+            df_selfok = self.df.loc[is_ok].copy()
 
-            out_of_window_ids = np.zeros(df.shape[0])
+            out_of_window_ids = np.zeros(df_selfok.shape[0])
             window_list = [w for w in self.window_list if ti in w['turbines']]
             print(' ')
             print('Applying %d window filters to the df for turbine %d'
@@ -327,19 +334,19 @@ class ws_pw_curve_filtering():
                 axis = window['axis']
                 if axis == 0:
                     ii_out_of_window = (
-                        filters.window_range_flag(df['pow_%03d' % ti],
+                        filters.window_range_flag(df_selfok['pow_%03d' % ti],
                                                   pow_range[0],
                                                   pow_range[1],
-                                                  df['ws_%03d' % ti],
+                                                  df_selfok['ws_%03d' % ti],
                                                   ws_range[0],
                                                   ws_range[1])
                         )
                 else:
                     ii_out_of_window = (
-                        filters.window_range_flag(df['ws_%03d' % ti],
+                        filters.window_range_flag(df_selfok['ws_%03d' % ti],
                                                   ws_range[0],
                                                   ws_range[1],
-                                                  df['pow_%03d' % ti],
+                                                  df_selfok['pow_%03d' % ti],
                                                   pow_range[0],
                                                   pow_range[1])
                         )
@@ -347,24 +354,27 @@ class ws_pw_curve_filtering():
                 # Merge findings from all windows
                 out_of_window_ids[ii_out_of_window] = int(1)
                 print('  Removed %d outliers using window[%d].'
-                    % (int(sum(ii_out_of_window)), idx))
+                      % (int(sum(ii_out_of_window)), idx))
 
             print('Removed a total of %d outliers using the %d windows.'
-                  % (int(sum(out_of_window_ids)), len(self.window_list)))
-            self.df_out_of_windows.append([bool(i) for i in out_of_window_ids])
+                  % (int(sum(out_of_window_ids)), len(window_list)))
+            df_out_of_windows = np.zeros(self.df.shape[0])
+            out_of_window_indices = df_selfok.index[np.where(out_of_window_ids)[0]]
+            df_out_of_windows[out_of_window_indices] = 1
+            self.df_out_of_windows.append([bool(i) for i in df_out_of_windows])
 
             # Filter by standard deviation for the reduced dataset
-            df_ok = df[[not bool(i) for i in out_of_window_ids]]
+            df_ok = df_selfok[[not bool(i) for i in out_of_window_ids]]
             out_of_dev_series = filters.bin_filter(
                 df_ok['pow_%03d' % ti], df_ok['ws_%03d' % ti],
                 self.pow_step, self.ws_dev, 'median', 20.,
                 self.max_pow_bin, 'scalar', 'all')
             out_of_dev_indices = df_ok.index[np.where(out_of_dev_series)[0]]
-            df_out_of_ws_dev = np.zeros(df.shape[0])
+            df_out_of_ws_dev = np.zeros(self.df.shape[0])
             df_out_of_ws_dev[out_of_dev_indices] = 1
             self.df_out_of_ws_dev.append([bool(i) for i in df_out_of_ws_dev])
             print('Removed %d outliers using WS standard deviation filtering.'
-                  %(int(sum(df_out_of_ws_dev))))
+                  % (int(sum(df_out_of_ws_dev))))
 
             # Add a status flag for this turbine
             self.df['status_%03d' % ti] = 1
@@ -374,7 +384,7 @@ class ws_pw_curve_filtering():
         # Add a status_all column
         status_cols = [('status_%03d' % ti) for ti in range(self.num_turbines)]
         self.df['status_all'] = self.df[status_cols].min(axis=1)
-        self.pw_curve_df = None # Reset estimated power curve
+        self.pw_curve_df = None  # Reset estimated power curve after filtering
         return self.df
 
     def extract_power_curve(self, ws_bins=np.arange(0.0, 25.5, 0.5)):
@@ -602,7 +612,9 @@ class ws_pw_curve_filtering():
             if draw_windows:
                 xlim = (0., 30.)  #ax[0].get_xlim()
                 ylim = ax[0].get_ylim()
-                for window in self.window_list:
+                
+                window_list = [w for w in self.window_list if ti in w['turbines']]
+                for window in window_list:
                     ws_range = window['ws_range']
                     pow_range = window['pow_range']
                     axis = window['axis']
