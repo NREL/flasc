@@ -179,13 +179,18 @@ def plot_filtering_distribution(N, N_oow, N_oowsdev):
 
 
 class ws_pw_curve_filtering():
-    def __init__(self, df, single_turbine_mode=False):
+    def __init__(self, df, single_turbine_mode=False,
+                 add_default_windows=True):
         # Check format of df
         if 'self_status_000' not in df.columns:
-            print('No self_status flags found. Assuming all are 1.')
+            print('No self_status flags found. Assuming self_status_1 unless ws_ or pow_ is NaN.')
             num_turbines = dfm.get_num_turbines(df)
             for ti in range(num_turbines):
-                df['self_status_%03d' % ti] = int(1)
+                df['self_status_%03d' % ti] = 1
+                df.loc[np.isnan(df['ws_%03d' % ti]),
+                       'self_status_%03d' % ti] = 0
+                df.loc[np.isnan(df['pow_%03d' % ti]),
+                       'self_status_%03d' % ti] = 0
 
         # Assign dataframe to self
         self.set_df(df)
@@ -217,18 +222,19 @@ class ws_pw_curve_filtering():
         default_pow_step = 50
         default_ws_dev = 2.0
         default_max_pow_bin = 0.95 * est_ratedpw
-        default_w0_ws = (0.0, 15.0)
-        default_w0_pw = (0.0, 0.95 * est_ratedpw)
-        default_w1_ws = (0.0, 25.0)
-        default_w1_pw = (0.0, 1.04 * est_ratedpw)
 
         # Setup windows and binning properties
-        self.window_add(default_w0_ws, default_w0_pw, axis=0)
-        self.window_add(default_w1_ws, default_w1_pw, axis=1)
+        if add_default_windows:
+            default_w0_ws = (0.0, 15.0)
+            default_w0_pw = (0.0, 0.95 * est_ratedpw)
+            default_w1_ws = (0.0, 25.0)
+            default_w1_pw = (0.0, 1.04 * est_ratedpw)
+            self.window_add(default_w0_ws, default_w0_pw, axis=0)
+            self.window_add(default_w1_ws, default_w1_pw, axis=1)
+
         self.set_binning_properties(pow_step=default_pow_step,
                                     ws_dev=default_ws_dev,
-                                    max_pow_bin=default_max_pow_bin,
-                                   )
+                                    max_pow_bin=default_max_pow_bin)
 
     def set_df(self, df):
         # Make sure dataframe index is uniformly ascending and save
@@ -250,14 +256,37 @@ class ws_pw_curve_filtering():
         if max_pow_bin is not None:
             self.max_pow_bin = max_pow_bin
 
-    def window_add(self, ws_range, pow_range, axis=0):
-        # axis=0 means limiting values lower/higher than pow
-        # axis=1 means limiting values lower/higher than ws
+    def window_add(self, ws_range, pow_range, axis=0, turbines='all'):
+        """Add a filtering window for all or a particular set of turbines.
+        Any data that falls outside of this window will be removed, either
+        along the x-axis (wind speed, axis = 0) or along the y-axis
+        (power, axis = 1).
+
+        Args:
+            ws_range ([list, tuple]): Wind speed range in which data is OK.
+
+            pow_range ([list, tuple]): Power measurement range in which data
+            is OK.
+
+            axis (int, optional): Specify the axis over which values outside
+            of the window will be removed. axis=0 means limiting values lower
+            and higher than the specified pow_range, within the ws_range.
+            axis=1 means limiting values lower/higher than the ws_range
+            and that fall within the pow_range. Defaults to 0.
+
+            turbines (list, optional): Turbines to which this filter should
+            apply. If unspecified, then it defaults to 'all'.
+        """
+
+        if turbines == 'all':
+            turbines = range(self.num_turbines)
+
         idx = len(self.window_list)
         new_entry = {'idx': idx,
                      'ws_range': ws_range,
                      'pow_range': pow_range,
-                     'axis': axis}
+                     'axis': axis,
+                     'turbines': turbines}
         self.window_list.append(new_entry)
 
     def window_remove(self, i):
@@ -280,18 +309,18 @@ class ws_pw_curve_filtering():
         self.df_out_of_windows = []
         self.df_out_of_ws_dev = []
         for ti in range(self.num_turbines):
-            print(' ')
-            print('Applying window filters to the df for turbine %d' % ti)
-
-            # Filter by self flag / nan value
+            # Filter by self flag
             df = self.df.copy()
-            is_ok = ((df['self_status_%03d' % ti].values == 1) &
-                     (np.isnan(df['ws_%03d' % ti].values) == False) &
-                     (np.isnan(df['pow_%03d' % ti].values) == False))
+            is_ok = (df['self_status_%03d' % ti].values == 1)
             df = df.loc[is_ok]
 
             out_of_window_ids = np.zeros(df.shape[0])
-            for window in self.window_list:
+            window_list = [w for w in self.window_list if ti in w['turbines']]
+            print(' ')
+            print('Applying %d window filters to the df for turbine %d'
+                  % (len(window_list), ti))
+
+            for window in window_list:
                 idx = window['idx']
                 ws_range = window['ws_range']
                 pow_range = window['pow_range']
