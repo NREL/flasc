@@ -179,14 +179,17 @@ def plot_filtering_distribution(N, N_oow, N_oowsdev):
 
 
 class ws_pw_curve_filtering():
-    def __init__(self, df, single_turbine_mode=False,
-                 add_default_windows=True):
+    def __init__(self, df, turbine_list='all', add_default_windows=True):
 
         # Assign dataframe to self
         self.set_df(df)
 
-        # Set self.num_turbines to 1 or to all turbines
-        self.set_turbine_mode(single_turbine_mode)
+        # Get true total number of turbines
+        self.num_turbines_all = dfm.get_num_turbines(df)
+        self.full_turbine_list = range(self.num_turbines_all)
+
+        # Set desired number of turbines for analysis
+        self.set_turbine_mode(turbine_list=turbine_list)
 
         # Setup windows
         self.window_list = []
@@ -196,7 +199,8 @@ class ws_pw_curve_filtering():
 
         # Derive information from turbine 0 in dataset
         df = self.df  # Load from self after processing
-        for ti in [0]:
+        est_ratedpw_list = []
+        for ti in self.full_turbine_list:
             is_ok = (df['self_status_%03d' % ti] == 1)
             is_above_rated = (df['ws_%03d' % ti] > 15.)
             rated_ids = (is_ok & is_above_rated)
@@ -208,23 +212,37 @@ class ws_pw_curve_filtering():
                 est_ratedpw = np.round(est_ratedpw/1e3, 1)*1e3  # kW
             else:
                 est_ratedpw = np.round(est_ratedpw/1e6, 1)*1e6  # W
-        est_ratedpw = float(est_ratedpw)
-        print('Estimated rated power of turbines in this dataset' +
-              ' to be %.1f' % est_ratedpw)
+            est_ratedpw_list.append(float(est_ratedpw))
+
+        turbs_sorted = []
+        ratedpwrs = np.unique(est_ratedpw_list)
+        for ii in range(len(ratedpwrs)):
+            turbs = np.where(np.array(est_ratedpw_list) == ratedpwrs[ii])[0]
+            turbs = np.sort(turbs)
+            try_range = range(turbs[0], turbs[-1]+1)
+            if all(np.array(try_range) == turbs):
+                turbs = try_range
+            print('Estimated rated power of turbines %s in this dataset to be %.1f'
+                  % (str(turbs), ratedpwrs[ii]))
+            turbs_sorted.append(np.array(turbs))
 
         # Derive default settings
         default_pow_step = 50
         default_ws_dev = 2.0
-        default_max_pow_bin = 0.95 * est_ratedpw
+        default_max_pow_bin = 0.95 * np.array(est_ratedpw_list)
 
         # Setup windows and binning properties
         if add_default_windows:
-            default_w0_ws = (0.0, 15.0)
-            default_w0_pw = (0.0, 0.95 * est_ratedpw)
-            default_w1_ws = (0.0, 25.0)
-            default_w1_pw = (0.0, 1.04 * est_ratedpw)
-            self.window_add(default_w0_ws, default_w0_pw, axis=0)
-            self.window_add(default_w1_ws, default_w1_pw, axis=1)
+            for ii, turbs in enumerate(turbs_sorted):
+                est_ratedpw = ratedpwrs[ii]
+                default_w0_ws = (0.0, 15.0)
+                default_w0_pw = (0.0, 0.95 * est_ratedpw)
+                default_w1_ws = (0.0, 25.0)
+                default_w1_pw = (0.0, 1.04 * est_ratedpw)
+                self.window_add(default_w0_ws, default_w0_pw,
+                                axis=0, turbines=turbs)
+                self.window_add(default_w1_ws, default_w1_pw,
+                                axis=1, turbines=turbs)
 
         self.set_binning_properties(pow_step=default_pow_step,
                                     ws_dev=default_ws_dev,
@@ -249,19 +267,30 @@ class ws_pw_curve_filtering():
         self.df = df.reset_index(drop=('time' in df.columns))
         self.dt = fsato.estimate_dt(self.df['time'])
 
-    def set_turbine_mode(self, single_turbine_mode):
-        if single_turbine_mode:
-            self.num_turbines = 1
-        else:
-            self.num_turbines = dfm.get_num_turbines(self.df)
+    def set_turbine_mode(self, turbine_list):
+        if isinstance(turbine_list, str):
+            if turbine_list == 'all':
+                num_turbines = dfm.get_num_turbines(self.df)
+                turbine_list = range(num_turbines)
+            else:
+                raise KeyError('Invalid turbine_list specified.')
+
+        self.turbine_list = turbine_list
+        self.num_turbines = len(turbine_list)
 
     def set_binning_properties(self, pow_step=None,
                                ws_dev=None, max_pow_bin=None):
         if pow_step is not None:
+            if isinstance(pow_step, float) or isinstance(pow_step, int):
+                pow_step = np.repeat(pow_step, self.num_turbines_all)
             self.pow_step = pow_step
         if ws_dev is not None:
+            if isinstance(ws_dev, float) or isinstance(ws_dev, int):
+                ws_dev = np.repeat(ws_dev, self.num_turbines_all)
             self.ws_dev = ws_dev
         if max_pow_bin is not None:
+            if isinstance(max_pow_bin, float) or isinstance(max_pow_bin, int):
+                max_pow_bin = np.repeat(max_pow_bin, self.num_turbines_all)
             self.max_pow_bin = max_pow_bin
 
     def window_add(self, ws_range, pow_range, axis=0, turbines='all'):
@@ -286,8 +315,9 @@ class ws_pw_curve_filtering():
             apply. If unspecified, then it defaults to 'all'.
         """
 
-        if turbines == 'all':
-            turbines = range(self.num_turbines)
+        if isinstance(turbines, str):
+            if turbines == 'all':
+                turbines = self.full_turbine_list
 
         idx = len(self.window_list)
         new_entry = {'idx': idx,
@@ -367,8 +397,8 @@ class ws_pw_curve_filtering():
             df_ok = df_selfok[[not bool(i) for i in out_of_window_ids]]
             out_of_dev_series = filters.bin_filter(
                 df_ok['pow_%03d' % ti], df_ok['ws_%03d' % ti],
-                self.pow_step, self.ws_dev, 'median', 20.,
-                self.max_pow_bin, 'scalar', 'all')
+                self.pow_step[ti], self.ws_dev[ti], 'median', 20.,
+                self.max_pow_bin[ti], 'scalar', 'all')
             out_of_dev_indices = df_ok.index[np.where(out_of_dev_series)[0]]
             df_out_of_ws_dev = np.zeros(self.df.shape[0])
             df_out_of_ws_dev[out_of_dev_indices] = 1
