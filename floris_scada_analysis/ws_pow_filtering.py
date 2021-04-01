@@ -283,9 +283,11 @@ class ws_pw_curve_filtering():
             print(' ')
             print('Applying window filters to the df for turbine %d' % ti)
 
-            # Filter by self flag
+            # Filter by self flag / nan value
             df = self.df.copy()
-            is_ok = (df['self_status_%03d' % ti].values == 1)
+            is_ok = ((df['self_status_%03d' % ti].values == 1) &
+                     (np.isnan(df['ws_%03d' % ti].values) == False) &
+                     (np.isnan(df['pow_%03d' % ti].values) == False))
             df = df.loc[is_ok]
 
             out_of_window_ids = np.zeros(df.shape[0])
