@@ -142,6 +142,7 @@ def plot_df_filtering(df, save_path_and_prefix=None, dpi=300):
 
 def plot_redzone(ax, x0, y0, dx, dy, text, fontsize=24, ii=0):
     plotcolors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    ii = np.remainder(ii, len(plotcolors))
     clr = plotcolors[ii]
 
     r = ax.add_patch(
@@ -461,6 +462,8 @@ class ws_pw_curve_filtering():
         df = df.reset_index(drop=('time' in df.columns))
         df.to_feather(fout)
 
+        return df
+
     def plot(self, pretty=False, draw_windows=True,
              confirm_plot=True,  save_path=None,
              fig_format='png', dpi=300):
@@ -553,7 +556,7 @@ class ws_pw_curve_filtering():
             if draw_windows:
                 xlim = (0., 30.)
                 ylim = ax[0].get_ylim()
-                for window in self.window_list:
+                for ii, window in enumerate(self.window_list):
                     ws_range = window['ws_range']
                     pow_range = window['pow_range']
                     axis = window['axis']
@@ -564,23 +567,23 @@ class ws_pw_curve_filtering():
                         plot_redzone(ax[0], xlim[0], pow_range[0],
                                      ws_range[0] - xlim[0],
                                      pow_range[1] - pow_range[0],
-                                     '%d' % idx, ii=idx)
+                                     '%d' % idx, ii=ii)
                         # Filtered region right of curve
                         plot_redzone(ax[0], ws_range[1], pow_range[0],
                                      xlim[1] - ws_range[1],
                                      pow_range[1] - pow_range[0],
-                                     '%d' % idx, ii=idx)
+                                     '%d' % idx, ii=ii)
                     else:
                         # Filtered region above curve
                         plot_redzone(ax[0], ws_range[0], pow_range[1],
                                      ws_range[1] - ws_range[0],
                                      ylim[1] - pow_range[1],
-                                     '%d' % idx, ii=idx)
+                                     '%d' % idx, ii=ii)
                         # Filtered region below curve
                         plot_redzone(ax[0], ws_range[0], ylim[0],
                                      ws_range[1] - ws_range[0],
                                      pow_range[0] - ylim[0],
-                                     '%d' % idx, ii=idx)
+                                     '%d' % idx, ii=ii)
                     # ax[0].add_patch(rect)
 
             ax[0].set_xlim(xlim)
@@ -619,7 +622,9 @@ class ws_pw_curve_filtering():
             self_flagged = (df['self_status_%03d' % ti] == 0)
             oowsdev = self.df_out_of_ws_dev[ti]
             oow = self.df_out_of_windows[ti]
-            good_ids = (self_flagged==False) & (oowsdev==False) & (oow==False)
+            good_ids = ((self_flagged==False) &
+                        (np.array(oowsdev)==False) &
+                        (np.array(oow)==False))
             x = df.loc[good_ids, 'ws_%03d' % ti]
             y = df.loc[good_ids, 'pow_%03d' % ti]
             ax[0].plot(x, y, '.', color='k', markersize=3, alpha=alpha)
@@ -629,20 +634,20 @@ class ws_pw_curve_filtering():
             if plot_selfflagged:
                 alpha = 0.30
                 ax[0].plot(df.loc[self_flagged, 'ws_%03d' % ti],
-                        df.loc[self_flagged,'pow_%03d' % ti],
-                        '.', markerfacecolor='r', markersize=5, alpha=alpha)
+                           df.loc[self_flagged,'pow_%03d' % ti],
+                           '.', markerfacecolor='r', markersize=5, alpha=alpha)
 
             # Show the points screened out of window
             alpha = 0.30
             ax[0].plot(df.loc[oow, 'ws_%03d' % ti],
-                    df.loc[oow, 'pow_%03d' % ti],
-                    '.', color='orange', markersize=5, alpha=alpha)
+                       df.loc[oow, 'pow_%03d' % ti],
+                       '.', color='orange', markersize=5, alpha=alpha)
 
             # Show the points screened using ws_dev
             alpha = 0.30
             ax[0].plot(df.loc[oowsdev, 'ws_%03d' % ti],
-                    df.loc[oowsdev, 'pow_%03d' % ti],
-                    '.', color='purple', markersize=5, alpha=alpha)
+                       df.loc[oowsdev, 'pow_%03d' % ti],
+                       '.', color='purple', markersize=5, alpha=alpha)
 
             # Show the approximated power curve, if calculated
             if self.pw_curve_df is not None:
