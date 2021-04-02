@@ -780,7 +780,7 @@ if __name__ == '__main__':
     data_path = os.path.join(root_path, 'data/01_structured_data')
     df_60s_filelist = sqldbm.browse_datafiles(data_path=data_path,
                                               scada_table='scada_data_60s')
-    df_60s = sqldbm.batch_load_and_concat_dfs(df_filelist=df_60s_filelist)
+    df_60s = dfm.batch_load_and_concat_dfs(df_filelist=df_60s_filelist)
 
     # Setup a wind-speed power curve filtering class
     ws_pow_filtering = ws_pw_curve_filtering(df=df_60s,

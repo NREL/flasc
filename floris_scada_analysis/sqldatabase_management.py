@@ -16,7 +16,7 @@ import numpy as np
 import os
 import pandas as pd
 import re
-import warnings
+# import warnings
 
 from floris_scada_analysis import dataframe_manipulations as dfm
 
@@ -346,21 +346,3 @@ def _restructure_single_df(df, column_mapping_dict):
     print('    Copied the columns to the new dataframe with the appropriate naming.')
 
     return df_structured
-
-
-def restructure_df_files(df_table_name, column_mapping_dict,
-                         data_path, target_path):
-    print('Loading, processing and saving dataframes for '+df_table_name+'.')
-    if not os.path.exists(target_path):
-        os.mkdir(target_path)
-
-    files_result = browse_datafiles(data_path, scada_table=df_table_name)
-    files_result = np.sort(files_result)
-    for fi in files_result:
-        print('  Reading ' + fi + '.')
-        df_in = pd.read_feather(fi)  # Read
-        df_out = _restructure_single_df(df_in, column_mapping_dict)
-        if df_out is not None:
-            if df_out.shape[0] > 0:
-                fout = os.path.join(target_path, os.path.basename(fi))
-                df_out.reset_index(drop=True).to_feather(fout)
