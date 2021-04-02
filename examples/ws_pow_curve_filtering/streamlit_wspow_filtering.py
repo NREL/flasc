@@ -17,6 +17,7 @@ import os
 import pandas as pd
 import streamlit as st
 
+from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import ws_pow_filtering as wspcf
 
 
@@ -39,7 +40,7 @@ def load_data():
 def load_class():
     df_60s = load_data()
     ws_pow_filtering = wspcf.ws_pw_curve_filtering(
-        df=df_60s, single_turbine_mode=True)
+        df=df_60s, turbine_list=[0])
     return df_60s, ws_pow_filtering
 
 
@@ -57,6 +58,7 @@ time_end = st.sidebar.date_input('End date', value=t1, min_value=time_start, max
 df = df_full.copy()
 df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) >= pd.to_datetime(time_start)]
 df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) <= pd.to_datetime(time_end)]
+num_turbines = dfm.get_num_turbines(df)
 ws_pow_filtering.set_df(df)
 
 # Generalized settings
@@ -67,22 +69,29 @@ wind_dev = st.sidebar.slider('Maximum wind speed deviation within bin (m/s)', .2
                              2.0, step=0.25)
 max_bin = st.sidebar.slider('Maximum bin for which to filter out deviations (kW)', 4200., 5000.,
                             4800., step=10.)
-stm = st.sidebar.selectbox(label='Single turbine analysis',
-                           options=[True, False], index=0)
+turbines_options = ['all']
+turbines_options.extend(list(range(num_turbines)))
+turbs_analyzed = st.sidebar.multiselect(label="Turbines to analyze",
+                                        options=turbines_options,
+                                        default=[0])
 cfmplots = st.sidebar.selectbox(label='Generate confirmation plots',
                            options=[True, False], index=1)
 
-# Set turbine analysis mode
-ws_pow_filtering.set_turbine_mode(single_turbine_mode=stm)
+# Set turbines to analyze
+if 'all' in turbs_analyzed:
+    turbs_analyzed = 'all'
+ws_pow_filtering.set_turbine_mode(turbine_list=turbs_analyzed)
 window_list = ws_pow_filtering.window_list
 
 # Add new window
 st.sidebar.markdown('## Add or remove a window')
 if st.sidebar.button('Add new window'):
+    est_rated_pow = ws_pow_filtering.est_rated_pow[0]
     window_list.append({'idx': len(window_list),
                         'ws_range': [0., 50.],
-                        'pow_range': [0., 5500.],
-                        'axis': int(0)})
+                        'pow_range': [0., 1.1*est_rated_pow],
+                        'axis': int(0),
+                        'turbines': turbs_analyzed})
 
 # Remove window options
 if st.sidebar.button('Delete last window'):
@@ -99,7 +108,10 @@ for wdw in window_list:
     st.sidebar.slider("[%d] Power range" % wdw['idx'], 0.0, 5500.0,
                       wdw['pow_range'], 0.5, format='%.1f'),
     st.sidebar.selectbox(label='[%d] Axis' % wdw['idx'],
-                         options=[0, 1], index=wdw['axis'])
+                         options=[0, 1], index=wdw['axis']),
+    st.sidebar.multiselect(label="[%d] Turbines" % wdw['idx'],
+                           options=turbines_options,
+                           default=['all'])
     ])
 
 # Update values in WS-power curve filter
@@ -111,9 +123,13 @@ ws_pow_filtering.set_binning_properties(pow_step=pow_step,
 ws_pow_filtering.window_list = window_list
 for i in range(len(window_list)):
     wdw = windows_st_list[i]
+    turbine_list = wdw[3]
+    if 'all' in turbine_list:
+        turbine_list = list(range(num_turbines))
     ws_pow_filtering.window_list[i]['ws_range'] = wdw[0]
     ws_pow_filtering.window_list[i]['pow_range']= wdw[1]
     ws_pow_filtering.window_list[i]['axis']= int(wdw[2])
+    ws_pow_filtering.window_list[i]['turbines'] = turbine_list
 
 # Filter data using default settings
 ws_pow_filtering.apply_filters()
@@ -130,15 +146,24 @@ if st.sidebar.button('Save'):
 st.markdown('## Filtering results')
 figs = ws_pow_filtering.plot(draw_windows=True,
                              confirm_plot=cfmplots)
+
+if turbs_analyzed == 'all':
+    turbs_analyzed = list(range(num_turbines))
+
 for idx, f in enumerate(figs):
-    st.write('Turbine %03d' % idx)
+    ti = turbs_analyzed[idx]
+    st.write('Turbine %03d' % ti)
     st.write(f)
 
-    N=ws_pow_filtering.df.shape[0]
-    N_oow=sum(ws_pow_filtering.df_out_of_windows[idx])
-    N_oowsdev=sum(ws_pow_filtering.df_out_of_ws_dev[idx])
+    N = ws_pow_filtering.df.shape[0]
+    N_selfflg = sum(ws_pow_filtering.df['self_status_%03d' % ti]==0)
+    N_oow = sum(ws_pow_filtering.df_out_of_windows[ti])
+    N_oowsdev = sum(ws_pow_filtering.df_out_of_ws_dev[ti])
 
     # Plot point distribution/filtered
+    N_list = [N-N_selfflg-N_oow-N_oowsdev, N_selfflg, N_oow, N_oowsdev]
     fd = wspcf.plot_filtering_distribution(
-        N=N, N_oow=N_oow, N_oowsdev=N_oowsdev)
+        N_list=N_list,
+        label_list=['good', 'self-flagged',
+                    'window-filered', 'ws dev filtered'])
     st.write(fd)
