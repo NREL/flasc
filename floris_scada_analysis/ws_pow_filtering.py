@@ -159,23 +159,21 @@ def plot_redzone(ax, x0, y0, dx, dy, text, fontsize=24, ii=0):
     return ax
 
 
-def plot_filtering_distribution(N, N_oow, N_oowsdev):
+def plot_filtering_distribution(N_list, label_list):
     fig, ax = plt.subplots(figsize=(10, 0.5))
-    N_clean = N-N_oow-N_oowsdev
-    plt.barh(0, N_clean/N, left=0, color='black')
-    plt.barh(0, N_oow/N, left=N_clean/N, color='orange')
-    plt.barh(0, N_oowsdev/N, left=(N-N_oowsdev)/N, color='purple')
-
-    ax.text(N_clean/(2*N), 0, '%d valid datapoints (%.1f %%)'
-            % (N_clean, N_clean*100/N), ha='center', va='center',
-            color='white')
-    ax.text(N_clean/N + N_oow/(2*N), 0, '%.1f%%' % (N_oow*100/N),
-            ha='center', va='center', color='w')
-    ax.text(N_clean/N + N_oow/N + N_oowsdev/(2*N), 0,
-            '%.1f%%' % (N_oowsdev*100/N), ha='center',
-            va='center', color='w')
-    ax.axis('off')
-
+    N_total = int(np.sum(N_list))
+    N_list_nrm = [i/N_total for i in N_list]  # Normalize
+    clrs = ['black', 'orange', 'purple', 'blue']
+    edge_l = 0
+    for ii in range(len(N_list)):
+        edge_r = N_list_nrm[ii]
+        plt.barh(0, edge_r, left=edge_l, color=clrs[ii])
+        ax.text(edge_l + edge_r / 2., 0, label_list[ii] +
+                ': %d (%.1f %%)' % (N_list[ii], N_list_nrm[ii]*100), 
+                ha='center', va='center', color='white')
+        edge_l = edge_l + edge_r
+    ax.set_xlim([0.0, 1.0])
+    ax.set(yticklabels=[])
     return fig
 
 
@@ -226,6 +224,7 @@ class ws_pw_curve_filtering():
             print('Estimated rated power of turbines %s in this dataset to be %.1f'
                   % (str(turbs), ratedpwrs[ii]))
             turbs_sorted.append(np.array(turbs))
+        self.est_rated_pow = ratedpwrs
 
         # Derive default settings
         default_pow_step = 50
@@ -235,7 +234,7 @@ class ws_pw_curve_filtering():
         # Setup windows and binning properties
         if add_default_windows:
             for ii, turbs in enumerate(turbs_sorted):
-                est_ratedpw = ratedpwrs[ii]
+                est_ratedpw = float(ratedpwrs[ii])
                 default_w0_ws = (0.0, 15.0)
                 default_w0_pw = (0.0, 0.95 * est_ratedpw)
                 default_w1_ws = (0.0, 25.0)
@@ -464,146 +463,146 @@ class ws_pw_curve_filtering():
 
         return df
 
-    def plot(self, pretty=False, draw_windows=True,
-             confirm_plot=True,  save_path=None,
-             fig_format='png', dpi=300):
-        if pretty:
-            fig_list = (
-                self.plot_pretty(
-                    draw_windows=draw_windows,
-                    confirm_plot=confirm_plot,
-                    save_path=save_path,
-                    fig_format=fig_format, dpi=dpi)
-            )
-        else:
-            fig_list = (
-                self.plot_fast(
-                    draw_windows=draw_windows,
-                    confirm_plot=confirm_plot,
-                    save_path=save_path,
-                    fig_format=fig_format, dpi=dpi)
-            )
-        return fig_list
+    # def plot(self, pretty=False, draw_windows=True,
+    #          confirm_plot=True,  save_path=None,
+    #          fig_format='png', dpi=300):
+    #     if pretty:
+    #         fig_list = (
+    #             self.plot_pretty(
+    #                 draw_windows=draw_windows,
+    #                 confirm_plot=confirm_plot,
+    #                 save_path=save_path,
+    #                 fig_format=fig_format, dpi=dpi)
+    #         )
+    #     else:
+    #         fig_list = (
+    #             self.plot_fast(
+    #                 draw_windows=draw_windows,
+    #                 confirm_plot=confirm_plot,
+    #                 save_path=save_path,
+    #                 fig_format=fig_format, dpi=dpi)
+    #         )
+    #     return fig_list
 
-    def plot_fast(self, draw_windows=True, confirm_plot=True,
-             save_path=None, fig_format='png', dpi=300):
-        df = self.df
+    # def plot_fast(self, draw_windows=True, confirm_plot=True,
+    #          save_path=None, fig_format='png', dpi=300):
+    #     df = self.df
 
-        fig_list = []
-        for ti in self.turbine_list:
-            print('Generating ws-power plot for turbine %03d' % ti)
-            if confirm_plot:
-                fig, ax = plt.subplots(1, 2, figsize=(28, 5))
-            else:
-                fig, ax = plt.subplots(1, 1, figsize=(14, 5))
-                ax = [ax]
-            fig_list.append(fig)
+    #     fig_list = []
+    #     for ti in self.turbine_list:
+    #         print('Generating ws-power plot for turbine %03d' % ti)
+    #         if confirm_plot:
+    #             fig, ax = plt.subplots(1, 2, figsize=(28, 5))
+    #         else:
+    #             fig, ax = plt.subplots(1, 1, figsize=(14, 5))
+    #             ax = [ax]
+    #         fig_list.append(fig)
 
-            # Discretization variables
-            xmin = np.min(df['ws_%03d' % ti])
-            xmax = np.max(df['ws_%03d' % ti])
-            ymin = np.min(df['pow_%03d' % ti])
-            ymax = np.max(df['pow_%03d' % ti])
-            bounds = [[xmin, xmax], [ymin, ymax]]
-            dalpha = 0.05
-            alpha_edges = np.arange(0.0, 1.0, dalpha)
+    #         # Discretization variables
+    #         xmin = np.min(df['ws_%03d' % ti])
+    #         xmax = np.max(df['ws_%03d' % ti])
+    #         ymin = np.min(df['pow_%03d' % ti])
+    #         ymax = np.max(df['pow_%03d' % ti])
+    #         bounds = [[xmin, xmax], [ymin, ymax]]
+    #         dalpha = 0.05
+    #         alpha_edges = np.arange(0.0, 1.0, dalpha)
 
-            # Show the acceptable points
-            oowsdev = self.df_out_of_ws_dev[ti]
-            oow = self.df_out_of_windows[ti]
-            good_ids = [not(a) and not(b) for a, b in zip(oow, oowsdev)]
-            x = df.loc[good_ids, 'ws_%03d' % ti]
-            y = df.loc[good_ids, 'pow_%03d' % ti]
-            x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
-            ax[0] = _plot_by_transparency_bins(ax=ax[0], x=x_approx,
-                                               y=y_approx, z=z,
-                                               alpha_edges=alpha_edges,
-                                               markersize=3, color='k',
-                                               plotlabel='Filtered data')
-            ax[0].set_title('Turbine %03d, 60 s sampled data' % ti)
+    #         # Show the acceptable points
+    #         oowsdev = self.df_out_of_ws_dev[ti]
+    #         oow = self.df_out_of_windows[ti]
+    #         good_ids = [not(a) and not(b) for a, b in zip(oow, oowsdev)]
+    #         x = df.loc[good_ids, 'ws_%03d' % ti]
+    #         y = df.loc[good_ids, 'pow_%03d' % ti]
+    #         x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
+    #         ax[0] = _plot_by_transparency_bins(ax=ax[0], x=x_approx,
+    #                                            y=y_approx, z=z,
+    #                                            alpha_edges=alpha_edges,
+    #                                            markersize=3, color='k',
+    #                                            plotlabel='Filtered data')
+    #         ax[0].set_title('Turbine %03d, 60 s sampled data' % ti)
 
-            # Show the points self-screened
-            alpha = 0.80
-            self_flagged = [not bool(i) for i in df['self_status_%03d' % ti]]
-            x = df.loc[self_flagged, 'ws_%03d' % ti]
-            y = df.loc[self_flagged,'pow_%03d' % ti]
-            x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
-            ax[0].plot(x_approx, y_approx, '.', markerfacecolor='r',
-                       markersize=2, alpha=alpha, label='Self-flagged data')
+    #         # Show the points self-screened
+    #         alpha = 0.80
+    #         self_flagged = [not bool(i) for i in df['self_status_%03d' % ti]]
+    #         x = df.loc[self_flagged, 'ws_%03d' % ti]
+    #         y = df.loc[self_flagged,'pow_%03d' % ti]
+    #         x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
+    #         ax[0].plot(x_approx, y_approx, '.', markerfacecolor='r',
+    #                    markersize=2, alpha=alpha, label='Self-flagged data')
 
-            # Show the points screened out of window
-            alpha = 0.80
-            x = df.loc[oow, 'ws_%03d' % ti]
-            y = df.loc[oow, 'pow_%03d' % ti]
-            x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
-            ax[0].plot(x_approx, y_approx, '.', color='orange',
-                       markersize=5, alpha=alpha, label='Window outliers')
+    #         # Show the points screened out of window
+    #         alpha = 0.80
+    #         x = df.loc[oow, 'ws_%03d' % ti]
+    #         y = df.loc[oow, 'pow_%03d' % ti]
+    #         x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
+    #         ax[0].plot(x_approx, y_approx, '.', color='orange',
+    #                    markersize=5, alpha=alpha, label='Window outliers')
 
-            # Show the points screened using ws_dev
-            alpha = 0.80
-            x = df.loc[oowsdev, 'ws_%03d' % ti]
-            y = df.loc[oowsdev, 'pow_%03d' % ti]
-            x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
-            ax[0].plot(x_approx, y_approx, '.', color='purple',
-                       markersize=5, alpha=alpha, label='WS deviation outliers')
+    #         # Show the points screened using ws_dev
+    #         alpha = 0.80
+    #         x = df.loc[oowsdev, 'ws_%03d' % ti]
+    #         y = df.loc[oowsdev, 'pow_%03d' % ti]
+    #         x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
+    #         ax[0].plot(x_approx, y_approx, '.', color='purple',
+    #                    markersize=5, alpha=alpha, label='WS deviation outliers')
 
-            # Show the approximated power curve, if calculated
-            if self.pw_curve_df is not None:
-                ax[0].plot(self.pw_curve_df['ws'],
-                           self.pw_curve_df['pow_%03d' % ti], '--',
-                           label='Approximate power curve')
+    #         # Show the approximated power curve, if calculated
+    #         if self.pw_curve_df is not None:
+    #             ax[0].plot(self.pw_curve_df['ws'],
+    #                        self.pw_curve_df['pow_%03d' % ti], '--',
+    #                        label='Approximate power curve')
 
-            if draw_windows:
-                xlim = (0., 30.)
-                ylim = ax[0].get_ylim()
-                for ii, window in enumerate(self.window_list):
-                    ws_range = window['ws_range']
-                    pow_range = window['pow_range']
-                    axis = window['axis']
-                    idx = window['idx']
+    #         if draw_windows:
+    #             xlim = (0., 30.)
+    #             ylim = ax[0].get_ylim()
+    #             for ii, window in enumerate(self.window_list):
+    #                 ws_range = window['ws_range']
+    #                 pow_range = window['pow_range']
+    #                 axis = window['axis']
+    #                 idx = window['idx']
 
-                    if axis == 0:
-                        # Filtered region left of curve
-                        plot_redzone(ax[0], xlim[0], pow_range[0],
-                                     ws_range[0] - xlim[0],
-                                     pow_range[1] - pow_range[0],
-                                     '%d' % idx, ii=ii)
-                        # Filtered region right of curve
-                        plot_redzone(ax[0], ws_range[1], pow_range[0],
-                                     xlim[1] - ws_range[1],
-                                     pow_range[1] - pow_range[0],
-                                     '%d' % idx, ii=ii)
-                    else:
-                        # Filtered region above curve
-                        plot_redzone(ax[0], ws_range[0], pow_range[1],
-                                     ws_range[1] - ws_range[0],
-                                     ylim[1] - pow_range[1],
-                                     '%d' % idx, ii=ii)
-                        # Filtered region below curve
-                        plot_redzone(ax[0], ws_range[0], ylim[0],
-                                     ws_range[1] - ws_range[0],
-                                     pow_range[0] - ylim[0],
-                                     '%d' % idx, ii=ii)
-                    # ax[0].add_patch(rect)
+    #                 if axis == 0:
+    #                     # Filtered region left of curve
+    #                     plot_redzone(ax[0], xlim[0], pow_range[0],
+    #                                  ws_range[0] - xlim[0],
+    #                                  pow_range[1] - pow_range[0],
+    #                                  '%d' % idx, ii=ii)
+    #                     # Filtered region right of curve
+    #                     plot_redzone(ax[0], ws_range[1], pow_range[0],
+    #                                  xlim[1] - ws_range[1],
+    #                                  pow_range[1] - pow_range[0],
+    #                                  '%d' % idx, ii=ii)
+    #                 else:
+    #                     # Filtered region above curve
+    #                     plot_redzone(ax[0], ws_range[0], pow_range[1],
+    #                                  ws_range[1] - ws_range[0],
+    #                                  ylim[1] - pow_range[1],
+    #                                  '%d' % idx, ii=ii)
+    #                     # Filtered region below curve
+    #                     plot_redzone(ax[0], ws_range[0], ylim[0],
+    #                                  ws_range[1] - ws_range[0],
+    #                                  pow_range[0] - ylim[0],
+    #                                  '%d' % idx, ii=ii)
+    #                 # ax[0].add_patch(rect)
 
-            ax[0].set_xlim(xlim)
-            ax[0].set_ylim(ylim)
+    #         ax[0].set_xlim(xlim)
+    #         ax[0].set_ylim(ylim)
             
-            ax[0].set_ylabel('Power (kW)')
-            ax[0].set_xlabel('Wind speed (m/s)')
+    #         ax[0].set_ylabel('Power (kW)')
+    #         ax[0].set_xlabel('Wind speed (m/s)')
 
-            ax[0].legend()
-            if confirm_plot:
-                _make_confirmation_plot(df, ti=ti, ax=ax[1])
+    #         ax[0].legend()
+    #         if confirm_plot:
+    #             _make_confirmation_plot(df, ti=ti, ax=ax[1])
 
-            if save_path is not None:
-                plt.savefig(save_path + '/%03d.' % ti + fig_format, dpi=dpi)
+    #         if save_path is not None:
+    #             plt.savefig(save_path + '/%03d.' % ti + fig_format, dpi=dpi)
 
-        return fig_list
+    #     return fig_list
 
-    def plot_pretty(self, draw_windows=True, confirm_plot=True,
-                    plot_selfflagged=True,
-                    save_path=None, fig_format='png', dpi=300):
+    def plot(self, draw_windows=True, confirm_plot=True,
+             plot_selfflagged=True, save_path=None,
+             fig_format='png', dpi=300):
         df = self.df
 
         fig_list = []
@@ -656,7 +655,7 @@ class ws_pw_curve_filtering():
             if draw_windows:
                 xlim = (0., 30.)  #ax[0].get_xlim()
                 ylim = ax[0].get_ylim()
-                
+
                 window_list = [w for w in self.window_list if ti in w['turbines']]
                 for window in window_list:
                     ws_range = window['ws_range']
