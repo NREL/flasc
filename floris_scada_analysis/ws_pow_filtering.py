@@ -255,11 +255,14 @@ class ws_pw_curve_filtering():
     def set_df(self, df):
         # Check format of df
         num_turbines = dfm.get_num_turbines(df)
-        if 'self_status_000' not in df.columns:
-            print('No self_status flags found.')
-            print('Assuming self_status == 1 for all non-NaN entries.')
-            for ti in range(num_turbines):
+        for ti in range(num_turbines):
+            if 'self_status_%03d' % ti not in df.columns:
+                print('No self_status flags found for ti = %03d.' % ti)
+                print('Assuming self_status == 1 for all non-NaN entries.')
                 df['self_status_%03d' % ti] = 1
+            else:
+                print('Found %d entries self flagged for ti = %03d.'
+                      % (np.sum(df['self_status_%03d' % ti] == 0), ti))
 
         for ti in range(num_turbines):
             nans = (np.isnan(df[['ws_%03d' % ti, 'pow_%03d' % ti]]).sum(axis=1) > 0)
@@ -409,7 +412,7 @@ class ws_pw_curve_filtering():
                   % (int(sum(df_out_of_ws_dev))))
 
             # Add a status flag for this turbine
-            self.df['status_%03d' % ti] = 1
+            self.df['status_%03d' % ti] = self.df['self_status_%03d' % ti]
             self.df.loc[self.df_out_of_ws_dev[ti], 'status_%03d' % ti] = 0
             self.df.loc[self.df_out_of_windows[ti], 'status_%03d' % ti] = 0
 
@@ -518,9 +521,9 @@ class ws_pw_curve_filtering():
 
             # Show the points self-screened
             alpha = 0.80
-            self_not_ok = [not bool(i) for i in df['self_status_%03d' % ti]]
-            x = df.loc[self_not_ok, 'ws_%03d' % ti]
-            y = df.loc[self_not_ok,'pow_%03d' % ti]
+            self_flagged = [not bool(i) for i in df['self_status_%03d' % ti]]
+            x = df.loc[self_flagged, 'ws_%03d' % ti]
+            y = df.loc[self_flagged,'pow_%03d' % ti]
             x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
             ax[0].plot(x_approx, y_approx, '.', markerfacecolor='r',
                        markersize=2, alpha=alpha, label='Self-flagged data')
@@ -596,7 +599,8 @@ class ws_pw_curve_filtering():
         return fig_list
 
     def plot_pretty(self, draw_windows=True, confirm_plot=True,
-        save_path=None, fig_format='png', dpi=300):
+                    plot_selfflagged=True,
+                    save_path=None, fig_format='png', dpi=300):
         df = self.df
 
         fig_list = []
@@ -612,20 +616,21 @@ class ws_pw_curve_filtering():
 
             # Show the acceptable points
             alpha = 0.10
+            self_flagged = (df['self_status_%03d' % ti] == 0)
             oowsdev = self.df_out_of_ws_dev[ti]
             oow = self.df_out_of_windows[ti]
-            good_ids = [not(a) and not(b) for a, b in zip(oow, oowsdev)]
+            good_ids = (self_flagged==False) & (oowsdev==False) & (oow==False)
             x = df.loc[good_ids, 'ws_%03d' % ti]
             y = df.loc[good_ids, 'pow_%03d' % ti]
             ax[0].plot(x, y, '.', color='k', markersize=3, alpha=alpha)
             ax[0].set_title('Turbine %03d, 60 s sampled data' % ti)
 
             # Show the points self-screened
-            alpha = 0.30
-            self_not_ok = [not bool(i) for i in df['self_status_%03d' % ti]]
-            ax[0].plot(df.loc[self_not_ok, 'ws_%03d' % ti],
-                    df.loc[self_not_ok,'pow_%03d' % ti],
-                    '.', markerfacecolor='r', markersize=2, alpha=alpha)
+            if plot_selfflagged:
+                alpha = 0.30
+                ax[0].plot(df.loc[self_flagged, 'ws_%03d' % ti],
+                        df.loc[self_flagged,'pow_%03d' % ti],
+                        '.', markerfacecolor='r', markersize=5, alpha=alpha)
 
             # Show the points screened out of window
             alpha = 0.30
