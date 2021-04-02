@@ -19,7 +19,6 @@ import re
 import warnings
 
 from floris_scada_analysis import dataframe_manipulations as dfm
-from floris_scada_analysis import time_operations as fsato
 
 
 def generate_models_py(table_names, table_upsampling, fn_channel_defs,
@@ -323,62 +322,6 @@ def batch_download_data_from_sql(dbc, destination_path,
         print(' ')  # Blank line for log clarity
 
 
-def batch_load_and_concat_dfs(df_filelist):
-    df_array = []
-    for dfn in df_filelist:
-        df_array.append(pd.read_feather(dfn))
-
-    df_out = pd.concat(df_array, ignore_index=True)
-    df_out = df_out.reset_index(drop=('time' in df_out.columns))
-    df_out = df_out.sort_values(by='time')
-    return df_out
-
-
-def batch_split_and_save_dfs(df, save_path, table_name='scada_data'):
-    df = df.copy()
-    if 'time' not in df.columns:
-        df = df.reset_index(drop=False)
-    else:
-        df = df.reset_index(drop=True)
-
-    time_array = pd.to_datetime(df['time'])
-    dt = fsato.estimate_dt(time_array)
-
-    # Check if dataframe is continually ascending
-    if (any([float(i) for i in np.diff(time_array)]) <= 0):
-        raise KeyError("Time column in dataframe is not ascending.")
-
-    df_array = []
-    time_start = list(time_array)[0]
-    time_end = list(time_array)[-1]
-
-    df_time_windows = []
-    years = np.unique([t.year for t in time_array])
-    for yr in years:
-        months = np.unique([t.month for t in time_array
-                            if t.year == yr])
-        for mo in months:
-            tw0 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo)) + dt
-            if mo == 12:
-                tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr+1, 1))
-            else:
-                tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo+1))
-            df_time_windows.append([tw0, tw1])
-
-    # Extract time indices
-    print('Splitting the data into %d separate months.' % len(df_time_windows))
-    id_map = fsato.find_window_in_time_array(time_array, df_time_windows)
-    for ii in range(len(id_map)):
-        df_sub = df.copy().loc[id_map[ii]].reset_index(drop=True)
-        year = list(pd.to_datetime(df_sub.time))[0].year
-        month = list(pd.to_datetime(df_sub.time))[0].month
-        fn = '%04d-%02d' % (year, month) + '_' + table_name + '.ftr'
-        df_sub.to_feather(os.path.join(save_path, fn))
-        df_array.append(df_sub)
-    print('Saved the output files to %s.' % save_path)
-
-    return df_array
-
 # Formerly a_01_structure_data.py
 def _restructure_single_df(df, column_mapping_dict):
     print('  Processing dataset...')
@@ -401,31 +344,6 @@ def _restructure_single_df(df, column_mapping_dict):
         cn_target = col_names_target[i]
         df_structured[cn_target] = df[cn_original]
     print('    Copied the columns to the new dataframe with the appropriate naming.')
-
-    # # Essential filtering: remove very low power situations
-    # num_turbines = dfm.get_num_turbines(df_structured)
-    # pow_col_names = ['pow_%03d' % ti for ti in range(num_turbines)]
-    # ws_col_names = ['ws_%03d' % ti for ti in range(num_turbines)]
-
-    # with warnings.catch_warnings():
-    #     warnings.simplefilter("ignore", category=RuntimeWarning)
-    #     power_medians = np.nanmedian(
-    #         df_structured[pow_col_names].astype(float), axis=1)
-    # df_structured = df_structured[power_medians >= powmedian_min]  # Only keep >= 50 kW nanmedian
-    # print("    Essential filtering (median power minimum) reduced rows from " +
-    #       str(no_rows) + " to " + str(df_structured.shape[0]) + ".")
-
-    # # Essential filtering: remove WS lower than 4 m/s and higher than 16 m/s
-    # no_rows = df_structured.shape[0]
-    # with warnings.catch_warnings():
-    #     warnings.simplefilter("ignore", category=RuntimeWarning)
-    #     ws_medians = np.nanmedian(
-    #         df_structured[ws_col_names].astype(float), axis=1)
-    # df_structured = df_structured[[a or b for a, b in
-    #                                zip(ws_medians >= wsmedian_range[0],
-    #                                    ws_medians <= wsmedian_range[1])]]
-    # print("    Essential filtering (median ws range) reduced rows from " +
-    #       str(no_rows) + " to " + str(df_structured.shape[0]) + ".")
 
     return df_structured
 

@@ -17,6 +17,8 @@ import pandas as pd
 import warnings
 
 from floris_scada_analysis.circular_statistics import wrap_360_deg
+from floris_scada_analysis import time_operations as fsato
+
 
 # Functions related to wind farm analysis for df
 def filter_df_by_ws(df, ws_range):
@@ -167,6 +169,80 @@ def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
     return df
 
 
+def df_reduce_precision(df_in):
+    df_out = pd.DataFrame()
+    dtypes = df_in.dtypes
+    for c in df_in.columns:
+        datatype = str(dtypes[c])
+        if datatype == 'float64':
+            df_out[c] = df_in[c].astype(np.float32)
+            max_error = np.max(np.abs(df_out[c]-df_in[c]))
+            print("Column %s has datatype '%s'. Downsampled to float32. Max error:"
+                % (c, datatype), max_error)
+        else:
+            print("Datatype '%s' not recognized. Not downsampling." % datatype)
+            df_out[c] = df_in[c]
+
+    return df_out
+
+
+def batch_load_and_concat_dfs(df_filelist):
+    df_array = []
+    for dfn in df_filelist:
+        df_array.append(pd.read_feather(dfn))
+
+    df_out = pd.concat(df_array, ignore_index=True)
+    df_out = df_out.reset_index(drop=('time' in df_out.columns))
+    df_out = df_out.sort_values(by='time')
+    return df_out
+
+
+def batch_split_and_save_dfs(df, save_path, table_name='scada_data'):
+    df = df.copy()
+    if 'time' not in df.columns:
+        df = df.reset_index(drop=False)
+    else:
+        df = df.reset_index(drop=True)
+
+    time_array = pd.to_datetime(df['time'])
+    dt = fsato.estimate_dt(time_array)
+
+    # Check if dataframe is continually ascending
+    if (any([float(i) for i in np.diff(time_array)]) <= 0):
+        raise KeyError("Time column in dataframe is not ascending.")
+
+    df_array = []
+    time_start = list(time_array)[0]
+    time_end = list(time_array)[-1]
+
+    df_time_windows = []
+    years = np.unique([t.year for t in time_array])
+    for yr in years:
+        months = np.unique([t.month for t in time_array
+                            if t.year == yr])
+        for mo in months:
+            tw0 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo)) + dt
+            if mo == 12:
+                tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr+1, 1))
+            else:
+                tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo+1))
+            df_time_windows.append([tw0, tw1])
+
+    # Extract time indices
+    print('Splitting the data into %d separate months.' % len(df_time_windows))
+    id_map = fsato.find_window_in_time_array(time_array, df_time_windows)
+    for ii in range(len(id_map)):
+        df_sub = df.copy().loc[id_map[ii]].reset_index(drop=True)
+        year = list(pd.to_datetime(df_sub.time))[0].year
+        month = list(pd.to_datetime(df_sub.time))[0].month
+        fn = '%04d-%02d' % (year, month) + '_' + table_name + '.ftr'
+        df_sub.to_feather(os.path.join(save_path, fn))
+        df_array.append(df_sub)
+    print('Saved the output files to %s.' % save_path)
+
+    return df_array
+
+
 # Functions used for dataframe processing specifically
 def df_drop_nan_rows(df, verbose=False):
     """Remove entries in dataframe where all rows (besides 'time')
@@ -266,6 +342,24 @@ def df_sort_and_find_duplicates(df):
         df = df.drop(columns='index')
 
     return df, duplicate_entries_idx
+
+
+def restructure_df_files(df_table_name, column_mapping_dict,
+                         data_path, target_path):
+    print('Loading, processing and saving dataframes for '+df_table_name+'.')
+    if not os.path.exists(target_path):
+        os.mkdir(target_path)
+
+    files_result = browse_datafiles(data_path, scada_table=df_table_name)
+    files_result = np.sort(files_result)
+    for fi in files_result:
+        print('  Reading ' + fi + '.')
+        df_in = pd.read_feather(fi)  # Read
+        df_out = _restructure_single_df(df_in, column_mapping_dict)
+        if df_out is not None:
+            if df_out.shape[0] > 0:
+                fout = os.path.join(target_path, os.path.basename(fi))
+                df_out.reset_index(drop=True).to_feather(fout)
 
 
 def df_sort_and_fix_duplicates(df):
