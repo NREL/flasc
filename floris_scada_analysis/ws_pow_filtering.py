@@ -248,6 +248,10 @@ class ws_pw_curve_filtering():
                                     ws_dev=default_ws_dev,
                                     max_pow_bin=default_max_pow_bin)
 
+        # Add empty filtering variables
+        self.df_out_of_windows = [[] for _ in range(self.num_turbines_all)]
+        self.df_out_of_ws_dev = [[] for _ in range(self.num_turbines_all)]
+
     def set_df(self, df):
         # Check format of df
         num_turbines = dfm.get_num_turbines(df)
@@ -344,9 +348,7 @@ class ws_pw_curve_filtering():
                       self.window_list[i][k])
 
     def apply_filters(self):
-        self.df_out_of_windows = []
-        self.df_out_of_ws_dev = []
-        for ti in range(self.num_turbines):
+        for ti in self.turbine_list:
             # Filter by self flag
             is_ok = (self.df['self_status_%03d' % ti].values == 1)
             df_selfok = self.df.loc[is_ok].copy()
@@ -391,7 +393,7 @@ class ws_pw_curve_filtering():
             df_out_of_windows = np.zeros(self.df.shape[0])
             out_of_window_indices = df_selfok.index[np.where(out_of_window_ids)[0]]
             df_out_of_windows[out_of_window_indices] = 1
-            self.df_out_of_windows.append([bool(i) for i in df_out_of_windows])
+            self.df_out_of_windows[ti] = ([bool(i) for i in df_out_of_windows])
 
             # Filter by standard deviation for the reduced dataset
             df_ok = df_selfok[[not bool(i) for i in out_of_window_ids]]
@@ -402,18 +404,20 @@ class ws_pw_curve_filtering():
             out_of_dev_indices = df_ok.index[np.where(out_of_dev_series)[0]]
             df_out_of_ws_dev = np.zeros(self.df.shape[0])
             df_out_of_ws_dev[out_of_dev_indices] = 1
-            self.df_out_of_ws_dev.append([bool(i) for i in df_out_of_ws_dev])
+            self.df_out_of_ws_dev[ti] = ([bool(i) for i in df_out_of_ws_dev])
             print('Removed %d outliers using WS standard deviation filtering.'
                   % (int(sum(df_out_of_ws_dev))))
 
             # Add a status flag for this turbine
             self.df['status_%03d' % ti] = 1
-            self.df.loc[self.df_out_of_ws_dev[-1], 'status_%03d' % ti] = 0
-            self.df.loc[self.df_out_of_windows[-1], 'status_%03d' % ti] = 0
+            self.df.loc[self.df_out_of_ws_dev[ti], 'status_%03d' % ti] = 0
+            self.df.loc[self.df_out_of_windows[ti], 'status_%03d' % ti] = 0
 
-        # Add a status_all column
-        status_cols = [('status_%03d' % ti) for ti in range(self.num_turbines)]
-        self.df['status_all'] = self.df[status_cols].min(axis=1)
+        if self.num_turbines_all == self.num_turbines:
+            # Add a status_all column if processing all turbines
+            status_cols = [('status_%03d' % ti) for ti in range(self.num_turbines_all)]
+            self.df['status_all'] = self.df[status_cols].min(axis=1)
+
         self.pw_curve_df = None  # Reset estimated power curve after filtering
         return self.df
 
@@ -424,7 +428,7 @@ class ws_pw_curve_filtering():
             'ws': (ws_bins[1::]+ws_bins[0:-1])/2,
             'ws_min': ws_bins[0:-1], 'ws_max': ws_bins[1::]})
 
-        for ti in range(self.num_turbines):
+        for ti in self.turbine_list:
             ws = self.df['ws_%03d' % ti]
             pow = self.df['pow_%03d' % ti]
             status = self.df['status_%03d' % ti]
@@ -445,7 +449,7 @@ class ws_pw_curve_filtering():
         return pw_curve_df
 
     def save_df(self, fout):
-        status_cols = [('status_%03d' % ti) for ti in range(self.num_turbines)]
+        status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
 
         # Remove df entries with all status == 0
         df = self.df.copy()
@@ -480,7 +484,7 @@ class ws_pw_curve_filtering():
         df = self.df
 
         fig_list = []
-        for ti in range(self.num_turbines):
+        for ti in self.turbine_list:
             print('Generating ws-power plot for turbine %03d' % ti)
             if confirm_plot:
                 fig, ax = plt.subplots(1, 2, figsize=(28, 5))
@@ -596,7 +600,7 @@ class ws_pw_curve_filtering():
         df = self.df
 
         fig_list = []
-        for ti in range(self.num_turbines):
+        for ti in self.turbine_list:
             print('Generating ws-power plot for turbine %03d' % ti)
             if confirm_plot:
                 fig, ax = plt.subplots(1, 2, figsize=(28, 5))
@@ -704,8 +708,7 @@ class ws_pw_curve_filtering():
 
         if df_target.shape[0] < 2:
             # Too few entries: just assume status is bad
-            status_cols = [('status_%03d' % ti) for
-                           ti in range(self.num_turbines)]
+            status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
             df_target[status_cols] = int(0)
             return df_target
 
@@ -717,7 +720,7 @@ class ws_pw_curve_filtering():
                 time_array_src=self.df['time'],
                 seek_time_windows=stws)
 
-            for ti in range(self.num_turbines): # Base decision on threshold (-) of data
+            for ti in self.full_turbine_list: # Base decision on threshold (-) of data
                 print('Applying filtering to target_df with dt = %.1f s, turbine %03d.' % (dt_target.seconds, ti))
                 # any_bad_ids = [(np.min(self.df.loc[ids, 'status_%03d' % ti])) for ids in time_map]
                 bad_ids = [(np.mean(self.df.loc[ids, 'status_%03d' % ti]) < threshold) for ids in time_map]
@@ -726,7 +729,7 @@ class ws_pw_curve_filtering():
                 print('  Mapping yields %d entries (%.2f %%) flagged as bad for ti = %d.'
                       % (np.sum(bad_ids), 100. * np.sum(bad_ids) / df_target.shape[0], ti))
         else:
-            for ti in range(self.num_turbines):
+            for ti in self.full_turbine_list:
                 print('Applying filtering to target_df with dt = %.1f s, turbine %03d.' % (dt_target.seconds, ti))
                 status_bad = self.df[('status_%03d' % ti)] == 0
                 time_array_src_bad = self.df.loc[status_bad, 'time']
@@ -743,7 +746,7 @@ class ws_pw_curve_filtering():
                 print('  Mapping yields %d entries (%d %%) flagged as bad for ti = %d.'
                       % (nbad, 100. * nbad / df_target.shape[0], ti))
 
-        status_cols = [('status_%03d' % ti) for ti in range(self.num_turbines)]
+        status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
         df_target['status_all'] = df_target[status_cols].min(axis=1)
 
         # Remove df entries with all status == 0
