@@ -43,8 +43,6 @@ class energy_ratio:
         self,
         df,
         test_turbines,
-        ref_turbines,
-        dep_turbines=[],
         wd_step=2.0,
         ws_step=1.0,
         verbose=False,
@@ -55,24 +53,19 @@ class energy_ratio:
         self.num_turbines = dfm.get_num_turbines(self.df)
 
         self.set_test_turbines(test_turbines, init=True)
-        self.set_ref_turbines(ref_turbines, init=True)
-        self.set_dep_turbines(dep_turbines)
 
         self.ws_step = ws_step
         self.wd_step = wd_step
 
-        self.filter_df_by_status()
         self.set_ref_test_power()
 
 
     def _set_df(self, df):
+        df = df.copy()  # Create a copy
         if 'category' not in df.columns:
             if self.verbose:
                 print("Did not find 'category' column. Adding one with all values 'baseline'.")
             df['category'] = 'baseline'
-        if 'status' not in df.columns:
-            if self.verbose:
-                print("Did not find 'status_' columns in df. Will assume all measurements are correct.")
 
         self.categories = list(np.unique(df['category']))
         if len(self.categories) > 2:
@@ -82,63 +75,22 @@ class energy_ratio:
                 print('Your dataframe has categories', self.categories)
         self.df = df
 
-    def _set_turbines_all(self):
-        self.turbines_all = np.unique(
-            [*self.test_turbines, *self.ref_turbines, *self.dep_turbines]
-        )
-
-    def set_dep_turbines(self, dep_turbines):
-        if not (type(dep_turbines) is list):
-            dep_turbines = [dep_turbines]
-        self.dep_turbines = dep_turbines
-        self._set_turbines_all()
-
-    def set_ref_turbines(self, ref_turbines, init=False):
-        if not (type(ref_turbines) is list):
-            ref_turbines = [ref_turbines]
-        self.ref_turbines = ref_turbines
-        if not init:
-            self._set_turbines_all()
-            self.set_ref_test_power()
-
     def set_test_turbines(self, test_turbines, init=False):
         if not (type(test_turbines) is list):
             test_turbines = [test_turbines]
         self.test_turbines = test_turbines
         if not init:
-            self._set_turbines_all()
+            # self._set_turbines_all()
             self.set_ref_test_power()
 
     def set_ref_test_power(self):
-        self.df["ref_power"] = dfm.get_column_mean(
-            df=self.df,
-            col_prefix="pow",
-            turbine_list=self.ref_turbines,
-            circular_mean=False,
-        )
+        self.df["ref_power"] = self.df["pow_ref"]
         self.df["test_power"] = dfm.get_column_mean(
             df=self.df,
             col_prefix="pow",
             turbine_list=self.test_turbines,
             circular_mean=False,
         )
-
-    def filter_df_by_status(self):
-        status_cols = ["status_%03d" % ti for ti in self.turbines_all]
-        for c in status_cols:
-            if not (c in self.df.columns):
-                if self.verbose:
-                    print(
-                        "Column "
-                        + c
-                        + " does not exist or was already"
-                        + " filtered. Assuming all values are 1 (good). "
-                    )
-                self.df[c] = int(1)
-
-        all_status_okay = self.df[status_cols].sum(axis=1) == len(self.turbines_all)
-        self.df = self.df[all_status_okay]
-        self.df = self.df.drop(columns=status_cols)
 
     def setup_directions_and_frequencies(self):
         # Define some local values
@@ -258,9 +210,7 @@ class energy_ratio:
             ax.plot(result.wd_bin, result.controlled)
             ax.fill_between(result.wd_bin, result.controlled_l, result.controlled_u, alpha=0.15)
         plt.legend(self.categories)
-        plt.title(str(['Test turbines:', self.test_turbines,
-                  'Ref. turbines:', self.ref_turbines,
-                  'Dep. turbines:', self.dep_turbines])[1:-1])
+        plt.title(str(['Test turbines:', self.test_turbines]))
         plt.xlabel('Wind direction (degrees)')
         plt.ylabel('Energy ratio (-)')
         plt.grid(True)
@@ -290,8 +240,6 @@ class Energy_Frame:
         # Save some relevent info
         self.wd_bin = np.array(sorted(df.wd_bin.unique()))
         self.ws_bin = np.array(sorted(df.ws_bin.unique()))
-        # self.wd_bin = np.array(sorted(df_freq.wd_bin.unique()))
-        # self.ws_bin = np.array(sorted(df_freq.ws_bin.unique()))
 
         self.category = category
 
