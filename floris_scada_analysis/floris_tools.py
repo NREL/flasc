@@ -40,8 +40,32 @@ def _get_turbine_cutout_ws(fCpInterp):
     return ws_cutout_ti
 
 
+def _run_fi_serial(df_subset, fi, verbose=False):
+    num_turbines = len(fi.layout_x)
+    df_out = df_subset.copy()
+    for idx in df_out.index:
+        if (
+            verbose and
+            ((np.remainder(idx, 100) == 0) or idx == df_out.shape[0]-1)
+        ):  # Print output every 100 steps:
+            print('  Progress: finished %.1f percent (%d/%d cases).'
+                    % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
+
+        fi.reinitialize_flow_field(wind_speed=df_out.loc[idx, 'ws'],
+                                    wind_direction=df_out.loc[idx, 'wd'],
+                                    turbulence_intensity=df_out.loc[idx, 'ti'])
+        fi.calculate_wake()
+
+        for ti in range(num_turbines):
+            df_out.loc[idx, 'pow_%03d' % ti] = np.array(fi.get_turbine_power())[ti]/1000.
+            df_out.loc[idx, 'wd_%03d' % ti] = df_out.loc[idx, 'wd']  # Assume uniform for now
+            df_out.loc[idx, 'ws_%03d' % ti] = fi.floris.farm.turbines[ti].average_velocity
+            df_out.loc[idx, 'ti_%03d' % ti] = fi.floris.farm.turbines[ti]._turbulence_intensity
+    return df_out
+
+
 # Define an approximate calc_floris() function
-def calc_floris(df, fi):
+def calc_floris(df, fi, num_threads=1):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function calculates the exact solutions.
 
@@ -55,6 +79,11 @@ def calc_floris(df, fi):
         [type]: [description]
     """
 
+    if num_threads > 1:
+        import multiprocessing as mp
+        from itertools import repeat
+        from functools import partial
+
     num_turbines = len(fi.layout_x)
 
     # Start by ensuring simple index for df
@@ -65,36 +94,42 @@ def calc_floris(df, fi):
         df['ti'] = np.min(fi.floris.farm.turbulence_intensity)
 
     if 'time' in df.columns:
-        df_out = df[['time', 'wd', 'ws', 'ti']]
+        df_out = df[['time', 'wd', 'ws', 'ti']].copy()
     else:
-        df_out = df[['wd', 'ws', 'ti']]
+        df_out = df[['wd', 'ws', 'ti']].copy()
 
     # Create placeholders for turbine measurements
     for colname in ['pow', 'ws', 'wd', 'ti']:
         for ti in range(num_turbines):
             df_out[colname + '_%03d' % ti] = 0.0
 
-    for idx in range(df_out.shape[0]):
-        if (np.remainder(idx, 100) == 0) or idx == df_out.shape[0]-1:  # Print output every 100 steps:
-            print('  Progress: finished %.1f percent (%d/%d cases).'
-                  % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
+    N = df.shape[0]
+    dN = int(np.ceil(N / num_threads))
+    df_list = []
+    for ii in range(num_threads):
+        if ii == num_threads - 1:
+            df_list.append(df.iloc[ii*dN::])
+        else:
+            df_list.append(df.iloc[ii*dN:(ii+1)*dN])
 
-        fi.reinitialize_flow_field(wind_speed=df_out.loc[idx, 'ws'],
-                                   wind_direction=df_out.loc[idx, 'wd'],
-                                   turbulence_intensity=df_out.loc[idx, 'ti'])
-        fi.calculate_wake()
-
-        for ti in range(num_turbines):
-            df_out.loc[idx, 'pow_%03d' % ti] = np.array(fi.get_turbine_power())[ti]/1000.
-            df_out.loc[idx, 'wd_%03d' % ti] = df_out.loc[idx, 'wd']  # Assume uniform for now
-            df_out.loc[idx, 'ws_%03d' % ti] = fi.floris.farm.turbines[ti].average_velocity
-            df_out.loc[idx, 'ti_%03d' % ti] = fi.floris.farm.turbines[ti]._turbulence_intensity
-
+    print('Calculating FLORIS solutions with num_threads = %d.'
+            % num_threads)
+    if num_threads == 1:
+        df_out = _run_fi_serial(df_subset=df_out, fi=fi, verbose=True)
+    else:
+        with mp.Pool(processes=num_threads) as pool:
+            df_list = pool.starmap(_run_fi_serial,
+                                   zip(df_list, repeat(fi)))
+            # df_list = pool.map(partial(func, b=second_arg), a_args)
+            # df_list = pool.map(partial(_run_fi_serial, fi=fi), df_list)
+        df_out = pd.concat(df_list).drop(columns='index')
     print('Finished calculating the FLORIS solutions for the dataframe.')
+
     return df_out
 
 
-def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='linear'):
+def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None,
+                       method='linear', df_approx=None, num_threads=1):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function approximates the exact solutions
     by binning the wd, ws and ti, calculating floris for the mean of those bins,
@@ -108,16 +143,28 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
         fi ([FlorisInterface]): Floris object for the wind farm of interest
         ws_step (float, optional): Wind speed bin width in m/s. Defaults to 0.5.
         wd_step (float, optional): Wind direction bin width in deg. Defaults to 1.0.
-        ti_step ([type], optional): Turbulence intensity bin width in [-]. Should be 
+        ti_step ([type], optional): Turbulence intensity bin width in [-]. Should be
         a value between 0 and 1.0. If left empty, will assume one fixed value for TI
         and not bin over various options. This significantly speeds up calculations.
         Defaults to None.
         method (str, optional): Interpolation method. Options are 'linear' and
         'nearest'. Nearest is faster but linear is more accurate. Defaults to
         'linear'.
+        df_approx ([pd.DataFrame]): Dataframe with the precalculated and tabulated
+        FLORIS predictions for a range of wind directions, wind speeds and
+        turbulence intensities.
+        num_threads ([int]): Number of threads to compute the FLORIS solutions with.
+        This accommodates parallelized solving using the multiprocessing interface.
+        For a large number of cases, it is recommended to use a value several times
+        larger than the actual number of cores, to ensure calculations are distributed
+        evenly over the cores.
 
     Returns:
-        [type]: [description]
+        df_out ([pd.DataFrame]): Dataframe with the predicted power productions for each
+        turbine according to FLORIS, for the wind conditions in the dataframe ('ws', 'wd',
+        and 'ti').
+        df_approx ([pd.DataFrame]): Dataframe with a standardized set of FLORIS predictions
+        for a gridded set of wind directions, wind speeds and turbulence intensities.
     """
 
     num_turbines = len(fi.layout_x)
@@ -134,48 +181,61 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
         ti_fi = np.min(fi.floris.farm.turbulence_intensity)
         ti_array = np.repeat(ti_fi, df.shape[0])
 
-    wd_min = np.max([np.min(wd_array), 0.0])
-    wd_max = np.min([np.max(wd_array), 360.0])
-
     ws_cutin = [_get_turbine_cutin_ws(t.fCpInterp) for t in fi.floris.farm.turbines]
     ws_cutin = np.min(ws_cutin)  # Take the minimum of all
     ws_cutout = [_get_turbine_cutout_ws(t.fCpInterp) for t in fi.floris.farm.turbines]
     ws_cutout = np.max(ws_cutout)
-    ws_min = np.max([np.min(ws_array), ws_cutin]) 
-    ws_max = np.min([np.max(ws_array), ws_cutout])
 
-    ti_min = np.max([np.min(ti_array), 0.0])
-    ti_max = np.min([np.max(ti_array), 0.30])
+    if df_approx is None:
+        wd_min = np.max([np.min(wd_array), 0.0])
+        wd_max = np.min([np.max(wd_array), 360.0])
 
-    wd_array_approx = np.arange(wd_min, wd_max + wd_step, wd_step)
-    ws_array_approx = np.arange(ws_min, ws_max + ws_step, ws_step)
-    if ti_step is None:
-        ti_array_approx = np.min(fi.floris.farm.turbulence_intensity)
+        ws_min = np.max([np.min(ws_array), ws_cutin]) 
+        ws_max = np.min([np.max(ws_array), ws_cutout])
+
+        ti_min = np.max([np.min(ti_array), 0.0])
+        ti_max = np.min([np.max(ti_array), 0.30])
+
+        wd_array_approx = np.arange(wd_min, wd_max + wd_step, wd_step)
+        ws_array_approx = np.arange(ws_min, ws_max + ws_step, ws_step)
+        if ti_step is None:
+            ti_array_approx = np.min(fi.floris.farm.turbulence_intensity)
+        else:
+            ti_array_approx = np.arange(ti_min, ti_max + ti_step, ti_step)
+
+        xyz_grid = np.array(np.meshgrid(
+            wd_array_approx, ws_array_approx, ti_array_approx, indexing='ij'))
+        df_approx = pd.DataFrame(
+            {'wd': np.reshape(xyz_grid[0], [-1, 1]).flatten(),
+             'ws': np.reshape(xyz_grid[1], [-1, 1]).flatten(),
+             'ti': np.reshape(xyz_grid[2], [-1, 1]).flatten()})
+
+        N_raw = df.shape[0]
+        N_approx = df_approx.shape[0]
+        if df.shape[0] <= df_approx.shape[0]:
+            print('Approximation would not reduce number of cases with the current settings (N_raw = %d, N_approx = %d)'
+                  % (N_raw, N_approx))
+            print('Calculating the exact solutions for this dataset. Avoiding any approximations.')
+            return calc_floris(df=df, fi=fi, num_threads=num_threads), None
+
+        # Calculate approximate solutions
+        print('Reducing calculations from %d to %d cases using calc_floris_approx() over calc_floris().'
+              % (N_raw, N_approx))
+        df_approx = calc_floris(df=df_approx, fi=fi, num_threads=num_threads)
     else:
-        ti_array_approx = np.arange(ti_min, ti_max + ti_step, ti_step)
-
-    xyz_grid = np.array(np.meshgrid(
-        wd_array_approx, ws_array_approx, ti_array_approx, indexing='ij'))
-    df_approx = pd.DataFrame(
-        {'wd': np.reshape(xyz_grid[0], [-1, 1]).flatten(),
-         'ws': np.reshape(xyz_grid[1], [-1, 1]).flatten(),
-         'ti': np.reshape(xyz_grid[2], [-1, 1]).flatten()})
-
-    if df.shape[0] <= df_approx.shape[0]:
-        print('Approximation would not reduce number of cases with the current settings (N_raw=' +str(N_raw)+', N_approx='+str(N_approx)+')')
-        print('Calculating the exact solutions for this dataset. Avoiding any approximations.')
-        return calc_floris(df, fi)
-
-    # Calculate approximate solutions
-    print('Reducing calculations from ' + str(df.shape[0]) + ' to ' + str(df_approx.shape[0]) + ' cases using calc_floris_approx() over calc_floris().')
-    df_approx = calc_floris(df_approx, fi)
+        print('Using df_approx provided by user.')
+        wd_array_approx = np.unique(df_approx['wd'])
+        ws_array_approx = np.unique(df_approx['ws'])
+        ti_array_approx = np.unique(df_approx['ti'])
+        xyz_grid = np.array(np.meshgrid(
+            wd_array_approx, ws_array_approx, ti_array_approx, indexing='ij'))
 
     # Map individual data entries to full DataFrame
     print('Now mapping the precalculated solutions from FLORIS to the dataframe entries...')
     print("  Creating a gridded interpolant with interpolation method '" + method + "'.")
 
     # Create interpolant
-    if xyz_grid.shape[3]==1:
+    if xyz_grid.shape[3] == 1:
         print('    Performing 2D interpolation')
         shape_y = [len(wd_array_approx), len(ws_array_approx)]
         values = np.reshape(np.array(df_approx['pow_000']), shape_y)
@@ -203,7 +263,7 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
         for ti in range(num_turbines):
             colname = varname + '_%03d' % ti
             f.values = np.reshape(np.array(df_approx[colname]), shape_y)
-            if xyz_grid.shape[3]==1:
+            if xyz_grid.shape[3] == 1:
                 df_out[colname] = f(df[['wd', 'ws']])
             else:
                 df_out[colname] = f(df[['wd', 'ws', 'ti']])
@@ -216,7 +276,7 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None, method='l
     df_out.loc[idxs_lowws, ['pow_%03d' % ti for ti in range(num_turbines)]] = 0.0
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
-    return df_out
+    return df_out, df_approx
 
 
 def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius, include_itself):
