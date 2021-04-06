@@ -145,15 +145,13 @@ class scada_analysis():
         for ii in range(len(self.df_list)):
             self.clear_energy_ratio_results(ii)
 
-    def get_energy_ratios(self, test_turbines, ref_turbines, dep_turbines,
-                          wd_step, ws_step, N=1, verbose=False):
+    def get_energy_ratios(self, test_turbines, wd_step, ws_step,
+                          N=1, verbose=False):
 
         for ii in range(len(self.df_list)):
             df = self.df_list[ii]['df_subset'].copy()
             era = er.energy_ratio(df=df,
                                   test_turbines=test_turbines,
-                                  ref_turbines=ref_turbines,
-                                  dep_turbines=dep_turbines,
                                   wd_step=wd_step,
                                   ws_step=ws_step,
                                   verbose=self.verbose)
@@ -161,8 +159,6 @@ class scada_analysis():
 
             self.df_list[ii]['er_results'] = er_result
             self.df_list[ii]['er_test_turbines'] = test_turbines
-            self.df_list[ii]['er_ref_turbines'] = ref_turbines
-            self.df_list[ii]['er_dep_turbines'] = dep_turbines
             self.df_list[ii]['er_wd_step'] = wd_step
             self.df_list[ii]['er_ws_step'] = ws_step
             self.df_list[ii]['er_bootstrap_N'] = N
@@ -180,10 +176,6 @@ class scada_analysis():
             categories = self.df_list[0]['categories']
             test_turbine_names = [self.turbine_names[i] for i in
                                   self.df_list[ii]['er_test_turbines']]
-            ref_turbine_names = [self.turbine_names[i] for i in
-                                 self.df_list[ii]['er_ref_turbines']]
-            dep_turbine_names = [self.turbine_names[i] for i in
-                                 self.df_list[ii]['er_dep_turbines']]
 
             ax.plot(result.wd_bin, result.baseline, 
                     label=data_name+': '+categories[0])
@@ -195,9 +187,7 @@ class scada_analysis():
                 ax.fill_between(result.wd_bin, result.controlled_l,
                                 result.controlled_u, alpha=0.15)
             ax.legend()
-            plt.title(str(['Test turbines:', test_turbine_names,
-                           'Ref. turbines:', ref_turbine_names,
-                           'Dep. turbines:', dep_turbine_names])[1:-1])
+            plt.title(str(['Test turbines:', test_turbine_names]))
             plt.xlabel('Wind direction (degrees)')
             plt.ylabel('Energy ratio (-)')
             plt.grid(True)
