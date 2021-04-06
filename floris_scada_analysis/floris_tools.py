@@ -17,6 +17,17 @@ from scipy import interpolate
 
 
 def _get_turbine_cutin_ws(fCpInterp):
+    """Helper function to determine the cut-in wind speed of a turbine
+    in the farm.
+
+    Args:
+        fCpInterp ([interpolant]): Interpolant function for Cp that can
+        directly be pulled from the FLORIS runner object. The interpolant
+        is typically located in fi.floris.farm.turbines[i].fCpInterp].
+
+    Returns:
+        ws_cutin_ti ([float]): Cut-in wind speed in m/s
+    """
     dx = np.diff(fCpInterp.x)
     dx = np.median(dx)
     ws_cutin_ti = fCpInterp.x[0] - dx
@@ -29,6 +40,17 @@ def _get_turbine_cutin_ws(fCpInterp):
 
 
 def _get_turbine_cutout_ws(fCpInterp):
+    """Helper function to determine the cut-out wind speed of a turbine
+    in the farm.
+
+    Args:
+        fCpInterp ([interpolant]): Interpolant function for Cp that can
+        directly be pulled from the FLORIS runner object. The interpolant
+        is typically located in fi.floris.farm.turbines[i].fCpInterp].
+
+    Returns:
+        ws_cutout_ti ([float]): Cut-out wind speed in m/s
+    """    
     dx = np.diff(fCpInterp.x)
     dx = np.median(dx)
     ws_cutout_ti = fCpInterp.x[-1] + dx
@@ -41,6 +63,24 @@ def _get_turbine_cutout_ws(fCpInterp):
 
 
 def _run_fi_serial(df_subset, fi, verbose=False):
+    """Evaluate the FLORIS solutions for a set of wind directions,
+    wind speeds and turbulence intensities in serial (non-
+    parallelized) mode. 
+
+    Args:
+        df_subset ([pd.DataFrame]): Dataframe containing the columns
+        'wd', 'ws' and 'ti'. The FLORIS power predictions will be
+        calculated for each row/set of ambient conditions.
+        fi ([floris]): FLORIS object for the farm of interest.
+        verbose (bool, optional): Print information to terminal, used
+        for debugging. Defaults to False.
+
+    Returns:
+        df_out ([pd.DataFrame]): Identical to the inserted dataframe,
+        df_subset, but now with additional columns containing the
+        predicted power production for each turbine, as pow_000, ...
+        pow_00N. 
+    """
     num_turbines = len(fi.layout_x)
     df_out = df_subset.copy()
     for idx in df_out.index:
@@ -49,11 +89,11 @@ def _run_fi_serial(df_subset, fi, verbose=False):
             ((np.remainder(idx, 100) == 0) or idx == df_out.shape[0]-1)
         ):  # Print output every 100 steps:
             print('  Progress: finished %.1f percent (%d/%d cases).'
-                    % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
+                   % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
 
         fi.reinitialize_flow_field(wind_speed=df_out.loc[idx, 'ws'],
-                                    wind_direction=df_out.loc[idx, 'wd'],
-                                    turbulence_intensity=df_out.loc[idx, 'ti'])
+                                   wind_direction=df_out.loc[idx, 'wd'],
+                                   turbulence_intensity=df_out.loc[idx, 'ti'])
         fi.calculate_wake()
 
         for ti in range(num_turbines):
@@ -279,9 +319,38 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None,
     return df_out, df_approx
 
 
-def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius, include_itself):
-    dr_turb = np.sqrt((x_turbs - x_turbs[turb_no])**2.0 + (y_turbs - y_turbs[turb_no])**2.0)
-    turbs_within_radius = np.where(dr_turb <= max_radius)[0]
+def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,
+                        include_itself, sort_by_distance=False):
+    """Determine which turbines are within a certain radius of other
+    wind turbines.
+
+    Args:
+        x_turbs ([list, array]): Long. locations of turbines
+        y_turbs ([list, array]): Lat. locations of turbines
+        turb_no ([int]): Turbine number for which the distance is
+        calculated w.r.t. the other turbines.
+        max_radius ([float]): Maximum distance between turbines to be
+        considered within the radius of turbine [turb_no].
+        include_itself ([type]): Include itself in the list of turbines
+        within the radius.
+        sort_by_distance (bool, optional): Sort the output list of turbines
+        according to distance to the turbine, from closest to furthest (but
+        still within radius). Defaults to False.
+
+    Returns:
+        turbs_within_radius ([list]): List of turbines that are within the
+        prespecified distance from turbine [turb_no].
+    """
+    dr_turb = np.sqrt((x_turbs - x_turbs[turb_no])**2.0 +
+                      (y_turbs - y_turbs[turb_no])**2.0)
+    turbine_list = np.array(range(len(x_turbs)))
+
+    if sort_by_distance:
+        indices_sorted = np.argsort(dr_turb)
+        dr_turb = dr_turb[indices_sorted]
+        turbine_list = turbine_list[indices_sorted]
+
+    turbs_within_radius = turbine_list[dr_turb <= max_radius]
     if not include_itself:
         turbs_within_radius = [ti for ti in turbs_within_radius if not ti == turb_no]
 
@@ -289,6 +358,34 @@ def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius, include_itself):
 
 
 def get_upstream_turbs_floris(fi, wd_step=3.0, verbose=False):
+    """Determine which turbines are operating in freestream (unwaked)
+    flow, for the entire wind rose. This function will return a data-
+    frame where each row will present a wind direction range and a set
+    of wind turbine numbers for which those turbines are operating
+    upstream. This is useful in determining the freestream conditions.
+
+    Args:
+        fi ([floris object]): FLORIS object of the farm of interest.
+        wd_step (float, optional): Wind direction discretization step.
+        It will test what the upstream turbines are every [wd_step]
+        degrees. A lower number means more accurate results, but
+        typically there's no real benefit below 2.0 deg or so.
+        Defaults to 3.0.
+        verbose (bool, optional): Enable print statements for debugging.
+        Defaults to False.
+
+    Returns:
+        df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row
+        contains a wind direction range and a list of turbine numbers. For
+        that particular wind direction range, the turbines numbered are 
+        all upstream according to the FLORIS predictions. Depending on
+        the FLORIS model parameters and ambient conditions, these results
+        may vary slightly. Though, having minimal wake losses should not
+        noticably affect your outcomes. Empirically, this approach has
+        yielded good results with real SCADA data for determining what
+        turbines are waked/unwaked and has served useful for determining
+        what turbines to use as reference.
+    """    
     if verbose:
         print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' % (wd_step))
     upstream_turbs_ids = []  # turbine numbers that are freestream
