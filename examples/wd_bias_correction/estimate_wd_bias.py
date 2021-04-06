@@ -26,6 +26,7 @@ from floris_scada_analysis import floris_tools as ftools
 
 # Load dataframe with scada data
 root_dir = os.path.dirname(os.path.abspath(__file__))
+out_path = root_dir
 ftr_path = os.path.join(root_dir, '../demo_dataset/demo_dataset_60s.ftr')
 if not os.path.exists(ftr_path):
     raise FileNotFoundError('Please run ./examples/demo_dataset/' +
@@ -40,13 +41,16 @@ fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.json")
 fi = wfct.floris_interface.FlorisInterface(fi_path)
 fi.vis_layout()
 
+# Figure out which turbines are freestream per wind direction
+df_upstream = ftools.get_upstream_turbs_floris(fi, wd_step=2.0)
+
 # Add an artificial 7.5 deg bias on the turbine WD measurements
 col_names = ['wd_%03d' % ti for ti in range(len(fi.layout_x))]
 df[col_names] = wrap_360(df[col_names] + 7.5)
 
 # Define 'wd', 'ws' and restrict dataframe to a ws region of interest
+df = dfm.filter_df_by_status(df)
 df = dfm.set_wd_by_all_turbines(df)
-df_upstream = ftools.get_upstream_turbs_floris(fi, wd_step=2.0)
 df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
 df = dfm.set_ti_by_upstream_turbines(df, df_upstream)
 df = dfm.filter_df_by_ws(df, [6.0, 11.0])
@@ -58,21 +62,28 @@ df = dfm.filter_df_by_ws(df, [6.0, 11.0])
 #  thing is the relative position of the wakes. Ignoring TI
 #  significantly reduces the n.o. calculations and speeds up
 #  the codecode.)
-fout_df_fi = os.path.join(file_path, "df_fi.ftr")
-if os.path.exists(fout_df_fi):
-    df_fi = pd.read_feather(fout_df_fi)
+df_fi = df[['time', 'ws', 'wd']].copy()
+fout_df_fi_approx = os.path.join(out_path, "df_fi_approx.ftr")
+if os.path.exists(fout_df_fi_approx):
+    df_approx = pd.read_feather(fout_df_fi_approx)
+    df_fi, _ = ftools.calc_floris_approx(df_fi, fi, df_approx=df_approx)
 else:
-    # Could insert entire df into calc_floris_approx(), but not necessary
-    df_fi = df[['time', 'ws', 'wd', 'ti']].copy()
-    df_fi = ftools.calc_floris_approx(df_fi, fi, wd_step=2.0, ti_step=None)
-    df_fi.to_feather(fout_df_fi)
+    df_fi, df_approx = ftools.calc_floris_approx(df_fi, fi, wd_step=2.0,
+                                                 num_threads=40)
+    df_approx.to_feather(fout_df_fi_approx)
+
+# Add a 'pow_ref' column to dfs specifying the reference power
+df = dfm.set_pow_ref_by_upstream_turbines(df, df_upstream)
+df_fi = dfm.set_pow_ref_by_upstream_turbines(df_fi, df_upstream)
 
 # Initialize an bias_estimation object
-fsc = best.bias_estimation(df=df, df_fi=df_fi, fi=fi,
+fsc = best.bias_estimation(df=df,
+                           df_fi=df_fi,
+                           fi=fi,
                            test_turbines_subset=[0, 1, 2],
-                           ref_turbine_maxrange=1.0e9,
                            sliding_window_lb_ub=[-td(days=999), td(days=999)],
-                           eo_ws_step=5.0, eo_wd_step=2.0)
+                           eo_ws_step=5.0,
+                           eo_wd_step=2.0)
 
 current_time = list(fsc.df.time)[0]
 end_time = list(fsc.df.time)[-1]
