@@ -172,11 +172,11 @@ class bias_estimation():
         time_min = self.sw_time_array[self._sw_lower_idx]
         time_max = self.sw_time_array[self._sw_upper_idx]
         printnow('Sliding window locked onto time range (' + time_min.strftime('%Y-%m-%d %H:%M:%S') +
-                 ', ' + time_max.strftime('%Y-%m-%d %H:%M:%S') + ') with current time (' + 
+                 ', ' + time_max.strftime('%Y-%m-%d %H:%M:%S') + ') with current time (' +
                  current_time.strftime('%Y-%m-%d %H:%M:%S') + ').')
 
     # Determine which turbines are freestream for certain WD
-    def _map_ref_turbs_floris(self, include_itself=False):
+    def _map_ref_turbs_floris(self):
         fi = self.fi
         df_upstream = self.df_upstream
         if df_upstream is None:
