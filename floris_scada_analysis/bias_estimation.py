@@ -29,9 +29,9 @@ def printnow(text):
 
 
 class bias_estimation():
-    def __init__(self, df, df_fi, fi, test_turbines_subset, ref_turbine_maxrange,
-                 sliding_window_lb_ub, df_upstream=None, eo_ws_step=5.0, eo_wd_step=2.0,
-                 verbose=False):
+    def __init__(self, df, df_fi, fi, test_turbines_subset,
+                 sliding_window_lb_ub, df_upstream=None,
+                 eo_ws_step=5.0, eo_wd_step=2.0, verbose=False):
         printnow('Initializing the bias_correction() class from floris_scada_analysis.')
 
         self.verbose = verbose
@@ -58,7 +58,7 @@ class bias_estimation():
 
         self.turbine_list = range(len(fi.layout_x))
         self.test_turbines_subset = test_turbines_subset
-        self.ref_turbine_maxrange = ref_turbine_maxrange
+        # self.ref_turbine_maxrange = ref_turbine_maxrange
         self.eo_wd_step = eo_wd_step
         self.eo_ws_step = eo_ws_step
 
@@ -67,7 +67,7 @@ class bias_estimation():
         self.opt_search_dx = 0.10
 
         self.df_upstream = df_upstream
-        self._get_ref_turbs_floris()
+        self._map_ref_turbs_floris()
 
         printnow('  Initializing sliding window')
         time_array = list(pd.to_datetime(df.time))
@@ -151,7 +151,9 @@ class bias_estimation():
         else:
             # We guess that the new window should be here
             self._sw_lower_idx += sliding_window_stepsize_didx + 2
-            self._sw_lower_idx = np.max([self._sw_lower_idx, 0])
+            self._sw_lower_idx = int(np.max([self._sw_lower_idx, 0]))
+            self._sw_lower_idx = int(np.min([self._sw_lower_idx, len(time_array)-1]))
+
             # Step back until we are actually right on the window
             while time_array[self._sw_lower_idx] > window_time_min:
                 self._sw_lower_idx += -1
@@ -174,7 +176,7 @@ class bias_estimation():
                  current_time.strftime('%Y-%m-%d %H:%M:%S') + ').')
 
     # Determine which turbines are freestream for certain WD
-    def _get_ref_turbs_floris(self, include_itself=False):
+    def _map_ref_turbs_floris(self, include_itself=False):
         fi = self.fi
         df_upstream = self.df_upstream
         if df_upstream is None:
@@ -187,25 +189,25 @@ class bias_estimation():
             for i in range(df_upstream.shape[0])]
         self.upstream_turbs_ids = list(df_upstream.turbines)
 
-        # Now mapping upstream turbine ids to test turbines
-        x_turbs = fi.layout_x
-        y_turbs = fi.layout_y
-        test_turbines = self.test_turbines_subset
-        max_radius = self.ref_turbine_maxrange
-        upstream_turbs_ids_per_test_turb = [[] for _ in range(len(test_turbines))]
-        for ii in range(len(test_turbines)):
-            ti = test_turbines[ii]
-            printnow('    Mapping upstream turbines per wind direction to each individual test turbine, ti = %d' % (ti))
-            turbs_in_radius = ftools.get_turbs_in_radius(x_turbs, y_turbs,
-                                                         ti, max_radius,
-                                                         include_itself=include_itself)
+        # # Now mapping upstream turbine ids to test turbines
+        # x_turbs = fi.layout_x
+        # y_turbs = fi.layout_y
+        # test_turbines = self.test_turbines_subset
+        # max_radius = self.ref_turbine_maxrange
+        # upstream_turbs_ids_per_test_turb = [[] for _ in range(len(test_turbines))]
+        # for ii in range(len(test_turbines)):
+        #     ti = test_turbines[ii]
+        #     printnow('    Mapping upstream turbines per wind direction to each individual test turbine, ti = %d' % (ti))
+        #     turbs_in_radius = ftools.get_turbs_in_radius(x_turbs, y_turbs,
+        #                                                  ti, max_radius,
+        #                                                  include_itself=include_itself)
 
-            for wd_bin_ii in range(len(self.upstream_turbs_wds)):
-                upstream_turbs_local = [tii for tii in self.upstream_turbs_ids[wd_bin_ii] if (tii in turbs_in_radius)]
-                upstream_turbs_ids_per_test_turb[ii].append(upstream_turbs_local)
+        #     for wd_bin_ii in range(len(self.upstream_turbs_wds)):
+        #         upstream_turbs_local = [tii for tii in self.upstream_turbs_ids[wd_bin_ii] if (tii in turbs_in_radius)]
+        #         upstream_turbs_ids_per_test_turb[ii].append(upstream_turbs_local)
 
-        # Save to self
-        self.upstream_turbs_ids_per_test_turb = upstream_turbs_ids_per_test_turb
+        # # Save to self
+        # self.upstream_turbs_ids_per_test_turb = upstream_turbs_ids_per_test_turb
 
     def _get_energy_ratios_allbins(self):
         wd_step = self.eo_wd_step
@@ -224,34 +226,31 @@ class bias_estimation():
             ti = test_turbines[ii]
             printnow('  Determining energy ratio for test turbine = %03d' % (ti))
             for wd_bin_i in range(len(self.upstream_turbs_wds)):
-                wd_range = (self.upstream_turbs_wds[wd_bin_i][0], 
+                wd_range = (self.upstream_turbs_wds[wd_bin_i][0],
                             self.upstream_turbs_wds[wd_bin_i][1])
 
-                ref_turbines = self.upstream_turbs_ids_per_test_turb[ii][wd_bin_i]
-                if (not (ti in ref_turbines) and len(ref_turbines) > 0):  # Ignore non-waked situations
-                    fsc.set_masks(wd_range=wd_range)
-                    fsc.get_energy_ratios(test_turbines=[ti], ref_turbines=ref_turbines,
-                                          dep_turbines=[], wd_step=wd_step,
-                                          ws_step=ws_step, N=1)
-                    result = fsc.df_list[0]['er_results']
-                    result_floris = fsc.df_list[1]['er_results']
+                fsc.set_masks(wd_range=wd_range)
+                fsc.get_energy_ratios(test_turbines=[ti], wd_step=wd_step,
+                                      ws_step=ws_step, N=1)
+                result = fsc.df_list[0]['er_results']
+                result_floris = fsc.df_list[1]['er_results']
 
-                    if (result is not None and result_floris is not None):
-                        if not (len(result) == len(result_floris)):
-                            breakpoint()
-                        if len(result) > 0:
-                            er_result_wd[ii].extend(result.wd_bin)
-                            er_result_scada[ii].extend(result.baseline)
-                            er_result_floris[ii].extend(result_floris.baseline)
-                    elif self.verbose:
-                        print('Issue with processing bin for wd_range ' +
-                              '(%d deg, %d deg).' % (wd_range[0], wd_range[1]))
+                if (result is not None and result_floris is not None):
+                    if not (len(result) == len(result_floris)):
+                        breakpoint()
+                    if len(result) > 0:
+                        er_result_wd[ii].extend(result.wd_bin)
+                        er_result_scada[ii].extend(result.baseline)
+                        er_result_floris[ii].extend(result_floris.baseline)
+                elif self.verbose:
+                    print('Issue with processing bin for wd_range ' +
+                            '(%d deg, %d deg).' % (wd_range[0], wd_range[1]))
 
         self.energy_ratio_wd_total = er_result_wd
         self.energy_ratio_scada_total = er_result_scada
         self.energy_ratio_floris_total = er_result_floris
 
-    def plot_energy_ratios(self, save_path=None):
+    def plot_energy_ratios(self, save_path=None, format='png'):
         import matplotlib.pyplot as plt
 
         wd_arrays = self.energy_ratio_wd_total
@@ -267,7 +266,7 @@ class bias_estimation():
             if not np.isnan(self.opt_wd_bias):
                 ax.plot(wd_arrays[ii] - self.opt_wd_bias, er_result_scada[ii], color='blue', label='SCADA data (corrected)')
             ax.plot(wd_arrays[ii], er_result_floris[ii], ls = '--', color='orange', label='FLORIS')
-            plt.title('Turbine %d' % ti)
+            plt.title('Turbine %d. Current time: %s' % (ti, str(self.sw_current_time)))
             plt.ylabel('Energy ratio (-)')
             plt.xlabel('Wind direction (deg)')
             plt.grid(b=True, which='major', axis='both', color='gray')
@@ -276,4 +275,4 @@ class bias_estimation():
             plt.legend()
 
             if save_path is not None:
-                plt.savefig(save_path + '_%03d.pdf' % ti)
+                plt.savefig(save_path + '_%03d.%s' % (ti, format))
