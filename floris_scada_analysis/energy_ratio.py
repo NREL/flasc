@@ -48,20 +48,20 @@ class energy_ratio:
         verbose=False,
     ):
         self.verbose = verbose
-
         self._set_df(df)
         self.num_turbines = dfm.get_num_turbines(self.df)
-
         self.set_test_turbines(test_turbines, init=True)
-
         self.ws_step = ws_step
         self.wd_step = wd_step
-
-        self.set_ref_test_power()
+        self.set_pow_test()
 
 
     def _set_df(self, df):
         df = df.copy()  # Create a copy
+        if 'pow_ref' not in df.columns:
+            raise KeyError('pow_ref column not found in dataframe. Cannot proceed.')
+            # INFO: You can add such a column using dfm.set_pow_ref_by_*.
+
         if 'category' not in df.columns:
             if self.verbose:
                 print("Did not find 'category' column. Adding one with all values 'baseline'.")
@@ -81,11 +81,10 @@ class energy_ratio:
         self.test_turbines = test_turbines
         if not init:
             # self._set_turbines_all()
-            self.set_ref_test_power()
+            self.set_pow_test()
 
-    def set_ref_test_power(self):
-        self.df["ref_power"] = self.df["pow_ref"]
-        self.df["test_power"] = dfm.get_column_mean(
+    def set_pow_test(self):
+        self.df["pow_test"] = dfm.get_column_mean(
             df=self.df,
             col_prefix="pow",
             turbine_list=self.test_turbines,
@@ -183,7 +182,7 @@ class energy_ratio:
             print('  df has already been binned. Loading existing bins.')
 
         # Extract the interesting parts for the energy ratio frame
-        rlvnt_cols = ['ws_bin', 'wd_bin', 'ref_power', 'test_power', 'category']
+        rlvnt_cols = ['ws_bin', 'wd_bin', 'pow_ref', 'pow_test', 'category']
 
         # Define the energy frame class
         energy_frame = Energy_Frame(df=self.df[rlvnt_cols],
@@ -345,13 +344,13 @@ class Energy_Column:
             return np.zeros(len(category)) * np.nan
 
         df_group = (
-            df[["ws_bin", "category", "ref_power", "test_power"]]
+            df[["ws_bin", "category", "pow_ref", "pow_test"]]
             .groupby(["ws_bin", "category"])
             .mean()
         )
-        df_ref = df_group[["ref_power"]].unstack()
+        df_ref = df_group[["pow_ref"]].unstack()
         df_ref.columns = [c[1] for c in df_ref.columns]
-        df_test = df_group[["test_power"]].unstack()
+        df_test = df_group[["pow_test"]].unstack()
         df_test.columns = [c[1] for c in df_test.columns]
 
         df_freq = (
