@@ -39,21 +39,20 @@ fi = wfct.floris_interface.FlorisInterface(fi_path)
 fi.vis_layout()
 
 # Preprocess dataframes using floris
+df = dfm.filter_df_by_status(df)
 df = dfm.set_wd_by_all_turbines(df)
 df_upstream = fsatools.get_upstream_turbs_floris(fi, wd_step=5.0)
 df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
 df = dfm.set_ti_by_upstream_turbines(df, df_upstream)
+df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
 
 # limit df to narrow wind direction region
-df = df[df['wd'] > 20.]
-df = df[df['wd'] < 90.]
+df = dfm.filter_df_by_wd(df=df, wd_range=[20., 90.])
 df = df.reset_index(drop=True)
 
 # Calculate energy ratio for single category df
 era = er.energy_ratio(df=df,
                       test_turbines=[1],
-                      ref_turbines=[0, 6],
-                      dep_turbines=[],
                       wd_step=2.0,
                       ws_step=1.0,
                       verbose=True)
@@ -69,11 +68,10 @@ ids_opt = [np.arange(i, i+30, 1) for i in ids_opt]
 ids_opt = np.array(ids_opt).flatten()
 df.loc[ids_opt, 'pow_003'] *= 1.20  # Increased power of T3
 df.loc[ids_opt, 'category'] = 'optimized'
+df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[6])
 
 era = er.energy_ratio(df=df,
                       test_turbines=[3],
-                      ref_turbines=[6],
-                      dep_turbines=[],
                       wd_step=2.0,
                       ws_step=1.0,
                       verbose=True)
