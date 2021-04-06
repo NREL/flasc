@@ -14,11 +14,11 @@
 # import datetime
 import numpy as np
 # import os as os
-# import pandas as pd
+import pandas as pd
 import warnings
 
 from floris_scada_analysis.circular_statistics import wrap_360_deg
-# from floris_scada_analysis import time_operations as fsato
+from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import floris_tools as ftools
 
 
@@ -87,7 +87,8 @@ def _set_col_by_turbines(col_out, col_prefix, df,
 
 
 def _set_col_by_upstream_turbines(col_out, col_prefix, df,
-                                  df_upstream, exclude_turbs=[]):
+                                  df_upstream, circular_mean,
+                                  exclude_turbs=[]):
     # Can get df_upstream using floris_tools.get_upstream_turbs_floris()
     df[col_out] = np.nan
     for i in range(df_upstream.shape[0]):
@@ -105,7 +106,8 @@ def _set_col_by_upstream_turbines(col_out, col_prefix, df,
 
         col_mean = get_column_mean(df.loc[ids, :],
                                   col_prefix=col_prefix,
-                                  turbine_list=upstr_turbs)
+                                  turbine_list=upstr_turbs,
+                                  circular_mean=circular_mean)
         df.loc[ids, col_out] = col_mean
 
     return df
@@ -132,6 +134,34 @@ def _set_col_by_upstream_turbines_in_radius(
     col_out, col_prefix, df, df_upstream, turb_no,
     x_turbs, y_turbs, max_radius, circular_mean,
     include_itself=True):
+    """Add a column called [col_out] to your dataframe, which is the
+    mean of the columns pow_%03d for turbines that are upstream and
+    also within radius [max_radius] of the turbine of interest
+    [turb_no].
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
+        wind direction ranges and the corresponding upstream turbines for 
+        that wind direction range. This variable can be generated with
+        floris_scada_analysis.floris_tools.get_upstream_turbs_floris(...).
+        turb_no ([int]): Turbine number from which the radius should be
+        calculated.
+        x_turbs ([list, array]): Array containing x locations of turbines.
+        y_turbs ([list, array]): Array containing y locations of turbines.
+        max_radius ([float]): Maximum radius for the upstream turbines
+        until which they are still considered as relevant/used for the
+        calculation of the averaged column quantity.
+        include_itself (bool, optional): Include the measurements of turbine
+        turb_no in the determination of the averaged column quantity. Defaults
+        to False.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called [col_ref].
+    """
 
     turbs_in_radius = ftools.get_turbs_in_radius(
         x_turbs=x_turbs, y_turbs=y_turbs, turb_no=turb_no,
@@ -148,15 +178,44 @@ def _set_col_by_upstream_turbines_in_radius(
         col_prefix=col_prefix,
         df=df,
         df_upstream=df_upstream,
+        circular_mean=circular_mean,
         exclude_turbs=turbs_outside_radius)
 
 
 # Helper functions
 def set_wd_by_turbines(df, turbine_numbers):
+    """Add a column called 'wd' in your dataframe with value equal
+    to the circular-averaged wind direction measurements of all
+    the turbines in turbine_numbers.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        turbine_numbers ([list, array]): List of turbine numbers that
+        should be used to calculate the column average.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'wd'.
+    """
     return _set_col_by_turbines('wd', 'wd', df, turbine_numbers, True)
 
 
 def set_wd_by_all_turbines(df):
+    """Add a column called 'wd' in your dataframe with value equal
+    to the circular-averaged wind direction measurements of all
+    turbines.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'wd'.
+    """
     return _set_col_by_turbines('wd', 'wd', df, 'all', True)
 
 
@@ -175,14 +234,63 @@ def set_wd_by_radius_from_turbine(df, turb_no, x_turbs, y_turbs,
 
 
 def set_ws_by_turbines(df, turbine_numbers):
+    """Add a column called 'ws' in your dataframe with value equal
+    to the circular-averaged wind direction measurements of all
+    the turbines in turbine_numbers.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        turbine_numbers ([list, array]): List of turbine numbers that
+        should be used to calculate the column average.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ws'.
+    """
     return _set_col_by_turbines('ws', 'ws', df, turbine_numbers, False)
 
 
 def set_ws_by_all_turbines(df):
+    """Add a column called 'ws' in your dataframe with value equal
+    to the circular-averaged wind direction measurements of all
+    turbines.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        turbine_numbers ([list, array]): List of turbine numbers that
+        should be used to calculate the column average.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ws'.
+    """
     return _set_col_by_turbines('ws', 'ws', df, 'all', False)
 
 
 def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
+    """Add a column called 'ws' in your dataframe with value equal
+    to the averaged wind speed measurements of all the turbines
+    upstream, excluding the turbines listed in exclude_turbs.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
+        wind direction ranges and the corresponding upstream turbines for
+        that wind direction range. This variable can be generated with
+        floris_scada_analysis.floris_tools.get_upstream_turbs_floris(...).
+        exclude_turbs ([list, array]): array-like variable containing
+        turbine indices that should be excluded in determining the column
+        mean quantity.
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ws'.
+    """
     return _set_col_by_upstream_turbines(
         col_out='ws',
         col_prefix='ws',
@@ -195,6 +303,34 @@ def set_ws_by_upstream_turbines_in_radius(df, df_upstream, turb_no,
                                           x_turbs, y_turbs,
                                           max_radius,
                                           include_itself=True):
+    """Add a column called 'ws' to your dataframe, which is the
+    mean of the columns pow_%03d for turbines that are upstream and
+    also within radius [max_radius] of the turbine of interest
+    [turb_no].
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
+        wind direction ranges and the corresponding upstream turbines for
+        that wind direction range. This variable can be generated with
+        floris_scada_analysis.floris_tools.get_upstream_turbs_floris(...).
+        turb_no ([int]): Turbine number from which the radius should be
+        calculated.
+        x_turbs ([list, array]): Array containing x locations of turbines.
+        y_turbs ([list, array]): Array containing y locations of turbines.
+        max_radius ([float]): Maximum radius for the upstream turbines
+        until which they are still considered as relevant/used for the
+        calculation of the averaged column quantity.
+        include_itself (bool, optional): Include the measurements of turbine
+        turb_no in the determination of the averaged column quantity. Defaults
+        to False.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ws'.
+    """
     return _set_col_by_upstream_turbines_in_radius(
         col_out='ws',
         col_prefix='ws',
@@ -209,14 +345,63 @@ def set_ws_by_upstream_turbines_in_radius(df, df_upstream, turb_no,
 
 
 def set_ti_by_turbines(df, turbine_numbers):
+    """Add a column called 'ti' in your dataframe with value equal
+    to the averaged turbulence intensity measurements of all the
+    turbines listed in turbine_numbers.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        turbine_numbers ([list, array]): List of turbine numbers that
+        should be used to calculate the column average.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ti'.
+    """
     return _set_col_by_turbines('ti', 'ti', df, turbine_numbers, False)
 
 
 def set_ti_by_all_turbines(df):
+    """Add a column called 'ti' in your dataframe with value equal
+    to the averaged turbulence intensity measurements of all
+    turbines.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        turbine_numbers ([list, array]): List of turbine numbers that
+        should be used to calculate the column average.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ti'.
+    """
     return _set_col_by_turbines('ti', 'ti', df, 'all', False)
 
 
 def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
+    """Add a column called 'ti' in your dataframe with value equal
+    to the averaged turbulence intensity measurements of all the turbines
+    upstream, excluding the turbines listed in exclude_turbs.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
+        wind direction ranges and the corresponding upstream turbines for
+        that wind direction range. This variable can be generated with
+        floris_scada_analysis.floris_tools.get_upstream_turbs_floris(...).
+        exclude_turbs ([list, array]): array-like variable containing
+        turbine indices that should be excluded in determining the column
+        mean quantity.
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ti'.
+    """
     return _set_col_by_upstream_turbines(
         col_out='ti',
         col_prefix='ti',
@@ -229,6 +414,34 @@ def set_ti_by_upstream_turbines_in_radius(df, df_upstream, turb_no,
                                           x_turbs, y_turbs,
                                           max_radius,
                                           include_itself=True):
+    """Add a column called 'ti' to your dataframe, which is the
+    mean of the columns ti_%03d for turbines that are upstream and
+    also within radius [max_radius] of the turbine of interest
+    [turb_no].
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
+        wind direction ranges and the corresponding upstream turbines for 
+        that wind direction range. This variable can be generated with
+        floris_scada_analysis.floris_tools.get_upstream_turbs_floris(...).
+        turb_no ([int]): Turbine number from which the radius should be
+        calculated.
+        x_turbs ([list, array]): Array containing x locations of turbines.
+        y_turbs ([list, array]): Array containing y locations of turbines.
+        max_radius ([float]): Maximum radius for the upstream turbines
+        until which they are still considered as relevant/used for the
+        calculation of the averaged column quantity.
+        include_itself (bool, optional): Include the measurements of turbine
+        turb_no in the determination of the averaged column quantity. Defaults
+        to False.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ti'.
+    """
     return _set_col_by_upstream_turbines_in_radius(
         col_out='ti',
         col_prefix='ti',
@@ -243,10 +456,44 @@ def set_ti_by_upstream_turbines_in_radius(df, df_upstream, turb_no,
 
 
 def set_pow_ref_by_turbines(df, turbine_numbers):
+    """Add a column called 'pow_ref' in your dataframe with value equal
+    to the averaged turbulence intensity measurements of all the
+    turbines listed in turbine_numbers.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        turbine_numbers ([list, array]): List of turbine numbers that
+        should be used to calculate the column average.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'ti'.
+    """
     return _set_col_by_turbines('pow_ref', 'pow', df, turbine_numbers, False)
 
 
 def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
+    """Add a column called 'pow_ref' in your dataframe with value equal
+    to the averaged power measurements of all the turbines upstream,
+    excluding the turbines listed in exclude_turbs.
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
+        wind direction ranges and the corresponding upstream turbines for
+        that wind direction range. This variable can be generated with
+        floris_scada_analysis.floris_tools.get_upstream_turbs_floris(...).
+        exclude_turbs ([list, array]): array-like variable containing
+        turbine indices that should be excluded in determining the column
+        mean quantity.
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'pow_ref'.
+    """
     return _set_col_by_upstream_turbines(
         col_out='pow_ref',
         col_prefix='pow',
@@ -257,7 +504,35 @@ def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
 
 def set_pow_ref_by_upstream_turbines_in_radius(
     df, df_upstream, turb_no, x_turbs,
-    y_turbs, max_radius, include_itself=True):
+    y_turbs, max_radius, include_itself=False):
+    """Add a column called 'pow_ref' to your dataframe, which is the
+    mean of the columns pow_%03d for turbines that are upstream and
+    also within radius [max_radius] of the turbine of interest
+    [turb_no].
+
+    Args:
+        df ([pd.DataFrame]): Dataframe with measurements. This dataframe
+        typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+        potentially additional measurements.
+        df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
+        wind direction ranges and the corresponding upstream turbines for 
+        that wind direction range. This variable can be generated with
+        floris_scada_analysis.floris_tools.get_upstream_turbs_floris(...).
+        turb_no ([int]): Turbine number from which the radius should be
+        calculated.
+        x_turbs ([list, array]): Array containing x locations of turbines.
+        y_turbs ([list, array]): Array containing y locations of turbines.
+        max_radius ([float]): Maximum radius for the upstream turbines
+        until which they are still considered as relevant/used for the
+        calculation of the averaged column quantity.
+        include_itself (bool, optional): Include the measurements of turbine
+        turb_no in the determination of the averaged column quantity. Defaults
+        to False.
+
+    Returns:
+        df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+        plus the additional column called 'pow_ref'.
+    """
     return _set_col_by_upstream_turbines_in_radius(
         col_out='pow_ref',
         col_prefix='pow',
@@ -306,29 +581,96 @@ def filter_df_by_status(df, exclude_columns=[]):
         ti_string = c[-4::] # Last 4 digits of string: underscore and turb. no
         ti_columns = [s for s in df.columns if s[-4::] == ti_string and
                       not s in exclude_columns]
-        df.loc[df[c]==0, ti_columns] = np.nan
+        df.loc[df[c] == 0, ti_columns] = np.nan
 
     return df
 
 
-def df_reduce_precision(df_in):
+def df_reduce_precision(df_in, verbose=False):
+    """Reduce the precision in dataframes from float64 to float32, or possibly
+    even further to int32, int16, int8 or even bool. This operation typically
+    reduces the size of the dataframe by a factor 2 without any real loss in
+    precision. This can make particular operations and data storage much more
+    efficient. This can also bring about speed-ups doing calculations with
+    these variables.
+
+    Args:
+        df_in ([pd.DataFrame]): Dataframe that needs to be reduced.
+        verbose (bool, optional): Print progress. Defaults to False.
+
+    Returns:
+        df_out ([pd.DataFrame]): Reduced dataframe
+    """
     df_out = pd.DataFrame()
     dtypes = df_in.dtypes
-    for c in df_in.columns:
+    for ii, c in enumerate(df_in.columns):
         datatype = str(dtypes[c])
-        if datatype == 'float64':
-            df_out[c] = df_in[c].astype(np.float32)
+        if ((datatype == 'float64') or
+            (datatype == 'float32') or
+            (datatype == 'float')):
+            # Check if can be simplified as integer
+            if (not any(np.isnan(df_in[c])) and
+                all(np.isclose(np.round(df_in[c]),
+                               df_in[c], equal_nan=True))):
+                unique_values = np.unique(df_in[c])
+                if np.array_equal(unique_values, [0, 1]):
+                    df_out[c] = df_in[c].astype(bool)
+                elif np.max(df_in[c]) < np.iinfo(np.int8).max:
+                    df_out[c] = df_in[c].astype(np.int8)
+                elif np.max(df_in[c]) < np.iinfo(np.int16).max:
+                    df_out[c] = df_in[c].astype(np.int16)
+                elif np.max(df_in[c]) < np.iinfo(np.int32).max:
+                    df_out[c] = df_in[c].astype(np.int32)
+                else:
+                    df_out[c] = df_in[c].astype(np.int64)
+            else:  # If not, just simplify as float32
+                df_out[c] = df_in[c].astype(np.float32)
             max_error = np.max(np.abs(df_out[c]-df_in[c]))
-            print("Column %s has datatype '%s'. Downsampled to float32. Max error:"
-                % (c, datatype), max_error)
+            if verbose:
+                print("Column %s ['%s'] was downsampled to %s."
+                      % (c, datatype, df_out.dtypes[ii]))
+                print( "Max error: ", max_error)
+        elif ((datatype == 'int64') or
+              (datatype == 'int32') or
+              (datatype == 'int')):
+            if all(np.unique(df_in[c]) == [0, 1]):
+                df_out[c] = df_in[c].astype(bool)
+            elif len(np.unique(df_in[c])) < 100:
+                df_out[c] = df_in[c].astype(np.int16)
+            else:
+                df_out[c] = df_in[c].astype(np.int32)
+            max_error = np.max(np.abs(df_out[c]-df_in[c]))
+            if verbose:
+                print("Column %s ['%s'] was downsampled to %s."
+                      % (c, datatype, df_out.dtypes[ii]))
+                print( "Max error: ", max_error)
         else:
-            print("Datatype '%s' not recognized. Not downsampling." % datatype)
+            if verbose:
+                print("Datatype '%s' not recognized. Not downsampling."
+                      % datatype)
             df_out[c] = df_in[c]
 
     return df_out
 
 
 def batch_load_and_concat_dfs(df_filelist):
+    """Function to batch load and concatenate dataframe files. Data
+    in floris_scada_analysis is typically split up in monthly data
+    files to accommodate very large data files and easy debugging
+    and batch processing. A common method for loading data is:
+    
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(root_path, 'data')
+    df_filelist = sqldbm.browse_datafiles(data_path=data_path,
+                                          scada_table='scada_data')
+    df = dfm.batch_load_and_concat_dfs(df_filelist=df_filelist)
+
+    Args:
+        df_filelist ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """    
     df_array = []
     for dfn in df_filelist:
         df_array.append(pd.read_feather(dfn))
