@@ -11,7 +11,13 @@
 # the License.
 
 
+import pandas as pd
+import numpy as np
+from datetime import timedelta as td
 import re
+
+from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis import time_operations as fsato
 
 
 def fix_csv_contents(csv_contents, line_format_str):
@@ -53,3 +59,60 @@ def fix_csv_contents(csv_contents, line_format_str):
 
     csv_contents = "\n".join(csv_contents) + "\n"
     return csv_contents
+
+
+def read_raw_data_files(files, single_file_reader_func,
+                        channel_definitions_filename,
+                        channel_definitions_sheetname,
+                        ffill_missing_data=False,
+                        missing_data_buffer=None):
+    """ Read multiple SCADA datafiles and process them in preparation for
+        uploading to the SQL database. Processing steps include merging
+        multiple dataframes, removing/merging duplicate time entries, up-
+        sampling data to the 1 second frequency, and finding large time
+        gaps in the dataset and filling it with empty placeholder values.
+
+    Args:
+        files ([list]): List containing file paths for raw .csv files
+        fn_channel_defs ([str]): Path to channel_definitions.xlsx
+
+    Returns:
+        df_db[pd.DataFrame]: Dataframe with the formatted database
+    """
+    # Read channel definitions file
+    df_defs = pd.read_excel(io=channel_definitions_filename,
+                            sheet_name=channel_definitions_sheetname)
+
+    # Convert files to list if necessary
+    if isinstance(files, str):
+        files = [files]
+
+    # Read all datafiles and merge them together
+    df = single_file_reader_func(files[0], df_defs)
+    for fn in files[1::]:
+        df = df.append(single_file_reader_func(fn, df_defs))
+
+    # Sort dataset by time and fix duplicate entries
+    df = dfm.df_sort_and_fix_duplicates(df)
+
+    if ffill_missing_data:
+        dt = fsato.estimate_dt(df)
+        if missing_data_buffer is None:
+            missing_data_buffer = dt + td(seconds=1)
+
+        # Find large gaps of missing data and fill it with 'missing'
+        df = dfm.df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer)
+
+        # Upsample dataset with forward fill (ZOH)
+        print("Upsampling df with forward fill...")
+        df = df.set_index('time')
+        df = df.resample(dt).ffill().ffill()  # Forward fill()
+
+        print("Replacing all 'missing' rows in the upsampled df with np.nan...")
+        for c in df.columns:
+            df[c] = df[c].replace(['missing'], np.nan)
+
+    # Drop all rows that only have nan values
+    df = dfm.df_drop_nan_rows(df)
+
+    return df
