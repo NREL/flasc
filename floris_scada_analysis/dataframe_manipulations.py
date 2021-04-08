@@ -105,9 +105,9 @@ def _set_col_by_upstream_turbines(col_out, col_prefix, df,
             ids = (df['wd'] > wd_min) & (df['wd'] <= wd_max)
 
         col_mean = get_column_mean(df.loc[ids, :],
-                                  col_prefix=col_prefix,
-                                  turbine_list=upstr_turbs,
-                                  circular_mean=circular_mean)
+                                   col_prefix=col_prefix,
+                                   turbine_list=upstr_turbs,
+                                   circular_mean=circular_mean)
         df.loc[ids, col_out] = col_mean
 
     return df
@@ -296,6 +296,7 @@ def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         col_prefix='ws',
         df=df,
         df_upstream=df_upstream,
+        circular_mean=False,
         exclude_turbs=exclude_turbs)
 
 
@@ -407,6 +408,7 @@ def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         col_prefix='ti',
         df=df,
         df_upstream=df_upstream,
+        circular_mean=False,
         exclude_turbs=exclude_turbs)
 
 
@@ -499,6 +501,7 @@ def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         col_prefix='pow',
         df=df,
         df_upstream=df_upstream,
+        circular_mean=False,
         exclude_turbs=exclude_turbs)
 
 
@@ -743,7 +746,7 @@ def df_drop_nan_rows(df, verbose=False):
     return df
 
 
-def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer_s=10.):
+def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.):
     """This function takes a pd.DataFrame object and look for large jumps in
        the 'time' column. Rather than simply interpolating these values using
        a ZOH, this rather indicates that measurements are missing. Hence,
@@ -754,7 +757,7 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer_s=10.):
 
     Args:
         df ([pd.DataFrame]): Merged dataframe for all imported files
-        missing_data_buffer_s (int, optional): If the time gaps are equal or
+        missing_data_buffer (int, optional): If the time gaps are equal or
         larger than this limit [s], then it will consider the data as
         corrupted or missing. Defaults to 10.
 
@@ -778,7 +781,7 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer_s=10.):
         print('Found a gap of > 30 minutes in data.\n' +
               ' Are you missing a data file?')
 
-    dt_buffer = np.timedelta64(datetime.timedelta(seconds=missing_data_buffer_s))
+    dt_buffer = np.timedelta64(missing_data_buffer)
     missing_data_idx = np.where(time_delta >= dt_buffer)[0]
     N_datagaps = len(missing_data_idx)
     td_avg = np.mean(time_delta[missing_data_idx])/np.timedelta64(datetime.timedelta(seconds=1))
@@ -828,6 +831,32 @@ def df_sort_and_find_duplicates(df):
     return df, duplicate_entries_idx
 
 
+# Formerly a_01_structure_data.py
+def restructure_single_df(df, column_mapping_dict):
+    print('  Processing dataset...')
+
+    if df.shape[0] < 1:
+        return None
+
+    # Drop NaN rows and get basic df info
+    df = dfm.df_drop_nan_rows(df)
+    # no_rows = df.shape[0]
+
+    # Build up the new data frame
+    df_structured = pd.DataFrame({'time': df.time})
+    col_names_target = list(column_mapping_dict.keys())
+    col_names_original = list(column_mapping_dict.values())
+
+    # Map columns of interest
+    for i in range(len(col_names_original)):
+        cn_original = col_names_original[i]
+        cn_target = col_names_target[i]
+        df_structured[cn_target] = df[cn_original]
+    print('    Copied the columns to the new dataframe with the appropriate naming.')
+
+    return df_structured
+
+
 def restructure_df_files(df_table_name, column_mapping_dict,
                          data_path, target_path):
     print('Loading, processing and saving dataframes for '+df_table_name+'.')
@@ -839,7 +868,7 @@ def restructure_df_files(df_table_name, column_mapping_dict,
     for fi in files_result:
         print('  Reading ' + fi + '.')
         df_in = pd.read_feather(fi)  # Read
-        df_out = _restructure_single_df(df_in, column_mapping_dict)
+        df_out = restructure_single_df(df_in, column_mapping_dict)
         if df_out is not None:
             if df_out.shape[0] > 0:
                 fout = os.path.join(target_path, os.path.basename(fi))
