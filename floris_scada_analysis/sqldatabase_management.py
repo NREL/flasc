@@ -488,7 +488,7 @@ def batch_download_data_from_sql(dbc, destination_path, table_name):
         os.makedirs(destination_path)
 
     # Check current start and end time of database
-    db_end_time = get_first_time_entry_sqldb(dbc.engine, table_name)
+    db_end_time = get_last_time_entry_sqldb(dbc.engine, table_name)
     db_end_time = db_end_time + datetime.timedelta(minutes=10)
 
     # Check for past files and continue download or start a fresh download
@@ -506,8 +506,8 @@ def batch_download_data_from_sql(dbc, destination_path, table_name):
         current_timestamp = pd.to_datetime('%s-01-01' %
             str(latest_timestamp.year+1))
     else:
-        current_timestamp = pd.to_datetime("%s-%s-01" %
-            str(latest_timestamp.year), str(latest_timestamp.month+1))
+        current_timestamp = pd.to_datetime("%s-%s-01" % (
+            str(latest_timestamp.year), str(latest_timestamp.month+1)))
 
     print('Continuing import from timestep: ', current_timestamp)
     while current_timestamp <= db_end_time:
@@ -549,8 +549,7 @@ def batch_download_data_from_sql(dbc, destination_path, table_name):
 
 def gui_sql_data_explorer(dbc):
     from datetime import timedelta as td
-    import os
-    import pickle
+    # import pickle
 
     import tkinter as tk
 
