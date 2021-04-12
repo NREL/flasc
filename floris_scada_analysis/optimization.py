@@ -13,6 +13,7 @@
 
 import numpy as np
 import scipy.stats as spst
+from floris.utilities import wrap_360
 
 
 def find_bias_x(x_1, y_1, x_2, y_2, search_range, search_dx):
@@ -21,11 +22,9 @@ def find_bias_x(x_1, y_1, x_2, y_2, search_range, search_dx):
 
     def errfunc(dx, x_1, x_2, y_1, y_2):
         y_1_cor = np.interp(x_2, x_1 - dx, y_1)
-        y_1_isnan = np.isnan(y_1_cor)
-        y_2_isnan = np.isnan(y_2)        
 
         # Clean up data
-        clean_data = [~a and ~b for a, b in zip(y_1_isnan, y_2_isnan)]
+        clean_data = (~np.isnan(y_1_cor)) & (~np.isnan(y_2))
         y_1_cor = y_1_cor[clean_data]
         y_2 = y_2[clean_data]
 
@@ -47,3 +46,66 @@ def find_bias_x(x_1, y_1, x_2, y_2, search_range, search_dx):
     dx_opt = p1[0]
 
     return dx_opt, success
+
+
+def find_wd_bias_by_energy_ratios(er_wd_list, er_scada_list,
+                                  er_floris_list, search_range,
+                                  search_dx):
+
+    def errfunc(dx, er_wd, er_scada, er_floris):
+        x_total = []
+        y_scada = []
+        y_floris = []
+        for ii in range(len(er_wd)):
+            x = np.array(er_wd_list[ii])
+            x_cor = wrap_360(x - dx)  # Removing bias from wd measurement
+            y_cor = np.array(er_scada[ii])  # And corresponding en. ratios
+            y_cor = y_cor[np.argsort(x_cor)]  # Sort ascending
+            x_cor = np.sort(x_cor)  # Sort ascending
+            y_scada_interp = np.interp(x, x_cor, y_cor,
+                                       left=np.nan, right=np.nan)
+
+            x_total.extend(ii*400. + x)
+            y_floris.extend(er_floris[ii])
+            y_scada.extend(y_scada_interp)
+
+        # Make sure SCADA data is ascending
+        x_total = np.array(x_total)
+        y_floris = np.array(y_floris)
+        y_scada = np.array(y_scada)
+
+        # Clean up data
+        clean_data = (~np.isnan(y_floris)) & (~np.isnan(y_scada))
+        x_total = x_total[clean_data]
+        y_scada = y_scada[clean_data]
+        y_floris = y_floris[clean_data]
+
+        # import matplotlib.pyplot as plt
+        # fig, ax = plt.subplots()
+        # for ii in range(int(np.ceil(np.max(x_total)/400))):
+        #     ids = (x_total >= (ii*400)) & (x_total < (ii+1)*400)
+        #     ax.plot(x_total[ids], y_floris[ids], '--', color='black')
+        #     ax.plot(x_total[ids], y_scada[ids], '--', color='red')
+        # plt.show()
+
+        if all(np.isnan(y_scada)) and all(np.isnan(y_floris)):
+            cost = np.nan
+        else:
+            cost = -1.0 * spst.pearsonr(y_scada, y_floris)[0]
+        return cost
+
+    cost_min = 1.0e15
+    success = False
+    dx_opt = 0.0
+    for dx in np.arange(search_range[0], search_range[1], search_dx):
+        cost_eval = errfunc(dx=dx,
+                            er_wd=er_wd_list,
+                            er_scada=er_scada_list,
+                            er_floris=er_floris_list)
+        if cost_eval <= cost_min:
+            dx_opt = dx
+            cost_min = cost_eval
+            success = True
+
+    wd_bias = dx_opt
+    return wd_bias, success

@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 from pandas.core.base import DataError
 
+from floris.utilities import wrap_360
+
 from floris_scada_analysis import floris_tools as ftools
 from floris_scada_analysis import optimization as opt
 from floris_scada_analysis import scada_analysis as sca
@@ -63,8 +65,8 @@ class bias_estimation():
         self.eo_ws_step = eo_ws_step
 
         self._reset_results()
-        self.opt_search_range = (-50., 50.)
-        self.opt_search_dx = 0.10
+        self.opt_search_range = (-180., 180.)
+        self.opt_search_dx = 0.50
 
         self.df_upstream = df_upstream
         self._map_ref_turbs_floris()
@@ -92,24 +94,32 @@ class bias_estimation():
         self._reset_results()
         self._update_df_subset()
 
-    def estimate_wd_bias(self):
+    def estimate_wd_bias(self, N_btstrp=1):
         printnow('Estimating the wind direction bias')
-        self._get_energy_ratios_allbins()
+        self._get_energy_ratios_allbins(N_btstrp=N_btstrp)
 
-        printnow('  Combining %d turbine energy ratios into single curve'
-                 % len(self.test_turbines_subset))
-        x_array = []
-        y_scada = []
-        y_floris = []
-        for ii in range(len(self.test_turbines_subset)):
-            x_array.extend(ii*400. + np.array(self.energy_ratio_wd_total[ii]))  # Space curves apart by > 360.
-            y_scada.extend(self.energy_ratio_scada_total[ii])
-            y_floris.extend(self.energy_ratio_floris_total[ii])
+        # printnow('  Combining %d turbine energy ratios into single curve'
+        #          % len(self.test_turbines_subset))
+        # x_array = []
+        # y_scada = []
+        # y_floris = []
+        # for ii in range(len(self.test_turbines_subset)):
+        #     x_array.extend(ii*400. + np.array(self.energy_ratio_wd_total[ii]))  # Space curves apart by > 360.
+        #     y_scada.extend(self.energy_ratio_scada_total[ii])
+        #     y_floris.extend(self.energy_ratio_floris_total[ii])
 
-        printnow('  Matching SCADA and FLORIS energy ratio curves...')
-        wd_bias, success = opt.find_bias_x(x_array, y_scada, x_array, y_floris,
-                                           search_range = self.opt_search_range,
-                                           search_dx = self.opt_search_dx)
+        # printnow('  Matching SCADA and FLORIS energy ratio curves...')
+        # wd_bias, success = opt.find_bias_x(x_array, y_scada, x_array, y_floris,
+        #                                    search_range = self.opt_search_range,
+        #                                    search_dx = self.opt_search_dx)
+
+        wd_bias, success = opt.find_wd_bias_by_energy_ratios(
+            er_wd_list=self.energy_ratio_wd_total,
+            er_scada_list=self.energy_ratio_scada_total,
+            er_floris_list=self.energy_ratio_floris_total,
+            search_range=self.opt_search_range,
+            search_dx=self.opt_search_dx
+            )
 
         self.opt_wd_bias = wd_bias
         self.opt_success = success
@@ -209,7 +219,7 @@ class bias_estimation():
         # # Save to self
         # self.upstream_turbs_ids_per_test_turb = upstream_turbs_ids_per_test_turb
 
-    def _get_energy_ratios_allbins(self):
+    def _get_energy_ratios_allbins(self, N_btstrp=1):
         wd_step = self.eo_wd_step
         ws_step = self.eo_ws_step
 
@@ -231,7 +241,7 @@ class bias_estimation():
 
                 fsc.set_masks(wd_range=wd_range)
                 fsc.get_energy_ratios(test_turbines=[ti], wd_step=wd_step,
-                                      ws_step=ws_step, N=1)
+                                      ws_step=ws_step, N=N_btstrp)
                 result = fsc.df_list[0]['er_results']
                 result_floris = fsc.df_list[1]['er_results']
 
@@ -264,7 +274,11 @@ class bias_estimation():
             fig, ax = plt.subplots(figsize=(10, 5))
             ax.plot(wd_arrays[ii], er_result_scada[ii], color='k', label='SCADA data')
             if not np.isnan(self.opt_wd_bias):
-                ax.plot(wd_arrays[ii] - self.opt_wd_bias, er_result_scada[ii], color='blue', label='SCADA data (corrected)')
+                x_corrected = wrap_360(wd_arrays[ii] - self.opt_wd_bias)
+                y_corrected = np.array(er_result_scada[ii])
+                y_corrected = y_corrected[np.argsort(x_corrected)]
+                x_corrected = np.sort(x_corrected)
+                ax.plot(x_corrected, y_corrected, color='blue', label='SCADA data (corrected)')
             ax.plot(wd_arrays[ii], er_result_floris[ii], ls = '--', color='orange', label='FLORIS')
             plt.title('Turbine %d. Current time: %s' % (ti, str(self.sw_current_time)))
             plt.ylabel('Energy ratio (-)')
