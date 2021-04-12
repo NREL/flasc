@@ -13,11 +13,12 @@
 
 # import datetime
 import numpy as np
-# import os as os
+import os as os
 import pandas as pd
 import warnings
 
 from floris_scada_analysis.circular_statistics import wrap_360_deg
+from floris_scada_analysis import sqldatabase_management as sqldbm
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import floris_tools as ftools
 
@@ -839,7 +840,7 @@ def restructure_single_df(df, column_mapping_dict):
         return None
 
     # Drop NaN rows and get basic df info
-    df = dfm.df_drop_nan_rows(df)
+    df = df_drop_nan_rows(df)
     # no_rows = df.shape[0]
 
     # Build up the new data frame
@@ -863,7 +864,8 @@ def restructure_df_files(df_table_name, column_mapping_dict,
     if not os.path.exists(target_path):
         os.mkdir(target_path)
 
-    files_result = browse_datafiles(data_path, scada_table=df_table_name)
+    files_result = sqldbm.browse_downloaded_datafiles(
+        data_path, scada_table=df_table_name)
     files_result = np.sort(files_result)
     for fi in files_result:
         print('  Reading ' + fi + '.')
