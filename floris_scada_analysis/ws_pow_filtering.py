@@ -163,13 +163,13 @@ def plot_filtering_distribution(N_list, label_list):
     fig, ax = plt.subplots(figsize=(10, 0.5))
     N_total = int(np.sum(N_list))
     N_list_nrm = [i/N_total for i in N_list]  # Normalize
-    clrs = ['black', 'orange', 'purple', 'blue']
+    clrs = ['black', 'blue', 'orange', 'purple']
     edge_l = 0
     for ii in range(len(N_list)):
         edge_r = N_list_nrm[ii]
         plt.barh(0, edge_r, left=edge_l, color=clrs[ii])
         ax.text(edge_l + edge_r / 2., 0, label_list[ii] +
-                ': %d (%.1f %%)' % (N_list[ii], N_list_nrm[ii]*100), 
+                ': %d (%.1f %%)' % (N_list[ii], N_list_nrm[ii]*100),
                 ha='center', va='center', color='white')
         edge_l = edge_l + edge_r
     ax.set_xlim([0.0, 1.0])
@@ -219,7 +219,7 @@ class ws_pw_curve_filtering():
             turbs = np.where(np.array(est_ratedpw_list) == ratedpwrs[ii])[0]
             turbs = np.sort(turbs)
             try_range = range(turbs[0], turbs[-1]+1)
-            if all(np.array(try_range) == turbs):
+            if np.array_equal(np.array(try_range), turbs):
                 turbs = try_range
             print('Estimated rated power of turbines %s in this dataset to be %.1f'
                   % (str(turbs), ratedpwrs[ii]))
@@ -252,23 +252,26 @@ class ws_pw_curve_filtering():
         self.df_out_of_windows = [[] for _ in range(self.num_turbines_all)]
         self.df_out_of_ws_dev = [[] for _ in range(self.num_turbines_all)]
 
-    def set_df(self, df):
+    def set_df(self, df, verbose=False):
         # Check format of df
         num_turbines = dfm.get_num_turbines(df)
         for ti in range(num_turbines):
             if 'self_status_%03d' % ti not in df.columns:
-                print('No self_status flags found for ti = %03d.' % ti)
-                print('Assuming self_status == 1 for all non-NaN entries.')
+                if verbose:
+                    print('No self_status flags found for ti = %03d.' % ti)
+                    print('Assuming self_status == 1 for all non-NaN entries.')
                 df['self_status_%03d' % ti] = 1
             else:
-                print('Found %d entries self flagged for ti = %03d.'
-                      % (np.sum(df['self_status_%03d' % ti] == 0), ti))
+                if verbose:
+                    print('Found %d entries self flagged for ti = %03d.'
+                        % (np.sum(df['self_status_%03d' % ti] == 0), ti))
 
         for ti in range(num_turbines):
             nans = (np.isnan(df[['ws_%03d' % ti, 'pow_%03d' % ti]]).sum(axis=1) > 0)
             df.loc[nans, 'self_status_%03d' % ti] = 0
-            print('Self-flagged %d entries for turbine %d due to NaN values.'
-                  % (np.sum(nans), ti))
+            if verbose:
+                print('Self-flagged %d entries for turbine %d due to NaN values.'
+                    % (np.sum(nans), ti))
 
         # Make sure dataframe index is uniformly ascending and save
         self.df = df.reset_index(drop=('time' in df.columns))
@@ -693,17 +696,14 @@ class ws_pw_curve_filtering():
             ax[0].set_ylabel('Power (kW)')
             ax[0].set_xlabel('Wind speed (m/s)')
 
-            if self.pw_curve_df is None:
-                ax[0].legend(['Filtered data',
-                              'Self-flagged data',
-                              'Window outliers',
-                              'WS deviation outliers'])
-            else:
-                ax[0].legend(['Filtered data',
-                              'Self-flagged data',
-                              'Window outliers',
-                              'WS deviation outliers',
-                              'Approximate power curve'])
+            # Create legend list
+            legend_list = ['Filtered data']
+            if plot_selfflagged:
+                legend_list.extend(['Self-flagged data'])
+            legend_list.extend(['Window outliers', 'WS deviation outliers'])
+            if self.pw_curve_df is not None:
+                legend_list.extend(['Approximate power curve'])
+            ax[0].legend(legend_list)
 
             if confirm_plot:
                 _make_confirmation_plot(df, ti=ti, ax=ax[1])
