@@ -12,6 +12,7 @@
 
 
 # import datetime
+import datetime
 import numpy as np
 import os as os
 import pandas as pd
@@ -551,7 +552,7 @@ def set_pow_ref_by_upstream_turbines_in_radius(
 
 
 # Other dataframe manipulations
-def filter_df_by_status(df, exclude_columns=[]):
+def filter_df_by_status(df, exclude_columns=[], drop_all_bad_status=True):
     """This function overwrites measurement values with np.nan wherever
     the related status flag for that particular turbine reports a value
     of 0 (status_000 = 0, status_001 = 0, ....). You can exclude particular
@@ -586,6 +587,13 @@ def filter_df_by_status(df, exclude_columns=[]):
         ti_columns = [s for s in df.columns if s[-4::] == ti_string and
                       not s in exclude_columns]
         df.loc[df[c] == 0, ti_columns] = np.nan
+
+    if drop_all_bad_status:
+        Ninit = df.shape[0]
+        df = df.dropna(subset=status_cols)
+        if Ninit > df.shape[0]:
+            print('Dropped %d rows due to all status flags being 0.'
+                  % (df.shape[0] - Ninit))
 
     return df
 
@@ -893,37 +901,52 @@ def df_sort_and_fix_duplicates(df):
     """
     # Check and merge any duplicate entries in the dataset
     df, duplicate_time_entries = df_sort_and_find_duplicates(df)
-    while len(duplicate_time_entries) > 0:       
+    while len(duplicate_time_entries) > 0:
         di = duplicate_time_entries[0]
-        df_subset = df[di:di+2].copy()
+        # df_subset = df[di:di+2].copy()
 
         # Check if any conflicting entries exist within duplicate rows
         column_list = [c for c in df.columns if (c != 'time' and c != 'index')]
+        df_merged = df[di:di+1].copy().reset_index(drop=True)  # Start with first row
         for c in column_list:
-            is_faulty = False
-            x1 = df_subset.iloc[0, :][c]
-            x2 = df_subset.iloc[1, :][c]
-            if not type(x1) == type(x2):
-                is_faulty = True
-            elif isinstance(x1, str):
-                is_faulty = (not (x1 == x2))
-            elif isinstance(x1, float) | isinstance(x1, int):
-                is_faulty = not np.array_equal(x1, x2, equal_nan=True)
+            x1 = df.loc[di, c]
+            x2 = df.loc[di+1, c]
+
+            # Check if either is NaN
+            x1_isnan = not (x1 == x1)
+            x2_isnan = not (x2 == x2)
+
+            # Check if values conflict
+            if x1_isnan:
+                is_faulty = False
+                df_merged.loc[0, c] = x2
+            elif x2_isnan:
+                is_faulty = False
+                # Do nothing, keep x1
+            elif x1 == x2:
+                is_faulty = False
+                # Do nothing, keep x1
             else:
-                is_faulty = (not (x1 == x2))
+                is_faulty = True
+                df_merged.loc[0, c] = np.nan
+
             if is_faulty:
                 import warnings
-                warnings.warn('Found conflicting data entries for timestamp:' +
-                              str(df_subset.iloc[0]['time']))
-                print(df_subset[c])
+                warnings.warn('Found conflicting data entries for timestamp: '
+                              + str(df.loc[di, 'time']) + '.')
+                print(df.loc[di:di+1, c])
                 print('Setting value to np.nan as a safety measure...')
-                c_indx = np.where([c == df_subset.columns])[1][0]
-                df_subset.iloc[0, c_indx] = np.nan
-                df_subset.iloc[1, c_indx] = np.nan
+
+        print('Merged two rows with identical timestamp:',
+              df.loc[di, 'time'], '.')
+        print('Before merging:')
+        print(df[di:di+2])
+        print(' ')
+        print('After merging:')
+        print(df_merged)
+        print(' ')
 
         # Now merge data
-        df_subset = df_subset.reset_index(drop=('time' in df_subset.columns))
-        df_merged = df_subset.head(1).fillna(df_subset.tail(1))
         df = df.reset_index().drop([di, di+1])  # Remove dupl. rows
         df = df.append(df_merged)  # Add merged row
 
