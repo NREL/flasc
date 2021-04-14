@@ -419,3 +419,35 @@ def get_upstream_turbs_floris(fi, wd_step=3.0, verbose=False):
                                 'turbines': upstream_turbs_ids})
 
     return df_upstream
+
+
+# Wrapper function to easily set new TI values
+def _fi_set_ws_wd_ti(fi, wd=None, ws=None, ti=None):
+    num_turbines = len(fi.layout_x)
+
+    # Convert scalar values to lists
+    if not isinstance(wd, list):
+        if isinstance(wd, np.ndarray):
+            wd = list(wd)
+        elif wd is not None:
+            wd = list(np.repeat(wd, num_turbines))
+    if not isinstance(ws, list):
+        if isinstance(ws, np.ndarray):
+            ws = list(ws)
+        elif ws is not None:
+            ws = list(np.repeat(ws, num_turbines))
+    if not isinstance(ti, list):
+        if isinstance(ti, np.ndarray):
+            ti = list(ti)
+        elif ti is not None:
+            ti = list(np.repeat(ti, num_turbines))
+
+    wind_layout = (np.array(fi.layout_x), np.array(fi.layout_y))
+
+    fi.reinitialize_flow_field(
+        wind_layout=wind_layout,
+        wind_direction=wd,
+        wind_speed=ws,
+        turbulence_intensity=ti
+    )
+    return fi

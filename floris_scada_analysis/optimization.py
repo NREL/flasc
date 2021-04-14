@@ -11,9 +11,14 @@
 # the License.
 
 
+import copy
 import numpy as np
+import scipy.optimize as opt
 import scipy.stats as spst
+
 from floris.utilities import wrap_360
+
+from floris_scada_analysis import floris_tools as ftools
 
 
 def find_bias_x(x_1, y_1, x_2, y_2, search_range, search_dx):
@@ -109,3 +114,44 @@ def find_wd_bias_by_energy_ratios(er_wd_list, er_scada_list,
 
     wd_bias = dx_opt
     return wd_bias, success
+
+
+def estimate_ti(fi, P_measured, Ns, bounds, turbine_upstream,
+                 turbines_downstream, refine_with_fmin=False,
+                 verbose=False):
+    # Make copy so that existing object is not changed
+    fi = copy.deepcopy(fi)
+    num_turbines = len(fi.layout_x)
+    ti_0 = np.mean(fi.floris.farm.turbulence_intensity)
+
+    # Define a cost function
+    def cost_fun(ti):
+        ti_array = np.repeat(ti_0, num_turbines)
+        ti_array[turbine_upstream] = ti
+        ftools._fi_set_ws_wd_ti(fi, ti=ti_array)
+        fi.calculate_wake()
+        Pturbs = np.array(fi.get_turbine_power())
+        Pturbs = Pturbs[turbines_downstream]
+        se = (P_measured-Pturbs)**2.0
+        mse = np.mean(se)
+        return mse
+
+    if refine_with_fmin:
+        finish = opt.fmin
+    else:
+        finish = None
+
+    # Ensure appropriate format
+    if not (isinstance(bounds[0], tuple) | isinstance(bounds[0], list)):
+        bounds = [bounds]
+
+    # Optimize using grid search approach
+    x_opt, J_opt, x, J = opt.brute(cost_fun,
+                                   ranges=bounds,
+                                   Ns=Ns,
+                                   finish=finish,
+                                   disp=verbose,
+                                   full_output=True)
+
+    opt_result = {'x_opt': x_opt, 'J_opt': J_opt,  'x': x, 'J': J}
+    return opt_result
