@@ -33,6 +33,7 @@ if not os.path.exists(ftr_path):
                             'generate_demo_dataset.py before try' +
                             'ing any of the other examples.')
 df = pd.read_feather(ftr_path)
+df = dfm.filter_df_by_status(df)
 
 # Initialize the FLORIS interface fi
 print('Initializing the FLORIS object for our demo wind farm')
@@ -77,25 +78,34 @@ df = dfm.set_pow_ref_by_upstream_turbines(df, df_upstream)
 df_fi = dfm.set_pow_ref_by_upstream_turbines(df_fi, df_upstream)
 
 # Initialize an bias_estimation object
+test_turbines = [0, 1]
 fsc = best.bias_estimation(df=df,
                            df_fi=df_fi,
                            fi=fi,
-                           test_turbines_subset=[0, 1, 2],
-                           sliding_window_lb_ub=[-td(days=999), td(days=999)],
+                           test_turbines_subset=test_turbines,
+                           sliding_window_lb_ub=[-td(days=45), td(days=45)],
+                           df_upstream=df_upstream,
                            eo_ws_step=5.0,
                            eo_wd_step=2.0)
 
+df_bias = pd.DataFrame()
 current_time = list(fsc.df.time)[0]
 end_time = list(fsc.df.time)[-1]
-sliding_window_stepsize = td(days=999)
+sliding_window_stepsize = td(days=30)
 while current_time <= end_time:
     fsc.set_current_time(new_time=current_time)
     wd_bias, success = fsc.estimate_wd_bias()
 
-    # Print progress
+    # Save estimated bias to a .csv
+    df_bias = df_bias.append({'test_turbines': test_turbines,
+                              'current_time': current_time,
+                              'wd_bias': wd_bias}, ignore_index=True)
+    df_bias.to_csv(os.path.join(out_path, 'df_bias.csv'))
+
+    # Print progress to terminal
     print('Estimated wd bias to be %.1f degrees' % wd_bias)
     fsc.plot_energy_ratios()
     plt.show()
 
-    # Every [sliding_window_stepsize] we generate a new bias estimate
+    # Move forward in time and repeat the estimation process
     current_time = current_time + sliding_window_stepsize
