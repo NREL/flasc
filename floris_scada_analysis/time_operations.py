@@ -20,8 +20,7 @@ from pandas.core.base import DataError
 
 def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
     """Downsampling of a predefined dataframe with data to a higher
-    timestep. This is useful for downsampling 1s or 60s data to
-    600s or even hourly data.
+    timestep. This is useful for downsampling 1s to 60s, 600s or hourly data
 
     Args:
         df ([pd.DataFrame]): Source dataframe with either a column called
@@ -64,17 +63,18 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
     )
     time_array_target = pd.to_datetime(time_array_target)
 
-    print("Calculating mapping between 1s, 60s and 600s data timestamps")
+    print("Calculating mapping between raw and downsampled data")
     time_target_start_array = [t - target_dt for t in time_array_target]
     time_windows = [[time_target_start_array[i], time_array_target[i]] 
                     for i in range(len(time_target_start_array))]
     tids_array = find_window_in_time_array(time_array_src, time_windows)
 
-    print("Creating df_60s and df_600s based on df_1s data")
+    print("Downsampling data and calculating _mean, _median, _min, _max, and _std.")
     df_res = pd.DataFrame({"time": time_array_target})
 
     resample_cols_regular = [
-        c for c in df.columns if c not in resample_cols_angular and "index" not in c
+        c for c in df.columns if c not in resample_cols_angular
+        and "index" not in c and "time" not in c
     ]
 
     for c in resample_cols_regular:
@@ -120,8 +120,8 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
 
         for ti in range(len(tids_array)):
             time_ids = tids_array[ti]
-            mean_c, median_c, std_c, min_c, max_c = calculate_wd_statistics(
-                np.array(df[c][time_ids]), method="radial")
+            mean_c, median_c, std_c, min_c, max_c = (
+                calculate_wd_statistics(np.array(df[c][time_ids])))
 
             mean_ang_array = np.append(mean_ang_array, mean_c)
             median_ang_array = np.append(median_ang_array, median_c)
@@ -258,11 +258,15 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
             while time_array_src[i] <= seek_times_max_remaining[0]:
                 idxs_out.append(i)
                 i += 1
+                if i == len(time_array_src):
+                    break
             idxs_out_array.append(idxs_out)
 
             # Remove entry in oow_time_min/max
             seek_times_min_remaining.pop(0)
             seek_times_max_remaining.pop(0)
+
+            # Check if we are done yet
             if len(seek_times_min_remaining) <= 0:
                 break
 
