@@ -82,10 +82,13 @@ if __name__ == '__main__':
                             'Turbulence Intensity @ 80m': 'ti'})
 
     # Calculate 'true' solutions
-    df_fi = ftls.calc_floris_approx(df, fi,
-                                    ws_step=1.0,
-                                    wd_step=2.0,
-                                    ti_step=0.03)
+    num_threads = 50  # Parallelization in calc_floris, typically
+    # num_threads is several times larger than the number of cores
+    df_fi, df_approx = ftls.calc_floris_approx(df, fi,
+                                               ws_step=1.0,
+                                               wd_step=2.0,
+                                               ti_step=0.03,
+                                               num_threads=num_threads)
 
     # Add noise and bias per turbine
     np.random.seed(123)  # Fixed seed for reproducability
