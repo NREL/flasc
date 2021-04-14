@@ -25,7 +25,7 @@ from floris_scada_analysis import ws_pow_filtering as wspcf
 st.set_page_config(layout="wide")
 
 @st.cache()
-def load_data():    
+def load_data():
     print("Loading .ftr data.")
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(root_dir, '../demo_dataset/demo_dataset_60s.ftr')
@@ -41,13 +41,16 @@ def load_class():
     df_60s = load_data()
     ws_pow_filtering = wspcf.ws_pw_curve_filtering(
         df=df_60s, turbine_list=[0])
-    return df_60s, ws_pow_filtering
+    df_full_filtered = ws_pow_filtering.df
+    df_time_array = pd.to_datetime(
+        np.array(df_full_filtered.time)).tz_localize(None)
+    return df_full_filtered, df_time_array, ws_pow_filtering
 
 
 # Load dataset and initialize class
-df_full, ws_pow_filtering = load_class()
-t0 = min(pd.to_datetime(df_full.time))
-t1 = max(pd.to_datetime(df_full.time))
+df_full, df_time_array, ws_pow_filtering = load_class()
+t0 = list(df_full.time)[0]
+t1 = list(df_full.time)[-1]
 
 # Time filtering of dataset
 st.sidebar.markdown('## Dataset selection')
@@ -55,11 +58,18 @@ time_start = st.sidebar.date_input('Start date', value=t0, min_value=t0, max_val
 time_end = st.sidebar.date_input('End date', value=t1, min_value=time_start, max_value=t1)
 
 # Cut data down to time region
-df = df_full.copy()
-df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) >= pd.to_datetime(time_start)]
-df = df[pd.to_datetime(np.array(df.time)).tz_localize(None) <= pd.to_datetime(time_end)]
+from time import perf_counter as timerpc
+start_time = timerpc()
+df = df_full
+print('Time passed copying df: ', timerpc()-start_time)
+df = df[(df_time_array >= pd.to_datetime(time_start)) &
+        (df_time_array <= pd.to_datetime(time_end))].reset_index(drop=True)
+# print('Time passed cutting down df: ', timerpc()-start_time)
+# df = df.reset_index(drop=True)
+print('Time passed resetting index: ', timerpc()-start_time)
 num_turbines = dfm.get_num_turbines(df)
-ws_pow_filtering.set_df(df)
+ws_pow_filtering.df = df
+print('Time passed writing df: ', timerpc()-start_time)
 
 # Generalized settings
 st.sidebar.markdown('## General filter settings')
