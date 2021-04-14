@@ -61,11 +61,11 @@ def fix_csv_contents(csv_contents, line_format_str):
     return csv_contents
 
 
-def read_raw_data_files(files, single_file_reader_func,
-                        channel_definitions_filename,
-                        channel_definitions_sheetname,
-                        ffill_missing_data=False,
-                        missing_data_buffer=None):
+def read_raw_scada_files(files, single_file_reader_func,
+                         channel_definitions_filename,
+                         channel_definitions_sheetname,
+                         ffill_missing_data=False,
+                         missing_data_buffer=None):
     """ Read multiple SCADA datafiles and process them in preparation for
         uploading to the SQL database. Processing steps include merging
         multiple dataframes, removing/merging duplicate time entries, up-
@@ -96,7 +96,7 @@ def read_raw_data_files(files, single_file_reader_func,
     df = dfm.df_sort_and_fix_duplicates(df)
 
     if ffill_missing_data:
-        dt = fsato.estimate_dt(df)
+        dt = fsato.estimate_dt(df['time'])
         if missing_data_buffer is None:
             missing_data_buffer = dt + td(seconds=1)
 
@@ -107,6 +107,7 @@ def read_raw_data_files(files, single_file_reader_func,
         print("Upsampling df with forward fill...")
         df = df.set_index('time')
         df = df.resample(dt).ffill().ffill()  # Forward fill()
+        df = df.reset_index(drop=False)
 
         print("Replacing all 'missing' rows in the upsampled df with np.nan...")
         for c in df.columns:
