@@ -50,73 +50,77 @@ def generate_models_py(table_names, table_upsampling, fn_channel_defs,
     """
 
     # Initialize default template
-    modelspy_str = \
-    '''
-    # AUTOMATICALLY GENERATED FUNCTION BY 'GENERATE_MODELSPY.PY'
-    #      DATE: ''' + datetime.datetime.now().strftime('%H:%M:%S on %A, %B the %dth, %Y') + ''''
+    modelspy_str = (
+'''
+# AUTOMATICALLY GENERATED FUNCTION BY 'GENERATE_MODELSPY.PY'
+#      DATE: ''' + datetime.datetime.now().strftime('%H:%M:%S on %A, %B the %dth, %Y') + ''''
 
-    from sqlalchemy import create_engine
-    from sqlalchemy import Table, Column, String, Integer, DateTime, UniqueConstraint, REAL
-    from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy.engine.url import URL
+from sqlalchemy import create_engine
+from sqlalchemy import Table, Column, String, Integer, DateTime, UniqueConstraint, REAL
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.engine.url import URL
 
-    from ''' + repository_name + ''' import ''' + settingsfile_name + '''
+from ''' + repository_name + ''' import ''' + settingsfile_name + '''
 
-    DeclarativeBase = declarative_base()
-
-
-    def db_connect():
-        """
-        Performs database connection using database settings from settings.py.
-        Returns sqlalchemy engine instance
-        """
-        print(''' + settingsfile_name + '''.DATABASE)
-        return create_engine(URL(**''' + settingsfile_name + '''.DATABASE), pool_timeout=60*60*24)
+DeclarativeBase = declarative_base()
 
 
-    def create_tables(engine):
-        """ Initialize all tables """
-        DeclarativeBase.metadata.create_all(engine)
+def db_connect():
+    """
+    Performs database connection using database settings from settings.py.
+    Returns sqlalchemy engine instance
+    """
+    print(''' + settingsfile_name + '''.DATABASE)
+    return create_engine(URL(**''' + settingsfile_name + '''.DATABASE), pool_timeout=60*60*24)
 
 
-    def recreate_all(engine):
-        """ Delete all tables and data and recreate base tables """
-        print("DROPPING AND RECREATING ALL TABLES")
-        DeclarativeBase.metadata.drop_all(engine)
-        DeclarativeBase.metadata.create_all(engine)
+def create_tables(engine):
+    """ Initialize all tables """
+    DeclarativeBase.metadata.create_all(engine)
 
 
-    def recreate_by_type(engine, table_name):
-        """ Delete tables by type and recreate"""
+def recreate_all(engine):
+    """ Delete all tables and data and recreate base tables """
+    print("DROPPING AND RECREATING ALL TABLES")
+    DeclarativeBase.metadata.drop_all(engine)
+    DeclarativeBase.metadata.create_all(engine)
 
-        table_name = table_name.lower()
-    '''
+
+def recreate_by_type(engine, table_name):
+    """ Delete tables by type and recreate"""
+
+    table_name = table_name.lower()
+'''
+    )
 
     # Populate recreate_by_type(...) function
     for table_name in table_names:
-        modelspy_str = modelspy_str + '''
-        if table_name == "''' + table_name + '''":
-            DeclarativeBase.metadata.drop_all(engine, tables=[''' + table_name + '''_filenames_class.__table__, ''' + table_name + '''_class.__table__])
-            DeclarativeBase.metadata.create_all(engine, tables=[''' + table_name + '''_filenames_class.__table__, ''' + table_name + '''_class.__table__])
-        '''
+        modelspy_str = modelspy_str + (
+'''
+    if table_name == "''' + table_name + '''":
+        DeclarativeBase.metadata.drop_all(engine, tables=[''' + table_name + '''_filenames_class.__table__, ''' + table_name + '''_class.__table__])
+        DeclarativeBase.metadata.create_all(engine, tables=[''' + table_name + '''_filenames_class.__table__, ''' + table_name + '''_class.__table__])
+'''
+        )
 
 
     # Add individual classes for table_name_filenames and table_names
     for iii in range(len(table_names)):
         table_name = table_names[iii]
 
-        modelspy_str = modelspy_str + '''
-    class ''' + table_name + '''_filenames_class(DeclarativeBase):
-        """Sqlalchemy filenames model"""
-        __tablename__ = "''' + table_name + '''_filenames"
-        id = Column(Integer, primary_key=True, autoincrement=True)
-        filename = Column('filename', String, nullable=False, primary_key=True, unique=True)
+        modelspy_str = modelspy_str + (
+'''class ''' + table_name + '''_filenames_class(DeclarativeBase):
+    """Sqlalchemy filenames model"""
+    __tablename__ = "''' + table_name + '''_filenames"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    filename = Column('filename', String, nullable=False, primary_key=True, unique=True)
 
-    class ''' + table_name + '''_class(DeclarativeBase):
-        """Sqlalchemy data model"""
-        __tablename__ = "''' + table_name + '''"
+class ''' + table_name + '''_class(DeclarativeBase):
+    """Sqlalchemy data model"""
+    __tablename__ = "''' + table_name + '''"
 
-        index = Column('index', Integer, primary_key=True, autoincrement=True)'''
+    index = Column('index', Integer, primary_key=True, autoincrement=True)'''
+        )
 
         # Add individual variable definitions
         df_defs = pd.read_excel(fn_channel_defs, sheet_name=table_name)
@@ -137,17 +141,17 @@ def generate_models_py(table_names, table_upsampling, fn_channel_defs,
             remove_fields.append('turbid')
             modelspy_str = modelspy_str + ''' 
 
-        # Time and turbine are the indexed columns (OVERWRITE)
-        time = Column('time', DateTime, index=True)
-        turbid = Column('turbid', Integer,nullable=True, index=True)
-        UniqueConstraint('time', 'turbid', name='timeturbid')
-        '''
+    # Time and turbine are the indexed columns (OVERWRITE)
+    time = Column('time', DateTime, index=True)
+    turbid = Column('turbid', Integer,nullable=True, index=True)
+    UniqueConstraint('time', 'turbid', name='timeturbid')
+    '''
         else:
             modelspy_str = modelspy_str + ''' 
 
-        # Time is the indexed column (OVERWRITE)
-        time = Column('time', DateTime, primary_key=True, unique=True, index=True)
-        '''
+    # Time is the indexed column (OVERWRITE)
+    time = Column('time', DateTime, primary_key=True, unique=True, index=True)
+    '''
 
         # Create all necessary db variables in models.py
         remove_fields.append('time')  # Do not repeat time variable
@@ -158,13 +162,19 @@ def generate_models_py(table_names, table_upsampling, fn_channel_defs,
             for di in range(len(database_name)):
                 if database_name[di] not in remove_fields:
                     for ti in turbine_range:
-                        if table_upsampling[iii]:
+                        if (table_upsampling[iii] and (variable_type[di] == 'REAL' or variable_type[di] == 'Integer')):
                             db_name_new.append(database_name[di] + "_" + str(ti) + "_mean")
-                            vb_type_new.append(variable_type[di])
+                            if variable_type[di] == 'Integer':
+                                vb_type_new.append('REAL')
+                            else:
+                                vb_type_new.append(variable_type[di])
                             db_name_new.append(database_name[di] + "_" + str(ti) + "_median")
                             vb_type_new.append(variable_type[di])
                             db_name_new.append(database_name[di] + "_" + str(ti) + "_std")
-                            vb_type_new.append(variable_type[di])
+                            if variable_type[di] == 'Integer':
+                                vb_type_new.append('REAL')
+                            else:
+                                vb_type_new.append(variable_type[di])
                             db_name_new.append(database_name[di] + "_" + str(ti) + "_min")
                             vb_type_new.append(variable_type[di])
                             db_name_new.append(database_name[di] + "_" + str(ti) + "_max")
@@ -178,10 +188,9 @@ def generate_models_py(table_names, table_upsampling, fn_channel_defs,
         for i in range(len(database_name)):
             if database_name[i] not in remove_fields:
                 modelspy_str = modelspy_str + '''
-        ''' + database_name[i] + ''' = Column("''' + database_name[i] + '''", ''' + variable_type[i] + ''', nullable=True)'''
+    ''' + database_name[i] + ''' = Column("''' + database_name[i] + '''", ''' + variable_type[i] + ''', nullable=True)'''
         modelspy_str = modelspy_str + '''
-        '''
-
+'''
 
     # WRITE TO FILE, but make sure no models.py file gets overwritten
     if os.path.exists(fout):
@@ -358,6 +367,9 @@ def upload_df_to_sqldb(df, files, sql_engine, table_name,
 
 
 def omit_last_rows_by_buffer(df, omit_buffer):
+    if not 'time' in df.columns:
+        df = df.reset_index(drop=False)
+
     num_rows = df.shape[0]
     df = df[df['time'] < max(df['time']) - omit_buffer]
     print('Omitting last %d rows (%s s) as a buffer for future files.'
@@ -552,7 +564,7 @@ def gui_sql_data_explorer(dbc):
     # import pickle
 
     import tkinter as tk
-
+    import tkcalendar as tkcal
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
     from matplotlib.figure import Figure
     import matplotlib.backends.backend_tkagg as tkagg
@@ -583,77 +595,38 @@ def gui_sql_data_explorer(dbc):
                 self.table_listbox.insert(tk.END, tci)
             self.table_listbox.select_set(0)
 
-            # Create a year widget
-            year_label = tk.Label(frame_1, text="year")
-            year_label.pack()
-            var_year = tk.StringVar(root)
-            years = tuple(range(min_time.year, max_time.year + 1))
-            self.year_select = tk.Spinbox(frame_1, values=years,
-                                        textvariable=var_year)
-            var_year.set(years[0])
-            self.year_select.pack()
+            # Create a start_date widget
+            start_date_label = tk.Label(frame_1, text='Data import: start date')
+            start_date_label.pack()
+            self.cal_start_date = tkcal.DateEntry(
+                frame_1, year=min_time.year, month=min_time.month,
+                day=min_time.day, mindate=min_time, maxdate=max_time)
+            self.cal_start_date.pack()
 
-            # Create a month widget
-            month_label = tk.Label(frame_1, text="month")
-            month_label.pack()
-            var_month = tk.StringVar(root)
-            self.month_select = tk.Spinbox(
-                frame_1,
-                values=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
-                textvariable=var_month,
-            )
-            var_month.set(min_time.month)
-            self.month_select.pack()
+            end_date_label = tk.Label(frame_1, text='Data import: end date')
+            end_date_label.pack()
+            self.cal_end_date = tkcal.DateEntry(
+                frame_1, year=min_time.year, month=min_time.month,
+                day=min_time.day, mindate=min_time, maxdate=max_time)
+            self.cal_end_date.pack()
 
-            # Create a day widget
-            day_label = tk.Label(frame_1, text="day")
-            day_label.pack()
-            var_day = tk.StringVar(root)
-            self.day_select = tk.Spinbox(frame_1, from_=0, to=32, textvariable=var_day)
-            var_day.set(min_time.day)
-            self.day_select.pack()
+            # # Add a connect gap
+            # self.connect_gap_var = tk.IntVar()
+            # self.connect_gap = tk.Checkbutton(
+            #     frame_1, text="Connect gap between data", variable=self.connect_gap_var
+            # )
+            # self.connect_gap.pack()
 
-            # Add a connect gap
-            self.connect_gap_var = tk.IntVar()
-            self.connect_gap = tk.Checkbutton(
-                frame_1, text="Connect gap between data", variable=self.connect_gap_var
-            )
-            self.connect_gap.pack()
-
-            # Add a convert to eastern checkbox
-            self.check_eastern_var = tk.IntVar()
-            self.eastern_check = tk.Checkbutton(
-                frame_1, text="Eastern", variable=self.check_eastern_var
-            )
-            self.eastern_check.pack()
-
-            # Add a through-to-end checkbox
-            self.tte_var = tk.IntVar()
-            self.tte_check = tk.Checkbutton(
-                frame_1, text="Import data through to end", variable=self.tte_var
-            )
-            self.tte_check.pack()
-
-            # Add a range checkbox
-            self.range_var = tk.IntVar()
-            self.range_check = tk.Checkbutton(
-                frame_1, text="Import range of days", variable=self.range_var
-            )
-            self.range_check.pack()
-
-            # Create a num days widget
-            num_day_label = tk.Label(frame_1, text="num day")
-            num_day_label.pack()
-            var_num_day = tk.StringVar(root)
-            self.num_day_select = tk.Spinbox(
-                frame_1, from_=0, to=90, textvariable=var_num_day
-            )
-            var_num_day.set("8")
-            self.num_day_select.pack()
+            # # Add a convert to eastern checkbox
+            # self.check_eastern_var = tk.IntVar()
+            # self.eastern_check = tk.Checkbutton(
+            #     frame_1, text="Eastern", variable=self.check_eastern_var
+            # )
+            # self.eastern_check.pack()
 
             # Add a load data button
-            self.button_load = tk.Button(frame_1, text="Load Data", command=self.load_data)
-            self.button_load.pack()  # side="left")
+            self.button_load = tk.Button(frame_1, text="Download data", command=self.load_data)
+            self.button_load.pack(pady=10)  # side="left")
 
             # # Add a load pickle button
             # self.button_load_pickle = tk.Button(
@@ -665,11 +638,11 @@ def gui_sql_data_explorer(dbc):
             # self.button_save = tk.Button(frame_1, text="Save Data", command=self.save_data)
             # self.button_save.pack()  # side="left")
 
-            # Add a average data button
-            self.button_average = tk.Button(
-                frame_1, text="Average Data", command=self.average_data
-            )
-            self.button_average.pack()  # side="left")
+            # # Add a average data button
+            # self.button_average = tk.Button(
+            #     frame_1, text="Average Data", command=self.average_data
+            # )
+            # self.button_average.pack()  # side="left")
 
             # Add channel 1 list box
             p1_label = tk.Label(frame_1, text="plot 1")
@@ -763,28 +736,28 @@ def gui_sql_data_explorer(dbc):
         #     df_save.to_pickle(os.path.join(save_folder, filename))
         #     print("...Done")
 
-        def average_data(self):
+        # def average_data(self):
 
-            # Get x_range
-            ax_dates = self.ax_1.get_xlim()
-            ax_dates = [pd.to_datetime(dates.num2date(d)) for d in ax_dates]
+        #     # Get x_range
+        #     ax_dates = self.ax_1.get_xlim()
+        #     ax_dates = [pd.to_datetime(dates.num2date(d)) for d in ax_dates]
 
-            # Get data to save
-            df_save = self.df[(self.df.time >= ax_dates[0]) & (self.df.time <= ax_dates[1])]
+        #     # Get data to save
+        #     df_save = self.df[(self.df.time >= ax_dates[0]) & (self.df.time <= ax_dates[1])]
 
-            # C1 particulars
-            for listbox in [
-                self.c1_listbox,
-                self.c2_listbox,
-                self.c3_listbox,
-                self.c4_listbox,
-            ]:
-                indices = listbox.curselection()
-                channels = [self.df.columns[idx] for idx in indices]
+        #     # C1 particulars
+        #     for listbox in [
+        #         self.c1_listbox,
+        #         self.c2_listbox,
+        #         self.c3_listbox,
+        #         self.c4_listbox,
+        #     ]:
+        #         indices = listbox.curselection()
+        #         channels = [self.df.columns[idx] for idx in indices]
 
-                # Show the averages
-                for c in channels:
-                    print(c, df_save[c].mean())
+        #         # Show the averages
+        #         for c in channels:
+        #             print(c, df_save[c].mean())
 
         # def load_pickle(self):
         #     pickle_filename = tk.filedialog.askopenfilename(
@@ -828,28 +801,11 @@ def gui_sql_data_explorer(dbc):
         #         ax.clear()
 
         def load_data(self):
-
-            year = int(self.year_select.get())
-            month = int(self.month_select.get())
-            day = int(self.day_select.get())
-            start_date = "%04d-%02d-%02d" % (year, month, day)
-            num_days = int(self.num_day_select.get())
+            start_time = self.cal_start_date.get_date()
+            end_time = self.cal_end_date.get_date() + datetime.timedelta(days=1)
 
             # Determine which table to use
             table_select = self.table_choices[self.table_listbox.curselection()[0]]
-
-            # Determine start and end time
-            start_time = pd.to_datetime(start_date)
-            if self.tte_var.get() == 1:  # Through the end
-                end_time = self.dbc.get_last_time_entry()
-                # end_date = '%d-%02d-%02d' % (end_time.year,end_time.month,end_time.day)
-                # end_time = None  # Set to None for read functions
-            elif self.range_var.get() == 1:  # Plot a range
-                end_time = start_time + td(days=num_days)
-                # end_date = '%d-%02d-%02d' % (end_time.year,end_time.month,end_time.day)
-            else:
-                end_time = start_time + td(days=1)
-                # end_date = '%d-%02d-%02d' % (end_time.year,end_time.month,end_time.day)
 
             print("Importing %s from %s to %s" % (table_select, start_time, end_time))
             self.df = self.dbc.get_table_data_from_db_wide(
@@ -857,26 +813,26 @@ def gui_sql_data_explorer(dbc):
             )
             print("...Imported data successfully.")
 
-            # If requested, reconfig data so-as not to connect gap
-            second_gap = 600  # 10 minutes between data
-            if self.connect_gap_var.get() == 0:
-                print("Putting in nans to avoid gap connect")
-                # self.df = ut.convert_to_eastern(self.df)
-                self.df["next_times"] = self.df["time"] + td(
-                    seconds=second_gap
-                )
-                next_times = self.df.next_times[~self.df.next_times.isin(self.df["time"])]
-                current_times = self.df["time"]
-                full_times = current_times.append(next_times)
+            # # If requested, reconfig data so-as not to connect gap
+            # second_gap = 600  # 10 minutes between data
+            # if self.connect_gap_var.get() == 0:
+            #     print("Putting in nans to avoid gap connect")
+            #     # self.df = ut.convert_to_eastern(self.df)
+            #     self.df["next_times"] = self.df["time"] + td(
+            #         seconds=second_gap
+            #     )
+            #     next_times = self.df.next_times[~self.df.next_times.isin(self.df["time"])]
+            #     current_times = self.df["time"]
+            #     full_times = current_times.append(next_times)
 
-                self.df = self.df.set_index("time").reindex(full_times)
-                self.df.index.name = "time"
-                self.df = self.df.reset_index().sort_values(by="time")
+            #     self.df = self.df.set_index("time").reindex(full_times)
+            #     self.df.index.name = "time"
+            #     self.df = self.df.reset_index().sort_values(by="time")
 
-            # If requested, convert to eastern
-            if self.check_eastern_var.get() == 1:
-                print("Converting to eastern time")
-                self.df = ut.convert_to_eastern(self.df)
+            # # If requested, convert to eastern
+            # if self.check_eastern_var.get() == 1:
+            #     print("Converting to eastern time")
+            #     self.df = ut.convert_to_eastern(self.df)
 
             # Update the channel list box with the available channels
             self.c1_listbox.delete(0, tk.END)
