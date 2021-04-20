@@ -38,7 +38,7 @@ def generate_models_py(table_names, table_upsampling, fn_channel_defs,
         additional table entries will be made to include _mean,
         _median, _std, _min and _max for all numerical variables.
         fn_channel_defs ([str]): Path to xlsx with channel definitions.
-        wide_format ([bool]): Definition whether table is WIDE or TALL.
+        wide_format ([list of bools]): Definition whether table is WIDE.
         turbine_range ([list]): List of turbine names.
         repository_name ([str]): Name of Python repository
         settingsfile_name ([str]): Name of settings file for Python/SQL
@@ -108,8 +108,8 @@ def recreate_by_type(engine, table_name):
     for iii in range(len(table_names)):
         table_name = table_names[iii]
 
-        modelspy_str = modelspy_str + (
-'''class ''' + table_name + '''_filenames_class(DeclarativeBase):
+        modelspy_str = modelspy_str + ('''
+class ''' + table_name + '''_filenames_class(DeclarativeBase):
     """Sqlalchemy filenames model"""
     __tablename__ = "''' + table_name + '''_filenames"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -137,7 +137,7 @@ class ''' + table_name + '''_class(DeclarativeBase):
         ]
 
         # Create index/unique variables first
-        if 'turbid' in database_name.values and not wide_format:
+        if 'turbid' in database_name.values and not wide_format[iii]:
             remove_fields.append('turbid')
             modelspy_str = modelspy_str + ''' 
 
@@ -155,7 +155,7 @@ class ''' + table_name + '''_class(DeclarativeBase):
 
         # Create all necessary db variables in models.py
         remove_fields.append('time')  # Do not repeat time variable
-        if wide_format:
+        if wide_format[iii]:
             remove_fields.append('turbid')
             db_name_new = []
             vb_type_new = []
@@ -202,7 +202,7 @@ class ''' + table_name + '''_class(DeclarativeBase):
 
     # Write a new models.py
     text_file = open(fout, "w")
-    n = text_file.write(modelspy_str)
+    text_file.write(modelspy_str)
     text_file.close()
     print("Finished writing 'models.py' to " + fout + ".")
 
@@ -325,7 +325,8 @@ def browse_downloaded_datafiles(data_path, scada_table=''):
 # # # DATA UPLOAD FUNCTIONS
 # # # # # # # # # # # # # # # # # # # # # # # # #
 def upload_df_to_sqldb(df, files, sql_engine, table_name,
-                       df_chunk_size=10000, sql_chunk_size=10000):
+                       df_chunk_size=10000, sql_chunk_size=10000,
+                       leave_out_last_filename=False):
     if df.shape[0] > 0:
         print("Inserting  %d rows into table '%s'."
               % (df.shape[0], table_name))
@@ -354,7 +355,11 @@ def upload_df_to_sqldb(df, files, sql_engine, table_name,
     if isinstance(files, str):
         files = [files]
 
-    for fi in files[0:-1]:
+    # Leave out last filename if overlap necessary
+    if leave_out_last_filename:
+        files = files[0:-1]
+
+    for fi in files:
         fi = os.path.basename(fi)  # Only filename.csv
         df_names = pd.DataFrame({"filename": [fi]})
         df_names.to_sql(
@@ -561,305 +566,251 @@ def batch_download_data_from_sql(dbc, destination_path, table_name):
 
 def gui_sql_data_explorer(dbc):
     from datetime import timedelta as td
-    # import pickle
 
     import tkinter as tk
     import tkcalendar as tkcal
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
     from matplotlib.figure import Figure
     import matplotlib.backends.backend_tkagg as tkagg
-    from matplotlib import dates
 
     class App:
         def __init__(self, master, dbc):
 
             # Create the options container
-            frame_1 = tk.Frame(master, width=200, height=100)
+            frame_1 = tk.Frame(master)
+            self.master = master
 
             # Get basic database properties
             table_names = [c for c in dbc.sql_tables if '_filenames' not in c]
-            min_time = [dbc.get_first_time_entry(table_name=t) for t in table_names]
-            min_time = pd.to_datetime(np.min(min_time))
-            max_time = [dbc.get_last_time_entry(table_name=t) for t in table_names]
-            max_time = pd.to_datetime(np.max(max_time))
+            min_table_dates = [dbc.get_first_time_entry(table_name=t)
+                               for t in table_names]
+            max_table_dates = [dbc.get_last_time_entry(table_name=t)
+                               for t in table_names]
+            max_nochars_tbname = 4 + int(np.max([len(c) for c in table_names]))
 
             # Add data table list box
             self.table_choices = table_names
             table_label = tk.Label(frame_1, text="Data Table")
             table_label.pack()
             self.table_listbox = tk.Listbox(
-                frame_1, selectmode=tk.SINGLE, exportselection=False, height=4
+                frame_1, selectmode=tk.EXTENDED,
+                exportselection=False, height=4,
+                width=max_nochars_tbname
             )
             self.table_listbox.pack()
-            for tci in self.table_choices:
-                self.table_listbox.insert(tk.END, tci)
-            self.table_listbox.select_set(0)
+            for ii, tci in enumerate(self.table_choices):
+                id_letter = '[' + chr(97 + ii).upper() + ']'
+                self.table_listbox.insert(tk.END, id_letter + ' ' + tci)
+            # self.table_listbox.select_set(0)
 
             # Create a start_date widget
             start_date_label = tk.Label(frame_1, text='Data import: start date')
             start_date_label.pack()
             self.cal_start_date = tkcal.DateEntry(
-                frame_1, year=min_time.year, month=min_time.month,
-                day=min_time.day, mindate=min_time, maxdate=max_time)
+                frame_1, date_pattern='MM/dd/yyyy',state='disabled')
             self.cal_start_date.pack()
 
             end_date_label = tk.Label(frame_1, text='Data import: end date')
             end_date_label.pack()
             self.cal_end_date = tkcal.DateEntry(
-                frame_1, year=min_time.year, month=min_time.month,
-                day=min_time.day, mindate=min_time, maxdate=max_time)
+                frame_1, date_pattern='MM/dd/yyyy', state='disabled')
             self.cal_end_date.pack()
 
-            # # Add a connect gap
-            # self.connect_gap_var = tk.IntVar()
-            # self.connect_gap = tk.Checkbutton(
-            #     frame_1, text="Connect gap between data", variable=self.connect_gap_var
-            # )
-            # self.connect_gap.pack()
 
-            # # Add a convert to eastern checkbox
-            # self.check_eastern_var = tk.IntVar()
-            # self.eastern_check = tk.Checkbutton(
-            #     frame_1, text="Eastern", variable=self.check_eastern_var
-            # )
-            # self.eastern_check.pack()
+            # Change min and max time depending on table(s) selected
+            def update_table_selection(event):
+                # Get selected tables
+                tids = [i for i in self.table_listbox.curselection()]
+
+                # Determine and update min/max dates
+                if len(tids) <= 0:
+                    self.cal_start_date.config({'state': 'disabled'})
+                    self.cal_end_date.config({'state': 'disabled'})
+                else:
+                    min_time = [min_table_dates[i] for i in tids]
+                    max_time = [max_table_dates[i] for i in tids]
+                    min_time = pd.to_datetime(np.min(min_time))
+                    max_time = pd.to_datetime(np.max(max_time))
+                    mean_time = min_time + (max_time-min_time)/2.
+                    cal_dict = {'state': 'normal',
+                                'mindate': min_time,
+                                'maxdate': max_time}
+                    self.cal_start_date.config(cal_dict)
+                    self.cal_end_date.config(cal_dict)
+                    self.cal_start_date.set_date(mean_time)
+                    self.cal_end_date.set_date(mean_time)
+
+            self.table_listbox.bind('<<ListboxSelect>>',
+                                    update_table_selection)
+
+            # Add commands to change end_date if start_date > end_date
+            def callback_change_enddate(event):
+                start_date = self.cal_start_date.get_date()
+                end_date = self.cal_end_date.get_date()
+                if end_date <= start_date:
+                    self.cal_end_date.set_date(
+                        date=start_date + td(days=1)
+                    )
+            def callback_change_startdate(event):
+                start_date = self.cal_start_date.get_date()
+                end_date = self.cal_end_date.get_date()
+                if end_date <= start_date:
+                    self.cal_start_date.set_date(
+                        date=end_date - td(days=1)
+                    )
+
+            self.cal_start_date.bind("<<DateEntrySelected>>",
+                                     callback_change_enddate)
+            self.cal_end_date.bind("<<DateEntrySelected>>",
+                                   callback_change_startdate)
 
             # Add a load data button
-            self.button_load = tk.Button(frame_1, text="Download data", command=self.load_data)
+            self.button_load = tk.Button(frame_1, text="Download data",
+                                         command=self.load_data)
             self.button_load.pack(pady=10)  # side="left")
 
-            # # Add a load pickle button
-            # self.button_load_pickle = tk.Button(
-            #     frame_1, text="Load Pickle", command=self.load_pickle
-            # )
-            # self.button_load_pickle.pack()  # side="left")
+            # Add button to remove/add plots
+            self.channel_add_button = tk.Button(frame_1,
+                                                text='Add plotting channel',
+                                                command=self.channel_add)
+            self.channel_add_button.pack()
+            self.channel_rem_button = tk.Button(frame_1,
+                                                text='Remove plotting channel',
+                                                command=self.channel_rem)
+            self.channel_rem_button.pack()
 
-            # # Add a save data button
-            # self.button_save = tk.Button(frame_1, text="Save Data", command=self.save_data)
-            # self.button_save.pack()  # side="left")
+            # Add (placeholder) channels
+            N_channels_max = 10
+            self.N_channels = 1
+            self.N_channels_max = N_channels_max
+            self.channel_label = [[] for _ in range(N_channels_max)]
+            self.channel_listbox = [[] for _ in range(N_channels_max)]
+            for i in range(N_channels_max):
+                self.channel_label[i] = tk.Label(frame_1, text="plot %d" % i)
+                self.channel_listbox[i] = tk.Listbox(
+                    frame_1, selectmode=tk.EXTENDED,
+                    exportselection=False, height=5,
+                    width=max_nochars_tbname,
+                    state='normal'
+                )
+                def mapper_func(evt):
+                    ci = int(str(evt.widget).replace('.!frame.!listbox', ''))-2
+                    self.ci_select(channel_no=ci)
+                self.channel_listbox[i].bind("<<ListboxSelect>>", mapper_func)
 
-            # # Add a average data button
-            # self.button_average = tk.Button(
-            #     frame_1, text="Average Data", command=self.average_data
-            # )
-            # self.button_average.pack()  # side="left")
-
-            # Add channel 1 list box
-            p1_label = tk.Label(frame_1, text="plot 1")
-            p1_label.pack()
-            self.c1_listbox = tk.Listbox(
-                frame_1, selectmode=tk.EXTENDED, exportselection=False, height=5
-            )
-            self.c1_listbox.pack()
-            self.c1_listbox.bind("<<ListboxSelect>>", self.c1_select)
-
-            # Add channel 2 list box
-            p2_label = tk.Label(frame_1, text="plot 2")
-            p2_label.pack()
-            self.c2_listbox = tk.Listbox(
-                frame_1, selectmode=tk.EXTENDED, exportselection=False, height=5
-            )
-            self.c2_listbox.pack()
-            self.c2_listbox.bind("<<ListboxSelect>>", self.c2_select)
-
-            # Add channel 3 list box
-            p3_label = tk.Label(frame_1, text="plot 3")
-            p3_label.pack()
-            self.c3_listbox = tk.Listbox(
-                frame_1, selectmode=tk.EXTENDED, exportselection=False, height=5
-            )
-            self.c3_listbox.pack()
-            self.c3_listbox.bind("<<ListboxSelect>>", self.c3_select)
-
-            # Add channel 4 list box
-            p4_label = tk.Label(frame_1, text="plot 4")
-            p4_label.pack()
-            self.c4_listbox = tk.Listbox(
-                frame_1, selectmode=tk.EXTENDED, exportselection=False, height=5
-            )
-            self.c4_listbox.pack()
-            self.c4_listbox.bind("<<ListboxSelect>>", self.c4_select)
-
-            # Pack the first frame
-            frame_1.pack(fill=None, expand=0, side="left")
+                if i == 0:
+                    self.channel_label[i].pack()
+                    self.channel_listbox[i].pack(fill=tk.BOTH, expand=True)
 
             # Create the plotting frame
-            frame_2 = tk.Frame(master, width=1000, height=500)
+            self.frame_2 = tk.Frame(master, width=20, height=500)
 
-            # Init the plotting area
-            self.fig = Figure()
-            self.ax_1 = self.fig.add_subplot(411)
-            self.ax_2 = self.fig.add_subplot(412, sharex=self.ax_1)
-            self.ax_3 = self.fig.add_subplot(413, sharex=self.ax_1)
-            self.ax_4 = self.fig.add_subplot(414, sharex=self.ax_1)
+            # Pack the first frame
+            frame_1.pack(fill=tk.BOTH, expand=False, side="left", padx=5)
 
-            self.canvas = FigureCanvasTkAgg(self.fig, master=frame_2)
-            tkagg.NavigationToolbar2Tk(self.canvas, master)
-            # tkagg.NavigationToolbar2TkAgg(self.canvas, master)
-            # self.canvas.show()
-            self.canvas.draw()
-            self.canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
-
-            frame_2.pack(fill="both", expand=1, side="right")
+            self.create_figures()
             self.master = master
 
             # Set up the database connection
             self.dbc = dbc
 
-        # def save_data(self):
+        def channel_add(self):
+            if self.N_channels < self.N_channels_max:
+                ci = self.N_channels  # New channel
+                self.channel_listbox[ci].config({'state': 'normal'})
+                self.channel_label[ci].pack()
+                self.channel_listbox[ci].pack(fill=tk.BOTH, expand=True)
+                self.N_channels = self.N_channels + 1
+                self.create_figures()
 
-        #     # Get x_range
-        #     ax_dates = self.ax_1.get_xlim()
-        #     ax_dates = [pd.to_datetime(dates.num2date(d), utc=True) for d in ax_dates]
-
-        #     # Get data to save
-        #     time = pd.to_datetime(self.df.time, utc=True)
-        #     # df_save = self.df[(self.df.time >= ax_dates[0]) & (self.df.time <= ax_dates[1]) ]
-        #     df_save = self.df[(time >= ax_dates[0]) & (time <= ax_dates[1])]
-
-        #     # Get a filename
-        #     home = os.path.expanduser("~")
-        #     save_folder = os.path.join(home, "Desktop/save_folder")
-
-        #     # Make if doesn't exist
-        #     if not os.path.exists(save_folder):
-        #         os.makedirs(save_folder)
-
-        #     # Create filename
-        #     d1 = ax_dates[0]
-        #     filename = os.path.join(
-        #         save_folder,
-        #         "data_%d_%02d_%02d_%02d.p" % (d1.year, d1.month, d1.day, d1.hour),
-        #     )
-
-        #     print("Saving...%s" % filename)
-        #     df_save.to_pickle(os.path.join(save_folder, filename))
-        #     print("...Done")
-
-        # def average_data(self):
-
-        #     # Get x_range
-        #     ax_dates = self.ax_1.get_xlim()
-        #     ax_dates = [pd.to_datetime(dates.num2date(d)) for d in ax_dates]
-
-        #     # Get data to save
-        #     df_save = self.df[(self.df.time >= ax_dates[0]) & (self.df.time <= ax_dates[1])]
-
-        #     # C1 particulars
-        #     for listbox in [
-        #         self.c1_listbox,
-        #         self.c2_listbox,
-        #         self.c3_listbox,
-        #         self.c4_listbox,
-        #     ]:
-        #         indices = listbox.curselection()
-        #         channels = [self.df.columns[idx] for idx in indices]
-
-        #         # Show the averages
-        #         for c in channels:
-        #             print(c, df_save[c].mean())
-
-        # def load_pickle(self):
-        #     pickle_filename = tk.filedialog.askopenfilename(
-        #         initialdir="/", title="Select file"
-        #     )  # ,filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
-        #     print(pickle_filename)
-        #     self.df = pickle.load(open(pickle_filename, "rb"))
-
-        #     # If requested, reconfig data so-as not to connect gap
-        #     if self.connect_gap_var.get() == 0:
-        #         print("Putting in nans to avoid gap connect")
-        #         # self.df = ut.convert_to_eastern(self.df)
-        #         self.df["next_times"] = self.df["time"] + td(seconds=60)
-        #         next_times = self.df.next_times[~self.df.next_times.isin(self.df["time"])]
-        #         current_times = self.df["time"]
-        #         full_times = current_times.append(next_times)
-
-        #         self.df = self.df.set_index("time").reindex(full_times)
-        #         self.df.index.name = "time"
-        #         self.df = self.df.reset_index().sort_values(by="time")
-
-        #     # Update the channel list box with the available channels
-        #     self.c1_listbox.delete(0, tk.END)
-        #     for c in self.df.columns:
-        #         self.c1_listbox.insert(tk.END, c)
-
-        #     self.c2_listbox.delete(0, tk.END)
-        #     for c in self.df.columns:
-        #         self.c2_listbox.insert(tk.END, c)
-
-        #     self.c3_listbox.delete(0, tk.END)
-        #     for c in self.df.columns:
-        #         self.c3_listbox.insert(tk.END, c)
-
-        #     self.c4_listbox.delete(0, tk.END)
-        #     for c in self.df.columns:
-        #         self.c4_listbox.insert(tk.END, c)
-
-        #     # Clear all axes
-        #     for ax in [self.ax_1, self.ax_2, self.ax_3, self.ax_4]:
-        #         ax.clear()
+        def channel_rem(self):
+            if self.N_channels > 1:
+                ci = self.N_channels - 1  # Last existing channel
+                self.channel_listbox[ci].config({'state': 'disabled'})
+                self.channel_listbox[ci].pack_forget()
+                self.channel_label[ci].pack_forget()
+                self.N_channels = self.N_channels - 1
+                self.create_figures()
 
         def load_data(self):
             start_time = self.cal_start_date.get_date()
             end_time = self.cal_end_date.get_date() + datetime.timedelta(days=1)
 
-            # Determine which table to use
-            table_select = self.table_choices[self.table_listbox.curselection()[0]]
+            # Load specified table(s)
+            df_array = []
+            table_choices = self.table_choices
+            tables_selected = self.table_listbox.curselection()
+            for ii in range(len(tables_selected)):
+                table_select = table_choices[tables_selected[ii]]
 
-            print("Importing %s from %s to %s" % (table_select, start_time, end_time))
-            self.df = self.dbc.get_table_data_from_db_wide(
-                table_select, start_time, end_time
-            )
-            print("...Imported data successfully.")
+                print("Importing %s from %s to %s"
+                      % (table_select, start_time, end_time))
+                df = self.dbc.get_table_data_from_db_wide(
+                    table_select, start_time, end_time)
+                df = df.set_index('time', drop=True)
 
-            # # If requested, reconfig data so-as not to connect gap
-            # second_gap = 600  # 10 minutes between data
-            # if self.connect_gap_var.get() == 0:
-            #     print("Putting in nans to avoid gap connect")
-            #     # self.df = ut.convert_to_eastern(self.df)
-            #     self.df["next_times"] = self.df["time"] + td(
-            #         seconds=second_gap
-            #     )
-            #     next_times = self.df.next_times[~self.df.next_times.isin(self.df["time"])]
-            #     current_times = self.df["time"]
-            #     full_times = current_times.append(next_times)
+                if df.shape[0] <= 0:
+                    print('No data found in this timerange for table %s'
+                          % table_select)
+                else:
+                    print("...Imported data successfully.")
 
-            #     self.df = self.df.set_index("time").reindex(full_times)
-            #     self.df.index.name = "time"
-            #     self.df = self.df.reset_index().sort_values(by="time")
+                    old_col_names = list(df.columns)
+                    new_col_names = [chr(97 + tables_selected[ii]).upper()
+                                     + '_%s'  % c for c in df.columns]
+                    col_mapping = dict(zip(old_col_names,new_col_names))
+                    df = df.rename(columns=col_mapping)
+                    df_array.append(df)
 
-            # # If requested, convert to eastern
-            # if self.check_eastern_var.get() == 1:
-            #     print("Converting to eastern time")
-            #     self.df = ut.convert_to_eastern(self.df)
+            # Merge dataframes
+            self.df = pd.concat(df_array, axis=1).reset_index(drop=False)
 
-            # Update the channel list box with the available channels
-            self.c1_listbox.delete(0, tk.END)
-            for c in self.df.columns:
-                self.c1_listbox.insert(tk.END, c)
-
-            self.c2_listbox.delete(0, tk.END)
-            for c in self.df.columns:
-                self.c2_listbox.insert(tk.END, c)
-
-            self.c3_listbox.delete(0, tk.END)
-            for c in self.df.columns:
-                self.c3_listbox.insert(tk.END, c)
-
-            self.c4_listbox.delete(0, tk.END)
-            for c in self.df.columns:
-                self.c4_listbox.insert(tk.END, c)
+            self.update_channel_cols()
 
             # Clear all axes
-            for ax in [self.ax_1, self.ax_2, self.ax_3, self.ax_4]:
+            for ax in self.axes:
                 ax.clear()
 
-        def c1_select(self, evt):
+            # Update frame width
+            nochars_cols = [len(c) for c in self.df.columns]
+            max_col_width = np.max(nochars_cols)
+            max_tbn_width = 4 + np.max([len(c) for c in table_choices])
+            frame_width = int(np.max([max_col_width, max_tbn_width]))
+            self.channel_listbox[0].config({'width': frame_width})
 
-            # C1 particulars
-            indices = self.c1_listbox.curselection()
-            ax = self.ax_1
+        def update_channel_cols(self):
+            # Update the channel list box with the available channels
+            for i in range(self.N_channels_max):
+                self.channel_listbox[i].delete(0, tk.END)
+                if len(self.table_listbox.curselection()) > 0:
+                    for c in self.df.columns:
+                        self.channel_listbox[i].insert(tk.END, c)
+
+        def create_figures(self):
+            try:
+                self.toolbar.destroy()
+                self.frame_2.destroy()
+            except:
+                print('No preexisting figures found.')
+
+            self.frame_2 = tk.Frame(self.master, width=20, height=500)
+            self.fig = Figure()
+            self.axes = [[] for _ in range(self.N_channels)]
+            self.axes[0] = self.fig.add_subplot(self.N_channels, 1, 1)
+            for ii in range(1, self.N_channels):
+                self.axes[ii] = self.fig.add_subplot(
+                    self.N_channels, 1, ii+1, sharex=self.axes[0])
+
+            self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_2)
+            self.toolbar = tkagg.NavigationToolbar2Tk(self.canvas, self.master)
+            self.canvas.draw()
+            self.canvas.get_tk_widget().pack(side="bottom", fill="both", expand=True)
+            self.frame_2.pack(fill="both", expand=True, side="right")
+            self.update_channel_cols()  # Reset column selection
+
+        def ci_select(self, channel_no=0, evt=None):
+            indices = self.channel_listbox[channel_no].curselection()
+            ax = self.axes[channel_no]
 
             # Generic
             channels = [self.df.columns[idx] for idx in indices]
@@ -875,73 +826,7 @@ def gui_sql_data_explorer(dbc):
             ax.grid(True)
 
             self.canvas.draw()
-            # self.canvas.show()
 
-        def c2_select(self, evt):
-
-            # C2 particulars
-            indices = self.c2_listbox.curselection()
-            ax = self.ax_2
-
-            # Generic
-            channels = [self.df.columns[idx] for idx in indices]
-
-            # Update the tool bar
-            self.canvas.toolbar.update()
-
-            # Update axes plot
-            ax.clear()
-            for c in channels:
-                ax.plot(self.df.time, self.df[c], label=c)
-            ax.legend()
-            ax.grid(True)
-
-            self.canvas.draw()
-            # self.canvas.show()
-
-        def c3_select(self, evt):
-
-            # C3 particulars
-            indices = self.c3_listbox.curselection()
-            ax = self.ax_3
-
-            # Generic
-            channels = [self.df.columns[idx] for idx in indices]
-
-            # Update the tool bar
-            self.canvas.toolbar.update()
-
-            # Update axes plot
-            ax.clear()
-            for c in channels:
-                ax.plot(self.df.time, self.df[c], label=c)
-            ax.legend()
-            ax.grid(True)
-
-            self.canvas.draw()
-            # self.canvas.show()
-
-        def c4_select(self, evt):
-
-            # C4 particulars
-            indices = self.c4_listbox.curselection()
-            ax = self.ax_4
-
-            # Generic
-            channels = [self.df.columns[idx] for idx in indices]
-
-            # Update the tool bar
-            self.canvas.toolbar.update()
-
-            # Update axes plot
-            ax.clear()
-            for c in channels:
-                ax.plot(self.df.time, self.df[c], label=c)
-            ax.legend()
-            ax.grid(True)
-
-            self.canvas.draw()
-            # self.canvas.show()
 
     root = tk.Tk()
     app = App(master=root, dbc=dbc)
