@@ -54,6 +54,8 @@ def get_column_mean(df, col_prefix='pow', turbine_list=None,
                     circular_mean=False):
     if turbine_list is None:
         turbine_list = range(get_num_turbines(df))  # Assume all turbines
+    elif isinstance(turbine_list, (int, np.integer)):
+        turbine_list = [turbine_list]
 
     col_names = [col_prefix + '_%03d' % ti for ti in turbine_list]
     array = df[col_names]
@@ -687,9 +689,12 @@ def batch_load_and_concat_dfs(df_filelist):
     for dfn in df_filelist:
         df_array.append(pd.read_feather(dfn))
 
-    df_out = pd.concat(df_array, ignore_index=True)
-    df_out = df_out.reset_index(drop=('time' in df_out.columns))
-    df_out = df_out.sort_values(by='time')
+    if len(df_array) == 0:
+        df_out = pd.DataFrame()
+    else:
+        df_out = pd.concat(df_array, ignore_index=True)
+        df_out = df_out.reset_index(drop=('time' in df_out.columns))
+        df_out = df_out.sort_values(by='time')
     return df_out
 
 
@@ -864,6 +869,18 @@ def restructure_single_df(df, column_mapping_dict):
     print('    Copied the columns to the new dataframe with the appropriate naming.')
 
     return df_structured
+
+
+def make_df_wide(df):
+    df["turbid"] = df['turbid'].astype(int)
+    df = df.reset_index(drop=False)
+    if 'index' in df.columns:
+        df = df.drop(columns='index')
+    df = df.set_index(["time", "turbid"], drop=True)
+    df = df.unstack()
+    df.columns = ["%s_%s" % c for c in df.columns]
+    df = df.reset_index(drop=False)
+    return df
 
 
 def restructure_df_files(df_table_name, column_mapping_dict,
