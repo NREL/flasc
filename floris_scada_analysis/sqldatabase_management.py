@@ -216,19 +216,19 @@ def get_first_time_entry_sqldb(sql_engine, table_name):
     # Get the list of scada filenames
     query_string = 'SELECT time FROM ' + table_name + ' ORDER BY time asc LIMIT 1'
     df_time = pd.read_sql_query(query_string, sql_engine)
-    start_time = df_time['time'][0]
-
-    return start_time
-
+    if df_time.shape[0] <= 0:
+        return None
+    else:
+        return df_time['time'][0]
 
 def get_last_time_entry_sqldb(sql_engine, table_name):
     # Get the list of scada filenames
     query_string = 'SELECT time FROM ' + table_name + ' ORDER BY time desc LIMIT 1'
     df_time = pd.read_sql_query(query_string, sql_engine)
-    end_time = df_time['time'][0]
-
-    return end_time
-
+    if df_time.shape[0] <= 0:
+        return None
+    else:
+        return df_time['time'][0]
 
 def get_column_names_sqldb(sql_engine, table_name):
     # Find all columns
@@ -236,7 +236,6 @@ def get_column_names_sqldb(sql_engine, table_name):
         "SELECT * FROM " + table_name + " WHERE false;", sql_engine)
     column_names = list(df.columns)
     return column_names
-
 
 def get_timestamp_of_last_downloaded_datafile(filelist):
     time_latest = None
@@ -284,7 +283,11 @@ def find_files_to_add_to_sqldb(sqldb_engine, files_paths, filenames_table):
     # Figure out which files exists on local system
     files = []
     for fpath in files_paths:
-        files.extend(glob.glob(fpath))
+        fl = glob.glob(fpath)
+        if len(fl) <= 0:
+            print('No files found in directory %s.' % fpath)
+        else:
+            files.extend(fl)
 
     # Figure out which files have already been uploaded to sql db
     query_string = "select * from " + filenames_table + ";"
@@ -581,6 +584,7 @@ def gui_sql_data_explorer(dbc):
             self.master = master
 
             # Get basic database properties
+            self.df = pd.DataFrame()
             table_names = [c for c in dbc.sql_tables if '_filenames' not in c]
             min_table_dates = [dbc.get_first_time_entry(table_name=t)
                                for t in table_names]
@@ -685,6 +689,7 @@ def gui_sql_data_explorer(dbc):
             self.N_channels_max = N_channels_max
             self.channel_label = [[] for _ in range(N_channels_max)]
             self.channel_listbox = [[] for _ in range(N_channels_max)]
+            self.channel_selection = [[] for _ in range(N_channels_max)]
             for i in range(N_channels_max):
                 self.channel_label[i] = tk.Label(frame_1, text="plot %d" % i)
                 self.channel_listbox[i] = tk.Listbox(
@@ -766,10 +771,10 @@ def gui_sql_data_explorer(dbc):
             self.df = pd.concat(df_array, axis=1).reset_index(drop=False)
 
             self.update_channel_cols()
-
-            # Clear all axes
-            for ax in self.axes:
-                ax.clear()
+            self.create_figures()
+            # # Clear all axes
+            # for ax in self.axes:
+            #     ax.clear()
 
             # Update frame width
             nochars_cols = [len(c) for c in self.df.columns]
@@ -779,12 +784,44 @@ def gui_sql_data_explorer(dbc):
             self.channel_listbox[0].config({'width': frame_width})
 
         def update_channel_cols(self):
+            cols = self.df.columns
+
             # Update the channel list box with the available channels
             for i in range(self.N_channels_max):
                 self.channel_listbox[i].delete(0, tk.END)
                 if len(self.table_listbox.curselection()) > 0:
-                    for c in self.df.columns:
+                    for c in cols:
                         self.channel_listbox[i].insert(tk.END, c)
+
+            # Remove any no-longer-existent channels to plot
+            for i in range(self.N_channels_max):
+                for ii, cn in enumerate(self.channel_selection[i]):
+                    if cn not in cols:
+                        self.channel_selection[i].pop(ii)
+            
+            for i in range(self.N_channels):
+                for cn in self.channel_selection[i]:
+                    id = [i for i in range(len(cols)) if cn==cols[i]][0]
+                    self.channel_listbox[i].selection_set(id)
+
+
+        def update_plot(self, channel_no):
+            # Only update if we have anything to plot...
+            if ((self.df.shape[0] > 1) &
+                any([len(i) > 0 for i in self.channel_selection])):
+                # Update the tool bar
+                # self.canvas.toolbar.update()
+
+                # Update axis plot
+                ax = self.axes[channel_no]
+                ax.clear()
+                for c in self.channel_selection[channel_no]:
+                    ax.plot(self.df.time, np.array(self.df[c].values), label=c)
+                ax.legend()
+                ax.grid(True)
+
+                self.canvas.draw()
+            return None
 
         def create_figures(self):
             try:
@@ -797,35 +834,24 @@ def gui_sql_data_explorer(dbc):
             self.fig = Figure()
             self.axes = [[] for _ in range(self.N_channels)]
             self.axes[0] = self.fig.add_subplot(self.N_channels, 1, 1)
+            self.update_plot(channel_no=0)
             for ii in range(1, self.N_channels):
                 self.axes[ii] = self.fig.add_subplot(
                     self.N_channels, 1, ii+1, sharex=self.axes[0])
+                self.update_plot(channel_no=ii)
 
             self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_2)
             self.toolbar = tkagg.NavigationToolbar2Tk(self.canvas, self.master)
             self.canvas.draw()
             self.canvas.get_tk_widget().pack(side="bottom", fill="both", expand=True)
             self.frame_2.pack(fill="both", expand=True, side="right")
-            self.update_channel_cols()  # Reset column selection
+            # self.update_channel_cols()  # Reset column selection
 
-        def ci_select(self, channel_no=0, evt=None):
+        def ci_select(self, channel_no, evt=None):
             indices = self.channel_listbox[channel_no].curselection()
-            ax = self.axes[channel_no]
-
-            # Generic
             channels = [self.df.columns[idx] for idx in indices]
-
-            # Update the tool bar
-            self.canvas.toolbar.update()
-
-            # Update axes plot
-            ax.clear()
-            for c in channels:
-                ax.plot(self.df.time, np.array(self.df[c].values), label=c)
-            ax.legend()
-            ax.grid(True)
-
-            self.canvas.draw()
+            self.channel_selection[channel_no] = channels
+            self.update_plot(channel_no=channel_no)
 
 
     root = tk.Tk()
