@@ -630,7 +630,7 @@ class ws_pw_curve_filtering():
             x = df.loc[good_ids, 'ws_%03d' % ti]
             y = df.loc[good_ids, 'pow_%03d' % ti]
             ax[0].plot(x, y, '.', color='k', markersize=3, alpha=alpha)
-            ax[0].set_title('Turbine %03d, 60 s sampled data' % ti)
+            ax[0].set_title('Turbine %03d' % ti)
 
             # Show the points self-screened
             if plot_selfflagged:
