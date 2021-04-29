@@ -14,8 +14,10 @@
 import datetime
 import numpy as np
 import pandas as pd
-from floris_scada_analysis.circular_statistics import calculate_wd_statistics
 from pandas.core.base import DataError
+
+from floris_scada_analysis.circular_statistics import calculate_wd_statistics
+from floris_scada_analysis import optimization as fopt
 
 
 def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
@@ -138,6 +140,41 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
     return df_res
 
 
+def df_resample_to_time_array(df, time_array, circular_cols,
+                              interp_method, interp_margin=None):
+    df_res = df.head(0).copy()  # Copy with properties but no actual data
+    df_res['time'] = time_array
+
+    t0 = time_array[0]
+    df_t = np.array(df['time'] - t0, dtype=np.timedelta64)
+    xp = df_t/np.timedelta64(1, 's')  # Convert to regular seconds
+
+    # Normalize time variables
+    time_array = np.array([t - t0 for t in time_array], dtype=np.timedelta64)
+    x = time_array/np.timedelta64(1, 's')
+
+    if interp_margin is None:
+        dxx = 0.500001 * np.median(np.diff(x))
+    else:
+        dxx = np.timedelta64(interp_margin) / np.timedelta64(1, 's')
+
+    cols_to_interp = [c for c in df_res.columns if c not in ['time']]
+    for ii, c in enumerate(cols_to_interp):
+        if isinstance(circular_cols, bool):
+            wrap_around_360 = circular_cols
+        elif isinstance(circular_cols[0], bool):
+            wrap_around_360 = circular_cols[ii]
+        elif isinstance(circular_cols[0], str):
+            wrap_around_360 = (c in circular_cols)
+
+        y = fopt.interp_within_margin(
+            x=x, xp=xp, yp=df[c], x_margin=dxx, kind=interp_method,
+            wrap_around_360=wrap_around_360)
+        df_res[c] = y
+
+    return df_res
+
+
 def estimate_dt(time_array):
     """Automatically estimate timestep in a time_array
 
@@ -152,7 +189,7 @@ def estimate_dt(time_array):
         # Assume arbitrary value
         return datetime.timedelta(seconds=0)
 
-    dt = np.min(np.diff(time_array))
+    dt = np.median(np.diff(time_array))
     if not isinstance(dt, datetime.timedelta):
         dt = datetime.timedelta(seconds=dt.astype(float)/1e9)
 
@@ -288,3 +325,5 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
         idxs_out_array.append(ar)
 
     return idxs_out_array
+
+
