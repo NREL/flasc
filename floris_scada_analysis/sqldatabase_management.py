@@ -303,8 +303,8 @@ def find_files_to_add_to_sqldb(sqldb_engine, files_paths, filenames_table):
     return files
 
 
-def browse_downloaded_datafiles(data_path, scada_table=''):
-    fn_pattern = re.compile('\d\d\d\d-\d\d_' + scada_table + '.ftr')
+def browse_downloaded_datafiles(data_path, table_name=''):
+    fn_pattern = re.compile('\d\d\d\d-\d\d_' + table_name + '.ftr')
     files_list = []
     for root, _, files in os.walk(data_path):
         for name in files:
@@ -314,12 +314,15 @@ def browse_downloaded_datafiles(data_path, scada_table=''):
                 fn_path = os.path.join(root, fn_item)
                 files_list.append(fn_path)
 
+    # path_files = os.path.join(data_path, '*_' + table_name) + '.ftr'
+    # files_list = glob.glob(path_files)
+
     # Sort alphabetically/numerically
     files_list = list(np.sort(files_list))
     files_list = [str(f) for f in files_list]
 
     if len(files_list) == 0:
-        print('No data files found in ' + data_path)
+        print('No data files found in %s.' % data_path)
 
     return files_list
 
