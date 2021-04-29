@@ -70,7 +70,8 @@ def interp_within_margin(x, xp, yp, x_margin, kind, wrap_around_360=False):
 
 def find_timeshift_between_dfs(df1, df2, cols_df1, cols_df2,
                                use_circular_statistics=False,
-                               t_step=td(days=30), verbose=True):
+                               t_step=td(days=30), opt_bounds=None,
+                               opt_Ns=None, verbose=True):
 
     # Get min and max time for dataframes
     min_time = np.max([np.min(df1.time), np.min(df2.time)])
@@ -148,14 +149,29 @@ def find_timeshift_between_dfs(df1, df2, cols_df1, cols_df2,
             return cost
 
         # Optimize using scipy.brute()
-        bounds = [(-10*3600., 10*3600.)]
-        Ns = int((bounds[0][1]-bounds[0][0]) / 600.)
+        if opt_bounds is None:
+            opt_bounds = [(-td(hours=10), td(hours=10))]
+        elif isinstance(opt_bounds[0], (tuple, list)):
+            opt_bounds = opt_bounds  # Fine
+        else:
+            opt_bounds = [opt_bounds]
+
+        if isinstance(opt_bounds[0][0], np.timedelta64):
+            opt_bounds[0] = (opt_bounds[0][0] / np.timedelta64(1, 's'),
+                             opt_bounds[0][1] / np.timedelta64(1, 's'))
+        if isinstance(opt_bounds[0][0], td):
+            opt_bounds[0] = (opt_bounds[0][0] / td(seconds=1),
+                             opt_bounds[0][1] / td(seconds=1))
+
+        if opt_Ns is None:
+            opt_Ns = int((opt_bounds[0][1]-opt_bounds[0][0]) / 600.)
+
         finish = opt.fmin  # Can also be None
         verbose = True
         x_opt, J_opt, x_all, J_all = opt.brute(
             cost_fun,
-            ranges=bounds,
-            Ns=Ns,
+            ranges=opt_bounds,
+            Ns=opt_Ns,
             finish=finish,
             disp=verbose,
             full_output=True)
