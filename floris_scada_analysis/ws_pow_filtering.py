@@ -11,6 +11,7 @@
 # the License.
 
 
+import itertools
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -19,6 +20,7 @@ import matplotlib.patches as patches
 import os
 import scipy.stats as scst
 
+from floris_scada_analysis import dataframe_filtering as dff
 from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import sqldatabase_management as sqldbm
 from floris_scada_analysis import time_operations as fsato
@@ -111,7 +113,10 @@ def _make_confirmation_plot(df, ti=0, ax=None):
     ax.plot(x, y, '.', color='k', markersize=3)
 
     ax.set_title('Turbine %03d' % ti)
-    ax.legend(['Faulty data', 'Filtered data'])
+    ax.legend(['Faulty data (%.1f %%)'
+               % (100*np.sum(~is_ok)/len(is_ok)),
+               'Filtered data (%.1f %%)'
+               % (100*np.sum(is_ok)/len(is_ok))])
     ax.set_xlim([0., 30.])
 
     ax.set_ylabel('Power (kW)')
@@ -177,6 +182,29 @@ def plot_filtering_distribution(N_list, label_list):
     return fig
 
 
+# Function to convert list to ranges
+def convert_list_to_ranges(list_in):
+    def _ranges(i):
+        for a, b in itertools.groupby(enumerate(i), lambda pair: pair[1] - pair[0]):
+            b = list(b)
+            yield b[0][1], b[-1][1]
+
+    list_out = [range(i[0], i[1]+1) for i in (_ranges(list_in))]
+    N = len(list_out)
+    i = 0
+    while i < N:
+        v = list_out[i]
+        if len(np.array(v)) == 1:
+            list_out[i] = np.int64(v[0])
+        if len(np.array(v)) == 2:
+            list_out[i] = np.int64(v[0])
+            list_out.insert(i+1, np.int64(v[1]))
+            N = N + 1
+            i = i + 1
+        i = i + 1
+    return list_out
+
+
 class ws_pw_curve_filtering():
     def __init__(self, df, turbine_list='all', add_default_windows=True):
 
@@ -198,36 +226,37 @@ class ws_pw_curve_filtering():
 
         # Derive information from turbine 0 in dataset
         df = self.df  # Load from self after processing
-        est_ratedpw_list = []
+        est_ratedpw_list = np.zeros(self.num_turbines_all)
         for ti in self.full_turbine_list:
-            is_ok = (df['self_status_%03d' % ti] == 1)
-            is_above_rated = (df['ws_%03d' % ti] > 15.)
-            rated_ids = (is_ok & is_above_rated)
+            rated_ids = (df['ws_%03d' % ti] > 15.)
             est_ratedpw = np.nanmedian(
                 df.loc[rated_ids, 'pow_%03d' % (ti)])
-            if est_ratedpw < 20.0:
+            if np.isnan(est_ratedpw):
+                est_ratedpw = 1.  # Placeholder
+            elif est_ratedpw < 20.0:
                 est_ratedpw = np.round(est_ratedpw, 1)  # MW
             elif est_ratedpw < 20.0e3:
                 est_ratedpw = np.round(est_ratedpw/1e3, 1)*1e3  # kW
             else:
                 est_ratedpw = np.round(est_ratedpw/1e6, 1)*1e6  # W
-            est_ratedpw_list.append(float(est_ratedpw))
+            est_ratedpw_list[ti] = float(est_ratedpw)
 
         turbs_sorted = []
         ratedpwrs = np.unique(est_ratedpw_list)
         for ii in range(len(ratedpwrs)):
             turbs = np.where(np.array(est_ratedpw_list) == ratedpwrs[ii])[0]
             turbs = np.sort(turbs)
-            try_range = range(turbs[0], turbs[-1]+1)
-            if np.array_equal(np.array(try_range), turbs):
-                turbs = try_range
+            if len(turbs) > 2:
+                try_range = range(turbs[0], turbs[-1]+1)
+                if np.array_equal(np.array(try_range), turbs):
+                    turbs = try_range
             print('Estimated rated power of turbines %s in this dataset to be %.1f'
-                  % (str(turbs), ratedpwrs[ii]))
+                  % (str(convert_list_to_ranges((turbs))), ratedpwrs[ii]))
             turbs_sorted.append(np.array(turbs))
         self.est_rated_pow = ratedpwrs
 
         # Derive default settings
-        default_pow_step = 50
+        default_pow_step = 20
         default_ws_dev = 2.0
         default_max_pow_bin = 0.95 * np.array(est_ratedpw_list)
 
@@ -239,6 +268,9 @@ class ws_pw_curve_filtering():
                 default_w0_pw = (0.0, 0.95 * est_ratedpw)
                 default_w1_ws = (0.0, 25.0)
                 default_w1_pw = (0.0, 1.04 * est_ratedpw)
+                idx = len(self.window_list)
+                print('Adding window[%d] and window[%d] for turbines:'
+                      % (idx, idx+1), convert_list_to_ranges(turbs))
                 self.window_add(default_w0_ws, default_w0_pw,
                                 axis=0, turbines=turbs)
                 self.window_add(default_w1_ws, default_w1_pw,
@@ -252,28 +284,7 @@ class ws_pw_curve_filtering():
         self.df_out_of_windows = [[] for _ in range(self.num_turbines_all)]
         self.df_out_of_ws_dev = [[] for _ in range(self.num_turbines_all)]
 
-    def set_df(self, df, verbose=False):
-        # Check format of df
-        num_turbines = dfm.get_num_turbines(df)
-        for ti in range(num_turbines):
-            if 'self_status_%03d' % ti not in df.columns:
-                if verbose:
-                    print('No self_status flags found for ti = %03d.' % ti)
-                    print('Assuming self_status == 1 for all non-NaN entries.')
-                df['self_status_%03d' % ti] = 1
-            else:
-                if verbose:
-                    print('Found %d entries self flagged for ti = %03d.'
-                        % (np.sum(df['self_status_%03d' % ti] == 0), ti))
-
-        for ti in range(num_turbines):
-            nans = (np.isnan(df[['ws_%03d' % ti, 'pow_%03d' % ti]]).sum(axis=1) > 0)
-            df.loc[nans, 'self_status_%03d' % ti] = 0
-            if verbose:
-                print('Self-flagged %d entries for turbine %d due to NaN values.'
-                    % (np.sum(nans), ti))
-
-        # Make sure dataframe index is uniformly ascending and save
+    def set_df(self, df):
         self.df = df.reset_index(drop=('time' in df.columns))
         self.dt = fsato.estimate_dt(self.df['time'])
 
@@ -337,8 +348,13 @@ class ws_pw_curve_filtering():
                      'turbines': turbines}
         self.window_list.append(new_entry)
 
-    def window_remove(self, i):
-        self.window_list.pop(i)
+    def window_remove(self, ids_to_remove):
+        if not isinstance(ids_to_remove, (list, np.array)):
+            ids_to_remove = [ids_to_remove]
+        ids_to_remove = np.sort(ids_to_remove)[::-1]
+        for i in ids_to_remove:
+            self.window_list.pop(i)
+
         # Update indices
         for i in range(len(self.window_list)):
             self.window_list[i]['idx'] = i
@@ -350,16 +366,21 @@ class ws_pw_curve_filtering():
         for i in range(len(self.window_list)):
             window = self.window_list[i]
             for k in window.keys():
-                print("window_list[%d][%s] = " % (i, k),
-                      self.window_list[i][k])
+                if k == 'turbines':
+                    str_short = convert_list_to_ranges(
+                        self.window_list[i][k])
+                    print("window_list[%d][%s] = " % (i, k),
+                          str_short)
+                elif not k == 'idx':
+                    print("window_list[%d][%s] = " % (i, k),
+                          self.window_list[i][k])
+            print('')
 
     def apply_filters(self):
         for ti in self.turbine_list:
-            # Filter by self flag
-            is_ok = (self.df['self_status_%03d' % ti].values == 1)
-            df_selfok = self.df.loc[is_ok].copy()
+            df = self.df.copy()
 
-            out_of_window_ids = np.zeros(df_selfok.shape[0])
+            out_of_window_ids = np.zeros(df.shape[0])
             window_list = [w for w in self.window_list if ti in w['turbines']]
             print(' ')
             print('Applying %d window filters to the df for turbine %d'
@@ -372,19 +393,19 @@ class ws_pw_curve_filtering():
                 axis = window['axis']
                 if axis == 0:
                     ii_out_of_window = (
-                        filters.window_range_flag(df_selfok['pow_%03d' % ti],
+                        filters.window_range_flag(df['pow_%03d' % ti],
                                                   pow_range[0],
                                                   pow_range[1],
-                                                  df_selfok['ws_%03d' % ti],
+                                                  df['ws_%03d' % ti],
                                                   ws_range[0],
                                                   ws_range[1])
                         )
                 else:
                     ii_out_of_window = (
-                        filters.window_range_flag(df_selfok['ws_%03d' % ti],
+                        filters.window_range_flag(df['ws_%03d' % ti],
                                                   ws_range[0],
                                                   ws_range[1],
-                                                  df_selfok['pow_%03d' % ti],
+                                                  df['pow_%03d' % ti],
                                                   pow_range[0],
                                                   pow_range[1])
                         )
@@ -397,16 +418,25 @@ class ws_pw_curve_filtering():
             print('Removed a total of %d outliers using the %d windows.'
                   % (int(sum(out_of_window_ids)), len(window_list)))
             df_out_of_windows = np.zeros(self.df.shape[0])
-            out_of_window_indices = df_selfok.index[np.where(out_of_window_ids)[0]]
+            out_of_window_indices = df.index[np.where(out_of_window_ids)[0]]
             df_out_of_windows[out_of_window_indices] = 1
             self.df_out_of_windows[ti] = ([bool(i) for i in df_out_of_windows])
 
             # Filter by standard deviation for the reduced dataset
-            df_ok = df_selfok[[not bool(i) for i in out_of_window_ids]]
-            out_of_dev_series = filters.bin_filter(
-                df_ok['pow_%03d' % ti], df_ok['ws_%03d' % ti],
-                self.pow_step[ti], self.ws_dev[ti], 'median', 20.,
-                self.max_pow_bin[ti], 'scalar', 'all')
+            df_ok = df[[not bool(i) for i in out_of_window_ids]]
+            if not all(np.isnan(df_ok['pow_%03d' % ti])):
+                out_of_dev_series = filters.bin_filter(
+                    bin_col=df_ok['pow_%03d' % ti],
+                    value_col=df_ok['ws_%03d' % ti],
+                    bin_width=self.pow_step[ti],
+                    threshold=self.ws_dev[ti],
+                    center_type='median',
+                    bin_min=20.,
+                    bin_max=self.max_pow_bin[ti],
+                    threshold_type='scalar',
+                    direction='all')
+            else:
+                out_of_dev_series = [False] * df.shape[0]
             out_of_dev_indices = df_ok.index[np.where(out_of_dev_series)[0]]
             df_out_of_ws_dev = np.zeros(self.df.shape[0])
             df_out_of_ws_dev[out_of_dev_indices] = 1
@@ -414,15 +444,15 @@ class ws_pw_curve_filtering():
             print('Removed %d outliers using WS standard deviation filtering.'
                   % (int(sum(df_out_of_ws_dev))))
 
+            # Calculate remaining 'good' data
+            N = df.shape[0] - dff.df_get_no_faulty_measurements(df, ti)
+            print('A total of %.2f %% of data has been classified as bad.'
+                  % (100*(sum(df_out_of_ws_dev + out_of_window_ids))/N))
+
             # Add a status flag for this turbine
-            self.df['status_%03d' % ti] = self.df['self_status_%03d' % ti]
+            self.df['status_%03d' % ti] = 1
             self.df.loc[self.df_out_of_ws_dev[ti], 'status_%03d' % ti] = 0
             self.df.loc[self.df_out_of_windows[ti], 'status_%03d' % ti] = 0
-
-        if self.num_turbines_all == self.num_turbines:
-            # Add a status_all column if processing all turbines
-            status_cols = [('status_%03d' % ti) for ti in range(self.num_turbines_all)]
-            self.df['status_all'] = self.df[status_cols].min(axis=1)
 
         self.pw_curve_df = None  # Reset estimated power curve after filtering
         return self.df
@@ -455,189 +485,49 @@ class ws_pw_curve_filtering():
         return pw_curve_df
 
     def save_df(self, fout):
-        status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
+        if not (self.turbine_list == self.full_turbine_list):
+            print('Skipping saving dataframe since not all turbines are filtered.')
+            print("Please specify 'turbine_list' as 'full' and filter accordingly before saving.")
+            return None
 
-        # Remove df entries with all status == 0
         df = self.df.copy()
-        all_bad = (df[status_cols].max(axis=1) == 0)
-        df = df[[not bool(i) for i in all_bad]]
+        for ti in self.turbine_list:
+            bad_ids = (df['status_%03d' % ti] == 0)
+            df = dff.df_mark_turbdata_as_faulty(df=df, cond=bad_ids, turbine_list=ti)
+
+        # Drop status columns after filtering
+        df = df.drop(columns=['status_%03d' % ti for ti in self.turbine_list])
+        
+        # Reset index and save to file
         df = df.reset_index(drop=('time' in df.columns))
         df.to_feather(fout)
-
         return df
 
-    # def plot(self, pretty=False, draw_windows=True,
-    #          confirm_plot=True,  save_path=None,
-    #          fig_format='png', dpi=300):
-    #     if pretty:
-    #         fig_list = (
-    #             self.plot_pretty(
-    #                 draw_windows=draw_windows,
-    #                 confirm_plot=confirm_plot,
-    #                 save_path=save_path,
-    #                 fig_format=fig_format, dpi=dpi)
-    #         )
-    #     else:
-    #         fig_list = (
-    #             self.plot_fast(
-    #                 draw_windows=draw_windows,
-    #                 confirm_plot=confirm_plot,
-    #                 save_path=save_path,
-    #                 fig_format=fig_format, dpi=dpi)
-    #         )
-    #     return fig_list
-
-    # def plot_fast(self, draw_windows=True, confirm_plot=True,
-    #          save_path=None, fig_format='png', dpi=300):
-    #     df = self.df
-
-    #     fig_list = []
-    #     for ti in self.turbine_list:
-    #         print('Generating ws-power plot for turbine %03d' % ti)
-    #         if confirm_plot:
-    #             fig, ax = plt.subplots(1, 2, figsize=(28, 5))
-    #         else:
-    #             fig, ax = plt.subplots(1, 1, figsize=(14, 5))
-    #             ax = [ax]
-    #         fig_list.append(fig)
-
-    #         # Discretization variables
-    #         xmin = np.min(df['ws_%03d' % ti])
-    #         xmax = np.max(df['ws_%03d' % ti])
-    #         ymin = np.min(df['pow_%03d' % ti])
-    #         ymax = np.max(df['pow_%03d' % ti])
-    #         bounds = [[xmin, xmax], [ymin, ymax]]
-    #         dalpha = 0.05
-    #         alpha_edges = np.arange(0.0, 1.0, dalpha)
-
-    #         # Show the acceptable points
-    #         oowsdev = self.df_out_of_ws_dev[ti]
-    #         oow = self.df_out_of_windows[ti]
-    #         good_ids = [not(a) and not(b) for a, b in zip(oow, oowsdev)]
-    #         x = df.loc[good_ids, 'ws_%03d' % ti]
-    #         y = df.loc[good_ids, 'pow_%03d' % ti]
-    #         x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
-    #         ax[0] = _plot_by_transparency_bins(ax=ax[0], x=x_approx,
-    #                                            y=y_approx, z=z,
-    #                                            alpha_edges=alpha_edges,
-    #                                            markersize=3, color='k',
-    #                                            plotlabel='Filtered data')
-    #         ax[0].set_title('Turbine %03d, 60 s sampled data' % ti)
-
-    #         # Show the points self-screened
-    #         alpha = 0.80
-    #         self_flagged = [not bool(i) for i in df['self_status_%03d' % ti]]
-    #         x = df.loc[self_flagged, 'ws_%03d' % ti]
-    #         y = df.loc[self_flagged,'pow_%03d' % ti]
-    #         x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
-    #         ax[0].plot(x_approx, y_approx, '.', markerfacecolor='r',
-    #                    markersize=2, alpha=alpha, label='Self-flagged data')
-
-    #         # Show the points screened out of window
-    #         alpha = 0.80
-    #         x = df.loc[oow, 'ws_%03d' % ti]
-    #         y = df.loc[oow, 'pow_%03d' % ti]
-    #         x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
-    #         ax[0].plot(x_approx, y_approx, '.', color='orange',
-    #                    markersize=5, alpha=alpha, label='Window outliers')
-
-    #         # Show the points screened using ws_dev
-    #         alpha = 0.80
-    #         x = df.loc[oowsdev, 'ws_%03d' % ti]
-    #         y = df.loc[oowsdev, 'pow_%03d' % ti]
-    #         x_approx, y_approx, z = _approximate_large_scatter_plot(x, y, bounds=bounds)
-    #         ax[0].plot(x_approx, y_approx, '.', color='purple',
-    #                    markersize=5, alpha=alpha, label='WS deviation outliers')
-
-    #         # Show the approximated power curve, if calculated
-    #         if self.pw_curve_df is not None:
-    #             ax[0].plot(self.pw_curve_df['ws'],
-    #                        self.pw_curve_df['pow_%03d' % ti], '--',
-    #                        label='Approximate power curve')
-
-    #         if draw_windows:
-    #             xlim = (0., 30.)
-    #             ylim = ax[0].get_ylim()
-    #             for ii, window in enumerate(self.window_list):
-    #                 ws_range = window['ws_range']
-    #                 pow_range = window['pow_range']
-    #                 axis = window['axis']
-    #                 idx = window['idx']
-
-    #                 if axis == 0:
-    #                     # Filtered region left of curve
-    #                     plot_redzone(ax[0], xlim[0], pow_range[0],
-    #                                  ws_range[0] - xlim[0],
-    #                                  pow_range[1] - pow_range[0],
-    #                                  '%d' % idx, ii=ii)
-    #                     # Filtered region right of curve
-    #                     plot_redzone(ax[0], ws_range[1], pow_range[0],
-    #                                  xlim[1] - ws_range[1],
-    #                                  pow_range[1] - pow_range[0],
-    #                                  '%d' % idx, ii=ii)
-    #                 else:
-    #                     # Filtered region above curve
-    #                     plot_redzone(ax[0], ws_range[0], pow_range[1],
-    #                                  ws_range[1] - ws_range[0],
-    #                                  ylim[1] - pow_range[1],
-    #                                  '%d' % idx, ii=ii)
-    #                     # Filtered region below curve
-    #                     plot_redzone(ax[0], ws_range[0], ylim[0],
-    #                                  ws_range[1] - ws_range[0],
-    #                                  pow_range[0] - ylim[0],
-    #                                  '%d' % idx, ii=ii)
-    #                 # ax[0].add_patch(rect)
-
-    #         ax[0].set_xlim(xlim)
-    #         ax[0].set_ylim(ylim)
-            
-    #         ax[0].set_ylabel('Power (kW)')
-    #         ax[0].set_xlabel('Wind speed (m/s)')
-
-    #         ax[0].legend()
-    #         if confirm_plot:
-    #             _make_confirmation_plot(df, ti=ti, ax=ax[1])
-
-    #         if save_path is not None:
-    #             plt.savefig(save_path + '/%03d.' % ti + fig_format, dpi=dpi)
-
-    #     return fig_list
-
     def plot(self, draw_windows=True, confirm_plot=True,
-             plot_selfflagged=True, save_path=None,
-             fig_format='png', dpi=300):
+             save_path=None, fig_format='png', dpi=300):
         df = self.df
 
         fig_list = []
         for ti in self.turbine_list:
             print('Generating ws-power plot for turbine %03d' % ti)
             if confirm_plot:
-                fig, ax = plt.subplots(1, 2, figsize=(28, 5))
+                fig, ax = plt.subplots(1, 2, figsize=(16, 5), sharey=True)
             else:
-                fig, ax = plt.subplots(1, 1, figsize=(14, 5))
+                fig, ax = plt.subplots(1, 1, figsize=(10, 5))
                 ax = [ax]
 
             fig_list.append(fig)
 
             # Show the acceptable points
             alpha = 0.10
-            self_flagged = (df['self_status_%03d' % ti] == 0)
             oowsdev = self.df_out_of_ws_dev[ti]
             oow = self.df_out_of_windows[ti]
-            good_ids = ((self_flagged==False) &
-                        (np.array(oowsdev)==False) &
+            good_ids = ((np.array(oowsdev)==False) &
                         (np.array(oow)==False))
             x = df.loc[good_ids, 'ws_%03d' % ti]
             y = df.loc[good_ids, 'pow_%03d' % ti]
             ax[0].plot(x, y, '.', color='k', markersize=3, alpha=alpha)
             ax[0].set_title('Turbine %03d' % ti)
-
-            # Show the points self-screened
-            if plot_selfflagged:
-                alpha = 0.30
-                ax[0].plot(df.loc[self_flagged, 'ws_%03d' % ti],
-                           df.loc[self_flagged,'pow_%03d' % ti],
-                           '.', markerfacecolor='r', markersize=5, alpha=alpha)
 
             # Show the points screened out of window
             alpha = 0.30
@@ -697,24 +587,50 @@ class ws_pw_curve_filtering():
             ax[0].set_xlabel('Wind speed (m/s)')
 
             # Create legend list
-            legend_list = ['Filtered data']
-            if plot_selfflagged:
-                legend_list.extend(['Self-flagged data'])
-            legend_list.extend(['Window outliers', 'WS deviation outliers'])
+            legend_list = ['Filtered data (%.1f %%)'
+                           % (100*np.sum(good_ids)/len(good_ids)),
+                           'Window outliers (%.1f %%)'
+                           % (100*np.sum(oow)/len(oow)),
+                           'WS deviation outliers (%.1f %%)'
+                           % (100*np.sum(oowsdev)/len(oowsdev))]
+            # if plot_selfflagged:
+            #     legend_list.extend(['Self-flagged data'])
+            # legend_list.extend(['Window outliers', 'WS deviation outliers'])
             if self.pw_curve_df is not None:
                 legend_list.extend(['Approximate power curve'])
             ax[0].legend(legend_list)
-
+            fig.tight_layout()
+            
             if confirm_plot:
                 _make_confirmation_plot(df, ti=ti, ax=ax[1])
+                ax[1].set_ylabel('')
+            fig.tight_layout()
 
             if save_path is not None:
-                plt.savefig(save_path + '/%03d.' % ti + fig_format, dpi=dpi)
+                plt.savefig(save_path + '/wspowcurve_%03d.' % ti + fig_format, dpi=dpi)
+
+        return fig_list
+
+    def plot_outliers_vs_time(self, save_path=None, fig_format='png', dpi=300):
+        df = self.df
+
+        fig_list = []
+        for ti in self.turbine_list:
+            oowsdev = self.df_out_of_ws_dev[ti]
+            oow = self.df_out_of_windows[ti]
+            conds = [oowsdev, oow]
+            print('Producing time-outliers bar plot for turbine %03d.' % ti)
+            fig, ax = dff.plot_highlight_data_by_conds(df, conds, ti)
+            ax.legend(['All data', 'WS dev. outliers', 'Window outliers'])
+            fig_list.append(fig)
+
+            if save_path is not None:
+                os.makedirs(save_path, exist_ok=True)
+                plt.savefig(save_path + '/fault_timestamps_histogram_%03d.' % ti + fig_format, dpi=dpi)
 
         return fig_list
 
     def apply_filtering_to_other_df(self, df_target, threshold=.999, fout=None):
-
         if df_target.shape[0] < 2:
             # Too few entries: just assume status is bad
             status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
@@ -733,8 +649,9 @@ class ws_pw_curve_filtering():
                 print('Applying filtering to target_df with dt = %.1f s, turbine %03d.' % (dt_target.seconds, ti))
                 # any_bad_ids = [(np.min(self.df.loc[ids, 'status_%03d' % ti])) for ids in time_map]
                 bad_ids = [(np.mean(self.df.loc[ids, 'status_%03d' % ti]) < threshold) for ids in time_map]
-                df_target['status_%03d' % ti] = int(1)
-                df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
+                df_target = dfm.df_mark_turbdata_as_faulty(df=df_target, cond=bad_ids, turbine_list=ti)
+                # df_target['status_%03d' % ti] = int(1)
+                # df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
                 print('  Mapping yields %d entries (%.2f %%) flagged as bad for ti = %d.'
                       % (np.sum(bad_ids), 100. * np.sum(bad_ids) / df_target.shape[0], ti))
         else:
@@ -747,20 +664,20 @@ class ws_pw_curve_filtering():
                     time_array_src=time_array_target,
                     seek_time_windows=stws)
 
-                df_target['status_%03d' % ti] = int(1)
+                # df_target['status_%03d' % ti] = int(1)
                 if bad_ids is not None:
                     bad_ids = np.concatenate(bad_ids)
-                    df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
+                    df_target = dfm.df_mark_turbdata_as_faulty(df=df_target, cond=bad_ids, turbine_list=ti)
+                    # df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
                 nbad = np.sum(1-df_target['status_%03d' % ti])
                 print('  Mapping yields %d entries (%d %%) flagged as bad for ti = %d.'
                       % (nbad, 100. * nbad / df_target.shape[0], ti))
 
-        status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
-        df_target['status_all'] = df_target[status_cols].min(axis=1)
+        # status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
 
-        # Remove df entries with all status == 0
-        all_bad = (df_target[status_cols].max(axis=1) == 0)
-        df_target = df_target[[not bool(i) for i in all_bad]]
+        # # Remove df entries with all status == 0
+        # all_bad = (df_target[status_cols].max(axis=1) == 0)
+        # df_target = df_target[[not bool(i) for i in all_bad]]
 
         if fout is not None:
             print('Saving dataframe to ', fout)
