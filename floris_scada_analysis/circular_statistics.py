@@ -12,6 +12,7 @@
 
 
 import numpy as np
+import pandas as pd
 
 from floris_scada_analysis.floris_tools import get_turbs_in_radius
 
@@ -37,6 +38,25 @@ def calc_wd_mean_radial(angles_array_deg):
     mean_wd = wrap_360_deg(mean_wd * 180. / np.pi)
 
     return mean_wd
+
+
+def calc_wd_mean_radial_list(angles_array_list):
+    if isinstance(angles_array_list, (pd.DataFrame, pd.Series)):
+        array = np.array(angles_array_list)
+    elif isinstance(angles_array_list, list):
+        array = np.vstack(angles_array_list).T
+    else:
+        array = np.array(angles_array_list)
+
+    # Use unit vectors to calculate the mean
+    dir_x = np.cos(array * np.pi / 180.).sum(axis=1)
+    dir_y = np.sin(array * np.pi / 180.).sum(axis=1)
+
+    mean_dirs = np.arctan2(dir_y, dir_x)
+    mean_out = wrap_360_deg(mean_dirs * 180. / np.pi)
+
+    return mean_out
+
 
 
 def calculate_wd_statistics(angles_array_deg):
