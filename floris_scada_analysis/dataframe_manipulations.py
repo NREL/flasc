@@ -553,53 +553,6 @@ def set_pow_ref_by_upstream_turbines_in_radius(
         include_itself=include_itself)
 
 
-# Other dataframe manipulations
-def filter_df_by_status(df, exclude_columns=[], drop_all_bad_status=True):
-    """This function overwrites measurement values with np.nan wherever
-    the related status flag for that particular turbine reports a value
-    of 0 (status_000 = 0, status_001 = 0, ....). You can exclude particular
-    columns from being overwritten by inserting them into the
-    exclude_columns list.
-
-    Args:
-        df ([pd.DataFrame]): Dataframe with SCADA data with measurements
-        formatted according to wd_000, wd_001, wd_002, pow_000, pow_001,
-        pow_002, and so on.
-        exclude_fields (list, optional): Columns that should not be over-
-        written by a np.nan value. Defaults to [], and will only prevent
-        overwriting of columns containing the substring "status".
-
-    Returns:
-        df([pd.DataFrame]): The dataframe with measurements overwritten
-        with a np.nan value wherever that turbine's status flag reports
-        a value of 0.
-    """
-
-    turbine_list = range(get_num_turbines(df))
-    status_cols = ["status_%03d" % ti for ti in turbine_list]
-    status_cols = [c for c in status_cols if c in df.columns]
-    if len(status_cols) < len(turbine_list):
-        print('Found fewer status columns (%d) than turbines (%d).'
-              % (len(status_cols), len(turbine_list)) +
-              ' Ignoring missing entries.')
-
-    exclude_columns.extend([c for c in df.columns if 'status' in c])
-    for c in status_cols:
-        ti_string = c[-4::] # Last 4 digits of string: underscore and turb. no
-        ti_columns = [s for s in df.columns if s[-4::] == ti_string and
-                      not s in exclude_columns]
-        df.loc[df[c] == 0, ti_columns] = np.nan
-
-    if drop_all_bad_status:
-        Ninit = df.shape[0]
-        df = df.dropna(subset=status_cols)
-        if Ninit > df.shape[0]:
-            print('Dropped %d rows due to all status flags being 0.'
-                  % (df.shape[0] - Ninit))
-
-    return df
-
-
 def df_reduce_precision(df_in, verbose=False):
     """Reduce the precision in dataframes from float64 to float32, or possibly
     even further to int32, int16, int8 or even bool. This operation typically
@@ -751,7 +704,7 @@ def df_drop_nan_rows(df, verbose=False):
     """
 
     N_init = df.shape[0]
-    colnames = [c for c in df.columns if 'time' not in c]
+    colnames = [c for c in df.columns if c not in ['time', 'turbid', 'index']]
     df = df.dropna(axis=0, subset=colnames, how='all')
 
     if verbose:
