@@ -168,8 +168,10 @@ def calc_floris(df, fi, num_threads=1):
     return df_out
 
 
-def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None,
-                       method='linear', df_approx=None, num_threads=1):
+def calc_floris_approx(fi, ws_step=0.5, wd_step=1.0, ti_step=None,
+                       ws_bounds=None, wd_bounds=None, ti_bounds=None,
+                       df=None, method='linear', df_approx=None,
+                       num_threads=1):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function approximates the exact solutions
     by binning the wd, ws and ti, calculating floris for the mean of those bins,
@@ -227,14 +229,26 @@ def calc_floris_approx(df, fi, ws_step=0.5, wd_step=1.0, ti_step=None,
     ws_cutout = np.max(ws_cutout)
 
     if df_approx is None:
-        wd_min = np.max([np.min(wd_array), 0.0])
-        wd_max = np.min([np.max(wd_array), 360.0])
+        if wd_bounds is None:
+            wd_min = np.max([np.min(wd_array), 0.0])
+            wd_max = np.min([np.max(wd_array), 360.0])
+        else:
+            wd_min = wd_bounds[0]
+            wd_max = wd_bounds[1]
 
-        ws_min = np.max([np.min(ws_array), ws_cutin]) 
-        ws_max = np.min([np.max(ws_array), ws_cutout])
-
-        ti_min = np.max([np.min(ti_array), 0.0])
-        ti_max = np.min([np.max(ti_array), 0.30])
+        if ws_bounds is None:
+            ws_min = np.max([np.min(ws_array), ws_cutin]) 
+            ws_max = np.min([np.max(ws_array), ws_cutout])
+        else:
+            ws_min = ws_bounds[0]
+            ws_max = ws_bounds[1]
+        
+        if ti_bounds is None:
+            ti_min = np.max([np.min(ti_array), 0.0])
+            ti_max = np.min([np.max(ti_array), 0.30])
+        else:
+            ti_min = ti_bounds[0]
+            ti_max = ti_bounds[1]
 
         wd_array_approx = np.arange(wd_min, wd_max + wd_step, wd_step)
         ws_array_approx = np.arange(ws_min, ws_max + ws_step, ws_step)
