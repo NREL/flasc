@@ -14,6 +14,7 @@
 import datetime
 from matplotlib import pyplot as plt
 import numpy as np
+import os as os
 import pandas as pd
 # from pandas.core.base import DataError
 from scipy import optimize as opt
@@ -179,7 +180,8 @@ class bias_estimation():
             for i in range(df_upstream.shape[0])]
         self.upstream_turbs_ids = list(df_upstream.turbines)
 
-    def _get_energy_ratios_allbins(self, wd_bias=0.0, N_btstrp=1):
+    def _get_energy_ratios_allbins(self, wd_bias=0.0, N_btstrp=1,
+                                   plot_iter_path=None):
         wd_step = self.eo_wd_step
         ws_step = self.eo_ws_step
 
@@ -241,24 +243,23 @@ class bias_estimation():
             self.energy_ratios_floris[ii] = df_energyratio_floris_ti
 
         # Debugging: show all possible options
-        fp = ('/home/bdoekeme/python_scripts/wfc_owez/' +
-              'analysis/01_postprocessing/data/' +
-              '07_wdbias_filtered_data/'
-              'bias%+.3f' % (wd_bias) +
-              '_energyratio'
-            )
-        self.plot_energy_ratios(save_path=fp, format='png')
-        plt.close('all')
+        if plot_iter_path is not None:
+            fp = os.path.join(plot_iter_path, 'bias%+.3f' % (wd_bias), 'energyratio_')
+            os.makedirs(os.path.basename(fp), exist_ok=True)
+            self.plot_energy_ratios(save_path=fp, format='png')
+            plt.close('all')
 
         return None
 
     def estimate_wd_bias(self, opt_search_range=(-180., 180.),
                          opt_search_dx=1.0, opt_finish=opt.fmin,
-                         energy_ratio_N_btstrp=1):
+                         energy_ratio_N_btstrp=1,
+                         plot_iter_path=None):
 
         printnow('Estimating the wind direction bias')
         def cost_fun(wd_bias):
-            self._get_energy_ratios_allbins(wd_bias=wd_bias, N_btstrp=1)
+            self._get_energy_ratios_allbins(wd_bias=wd_bias, N_btstrp=1,
+                                            plot_iter_path=plot_iter_path)
 
             # Unpack variables
             # wd_arrays = [self.energy_ratios_scada[i]['wd_bin'] for i
@@ -274,13 +275,20 @@ class bias_estimation():
             cost = np.mean(cost_array)
             return cost
 
+        if opt_finish is not None:
+            opt_finish = (
+                lambda func, x0, args=(): opt.fmin(func, x0, args,
+                                                   full_output=True,
+                                                   xtol=0.1, disp=True)
+            )
+
         dran = opt_search_range[1]-opt_search_range[0]
         x_opt, J_opt, x, J = opt.brute(
             func=cost_fun,
             ranges=[opt_search_range],
             Ns=int(np.ceil(dran/opt_search_dx) + 1),
             full_output=True,
-            disp='iter',
+            disp=True,
             finish=opt_finish)
 
         wd_bias = x_opt
@@ -321,15 +329,15 @@ class bias_estimation():
             fig, ax = plt.subplots(figsize=(10, 5))
             ax.plot(wd_arrays[ii], er_result_scada[ii], color='k', label='SCADA data')
             ax.fill_between(wd_arrays[ii], er_result_scada_l[ii], er_result_scada_u[ii], alpha=0.15)
-            if not np.isnan(self.opt_wd_bias):
-                x_corrected = wrap_360(wd_arrays[ii] - self.opt_wd_bias)
-                y_corrected = np.array(er_result_scada[ii])[np.argsort(x_corrected)]
-                y_corrected_l = np.array(er_result_scada_l[ii])[np.argsort(x_corrected)]
-                y_corrected_u = np.array(er_result_scada_u[ii])[np.argsort(x_corrected)]
-                x_corrected = np.sort(x_corrected)
-                ax.plot(x_corrected, y_corrected, color='blue', label='SCADA data (corrected)')
-                ax.fill_between(x_corrected, y_corrected_l, y_corrected_u, alpha=0.15)
-            ax.plot(wd_arrays[ii], er_result_floris[ii], ls = '--', color='orange', label='FLORIS')
+            # if not np.isnan(self.opt_wd_bias):
+            #     x_corrected = wrap_360(wd_arrays[ii] - self.opt_wd_bias)
+            #     y_corrected = np.array(er_result_scada[ii])[np.argsort(x_corrected)]
+            #     y_corrected_l = np.array(er_result_scada_l[ii])[np.argsort(x_corrected)]
+            #     y_corrected_u = np.array(er_result_scada_u[ii])[np.argsort(x_corrected)]
+            #     x_corrected = np.sort(x_corrected)
+            #     ax.plot(x_corrected, y_corrected, color='blue', label='SCADA data (corrected)')
+            #     ax.fill_between(x_corrected, y_corrected_l, y_corrected_u, alpha=0.15)
+            ax.plot(wd_arrays[ii], er_result_floris[ii], ls='--', color='orange', label='FLORIS')
             ax.fill_between(wd_arrays[ii], er_result_floris_l[ii], er_result_floris_u[ii], alpha=0.15)
             plt.title('Turbine %d. Current time: %s' % (ti, str(self.sw_current_time)))
             plt.ylabel('Energy ratio (-)')
