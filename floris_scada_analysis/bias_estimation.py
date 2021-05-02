@@ -244,7 +244,7 @@ class bias_estimation():
 
         # Debugging: show all possible options
         if plot_iter_path is not None:
-            fp = os.path.join(plot_iter_path, 'bias%+.3f' % (wd_bias), 'energyratio_')
+            fp = os.path.join(plot_iter_path, 'bias%+.3f' % (wd_bias), 'energyratio')
             os.makedirs(os.path.basename(fp), exist_ok=True)
             self.plot_energy_ratios(save_path=fp, format='png')
             plt.close('all')
@@ -348,4 +348,5 @@ class bias_estimation():
             plt.legend()
 
             if save_path is not None:
+                os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 plt.savefig(save_path + '_%03d.%s' % (ti, format))
