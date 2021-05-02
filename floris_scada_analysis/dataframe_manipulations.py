@@ -682,6 +682,9 @@ def batch_split_and_save_dfs(df, save_path, table_name='scada_data'):
                 tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo+1))
             df_time_windows.append([tw0, tw1])
 
+    # Create output folder
+    os.makedirs(save_path, exist_ok=True)
+
     # Extract time indices
     print('Splitting the data into %d separate months.' % len(df_time_windows))
     id_map = fsato.find_window_in_time_array(time_array, df_time_windows)
