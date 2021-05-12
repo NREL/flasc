@@ -18,7 +18,7 @@ import os as os
 import pandas as pd
 import warnings
 
-from floris_scada_analysis.circular_statistics import wrap_360_deg
+from floris.utilities import wrap_360
 from floris_scada_analysis import sqldatabase_management as sqldbm
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import floris_tools as ftools
@@ -45,7 +45,16 @@ def filter_df_by_ti(df, ti_range):
 
 def get_num_turbines(df):
     # Let's assume that the format of variables is ws_%03d, wd_%03d, and so on
-    num_turbines = len([c for c in df.columns if 'ws_' in c and len(c) == 6])
+    num_turbines = len([c for c in df.columns if 'pow_' in c and len(c) == 7])
+
+    if num_turbines == 0:
+        # Try with wind speed
+        num_turbines = len([c for c in df.columns if 'ws_' in c and len(c) == 6])
+
+    if num_turbines == 0:
+        # Try with wind direction
+        num_turbines = len([c for c in df.columns if 'wd_' in c and len(c) == 6])
+
     return num_turbines
 
 
@@ -66,7 +75,7 @@ def get_column_mean(df, col_prefix='pow', turbine_list=None,
         dir_y = np.sin(array * np.pi / 180.).sum(axis=1)
 
         mean_dirs = np.arctan2(dir_y, dir_x)
-        mean_out = wrap_360_deg(mean_dirs * 180. / np.pi)
+        mean_out = wrap_360(mean_dirs * 180. / np.pi)
     else:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -846,7 +855,7 @@ def restructure_df_files(df_table_name, column_mapping_dict,
         os.mkdir(target_path)
 
     files_result = sqldbm.browse_downloaded_datafiles(
-        data_path, scada_table=df_table_name)
+        data_path, table_name=df_table_name)
     files_result = np.sort(files_result)
     for fi in files_result:
         print('  Reading ' + fi + '.')
