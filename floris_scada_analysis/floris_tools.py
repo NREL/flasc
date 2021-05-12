@@ -11,6 +11,7 @@
 # the License.
 
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import interpolate
@@ -381,58 +382,127 @@ def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,
 
     turbs_within_radius = turbine_list[dr_turb <= max_radius]
     if not include_itself:
-        turbs_within_radius = [ti for ti in turbs_within_radius if not ti == turb_no]
+        turbs_within_radius = [ti for ti in turbs_within_radius
+                               if not ti == turb_no]
 
     return turbs_within_radius
 
 
-def get_upstream_turbs_floris(fi, wd_step=3.0, verbose=False):
-    """Determine which turbines are operating in freestream (unwaked)
-    flow, for the entire wind rose. This function will return a data-
-    frame where each row will present a wind direction range and a set
-    of wind turbine numbers for which those turbines are operating
-    upstream. This is useful in determining the freestream conditions.
+def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
+                              plot_lines=False):
+#     """Determine which turbines are operating in freestream (unwaked)
+#     flow, for the entire wind rose. This function will return a data-
+#     frame where each row will present a wind direction range and a set
+#     of wind turbine numbers for which those turbines are operating
+#     upstream. This is useful in determining the freestream conditions.
+#
+#     Args:
+#         fi ([floris object]): FLORIS object of the farm of interest.
+#         wd_step (float, optional): Wind direction discretization step.
+#         It will test what the upstream turbines are every [wd_step]
+#         degrees. A lower number means more accurate results, but
+#         typically there's no real benefit below 2.0 deg or so.
+#         Defaults to 3.0.
+#         wake_slope (float, optional): linear slope of the wake (dy/dx)
+#         plot_lines (bool, optional): Enable plotting wakes/turbines.
+#         Defaults to False.
+#
+#     Returns:
+#         df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row
+#         contains a wind direction range and a list of turbine numbers. For
+#         that particular wind direction range, the turbines numbered are 
+#         all upstream according to the FLORIS predictions. Depending on
+#         the FLORIS model parameters and ambient conditions, these results
+#         may vary slightly. Though, having minimal wake losses should not
+#         noticably affect your outcomes. Empirically, this approach has
+#         yielded good results with real SCADA data for determining what
+#         turbines are waked/unwaked and has served useful for determining
+#         what turbines to use as reference.
+#     """
 
-    Args:
-        fi ([floris object]): FLORIS object of the farm of interest.
-        wd_step (float, optional): Wind direction discretization step.
-        It will test what the upstream turbines are every [wd_step]
-        degrees. A lower number means more accurate results, but
-        typically there's no real benefit below 2.0 deg or so.
-        Defaults to 3.0.
-        verbose (bool, optional): Enable print statements for debugging.
-        Defaults to False.
+    # Get farm layout
+    x = fi.layout_x
+    y = fi.layout_y
+    D = np.array([t.rotor_diameter for t in fi.floris.farm.turbines])
+    n_turbs = len(x)
 
-    Returns:
-        df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row
-        contains a wind direction range and a list of turbine numbers. For
-        that particular wind direction range, the turbines numbered are 
-        all upstream according to the FLORIS predictions. Depending on
-        the FLORIS model parameters and ambient conditions, these results
-        may vary slightly. Though, having minimal wake losses should not
-        noticably affect your outcomes. Empirically, this approach has
-        yielded good results with real SCADA data for determining what
-        turbines are waked/unwaked and has served useful for determining
-        what turbines to use as reference.
-    """    
-    if verbose:
-        print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' % (wd_step))
+    # Setup output list
     upstream_turbs_ids = []  # turbine numbers that are freestream
     upstream_turbs_wds = []  # lower bound of bin
+
+    # Rotate farm and determine freestream/waked turbines
     for wd in np.arange(0., 360., wd_step):
-        fi.reinitialize_flow_field(wind_direction=wd, wind_speed=8.0)
-        fi.calculate_wake(no_wake=True)
-        power_out_nowake = np.array(fi.get_turbine_power())
-        fi.calculate_wake(no_wake=False)
-        power_out_wake = np.array(fi.get_turbine_power())
-        power_wake_loss = power_out_nowake - power_out_wake
-        turbs_freestream = list(np.where(power_wake_loss < 0.01)[0])
+        is_freestream = [True for _ in range(n_turbs)]
+        x_rot = (np.cos((wd-270.) * np.pi / 180.) * x -
+                 np.sin((wd-270.) * np.pi / 180.) * y)
+        y_rot = (np.sin((wd-270.) * np.pi / 180.) * x +
+                 np.cos((wd-270.) * np.pi / 180.) * y)
+
+        if plot_lines:
+            fig, ax = plt.subplots()
+            for ii in range(n_turbs):
+                ax.plot(x_rot[ii] * np.ones(2), [y_rot[ii] - D[ii] / 2, y_rot[ii] + D[ii] / 2], 'k')
+            for ii in range(n_turbs):
+                ax.text(x_rot[ii], y_rot[ii], 'T%03d' % ii)
+            ax.axis('equal')
+
+        srt = np.argsort(x_rot)
+        x_rot_srt = x_rot[srt]
+        y_rot_srt = y_rot[srt]
+        for ii in range(n_turbs):
+            x0 = x_rot_srt[ii]
+            y0 = y_rot_srt[ii]
+
+            def yw_upper(x):
+                y = (y0 + D[ii]) + (x-x0) * wake_slope
+                if isinstance(y, (float, np.float64, np.float32)):
+                    if x < (x0 + 0.01):
+                        y = -np.Inf
+                else:
+                    y[x < x0 + 0.01] = -np.Inf
+                return y
+
+            def yw_lower(x):
+                y = (y0 - D[ii]) - (x-x0) * wake_slope
+                if isinstance(y, (float, np.float64, np.float32)):
+                    if x < (x0 + 0.01):
+                        y = -np.Inf
+                else:
+                    y[x < x0 + 0.01] = -np.Inf
+                return y
+
+            is_in_wake = lambda xt, yt: ((yt < yw_upper(xt)) &
+                                         (yt > yw_lower(xt)))
+
+            is_freestream = (is_freestream &
+                             ~is_in_wake(x_rot_srt, y_rot_srt + D/2.) &
+                             ~is_in_wake(x_rot_srt, y_rot_srt - D/2.))
+
+            if plot_lines:
+                x1 = np.max(x_rot_srt) + 500.
+                ax.fill_between([x0, x1, x1, x0],
+                                [yw_upper(x0+0.02), yw_upper(x1),
+                                 yw_lower(x1), yw_lower(x0+0.02)],
+                                alpha=0.1, color='k', edgecolor=None)
+
+        usrt = np.argsort(srt)
+        is_freestream = is_freestream[usrt]
+        turbs_freestream = list(np.where(is_freestream)[0])
+
         if len(upstream_turbs_wds) == 0:
             upstream_turbs_ids.append(turbs_freestream)
             upstream_turbs_wds.append(wd)
         elif not(turbs_freestream == upstream_turbs_ids[-1]):
             upstream_turbs_ids.append(turbs_freestream)
             upstream_turbs_wds.append(wd)
+
+        if plot_lines:
+            ax.set_title('wd = %03d' % wd)
+            ax.set_xlim([np.min(x_rot)-500., x1])
+            ax.set_ylim([np.min(y_rot)-500., np.max(y_rot)+500.])
+            ax.plot(x_rot[turbs_freestream],
+                    y_rot[turbs_freestream],
+                    'o', color='green')
 
     # Connect at 360 degrees
     if upstream_turbs_ids[0] == upstream_turbs_ids[-1]:
@@ -448,6 +518,69 @@ def get_upstream_turbs_floris(fi, wd_step=3.0, verbose=False):
                                 'turbines': upstream_turbs_ids})
 
     return df_upstream
+
+# def get_upstream_turbs_floris(fi, wd_step=3.0, verbose=False):
+#     """Determine which turbines are operating in freestream (unwaked)
+#     flow, for the entire wind rose. This function will return a data-
+#     frame where each row will present a wind direction range and a set
+#     of wind turbine numbers for which those turbines are operating
+#     upstream. This is useful in determining the freestream conditions.
+
+#     Args:
+#         fi ([floris object]): FLORIS object of the farm of interest.
+#         wd_step (float, optional): Wind direction discretization step.
+#         It will test what the upstream turbines are every [wd_step]
+#         degrees. A lower number means more accurate results, but
+#         typically there's no real benefit below 2.0 deg or so.
+#         Defaults to 3.0.
+#         verbose (bool, optional): Enable print statements for debugging.
+#         Defaults to False.
+
+#     Returns:
+#         df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row
+#         contains a wind direction range and a list of turbine numbers. For
+#         that particular wind direction range, the turbines numbered are 
+#         all upstream according to the FLORIS predictions. Depending on
+#         the FLORIS model parameters and ambient conditions, these results
+#         may vary slightly. Though, having minimal wake losses should not
+#         noticably affect your outcomes. Empirically, this approach has
+#         yielded good results with real SCADA data for determining what
+#         turbines are waked/unwaked and has served useful for determining
+#         what turbines to use as reference.
+#     """    
+#     if verbose:
+#         print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' % (wd_step))
+#     upstream_turbs_ids = []  # turbine numbers that are freestream
+#     upstream_turbs_wds = []  # lower bound of bin
+#     for wd in np.arange(0., 360., wd_step):
+#         fi.reinitialize_flow_field(wind_direction=wd, wind_speed=8.0)
+#         fi.calculate_wake(no_wake=True)
+#         power_out_nowake = np.array(fi.get_turbine_power())
+#         fi.calculate_wake(no_wake=False)
+#         power_out_wake = np.array(fi.get_turbine_power())
+#         power_wake_loss = power_out_nowake - power_out_wake
+#         turbs_freestream = list(np.where(power_wake_loss < 0.01)[0])
+#         if len(upstream_turbs_wds) == 0:
+#             upstream_turbs_ids.append(turbs_freestream)
+#             upstream_turbs_wds.append(wd)
+#         elif not(turbs_freestream == upstream_turbs_ids[-1]):
+#             upstream_turbs_ids.append(turbs_freestream)
+#             upstream_turbs_wds.append(wd)
+
+#     # Connect at 360 degrees
+#     if upstream_turbs_ids[0] == upstream_turbs_ids[-1]:
+#         upstream_turbs_wds.pop(0)
+#         upstream_turbs_ids.pop(0)
+
+#     # Go from list to bins for upstream_turbs_wds
+#     upstream_turbs_wds = [[upstream_turbs_wds[i], upstream_turbs_wds[i+1]] for i in range(len(upstream_turbs_wds)-1)]
+#     upstream_turbs_wds.append([upstream_turbs_wds[-1][-1], upstream_turbs_wds[0][0]])
+
+#     df_upstream = pd.DataFrame({'wd_min': [wd[0] for wd in upstream_turbs_wds],
+#                                 'wd_max': [wd[1] for wd in upstream_turbs_wds],
+#                                 'turbines': upstream_turbs_ids})
+
+#     return df_upstream
 
 
 # Wrapper function to easily set new TI values
@@ -480,3 +613,32 @@ def _fi_set_ws_wd_ti(fi, wd=None, ws=None, ti=None):
         turbulence_intensity=ti
     )
     return fi
+
+
+# if __name__ == '__main__':
+#     import matplotlib.pyplot as plt
+#     import numpy as np
+
+#     import floris.tools as wfct
+
+#     wd = 240.
+#     D = 120.
+#     x = np.array([0., 5., 10., 15., 0., 5., 10., 15., 0., 5., 10., 15.]) * D
+#     y = np.array([0., 0., 0., 0., 5., 5., 5., 5., 10., 10., 10., 10.]) * D
+#     nTurbs = len(x)
+
+#     input_json = '/home/bdoekeme/python_scripts/floris_scada_analysis/examples/demo_dataset/demo_floris_input.json'
+#     fi = wfct.floris_interface.FlorisInterface(input_json)
+
+#     wd_step = 60.0
+#     for wd in np.arange(0., 360., wd_step):
+#         fi.reinitialize_flow_field(layout_array=(x, y), wind_direction=wd, turbulence_intensity=0.25)
+#         fi.calculate_wake()
+#         hor_plane = fi.get_hor_plane()
+#         fig, ax = plt.subplots()
+#         wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
+#         fi.vis_layout(ax=ax)
+#         ax.set_title('wind direction = %03d' % wd)
+
+#     get_upstream_turbs_floris(fi, wd_step=wd_step, plot_lines=True)
+#     plt.show()
