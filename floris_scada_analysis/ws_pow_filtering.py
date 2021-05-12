@@ -206,7 +206,7 @@ def convert_list_to_ranges(list_in):
 
 
 class ws_pw_curve_filtering():
-    def __init__(self, df, turbine_list='all', add_default_windows=True):
+    def __init__(self, df, turbine_list='all', add_default_windows=True, rated_powers=None):
 
         # Assign dataframe to self
         self.set_df(df)
@@ -224,22 +224,29 @@ class ws_pw_curve_filtering():
         # Setup empty dataframe for esti
         self.pw_curve_df = None
 
-        # Derive information from turbine 0 in dataset
         df = self.df  # Load from self after processing
-        est_ratedpw_list = np.zeros(self.num_turbines_all)
-        for ti in self.full_turbine_list:
-            rated_ids = (df['ws_%03d' % ti] > 15.)
-            est_ratedpw = np.nanmedian(
-                df.loc[rated_ids, 'pow_%03d' % (ti)])
-            if np.isnan(est_ratedpw):
-                est_ratedpw = 1.  # Placeholder
-            elif est_ratedpw < 20.0:
-                est_ratedpw = np.round(est_ratedpw, 1)  # MW
-            elif est_ratedpw < 20.0e3:
-                est_ratedpw = np.round(est_ratedpw/1e3, 1)*1e3  # kW
+
+        # Derive rated power information
+        if rated_powers is None:
+            est_ratedpw_list = np.zeros(self.num_turbines_all)
+            for ti in self.full_turbine_list:
+                rated_ids = (df['ws_%03d' % ti] > 15.)
+                est_ratedpw = np.nanmedian(
+                    df.loc[rated_ids, 'pow_%03d' % (ti)])
+                if np.isnan(est_ratedpw):
+                    est_ratedpw = 1.  # Placeholder
+                elif est_ratedpw < 20.0:
+                    est_ratedpw = np.round(est_ratedpw, 1)  # MW
+                elif est_ratedpw < 20.0e3:
+                    est_ratedpw = np.round(est_ratedpw/1e3, 1)*1e3  # kW
+                else:
+                    est_ratedpw = np.round(est_ratedpw/1e6, 1)*1e6  # W
+                est_ratedpw_list[ti] = float(est_ratedpw)
+        else:
+            if isinstance(rated_powers, (int, float, np.integer, np.float64)):
+                est_ratedpw_list = np.full(self.num_turbines_all, rated_powers)
             else:
-                est_ratedpw = np.round(est_ratedpw/1e6, 1)*1e6  # W
-            est_ratedpw_list[ti] = float(est_ratedpw)
+                est_ratedpw_list = np.array(rated_powers)
 
         turbs_sorted = []
         ratedpwrs = np.unique(est_ratedpw_list)
@@ -251,8 +258,9 @@ class ws_pw_curve_filtering():
                 if np.array_equal(np.array(try_range), turbs):
                     turbs = try_range
             print('Estimated rated power of turbines %s in this dataset to be %.1f'
-                  % (str(convert_list_to_ranges((turbs))), ratedpwrs[ii]))
+                % (str(convert_list_to_ranges((turbs))), ratedpwrs[ii]))
             turbs_sorted.append(np.array(turbs))
+
         self.est_rated_pow = ratedpwrs
 
         # Derive default settings
@@ -339,6 +347,8 @@ class ws_pw_curve_filtering():
         if isinstance(turbines, str):
             if turbines == 'all':
                 turbines = self.full_turbine_list
+        elif isinstance(turbines, (int, np.integer)):
+            turbines = [turbines]
 
         idx = len(self.window_list)
         new_entry = {'idx': idx,
@@ -493,11 +503,13 @@ class ws_pw_curve_filtering():
         df = self.df.copy()
         for ti in self.turbine_list:
             bad_ids = (df['status_%03d' % ti] == 0)
-            df = dff.df_mark_turbdata_as_faulty(df=df, cond=bad_ids, turbine_list=ti)
+            df = dff.df_mark_turbdata_as_faulty(df=df, cond=bad_ids,
+                                                turbine_list=ti,
+                                                verbose=True)
 
         # Drop status columns after filtering
         df = df.drop(columns=['status_%03d' % ti for ti in self.turbine_list])
-        
+
         # Reset index and save to file
         df = df.reset_index(drop=('time' in df.columns))
         df.to_feather(fout)
@@ -599,13 +611,12 @@ class ws_pw_curve_filtering():
             if self.pw_curve_df is not None:
                 legend_list.extend(['Approximate power curve'])
             ax[0].legend(legend_list)
-            fig.tight_layout()
             
             if confirm_plot:
                 _make_confirmation_plot(df, ti=ti, ax=ax[1])
                 ax[1].set_ylabel('')
-            fig.tight_layout()
 
+            fig.tight_layout()
             if save_path is not None:
                 plt.savefig(save_path + '/wspowcurve_%03d.' % ti + fig_format, dpi=dpi)
 
