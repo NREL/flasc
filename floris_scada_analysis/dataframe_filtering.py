@@ -95,7 +95,12 @@ def plot_highlight_data_by_conds(df, conds, ti):
     time_array = np.unique(tfull)
 
     # Get number of non-NaN entries before filtering
-    N_df = [sum(~np.isnan(df.loc[tfull==t, 'wd_%03d' % ti])) for t in time_array]
+    if 'wd_000' in df.columns:
+        N_df = [sum(~np.isnan(df.loc[tfull==t, 'wd_%03d' % ti]))
+                for t in time_array]
+    else:
+        N_df = [sum(~np.isnan(df.loc[tfull==t, 'ws_%03d' % ti]))
+                for t in time_array]
 
     N_hl = [np.zeros(len(time_array), 'int') for _ in range(len(conds))]
     for ii in range(len(conds)):
