@@ -195,4 +195,5 @@ class ti_estimator():
         ax.set_title('Measurement and FLORIS comparison')
         ax.set_ylabel('Power')
         ax.set_xlabel('Turbine number')
+        ax.legend(['FLORIS', 'SCADA'])
         return fig, ax
