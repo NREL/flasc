@@ -49,13 +49,13 @@ def interp_within_margin(x, xp, yp, x_margin, kind, wrap_around_360=False):
         Nx = len(x)
         dymax = np.full(Nx, np.nan)
         for i in range(Nx):
-            lrgv = xp[(xp - x[i]) > 0]
-            lwrv = xp[(xp - x[i]) < 0]
-            if len(lrgv) > 0:
-                dy_u = np.abs(yp[int(np.min(lrgv))] - y_full[i])
+            lrgv_id = np.where((xp - x[i]) > 0)[0]
+            lwrv_id = np.where((xp - x[i]) < 0)[0]
+            if len(lrgv_id) > 0:
+                dy_u = np.abs(yp[lrgv_id[0]] - y_full[i])
                 dymax[i] = np.nanmax([dy_u, dymax[i]])
-            if len(lwrv) > 0:
-                dy_l = np.abs(yp[int(np.max(lwrv))] - y_full[i])
+            if len(lwrv_id) > 0:
+                dy_l = np.abs(yp[lwrv_id[0]] - y_full[i])
                 dymax[i] = np.nanmax([dy_l, dymax[i]])
 
         # Replace those points with y_180 values
