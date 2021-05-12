@@ -79,63 +79,56 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
         and "index" not in c and "time" not in c
     ]
 
-    for c in resample_cols_regular:
-        if verbose:
-            print(
-                "  Downsampling column "
-                + c
-                + " to %.0f s using regular statistics."
-                % (target_dt / datetime.timedelta(seconds=1))
-            )
-        df_res[c + "_mean"] = [
-            np.nanmean(np.array(df[c])[i]) for i in tids_array
-        ]
-        df_res[c + "_median"] = [
-            np.nanmedian(np.array(df[c])[i]) for i in tids_array
-        ]
-        df_res[c + "_std"] = [
-            np.nanstd(np.array(df[c])[i]) for i in tids_array
-        ]
-        df_res[c + "_min"] = [
-            np.min(np.array(df[c])[tids_array[i]], initial=df_res[c + "_mean"][i])
-            for i in range(len(tids_array))
-        ]
-        df_res[c + "_max"] = [
-            np.max(np.array(df[c])[tids_array[i]],initial=df_res[c + "_mean"][i])
-            for i in range(len(tids_array))
-        ]
+    # Extract values and append row of np.nans
+    ncols = len(resample_cols_regular)
+    nws = len(tids_array)
+    array_df_reg = df[resample_cols_regular].values
+    array_df_reg = np.vstack([array_df_reg, np.array([np.nan] * ncols)])
+    id_row_allnans = array_df_reg.shape[0] - 1
 
-    for c in resample_cols_angular:
-        if verbose:
-            print(
-                "  Downsampling column "
-                + c
-                + " to %.0f s using angular statistics."
-                % (target_dt / datetime.timedelta(seconds=1))
-            )
+    # Update tids_array so that they all have same length
+    max_tlen = np.max([len(tid) for tid in tids_array])
+    tids_array_full = id_row_allnans * np.ones(max_tlen*nws, dtype='int')
+    for ii, ti in enumerate(tids_array):
+        tids_array_full[ii*max_tlen:ii*max_tlen+len(ti)] = ti
 
-        mean_ang_array = np.array([])
-        median_ang_array = np.array([])
-        std_ang_array = np.array([])
-        min_ang_array = np.array([])
-        max_ang_array = np.array([])
+    # Calculate statistical properties of regular columns
+    new_shape = (nws, max_tlen, ncols)
+    array_df_reg_tws = array_df_reg[tids_array_full, :].reshape(new_shape)
 
-        for ti in range(len(tids_array)):
-            time_ids = tids_array[ti]
-            mean_c, median_c, std_c, min_c, max_c = (
-                calculate_wd_statistics(np.array(df[c][time_ids])))
+    print('Downsampling non-angular columns: calculating mean, median, std, min, max...')
+    df_res[[c + '_mean' for c in resample_cols_regular]] = (
+        np.nanmean(array_df_reg_tws, axis=1)
+    )
+    df_res[[c + '_median' for c in resample_cols_regular]] = (
+        np.nanmedian(array_df_reg_tws, axis=1)
+    )
+    df_res[[c + '_std' for c in resample_cols_regular]] = (
+        np.nanstd(array_df_reg_tws, axis=1)
+    )
+    df_res[[c + '_min' for c in resample_cols_regular]] = (
+        np.nanmin(array_df_reg_tws, axis=1)
+    )
+    df_res[[c + '_max' for c in resample_cols_regular]] = (
+        np.nanmax(array_df_reg_tws, axis=1)
+    )
 
-            mean_ang_array = np.append(mean_ang_array, mean_c)
-            median_ang_array = np.append(median_ang_array, median_c)
-            std_ang_array = np.append(std_ang_array, std_c)
-            min_ang_array = np.append(min_ang_array, min_c)
-            max_ang_array = np.append(max_ang_array, max_c)
+    # Calculate statistical properties of angular columns
+    ncols = len(resample_cols_angular)
+    new_shape = (nws, max_tlen, ncols)
+    array_df_ang = df[resample_cols_angular].values
+    array_df_ang = np.vstack([array_df_ang, np.array([np.nan] * ncols)])
+    array_df_ang_tws = array_df_ang[tids_array_full, :].reshape(new_shape)
 
-        df_res[c + "_mean"] = mean_ang_array
-        df_res[c + "_median"] = median_ang_array
-        df_res[c + "_std"] = std_ang_array
-        df_res[c + "_min"] = min_ang_array
-        df_res[c + "_max"] = max_ang_array
+    print('Downsampling angular columns: calculating mean, median, std, min, max...')
+    means_ang, medians_ang, stds_ang, mins_ang, maxs_ang = (
+        calculate_wd_statistics(array_df_ang_tws, axis=1))
+
+    df_res[[c + '_mean' for c in resample_cols_angular]] = means_ang
+    df_res[[c + '_median' for c in resample_cols_angular]] = medians_ang
+    df_res[[c + '_std' for c in resample_cols_angular]] = stds_ang
+    df_res[[c + '_min' for c in resample_cols_angular]] = mins_ang
+    df_res[[c + '_max' for c in resample_cols_angular]] = maxs_ang
 
     return df_res
 
@@ -167,6 +160,7 @@ def df_resample_to_time_array(df, time_array, circular_cols,
         elif isinstance(circular_cols[0], str):
             wrap_around_360 = (c in circular_cols)
 
+        print('  Resampling column %s onto the specified time_array.' % c)
         y = fopt.interp_within_margin(
             x=x, xp=xp, yp=df[c], x_margin=dxx, kind=interp_method,
             wrap_around_360=wrap_around_360)
@@ -200,7 +194,8 @@ def estimate_dt(time_array):
     return dt
 
 
-def find_window_in_time_array(time_array_src, seek_time_windows):
+def find_window_in_time_array(time_array_src, seek_time_windows,
+                              predict_jumps=False):
     """This function will look through time_array_src and return the indices
     of each of the entries of time_array_src that are within the region
     seek_time_windows[..][0] < time_array_src[..] <= seek_time_windows[..][1],
@@ -222,12 +217,14 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
         [type]: [description]
     """
 
-    dt_src = estimate_dt(time_array_src)
-
     time_array_src = list(time_array_src)
     seek_times_min_remaining = [tw[0] for tw in seek_time_windows]
     seek_times_max_remaining = [tw[1] for tw in seek_time_windows]
     idxs_out_array = []
+
+    # Check time_array_src timestep if predicting jumps
+    if predict_jumps:
+        dt_src = estimate_dt(time_array_src)
 
     # Adress behavior at lower end (0)
     i = 0
@@ -281,49 +278,48 @@ def find_window_in_time_array(time_array_src, seek_time_windows):
         return idxs_out_array
 
     # Adress all other situations
-    i = 1
-    di = 0
-    while True:  # Continue until oow_time_min is empty
-        if time_array_src[i] > seek_times_min_remaining[0]:
-            # Step back in steps of 1 until we are exactly at right point
-            while time_array_src[i] > seek_times_min_remaining[0]:
-                i += -1
-            i += 1
+    i = 0
+    while len(seek_times_min_remaining) > 0:
+        seek_tmin = seek_times_min_remaining[0]
+        seek_tmax = seek_times_max_remaining[0]
 
-            # Marked as bad, now append entries until _max
-            idxs_out = []
-            while time_array_src[i] <= seek_times_max_remaining[0]:
-                idxs_out.append(i)
-                i += 1
-                if i == len(time_array_src):
-                    break
-            idxs_out_array.append(idxs_out)
+        if predict_jumps:
+            i += int((seek_tmin - time_array_src[i]) / dt_src)
 
-            # Remove entry in oow_time_min/max
-            seek_times_min_remaining.pop(0)
-            seek_times_max_remaining.pop(0)
-
-            # Check if we are done yet
-            if len(seek_times_min_remaining) <= 0:
+        # If necessary, step back until we are at right point
+        # iold = i
+        while time_array_src[i-1] > seek_tmin:
+            i += -1
+            if i < 0:
+                i = 0
                 break
+        # print('stepped back from %d to %d...' % (iold, i))
 
-        # Make a guess and step forward exactly this much
-        i += -1
-        di = int((seek_times_min_remaining[0]-time_array_src[i]) / dt_src + 1)
-        if di < 0:
-            raise ValueError(
-                "Data does not seem to be sorted. " +
-                "Please only use time-ascending data with this function."
-            )
+        # If necessary, step forward until we are at the right point
+        # iold = i
+        while time_array_src[i] <= seek_tmin:
+            i += 1
+            if i >= len(time_array_src):
+                i = len(time_array_src) - 1
+                break
+        # print('stepped forward from %d to %d...' % (iold, i))
 
-        i += di
-        if i > len(time_array_src) - 1:
-            i = len(time_array_src) - 1
+        # Now start appending entries until _max
+        idxs_out = []
+        while time_array_src[i] <= seek_tmax:
+            idxs_out.append(i)
+            i += 1
+            if i >= len(time_array_src):
+                i += -1
+                break
+        idxs_out_array.append(idxs_out)
+
+        # Remove time window entry
+        seek_times_min_remaining.pop(0)
+        seek_times_max_remaining.pop(0)
 
     # Append idxs_out_array_end entries to idxs_out_array
     for ar in idxs_out_array_end:
         idxs_out_array.append(ar)
 
     return idxs_out_array
-
-
