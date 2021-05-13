@@ -516,7 +516,7 @@ def batch_download_data_from_sql(dbc, destination_path, table_name):
 
     # Check for past files and continue download or start a fresh download
     files_result = browse_downloaded_datafiles(destination_path,
-                                               scada_table=table_name)
+                                               table_name=table_name)
     print('A total of %d existing files found.' % len(files_result))
 
     # Next timestamp is going to be next first of the month
