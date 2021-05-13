@@ -32,7 +32,7 @@ def compute_expectation(fx, p_X):
             (anon) - float - Expected value of f(X)
         """
         p_X = p_X/p_X.sum() # Make sure distribution is valid
-        
+
         return fx @ p_X
 
 
@@ -41,51 +41,56 @@ class energy_ratio:
 
     def __init__(
         self,
-        df,
+        df_in,
         test_turbines,
         wd_step=2.0,
         ws_step=1.0,
         verbose=False,
     ):
         self.verbose = verbose
-        self._set_df(df)
-        self.num_turbines = dfm.get_num_turbines(self.df)
+        self.df = pd.DataFrame()
+        self._set_df(df_in)
+        self.num_turbines = dfm.get_num_turbines(df_in)
         self.set_test_turbines(test_turbines, init=True)
         self.ws_step = ws_step
         self.wd_step = wd_step
         self.set_pow_test()
 
-
-    def _set_df(self, df):
-        df = df.copy()  # Create a copy
-        if 'pow_ref' not in df.columns:
+    def _set_df(self, df_in):
+        if 'pow_ref' not in df_in.columns:
             raise KeyError('pow_ref column not found in dataframe. Cannot proceed.')
             # INFO: You can add such a column using dfm.set_pow_ref_by_*.
 
-        if 'category' not in df.columns:
+        # Copy minimal columns from df_in to df
+        if 'category' in df_in.columns:
+            df = df_in[['wd', 'ws', 'pow_ref', 'category']].copy()
+        else:
             if self.verbose:
                 print("Did not find 'category' column. Adding one with all values 'baseline'.")
+            df = df_in[['wd', 'ws', 'pow_ref']].copy()
             df['category'] = 'baseline'
 
+        # Check categories
         self.categories = list(np.unique(df['category']))
         if len(self.categories) > 2:
             raise KeyError('Cannot have more than 2 categories in your dataframe.')
         else:
             if self.verbose:
                 print('Your dataframe has categories', self.categories)
-        self.df = df
+
+        self.df_full = df_in  # Save reference to full dataframe
+        self.df = df  # Minimal dataframe
 
     def set_test_turbines(self, test_turbines, init=False):
         if not (type(test_turbines) is list):
             test_turbines = [test_turbines]
         self.test_turbines = test_turbines
         if not init:
-            # self._set_turbines_all()
             self.set_pow_test()
 
     def set_pow_test(self):
         self.df["pow_test"] = dfm.get_column_mean(
-            df=self.df,
+            df=self.df_full,
             col_prefix="pow",
             turbine_list=self.test_turbines,
             circular_mean=False,
@@ -183,9 +188,10 @@ class energy_ratio:
 
         # Extract the interesting parts for the energy ratio frame
         rlvnt_cols = ['ws_bin', 'wd_bin', 'pow_ref', 'pow_test', 'category']
+        df = self.df[rlvnt_cols]
 
         # Define the energy frame class
-        energy_frame = Energy_Frame(df=self.df[rlvnt_cols],
+        energy_frame = Energy_Frame(df=df,
                                     df_freq=self.df_freq,
                                     category=self.categories)
 
@@ -216,7 +222,7 @@ class energy_ratio:
         return fig, ax
 
 
-# Legacy class from Paul
+# Legacy class from Paul Fleming
 class Energy_Frame:
     """
     Top level analysis class for storing the data used across the analysis
@@ -255,28 +261,21 @@ class Energy_Frame:
         )
         return Energy_Column(df_sub, df_freq, self.ws_bin, self.category)
 
-    def get_1_cat_energy_ratio_array_with_range(self, use_observed_freq=True, N=100):
-
+    def get_1_cat_energy_ratio_array_with_range(self, use_observed_freq=True, N=1):
         result = np.zeros([len(self.wd_bin), 3])
-
         for wd_idx, wd in enumerate(self.wd_bin):
-            # print(wd)
             ec = self.get_column(wd)
             result[wd_idx, :] = ec.get_1cat_energy_ratio_with_range(
                 use_observed_freq=use_observed_freq, N=N
             )
-
         df_res = pd.DataFrame(result, columns=["baseline", "baseline_l", "baseline_u"])
         df_res["wd_bin"] = self.wd_bin
-
+        _, df_res["N_bin"] = np.unique(self.df.wd_bin, return_counts=True)
         return df_res
 
-    def get_2_cat_energy_ratio_array_with_range(self, use_observed_freq=True, N=100):
-
+    def get_2_cat_energy_ratio_array_with_range(self, use_observed_freq=True, N=1):
         result = np.zeros([len(self.wd_bin), 12])
-
         for wd_idx, wd in enumerate(self.wd_bin):
-            # print(wd)
             ec = self.get_column(wd)
             result[wd_idx, :] = ec.get_2cat_energy_ratio_with_range(
                 use_observed_freq=use_observed_freq, N=N
@@ -300,7 +299,7 @@ class Energy_Frame:
             ],
         )
         df_res["wd_bin"] = self.wd_bin
-
+        _, df_res["N_bin"] = np.unique(self.df.wd_bin, return_counts=True)
         return df_res
 
 
@@ -322,8 +321,8 @@ class Energy_Column:
     def get_energy_ratio(self, use_observed_freq=True, randomize_df=False):
 
         # Local copies
-        df = self.df.copy()
-        df_freq = self.df_freq.copy()
+        df = self.df #.copy()
+        df_freq = self.df_freq #.copy()
         ws_bin = self.ws_bin
         category = self.category
 
