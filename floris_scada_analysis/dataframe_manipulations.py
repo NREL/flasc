@@ -71,8 +71,8 @@ def get_column_mean(df, col_prefix='pow', turbine_list=None,
 
     if circular_mean:
         # Use unit vectors to calculate the mean
-        dir_x = np.cos(array * np.pi / 180.).sum(axis=1)
-        dir_y = np.sin(array * np.pi / 180.).sum(axis=1)
+        dir_x = np.nanmean(np.cos(array * np.pi / 180.), axis=1)
+        dir_y = np.nanmean(np.sin(array * np.pi / 180.), axis=1)
 
         mean_dirs = np.arctan2(dir_y, dir_x)
         mean_out = wrap_360(mean_dirs * 180. / np.pi)
