@@ -97,7 +97,7 @@ class scada_analysis():
             print(' ')
 
     def _apply_df_mask(self, ii):
-        df = self.df_list[ii]['df'].copy()
+        df = self.df_list[ii]['df']#.copy()
         if self.ws_range is not None:
             df = dfm.filter_df_by_ws(df, self.ws_range)
         if self.wd_range is not None:
@@ -121,8 +121,8 @@ class scada_analysis():
             self._apply_df_mask(ii)
             if self.verbose:
                 print('df_subset[%d] is %d rows (df is %d rows).'
-                      %(ii, self.df_list[ii]['df_subset'].shape[0],
-                          self.df_list[ii]['df'].shape[0]))
+                      % (ii, self.df_list[ii]['df_subset'].shape[0],
+                         self.df_list[ii]['df'].shape[0]))
 
     def set_turbine_names(self, turbine_names):
         if not len(turbine_names) == self.num_turbines:
@@ -149,12 +149,12 @@ class scada_analysis():
                           N=1, verbose=False):
 
         for ii in range(len(self.df_list)):
-            df = self.df_list[ii]['df_subset'].copy()
-            era = er.energy_ratio(df=df,
+            df_subset = self.df_list[ii]['df_subset']
+            era = er.energy_ratio(df_in=df_subset,
                                   test_turbines=test_turbines,
                                   wd_step=wd_step,
                                   ws_step=ws_step,
-                                  verbose=self.verbose)
+                                  verbose=verbose)
             er_result = era.get_energy_ratio(N=N)
 
             self.df_list[ii]['er_results'] = er_result
