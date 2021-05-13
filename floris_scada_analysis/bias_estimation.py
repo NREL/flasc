@@ -12,13 +12,15 @@
 
 
 import datetime
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import os as os
 import pandas as pd
 # from pandas.core.base import DataError
 from scipy import optimize as opt
 from scipy import stats as spst
+from time import perf_counter as timerpc
+
 from floris.utilities import wrap_360
 
 from floris_scada_analysis import dataframe_manipulations as dfm
@@ -43,16 +45,6 @@ class bias_estimation():
 
         self.verbose = verbose
 
-        # # Check format of dataframes based on first 100 rows
-        # if df.shape[0] != df_fi.shape[0]:
-        #     raise DataError('Please ensure df_fi and df have the same number of entries.')
-        # if not (list(df.iloc[0:100]['time'])==list(df_fi.iloc[0:100]['time'])):
-        #     raise DataError("The columns 'time' should be identical between df and df_fi.")
-        # if not (list(df.iloc[0:100]['wd'])==list(df_fi.iloc[0:100]['wd'])):
-        #     raise DataError("The columns 'wd' should be identical between df and df_fi.")
-        # if not (list(df.iloc[0:100]['ws'])==list(df_fi.iloc[0:100]['ws'])):
-        #     raise DataError("The columns 'ws' should be identical between df and df_fi.")
-
         df = df.reset_index(drop=('time' in df.columns))
         # df_fi = df_fi.reset_index(drop=('time' in df_fi.columns))
 
@@ -68,8 +60,6 @@ class bias_estimation():
 
         self.df_ws_mapping_func = df_ws_mapping_func
         self.df_pow_ref_mapping_func = df_pow_ref_mapping_func
-        # self.df_fi = df_fi  # Floris predictions
-        # self.df_fi_subset = None # Subset of interest (floris)
 
         self.turbine_list = range(len(fi.layout_x))
         self.test_turbines_subset = test_turbines_subset
@@ -110,7 +100,7 @@ class bias_estimation():
 
     def _update_df_subset(self):
         printnow('Updated dataframes according to sliding window lock.')
-        self.df_subset = self.df.loc[self._sw_lower_idx:self._sw_upper_idx].copy()
+        self.df_subset = self.df.loc[self._sw_lower_idx:self._sw_upper_idx] #.copy()
         # self.df_fi_subset = self.df_fi.loc[self._sw_lower_idx:self._sw_upper_idx].copy()
 
     def _reset_results(self):
@@ -185,19 +175,16 @@ class bias_estimation():
         wd_step = self.eo_wd_step
         ws_step = self.eo_ws_step
 
-        # Create dataframes: time-shifted df
         df_subset_cor = self.df_subset.copy()
         df_subset_cor['wd'] = wrap_360(df_subset_cor['wd'] - wd_bias)
 
         # Set columns 'ws' and 'pow_ref' for df_subset_cor
         df_subset_cor = self.df_ws_mapping_func(df_subset_cor)
         df_subset_cor = self.df_pow_ref_mapping_func(df_subset_cor)
+        df_subset_cor = df_subset_cor.dropna(subset=['wd', 'ws', 'pow_ref'])
 
         # Limit dataframe to ranges and remove NaN entries
         df_subset_cor = dfm.filter_df_by_ws(df_subset_cor, self.df_ws_range)
-        df_subset_cor = df_subset_cor.dropna(subset=['time', 'wd',
-                                                     'ws', 'pow_ref'])
-        df_subset_cor  = df_subset_cor.reset_index(drop=True)
 
         # Get FLORIS predictions
         df_fi_subset = df_subset_cor[['time', 'wd', 'ws']].copy()
@@ -217,30 +204,16 @@ class bias_estimation():
         for ii, ti in enumerate(test_turbines):
             printnow('  Determining energy ratio for wd_bias = ' +
                      '%.3f and test turbine = %03d...' % (wd_bias, ti))
-            df_energyratio_scada_ti = pd.DataFrame()
-            df_energyratio_floris_ti = pd.DataFrame()
-            for wd_bin_i in range(len(self.upstream_turbs_wds)):
-                wd_range = (self.upstream_turbs_wds[wd_bin_i][0],
-                            self.upstream_turbs_wds[wd_bin_i][1])
+            st = timerpc()
+            fsc.get_energy_ratios(test_turbines=[ti], wd_step=wd_step,
+                                  ws_step=ws_step, N=N_btstrp)
+            self.energy_ratios_scada[ii] = fsc.df_list[0]['er_results']
+            self.energy_ratios_floris[ii] = fsc.df_list[1]['er_results']
 
-                fsc.set_masks(wd_range=wd_range)
-                fsc.get_energy_ratios(test_turbines=[ti], wd_step=wd_step,
-                                      ws_step=ws_step, N=N_btstrp)
-
-                # Save outputs as a merged dataframe
-                out_scada = fsc.df_list[0]['er_results']
-                out_floris = fsc.df_list[1]['er_results']
-                df_energyratio_scada_ti = (
-                    df_energyratio_scada_ti.append(
-                        out_scada, ignore_index=True)
-                )
-                df_energyratio_floris_ti = (
-                    df_energyratio_floris_ti.append(
-                        out_floris, ignore_index=True)
-                )
-
-            self.energy_ratios_scada[ii] = df_energyratio_scada_ti
-            self.energy_ratios_floris[ii] = df_energyratio_floris_ti
+            print('  Finished energy ratio calculations in: %.3f s.'
+                  % (timerpc() - st))
+            # fsc.plot_energy_ratios()
+            # plt.show()
 
         # Debugging: show all possible options
         if plot_iter_path is not None:
@@ -262,17 +235,18 @@ class bias_estimation():
                                             plot_iter_path=plot_iter_path)
 
             # Unpack variables
-            # wd_arrays = [self.energy_ratios_scada[i]['wd_bin'] for i
-            #             in range(len(self.energy_ratios_scada))]
             cost_array = np.full(len(self.energy_ratios_scada), np.nan)
             for ii in range(len(self.energy_ratios_scada)):
                 y_scada = np.array(self.energy_ratios_scada[ii]['baseline'])
                 y_floris = np.array(self.energy_ratios_floris[ii]['baseline'])
                 ids = ~np.isnan(y_scada) & ~np.isnan(y_floris)
-                r, p = spst.pearsonr(y_scada[ids], y_floris[ids])
+                if np.sum(ids) > 5:  # At least 6 valid data entries
+                    r, p = spst.pearsonr(y_scada[ids], y_floris[ids])
+                else:
+                    r = np.nan
                 cost_array[ii] = -1. * r
 
-            cost = np.mean(cost_array)
+            cost = np.nanmean(cost_array)
             return cost
 
         if opt_finish is not None:
@@ -304,48 +278,38 @@ class bias_estimation():
         return x_opt, J_opt
 
     def plot_energy_ratios(self, save_path=None, format='png'):
-        import matplotlib.pyplot as plt
-
         # Unpack variables
-        wd_arrays = [self.energy_ratios_scada[i]['wd_bin'] for i
-                     in range(len(self.energy_ratios_scada))]
-        er_result_scada = [self.energy_ratios_scada[i]['baseline'] for i
-                           in range(len(self.energy_ratios_scada))]
-        er_result_scada_l = [self.energy_ratios_scada[i]['baseline_l'] for i
-                           in range(len(self.energy_ratios_scada))]
-        er_result_scada_u = [self.energy_ratios_scada[i]['baseline_u'] for i
-                           in range(len(self.energy_ratios_scada))]
-        er_result_floris = [self.energy_ratios_floris[i]['baseline'] for i
-                            in range(len(self.energy_ratios_floris))]
-        er_result_floris_l = [self.energy_ratios_floris[i]['baseline_l'] for i
-                            in range(len(self.energy_ratios_floris))]
-        er_result_floris_u = [self.energy_ratios_floris[i]['baseline_u'] for i
-                            in range(len(self.energy_ratios_floris))]
+        x = [v['wd_bin'] for v in self.energy_ratios_scada]
+        y_scada = [v['baseline'] for v in self.energy_ratios_scada]
+        y_scada_l = [v['baseline_l'] for v in self.energy_ratios_scada]
+        y_scada_u = [v['baseline_u'] for v in self.energy_ratios_scada]
+        y_bins_N = [v['N_bin'] for v in self.energy_ratios_scada]
+        y_floris = [v['baseline'] for v in self.energy_ratios_floris]
+        y_floris_l = [v['baseline_l'] for v in self.energy_ratios_floris]
+        y_floris_u = [v['baseline_u'] for v in self.energy_ratios_floris]
 
         printnow('Plotting results for last evaluated case')
         printnow('  Wind direction bias: %.1f deg' % (self.opt_wd_bias))
         for ii in range(len(self.test_turbines_subset)):
             ti = self.test_turbines_subset[ii]
-            fig, ax = plt.subplots(figsize=(10, 5))
-            ax.plot(wd_arrays[ii], er_result_scada[ii], color='k', label='SCADA data')
-            ax.fill_between(wd_arrays[ii], er_result_scada_l[ii], er_result_scada_u[ii], alpha=0.15)
-            # if not np.isnan(self.opt_wd_bias):
-            #     x_corrected = wrap_360(wd_arrays[ii] - self.opt_wd_bias)
-            #     y_corrected = np.array(er_result_scada[ii])[np.argsort(x_corrected)]
-            #     y_corrected_l = np.array(er_result_scada_l[ii])[np.argsort(x_corrected)]
-            #     y_corrected_u = np.array(er_result_scada_u[ii])[np.argsort(x_corrected)]
-            #     x_corrected = np.sort(x_corrected)
-            #     ax.plot(x_corrected, y_corrected, color='blue', label='SCADA data (corrected)')
-            #     ax.fill_between(x_corrected, y_corrected_l, y_corrected_u, alpha=0.15)
-            ax.plot(wd_arrays[ii], er_result_floris[ii], ls='--', color='orange', label='FLORIS')
-            ax.fill_between(wd_arrays[ii], er_result_floris_l[ii], er_result_floris_u[ii], alpha=0.15)
-            plt.title('Turbine %d. Current time: %s' % (ti, str(self.sw_current_time)))
-            plt.ylabel('Energy ratio (-)')
-            plt.xlabel('Wind direction (deg)')
-            plt.grid(b=True, which='major', axis='both', color='gray')
-            plt.minorticks_on()
-            plt.grid(b=True, which='minor', axis='both', color='lightgray')
-            plt.legend()
+            fig, ax = plt.subplots(figsize=(10, 6), nrows=2, sharex=True)
+            ax[0].plot(x[ii], y_scada[ii], color='k', label='SCADA data')
+            ax[0].fill_between(x[ii], y_scada_l[ii], y_scada_u[ii], alpha=0.15)
+            ax[0].plot(x[ii], y_floris[ii], ls='--', color='orange', label='FLORIS')
+            ax[0].fill_between(x[ii], y_floris_l[ii], y_floris_u[ii], alpha=0.15)
+            ax[0].set_title('Turbine %d. Current time: %s' % (ti, str(self.sw_current_time)))
+            ax[0].set_ylabel('Energy ratio (-)')
+            ax[0].grid(b=True, which='major', axis='both', color='gray')
+            ax[0].grid(b=True, which='minor', axis='both', color='lightgray')
+            ax[0].minorticks_on()
+            ax[0].legend()
+
+            ax[1].bar(x[ii], y_bins_N[ii], width=.7*self.eo_wd_step,
+                      label='Number of data points', color='black')
+            ax[1].grid(b=True, which='major', axis='both', color='gray')
+            ax[1].grid(b=True, which='minor', axis='both', color='lightgray')
+            ax[1].set_xlabel('Wind direction (deg)')
+            ax[1].set_ylabel('Number of data points (-)')
 
             if save_path is not None:
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
