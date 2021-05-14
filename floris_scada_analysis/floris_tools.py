@@ -16,51 +16,53 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-
-def _get_turbine_cutin_ws(fCpInterp):
-    """Helper function to determine the cut-in wind speed of a turbine
-    in the farm.
-
-    Args:
-        fCpInterp ([interpolant]): Interpolant function for Cp that can
-        directly be pulled from the FLORIS runner object. The interpolant
-        is typically located in fi.floris.farm.turbines[i].fCpInterp].
-
-    Returns:
-        ws_cutin_ti ([float]): Cut-in wind speed in m/s
-    """
-    dx = np.diff(fCpInterp.x)
-    dx = np.median(dx)
-    ws_cutin_ti = fCpInterp.x[0] - dx
-    ii = 0
-    while fCpInterp.y[ii] < 1.0e-4:
-        ws_cutin_ti = fCpInterp.x[ii]
-        ii = ii + 1
-
-    return ws_cutin_ti
+from floris_scada_analysis import dataframe_manipulations as dfm
 
 
-def _get_turbine_cutout_ws(fCpInterp):
-    """Helper function to determine the cut-out wind speed of a turbine
-    in the farm.
+# def _get_turbine_cutin_ws(fCpInterp):
+#     """Helper function to determine the cut-in wind speed of a turbine
+#     in the farm.
 
-    Args:
-        fCpInterp ([interpolant]): Interpolant function for Cp that can
-        directly be pulled from the FLORIS runner object. The interpolant
-        is typically located in fi.floris.farm.turbines[i].fCpInterp].
+#     Args:
+#         fCpInterp ([interpolant]): Interpolant function for Cp that can
+#         directly be pulled from the FLORIS runner object. The interpolant
+#         is typically located in fi.floris.farm.turbines[i].fCpInterp].
 
-    Returns:
-        ws_cutout_ti ([float]): Cut-out wind speed in m/s
-    """    
-    dx = np.diff(fCpInterp.x)
-    dx = np.median(dx)
-    ws_cutout_ti = fCpInterp.x[-1] + dx
-    ii = len(fCpInterp.x) - 1
-    while fCpInterp.y[ii] < 1.0e-4:
-        ws_cutout_ti = fCpInterp.x[ii]
-        ii = ii - 1
+#     Returns:
+#         ws_cutin_ti ([float]): Cut-in wind speed in m/s
+#     """
+#     dx = np.diff(fCpInterp.x)
+#     dx = np.median(dx)
+#     ws_cutin_ti = fCpInterp.x[0] - dx
+#     ii = 0
+#     while fCpInterp.y[ii] < 1.0e-4:
+#         ws_cutin_ti = fCpInterp.x[ii]
+#         ii = ii + 1
 
-    return ws_cutout_ti
+#     return ws_cutin_ti
+
+
+# def _get_turbine_cutout_ws(fCpInterp):
+#     """Helper function to determine the cut-out wind speed of a turbine
+#     in the farm.
+
+#     Args:
+#         fCpInterp ([interpolant]): Interpolant function for Cp that can
+#         directly be pulled from the FLORIS runner object. The interpolant
+#         is typically located in fi.floris.farm.turbines[i].fCpInterp].
+
+#     Returns:
+#         ws_cutout_ti ([float]): Cut-out wind speed in m/s
+#     """    
+#     dx = np.diff(fCpInterp.x)
+#     dx = np.median(dx)
+#     ws_cutout_ti = fCpInterp.x[-1] + dx
+#     ii = len(fCpInterp.x) - 1
+#     while fCpInterp.y[ii] < 1.0e-4:
+#         ws_cutout_ti = fCpInterp.x[ii]
+#         ii = ii - 1
+
+#     return ws_cutout_ti
 
 
 def _run_fi_serial(df_subset, fi, verbose=False):
@@ -169,184 +171,89 @@ def calc_floris(df, fi, num_threads=1):
     return df_out
 
 
-def calc_floris_approx(fi, ws_step=0.5, wd_step=1.0, ti_step=None,
-                       ws_bounds=None, wd_bounds=None, ti_bounds=None,
-                       df=None, method='linear', df_approx=None,
-                       num_threads=1):
-    """Calculate the FLORIS predictions for a particular wind direction, wind speed
-    and turbulence intensity set. This function approximates the exact solutions
-    by binning the wd, ws and ti, calculating floris for the mean of those bins,
-    and then finally mapping those solutions using linear/nearest-neighbor
-    interpolation.
+def interpolate_floris_from_df_approx(df, df_approx, method='linear'):
+    # Format dataframe and get num_turbines
+    df = df.reset_index(drop=('time' in df.columns))
+    num_turbines = dfm.get_num_turbines(df_approx)
 
-    Args:
-        df ([pd.DataFrame]): Dataframe with at least the columns 'time', 'wd' 
-        and 'ws'. Can optionally also have the column 'ti' and 'time'. Any
-        other column will be ignored.
-        fi ([FlorisInterface]): Floris object for the wind farm of interest
-        ws_step (float, optional): Wind speed bin width in m/s. Defaults to 0.5.
-        wd_step (float, optional): Wind direction bin width in deg. Defaults to 1.0.
-        ti_step ([type], optional): Turbulence intensity bin width in [-]. Should be
-        a value between 0 and 1.0. If left empty, will assume one fixed value for TI
-        and not bin over various options. This significantly speeds up calculations.
-        Defaults to None.
-        method (str, optional): Interpolation method. Options are 'linear' and
-        'nearest'. Nearest is faster but linear is more accurate. Defaults to
-        'linear'.
-        df_approx ([pd.DataFrame]): Dataframe with the precalculated and tabulated
-        FLORIS predictions for a range of wind directions, wind speeds and
-        turbulence intensities.
-        num_threads ([int]): Number of threads to compute the FLORIS solutions with.
-        This accommodates parallelized solving using the multiprocessing interface.
-        For a large number of cases, it is recommended to use a value several times
-        larger than the actual number of cores, to ensure calculations are distributed
-        evenly over the cores.
+    # Map individual data entries to full DataFrame
+    print('Mapping the precalculated solutions from FLORIS to the dataframe...')
+    print("  Creating a gridded interpolant with interpolation method '" + method + "'.")
 
-    Returns:
-        df_out ([pd.DataFrame]): Dataframe with the predicted power productions for each
-        turbine according to FLORIS, for the wind conditions in the dataframe ('ws', 'wd',
-        and 'ti').
-        df_approx ([pd.DataFrame]): Dataframe with a standardized set of FLORIS predictions
-        for a gridded set of wind directions, wind speeds and turbulence intensities.
-    """
+    wd_array_approx = np.unique(df_approx['wd'])
+    ws_array_approx = np.unique(df_approx['ws'])
+    ti_array_approx = np.unique(df_approx['ti'])
+    xyz_grid = np.array(np.meshgrid(
+        wd_array_approx, ws_array_approx, ti_array_approx, indexing='ij'))
 
-    num_turbines = len(fi.layout_x)
-
-    if df is not None:
-        # Start by ensuring simple index for df
-        df = df.reset_index(drop=('time' in df.columns))
-
-        # Derive bins from wd_array and ws_array
-        ws_array = df['ws']
-        wd_array = df['wd']
-        if 'ti' in df.columns:
-            ti_array = df['ti']
-        else:
-            ti_fi = np.min(fi.floris.farm.turbulence_intensity)
-            ti_array = np.repeat(ti_fi, df.shape[0])
-
-    ws_cutin = [_get_turbine_cutin_ws(t.fCpInterp) for t in fi.floris.farm.turbines]
-    ws_cutin = np.min(ws_cutin)  # Take the minimum of all
-    ws_cutout = [_get_turbine_cutout_ws(t.fCpInterp) for t in fi.floris.farm.turbines]
-    ws_cutout = np.max(ws_cutout)
-
-    if df_approx is None:
-        if wd_bounds is None:
-            wd_min = np.max([np.min(wd_array), 0.0])
-            wd_max = np.min([np.max(wd_array), 360.0])
-        else:
-            wd_min = wd_bounds[0]
-            wd_max = wd_bounds[1]
-
-        if ws_bounds is None:
-            ws_min = np.max([np.min(ws_array), ws_cutin]) 
-            ws_max = np.min([np.max(ws_array), ws_cutout])
-        else:
-            ws_min = ws_bounds[0]
-            ws_max = ws_bounds[1]
-
-        if ti_bounds is None:
-            if df is not None:
-                ti_min = np.max([np.min(ti_array), 0.0])
-                ti_max = np.min([np.max(ti_array), 0.30])
-        else:
-            ti_min = ti_bounds[0]
-            ti_max = ti_bounds[1]
-
-        wd_array_approx = np.arange(wd_min, wd_max + wd_step, wd_step)
-        ws_array_approx = np.arange(ws_min, ws_max + ws_step, ws_step)
-        if ti_step is None:
-            ti_array_approx = np.min(fi.floris.farm.turbulence_intensity)
-        else:
-            ti_array_approx = np.arange(ti_min, ti_max + ti_step, ti_step)
-
-        xyz_grid = np.array(np.meshgrid(
-            wd_array_approx, ws_array_approx, ti_array_approx, indexing='ij'))
-        df_approx = pd.DataFrame(
-            {'wd': np.reshape(xyz_grid[0], [-1, 1]).flatten(),
-             'ws': np.reshape(xyz_grid[1], [-1, 1]).flatten(),
-             'ti': np.reshape(xyz_grid[2], [-1, 1]).flatten()})
-        N_approx = df_approx.shape[0]
-
-        if df is None:
-            print('Generating a df_approx table of FLORIS solutions' +
-                  'covering a total of %d cases.' % (N_approx))
-        else:
-            N_raw = df.shape[0]
-            if df.shape[0] <= df_approx.shape[0]:
-                print('Approximation would not reduce number of cases ' +
-                      'with the current settings (N_raw = %d, N_approx = %d)'
-                      % (N_raw, N_approx))
-                print('Calculating the exact solutions for this dataset. ' +
-                      'Avoiding any approximations...')
-                df_out = calc_floris(df=df, fi=fi, num_threads=num_threads)
-                return df_out, None
-            else:
-                print('Reducing calculations from %d to %d' % (N_raw, N_approx) +
-                      ' cases using calc_floris_approx() over calc_floris().' )
-
-        df_approx = calc_floris(df=df_approx, fi=fi, num_threads=num_threads)
-
+    # Create interpolant
+    if xyz_grid.shape[3] == 1:
+        print('    Performing 2D interpolation')
+        shape_y = [len(wd_array_approx),
+                   len(ws_array_approx)]
+        xyz_tuple = (wd_array_approx,
+                     ws_array_approx)
+        values = np.reshape(np.array(df_approx['pow_000']),
+                            shape_y)
     else:
-        print('Using df_approx provided by user.')
-        wd_array_approx = np.unique(df_approx['wd'])
-        ws_array_approx = np.unique(df_approx['ws'])
-        ti_array_approx = np.unique(df_approx['ti'])
-        xyz_grid = np.array(np.meshgrid(
-            wd_array_approx, ws_array_approx, ti_array_approx, indexing='ij'))
+        print('    Performing 3D interpolation')
+        shape_y = [len(wd_array_approx),
+                   len(ws_array_approx),
+                   len(ti_array_approx)]
+        xyz_tuple = (wd_array_approx,
+                     ws_array_approx,
+                     ti_array_approx)
+        values = np.reshape(np.array(df_approx['pow_000']),
+                            shape_y)
 
-    # Calculate the output dataframe using interpolation
-    if df is None:
-        df_out = None
-    else:
-        # Map individual data entries to full DataFrame
-        print('Now mapping the precalculated solutions from FLORIS to the dataframe entries...')
-        print("  Creating a gridded interpolant with interpolation method '" + method + "'.")
+    f = interpolate.RegularGridInterpolator(xyz_tuple,
+                                            values,
+                                            method='linear',
+                                            bounds_error=False,
+                                            fill_value=np.nan)
 
-        # Create interpolant
-        if xyz_grid.shape[3] == 1:
-            print('    Performing 2D interpolation')
-            shape_y = [len(wd_array_approx), len(ws_array_approx)]
-            values = np.reshape(np.array(df_approx['pow_000']), shape_y)
-            xyz_tuple = (wd_array_approx, ws_array_approx)
-        else:
-            print('    Performing 3D interpolation')
-            shape_y = [len(wd_array_approx), len(ws_array_approx), len(ti_array_approx)]
-            values = np.reshape(np.array(df_approx['pow_000']), shape_y)
-            xyz_tuple = (wd_array_approx, ws_array_approx, ti_array_approx)
-        f = interpolate.RegularGridInterpolator(xyz_tuple, values,
-                                                method='linear',
-                                                bounds_error=False,
-                                                fill_value=np.nan)
-
-        # Create a new dataframe based on df
+    # Create a new dataframe based on df
+    if 'ti' not in df.columns:
         df_out = df[['time', 'wd', 'ws']].copy()
-        if 'ti' in df.columns:
-            df_out['ti'] = df['ti']
-        else:
-            df_out['ti'] = np.nan
+        df_out['ti'] = np.median(ti_array_approx)
+    else:
+        df_out = df[['time', 'wd', 'ws', 'ti']].copy()
 
-        # Use interpolant to determine values for all turbines and variables
-        for varname in ['pow', 'wd', 'ws', 'ti']:
-            print('     Interpolating ' + varname + ' for all turbines...')
-            for ti in range(num_turbines):
-                colname = varname + '_%03d' % ti
-                f.values = np.reshape(np.array(df_approx[colname]), shape_y)
-                if xyz_grid.shape[3] == 1:
-                    df_out[colname] = f(df[['wd', 'ws']])
-                else:
-                    df_out[colname] = f(df[['wd', 'ws', 'ti']])
+    # Use interpolant to determine values for all turbines and variables
+    for varname in ['pow', 'wd', 'ws', 'ti']:
+        print('     Interpolating ' + varname + ' for all turbines...')
+        for ti in range(num_turbines):
+            colname = varname + '_%03d' % ti
+            f.values = np.reshape(np.array(df_approx[colname]), shape_y)
+            if xyz_grid.shape[3] == 1:
+                df_out[colname] = f(df[['wd', 'ws']])
+            else:
+                df_out[colname] = f(df[['wd', 'ws', 'ti']])
 
-        # Overwrite the np.nan values for entries where ws < ws_cutin
-        idxs_lowws = (df_out['ws'] < ws_cutin)
-        df_out.loc[idxs_lowws, ['wd_%03d' % ti for ti in range(num_turbines)]] = df_out.loc[idxs_lowws, 'wd']
-        df_out.loc[idxs_lowws, ['ws_%03d' % ti for ti in range(num_turbines)]] = df_out.loc[idxs_lowws, 'ws']
-        df_out.loc[idxs_lowws, ['ti_%03d' % ti for ti in range(num_turbines)]] = df_out.loc[idxs_lowws, 'ti']
-        df_out.loc[idxs_lowws, ['pow_%03d' % ti for ti in range(num_turbines)]] = 0.0
+    return df_out
 
-        print('Finished calculating the FLORIS solutions for the dataframe.')
 
-    return df_out, df_approx
+def calc_floris_approx_table(fi,
+                             wd_array=np.arange(0., 360., 1.0),
+                             ws_array=np.arange(0., 20., 0.5),
+                             ti_array=None,
+                             num_threads=1):
+
+    xyz_grid = np.array(np.meshgrid(
+            wd_array, ws_array, ti_array, indexing='ij'))
+    df_approx = pd.DataFrame(
+        {'wd': np.reshape(xyz_grid[0], [-1, 1]).flatten(),
+         'ws': np.reshape(xyz_grid[1], [-1, 1]).flatten(),
+         'ti': np.reshape(xyz_grid[2], [-1, 1]).flatten()})
+    N_approx = df_approx.shape[0]
+
+    print('Generating a df_approx table of FLORIS solutions' +
+            'covering a total of %d cases.' % (N_approx))
+    df_approx = calc_floris(df=df_approx, fi=fi, num_threads=num_threads)
+
+    print('Finished calculating the FLORIS solutions for the dataframe.')
+
+    return df_approx
 
 
 def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,
