@@ -30,22 +30,19 @@ class bias_estimation():
                  df_fi_approx,
                  test_turbines_subset,
                  df_ws_mapping_func,
-                 df_pow_ref_mapping_func,
-                 verbose=False):
+                 df_pow_ref_mapping_func
+                 ):
         print('Initializing a bias_estimation() object...')
 
         # Import inputs
         self.df = df.reset_index(drop=('time' in df.columns))
         self.df_fi_approx = df_fi_approx
-        self.verbose = verbose
         self.df_ws_mapping_func = df_ws_mapping_func
         self.df_pow_ref_mapping_func = df_pow_ref_mapping_func
         self.test_turbines_subset = test_turbines_subset
 
-        self.opt_wd_bias = np.nan
-
     def _load_fsc_for_wd_bias(self, wd_bias):
-        print('Initializing fsc class for wd_bias = %.2f deg.'
+        print('  Initializing fsc class for wd_bias = %.2f deg.'
               % wd_bias)
         df_cor = self.df.copy()
         df_cor['wd'] = wrap_360(df_cor['wd'] - wd_bias)
@@ -56,13 +53,14 @@ class bias_estimation():
         df_cor = df_cor.dropna(subset=['wd', 'ws', 'pow_ref'])
 
         # Get FLORIS predictions
+        print('    Interpolating FLORIS predictions for dataframe.')
         df_fi = df_cor[['time', 'wd', 'ws']].copy()
         df_fi = ftools.interpolate_floris_from_df_approx(
-            df=df_fi, df_approx=self.df_fi_approx)
+            df=df_fi, df_approx=self.df_fi_approx, verbose=False)
         df_fi = self.df_pow_ref_mapping_func(df_fi)
 
         # Initialize SCADA analysis class and add dataframes
-        fsc = sca.scada_analysis(verbose=self.verbose)
+        fsc = sca.scada_analysis(verbose=False)
         fsc.add_df(df_cor, 'Measurement data')
         fsc.add_df(df_fi, 'FLORIS predictions')
 
@@ -84,7 +82,7 @@ class bias_estimation():
 
         fsc = self.fsc
         for ii, ti in enumerate(test_turbines):
-            print('  Determining energy ratio for test turbine = %03d.'
+            print('    Determining energy ratio for test turbine = %03d.'
                   % (ti) + ' WD bias: %.3f deg.' % self.fsc_wd_bias)
             fsc.get_energy_ratios(test_turbines=[ti],
                                   wd_step=wd_bin_size,
@@ -99,8 +97,12 @@ class bias_estimation():
 
         # Debugging: show all possible options
         if plot_iter_path is not None:
-            fp = os.path.join(plot_iter_path, 'bias%+.3f' % (self.fsc_wd_bias),
-                              'energyratio')
+            print('    Plotting & saving energy ratios for this iteration')
+            fp = os.path.join(
+                plot_iter_path,
+                'bias%+.3f' % (self.fsc_wd_bias),
+                'energyratio'
+                )
             os.makedirs(os.path.dirname(fp), exist_ok=True)
             self.plot_energy_ratios(save_path=fp, format='png')
             plt.close('all')
@@ -114,14 +116,12 @@ class bias_estimation():
                          ti_mask=None,
                          opt_search_range=(-180., 180.),
                          opt_search_brute_dx=5.0,
-                         opt_finish=opt.fmin,
                          energy_ratio_wd_binsize=2.0,
                          energy_ratio_ws_binsize=3.0,
                          energy_ratio_N_btstrp=1,
                          plot_iter_path=None):
 
         print('Estimating the wind direction bias')
-        self.time_mask = time_mask
 
         def cost_fun(wd_bias):
             self._load_fsc_for_wd_bias(wd_bias=wd_bias)
@@ -154,12 +154,12 @@ class bias_estimation():
             cost = np.nanmean(cost_array)
             return cost
 
-        if opt_finish is not None:
-            opt_finish = (
-                lambda func, x0, args=(): opt.fmin(func, x0, args,
-                                                   full_output=True,
-                                                   xtol=0.1, disp=True)
-            )
+        opt_finish = (
+            lambda func, x0, args=(): opt.fmin(func, x0, args,
+                                               maxfun=10,
+                                               full_output=True,
+                                               xtol=0.1, disp=True)
+        )
 
         dran = opt_search_range[1]-opt_search_range[0]
         x_opt, J_opt, x, J = opt.brute(
@@ -177,6 +177,7 @@ class bias_estimation():
         self.opt_wd_cost = J
 
         # End with optimal results and bootstrapping
+        print('  Evaluating optimal solution with bootstrapping')
         self._load_fsc_for_wd_bias(wd_bias=x_opt)
         self.fsc.set_masks(time_range=time_mask,
                            ws_range=ws_mask,
@@ -185,11 +186,12 @@ class bias_estimation():
         self._get_energy_ratios_allbins(
             wd_bin_size=energy_ratio_wd_binsize,
             ws_bin_size=energy_ratio_ws_binsize,
+            N_btstrp=energy_ratio_N_btstrp,
             plot_iter_path=plot_iter_path)
 
         return x_opt, J_opt
 
-    def plot_energy_ratios(self, save_path=None, format='png'):
+    def plot_energy_ratios(self, save_path=None, format='png', dpi=200):
         # Unpack variables
         energy_ratios_scada = self.energy_ratios_scada
         energy_ratios_floris = self.energy_ratios_floris
@@ -202,9 +204,9 @@ class bias_estimation():
         y_floris = [v['baseline'] for v in energy_ratios_floris]
         y_floris_l = [v['baseline_l'] for v in energy_ratios_floris]
         y_floris_u = [v['baseline_u'] for v in energy_ratios_floris]
+        time_range = (list(self.fsc.df_list[0]['df']['time'])[0],
+                      list(self.fsc.df_list[0]['df']['time'])[-1])
 
-        print('Plotting results for last evaluated case')
-        print('  Wind direction bias: %.1f deg' % (self.opt_wd_bias))
         for ii in range(len(self.test_turbines_subset)):
             ti = self.test_turbines_subset[ii]
             fig, ax = plt.subplots(figsize=(10, 6), nrows=2, sharex=True)
@@ -220,7 +222,7 @@ class bias_estimation():
                 )
             ax[0].set_title(
                 'Turbine %d. Time range: %s to %s.'
-                % (ti, str(self.time_mask[0]), str(self.time_mask[1]))
+                % (ti, str(time_range[0]), str(time_range[1]))
                 )
             ax[0].set_ylabel('Energy ratio (-)')
             ax[0].grid(b=True, which='major', axis='both', color='gray')
@@ -237,4 +239,4 @@ class bias_estimation():
 
             if save_path is not None:
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                plt.savefig(save_path + '_%03d.%s' % (ti, format))
+                plt.savefig(save_path + '_%03d.%s' % (ti, format), dpi=dpi)
