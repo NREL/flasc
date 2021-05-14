@@ -14,6 +14,7 @@
 import numpy as np
 import os
 import pandas as pd
+import re
 
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import utilities as fsut
@@ -24,7 +25,7 @@ def batch_load_and_concat_dfs(df_filelist):
     in floris_scada_analysis is typically split up in monthly data
     files to accommodate very large data files and easy debugging
     and batch processing. A common method for loading data is:
-    
+
     root_path = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(root_path, 'data')
     df_filelist = sqldbm.browse_datafiles(data_path=data_path,
@@ -97,3 +98,27 @@ def batch_split_and_save_dfs(df, save_path, table_name='scada_data'):
     print('Saved the output files to %s.' % save_path)
 
     return df_array
+
+
+def browse_downloaded_datafiles(data_path, table_name=''):
+    fn_pattern = re.compile('\d\d\d\d-\d\d_' + table_name + '.ftr')
+    files_list = []
+    for root, _, files in os.walk(data_path):
+        for name in files:
+            fn_item = fn_pattern.findall(name)
+            if len(fn_item) > 0:
+                fn_item = fn_item[0]
+                fn_path = os.path.join(root, fn_item)
+                files_list.append(fn_path)
+
+    # path_files = os.path.join(data_path, '*_' + table_name) + '.ftr'
+    # files_list = glob.glob(path_files)
+
+    # Sort alphabetically/numerically
+    files_list = list(np.sort(files_list))
+    files_list = [str(f) for f in files_list]
+
+    if len(files_list) == 0:
+        print('No data files found in %s.' % data_path)
+
+    return files_list
