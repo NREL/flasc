@@ -171,14 +171,18 @@ def calc_floris(df, fi, num_threads=1):
     return df_out
 
 
-def interpolate_floris_from_df_approx(df, df_approx, method='linear'):
+def interpolate_floris_from_df_approx(df, df_approx, method='linear',
+                                      verbose=True):
     # Format dataframe and get num_turbines
     df = df.reset_index(drop=('time' in df.columns))
     num_turbines = dfm.get_num_turbines(df_approx)
 
     # Map individual data entries to full DataFrame
-    print('Mapping the precalculated solutions from FLORIS to the dataframe...')
-    print("  Creating a gridded interpolant with interpolation method '" + method + "'.")
+    if verbose:
+        print("Mapping the precalculated solutions " +
+              "from FLORIS to the dataframe...")
+        print("  Creating a gridded interpolant with " +
+              "interpolation method '%s'." % method)
 
     wd_array_approx = np.unique(df_approx['wd'])
     ws_array_approx = np.unique(df_approx['ws'])
@@ -188,7 +192,8 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear'):
 
     # Create interpolant
     if xyz_grid.shape[3] == 1:
-        print('    Performing 2D interpolation')
+        if verbose:
+            print('    Performing 2D interpolation')
         shape_y = [len(wd_array_approx),
                    len(ws_array_approx)]
         xyz_tuple = (wd_array_approx,
@@ -196,7 +201,8 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear'):
         values = np.reshape(np.array(df_approx['pow_000']),
                             shape_y)
     else:
-        print('    Performing 3D interpolation')
+        if verbose:
+            print('    Performing 3D interpolation')
         shape_y = [len(wd_array_approx),
                    len(ws_array_approx),
                    len(ti_array_approx)]
@@ -221,7 +227,8 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear'):
 
     # Use interpolant to determine values for all turbines and variables
     for varname in ['pow', 'wd', 'ws', 'ti']:
-        print('     Interpolating ' + varname + ' for all turbines...')
+        if verbose:
+            print('     Interpolating ' + varname + ' for all turbines...')
         for ti in range(num_turbines):
             colname = varname + '_%03d' % ti
             f.values = np.reshape(np.array(df_approx[colname]), shape_y)
@@ -297,35 +304,35 @@ def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,
 
 def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
                               plot_lines=False):
-#     """Determine which turbines are operating in freestream (unwaked)
-#     flow, for the entire wind rose. This function will return a data-
-#     frame where each row will present a wind direction range and a set
-#     of wind turbine numbers for which those turbines are operating
-#     upstream. This is useful in determining the freestream conditions.
-#
-#     Args:
-#         fi ([floris object]): FLORIS object of the farm of interest.
-#         wd_step (float, optional): Wind direction discretization step.
-#         It will test what the upstream turbines are every [wd_step]
-#         degrees. A lower number means more accurate results, but
-#         typically there's no real benefit below 2.0 deg or so.
-#         Defaults to 3.0.
-#         wake_slope (float, optional): linear slope of the wake (dy/dx)
-#         plot_lines (bool, optional): Enable plotting wakes/turbines.
-#         Defaults to False.
-#
-#     Returns:
-#         df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row
-#         contains a wind direction range and a list of turbine numbers. For
-#         that particular wind direction range, the turbines numbered are 
-#         all upstream according to the FLORIS predictions. Depending on
-#         the FLORIS model parameters and ambient conditions, these results
-#         may vary slightly. Though, having minimal wake losses should not
-#         noticably affect your outcomes. Empirically, this approach has
-#         yielded good results with real SCADA data for determining what
-#         turbines are waked/unwaked and has served useful for determining
-#         what turbines to use as reference.
-#     """
+    """Determine which turbines are operating in freestream (unwaked)
+    flow, for the entire wind rose. This function will return a data-
+    frame where each row will present a wind direction range and a set
+    of wind turbine numbers for which those turbines are operating
+    upstream. This is useful in determining the freestream conditions.
+
+    Args:
+        fi ([floris object]): FLORIS object of the farm of interest.
+        wd_step (float, optional): Wind direction discretization step.
+        It will test what the upstream turbines are every [wd_step]
+        degrees. A lower number means more accurate results, but
+        typically there's no real benefit below 2.0 deg or so.
+        Defaults to 0.1.
+        wake_slope (float, optional): linear slope of the wake (dy/dx)
+        plot_lines (bool, optional): Enable plotting wakes/turbines.
+        Defaults to False.
+
+    Returns:
+        df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row
+        contains a wind direction range and a list of turbine numbers. For
+        that particular wind direction range, the turbines numbered are
+        all upstream according to the FLORIS predictions. Depending on
+        the FLORIS model parameters and ambient conditions, these results
+        may vary slightly. Though, having minimal wake losses should not
+        noticably affect your outcomes. Empirically, this approach has
+        yielded good results with real SCADA data for determining what
+        turbines are waked/unwaked and has served useful for determining
+        what turbines to use as reference.
+    """
 
     # Get farm layout
     x = fi.layout_x

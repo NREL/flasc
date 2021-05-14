@@ -65,8 +65,9 @@ class scada_analysis():
                 raise KeyError('More than 2 different category values ' +
                                'are found. Please limit yourself to 2.')
         else:
-            print("No 'category' column found in df. Adding column with " +
-                  "all values 'baseline'.")
+            if self.verbose:
+                print("No 'category' column found in df. Adding column " +
+                      "with all values 'baseline'.")
             df = df.copy()
             df.loc[:, 'category'] = 'baseline'
 
