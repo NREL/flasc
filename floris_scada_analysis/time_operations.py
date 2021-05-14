@@ -14,7 +14,8 @@
 import datetime
 import numpy as np
 import pandas as pd
-from pandas.core.base import DataError
+# from pandas.core.base import DataError
+from scipy import interpolate as interp
 
 from floris_scada_analysis.circular_statistics import calculate_wd_statistics
 from floris_scada_analysis import utilities as fsut
@@ -169,8 +170,7 @@ def df_resample_to_time_array(df, time_array, circular_cols,
     return df_res
 
 
-def find_window_in_time_array(time_array_src, seek_time_windows,
-                              predict_jumps=False):
+def find_window_in_time_array(time_array_src, seek_time_windows):
     """This function will look through time_array_src and return the indices
     of each of the entries of time_array_src that are within the region
     seek_time_windows[..][0] < time_array_src[..] <= seek_time_windows[..][1],
@@ -185,116 +185,42 @@ def find_window_in_time_array(time_array_src, seek_time_windows,
         respectively the minimum and maximum time of that particular time
         window.
 
-    Raises:
-        ValueError: [description]
-
     Returns:
-        [type]: [description]
+        idxs_out_array ([list]): List of range of integers indicating the
+        indices of time_array_src that correspond to the respective time
+        window defined in seek_time_windows.
     """
 
-    time_array_src = list(time_array_src)
-    seek_times_min_remaining = [tw[0] for tw in seek_time_windows]
-    seek_times_max_remaining = [tw[1] for tw in seek_time_windows]
-    idxs_out_array = []
+    # Get number of windows
+    Nw = len(seek_time_windows)
 
-    # Check time_array_src timestep if predicting jumps
-    if predict_jumps:
-        dt_src = fsut.estimate_dt(time_array_src)
+    # Convert source time array to datetime64
+    time_array_src = np.array(time_array_src, dtype="datetime64[ns]")
 
-    # Adress behavior at lower end (0)
-    i = 0
-    idxs_out = []
-    # Deal with situations in which entire range is out of array
-    while time_array_src[0] > seek_times_max_remaining[0]:
-        idxs_out_array.append([])
-        seek_times_min_remaining.pop(0)
-        seek_times_max_remaining.pop(0)
+    # Convert time_array_src to integers and set up interpolant
+    xq = time_array_src.astype(int)
+    yq = np.arange(0, len(xq), 1, dtype='int')
 
-    # Deal with first entry, partially covered by seek_times[0]
-    if time_array_src[0] > seek_times_min_remaining[0]:
-        while time_array_src[i] <= seek_times_max_remaining[0]:
-            idxs_out.append(i)
-            i += 1
-            if i == len(time_array_src):
-                break
-        idxs_out_array.append(idxs_out)
-        seek_times_min_remaining.pop(0)
-        seek_times_max_remaining.pop(0)
+    # Add limit cases and setup interpolant
+    xq_ext = np.hstack([0, xq, np.iinfo(int).max])
+    yq_ext = np.hstack([yq[0], yq, yq[-1]])
+    f = interp.interp1d(xq_ext, yq_ext, kind='nearest')
 
-    if len(seek_times_min_remaining) < 1:
-        return idxs_out_array
+    # Format the windows appropriately
+    windows_x = np.array(seek_time_windows, dtype="datetime64[ns]")
+    windows_x = windows_x.astype(int)
 
-    # Adress behavior at higher end (-1)
-    idxs_out_array_end = []
-    # Deal with situations in which entire range is out of array
-    while time_array_src[-1] < seek_times_min_remaining[-1]:
-        idxs_out_array_end.insert(0, [])  # Prepend
-        seek_times_min_remaining.pop(-1)
-        seek_times_max_remaining.pop(-1)
-        if len(seek_times_min_remaining) < 1:
-            idxs_out_array = idxs_out_array.extend(idxs_out_array_end)
-            return idxs_out_array
+    # Interpolate for all windows
+    ids_interp = np.array(f(windows_x), dtype='int')
 
-    # Deal with situations in which upper part of range is out of array
-    while time_array_src[-1] < seek_times_max_remaining[-1]:
-        i = len(time_array_src) - 1
-        while time_array_src[i] > seek_times_min_remaining[-1]:
-            i += -1
-        idxs_out = list(range(i + 1, len(time_array_src)))
-        idxs_out_array_end.insert(0, idxs_out)  # Prepend
-        seek_times_min_remaining.pop(-1)
-        seek_times_max_remaining.pop(-1)
-        if len(seek_times_min_remaining) < 1:
-            idxs_out_array = idxs_out_array.extend(idxs_out_array_end)
-            return idxs_out_array
+    # Step inside the time window, if currently outside
+    ids_min = ids_interp[:, 0]
+    ids_max = ids_interp[:, 1]
+    ids_min[xq[ids_min] <= windows_x[:, 0]] += 1
+    ids_max[xq[ids_max] > windows_x[:, 1]] += -1
 
-    if len(seek_times_min_remaining) < 1:
-        idxs_out_array = idxs_out_array.extend(idxs_out_array_end)
-        return idxs_out_array
-
-    # Adress all other situations
-    i = 0
-    while len(seek_times_min_remaining) > 0:
-        seek_tmin = seek_times_min_remaining[0]
-        seek_tmax = seek_times_max_remaining[0]
-
-        if predict_jumps:
-            i += int((seek_tmin - time_array_src[i]) / dt_src)
-
-        # If necessary, step back until we are at right point
-        # iold = i
-        while time_array_src[i-1] > seek_tmin:
-            i += -1
-            if i < 0:
-                i = 0
-                break
-        # print('stepped back from %d to %d...' % (iold, i))
-
-        # If necessary, step forward until we are at the right point
-        # iold = i
-        while time_array_src[i] <= seek_tmin:
-            i += 1
-            if i >= len(time_array_src):
-                i = len(time_array_src) - 1
-                break
-        # print('stepped forward from %d to %d...' % (iold, i))
-
-        # Now start appending entries until _max
-        idxs_out = []
-        while time_array_src[i] <= seek_tmax:
-            idxs_out.append(i)
-            i += 1
-            if i >= len(time_array_src):
-                i += -1
-                break
-        idxs_out_array.append(idxs_out)
-
-        # Remove time window entry
-        seek_times_min_remaining.pop(0)
-        seek_times_max_remaining.pop(0)
-
-    # Append idxs_out_array_end entries to idxs_out_array
-    for ar in idxs_out_array_end:
-        idxs_out_array.append(ar)
+    # Convert to a list of ranges
+    idxs_out_array = [list(range(ids_min[ii], ids_max[ii] + 1))
+                      for ii in range(Nw)]
 
     return idxs_out_array
