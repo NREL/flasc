@@ -17,7 +17,7 @@ from datetime import timedelta as td
 import re
 
 from floris_scada_analysis import dataframe_manipulations as dfm
-from floris_scada_analysis import time_operations as fsato
+from floris_scada_analysis import utilities as fsut
 
 
 def fix_csv_contents(csv_contents, line_format_str):
@@ -96,7 +96,7 @@ def read_raw_scada_files(files, single_file_reader_func,
     df = dfm.df_sort_and_fix_duplicates(df)
 
     if ffill_missing_data:
-        dt = fsato.estimate_dt(df['time'])
+        dt = fsut.estimate_dt(df['time'])
         if missing_data_buffer is None:
             missing_data_buffer = dt + td(seconds=1)
 

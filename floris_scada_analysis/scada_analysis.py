@@ -16,9 +16,9 @@ import numpy as np
 import pandas as pd
 from pandas.core.base import DataError
 
-from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import energy_ratio as er
 from floris_scada_analysis import time_operations as fsato
+from floris_scada_analysis import utilities as fsut
 
 
 class scada_analysis():
@@ -49,7 +49,7 @@ class scada_analysis():
             raise ImportError("Could not find all columns. Ensure that" +
                               "you have columns 'wd' and 'ws' in your df.")
 
-        num_turbines = dfm.get_num_turbines(df)
+        num_turbines = fsut.get_num_turbines(df)
         if len(self.df_list) < 1:
             self.num_turbines = num_turbines
             self.turbine_names = [str(i) for i in range(num_turbines)]

@@ -19,6 +19,7 @@ from scipy import optimize as opt
 from floris.utilities import wrap_180
 
 from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis import utilities as fsut
 
 
 class yaw_pow_fitting():
@@ -36,7 +37,7 @@ class yaw_pow_fitting():
             raise KeyError('vane_000 not found in dataset.')
 
         # Get true total number of turbines
-        self.num_turbines_all = dfm.get_num_turbines(df)
+        self.num_turbines_all = fsut.get_num_turbines(df)
         self.full_turbine_list = range(self.num_turbines_all)
 
         # Cut down dataframe by WS
@@ -62,7 +63,7 @@ class yaw_pow_fitting():
     def set_turbine_mode(self, turbine_list):
         if isinstance(turbine_list, str):
             if turbine_list == 'all':
-                num_turbines = dfm.get_num_turbines(self.df)
+                num_turbines = fsut.get_num_turbines(self.df)
                 turbine_list = range(num_turbines)
             else:
                 raise KeyError('Invalid turbine_list specified.')

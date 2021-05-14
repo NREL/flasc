@@ -21,9 +21,8 @@ import os
 import scipy.stats as scst
 
 from floris_scada_analysis import dataframe_filtering as dff
-from floris_scada_analysis import dataframe_manipulations as dfm
-from floris_scada_analysis import sqldatabase_management as sqldbm
 from floris_scada_analysis import time_operations as fsato
+from floris_scada_analysis import utilities as fsut
 
 from operational_analysis.toolkits import filters
 
@@ -130,7 +129,7 @@ def plot_df_filtering(df, save_path_and_prefix=None, dpi=300):
     num_turbines = len([c for c in df.columns if
                         'status_' in c and len(c) == 10 and
                         '_all' not in c])
-    dt = fsato.estimate_dt(df['time'])
+    dt = fsut.estimate_dt(df['time'])
     for ti in range(num_turbines):
         print('Producing confirmation plot for turbine %03d' % ti)
         if ti == 0:
@@ -212,7 +211,7 @@ class ws_pw_curve_filtering():
         self.set_df(df)
 
         # Get true total number of turbines
-        self.num_turbines_all = dfm.get_num_turbines(df)
+        self.num_turbines_all = fsut.get_num_turbines(df)
         self.full_turbine_list = range(self.num_turbines_all)
 
         # Set desired number of turbines for analysis
@@ -294,12 +293,12 @@ class ws_pw_curve_filtering():
 
     def set_df(self, df):
         self.df = df.reset_index(drop=('time' in df.columns))
-        self.dt = fsato.estimate_dt(self.df['time'])
+        self.dt = fsut.estimate_dt(self.df['time'])
 
     def set_turbine_mode(self, turbine_list):
         if isinstance(turbine_list, str):
             if turbine_list == 'all':
-                num_turbines = dfm.get_num_turbines(self.df)
+                num_turbines = fsut.get_num_turbines(self.df)
                 turbine_list = range(num_turbines)
             else:
                 raise KeyError('Invalid turbine_list specified.')
@@ -649,7 +648,7 @@ class ws_pw_curve_filtering():
             return df_target
 
         time_array_target = df_target['time']
-        dt_target = fsato.estimate_dt(time_array_target)
+        dt_target = fsut.estimate_dt(time_array_target)
         if dt_target >= 2.0 * self.dt:
             stws = [[t - dt_target, t] for t in time_array_target]
             time_map = fsato.find_window_in_time_array(
@@ -660,7 +659,7 @@ class ws_pw_curve_filtering():
                 print('Applying filtering to target_df with dt = %.1f s, turbine %03d.' % (dt_target.seconds, ti))
                 # any_bad_ids = [(np.min(self.df.loc[ids, 'status_%03d' % ti])) for ids in time_map]
                 bad_ids = [(np.mean(self.df.loc[ids, 'status_%03d' % ti]) < threshold) for ids in time_map]
-                df_target = dfm.df_mark_turbdata_as_faulty(df=df_target, cond=bad_ids, turbine_list=ti)
+                df_target = dff.df_mark_turbdata_as_faulty(df=df_target, cond=bad_ids, turbine_list=ti)
                 # df_target['status_%03d' % ti] = int(1)
                 # df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
                 print('  Mapping yields %d entries (%.2f %%) flagged as bad for ti = %d.'
@@ -678,7 +677,7 @@ class ws_pw_curve_filtering():
                 # df_target['status_%03d' % ti] = int(1)
                 if bad_ids is not None:
                     bad_ids = np.concatenate(bad_ids)
-                    df_target = dfm.df_mark_turbdata_as_faulty(df=df_target, cond=bad_ids, turbine_list=ti)
+                    df_target = dff.df_mark_turbdata_as_faulty(df=df_target, cond=bad_ids, turbine_list=ti)
                     # df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
                 nbad = np.sum(1-df_target['status_%03d' % ti])
                 print('  Mapping yields %d entries (%d %%) flagged as bad for ti = %d.'
@@ -698,48 +697,3 @@ class ws_pw_curve_filtering():
 
         return df_target
 
-
-# Example on how to use this class for data filtering
-if __name__ == '__main__':
-    # Load the data
-    print("Loading .ftr data. This may take a minute or two...")
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(root_path, 'data/01_structured_data')
-    df_60s_filelist = sqldbm.browse_datafiles(data_path=data_path,
-                                              scada_table='scada_data_60s')
-    df_60s = dfm.batch_load_and_concat_dfs(df_filelist=df_60s_filelist)
-
-    # Setup a wind-speed power curve filtering class
-    ws_pow_filtering = ws_pw_curve_filtering(df=df_60s,
-                                             single_turbine_mode=False)
-
-    # Filter data using default settings
-    ws_pow_filtering.apply_filters()
-
-    # Plot and save data for current dataframe
-    save_path = root_path + '/data/02_wspow_filtered_data/'
-    ws_pow_filtering.plot(draw_windows=True,
-                          confirm_plot=True,
-                          save_path=save_path)
-    plt.close('all')
-    ws_pow_filtering.df.to_feather(root_path +
-                                   '/data/02_wspow' +
-                                   '_filtered_data' +
-                                   '/scada_data_60' +
-                                   's.ftr')
-
-    # Apply same filters on down/upsampled data
-    df_1s_filelist = sqldbm.browse_datafiles(
-        data_path=data_path, scada_table='scada_data_1s')
-    for df_fn in df_1s_filelist:
-        print('Processing filtering for file %s' % df_fn)
-        df_1s = pd.read_feather(df_fn)
-        threshold = 0.99  # At least this ratio of data should be status == 1
-        save_path = (root_path + '/data/02_wspow_filtered_data/'
-                     + os.path.basename(df_fn))
-        df_1s = ws_pow_filtering.apply_filtering_to_other_df(
-            df_target=df_1s, threshold=threshold, fout=save_path)
-        fig_save_path_and_prefix = (root_path + '/data/02_wspow_filtered_data/'
-                                    + os.path.basename(df_fn) + '_plot')
-        plot_df_filtering(df_1s, save_path_and_prefix=fig_save_path_and_prefix)
-        plt.close('all')

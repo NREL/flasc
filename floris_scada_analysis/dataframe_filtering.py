@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 
 from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis import utilities as fsut
 
 
 def filter_df_by_status(df, exclude_columns=[], drop_all_bad_status=True,
@@ -45,7 +46,7 @@ def filter_df_by_status(df, exclude_columns=[], drop_all_bad_status=True,
           'FAULTY DATA IS DIRECTLY OVERWRITTEN BY NP.NAN TO AVOID ITS ' +
           '(ACCIDENTAL) USAGE.')
 
-    turbine_list = range(dfm.get_num_turbines(df))
+    turbine_list = range(fsut.get_num_turbines(df))
     status_cols = ["status_%03d" % ti for ti in turbine_list]
     status_cols = [c for c in status_cols if c in df.columns]
     if len(status_cols) < len(turbine_list):

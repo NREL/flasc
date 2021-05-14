@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis import utilities as fsut
 
 
 # def _get_turbine_cutin_ws(fCpInterp):
@@ -175,7 +175,7 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear',
                                       verbose=True):
     # Format dataframe and get num_turbines
     df = df.reset_index(drop=('time' in df.columns))
-    num_turbines = dfm.get_num_turbines(df_approx)
+    num_turbines = fsut.get_num_turbines(df_approx)
 
     # Map individual data entries to full DataFrame
     if verbose:

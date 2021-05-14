@@ -18,6 +18,7 @@ import os
 import pandas as pd
 
 from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis import utilities as fsut
 
 
 def compute_expectation(fx, p_X):
@@ -50,7 +51,7 @@ class energy_ratio:
         self.verbose = verbose
         self.df = pd.DataFrame()
         self._set_df(df_in)
-        self.num_turbines = dfm.get_num_turbines(df_in)
+        self.num_turbines = fsut.get_num_turbines(df_in)
         self.set_test_turbines(test_turbines, init=True)
         self.ws_step = ws_step
         self.wd_step = wd_step

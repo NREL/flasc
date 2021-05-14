@@ -19,9 +19,10 @@ import pandas as pd
 import warnings
 
 from floris.utilities import wrap_360
-from floris_scada_analysis import sqldatabase_management as sqldbm
+from floris_scada_analysis import df_reader_writer as fsio
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import floris_tools as ftools
+from floris_scada_analysis import utilities as fsut
 
 
 # Functions related to wind farm analysis for df
@@ -44,18 +45,7 @@ def filter_df_by_ti(df, ti_range):
 
 
 def get_num_turbines(df):
-    # Let's assume that the format of variables is ws_%03d, wd_%03d, and so on
-    num_turbines = len([c for c in df.columns if 'pow_' in c and len(c) == 7])
-
-    if num_turbines == 0:
-        # Try with wind speed
-        num_turbines = len([c for c in df.columns if 'ws_' in c and len(c) == 6])
-
-    if num_turbines == 0:
-        # Try with wind direction
-        num_turbines = len([c for c in df.columns if 'wd_' in c and len(c) == 6])
-
-    return num_turbines
+    return fsut.get_num_turbines(df)
 
 
 # Generic functions for column operations
@@ -629,86 +619,6 @@ def df_reduce_precision(df_in, verbose=False):
     return df_out
 
 
-def batch_load_and_concat_dfs(df_filelist):
-    """Function to batch load and concatenate dataframe files. Data
-    in floris_scada_analysis is typically split up in monthly data
-    files to accommodate very large data files and easy debugging
-    and batch processing. A common method for loading data is:
-    
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(root_path, 'data')
-    df_filelist = sqldbm.browse_datafiles(data_path=data_path,
-                                          scada_table='scada_data')
-    df = dfm.batch_load_and_concat_dfs(df_filelist=df_filelist)
-
-    Args:
-        df_filelist ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """    
-    df_array = []
-    for dfn in df_filelist:
-        df_array.append(pd.read_feather(dfn))
-
-    if len(df_array) == 0:
-        df_out = pd.DataFrame()
-    else:
-        df_out = pd.concat(df_array, ignore_index=True)
-        df_out = df_out.reset_index(drop=('time' in df_out.columns))
-        df_out = df_out.sort_values(by='time')
-    return df_out
-
-
-def batch_split_and_save_dfs(df, save_path, table_name='scada_data'):
-    df = df.copy()
-    if 'time' not in df.columns:
-        df = df.reset_index(drop=False)
-    else:
-        df = df.reset_index(drop=True)
-
-    time_array = pd.to_datetime(df['time'])
-    dt = fsato.estimate_dt(time_array)
-
-    # Check if dataframe is continually ascending
-    if (any([float(i) for i in np.diff(time_array)]) <= 0):
-        raise KeyError("Time column in dataframe is not ascending.")
-
-    df_array = []
-    # time_start = list(time_array)[0]
-    # time_end = list(time_array)[-1]
-
-    df_time_windows = []
-    years = np.unique([t.year for t in time_array])
-    for yr in years:
-        months = np.unique([t.month for t in time_array
-                            if t.year == yr])
-        for mo in months:
-            tw0 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo)) + dt
-            if mo == 12:
-                tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr+1, 1))
-            else:
-                tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo+1))
-            df_time_windows.append([tw0, tw1])
-
-    # Create output folder
-    os.makedirs(save_path, exist_ok=True)
-
-    # Extract time indices
-    print('Splitting the data into %d separate months.' % len(df_time_windows))
-    id_map = fsato.find_window_in_time_array(time_array, df_time_windows)
-    for ii in range(len(id_map)):
-        df_sub = df.copy().loc[id_map[ii]].reset_index(drop=True)
-        year = list(pd.to_datetime(df_sub.time))[0].year
-        month = list(pd.to_datetime(df_sub.time))[0].month
-        fn = '%04d-%02d' % (year, month) + '_' + table_name + '.ftr'
-        df_sub.to_feather(os.path.join(save_path, fn))
-        df_array.append(df_sub)
-    print('Saved the output files to %s.' % save_path)
-
-    return df_array
-
-
 # Functions used for dataframe processing specifically
 def df_drop_nan_rows(df, verbose=False):
     """Remove entries in dataframe where all rows (besides 'time')
@@ -810,8 +720,20 @@ def df_sort_and_find_duplicates(df):
     return df, duplicate_entries_idx
 
 
-# Formerly a_01_structure_data.py
+def make_df_wide(df):
+    df["turbid"] = df['turbid'].astype(int)
+    df = df.reset_index(drop=False)
+    if 'index' in df.columns:
+        df = df.drop(columns='index')
+    df = df.set_index(["time", "turbid"], drop=True)
+    df = df.unstack()
+    df.columns = ["%s_%s" % c for c in df.columns]
+    df = df.reset_index(drop=False)
+    return df
+
+
 def restructure_single_df(df, column_mapping_dict):
+    # Formerly a_01_structure_data.py
     print('  Processing dataset...')
 
     if df.shape[0] < 1:
@@ -836,25 +758,13 @@ def restructure_single_df(df, column_mapping_dict):
     return df_structured
 
 
-def make_df_wide(df):
-    df["turbid"] = df['turbid'].astype(int)
-    df = df.reset_index(drop=False)
-    if 'index' in df.columns:
-        df = df.drop(columns='index')
-    df = df.set_index(["time", "turbid"], drop=True)
-    df = df.unstack()
-    df.columns = ["%s_%s" % c for c in df.columns]
-    df = df.reset_index(drop=False)
-    return df
-
-
 def restructure_df_files(df_table_name, column_mapping_dict,
                          data_path, target_path):
     print('Loading, processing and saving dataframes for '+df_table_name+'.')
     if not os.path.exists(target_path):
         os.mkdir(target_path)
 
-    files_result = sqldbm.browse_downloaded_datafiles(
+    files_result = fsio.browse_downloaded_datafiles(
         data_path, table_name=df_table_name)
     files_result = np.sort(files_result)
     for fi in files_result:

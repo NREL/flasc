@@ -17,7 +17,7 @@ import pandas as pd
 from pandas.core.base import DataError
 
 from floris_scada_analysis.circular_statistics import calculate_wd_statistics
-from floris_scada_analysis import optimization as fopt
+from floris_scada_analysis import utilities as fsut
 
 
 def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
@@ -50,7 +50,7 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
 
     # Estimate sampling time of source dataset
     time_array_src = df.reset_index().time
-    dt_src = estimate_dt(time_array_src)
+    dt_src = fsut.estimate_dt(time_array_src)
 
     if target_dt < 2 * dt_src:
         raise UserWarning(
@@ -161,37 +161,12 @@ def df_resample_to_time_array(df, time_array, circular_cols,
             wrap_around_360 = (c in circular_cols)
 
         print('  Resampling column %s onto the specified time_array.' % c)
-        y = fopt.interp_within_margin(
+        y = fsut.interp_within_margin(
             x=x, xp=xp, yp=df[c], x_margin=dxx, kind=interp_method,
             wrap_around_360=wrap_around_360)
         df_res[c] = y
 
     return df_res
-
-
-def estimate_dt(time_array):
-    """Automatically estimate timestep in a time_array
-
-    Args:
-        time_array ([list]): List or dataframe with time entries
-
-    Returns:
-        dt ([datetime.timedelta]): Timestep in dt.timedelta format
-    """
-
-    if len(time_array) < 2:
-        # Assume arbitrary value
-        return datetime.timedelta(seconds=0)
-
-    dt = np.median(np.diff(time_array))
-    if not isinstance(dt, datetime.timedelta):
-        dt = datetime.timedelta(seconds=dt.astype(float)/1e9)
-
-    # Check if data is all ascending
-    if dt <= datetime.timedelta(0):
-        raise DataError('Please only insert time ascending data.')
-
-    return dt
 
 
 def find_window_in_time_array(time_array_src, seek_time_windows,
@@ -224,7 +199,7 @@ def find_window_in_time_array(time_array_src, seek_time_windows,
 
     # Check time_array_src timestep if predicting jumps
     if predict_jumps:
-        dt_src = estimate_dt(time_array_src)
+        dt_src = fsut.estimate_dt(time_array_src)
 
     # Adress behavior at lower end (0)
     i = 0
