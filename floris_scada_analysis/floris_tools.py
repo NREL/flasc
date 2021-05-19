@@ -184,9 +184,12 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear',
         print("  Creating a gridded interpolant with " +
               "interpolation method '%s'." % method)
 
-    wd_array_approx = np.unique(df_approx['wd'])
-    ws_array_approx = np.unique(df_approx['ws'])
-    ti_array_approx = np.unique(df_approx['ti'])
+    wd_array_approx = np.unique(df_approx['wd'].astype(float))
+    ws_array_approx = np.unique(df_approx['ws'].astype(float))
+    if len(df_approx['ti'].unique()) == 1:
+        ti_array_approx = 0.08  # Placeholder, does not matter
+    else:
+        ti_array_approx = np.unique(df_approx['ti'].astype(float))
     xyz_grid = np.array(np.meshgrid(
         wd_array_approx, ws_array_approx, ti_array_approx, indexing='ij'))
 
