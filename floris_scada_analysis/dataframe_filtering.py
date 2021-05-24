@@ -80,7 +80,7 @@ def filter_df_by_status(df, exclude_columns=[], drop_all_bad_status=True,
 def df_get_no_faulty_measurements(df, turbine):
     if isinstance(turbine, str):
         turbine = int(turbine)
-    entryisnan = np.isnan(df['pow_%03d' % turbine])
+    entryisnan = np.isnan(df['pow_%03d' % turbine].astype(float))
     # cols = [s for s in df.columns if s[-4::] == ('_%03d' % turbine)]
     # entryisnan = (np.sum(np.isnan(df[cols]),axis=1) > 0)
     N_isnan = np.sum(entryisnan)
@@ -137,6 +137,7 @@ def plot_highlight_data_by_conds(df, conds, ti):
     # ax.set_xticks(ax.get_xticks()[::4])
     xlbl_short = ['' for _ in range(len(xlbl))]
     stp = int(np.round(len(xlbl)/50))  # About 50 labels is fine
+    stp = int(np.max([stp, 1]))
     xlbl_short[::stp] = xlbl[::stp]
     ax.set_xticklabels(xlbl_short)
     ax.set_xlabel('Time (year-week no.)')
