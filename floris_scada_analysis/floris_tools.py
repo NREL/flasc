@@ -14,58 +14,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pandas.core.base import DataError
 from scipy import interpolate
 
 from floris_scada_analysis import utilities as fsut
 
-
-# def _get_turbine_cutin_ws(fCpInterp):
-#     """Helper function to determine the cut-in wind speed of a turbine
-#     in the farm.
-
-#     Args:
-#         fCpInterp ([interpolant]): Interpolant function for Cp that can
-#         directly be pulled from the FLORIS runner object. The interpolant
-#         is typically located in fi.floris.farm.turbines[i].fCpInterp].
-
-#     Returns:
-#         ws_cutin_ti ([float]): Cut-in wind speed in m/s
-#     """
-#     dx = np.diff(fCpInterp.x)
-#     dx = np.median(dx)
-#     ws_cutin_ti = fCpInterp.x[0] - dx
-#     ii = 0
-#     while fCpInterp.y[ii] < 1.0e-4:
-#         ws_cutin_ti = fCpInterp.x[ii]
-#         ii = ii + 1
-
-#     return ws_cutin_ti
+from floris.utilities import wrap_360
 
 
-# def _get_turbine_cutout_ws(fCpInterp):
-#     """Helper function to determine the cut-out wind speed of a turbine
-#     in the farm.
-
-#     Args:
-#         fCpInterp ([interpolant]): Interpolant function for Cp that can
-#         directly be pulled from the FLORIS runner object. The interpolant
-#         is typically located in fi.floris.farm.turbines[i].fCpInterp].
-
-#     Returns:
-#         ws_cutout_ti ([float]): Cut-out wind speed in m/s
-#     """    
-#     dx = np.diff(fCpInterp.x)
-#     dx = np.median(dx)
-#     ws_cutout_ti = fCpInterp.x[-1] + dx
-#     ii = len(fCpInterp.x) - 1
-#     while fCpInterp.y[ii] < 1.0e-4:
-#         ws_cutout_ti = fCpInterp.x[ii]
-#         ii = ii - 1
-
-#     return ws_cutout_ti
-
-
-def _run_fi_serial(df_subset, fi, verbose=False):
+def _run_fi_serial(df_subset, fi, use_yaw=None, verbose=False):
     """Evaluate the FLORIS solutions for a set of wind directions,
     wind speeds and turbulence intensities in serial (non-
     parallelized) mode. 
@@ -82,10 +39,24 @@ def _run_fi_serial(df_subset, fi, verbose=False):
         df_out ([pd.DataFrame]): Identical to the inserted dataframe,
         df_subset, but now with additional columns containing the
         predicted power production for each turbine, as pow_000, ...
-        pow_00N. 
+        pow_00N.
     """
     num_turbines = len(fi.layout_x)
     df_out = df_subset.copy()
+
+    if use_yaw is None:
+        use_yaw = ('yaw_000' in df_subset.columns)
+
+    yaw_rel = np.zeros((df_out.shape[0], num_turbines))
+    if use_yaw:
+        yaw_cols = ['yaw_%03d' % ti for ti in range(num_turbines)]
+        if np.any(df_subset[yaw_cols] < 0.):
+            raise DataError('Yaw should be defined in domain [0, 360) deg.')
+
+        wd = np.array(df_out['wd'], dtype=float)
+        yaw_rel = (np.array(df_out[yaw_cols], dtype=float) -
+                   np.stack((wd,) * num_turbines, axis=0).T)
+
     for idx in df_out.index:
         if (
             verbose and
@@ -97,7 +68,8 @@ def _run_fi_serial(df_subset, fi, verbose=False):
         fi.reinitialize_flow_field(wind_speed=df_out.loc[idx, 'ws'],
                                    wind_direction=df_out.loc[idx, 'wd'],
                                    turbulence_intensity=df_out.loc[idx, 'ti'])
-        fi.calculate_wake()
+
+        fi.calculate_wake(yaw_rel[idx, :])
 
         for ti in range(num_turbines):
             df_out.loc[idx, 'pow_%03d' % ti] = np.array(fi.get_turbine_power())[ti]/1000.
@@ -133,13 +105,21 @@ def calc_floris(df, fi, num_threads=1):
     df = df.reset_index(drop=('time' in df.columns))
 
     # Generate new dataframe called df_out
-    if not ('ti' in df.columns):
-        df['ti'] = np.min(fi.floris.farm.turbulence_intensity)
-
-    if 'time' in df.columns:
-        df_out = df[['time', 'wd', 'ws', 'ti']].copy()
+    df_out = df[['wd', 'ws']].copy()
+    if ('ti' in df.columns):
+        df_out['ti'] = df['ti'].copy()
     else:
-        df_out = df[['wd', 'ws', 'ti']].copy()
+        df['ti'] = np.min(fi.floris.farm.turbulence_intensity)
+    if ('time' in df.columns):
+        df_out['time'] = df['time'].copy()
+
+    # Copy yaw angles, if possible
+    yaw_cols = ['yaw_%03d' % ti for ti in range(num_turbines)]
+    yaw_cols = [c for c in yaw_cols if c in df.columns]
+    if len(yaw_cols) > 0:
+        if np.any(df[yaw_cols] < 0.):
+            raise DataError('Yaw should be defined in domain [0, 360) deg.')
+        df_out[yaw_cols] = df[yaw_cols].copy()
 
     # Create placeholders for turbine measurements
     for colname in ['pow', 'ws', 'wd', 'ti']:
@@ -163,8 +143,6 @@ def calc_floris(df, fi, num_threads=1):
         with mp.Pool(processes=num_threads) as pool:
             df_list = pool.starmap(_run_fi_serial,
                                    zip(df_list, repeat(fi)))
-            # df_list = pool.map(partial(func, b=second_arg), a_args)
-            # df_list = pool.map(partial(_run_fi_serial, fi=fi), df_list)
         df_out = pd.concat(df_list).drop(columns='index')
     print('Finished calculating the FLORIS solutions for the dataframe.')
 
