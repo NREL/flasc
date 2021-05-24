@@ -57,7 +57,7 @@ def get_column_mean(df, col_prefix='pow', turbine_list=None,
         turbine_list = [turbine_list]
 
     col_names = [col_prefix + '_%03d' % ti for ti in turbine_list]
-    array = df[col_names]
+    array = df[col_names].astype(float)
 
     if circular_mean:
         # Use unit vectors to calculate the mean
