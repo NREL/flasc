@@ -19,6 +19,7 @@ import pandas as pd
 from time import perf_counter as timerpc
 
 from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis import df_reader_writer as fsio
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -490,8 +491,8 @@ def batch_download_data_from_sql(dbc, destination_path, table_name):
     db_end_time = db_end_time + datetime.timedelta(minutes=10)
 
     # Check for past files and continue download or start a fresh download
-    files_result = browse_downloaded_datafiles(destination_path,
-                                               table_name=table_name)
+    files_result = fsio.browse_downloaded_datafiles(destination_path,
+                                                    table_name=table_name)
     print('A total of %d existing files found.' % len(files_result))
 
     # Next timestamp is going to be next first of the month
@@ -530,7 +531,7 @@ def batch_download_data_from_sql(dbc, destination_path, table_name):
         # Drop NaN rows
         df = dfm.df_drop_nan_rows(df)
 
-        # Save dataset as a .p file
+        # Save dataset as a .ftr file
         fout = os.path.join(destination_path, "%s_%s.ftr" %
             (current_timestamp.strftime("%Y-%m"), table_name))
 

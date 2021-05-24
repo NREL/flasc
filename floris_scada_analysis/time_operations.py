@@ -21,7 +21,8 @@ from floris_scada_analysis.circular_statistics import calculate_wd_statistics
 from floris_scada_analysis import utilities as fsut
 
 
-def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
+def df_downsample(df, resample_cols_angular, time_array_target,
+                  calc_median_min_max_std=True, verbose=True):
     """Downsampling of a predefined dataframe with data to a higher
     timestep. This is useful for downsampling 1s to 60s, 600s or hourly data
 
@@ -45,36 +46,37 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
         df_res ([pd.DataFrame]): Resampled dataframe
     """
 
-    # Convert input into datetime.timedelta if necessary
-    if isinstance(target_dt, float) or isinstance(target_dt, int):
-        target_dt = datetime.timedelta(seconds=target_dt)
-
     # Estimate sampling time of source dataset
     time_array_src = df.reset_index().time
     dt_src = fsut.estimate_dt(time_array_src)
 
+    target_dts = np.unique(np.diff(time_array_target))
+    if len(target_dts) > 1:
+        raise UserWarning(
+            "Varying timestep found in time_array_target. Exiting..."
+        )
+    target_dt = target_dts[0]
     if target_dt < 2 * dt_src:
         raise UserWarning(
             "Not recommended to downsample with < 2x the original dt."
         )
 
     # Set up new dataframes: values are based on past [target_dt] time
-    time_array_target = np.arange(
-        np.min(time_array_src) + target_dt,
-        np.max(time_array_src) + target_dt,
-        target_dt,
-    )
+    if time_array_target is None:
+        start_time = np.min(time_array_src) + target_dt
+        end_time = np.max(time_array_src) + 0.99 * target_dt
+        time_array_target = np.arange(start_time, end_time, target_dt)
+
     time_array_target = pd.to_datetime(time_array_target)
 
-    print("Calculating mapping between raw and downsampled data")
+    if verbose:
+        print("Calculating mapping between raw and downsampled data")
     time_target_start_array = [t - target_dt for t in time_array_target]
     time_windows = [[time_target_start_array[i], time_array_target[i]] 
                     for i in range(len(time_target_start_array))]
     tids_array = find_window_in_time_array(time_array_src, time_windows)
 
-    print("Downsampling data and calculating _mean, _median, _min, _max, and _std.")
     df_res = pd.DataFrame({"time": time_array_target})
-
     resample_cols_regular = [
         c for c in df.columns if c not in resample_cols_angular
         and "index" not in c and "time" not in c
@@ -97,22 +99,30 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
     new_shape = (nws, max_tlen, ncols)
     array_df_reg_tws = array_df_reg[tids_array_full, :].reshape(new_shape)
 
-    print('Downsampling non-angular columns: calculating mean, median, std, min, max...')
-    df_res[[c + '_mean' for c in resample_cols_regular]] = (
-        np.nanmean(array_df_reg_tws, axis=1)
-    )
-    df_res[[c + '_median' for c in resample_cols_regular]] = (
-        np.nanmedian(array_df_reg_tws, axis=1)
-    )
-    df_res[[c + '_std' for c in resample_cols_regular]] = (
-        np.nanstd(array_df_reg_tws, axis=1)
-    )
-    df_res[[c + '_min' for c in resample_cols_regular]] = (
-        np.nanmin(array_df_reg_tws, axis=1)
-    )
-    df_res[[c + '_max' for c in resample_cols_regular]] = (
-        np.nanmax(array_df_reg_tws, axis=1)
-    )
+    if calc_median_min_max_std:
+        if verbose:
+            print('Downsampling non-angular columns: calculating mean, median, std, min, max...')
+        df_res[[c + '_mean' for c in resample_cols_regular]] = (
+            np.nanmean(array_df_reg_tws, axis=1)
+        )
+        df_res[[c + '_median' for c in resample_cols_regular]] = (
+            np.nanmedian(array_df_reg_tws, axis=1)
+        )
+        df_res[[c + '_std' for c in resample_cols_regular]] = (
+            np.nanstd(array_df_reg_tws, axis=1)
+        )
+        df_res[[c + '_min' for c in resample_cols_regular]] = (
+            np.nanmin(array_df_reg_tws, axis=1)
+        )
+        df_res[[c + '_max' for c in resample_cols_regular]] = (
+            np.nanmax(array_df_reg_tws, axis=1)
+        )
+    else:
+        if verbose:
+            print('Downsampling non-angular columns: calculating mean...')
+        df_res[[c for c in resample_cols_regular]] = (
+            np.nanmean(array_df_reg_tws, axis=1)
+        )
 
     # Calculate statistical properties of angular columns
     ncols = len(resample_cols_angular)
@@ -121,24 +131,64 @@ def df_downsample(df, resample_cols_angular, target_dt=600.0, verbose=True):
     array_df_ang = np.vstack([array_df_ang, np.array([np.nan] * ncols)])
     array_df_ang_tws = array_df_ang[tids_array_full, :].reshape(new_shape)
 
-    print('Downsampling angular columns: calculating mean, median, std, min, max...')
-    means_ang, medians_ang, stds_ang, mins_ang, maxs_ang = (
-        calculate_wd_statistics(array_df_ang_tws, axis=1))
+    if calc_median_min_max_std:
+        if verbose:
+            print('Downsampling angular columns: calculating mean, median, std, min, max...')
+        means_ang, medians_ang, stds_ang, mins_ang, maxs_ang = (
+            calculate_wd_statistics(array_df_ang_tws,
+                                    axis=1,
+                                    calc_median_min_max_std=True)
+            )
+    else:
+        if verbose:
+            print('Downsampling angular columns: calculating mean...')
+        means_ang = (
+            calculate_wd_statistics(array_df_ang_tws,
+                                    axis=1,
+                                    calc_median_min_max_std=False)
+            )
 
-    df_res[[c + '_mean' for c in resample_cols_angular]] = means_ang
-    df_res[[c + '_median' for c in resample_cols_angular]] = medians_ang
-    df_res[[c + '_std' for c in resample_cols_angular]] = stds_ang
-    df_res[[c + '_min' for c in resample_cols_angular]] = mins_ang
-    df_res[[c + '_max' for c in resample_cols_angular]] = maxs_ang
+    if calc_median_min_max_std:
+        df_res[[c + '_mean' for c in resample_cols_angular]] = means_ang
+        df_res[[c + '_median' for c in resample_cols_angular]] = medians_ang
+        df_res[[c + '_std' for c in resample_cols_angular]] = stds_ang
+        df_res[[c + '_min' for c in resample_cols_angular]] = mins_ang
+        df_res[[c + '_max' for c in resample_cols_angular]] = maxs_ang
+    else:
+        df_res[[c for c in resample_cols_angular]] = means_ang
 
     return df_res
 
 
-def df_resample_to_time_array(df, time_array, circular_cols,
-                              interp_method, interp_margin=None):
+def df_resample_by_filling_gaps(df, time_array):
     df_res = df.head(0).copy()  # Copy with properties but no actual data
     df_res['time'] = time_array
 
+    if df.shape[0] < 1:
+        return df_res
+
+    # Find where datasets overlap
+    xt_src = np.array(df['time'], dtype="datetime64[ns]")
+    t0 = xt_src[0]
+    xt_src = np.array((xt_src - t0) / np.timedelta64(1, 's'), dtype=int)
+    xt_trg = np.array(time_array, dtype="datetime64[ns]")
+    xt_trg = np.array((xt_trg - t0) / np.timedelta64(1, 's'), dtype=int)
+    _, comm1, comm2 = np.intersect1d(xt_src, xt_trg, return_indices=True)
+
+    # Update dataframe with values wherever overlap
+    cols = [c for c in df.columns if not 'time' == c]
+    df_res.loc[comm2, cols] = df.loc[comm1, cols].values
+
+    return df_res
+
+def df_resample_by_interpolation(df, time_array, circular_cols,
+                              interp_method='nearest', interp_margin=None):
+    _resample_fill_gaps(df, time_array)
+    # Copy with properties but no actual data
+    df_res = df.head(0).copy()
+
+    # Fill with np.nan values and the correct time array
+    df_res['time'] = time_array
     t0 = time_array[0]
     df_t = np.array(df['time'] - t0, dtype=np.timedelta64)
     xp = df_t/np.timedelta64(1, 's')  # Convert to regular seconds
@@ -153,19 +203,29 @@ def df_resample_to_time_array(df, time_array, circular_cols,
         dxx = np.timedelta64(interp_margin) / np.timedelta64(1, 's')
 
     cols_to_interp = [c for c in df_res.columns if c not in ['time']]
-    for ii, c in enumerate(cols_to_interp):
-        if isinstance(circular_cols, bool):
-            wrap_around_360 = circular_cols
-        elif isinstance(circular_cols[0], bool):
-            wrap_around_360 = circular_cols[ii]
-        elif isinstance(circular_cols[0], str):
-            wrap_around_360 = (c in circular_cols)
 
-        print('  Resampling column %s onto the specified time_array.' % c)
-        y = fsut.interp_within_margin(
-            x=x, xp=xp, yp=df[c], x_margin=dxx, kind=interp_method,
-            wrap_around_360=wrap_around_360)
-        df_res[c] = y
+    # NN interpolation: just find indices and map accordingly for all cols
+    if interp_method == 'nearest':
+        y_indices = np.array(range(len(x)))
+        y_mapping = fsut.interp_within_margin(
+            x=x, xp=xp, yp=y_indices, x_margin=dxx, kind='nearest')
+        for ii, c in enumerate(cols_to_interp):
+            df_res[c] = np.array(df[c])[y_mapping]
+
+    else:
+        for ii, c in enumerate(cols_to_interp):
+            if isinstance(circular_cols, bool):
+                wrap_around_360 = circular_cols
+            elif isinstance(circular_cols[0], bool):
+                wrap_around_360 = circular_cols[ii]
+            elif isinstance(circular_cols[0], str):
+                wrap_around_360 = (c in circular_cols)
+
+            print('  Resampling column %s onto the specified time_array.' % c)
+            y = fsut.interp_within_margin(
+                x=x, xp=xp, yp=df[c], x_margin=dxx, kind=interp_method,
+                wrap_around_360=wrap_around_360)
+            df_res[c] = y
 
     return df_res
 
