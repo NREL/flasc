@@ -19,7 +19,7 @@ from scipy import stats as spst
 
 from floris.utilities import wrap_360
 
-from floris_scada_analysis.logging import printnow as print
+from floris_scada_analysis.fsalogging import printnow as print
 from floris_scada_analysis import floris_tools as ftools
 from floris_scada_analysis import scada_analysis as sca
 
@@ -187,7 +187,7 @@ class bias_estimation():
             wd_bin_size=energy_ratio_wd_binsize,
             ws_bin_size=energy_ratio_ws_binsize,
             N_btstrp=energy_ratio_N_btstrp,
-            plot_iter_path=plot_iter_path)
+            plot_iter_path=None)
 
         return x_opt, J_opt
 
