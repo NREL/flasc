@@ -46,7 +46,8 @@ def calc_wd_mean_radial(angles_array_deg, axis=0):
 #     return mean_out
 
 
-def calculate_wd_statistics(angles_array_deg, axis=0):
+def calculate_wd_statistics(angles_array_deg, axis=0,
+                            calc_median_min_max_std=True):
     """Determine statistical properties of an array of wind directions.
     This includes the mean of the array, the median, the standard deviation,
     the minimum value and the maximum value.
@@ -71,6 +72,9 @@ def calculate_wd_statistics(angles_array_deg, axis=0):
 
     if np.unique(angles_array_deg).shape[0] == 1:
         mean_wd = angles_array_deg[0]
+        if not calc_median_min_max_std:
+            return mean_wd
+
         median_wd = angles_array_deg[0]
         std_wd = 0.0
         min_wd = angles_array_deg[0]
@@ -79,6 +83,10 @@ def calculate_wd_statistics(angles_array_deg, axis=0):
 
     # Calculate the mean
     mean_wd = calc_wd_mean_radial(angles_array_deg, axis=axis)
+
+    # Return if we dont need to calculate statistical properties
+    if not calc_median_min_max_std:
+        return mean_wd
 
     # Upsample mean_wd for next calculations
     new_shape = list(mean_wd.shape)
