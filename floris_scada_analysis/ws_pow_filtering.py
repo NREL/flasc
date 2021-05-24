@@ -230,8 +230,12 @@ class ws_pw_curve_filtering():
             est_ratedpw_list = np.zeros(self.num_turbines_all)
             for ti in self.full_turbine_list:
                 rated_ids = (df['ws_%03d' % ti] > 15.)
-                est_ratedpw = np.nanmedian(
-                    df.loc[rated_ids, 'pow_%03d' % (ti)])
+                df_subset = df.loc[rated_ids, 'pow_%03d' % (ti)]
+                if df_subset.shape[0] > 0:
+                    est_ratedpw = np.nanmedian(
+                        df.loc[rated_ids, 'pow_%03d' % (ti)])
+                else:
+                    est_ratedpw = np.nan
                 if np.isnan(est_ratedpw):
                     est_ratedpw = 1.  # Placeholder
                 elif est_ratedpw < 20.0:
@@ -433,10 +437,10 @@ class ws_pw_curve_filtering():
 
             # Filter by standard deviation for the reduced dataset
             df_ok = df[[not bool(i) for i in out_of_window_ids]]
-            if not all(np.isnan(df_ok['pow_%03d' % ti])):
+            if not all(np.isnan(df_ok['pow_%03d' % ti].astype(float))):
                 out_of_dev_series = filters.bin_filter(
-                    bin_col=df_ok['pow_%03d' % ti],
-                    value_col=df_ok['ws_%03d' % ti],
+                    bin_col=df_ok['pow_%03d' % ti].astype(float),
+                    value_col=df_ok['ws_%03d' % ti].astype(float),
                     bin_width=self.pow_step[ti],
                     threshold=self.ws_dev[ti],
                     center_type='median',
@@ -640,54 +644,46 @@ class ws_pw_curve_filtering():
 
         return fig_list
 
-    def apply_filtering_to_other_df(self, df_target, threshold=.999, fout=None):
-        if df_target.shape[0] < 2:
-            # Too few entries: just assume status is bad
-            status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
-            df_target[status_cols] = int(0)
+    def apply_filtering_to_other_df(self, df_target, fout=None):
+        turbines_in_target_df = [ti for ti in self.full_turbine_list
+                                 if 'pow_%03d' % ti in df_target.columns]
+
+        if df_target.shape[0] <= 2:
+            print('Dataframe is too small to estimate dt from. Skipping...')
+            if fout is not None:
+                print('Saving dataframe to ', fout)
+                df_target = df_target.reset_index(
+                    drop=('time' in df_target.columns))
+                df_target.to_feather(fout)
             return df_target
 
-        time_array_target = df_target['time']
+        time_array_target = df_target['time'].values
         dt_target = fsut.estimate_dt(time_array_target)
-        if dt_target >= 2.0 * self.dt:
-            stws = [[t - dt_target, t] for t in time_array_target]
-            time_map = fsato.find_window_in_time_array(
-                time_array_src=self.df['time'],
+        if dt_target >= self.dt:
+            raise UserWarning('This function only works with higher ' +
+                              'resolution data. If you want to map this' +
+                              'to lower resolution data, simply use the' +
+                              'dataframe downsampling function.')
+
+        for ti in turbines_in_target_df:
+            print('Applying filtering to target_df with dt = %.1f s, turbine %03d.' % (dt_target.seconds, ti))
+            status_bad = self.df[('status_%03d' % ti)] == 0
+            time_array_src_bad = self.df.loc[status_bad, 'time'].values
+            time_array_src_bad = pd.to_datetime(time_array_src_bad)
+            stws = [[t - self.dt, t] for t in time_array_src_bad]
+            bad_ids = fsato.find_window_in_time_array(
+                time_array_src=time_array_target,
                 seek_time_windows=stws)
 
-            for ti in self.full_turbine_list: # Base decision on threshold (-) of data
-                print('Applying filtering to target_df with dt = %.1f s, turbine %03d.' % (dt_target.seconds, ti))
-                # any_bad_ids = [(np.min(self.df.loc[ids, 'status_%03d' % ti])) for ids in time_map]
-                bad_ids = [(np.mean(self.df.loc[ids, 'status_%03d' % ti]) < threshold) for ids in time_map]
-                df_target = dff.df_mark_turbdata_as_faulty(df=df_target, cond=bad_ids, turbine_list=ti)
-                # df_target['status_%03d' % ti] = int(1)
-                # df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
-                print('  Mapping yields %d entries (%.2f %%) flagged as bad for ti = %d.'
-                      % (np.sum(bad_ids), 100. * np.sum(bad_ids) / df_target.shape[0], ti))
-        else:
-            for ti in self.full_turbine_list:
-                print('Applying filtering to target_df with dt = %.1f s, turbine %03d.' % (dt_target.seconds, ti))
-                status_bad = self.df[('status_%03d' % ti)] == 0
-                time_array_src_bad = self.df.loc[status_bad, 'time']
-                stws = [[t - self.dt, t] for t in time_array_src_bad]
-                bad_ids = fsato.find_window_in_time_array(
-                    time_array_src=time_array_target,
-                    seek_time_windows=stws)
-
-                # df_target['status_%03d' % ti] = int(1)
-                if bad_ids is not None:
-                    bad_ids = np.concatenate(bad_ids)
-                    df_target = dff.df_mark_turbdata_as_faulty(df=df_target, cond=bad_ids, turbine_list=ti)
-                    # df_target.loc[bad_ids, 'status_%03d' % ti] = int(0)
-                nbad = np.sum(1-df_target['status_%03d' % ti])
-                print('  Mapping yields %d entries (%d %%) flagged as bad for ti = %d.'
-                      % (nbad, 100. * nbad / df_target.shape[0], ti))
-
-        # status_cols = [('status_%03d' % ti) for ti in self.full_turbine_list]
-
-        # # Remove df entries with all status == 0
-        # all_bad = (df_target[status_cols].max(axis=1) == 0)
-        # df_target = df_target[[not bool(i) for i in all_bad]]
+            if bad_ids is not None:
+                bad_ids = np.concatenate(bad_ids)
+                print('  Marking entries as faulty in higher resolution dataframe...')
+                df_target = dff.df_mark_turbdata_as_faulty(
+                    df=df_target,
+                    cond=bad_ids,
+                    turbine_list=ti,
+                    verbose=True
+                    )
 
         if fout is not None:
             print('Saving dataframe to ', fout)
@@ -696,4 +692,3 @@ class ws_pw_curve_filtering():
             df_target.to_feather(fout)
 
         return df_target
-
