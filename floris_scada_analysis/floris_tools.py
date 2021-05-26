@@ -25,7 +25,7 @@ from floris.utilities import wrap_360
 def _run_fi_serial(df_subset, fi, use_yaw=None, verbose=False):
     """Evaluate the FLORIS solutions for a set of wind directions,
     wind speeds and turbulence intensities in serial (non-
-    parallelized) mode. 
+    parallelized) mode.
 
     Args:
         df_subset ([pd.DataFrame]): Dataframe containing the columns
@@ -80,7 +80,7 @@ def _run_fi_serial(df_subset, fi, use_yaw=None, verbose=False):
 
 
 # Define an approximate calc_floris() function
-def calc_floris(df, fi, num_threads=1):
+def calc_floris(df, fi, num_threads=1, use_yaw=None):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function calculates the exact solutions.
 
@@ -96,8 +96,8 @@ def calc_floris(df, fi, num_threads=1):
 
     if num_threads > 1:
         import multiprocessing as mp
-        from itertools import repeat
-        from functools import partial
+        # from itertools import repeat
+        # from functools import partial
 
     num_turbines = len(fi.layout_x)
 
@@ -138,11 +138,14 @@ def calc_floris(df, fi, num_threads=1):
     print('Calculating FLORIS solutions with num_threads = %d.'
             % num_threads)
     if num_threads == 1:
-        df_out = _run_fi_serial(df_subset=df_out, fi=fi, verbose=True)
+        df_out = _run_fi_serial(df_subset=df_out, fi=fi,
+                                use_yaw=use_yaw, verbose=True)
     else:
+        multiargs = []
+        for df in df_list:
+            multiargs.append((df, fi, use_yaw, False))
         with mp.Pool(processes=num_threads) as pool:
-            df_list = pool.starmap(_run_fi_serial,
-                                   zip(df_list, repeat(fi)))
+            df_list = pool.starmap(_run_fi_serial, multiargs)
         df_out = pd.concat(df_list).drop(columns='index')
     print('Finished calculating the FLORIS solutions for the dataframe.')
 
