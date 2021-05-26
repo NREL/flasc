@@ -96,6 +96,7 @@ def calc_floris(df, fi, num_threads=1, use_yaw=None):
 
     if num_threads > 1:
         import multiprocessing as mp
+        from copy import deepcopy
         # from itertools import repeat
         # from functools import partial
 
@@ -142,11 +143,14 @@ def calc_floris(df, fi, num_threads=1, use_yaw=None):
                                 use_yaw=use_yaw, verbose=True)
     else:
         multiargs = []
-        for df in df_list:
-            multiargs.append((df, fi, use_yaw, False))
+        for df_mp in df_list:
+            df_mp = df_mp.reset_index(drop=True)
+            multiargs.append((df_mp, deepcopy(fi), use_yaw, False))
         with mp.Pool(processes=num_threads) as pool:
             df_list = pool.starmap(_run_fi_serial, multiargs)
-        df_out = pd.concat(df_list).drop(columns='index')
+        df_out = pd.concat(df_list).reset_index(drop=True)
+        if 'index' in df_out.columns:
+            df_out = df_out.drop(columns='index')
     print('Finished calculating the FLORIS solutions for the dataframe.')
 
     return df_out
