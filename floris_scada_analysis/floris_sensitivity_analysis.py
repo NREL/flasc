@@ -13,12 +13,14 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from SALib.sample import saltelli
 from SALib.analyze import sobol
 
 from pandas.core.base import DataError
 
+from floris_scada_analysis import floris_tools as ftools
 
 class floris_sobol_analysis():
     def __init__(self, fi, problem, calc_second_order=False):
@@ -46,7 +48,14 @@ class floris_sobol_analysis():
         self.samples_y = None
         self.N = None
 
-    def _set_model_parameters(self, new_params_dict):
+    def _get_model_params_dict(self, id):
+        new_params_dict = {}
+        n_params = len(self.problem['names'])
+        for i in range(n_params):
+            var_name = self.problem['names'][i]
+            value = self.samples_x[id, i]
+            new_params_dict[var_name] = value
+
         keys = list(new_params_dict.keys())
         values = list(new_params_dict.values())
         for i in range(len(keys)):
@@ -76,17 +85,16 @@ class floris_sobol_analysis():
                  "use_yaw_added_recovery": True}
         }
 
-        self.fi.set_model_parameters(params=params, verbose=False)
+        return params
+        # self.fi.set_model_parameters(params=params, verbose=False)
 
-    def _set_fi_by_sample_id(self, id):
-        new_params_dict = {}
-        n_params = len(self.problem['names'])
-        for i in range(n_params):
-            var_name = self.problem['names'][i]
-            value = self.samples_x[id, i]
-            new_params_dict[var_name] = value
-
-        self._set_model_parameters(new_params_dict)
+    def _create_evals_dataframe(self):
+        Nt = self.samples_x.shape[0]
+        params_array = [[] for _ in range(Nt)]
+        for id in range(Nt):
+            params_array[id] = self._get_model_params_dict(id)
+        df = pd.DataFrame({'model_params_dict': params_array})
+        self.df_eval = df
 
     # Step 1: generating samples for a particular problem
     def generate_samples(self, N, problem=None, calc_second_order=None):
@@ -99,44 +107,41 @@ class floris_sobol_analysis():
         self.calc_second_order = calc_second_order
 
         Ns = N
-        # if calc_second_order:
-        #     Ns = int(np.floor(N/6))
-        # else:
-        #     Ns = int(np.floor(N/4))
-
         self.samples_x = saltelli.sample(
             problem, Ns, calc_second_order=calc_second_order)
 
         self.N = self.samples_x.shape[0]
         self.samples_y = np.zeros(self.N)
+        self._create_evals_dataframe()
 
-    # Step 2:
-    def calculate_wfpower_for_samples(self, print_progress=True):
+    def calculate_wfpower_for_samples(self, num_threads=1):
         if self.samples_x is None:
             raise DataError('Please run generate_samples first.')
 
-        print('Calculating WF power for %d samples.' % self.N)
-        for i in range(self.N):
-            if print_progress & (np.remainder(i, 100) == 0):
-                print('  Finished %d/%d cases.' % (i, self.N))
+        # Copy and write wd and ws to dataframe
+        # Nt = self.df_eval.shape[0]
+        df = self.df_eval
+        df['wd'] = self.fi.floris.farm.wind_direction[0]
+        df['ws'] = self.fi.floris.farm.wind_speed[0]
 
-            self._set_fi_by_sample_id(i)
-            self.fi.calculate_wake(no_wake=False, yaw_angles=0.0)
-            self.samples_y[i] = self.fi.get_farm_power()
-
-        return self.samples_y
-
-    def calculate_aep_for_samples(self, wd, ws, freq):
-        if self.samples_x is None:
-            raise DataError('Please run generate_samples first.')
-
-        print('Calculating AEP for %d samples.' % self.N)
-        for i in range(self.N):
-            self._set_fi_by_sample_id(i)
-            aep = self.fi.get_farm_AEP(wd=wd, ws=ws, freq=freq)
-            self.samples_y[i] = aep
+        # Calculate floris predictions
+        df_out = ftools.calc_floris(df, self.fi, num_threads)
+        pow_cols = ['pow_%03d' % ti for ti in range(len(self.fi.layout_x))]
+        self.samples_y = np.array(df_out[pow_cols].sum(axis=1), dtype=float)
 
         return self.samples_y
+
+    # def calculate_aep_for_samples(self, wd, ws, freq):
+    #     if self.samples_x is None:
+    #         raise DataError('Please run generate_samples first.')
+
+    #     print('Calculating AEP for %d samples.' % self.N)
+    #     for i in range(self.N):
+    #         self._set_fi_by_sample_id(i)
+    #         aep = self.fi.get_farm_AEP(wd=wd, ws=ws, freq=freq)
+    #         self.samples_y[i] = aep
+
+    #     return self.samples_y
 
     def get_sobol_sensitivity_indices(self, verbose=False):
         self.Si = sobol.analyze(self.problem, self.samples_y,
