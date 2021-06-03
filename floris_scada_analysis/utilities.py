@@ -14,6 +14,8 @@
 import datetime
 import numpy as np
 import scipy.interpolate as interp
+from sklearn.metrics import pairwise_distances_argmin_min as pwdist
+from floris.utilities import wrap_360
 
 
 def estimate_dt(time_array):
@@ -92,7 +94,24 @@ def interp_within_margin(x, xp, yp, x_margin, kind, wrap_around_360=False):
         # Replace those points with y_180 values
         y_full[dymax > 180.] = y_180[dymax > 180.]
 
+    # Find any values that exist in both arrays: no need to check
+    _, comm1, _ = np.intersect1d(x, xp, return_indices=True)
+    ids_to_check = np.delete(np.array(range(len(x))), comm1)
+
+    # Find entries outside of range: no need to check
+    xp_min = np.min(xp) - x_margin
+    xp_max = np.max(xp) + x_margin
+    oob = (x[ids_to_check] < xp_min) | (x[ids_to_check] > xp_max)
+    y_full[ids_to_check[oob]] = np.nan
+    ids_to_check = ids_to_check[~oob]
+
     # Set any values outside of x_margin to np.nan
+    _, dx = pwdist(
+        x[ids_to_check].reshape(-1, 1),
+        xp.reshape(-1, 1),
+        axis=1,
+        metric='euclidean'
+        )
     dx = np.array([np.min(np.abs(xi-np.array(xp))) for xi in x])
     y_full[dx > x_margin] = np.nan
 
