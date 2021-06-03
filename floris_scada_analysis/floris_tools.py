@@ -22,7 +22,7 @@ from floris_scada_analysis import utilities as fsut
 from floris.utilities import wrap_360
 
 
-def _run_fi_serial(df_subset, fi, use_yaw=None, verbose=False):
+def _run_fi_serial(df_subset, fi, verbose=False):
     """Evaluate the FLORIS solutions for a set of wind directions,
     wind speeds and turbulence intensities in serial (non-
     parallelized) mode.
@@ -42,10 +42,10 @@ def _run_fi_serial(df_subset, fi, use_yaw=None, verbose=False):
         pow_00N.
     """
     num_turbines = len(fi.layout_x)
-    df_out = df_subset.copy()
+    df_out = df_subset  #.copy()
 
-    if use_yaw is None:
-        use_yaw = ('yaw_000' in df_subset.columns)
+    use_model_params = ('model_params_dict' in df_subset.columns)
+    use_yaw = ('yaw_000' in df_subset.columns)
 
     yaw_rel = np.zeros((df_out.shape[0], num_turbines))
     if use_yaw:
@@ -57,37 +57,51 @@ def _run_fi_serial(df_subset, fi, use_yaw=None, verbose=False):
         yaw_rel = (np.array(df_out[yaw_cols], dtype=float) -
                    np.stack((wd,) * num_turbines, axis=0).T)
 
-    for idx in df_out.index:
+    if 'ti' not in df_out.columns:
+        df_out['ti'] = np.min(fi.floris.farm.turbulence_intensity)
+
+    for iii, idx in enumerate(df_out.index):
         if (
             verbose and
             ((np.remainder(idx, 100) == 0) or idx == df_out.shape[0]-1)
-        ):  # Print output every 100 steps:
+        ): 
             print('  Progress: finished %.1f percent (%d/%d cases).'
-                   % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
+                  % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
+
+        # Update model parameters, if present in dataframe
+        if use_model_params:
+            params = df_out.loc[idx, 'model_params_dict']
+            fi.set_model_parameters(params=params, verbose=False)
 
         fi.reinitialize_flow_field(wind_speed=df_out.loc[idx, 'ws'],
                                    wind_direction=df_out.loc[idx, 'wd'],
                                    turbulence_intensity=df_out.loc[idx, 'ti'])
 
-        fi.calculate_wake(yaw_rel[idx, :])
-
+        fi.calculate_wake(yaw_rel[iii, :])
         for ti in range(num_turbines):
             df_out.loc[idx, 'pow_%03d' % ti] = np.array(fi.get_turbine_power())[ti]/1000.
             df_out.loc[idx, 'wd_%03d' % ti] = df_out.loc[idx, 'wd']  # Assume uniform for now
             df_out.loc[idx, 'ws_%03d' % ti] = fi.floris.farm.turbines[ti].average_velocity
             df_out.loc[idx, 'ti_%03d' % ti] = fi.floris.farm.turbines[ti]._turbulence_intensity
+
     return df_out
 
 
 # Define an approximate calc_floris() function
-def calc_floris(df, fi, num_threads=1, use_yaw=None):
+def calc_floris(df, fi, num_threads=1):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function calculates the exact solutions.
 
     Args:
-        df ([pd.DataFrame]): Dataframe with at least the columns 'time', 'wd' 
-        and 'ws'. Can optionally also have the column 'ti' and 'time'. Any
-        other column will be ignored.
+        df ([pd.DataFrame]): Dataframe with at least the columns 'time', 'wd'
+        and 'ws'. Can optionally also have the column 'ti' and 'time'.
+
+        If the dataframe has columns 'yaw_000' through 'yaw_<nturbs>', then it
+        will calculate the floris solutions for those yaw angles too.
+
+        If the dataframe has column 'model_params_dict', then it will change
+        the floris model parameters for every run with the values therein.
+
         fi ([FlorisInterface]): Floris object for the wind farm of interest
 
     Returns:
@@ -97,22 +111,8 @@ def calc_floris(df, fi, num_threads=1, use_yaw=None):
     if num_threads > 1:
         import multiprocessing as mp
         from copy import deepcopy
-        # from itertools import repeat
-        # from functools import partial
 
     num_turbines = len(fi.layout_x)
-
-    # Start by ensuring simple index for df
-    df = df.reset_index(drop=('time' in df.columns))
-
-    # Generate new dataframe called df_out
-    df_out = df[['wd', 'ws']].copy()
-    if ('ti' in df.columns):
-        df_out['ti'] = df['ti'].copy()
-    else:
-        df['ti'] = np.min(fi.floris.farm.turbulence_intensity)
-    if ('time' in df.columns):
-        df_out['time'] = df['time'].copy()
 
     # Copy yaw angles, if possible
     yaw_cols = ['yaw_%03d' % ti for ti in range(num_turbines)]
@@ -120,13 +120,9 @@ def calc_floris(df, fi, num_threads=1, use_yaw=None):
     if len(yaw_cols) > 0:
         if np.any(df[yaw_cols] < 0.):
             raise DataError('Yaw should be defined in domain [0, 360) deg.')
-        df_out[yaw_cols] = df[yaw_cols].copy()
+        # df_out[yaw_cols] = df[yaw_cols].copy()
 
-    # Create placeholders for turbine measurements
-    for colname in ['pow', 'ws', 'wd', 'ti']:
-        for ti in range(num_turbines):
-            df_out[colname + '_%03d' % ti] = 0.0
-
+    # Split dataframe into smaller dataframes
     N = df.shape[0]
     dN = int(np.ceil(N / num_threads))
     df_list = []
@@ -139,13 +135,12 @@ def calc_floris(df, fi, num_threads=1, use_yaw=None):
     print('Calculating FLORIS solutions with num_threads = %d.'
             % num_threads)
     if num_threads == 1:
-        df_out = _run_fi_serial(df_subset=df_out, fi=fi,
-                                use_yaw=use_yaw, verbose=True)
+        df_out = _run_fi_serial(df_subset=df, fi=fi, verbose=True)
     else:
         multiargs = []
         for df_mp in df_list:
             df_mp = df_mp.reset_index(drop=True)
-            multiargs.append((df_mp, deepcopy(fi), use_yaw, False))
+            multiargs.append((df_mp, deepcopy(fi), False))
         with mp.Pool(processes=num_threads) as pool:
             df_list = pool.starmap(_run_fi_serial, multiargs)
         df_out = pd.concat(df_list).reset_index(drop=True)
@@ -420,69 +415,6 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
                                 'turbines': upstream_turbs_ids})
 
     return df_upstream
-
-# def get_upstream_turbs_floris(fi, wd_step=3.0, verbose=False):
-#     """Determine which turbines are operating in freestream (unwaked)
-#     flow, for the entire wind rose. This function will return a data-
-#     frame where each row will present a wind direction range and a set
-#     of wind turbine numbers for which those turbines are operating
-#     upstream. This is useful in determining the freestream conditions.
-
-#     Args:
-#         fi ([floris object]): FLORIS object of the farm of interest.
-#         wd_step (float, optional): Wind direction discretization step.
-#         It will test what the upstream turbines are every [wd_step]
-#         degrees. A lower number means more accurate results, but
-#         typically there's no real benefit below 2.0 deg or so.
-#         Defaults to 3.0.
-#         verbose (bool, optional): Enable print statements for debugging.
-#         Defaults to False.
-
-#     Returns:
-#         df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row
-#         contains a wind direction range and a list of turbine numbers. For
-#         that particular wind direction range, the turbines numbered are 
-#         all upstream according to the FLORIS predictions. Depending on
-#         the FLORIS model parameters and ambient conditions, these results
-#         may vary slightly. Though, having minimal wake losses should not
-#         noticably affect your outcomes. Empirically, this approach has
-#         yielded good results with real SCADA data for determining what
-#         turbines are waked/unwaked and has served useful for determining
-#         what turbines to use as reference.
-#     """    
-#     if verbose:
-#         print('Determining upstream turbines using FLORIS for wd_step = %.1f deg.' % (wd_step))
-#     upstream_turbs_ids = []  # turbine numbers that are freestream
-#     upstream_turbs_wds = []  # lower bound of bin
-#     for wd in np.arange(0., 360., wd_step):
-#         fi.reinitialize_flow_field(wind_direction=wd, wind_speed=8.0)
-#         fi.calculate_wake(no_wake=True)
-#         power_out_nowake = np.array(fi.get_turbine_power())
-#         fi.calculate_wake(no_wake=False)
-#         power_out_wake = np.array(fi.get_turbine_power())
-#         power_wake_loss = power_out_nowake - power_out_wake
-#         turbs_freestream = list(np.where(power_wake_loss < 0.01)[0])
-#         if len(upstream_turbs_wds) == 0:
-#             upstream_turbs_ids.append(turbs_freestream)
-#             upstream_turbs_wds.append(wd)
-#         elif not(turbs_freestream == upstream_turbs_ids[-1]):
-#             upstream_turbs_ids.append(turbs_freestream)
-#             upstream_turbs_wds.append(wd)
-
-#     # Connect at 360 degrees
-#     if upstream_turbs_ids[0] == upstream_turbs_ids[-1]:
-#         upstream_turbs_wds.pop(0)
-#         upstream_turbs_ids.pop(0)
-
-#     # Go from list to bins for upstream_turbs_wds
-#     upstream_turbs_wds = [[upstream_turbs_wds[i], upstream_turbs_wds[i+1]] for i in range(len(upstream_turbs_wds)-1)]
-#     upstream_turbs_wds.append([upstream_turbs_wds[-1][-1], upstream_turbs_wds[0][0]])
-
-#     df_upstream = pd.DataFrame({'wd_min': [wd[0] for wd in upstream_turbs_wds],
-#                                 'wd_max': [wd[1] for wd in upstream_turbs_wds],
-#                                 'turbines': upstream_turbs_ids})
-
-#     return df_upstream
 
 
 # Wrapper function to easily set new TI values
