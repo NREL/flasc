@@ -18,6 +18,8 @@ import pandas as pd
 import pytz
 
 import floris.tools as wfct
+from floris.utilities import wrap_360
+
 from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import floris_tools as ftls
 
@@ -84,10 +86,12 @@ if __name__ == '__main__':
     # Calculate 'true' solutions
     num_threads = 50  # Parallelization in calc_floris, typically
     # num_threads is several times larger than the number of cores
-    df_fi, df_approx = ftls.calc_floris_approx(df, fi,
-                                               ws_step=1.0,
-                                               wd_step=2.0,
-                                               ti_step=0.03,
+    df_fi, df_approx = ftls.calc_floris_approx(fi=fi,
+                                               ws_step=0.2,
+                                               wd_step=0.5,
+                                               ti_step=0.02,
+                                               df=df,
+                                               method='linear',
                                                num_threads=num_threads)
 
     # Add noise and bias per turbine
@@ -97,7 +101,10 @@ if __name__ == '__main__':
         df_fi['wd_%03d' % ti] += 3. * np.random.randn(df_fi.shape[0])
         df_fi['ws_%03d' % ti] += 0.2 * np.random.randn(df_fi.shape[0])
         df_fi['ti_%03d' % ti] += 0.01 * np.random.randn(df_fi.shape[0])
-        df_fi['wd_%03d' % ti] += 10. * (np.random.rand() - 0.50)  # Bias
+
+        # Mimic northing error
+        df_fi['wd_%03d' % ti] += 50. * (np.random.rand() - 0.50)
+        df_fi['wd_%03d' % ti] = wrap_360(df_fi['wd_%03d' % ti])
 
     # Drop true 'wd', 'ws' and 'ti' channels
     df_fi = df_fi.drop(columns=['wd', 'ws', 'ti'])
