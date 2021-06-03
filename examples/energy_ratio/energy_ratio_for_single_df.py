@@ -18,6 +18,7 @@ import pandas as pd
 
 from floris import tools as wfct
 from floris_scada_analysis import energy_ratio as er
+from floris_scada_analysis import dataframe_filtering as dff
 from floris_scada_analysis import dataframe_manipulations as dfm
 from floris_scada_analysis import floris_tools as fsatools
 
@@ -39,7 +40,7 @@ fi = wfct.floris_interface.FlorisInterface(fi_path)
 fi.vis_layout()
 
 # Preprocess dataframes using floris
-df = dfm.filter_df_by_status(df)
+df = dff.filter_df_by_status(df)
 df = dfm.set_wd_by_all_turbines(df)
 df_upstream = fsatools.get_upstream_turbs_floris(fi, wd_step=5.0)
 df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
