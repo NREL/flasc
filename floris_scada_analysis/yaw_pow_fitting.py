@@ -131,7 +131,7 @@ class yaw_pow_fitting():
     def estimate_cos_pp_fit(self,
                             opt_yshift_range=None,
                             opt_bias_range=(-15., 15.),
-                            opt_pp_range=(1.0, 10.0), opt_Ns=40):
+                            opt_pp_range=(1.0, 10.0), opt_Ns=41):
 
         # for ti in self.turbine_list:
         bins_x = self.bins_x
@@ -209,3 +209,5 @@ class yaw_pow_fitting():
         if save_path is not None:
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             plt.savefig(save_path, dpi=fig_dpi)
+
+        return fig, ax
