@@ -22,7 +22,8 @@ from floris_scada_analysis import utilities as fsut
 from floris.utilities import wrap_360
 
 
-def _run_fi_serial(df_subset, fi, verbose=False):
+def _run_fi_serial(df_subset, fi, include_unc=False,unc_pmfs=None,
+                   unc_options=None, verbose=False):
     """Evaluate the FLORIS solutions for a set of wind directions,
     wind speeds and turbulence intensities in serial (non-
     parallelized) mode.
@@ -42,7 +43,7 @@ def _run_fi_serial(df_subset, fi, verbose=False):
         pow_00N.
     """
     num_turbines = len(fi.layout_x)
-    df_out = df_subset  #.copy()
+    df_out = df_subset
 
     use_model_params = ('model_params_dict' in df_subset.columns)
     use_yaw = ('yaw_000' in df_subset.columns)
@@ -78,8 +79,11 @@ def _run_fi_serial(df_subset, fi, verbose=False):
                                    turbulence_intensity=df_out.loc[idx, 'ti'])
 
         fi.calculate_wake(yaw_rel[iii, :])
+        turbine_powers = fi.get_turbine_power(include_unc=include_unc,
+                                              unc_pmfs=unc_pmfs,
+                                              unc_options=unc_options)
         for ti in range(num_turbines):
-            df_out.loc[idx, 'pow_%03d' % ti] = np.array(fi.get_turbine_power())[ti]/1000.
+            df_out.loc[idx, 'pow_%03d' % ti] = turbine_powers[ti] / 1000.
             df_out.loc[idx, 'wd_%03d' % ti] = df_out.loc[idx, 'wd']  # Assume uniform for now
             df_out.loc[idx, 'ws_%03d' % ti] = fi.floris.farm.turbines[ti].average_velocity
             df_out.loc[idx, 'ti_%03d' % ti] = fi.floris.farm.turbines[ti]._turbulence_intensity
@@ -88,7 +92,8 @@ def _run_fi_serial(df_subset, fi, verbose=False):
 
 
 # Define an approximate calc_floris() function
-def calc_floris(df, fi, num_threads=1):
+def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
+                unc_options=None):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function calculates the exact solutions.
 
@@ -135,7 +140,12 @@ def calc_floris(df, fi, num_threads=1):
     print('Calculating FLORIS solutions with num_threads = %d.'
             % num_threads)
     if num_threads == 1:
-        df_out = _run_fi_serial(df_subset=df, fi=fi, verbose=True)
+        df_out = _run_fi_serial(df_subset=df,
+                                fi=fi,
+                                include_unc=include_unc,
+                                unc_pmfs=unc_pmfs,
+                                unc_options=unc_options,
+                                verbose=True)
     else:
         multiargs = []
         for df_mp in df_list:
