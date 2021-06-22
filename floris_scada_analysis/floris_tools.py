@@ -93,7 +93,7 @@ def _run_fi_serial(df_subset, fi, include_unc=False,
 
 
 # Define an approximate calc_floris() function
-def calc_floris(df, fi, num_workers=None, num_threads=180, include_unc=False,
+def calc_floris(df, fi, num_workers, num_threads, include_unc=False,
                 unc_pmfs=None, unc_options=None, use_mpi=False):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function calculates the exact solutions.
@@ -114,12 +114,13 @@ def calc_floris(df, fi, num_workers=None, num_threads=180, include_unc=False,
         [type]: [description]
     """
 
-    if num_threads < (5 * num_workers):
-        print("Found 'num_threads < 2 * num_workers'.")
-        print("Try num_threads = (5..10) * num_workers for performance.")
-    elif num_threads > (10 * num_workers):
-        print("Found 'num_threads > 10 * num_workers'.")
-        print("Try num_threads = (5...10) * num_workers for performance.")
+    if (num_threads > 1) or (num_workers > 1):
+        if num_threads < (5 * num_workers):
+            print("Found 'num_threads < 2 * num_workers'.")
+            print("Try num_threads = (5..10) * num_workers for performance.")
+        elif num_threads > (10 * num_workers):
+            print("Found 'num_threads > 10 * num_workers'.")
+            print("Try num_threads = (5...10) * num_workers for performance.")
 
     num_turbines = len(fi.layout_x)
 
