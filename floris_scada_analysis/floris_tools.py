@@ -22,8 +22,8 @@ from floris_scada_analysis import utilities as fsut
 from floris.utilities import wrap_360
 
 
-def _run_fi_serial(df_subset, fi, include_unc=False,unc_pmfs=None,
-                   unc_options=None, verbose=False):
+def _run_fi_serial(df_subset, fi, include_unc=False,
+                   unc_pmfs=None, unc_options=None, verbose=False):
     """Evaluate the FLORIS solutions for a set of wind directions,
     wind speeds and turbulence intensities in serial (non-
     parallelized) mode.
@@ -93,7 +93,7 @@ def _run_fi_serial(df_subset, fi, include_unc=False,unc_pmfs=None,
 
 # Define an approximate calc_floris() function
 def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
-                unc_options=None):
+                unc_options=None, num_df_splits=None, use_mpi=False):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function calculates the exact solutions.
 
@@ -119,6 +119,9 @@ def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
 
     num_turbines = len(fi.layout_x)
 
+    # Create placeholders
+    df[['pow_%03d' % ti for ti in range(num_turbines)]] = np.nan
+
     # Copy yaw angles, if possible
     yaw_cols = ['yaw_%03d' % ti for ti in range(num_turbines)]
     yaw_cols = [c for c in yaw_cols if c in df.columns]
@@ -128,17 +131,23 @@ def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
         # df_out[yaw_cols] = df[yaw_cols].copy()
 
     # Split dataframe into smaller dataframes
+    if num_df_splits is None:
+        num_df_splits = num_threads
+    elif num_df_splits < num_threads:
+        num_df_splits = num_threads
+        print('Warning: you must set num_df_splits >= num_threads. Setting num_df_splits = num_threads.')
+
     N = df.shape[0]
-    dN = int(np.ceil(N / num_threads))
+    dN = int(np.ceil(N / num_df_splits))
     df_list = []
-    for ii in range(num_threads):
-        if ii == num_threads - 1:
+    for ii in range(num_df_splits):
+        if ii == num_df_splits - 1:
             df_list.append(df.iloc[ii*dN::])
         else:
             df_list.append(df.iloc[ii*dN:(ii+1)*dN])
 
-    print('Calculating FLORIS solutions with num_threads = %d.'
-            % num_threads)
+    # Calculate solutions
+    print('Calculating FLORIS solutions with num_threads = %d.' % num_threads)
     if num_threads == 1:
         df_out = _run_fi_serial(df_subset=df,
                                 fi=fi,
@@ -147,15 +156,27 @@ def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
                                 unc_options=unc_options,
                                 verbose=True)
     else:
+        # Define a tuple of arguments
         multiargs = []
         for df_mp in df_list:
             df_mp = df_mp.reset_index(drop=True)
-            multiargs.append((df_mp, deepcopy(fi), False))
-        with mp.Pool(processes=num_threads) as pool:
-            df_list = pool.starmap(_run_fi_serial, multiargs)
+            multiargs.append((df_mp, deepcopy(fi), include_unc,
+                              unc_pmfs, unc_options, False))
+
+        if use_mpi:
+            # Use an MPI implementation, useful for HPC
+            from mpi4py.futures import MPIPoolExecutor
+            with MPIPoolExecutor() as pool:
+                df_list = pool.starmap(_run_fi_serial, multiargs)
+        else:
+            # Use Pythons internal multiprocessing functionality
+            with mp.Pool(processes=num_threads) as pool:
+                df_list = pool.starmap(_run_fi_serial, multiargs)
+
         df_out = pd.concat(df_list).reset_index(drop=True)
         if 'index' in df_out.columns:
             df_out = df_out.drop(columns='index')
+
     print('Finished calculating the FLORIS solutions for the dataframe.')
 
     return df_out
