@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from pandas.core.base import DataError
 from scipy import interpolate
+from time import perf_counter as timerpc
 
 from floris_scada_analysis import utilities as fsut
 
@@ -149,6 +150,7 @@ def calc_floris(df, fi, num_workers, num_threads, include_unc=False,
     print('Calculating with num_threads = %d and num_workers = %d.'
           % (num_threads, num_workers))
     print('Each thread contains about %d FLORIS evaluations.' % dN)
+    start_time = timerpc()
     if num_workers == 1:
         df_out = _run_fi_serial(df_subset=df,
                                 fi=fi,
@@ -178,8 +180,10 @@ def calc_floris(df, fi, num_workers, num_threads, include_unc=False,
         if 'index' in df_out.columns:
             df_out = df_out.drop(columns='index')
 
+    t = timerpc() - start_time
     print('Finished calculating the FLORIS solutions for the dataframe.')
-
+    print('Total wall time: %.3f s.' % t)
+    print('Mean wall time / function evaluation: %.3f s.' % (t/N))
     return df_out
 
 
