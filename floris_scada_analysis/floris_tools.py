@@ -11,6 +11,7 @@
 # the License.
 
 
+from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -92,8 +93,8 @@ def _run_fi_serial(df_subset, fi, include_unc=False,
 
 
 # Define an approximate calc_floris() function
-def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
-                unc_options=None, num_df_splits=None, use_mpi=False):
+def calc_floris(df, fi, num_workers=None, num_threads=180, include_unc=False,
+                unc_pmfs=None, unc_options=None, use_mpi=False):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function calculates the exact solutions.
 
@@ -113,9 +114,12 @@ def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
         [type]: [description]
     """
 
-    if num_threads > 1:
-        import multiprocessing as mp
-        from copy import deepcopy
+    if num_threads < (5 * num_workers):
+        print("Found 'num_threads < 2 * num_workers'.")
+        print("Try num_threads = (5..10) * num_workers for performance.")
+    elif num_threads > (10 * num_workers):
+        print("Found 'num_threads > 10 * num_workers'.")
+        print("Try num_threads = (5...10) * num_workers for performance.")
 
     num_turbines = len(fi.layout_x)
 
@@ -131,24 +135,20 @@ def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
         # df_out[yaw_cols] = df[yaw_cols].copy()
 
     # Split dataframe into smaller dataframes
-    if num_df_splits is None:
-        num_df_splits = num_threads
-    elif num_df_splits < num_threads:
-        num_df_splits = num_threads
-        print('Warning: you must set num_df_splits >= num_threads. Setting num_df_splits = num_threads.')
-
     N = df.shape[0]
-    dN = int(np.ceil(N / num_df_splits))
+    dN = int(np.ceil(N / num_threads))
     df_list = []
-    for ii in range(num_df_splits):
-        if ii == num_df_splits - 1:
+    for ii in range(num_threads):
+        if ii == num_threads - 1:
             df_list.append(df.iloc[ii*dN::])
         else:
             df_list.append(df.iloc[ii*dN:(ii+1)*dN])
 
     # Calculate solutions
-    print('Calculating FLORIS solutions with num_threads = %d.' % num_threads)
-    if num_threads == 1:
+    print('Calculating with num_threads = %d and num_workers = %d.'
+          % (num_threads, num_workers))
+    print('Each thread contains about %d FLORIS evaluations.' % dN)
+    if num_workers == 1:
         df_out = _run_fi_serial(df_subset=df,
                                 fi=fi,
                                 include_unc=include_unc,
@@ -165,13 +165,13 @@ def calc_floris(df, fi, num_threads=1, include_unc=False, unc_pmfs=None,
 
         if use_mpi:
             # Use an MPI implementation, useful for HPC
-            from mpi4py.futures import MPIPoolExecutor
-            with MPIPoolExecutor() as pool:
-                df_list = pool.starmap(_run_fi_serial, multiargs)
+            from mpi4py.futures import MPIPoolExecutor as pool_executor
         else:
             # Use Pythons internal multiprocessing functionality
-            with mp.Pool(processes=num_threads) as pool:
-                df_list = pool.starmap(_run_fi_serial, multiargs)
+            from multiprocessing import Pool as pool_executor
+
+        with pool_executor(num_workers) as pool:
+            df_list = pool.starmap(_run_fi_serial, multiargs)
 
         df_out = pd.concat(df_list).reset_index(drop=True)
         if 'index' in df_out.columns:
@@ -258,7 +258,7 @@ def calc_floris_approx_table(fi,
                              wd_array=np.arange(0., 360., 1.0),
                              ws_array=np.arange(0., 20., 0.5),
                              ti_array=None,
-                             num_threads=1):
+                             num_processes=1):
 
     xyz_grid = np.array(np.meshgrid(
             wd_array, ws_array, ti_array, indexing='ij'))
@@ -270,7 +270,7 @@ def calc_floris_approx_table(fi,
 
     print('Generating a df_approx table of FLORIS solutions' +
             'covering a total of %d cases.' % (N_approx))
-    df_approx = calc_floris(df=df_approx, fi=fi, num_threads=num_threads)
+    df_approx = calc_floris(df=df_approx, fi=fi, num_processes=num_processes)
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
 
