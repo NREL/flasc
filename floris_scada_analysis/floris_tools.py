@@ -437,14 +437,15 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
                     y_rot[turbs_freestream],
                     'o', color='green')
 
-    # Connect at 360 degrees
-    if upstream_turbs_ids[0] == upstream_turbs_ids[-1]:
-        upstream_turbs_wds.pop(0)
-        upstream_turbs_ids.pop(0)
+    # # Connect at 360 degrees
+    # if upstream_turbs_ids[0] == upstream_turbs_ids[-1]:
+    #     upstream_turbs_wds.pop(0)
+    #     upstream_turbs_ids.pop(0)
 
     # Go from list to bins for upstream_turbs_wds
-    upstream_turbs_wds = [[upstream_turbs_wds[i], upstream_turbs_wds[i+1]] for i in range(len(upstream_turbs_wds)-1)]
-    upstream_turbs_wds.append([upstream_turbs_wds[-1][-1], upstream_turbs_wds[0][0]])
+    upstream_turbs_wds = [[upstream_turbs_wds[i], upstream_turbs_wds[i+1]]
+                          for i in range(len(upstream_turbs_wds)-1)]
+    upstream_turbs_wds.append([upstream_turbs_wds[-1][-1], 360.])
 
     df_upstream = pd.DataFrame({'wd_min': [wd[0] for wd in upstream_turbs_wds],
                                 'wd_max': [wd[1] for wd in upstream_turbs_wds],
