@@ -263,7 +263,8 @@ def calc_floris_approx_table(fi,
                              wd_array=np.arange(0., 360., 1.0),
                              ws_array=np.arange(0., 20., 0.5),
                              ti_array=None,
-                             num_processes=1):
+                             num_workers=1,
+                             num_threads=1):
 
     xyz_grid = np.array(np.meshgrid(
             wd_array, ws_array, ti_array, indexing='ij'))
@@ -275,7 +276,7 @@ def calc_floris_approx_table(fi,
 
     print('Generating a df_approx table of FLORIS solutions' +
             'covering a total of %d cases.' % (N_approx))
-    df_approx = calc_floris(df=df_approx, fi=fi, num_processes=num_processes)
+    df_approx = calc_floris(df=df_approx, fi=fi, num_workers=num_workers, num_threads=num_threads)
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
 
