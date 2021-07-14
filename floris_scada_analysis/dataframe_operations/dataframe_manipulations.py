@@ -19,7 +19,7 @@ import pandas as pd
 import warnings
 
 from floris.utilities import wrap_360
-from floris_scada_analysis import df_reader_writer as fsio
+from floris_scada_analysis.dataframe_operations import df_reader_writer as fsio
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import floris_tools as ftools
 from floris_scada_analysis import utilities as fsut

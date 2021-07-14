@@ -19,9 +19,9 @@ from scipy import stats as spst
 
 from floris.utilities import wrap_360
 
-from floris_scada_analysis.fsalogging import printnow as print
+from floris_scada_analysis.utilities import printnow as print
 from floris_scada_analysis import floris_tools as ftools
-from floris_scada_analysis import scada_analysis as sca
+from floris_scada_analysis.energy_ratio import energy_ratio_suite
 
 
 class bias_estimation():
@@ -60,7 +60,7 @@ class bias_estimation():
         df_fi = self.df_pow_ref_mapping_func(df_fi)
 
         # Initialize SCADA analysis class and add dataframes
-        fsc = sca.scada_analysis(verbose=False)
+        fsc = energy_ratio_suite.scada_analysis(verbose=False)
         fsc.add_df(df_cor, 'Measurement data')
         fsc.add_df(df_fi, 'FLORIS predictions')
 

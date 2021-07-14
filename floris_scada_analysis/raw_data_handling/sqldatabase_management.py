@@ -18,8 +18,8 @@ import os
 import pandas as pd
 from time import perf_counter as timerpc
 
-from floris_scada_analysis import dataframe_manipulations as dfm
-from floris_scada_analysis import df_reader_writer as fsio
+from floris_scada_analysis.dataframe_operations import dataframe_manipulations as dfm
+from floris_scada_analysis.dataframe_operations import df_reader_writer as fsio
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # #

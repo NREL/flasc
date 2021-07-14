@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 
-from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis.dataframe_operations import dataframe_manipulations as dfm
 from floris_scada_analysis import utilities as fsut
 
 

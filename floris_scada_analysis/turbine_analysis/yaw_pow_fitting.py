@@ -18,7 +18,7 @@ from scipy import optimize as opt
 
 from floris.utilities import wrap_180
 
-from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis.dataframe_operations import dataframe_manipulations as dfm
 from floris_scada_analysis import utilities as fsut
 
 

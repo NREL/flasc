@@ -15,8 +15,8 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
-from floris_scada_analysis import dataframe_manipulations as dfm
-from floris_scada_analysis import energy_ratio_visualization as ervis
+from floris_scada_analysis.dataframe_operations import dataframe_manipulations as dfm
+from floris_scada_analysis.energy_ratio import energy_ratio_visualization as ervis
 from floris_scada_analysis import utilities as fsut
 
 
@@ -147,7 +147,7 @@ class energy_ratio:
         if self.verbose:
             print('Calculating energy ratio with N = %d.' % N)
 
-        print('  Binning data first...')
+        # Binning data first...
         self.setup_directions_and_frequencies()
 
         # Calculate the energy ratio for all bins

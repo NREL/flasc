@@ -16,7 +16,7 @@ import numpy as np
 from datetime import timedelta as td
 import re
 
-from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis.dataframe_operations import dataframe_manipulations as dfm
 from floris_scada_analysis import utilities as fsut
 
 

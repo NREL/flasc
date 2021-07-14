@@ -20,7 +20,7 @@ import matplotlib.patches as patches
 import os
 import scipy.stats as scst
 
-from floris_scada_analysis import dataframe_filtering as dff
+from floris_scada_analysis.dataframe_operations import dataframe_filtering as dff
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import utilities as fsut
 

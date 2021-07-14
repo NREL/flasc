@@ -18,6 +18,11 @@ from sklearn.metrics import pairwise_distances_argmin_min as pwdist
 from floris.utilities import wrap_360
 
 
+def printnow(text):
+    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print('%s: %s' % (now_time, text))
+
+
 def estimate_dt(time_array):
     """Automatically estimate timestep in a time_array
 

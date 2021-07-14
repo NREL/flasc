@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 from pandas.core.base import DataError
 
-from floris_scada_analysis import energy_ratio as er
+from floris_scada_analysis.energy_ratio import energy_ratio as er
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import utilities as fsut
 
@@ -191,13 +191,13 @@ class scada_analysis():
         self.turbine_names = turbine_names
 
     def clear_energy_ratio_results(self, ii):
-        self.self.df_list[ii].pop('er_results')
-        self.self.df_list[ii].pop('er_test_turbines')
-        self.self.df_list[ii].pop('er_ref_turbines')
-        self.self.df_list[ii].pop('er_dep_turbines')
-        self.self.df_list[ii].pop('er_wd_step')
-        self.self.df_list[ii].pop('er_ws_step')
-        self.self.df_list[ii].pop('er_bootstrap_N')
+        self.df_list[ii].pop('er_results')
+        self.df_list[ii].pop('er_test_turbines')
+        self.df_list[ii].pop('er_ref_turbines')
+        self.df_list[ii].pop('er_dep_turbines')
+        self.df_list[ii].pop('er_wd_step')
+        self.df_list[ii].pop('er_ws_step')
+        self.df_list[ii].pop('er_bootstrap_N')
 
     def clear_all_energy_ratio_results(self):
         for ii in range(len(self.df_list)):
