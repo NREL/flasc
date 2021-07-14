@@ -164,7 +164,7 @@ class energy_ratio:
 
     def plot_energy_ratio(self):
         # Simple linker function for easy usage
-        ax = ervis.plot_single_curve(self.energy_ratio_out)
+        ax = ervis.plot(self.energy_ratio_out)
         return ax
 
 

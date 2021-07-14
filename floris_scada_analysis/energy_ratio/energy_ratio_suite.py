@@ -17,11 +17,13 @@ import pandas as pd
 from pandas.core.base import DataError
 
 from floris_scada_analysis.energy_ratio import energy_ratio as er
+from floris_scada_analysis.energy_ratio import energy_ratio_visualization as vis
+
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import utilities as fsut
 
 
-class scada_analysis():
+class energy_ratio_suite():
     """
     """
 
@@ -60,19 +62,20 @@ class scada_analysis():
                   'addition.')
             return None
 
-        if 'category' in df:
-            if len(np.unique(df['category'])) > 2:
-                raise KeyError('More than 2 different category values ' +
-                               'are found. Please limit yourself to 2.')
-        else:
-            if self.verbose:
-                print("No 'category' column found in df. Adding column " +
-                      "with all values 'baseline'.")
-            df = df.copy()
-            df.loc[:, 'category'] = 'baseline'
+        # if 'category' in df:
+        #     if len(np.unique(df['category'])) > 2:
+        #         raise KeyError('More than 2 different category values ' +
+        #                        'are found. Please limit yourself to 2.')
+        # else:
+        #     if self.verbose:
+        #         print("No 'category' column found in df. Adding column " +
+        #               "with all values 'baseline'.")
+        df = df.copy()
+        #     df.loc[:, 'category'] = 'baseline'
 
-        categories = np.unique(df['category'])
-        new_entry = dict({'df': df, 'name': name, 'categories': categories})
+        # categories = np.unique(df['category'])
+        # new_entry = dict({'df': df, 'name': name, 'categories': categories})
+        new_entry = dict({'df': df, 'name': name})
         self.df_list.append(new_entry)
 
         default_ids = np.array([True for _ in range(df.shape[0])])
@@ -204,7 +207,7 @@ class scada_analysis():
             self.clear_energy_ratio_results(ii)
 
     def get_energy_ratios(self, test_turbines, wd_step, ws_step,
-                          N=1, verbose=False):
+                          N=1, percentiles=[10., 90.], verbose=False):
 
         for ii in range(len(self.df_list)):
             df_subset = self.df_list[ii]['df_subset']
@@ -213,7 +216,7 @@ class scada_analysis():
                                   wd_step=wd_step,
                                   ws_step=ws_step,
                                   verbose=verbose)
-            er_result = era.get_energy_ratio(N=N)
+            er_result = era.get_energy_ratio(N=N, percentiles=percentiles)
 
             self.df_list[ii]['er_results'] = er_result
             self.df_list[ii]['er_test_turbines'] = test_turbines
@@ -223,29 +226,14 @@ class scada_analysis():
 
     def plot_energy_ratios(self, superimpose=True):
         if superimpose:
-            _, ax = plt.subplots()
+            results_array = [df["er_results"] for df in self.df_list]
+            labels_array = [df["name"] for df in self.df_list]
+            fig, ax = vis.plot(results_array, labels_array)
 
-        for ii in range(len(self.df_list)):
-            if not superimpose:
-                _, ax = plt.subplots()
+        else:
+            ax = []
+            for df in self.df_list:
+                fig, axi = vis.plot(df['er_results'], df["name"])
+                ax.append(axi)
 
-            result = self.df_list[ii]['er_results']
-            data_name = self.df_list[ii]['name']
-            categories = self.df_list[0]['categories']
-            test_turbine_names = [self.turbine_names[i] for i in
-                                  self.df_list[ii]['er_test_turbines']]
-
-            ax.plot(result.wd_bin, result.baseline,
-                    label=data_name+': '+categories[0])
-            ax.fill_between(result.wd_bin, result.baseline_l,
-                            result.baseline_u, alpha=0.15)
-            if 'controlled' in result.columns:
-                ax.plot(result.wd_bin, result.controlled,
-                        label=data_name+': '+categories[1])
-                ax.fill_between(result.wd_bin, result.controlled_l,
-                                result.controlled_u, alpha=0.15)
-            ax.legend()
-            plt.title(str(['Test turbines:', test_turbine_names]))
-            plt.xlabel('Wind direction (degrees)')
-            plt.ylabel('Energy ratio (-)')
-            plt.grid(True)
+        return ax
