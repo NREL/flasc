@@ -13,6 +13,7 @@
 
 import datetime
 import numpy as np
+from numpy.core.defchararray import not_equal
 import scipy.interpolate as interp
 from sklearn.metrics import pairwise_distances_argmin_min as pwdist
 from floris.utilities import wrap_360
@@ -49,18 +50,10 @@ def estimate_dt(time_array):
 
 
 def get_num_turbines(df):
-    # Let's assume that the format of variables is ws_%03d, wd_%03d, and so on
-    num_turbines = len([c for c in df.columns if 'pow_' in c and len(c) == 7])
-
-    if num_turbines == 0:
-        # Try with wind speed
-        num_turbines = len([c for c in df.columns if 'ws_' in c and len(c) == 6])
-
-    if num_turbines == 0:
-        # Try with wind direction
-        num_turbines = len([c for c in df.columns if 'wd_' in c and len(c) == 6])
-
-    return num_turbines
+    nt = 0
+    while ('pow_%03d' % nt) in df.columns:
+        nt += 1
+    return nt
 
 
 def interp_within_margin(x, xp, yp, x_margin, kind, wrap_around_360=False):
