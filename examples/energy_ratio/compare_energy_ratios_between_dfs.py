@@ -18,8 +18,8 @@ import pandas as pd
 from floris import tools as wfct
 from floris.utilities import wrap_360
 
-from floris_scada_analysis import scada_analysis as sca
-from floris_scada_analysis import dataframe_manipulations as dfm
+from floris_scada_analysis.energy_ratio import energy_ratio_suite
+from floris_scada_analysis.dataframe_operations import dataframe_manipulations as dfm
 from floris_scada_analysis import floris_tools as fsatools
 
 
@@ -45,29 +45,38 @@ fi.vis_layout()
 df = dfm.set_wd_by_all_turbines(df)
 df_upstream = fsatools.get_upstream_turbs_floris(fi, wd_step=5.0)
 df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
-df = dfm.set_ti_by_upstream_turbines(df, df_upstream)
+df = dfm.set_pow_ref_by_upstream_turbines(df, df_upstream)
 
 # Generate second dataset with shifted x-axis
 df2 = df.copy()
 df2['wd'] = wrap_360(df2['wd'] + 7.5)
 
 # Initialize an energy ratio analysis object and add dfs
-fsc = sca.scada_analysis()
+fsc = energy_ratio_suite.energy_ratio_suite()
 fsc.add_df(df, 'Original data')
 fsc.add_df(df2, 'Data with wd bias of 7.5 degrees')
-fsc.set_turbine_names(turbine_names=['WTG_%03d' % ti for ti in range(7)])
+fsc.set_turbine_names(['WTG_%03d' % ti for ti in range(len(fi.layout_x))])
 fsc.print_dfs()
 
 # # look at one test-ref turbines set
-fsc.set_masks(wd_range=[20., 90.], ti_range=[0., 0.25])
-fsc.get_energy_ratios(test_turbines=[1], ref_turbines=[0, 6],
-                      dep_turbines=[], wd_step=2.0,
-                      ws_step=1.0, N=10, verbose=False)
+fsc.set_masks(wd_range=[20., 90.])
+fsc.get_energy_ratios(
+    test_turbines=[1],
+    wd_step=2.0,
+    ws_step=1.0,
+    N=5,
+    percentiles=[10., 90.],
+    verbose=False
+)
 fsc.plot_energy_ratios(superimpose=True)
 
-# look at another test-ref turbines set for same ws/wd/ti mask
-fsc.get_energy_ratios(test_turbines=[3], ref_turbines=[0, 6],
-                      dep_turbines=[], wd_step=2.0,
-                      ws_step=1.0, N=10, verbose=False)
-fsc.plot_energy_ratios(superimpose=True)
+# # look at another test-ref turbines set for same ws/wd/ti mask
+# fsc.get_energy_ratios(
+#     test_turbines=[3],
+#     wd_step=2.0,
+#     ws_step=1.0,
+#     N=10,
+#     percentiles=[10., 90.],
+#     verbose=False)
+# fsc.plot_energy_ratios(superimpose=True)
 plt.show()
