@@ -11,7 +11,6 @@
 # the License.
 
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pandas.core.base import DataError
@@ -44,7 +43,7 @@ class energy_ratio_suite():
         self.verbose = verbose
 
         if verbose:
-            print('Initialized energy_ratio_analysis() object.')
+            print('Initialized energy_ratio_suite() object.')
 
     def add_df(self, df, name):
         if not ('wd' in df.columns and 'ws' in df.columns):

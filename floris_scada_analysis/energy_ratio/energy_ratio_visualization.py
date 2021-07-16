@@ -27,7 +27,7 @@ def plot(energy_ratios, labels=None):
         labels = [None for _ in energy_ratios]
 
     N = len(energy_ratios)
-    fig, ax = plt.subplots(nrows=N, sharex=True)
+    fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(10, 5))
 
     # Calculate bar width for bin counts
     bar_width = (0.7 / N) * np.min(
@@ -43,10 +43,10 @@ def plot(energy_ratios, labels=None):
         ax[0].plot(xlims, [1., 1.], color='black')
 
         # Plot energy ratios
-        ax[0].plot(x, df["baseline"], '-o', label=labels[ii])
+        ax[0].plot(x, df["baseline"], '-o', markersize=3., label=labels[ii])
 
         # Plot uncertainty bounds from bootstrapping
-        ax[0].fill_between(x, df["baseline_l"], df["baseline_u"], alpha=0.15)
+        ax[0].fill_between(x, df["baseline_l"], df["baseline_u"], alpha=0.25)
 
         # Plot the bin count
         ax[1].bar(x-(ii-N/2)*bar_width, df["N_bin"], width=bar_width)
