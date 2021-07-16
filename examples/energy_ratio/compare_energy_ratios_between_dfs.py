@@ -51,10 +51,15 @@ df = dfm.set_pow_ref_by_upstream_turbines(df, df_upstream)
 df2 = df.copy()
 df2['wd'] = wrap_360(df2['wd'] + 7.5)
 
+# # Generate third dataset with scaled y-axis
+# df3 = df.copy()
+# df3['pow_ref'] = df3['pow_ref'] * 1.1
+
 # Initialize an energy ratio analysis object and add dfs
 fsc = energy_ratio_suite.energy_ratio_suite()
 fsc.add_df(df, 'Original data')
 fsc.add_df(df2, 'Data with wd bias of 7.5 degrees')
+# fsc.add_df(df3, 'Data with shifted pow_ref')
 fsc.set_turbine_names(['WTG_%03d' % ti for ti in range(len(fi.layout_x))])
 fsc.print_dfs()
 
@@ -70,13 +75,13 @@ fsc.get_energy_ratios(
 )
 fsc.plot_energy_ratios(superimpose=True)
 
-# # look at another test-ref turbines set for same ws/wd/ti mask
-# fsc.get_energy_ratios(
-#     test_turbines=[3],
-#     wd_step=2.0,
-#     ws_step=1.0,
-#     N=10,
-#     percentiles=[10., 90.],
-#     verbose=False)
-# fsc.plot_energy_ratios(superimpose=True)
+# look at another test-ref turbines set for same ws/wd/ti mask
+fsc.get_energy_ratios(
+    test_turbines=[3],
+    wd_step=2.0,
+    ws_step=1.0,
+    N=10,
+    percentiles=[10., 90.],
+    verbose=False)
+fsc.plot_energy_ratios(superimpose=True)
 plt.show()
