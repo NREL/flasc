@@ -25,13 +25,14 @@ from floris_scada_analysis.energy_ratio import energy_ratio_suite
 
 
 class bias_estimation():
-    def __init__(self,
-                 df,
-                 df_fi_approx,
-                 test_turbines_subset,
-                 df_ws_mapping_func,
-                 df_pow_ref_mapping_func
-                 ):
+    def __init__(
+        self,
+        df,
+        df_fi_approx,
+        test_turbines_subset,
+        df_ws_mapping_func,
+        df_pow_ref_mapping_func
+    ):
         print('Initializing a bias_estimation() object...')
 
         # Import inputs
@@ -60,7 +61,7 @@ class bias_estimation():
         df_fi = self.df_pow_ref_mapping_func(df_fi)
 
         # Initialize SCADA analysis class and add dataframes
-        fsc = energy_ratio_suite.scada_analysis(verbose=False)
+        fsc = energy_ratio_suite.energy_ratio_suite(verbose=False)
         fsc.add_df(df_cor, 'Measurement data')
         fsc.add_df(df_fi, 'FLORIS predictions')
 
@@ -70,11 +71,13 @@ class bias_estimation():
 
         return fsc
 
-    def _get_energy_ratios_allbins(self,
-                                   wd_bin_size=2.0,
-                                   ws_bin_size=3.0,
-                                   N_btstrp=1,
-                                   plot_iter_path=None):
+    def _get_energy_ratios_allbins(
+        self,
+        wd_bin_size=2.0,
+        ws_bin_size=3.0,
+        N_btstrp=1,
+        plot_iter_path=None
+        ):
 
         test_turbines = self.test_turbines_subset
         energy_ratios_scada = [[] for _ in test_turbines]
