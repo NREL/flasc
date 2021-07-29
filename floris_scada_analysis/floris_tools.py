@@ -21,7 +21,7 @@ from time import perf_counter as timerpc
 
 from floris_scada_analysis import utilities as fsut
 
-from floris.utilities import wrap_360
+from floris.utilities import wrap_360, wrap_180
 
 
 def _run_fi_serial(df_subset, fi, include_unc=False,
@@ -53,12 +53,16 @@ def _run_fi_serial(df_subset, fi, include_unc=False,
     yaw_rel = np.zeros((df_out.shape[0], num_turbines))
     if use_yaw:
         yaw_cols = ['yaw_%03d' % ti for ti in range(num_turbines)]
-        if np.any(df_subset[yaw_cols] < 0.):
-            raise DataError('Yaw should be defined in domain [0, 360) deg.')
-
         wd = np.array(df_out['wd'], dtype=float)
-        yaw_rel = (np.array(df_out[yaw_cols], dtype=float) -
-                   np.stack((wd,) * num_turbines, axis=0).T)
+        yaw_rel = wrap_180(
+            (
+                np.array(df_out[yaw_cols], dtype=float) -
+                np.stack((wd,) * num_turbines, axis=0).T
+            )
+        )
+
+        if np.any(np.abs(yaw_rel) > 30.):
+            raise DataError('Yaw should be defined in domain [0, 360) deg.')
 
     if 'ti' not in df_out.columns:
         df_out['ti'] = np.min(fi.floris.farm.turbulence_intensity)
@@ -276,7 +280,12 @@ def calc_floris_approx_table(fi,
 
     print('Generating a df_approx table of FLORIS solutions' +
             'covering a total of %d cases.' % (N_approx))
-    df_approx = calc_floris(df=df_approx, fi=fi, num_workers=num_workers, num_threads=num_threads)
+    df_approx = calc_floris(
+        df=df_approx,
+        fi=fi,
+        num_workers=num_workers,
+        num_threads=num_threads
+    )
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
 
