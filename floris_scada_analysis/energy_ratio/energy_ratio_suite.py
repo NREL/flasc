@@ -199,14 +199,22 @@ class energy_ratio_suite():
         self.df_list[ii].pop('er_dep_turbines')
         self.df_list[ii].pop('er_wd_step')
         self.df_list[ii].pop('er_ws_step')
+        self.df_list[ii].pop('er_wd_bin_width')
         self.df_list[ii].pop('er_bootstrap_N')
 
     def clear_all_energy_ratio_results(self):
         for ii in range(len(self.df_list)):
             self.clear_energy_ratio_results(ii)
 
-    def get_energy_ratios(self, test_turbines, wd_step, ws_step,
-                          N=1, percentiles=[10., 90.], verbose=False):
+    def get_energy_ratios(
+        self,
+        test_turbines,
+        wd_step=3.,
+        ws_step=5.,
+        wd_bin_width=None,
+        N=1,
+        percentiles=[10., 90.],
+        verbose=False):
 
         for ii in range(len(self.df_list)):
             df_subset = self.df_list[ii]['df_subset']
@@ -214,6 +222,7 @@ class energy_ratio_suite():
                                   test_turbines=test_turbines,
                                   wd_step=wd_step,
                                   ws_step=ws_step,
+                                  wd_bin_width=wd_bin_width,
                                   verbose=verbose)
             er_result = era.get_energy_ratio(N=N, percentiles=percentiles)
 
