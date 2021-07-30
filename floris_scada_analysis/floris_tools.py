@@ -263,28 +263,47 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear',
     return df_out
 
 
-def calc_floris_approx_table(fi,
-                             wd_array=np.arange(0., 360., 1.0),
-                             ws_array=np.arange(0., 20., 0.5),
-                             ti_array=None,
-                             num_workers=1,
-                             num_threads=1):
+def calc_floris_approx_table(
+    fi,
+    wd_array=np.arange(0., 360., 1.0),
+    ws_array=np.arange(0., 20., 0.5),
+    ti_array=None,
+    num_workers=1,
+    num_threads=1,
+    include_unc=False,
+    unc_pmfs=None,
+    unc_options=None,
+    use_mpi=False
+    ):
 
-    xyz_grid = np.array(np.meshgrid(
-            wd_array, ws_array, ti_array, indexing='ij'))
+    xyz_grid = np.array(
+        np.meshgrid(
+            wd_array,
+            ws_array,
+            ti_array,
+            indexing='ij'
+            )
+        )
     df_approx = pd.DataFrame(
         {'wd': np.reshape(xyz_grid[0], [-1, 1]).flatten(),
          'ws': np.reshape(xyz_grid[1], [-1, 1]).flatten(),
          'ti': np.reshape(xyz_grid[2], [-1, 1]).flatten()})
     N_approx = df_approx.shape[0]
 
-    print('Generating a df_approx table of FLORIS solutions' +
-            'covering a total of %d cases.' % (N_approx))
+    print(
+        'Generating a df_approx table of FLORIS solutions' +
+        'covering a total of %d cases.' % (N_approx)
+    )
+
     df_approx = calc_floris(
         df=df_approx,
         fi=fi,
         num_workers=num_workers,
-        num_threads=num_threads
+        num_threads=num_threads,
+        include_unc=include_unc,
+        unc_pmfs=unc_pmfs,
+        unc_options=unc_options,
+        use_mpi=use_mpi
     )
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
