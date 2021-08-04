@@ -214,7 +214,8 @@ class energy_ratio_suite():
         wd_bin_width=None,
         N=1,
         percentiles=[10., 90.],
-        verbose=False):
+        verbose=False
+    ):
 
         for ii in range(len(self.df_list)):
             df_subset = self.df_list[ii]['df_subset']

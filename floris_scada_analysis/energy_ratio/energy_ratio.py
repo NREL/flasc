@@ -208,7 +208,7 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
 
     Returns:
         [type]: [description]
-    """    
+    """
     # Copy minimal dataframe
     df = df_binned[['ws_bin', 'wd_bin', 'pow_ref', 'pow_test']]
 
@@ -264,7 +264,7 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
 
     Returns:
         [type]: [description]
-    """    
+    """
     # Renormalize frequencies
     df_freq = df_freq[["ws_bin", "freq"]].copy()
     df_freq["freq"] = df_freq["freq"] / df_freq["freq"].sum()
@@ -297,7 +297,9 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
     return results_array
 
 
-def _get_energy_ratio_single_wd_bin_nominal(df_binned, df_freq, randomize_df=False):
+def _get_energy_ratio_single_wd_bin_nominal(
+    df_binned, df_freq, randomize_df=False
+    ):
     # Copy over minimal dataframe
     df = df_binned[["ws_bin", "pow_ref", "pow_test"]].copy()
     df_freq = df_freq[["ws_bin", "freq"]].copy()
@@ -329,24 +331,26 @@ def _get_energy_ratio_single_wd_bin_nominal(df_binned, df_freq, randomize_df=Fal
         # df_freq = df_freq.sort(by='ws_bin')
 
     # Compute energy ratio
-    ref_energy = compute_expectation(df_ref, df_freq["freq"])
-    test_energy = compute_expectation(df_test, df_freq["freq"])
+    ref_energy = np.dot(df_ref, df_freq["freq"])
+    test_energy = np.dot(df_test, df_freq["freq"])
+    # ref_energy = compute_expectation(df_ref, df_freq["freq"])
+    # test_energy = compute_expectation(df_test, df_freq["freq"])
     energy_ratio = test_energy / ref_energy
 
     return energy_ratio
 
 
-def compute_expectation(fx, p_X):
-        """
-        Compute expected value of f(X), X ~ p_X(x).
-        Inputs:
-            fx - pandas Series / 1-D numpy - array of possible outcomes.
-            p_X - pandas Series / 1-D numpy - distribution of X.
-                                              May be supplied as
-                                              nonnormalized frequencies.
-        Outputs:
-            (anon) - float - Expected value of f(X)
-        """
-        p_X = p_X/p_X.sum()  # Make sure distribution is valid
+# def compute_expectation(fx, p_X):
+#         """
+#         Compute expected value of f(X), X ~ p_X(x).
+#         Inputs:
+#             fx - pandas Series / 1-D numpy - array of possible outcomes.
+#             p_X - pandas Series / 1-D numpy - distribution of X.
+#                                               May be supplied as
+#                                               nonnormalized frequencies.
+#         Outputs:
+#             (anon) - float - Expected value of f(X)
+#         """
+#         p_X = p_X/p_X.sum()  # Make sure distribution is valid
 
-        return fx @ p_X
+#         return fx @ p_X
