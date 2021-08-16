@@ -11,8 +11,16 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=6.0',
-    # TODO: put package requirements here
+    'feather-format>=0.4.1',
+    'matplotlib>=3',
+    'numpy>=1.16',
+    'openoa>=2.2',
+    'pandas>=0.24',
+    'pyproj>=2.1',
+    'pytest>=4',
+    'SALib>=1.4.0.2',
+    'scipy>=1.1',
+    'sklearn>=0.0',
 ]
 
 setup_requirements = [
