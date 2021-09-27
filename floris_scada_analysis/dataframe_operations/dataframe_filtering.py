@@ -97,20 +97,23 @@ def plot_highlight_data_by_conds(df, conds, ti):
 
     # Get number of non-NaN entries before filtering
     if 'wd_000' in df.columns:
-        N_df = [sum(~np.isnan(df.loc[tfull==t, 'wd_%03d' % ti]))
-                for t in time_array]
+        N_df = [
+            sum(~np.isnan(df.loc[tfull==t, 'wd_%03d' % ti]))
+            for t in time_array
+        ]
     else:
-        N_df = [sum(~np.isnan(df.loc[tfull==t, 'ws_%03d' % ti]))
-                for t in time_array]
+        N_df = [
+            sum(~np.isnan(df.loc[tfull==t, 'ws_%03d' % ti]))
+            for t in time_array
+        ]
 
     N_hl = [np.zeros(len(time_array), 'int') for _ in range(len(conds))]
+    conds_combined = np.array([False] * len(conds[0]), dtype=bool)
     for ii in range(len(conds)):
         # Convert time array of occurrences to year+week no.
-        conds_combined = np.array(conds[0])
-        for iii in range(ii):
-            conds_combined = (conds_combined | np.array(conds[ii]))
-        subset_time_array = [int('%04d%02d' % (i.year, i.week))
-                             for i in df.loc[conds_combined, 'time']]
+        conds_new = conds[ii] & (~conds_combined)
+        conds_combined = (conds_combined | np.array(conds[ii], dtype=bool))
+        subset_time_array = [int('%04d%02d' % (i.year, i.week)) for i in df.loc[conds_new, 'time']]
 
         for iii in range(len(time_array)):
             # Count occurrences for condition
@@ -118,22 +121,18 @@ def plot_highlight_data_by_conds(df, conds, ti):
                 np.sum(np.array(subset_time_array) == time_array[iii])
             )
 
-    # Calculate differences
-    for ii in range(len(conds)-1, 0, -1):
-        N_hl[ii] = np.array(N_hl[ii], dtype='int') - np.array(N_hl[ii-1], dtype='int')
-
-
     # Now plot occurrences
     xlbl = ['%s-%s' % (str(t)[0:4], str(t)[4:6]) for t in time_array]
     fig, ax = plt.subplots(1, 1, figsize=(15, 8))
     ax.bar(xlbl, N_df, width=1, label='Full dataset')
-    y_bottom = [0 for _ in N_hl[0]]
-    for ii in range(len(conds)):
-        ax.bar(xlbl, np.array(N_hl[ii]),
+    y_bottom = np.array([0 for _ in N_hl[0]], dtype=int)
+    for ii in range(0, len(conds)):
+        ax.bar(xlbl, N_hl[ii],
                width=1, bottom=y_bottom,
                label='Data subset (conditions 0 to %d)' % ii,
                edgecolor='gray', linewidth=0.2)
-        y_bottom = np.array(y_bottom) + np.array(N_hl[ii])
+        y_bottom = y_bottom + N_hl[ii]
+
     # ax.set_xticks(ax.get_xticks()[::4])
     xlbl_short = ['' for _ in range(len(xlbl))]
     stp = int(np.round(len(xlbl)/50))  # About 50 labels is fine
@@ -164,5 +163,5 @@ def df_mark_turbdata_as_faulty(df, cond, turbine_list, exclude_columns=[], verbo
             print('Faulty measurements for turbine %03d increased from %.1f %% to %.1f %%.'
                   % (ti, 100*N_init/df.shape[0], 100*N_post/df.shape[0]))
 
-    df = dfm.df_drop_nan_rows(df, verbose=verbose)  # Drop nan rows
+    # df = dfm.df_drop_nan_rows(df, verbose=verbose)  # Drop nan rows
     return df

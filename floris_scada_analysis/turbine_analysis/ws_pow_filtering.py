@@ -123,7 +123,7 @@ class ws_pw_curve_filtering:
             bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
             bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
             pow_bins = [
-                np.mean(pw_clean[bin_array == i]) for i in range(pw_curve_df.shape[0])
+                np.median(pw_clean[bin_array == i]) for i in range(pw_curve_df.shape[0])
             ]
 
             # Write outputs to the dataframe
