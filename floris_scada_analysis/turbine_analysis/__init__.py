@@ -8,4 +8,9 @@ __version__ = '0.1.0'
 
 from pathlib import Path
 
-from . import find_sensor_faults, ws_pow_filtering, yaw_pow_fitting
+from . import (
+    find_sensor_faults,
+    ws_pow_filtering,
+    ws_pow_filtering_utilities,
+    yaw_pow_fitting
+)
