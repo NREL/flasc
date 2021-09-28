@@ -112,17 +112,19 @@ class bias_estimation():
 
         return None
 
-    def estimate_wd_bias(self,
-                         time_mask=None,
-                         ws_mask=(6., 10.),
-                         wd_mask=None,
-                         ti_mask=None,
-                         opt_search_range=(-180., 180.),
-                         opt_search_brute_dx=5.0,
-                         energy_ratio_wd_binsize=2.0,
-                         energy_ratio_ws_binsize=3.0,
-                         energy_ratio_N_btstrp=1,
-                         plot_iter_path=None):
+    def estimate_wd_bias(
+        self,
+        time_mask=None,
+        ws_mask=(6., 10.),
+        wd_mask=None,
+        ti_mask=None,
+        opt_search_range=(-180., 180.),
+        opt_search_brute_dx=5.0,
+        energy_ratio_wd_binsize=2.0,
+        energy_ratio_ws_binsize=3.0,
+        energy_ratio_N_btstrp=1,
+        plot_iter_path=None
+        ):
 
         print('Estimating the wind direction bias')
 

@@ -213,25 +213,32 @@ class energy_ratio_suite():
         ws_step=5.,
         wd_bin_width=None,
         N=1,
-        percentiles=[10., 90.],
+        percentiles=[5., 95.],
         verbose=False
     ):
 
         for ii in range(len(self.df_list)):
             df_subset = self.df_list[ii]['df_subset']
-            era = er.energy_ratio(df_in=df_subset,
-                                  test_turbines=test_turbines,
-                                  wd_step=wd_step,
-                                  ws_step=ws_step,
-                                  wd_bin_width=wd_bin_width,
-                                  verbose=verbose)
-            er_result = era.get_energy_ratio(N=N, percentiles=percentiles)
+            era = er.energy_ratio(
+                df_in=df_subset,
+                verbose=verbose
+            )
+            er_result = era.get_energy_ratio(
+                test_turbines=test_turbines,
+                wd_step=wd_step,
+                ws_step=ws_step,
+                wd_bin_width=wd_bin_width,
+                N=N,
+                percentiles=percentiles
+            )
 
             self.df_list[ii]['er_results'] = er_result
             self.df_list[ii]['er_test_turbines'] = test_turbines
             self.df_list[ii]['er_wd_step'] = wd_step
             self.df_list[ii]['er_ws_step'] = ws_step
             self.df_list[ii]['er_bootstrap_N'] = N
+
+        return self.df_list
 
     def plot_energy_ratios(self, superimpose=True):
         if superimpose:
