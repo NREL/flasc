@@ -12,6 +12,7 @@
 
 
 import numpy as np
+import pandas as pd
 
 import matplotlib.pyplot as plt
 
@@ -35,8 +36,25 @@ def plot(energy_ratios, labels=None):
     )
 
     for ii, df in enumerate(energy_ratios):
+        df = df.copy()
+
         # Get x-axis values
         x = np.array(df["wd_bin"], dtype=float)
+
+        # Add NaNs to avoid connecting plots over gaps
+        dwd = np.min(x[1::] - x[0:-1])
+        jumps = np.where(np.diff(x) > dwd * 1.50)[0]
+        if len(jumps) > 0:
+            df = df.append(
+                pd.DataFrame(
+                    {
+                        'wd_bin': x[jumps] + dwd / 2.0,
+                        "N_bin": [0] * len(jumps),
+                    }
+                )
+            )
+            df = df.iloc[np.argsort(df['wd_bin'])].reset_index(drop=True)
+            x = np.array(df["wd_bin"], dtype=float)
 
         # Plot horizontal black line at 1.
         xlims = [np.min(x) - 4., np.max(x) + 4.]
