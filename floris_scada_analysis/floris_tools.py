@@ -221,8 +221,7 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear',
                    len(ws_array_approx)]
         xyz_tuple = (wd_array_approx,
                      ws_array_approx)
-        values = np.reshape(np.array(df_approx['pow_000']),
-                            shape_y)
+        values = np.reshape(np.array(df_approx['pow_000']), shape_y)
     else:
         if verbose:
             print('    Performing 3D interpolation')
@@ -232,14 +231,15 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear',
         xyz_tuple = (wd_array_approx,
                      ws_array_approx,
                      ti_array_approx)
-        values = np.reshape(np.array(df_approx['pow_000']),
-                            shape_y)
+        values = np.reshape(np.array(df_approx['pow_000']), shape_y)
 
-    f = interpolate.RegularGridInterpolator(xyz_tuple,
-                                            values,
-                                            method='linear',
-                                            bounds_error=False,
-                                            fill_value=np.nan)
+    f = interpolate.RegularGridInterpolator(
+        xyz_tuple,
+        values,
+        method='linear',
+        bounds_error=False,
+        fill_value=np.nan
+    )
 
     # Create a new dataframe based on df
     if 'ti' not in df.columns:
