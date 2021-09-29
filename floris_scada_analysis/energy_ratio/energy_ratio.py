@@ -42,11 +42,11 @@ class energy_ratio:
         Args:
             df_in ([pd.DataFrame]): The dataframe provided by the user. This
             dataframe should have the following columns:
-                * Wind direction at every turbine: wd_000, wd_001, wd_002, ..
-                * Wind speed at every turbine: ws_000, ws_001, ws_002, ..
+                * Reference wind direction for the test turbine, 'wd'
+                * Reference wind speed for the test turbine, 'ws'
                 * Power production of every turbine: pow_000, pow_001, ...
                 * Reference power production used to normalize the energy
-                    ratio: pow_ref
+                    ratio: 'pow_ref'
             wind_rose_function ([pd.DataFrame], optional): This defines the
             occurrence of each wind direction and wind speed bin. If None is
             specified, the occurrence of each bin is derived from the provided
@@ -74,11 +74,11 @@ class energy_ratio:
         Args:
             df_in ([pd.DataFrame]): The dataframe provided by the user. This
             dataframe should have the following columns:
-                * Wind direction at every turbine: wd_000, wd_001, wd_002, ..
-                * Wind speed at every turbine: ws_000, ws_001, ws_002, ..
+                * Reference wind direction for the test turbine, 'wd'
+                * Reference wind speed for the test turbine, 'ws'
                 * Power production of every turbine: pow_000, pow_001, ...
                 * Reference power production used to normalize the energy
-                    ratio: pow_ref
+                    ratio: 'pow_ref'
         """
         if 'pow_ref' not in df_in.columns:
             raise KeyError('pow_ref column not in dataframe. Cannot proceed.')
