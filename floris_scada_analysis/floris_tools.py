@@ -291,7 +291,7 @@ def calc_floris_approx_table(
     N_approx = df_approx.shape[0]
 
     print(
-        'Generating a df_approx table of FLORIS solutions' +
+        'Generating a df_approx table of FLORIS solutions ' +
         'covering a total of %d cases.' % (N_approx)
     )
 
