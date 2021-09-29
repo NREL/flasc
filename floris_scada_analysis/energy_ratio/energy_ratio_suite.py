@@ -16,17 +16,29 @@ import pandas as pd
 from pandas.core.base import DataError
 
 from floris_scada_analysis.energy_ratio import energy_ratio as er
-from floris_scada_analysis.energy_ratio import energy_ratio_visualization as vis
+from floris_scada_analysis.energy_ratio import \
+    energy_ratio_visualization as vis
 
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import utilities as fsut
 
 
 class energy_ratio_suite():
+    """Wrapping class that relies internally on the energy_ratio class to
+    import one or multiple datasets, mask data to specific atmospheric
+    conditions, calculate the respective energy ratios, and plot everything.
+    Essentially, this class facilitates easy comparisons between SCADA data
+    and the FLORIS model. Furthermore, a common use case for this class
+    is comparing the energy ratios with and without wake steering in field
+    campaigns.
     """
-    """
-
     def __init__(self, verbose=False):
+        """Initialization of the class. This creates several empty variables
+        which can be populated using functions such as add_df.
+
+        Args:
+            verbose (bool, optional): Print to console. Defaults to False.
+        """
         self.df_list = []
         self.num_turbines = []
         self.turbine_names = []
@@ -45,7 +57,28 @@ class energy_ratio_suite():
         if verbose:
             print('Initialized energy_ratio_suite() object.')
 
+    # Public methods
+
     def add_df(self, df, name):
+        """Add a dataframe to the class. This function verifies if the
+        dataframe inserted matches in formatting with the already existing
+        dataframes in the class. It also verifies if the right columns
+        exist.
+
+        Args:
+            df_in ([pd.DataFrame]): The dataframe provided by the user. This
+            dataframe should have the following columns:
+                * Wind direction at every turbine: wd_000, wd_001, wd_002, ..
+                * Wind speed at every turbine: ws_000, ws_001, ws_002, ..
+                * Power production of every turbine: pow_000, pow_001, ...
+                * Reference power production used to normalize the energy
+                    ratio: pow_ref
+            name ([str]): Label for the dataframe.
+
+        Raises:
+            ImportError: This error is raised if the user-provided dataframe
+                does not contain all necessary columns.
+        """
         if not ('wd' in df.columns and 'ws' in df.columns):
             raise ImportError("Could not find all columns. Ensure that" +
                               "you have columns 'wd' and 'ws' in your df.")
@@ -61,19 +94,6 @@ class energy_ratio_suite():
                   'addition.')
             return None
 
-        # if 'category' in df:
-        #     if len(np.unique(df['category'])) > 2:
-        #         raise KeyError('More than 2 different category values ' +
-        #                        'are found. Please limit yourself to 2.')
-        # else:
-        #     if self.verbose:
-        #         print("No 'category' column found in df. Adding column " +
-        #               "with all values 'baseline'.")
-        df = df.copy()
-        #     df.loc[:, 'category'] = 'baseline'
-
-        # categories = np.unique(df['category'])
-        # new_entry = dict({'df': df, 'name': name, 'categories': categories})
         new_entry = dict({'df': df, 'name': name})
         self.df_list.append(new_entry)
 
@@ -100,6 +120,11 @@ class energy_ratio_suite():
                        df_ids=[idx])
 
     def remove_df(self, index):
+        """Remove a dataframe from the class.
+
+        Args:
+            index ([int]): Index of the to-be-removed dataframe.
+        """
         if self.verbose:
             print("Removing dataframe with name '" +
                   self.df_list[index]['name'] + "'.")
@@ -118,6 +143,8 @@ class energy_ratio_suite():
             self.num_turbines = []
 
     def print_dfs(self):
+        """Print an overview of the contents and settings of all the
+        dataframes currently in the class."""
         for ii in range(len(self.df_list)):
             print('___ DATAFRAME %d ___' % ii)
             keys = [c for c in self.df_list[ii].keys()]
@@ -134,6 +161,37 @@ class energy_ratio_suite():
 
     def set_masks(self, ws_range=None, wd_range=None, ti_range=None,
                   time_range=None, df_ids=None):
+        """Mask all dataframes to a certain subset of data. One can
+        mask data based on the wind speed (ws_range), wind direction
+        (wd_range), turbulence intensity (ti_range), time (time_range)
+        for all dataframes of interest. The dataframes of interest
+        are assigned by their index, gathered a a list in df_ids.
+
+        Args:
+            ws_range ([iterable], optional): Wind speed mask. Should be an
+                iterable of length 2, e.g., [6.0, 10.0], defining the lower
+                and upper bound, respectively. If not specified, will not
+                mask the data based on this variable. Defaults to None.
+            wd_range ([iterable], optional): Wind direction mask. Should
+                be an iterable of length 2, e.g., [0.0, 180.0], defining
+                the lower and upper bound, respectively. If not specified,
+                will not mask the data based on this variable. Defaults to
+                None.
+            ti_range ([iterable], optional): Turbulence intensity mask.
+                Should be an iterable of length 2, e.g., [0.04, 0.08],
+                defining the lower and upper bound, respectively. If not
+                specified, will not mask the data based on this variable.
+                Defaults to None.
+            time_range ([iterable], optional): Wind speed mask. Should be an
+                iterable of length 2, e.g., [pd.to_datetime("2019-01-01"),
+                pd.to_datetime("2019-04-01")], defining the lower and upper
+                bound, respectively. If not specified, will not mask the data
+                based on this variable. Defaults to None.
+            df_ids ([iterable], optional): List of turbine indices depicting
+                which dataframes should be masked based on the specified
+                criteria. If not specified, will apply the masks to all
+                datasets. Defaults to None.
+        """
         if self.verbose:
             print("Extracting a mask over the df: 'df_subset'.")
 
@@ -185,6 +243,18 @@ class energy_ratio_suite():
             self.df_list[ii]['df_subset'] = df_full[mask]
 
     def set_turbine_names(self, turbine_names):
+        """Assign turbine names/labels instead of just their index number.
+        This can be useful when working with SCADA data where turbines are
+        marked by a non-integer label.
+
+        Args:
+            turbine_names ([iterable]): List containing the turbine name
+                strings.
+
+        Raises:
+            DataError: Will raise a DataError if the length of turbine_names
+                does not match the number of turbines in the dataframe.
+        """
         if not len(turbine_names) == self.num_turbines:
             raise DataError(
                 'The length of turbine_names is incorrect.'
@@ -192,7 +262,13 @@ class energy_ratio_suite():
                 % (self.num_turbines, len(turbine_names)))
         self.turbine_names = turbine_names
 
-    def clear_energy_ratio_results(self, ii):
+    def clear_energy_ratio_results_of_dataset(self, ii):
+        """Clear the energy ratio results for the ii'th dataset in the
+        class.
+
+        Args:
+            ii ([int]): Dataset number/identifier
+        """
         self.df_list[ii].pop('er_results')
         self.df_list[ii].pop('er_test_turbines')
         self.df_list[ii].pop('er_ref_turbines')
@@ -202,9 +278,10 @@ class energy_ratio_suite():
         self.df_list[ii].pop('er_wd_bin_width')
         self.df_list[ii].pop('er_bootstrap_N')
 
-    def clear_all_energy_ratio_results(self):
+    def clear_energy_ratio_results_all(self):
+        """Clear the energy ratio results for all datasets."""
         for ii in range(len(self.df_list)):
-            self.clear_energy_ratio_results(ii)
+            self.clear_energy_ratio_results_of_dataset(ii)
 
     def get_energy_ratios(
         self,
@@ -216,7 +293,59 @@ class energy_ratio_suite():
         percentiles=[5., 95.],
         verbose=False
     ):
+        """This is the main function used to calculate the energy ratios
+        for dataframe provided to the class during initialization. One
+        can calculate the energy ratio for different (sets of) turbines
+        and under various discretization options.
 
+        Args:
+            test_turbines ([iteratible]): List with the test turbine(s)
+                used to calculate the power production in the nominator of
+                the energy ratio equation. Typically, this is a single
+                turbine, e.g., test_turbines=[0], but can also be multiple
+                turbines. If multiple turbines are specified, it averages
+                the power production between the turbines to come up with
+                the test power values.
+            wd_step (float, optional): Wind direction discretization step
+                size. This defines for what wind directions the energy ratio
+                is to be calculated. Note that this does not necessarily
+                also mean each bin has a width of this value. Namely, the
+                bin width can be specified separately. Defaults to 2.0.
+            ws_step (float, optional): Wind speed discretization step size.
+                This defines the resolution and widths of the wind speed
+                bins. Defaults to 1.0.
+            wd_bin_width ([type], optional): The wind direction bin width.
+                This value should be equal or larger than wd_step. When no
+                value is specified, will default to wd_bin_width = wd_step.
+                In the literature, it is not uncommon to specify a bin width
+                larger than the step size to cover for variability in the
+                wind direction measurements. By setting a large value for
+                wd_bin_width, one gets a better idea of the larger-scale
+                wake losses in the wind farm. Defaults to None.
+            N (int, optional): Number of bootstrap evaluations for
+                uncertainty quantification (UQ). If N=1, will not perform
+                any uncertainty quantification. Defaults to 1.
+            percentiles (list, optional): Confidence bounds for the
+                uncertainty quantification in percents. This value is only
+                relevant if N > 1 is specified. Defaults to [5., 95.].
+            verbose (bool, optional): Print to console. Defaults to False.
+
+        Returns:
+            self.df_list (iterable): List of Pandas DataFrames containing
+                the energy ratios for each dataset, respectively. Each
+                entry in this list is a Dataframe containing the found
+                energy ratios under the prespecified settings, contains the
+                columns:
+                    * wd_bin: The mean wind direction for this bin
+                    * N_bin: Number of data entries in this bin
+                    * baseline: Nominal energy ratio value (without UQ)
+                    * baseline_l: Lower bound for energy ratio. This
+                        value is equal to baseline without UQ and lower
+                        with UQ.
+                    * baseline_u: Upper bound for energy ratio. This
+                        value is equal to baseline without UQ and higher
+                        with UQ.
+        """
         for ii in range(len(self.df_list)):
             df_subset = self.df_list[ii]['df_subset']
             era = er.energy_ratio(
@@ -241,6 +370,20 @@ class energy_ratio_suite():
         return self.df_list
 
     def plot_energy_ratios(self, superimpose=True):
+        """This function plots the energy ratios of each dataset against
+        the wind direction, potentially with uncertainty bounds if N > 1
+        was specified by the user. One must first run get_energy_ratios()
+        before attempting to plot the energy ratios.
+
+        Args:
+            superimpose (bool, optional): if True, plots the energy ratio
+            of all datasets into the same figure. If False, will plot the
+            energy ratio of each dataset into a separate figure. Defaults
+            to True.
+
+        Returns:
+            ax [plt.Axes]: Axis handle for the figure.
+        """
         if superimpose:
             results_array = [df["er_results"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
