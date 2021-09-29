@@ -72,7 +72,7 @@ class ws_pw_curve_filtering:
                 Defaults to None.
         """
         self._set_df(df)
-        self._set_turbine_mode(turbine_list=turbine_list)
+        self._set_turbine_mode(turbine_list, initialization=True)
 
         # Assign rated power for every turbine
         if rated_powers is None:
@@ -108,7 +108,7 @@ class ws_pw_curve_filtering:
         self.nturbs_all = fsut.get_num_turbines(df)
         self.full_turbs_list = range(self.nturbs_all)
 
-    def _set_turbine_mode(self, turbine_list):
+    def _set_turbine_mode(self, turbine_list, initialization=False):
         """Assign which turbine(s) should be considered for filtering and
         plotting.
 
@@ -127,7 +127,8 @@ class ws_pw_curve_filtering:
 
         self.turbine_list = turbine_list
         self.num_turbines = len(turbine_list)
-        self._get_mean_power_curves()
+        if not initialization:
+            self._get_mean_power_curves()
 
     def _add_default_windows(self):
         """Adds two windows to filter over based on the (estimated) rated
@@ -699,7 +700,7 @@ class ws_pw_curve_filtering:
                 Ad = 0.25 * np.pi * fi_turb.rotor_diameter ** 2.0
                 ws_array = np.array(fi_turb.power_thrust_table["wind_speed"])
                 cp_array = np.array(fi_turb.fCpInterp(ws_array))
-                rho = self.fi.floris.farm.air_density
+                rho = fi.floris.farm.air_density
                 pow_array = (
                     0.5 * rho * ws_array ** 3.0 * Ad * cp_array * 1.0e-3
                 )
