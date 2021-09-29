@@ -18,6 +18,33 @@ import matplotlib.pyplot as plt
 
 
 def plot(energy_ratios, labels=None):
+    """This function plots energy ratios against the reference wind
+    direction. The plot may or may not include uncertainty bounds,
+    depending on the information contained in the provided energy ratio
+    dataframes.
+
+    Args:
+        energy_ratios ([iteratible]): List of Pandas DataFrames containing
+                the energy ratios for each dataset, respectively. Each
+                entry in this list is a Dataframe containing the found
+                energy ratios under the prespecified settings, contains the
+                columns:
+                    * wd_bin: The mean wind direction for this bin
+                    * N_bin: Number of data entries in this bin
+                    * baseline: Nominal energy ratio value (without UQ)
+                    * baseline_l: Lower bound for energy ratio. This
+                        value is equal to baseline without UQ and lower
+                        with UQ.
+                    * baseline_u: Upper bound for energy ratio. This
+                        value is equal to baseline without UQ and higher
+                        with UQ.
+        labels ([iteratible], optional): Label for each of the energy ratio
+            dataframes. Defaults to None.
+
+    Returns:
+        fig ([plt.Figure]): Figure in which energy ratios are plotted.
+        ax ([iteratible]): List of axes in the figure with length 2.
+    """
     # Format inputs if single case is inserted vs. lists
     if not isinstance(energy_ratios, (list, tuple)):
         energy_ratios = [energy_ratios]
