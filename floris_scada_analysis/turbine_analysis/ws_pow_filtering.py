@@ -29,6 +29,18 @@ from operational_analysis.toolkits import filters
 
 
 class ws_pw_curve_filtering:
+    """This class allows a user to filter turbine data based on the
+    wind-speed power curve. This class includes several useful filtering
+    methods:
+        1. Filtering based on prespecified boxes/windows. Any data outside
+           of the specified box is considered faulty.
+        2. Filtering based on x-wise distance from the mean power curve. Any
+           data too far off the mean curve is considered faulty.
+        3. Filtering based on the standard deviation from the mean power
+           curve. This is slightly different from (2) in the point that
+           it allows the user to consider variations in standard deviation
+           per power bin.
+    """
     def __init__(
         self,
         df,
@@ -36,7 +48,29 @@ class ws_pw_curve_filtering:
         add_default_windows=False,
         rated_powers=None,
     ):
+        """Initializes the class.
 
+        Args:
+            df ([pd.DataFrame]): Dataframe containing the turbine data,
+                formatted in the generic SCADA data format. Namely, the
+                dataframe should at the very least contain the columns:
+                  * Time of each measurement: time
+                  * Wind speed of each turbine: ws_000, ws_001, ... 
+                  * Power production of each turbine: pow_000, pow_001, ...
+            turbine_list (iteratible, optional): List with turbine numbers
+                that should be filtered for. If "all" is specified, then
+                it will automatically determine the number of turbines and
+                assign turbine_list as range(num_turbs). Defaults to "all".
+            add_default_windows (bool, optional): Add default filtering
+                windows (filter method 1) based on the (estimated) rated
+                power of every turbine. Defaults to False.
+            rated_powers ([iteratible], optional): List with the rated
+                power production for every turbine. If only a single float
+                is provided it will assume all turbines have that value's
+                rated power. If left unspecified, the rated power for
+                every turbine will be derived from the provided data.
+                Defaults to None.
+        """
         self._set_df(df)
         self._set_turbine_mode(turbine_list=turbine_list)
 
@@ -59,12 +93,31 @@ class ws_pw_curve_filtering:
 
     # Private methods
     def _set_df(self, df):
+        """Format and save the provided dataframe to the class.
+
+        Args:
+            df ([pd.DataFrame]): Dataframe containing the turbine data,
+                formatted in the generic SCADA data format. Namely, the
+                dataframe should at the very least contain the columns:
+                  * Time of each measurement: time
+                  * Wind speed of each turbine: ws_000, ws_001, ... 
+                  * Power production of each turbine: pow_000, pow_001, ...
+        """
         self.df = df.reset_index(drop=("time" in df.columns))
         self.dt = fsut.estimate_dt(self.df["time"])
         self.nturbs_all = fsut.get_num_turbines(df)
         self.full_turbs_list = range(self.nturbs_all)
 
     def _set_turbine_mode(self, turbine_list):
+        """Assign which turbine(s) should be considered for filtering and
+        plotting.
+
+        Args:
+            turbine_list (iteratible, optional): List with turbine numbers
+                that should be filtered for. If "all" is specified, then
+                it will automatically determine the number of turbines and
+                assign turbine_list as range(num_turbs). Defaults to "all".
+        """
         if isinstance(turbine_list, str):
             if turbine_list == "all":
                 num_turbines = fsut.get_num_turbines(self.df)
@@ -77,6 +130,8 @@ class ws_pw_curve_filtering:
         self._get_mean_power_curves()
 
     def _add_default_windows(self):
+        """Adds two windows to filter over based on the (estimated) rated
+        power production of each turbine."""
         # First figure out which turbines can be clumped together (same rated pow.)
         turbs_sorted = []
         ratedpwrs = np.unique(self.rated_powers)
@@ -114,6 +169,17 @@ class ws_pw_curve_filtering:
             )
 
     def _get_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5)):
+        """Calculates the mean power production in bins of the wind speed.
+
+        Args:
+            ws_bins ([iteratible], optional): Wind speed bins. Defaults to
+                np.arange(0.0, 25.5, 0.5).
+
+        Returns:
+            pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
+                speed bins and the mean power production value for every
+                turbine in self.turbine_list.
+        """
         ws_max = np.max(ws_bins)
         ws_min = np.min(ws_bins)
         pw_curve_df = pd.DataFrame(
@@ -147,6 +213,10 @@ class ws_pw_curve_filtering:
         return pw_curve_df
 
     def _update_status_flags(self, verbose=True):
+        """Update the status flags based on the filtering choices made.
+        The status flags are part of the self.df_filters dataframe which
+        contains the information on which data points are marked faulty
+        and by what filter(s)."""
         for df_f in self.df_filters:
             cols = [c for c in df_f.columns if "status" not in c]
             df_f["status"] = ~df_f[cols].any(axis=1)
@@ -168,6 +238,7 @@ class ws_pw_curve_filtering:
 
     # Public methods
     def reset_filters(self):
+        """Reset all filter variables and assume all data is clean."""
         # Reset certain variables
         self.pw_curve_df_bounds = None
 
@@ -223,6 +294,11 @@ class ws_pw_curve_filtering:
         self.window_list.append(new_entry)
 
     def window_remove(self, ids_to_remove):
+        """Remove the specified filtering window.
+
+        Args:
+            ids_to_remove ([int]): Index of the window to remove
+        """
         if not isinstance(ids_to_remove, (list, np.array)):
             ids_to_remove = [ids_to_remove]
         ids_to_remove = np.sort(ids_to_remove)[::-1]
@@ -234,9 +310,11 @@ class ws_pw_curve_filtering:
             self.window_list[i]["idx"] = i
 
     def window_remove_all(self):
+        """Remove all filtering windows."""
         self.window_list = []
 
     def window_print_all(self):
+        """Print information of all filter windows to console"""
         for i in range(len(self.window_list)):
             window = self.window_list[i]
             for k in window.keys():
@@ -253,6 +331,8 @@ class ws_pw_curve_filtering:
             print("")
 
     def filter_by_windows(self):
+        """Apply window filters to the dataset for the turbines of interest.
+        """        
         print("Filtering data by specified regions...")
         for ti in self.turbine_list:
             df = self.df.copy()
@@ -318,6 +398,29 @@ class ws_pw_curve_filtering:
         m_pow_rb=0.99,
         no_iterations=10,
     ):
+        """Filter the data by offset from the mean power curve in x-
+        directions. This is an iterative process because the estimated mean
+        curve actually changes as data is filtered. This process typically
+        converges within a couple iterations.
+
+        Args:
+            m_ws_lb (float, optional): Multiplier on the wind speed defining
+            the left bound for the power curve. Any data to the left of this
+            curve is considered faulty. Defaults to 0.95.
+            m_pow_lb (float, optional): Multiplier on the power defining
+            the left bound for the power curve. Any data to the left of this
+            curve is considered faulty. Defaults to 1.01.
+            m_ws_rb (float, optional): Multiplier on the wind speed defining
+            the right bound for the power curve. Any data to the right of this
+            curve is considered faulty. Defaults to 1.05.
+            m_pow_rb (float, optional): Multiplier on the power defining
+            the right bound for the power curve. Any data to the right of this
+            curve is considered faulty. Defaults to 0.99.
+            no_iterations (int, optional): Number of iterations. The
+            solution typically converges in 2-3 steps, but as the process is
+            very fast, it's better to run a higher number of iterations.
+            Defaults to 10.
+        """
         print("Filtering data by deviations from the mean power curve...")
         for ii in range(no_iterations):
             # Create upper and lower bounds around mean curve
@@ -371,6 +474,26 @@ class ws_pw_curve_filtering:
     def filter_by_wsdev(
         self, pow_bin_width=20.0, max_ws_dev=2.0, pow_min=20.0, pow_max=None
     ):
+        """Filter data that is too far off the mean curve w.r.t. the
+        standard deviation in x-direction. This is slightly different from
+        filtering by deviations from the mean curve as now the standard
+        deviation of the data is taken into account.
+
+        Args:
+            pow_bin_width (float, optional): Bin width in the y-axis, thus
+            over the power production. Defaults to 20.0.
+            max_ws_dev (float, optional): Data points further than
+            max_ws_dev * ws_dev off the mean curve are considered faulty.
+            Defaults to 2.0, which is two standard deviations meaning
+            about 5% of the values will be marked faulty.
+            pow_min (float, optional): Lower bound on the power
+            production above which data should be filtered. Defaults to
+            20.0.
+            pow_max ([type], optional): Upper bound on the power
+            production below which data should be filtered. If none is
+            specified, will derive this value based on the estimated rated
+            power production. Defaults to None.
+        """
         print("Filtering data by WS std. dev...")
 
         # Default properties: must be arrays with length equal to n.o. turbines
@@ -428,6 +551,15 @@ class ws_pw_curve_filtering:
         self._update_status_flags()
 
     def save_df(self, fout):
+        """Apply all filters to the dataframe by marking any fauilty data
+        as None/np.nan. Then, save the dataframe to the specified path.
+
+        Args:
+            fout ([str]): Destination path for the output .ftr file.
+
+        Returns:
+            df ([pd.DataFrame]): Processed dataframe.
+        """
         if not (self.turbine_list == self.full_turbs_list):
             print(
                 "Skipping saving dataframe since not all turbines are filtered."
@@ -454,9 +586,14 @@ class ws_pw_curve_filtering:
         return df
 
     def save_power_curve(self, fout="power_curve.csv"):
+        """Save the estimated power curve as a .csv to a prespecified path.
+        """
         return self.pw_curve_df.to_csv(fout)
 
     def plot_power_curves(self):
+        """Plot all turbines' power curves in a single figure. Also estimate
+        and plot a mean turbine power curve.
+        """
         fig, ax = plt.subplots()
         x = np.array(self.pw_curve_df["ws"], dtype=float)
         for ti in self.turbine_list:
@@ -489,6 +626,24 @@ class ws_pw_curve_filtering:
         fig_format="png",
         dpi=300,
     ):
+        """Plot the wind speed power curve and mark faulty data according to
+        their filters.
+
+        Args:
+            draw_windows (bool, optional): Plot the windows over which data
+            is filtered. Defaults to True.
+            confirm_plot (bool, optional): Add a secondary subplot showing
+            which data are faulty and which are fine. Useful for debugging.
+            Defaults to False.
+            fi ([type], optional): floris object. If specified, will use
+            this to plot the turbine power curves as implemented in floris.
+            Defaults to None.
+            save_path ([str], optional): Path to save the figure to. If none
+            is specified, then will not save any figures. Defaults to None.
+            fig_format (str, optional): Figure format if saved. Defaults to
+            "png".
+            dpi (int, optional): Image resolution if saved. Defaults to 300.
+        """
         df = self.df
 
         fig_list = []
@@ -644,6 +799,21 @@ class ws_pw_curve_filtering:
     def plot_outliers_vs_time(
         self, save_path=None, fig_format="png", dpi=300
     ):
+        """Generate bar plot where each week of data is gathered and its
+        filtering results will be shown relative to the data size of each
+        week. This plot can particularly be useful to investigate whether
+        certain weeks/time periods show a particular high number of faulty
+        measurements. This can often be correlated with maintenance time
+        windows and the user may opt to completely remove any measurements
+        in the found time period from the dataset.
+
+        Args:
+            save_path ([str], optional): Path to save the figure to. If none
+            is specified, then will not save any figures. Defaults to None.
+            fig_format (str, optional): Figure format if saved. Defaults to
+            "png".
+            dpi (int, optional): Image resolution if saved. Defaults to 300.
+        """
         df = self.df
 
         fig_list = []
@@ -667,6 +837,20 @@ class ws_pw_curve_filtering:
         return fig_list
 
     def apply_filtering_to_other_df(self, df_target, fout=None):
+        """This function enables the user to implement the changes made in
+        the dataframe at hand in other dataframes. For example, if the data
+        in the dataframe self.df is sampled at 60 s, one may want to apply
+        the changes made back to the original 1 s dataset.
+
+        Args:
+            df_target ([pd.DataFrame]): Targetted dataframe to apply the
+            changes to.
+            fout ([str], optional): Output path for the formatted Dataframe.
+            Defaults to None.
+
+        Returns:
+            df_target ([pd.DataFrame]): Formatted dataframe.
+        """
         turbines_in_target_df = [
             ti
             for ti in self.full_turbs_list
