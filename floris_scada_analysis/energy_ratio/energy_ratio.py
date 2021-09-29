@@ -17,9 +17,10 @@ import pandas as pd
 
 from floris.utilities import wrap_360
 
-from floris_scada_analysis.dataframe_operations import dataframe_manipulations as dfm
-from floris_scada_analysis.energy_ratio import energy_ratio_visualization as ervis
-from floris_scada_analysis import utilities as fsut
+from floris_scada_analysis.dataframe_operations import \
+    dataframe_manipulations as dfm
+from floris_scada_analysis.energy_ratio import \
+    energy_ratio_visualization as ervis
 
 
 class energy_ratio:
@@ -33,30 +34,69 @@ class energy_ratio:
         self.verbose = verbose
 
         # Initialize dataframe
-        self.set_df(df_in)
+        self._set_df(df_in)
 
         # Initialize frequency functions
         self.wind_rose_function = wind_rose_function
 
-    def set_df(self, df_in):
+    # Private methods
+
+    def _set_df(self, df_in):
+        """This function writes the dataframe provided by the user to the
+        class as self.df_full. This full dataframe will be used to create
+        a minimal dataframe called self.df which contains the minimum
+        columns required to calculate the energy ratios. The contents of
+        self.df will depend on the test_turbine specified and hence
+        that dataframe is created in the _set_test_turbines() function.
+
+        Args:
+            df_in ([pd.DataFrame]): The dataframe provided by the user. This
+            dataframe should have the following columns:
+                * Wind direction at every turbine: wd_000, wd_001, wd_002, ..
+                * Wind speed at every turbine: ws_000, ws_001, ws_002, ..
+                * Power production of every turbine: pow_000, pow_001, ...
+                * Reference power production used to normalize the energy
+                    ratio: pow_ref
+        """
         if 'pow_ref' not in df_in.columns:
-            raise KeyError('pow_ref column not found in dataframe. Cannot proceed.')
-            # INFO: You can add such a column using dfm.set_pow_ref_by_*.
+            raise KeyError('pow_ref column not in dataframe. Cannot proceed.')
+            # INFO: You can add such a column using:
+            #   from floris_scada_analysis.dataframe_operations import \
+            #       dataframe_manipulations as dfm
+            #
+            #   df = dfm.set_pow_ref_by_*(df)
+            #   ...
 
-        # Copy minimal columns from df_in to df
-        df = df_in[['wd', 'ws', 'pow_ref']].copy()
+        # Copy full dataframe to self
+        self.df_full = df_in.copy()  # Full dataframe
+        self.df = None
 
-        self.df_full = df_in  # Save reference to full dataframe
-        self.df = df  # Minimal dataframe
+    def _set_test_turbines(self, test_turbines):
+        """This function calculates the power production upon which the
+        energy ratio is calculated, in the nominator of the energy ratio
+        equation. This is typically a single turbine, e.g.,
+        test_turbines=[0], but can also be the average of multiple turbines,
+        e.g., test_turbines=[0, 1, 2]. This function creates the minimal
+        dataframe, self.df, with columns being the wind direction 'wd',
+        the wind speed 'ws', the power production of the test turbine(s)
+        'pow_test' and the reference power production 'pow_ref'. The
+        arrays 'pow_test' and 'pow_ref' are in the nominator and
+        denominator in the energy ratio equation, respectively.
 
-    def set_test_turbines(self, test_turbines):
+        Args:
+            test_turbines ([iteratible]): List with the test turbine(s)
+                used to calculate the power production in the nominator of
+                the energy ratio equation. Typically, this is a single
+                turbine, e.g., test_turbines=[0], but can also be multiple
+                turbines. If multiple turbines are specified, it averages
+                the power production between the turbines to come up with
+                the test power values.
+        """
         if not (type(test_turbines) is list):
             test_turbines = [test_turbines]
         self.test_turbines = test_turbines
 
-        if "pow_test" in self.df.columns:
-            self.df.drop(columns="pow_test")
-
+        self.df = self.df_full[['wd', 'ws', 'pow_ref']].copy()
         self.df["pow_test"] = dfm.get_column_mean(
             df=self.df_full,
             col_prefix="pow",
@@ -65,9 +105,14 @@ class energy_ratio:
         )
 
     def _calculate_bins(self):
+        """This function bins the data in the minimal dataframe, self.df,
+        into the respective wind direction and wind speed bins. Note that
+        there might be bin overlap if the specified wd_bin_width is larger
+        than the bin step size. This code will copy dataframe rows that fall
+        into multiple bins, effectively increasing the sample size.
+        """
         # Define bin centers and bin widths
         ws_step = self.ws_step
-
         wd_step = self.wd_step
         wd_bin_width = self.wd_bin_width
 
@@ -83,14 +128,19 @@ class energy_ratio:
             wd_step
         )
 
-        # Bin according to wind speed [never overlap between bins]
+        # Bin according to wind speed. Note that data never falls into
+        # multiple wind speed bins at the same time.
         for ws in ws_labels:
             ws_min = ws - ws_step / 2.
             ws_max = ws + ws_step / 2.
             ids = (self.df["ws"] > ws_min) & (self.df["ws"] <= ws_max)
             self.df.loc[ids, "ws_bin"] = ws
 
-        # Bin according to wind direction [bin overlap if wd_bin_width > wd_step]
+        # Bin according to wind direction. Note that data can fall into
+        # multiple wind direction bins at the same time, if wd_bin_width is
+        # larger than the wind direction binning step size, wd_step. If so,
+        # data will be copied and the sample size is effectively increased
+        # so that every relevant bin has that particular measurement.
         df_list = [None for _ in range(len(wd_labels))]
         for ii, wd in enumerate(wd_labels):
             wd_min = wrap_360(wd - wd_bin_width / 2.)
@@ -110,6 +160,12 @@ class energy_ratio:
         self.wd_labels = wd_labels
 
     def _get_df_freq(self):
+        """This function derives the frequency of occurrence of each bin
+        (wind direction and wind speed) from the binned dataframe. The
+        found values are used in the energy ratio equation to weigh the
+        power productions of each bin according to their frequency of
+        occurrence.
+        """
         # Determine observed or annual freq
         if self.wind_rose_function is None:
             df_freq_observed = self.df[["ws_bin", "wd_bin"]].copy()
@@ -141,6 +197,8 @@ class energy_ratio:
             #     {"ws_bin": ws_array, "wd_bin": wd_array, "freq": freq_array}
             # )
 
+    # Public methods
+
     def get_energy_ratio(
         self,
         test_turbines,
@@ -150,7 +208,57 @@ class energy_ratio:
         N=1,
         percentiles=[5., 95.]
     ):
-        if self.df.shape[0] < 1:
+        """This is the main function used to calculate the energy ratios
+        for dataframe provided to the class during initialization. One
+        can calculate the energy ratio for different (sets of) turbines
+        and under various discretization options.
+
+        Args:
+            test_turbines ([iteratible]): List with the test turbine(s)
+                used to calculate the power production in the nominator of
+                the energy ratio equation. Typically, this is a single
+                turbine, e.g., test_turbines=[0], but can also be multiple
+                turbines. If multiple turbines are specified, it averages
+                the power production between the turbines to come up with
+                the test power values.
+            wd_step (float, optional): Wind direction discretization step
+                size. This defines for what wind directions the energy ratio
+                is to be calculated. Note that this does not necessarily
+                also mean each bin has a width of this value. Namely, the
+                bin width can be specified separately. Defaults to 2.0.
+            ws_step (float, optional): Wind speed discretization step size.
+                This defines the resolution and widths of the wind speed
+                bins. Defaults to 1.0.
+            wd_bin_width ([type], optional): The wind direction bin width.
+                This value should be equal or larger than wd_step. When no
+                value is specified, will default to wd_bin_width = wd_step.
+                In the literature, it is not uncommon to specify a bin width
+                larger than the step size to cover for variability in the
+                wind direction measurements. By setting a large value for
+                wd_bin_width, one gets a better idea of the larger-scale
+                wake losses in the wind farm. Defaults to None.
+            N (int, optional): Number of bootstrap evaluations for
+                uncertainty quantification (UQ). If N=1, will not perform
+                any uncertainty quantification. Defaults to 1.
+            percentiles (list, optional): Confidence bounds for the
+                uncertainty quantification in percents. This value is only
+                relevant if N > 1 is specified. Defaults to [5., 95.].
+
+        Returns:
+            energy_ratios ([pd.DataFrame]): Dataframe containing the found
+                energy ratios under the prespecified settings. The dataframe
+                contains the columns:
+                    * wd_bin: The mean wind direction for this bin
+                    * N_bin: Number of data entries in this bin
+                    * baseline: Nominal energy ratio value (without UQ)
+                    * baseline_l: Lower bound for energy ratio. This
+                        value is equal to baseline without UQ and lower
+                        with UQ.
+                    * baseline_u: Upper bound for energy ratio. This
+                        value is equal to baseline without UQ and higher
+                        with UQ.
+        """
+        if self.df_full.shape[0] < 1:
             # Empty dataframe, do nothing
             self.energy_ratio_out = pd.DataFrame()
             self.energy_ratio_N = N
@@ -160,7 +268,7 @@ class energy_ratio:
             print('Calculating energy ratios with N = %d.' % N)
 
         # Set up a 'pow_test' column in the dataframe
-        self.set_test_turbines(test_turbines)
+        self._set_test_turbines(test_turbines)
 
         # Set up binning
         self.ws_step = ws_step
@@ -190,26 +298,59 @@ class energy_ratio:
         return energy_ratios
 
     def plot_energy_ratio(self):
-        # Simple linker function for easy usage
-        ax = ervis.plot(self.energy_ratio_out)
-        return ax
+        """This function plots the energy ratio against the wind direction,
+        potentially with uncertainty bounds if N > 1 was specified by
+        the user. One must first run get_energy_ratio() before attempting
+        to plot the energy ratios.
+
+        Returns:
+            ax [plt.Axes]: Axis handle for the figure.
+        """
+        return ervis.plot(self.energy_ratio_out)
 
 
 def _get_energy_ratios_all_wd_bins_bootstrapping(
-    df_binned, df_freq=None, N=1, percentiles=[5., 95.]
-    ):
+    df_binned, df_freq=None, N=1, percentiles=[5., 95.]):
     """Wrapper function that calculates the energy ratio for every wind
-    direction bin in the dataframe. Thus, for every set of wind directions,
-    the function '_get_energy_ratio_single_wd_bin_bootstrapping' is called.
+    direction bin in the provided dataframe. This function wraps around
+    the function '_get_energy_ratio_single_wd_bin_bootstrapping', which
+    calculates the energy ratio for a single wind direction bin.
 
     Args:
-        df_binned ([type]): [description]
-        df_freq ([type]): [description]
-        N (int, optional): [description]. Defaults to 1.
-        percentiles (list, optional): [description]. Defaults to [5., 95.].
+        df_binned ([pd.DataFrame]): Dataframe containing the binned
+        data. This dataframe must contain, at the minimum, the following
+        columns:
+            * ws_bin: The wind speed bin
+            * wd_bin: The wind direction bin
+            * pow_ref: The reference power production, previously specified
+                by the user outside of this function/class. This value
+                belongs in the denominator in the energy ratio equation.
+            * pow_test: The test power production. This value belongs in the
+                nominator in the energy ratio equation.
+        df_freq ([pd.DataFrame]): Dataframe containing the frequency of every
+            wind direction and wind speed bin. This dataframe is typically
+            derived from the data itself but can also be a separate dataframe
+            based on the wind rose of the site.
+        N (int, optional): Number of bootstrap evaluations for
+            uncertainty quantification (UQ). If N=1, will not perform any
+            uncertainty quantification. Defaults to 1.
+        percentiles (list, optional): Confidence bounds for the
+            uncertainty quantification in percents. This value is only
+            relevant if N > 1 is specified. Defaults to [5., 95.].
 
     Returns:
-        [type]: [description]
+        energy_ratios ([pd.DataFrame]): Dataframe containing the found
+            energy ratios under the prespecified settings. The dataframe
+            contains the columns:
+                * wd_bin: The mean wind direction for this bin
+                * N_bin: Number of data entries in this bin
+                * baseline: Nominal energy ratio value (without UQ)
+                * baseline_l: Lower bound for energy ratio. This
+                    value is equal to baseline without UQ and lower
+                    with UQ.
+                * baseline_u: Upper bound for energy ratio. This
+                    value is equal to baseline without UQ and higher
+                    with UQ.
     """
     # Copy minimal dataframe
     df = df_binned[['ws_bin', 'wd_bin', 'pow_ref', 'pow_test']]
@@ -249,21 +390,11 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
 
 
 def _get_energy_ratio_single_wd_bin_bootstrapping(
-    df_binned, df_freq=None, N=1, percentiles=[5., 95.]
-    ):
+    df_binned, df_freq=None, N=1, percentiles=[5., 95.]):
     """Get the energy ratio for one particular wind direction bin and
     an array of wind speed bins. This function also includes bootstrapping
     functionality by increasing the number of bootstrap evaluations (N) to
     larger than 1. The bootstrap percentiles default to 5 % and 95 %.
-
-    Args:
-        df_binned ([type]): [description]
-        df_freq ([type]): [description]
-        N (int, optional): [description]. Defaults to 1.
-        percentiles (list, optional): [description]. Defaults to [5., 95.].
-
-    Returns:
-        [type]: [description]
     """
     if df_freq is not None:
         # Renormalize frequencies
@@ -299,8 +430,11 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
 
 
 def _get_energy_ratio_single_wd_bin_nominal(
-    df_binned, df_freq=None, randomize_df=False
-    ):
+    df_binned, df_freq=None, randomize_df=False):
+    """Get the energy ratio for one particular wind direction bin and
+    an array of wind speed bins. This function performs a single
+    calculation of the energy ratios without uncertainty quantification.
+    """
     # Copy over minimal dataframe
     df = df_binned[["ws_bin", "pow_ref", "pow_test"]].copy()
 
