@@ -25,7 +25,10 @@ def plot(energy_ratios, labels=None):
             labels = [labels]
 
     if labels is None:
-        labels = [None for _ in energy_ratios]
+        labels = ["Nominal" for _ in energy_ratios]
+        uq_labels = ["Confidence bounds" for _ in energy_ratios]
+    else:
+        uq_labels = ["%s confidence bounds" % lb for lb in labels]
 
     N = len(energy_ratios)
     fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(10, 5))
@@ -63,14 +66,18 @@ def plot(energy_ratios, labels=None):
         # Plot energy ratios
         ax[0].plot(x, df["baseline"], '-o', markersize=3., label=labels[ii])
 
-        # Plot uncertainty bounds from bootstrapping
-        ax[0].fill_between(x, df["baseline_l"], df["baseline_u"], alpha=0.25)
+        # Plot uncertainty bounds from bootstrapping, if applicable
+        has_uq = (np.max(np.abs(df['baseline'] - df['baseline_l'])) > 0.001)
+        if has_uq:
+            ax[0].fill_between(x, df["baseline_l"], df["baseline_u"],
+                               alpha=0.25, label=uq_labels[ii])
 
         # Plot the bin count
         ax[1].bar(x-(ii-N/2)*bar_width, df["N_bin"], width=bar_width)
 
     # Format the energy ratio plot
     ax[0].set_ylabel('Energy ratio (-)')
+    ax[0].legend()
     ax[0].grid(b=True, which='major', axis='both', color='gray')
     ax[0].grid(b=True, which='minor', axis='both', color='lightgray')
     ax[0].minorticks_on()
