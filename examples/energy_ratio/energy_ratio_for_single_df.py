@@ -17,15 +17,16 @@ import pandas as pd
 
 from floris import tools as wfct
 from floris_scada_analysis.energy_ratio import energy_ratio
-from floris_scada_analysis.dataframe_operations import dataframe_filtering as dff
-from floris_scada_analysis.dataframe_operations import dataframe_manipulations as dfm
+from floris_scada_analysis.dataframe_operations import \
+    dataframe_manipulations as dfm
 from floris_scada_analysis import floris_tools as fsatools
 
 
 def load_data():
     # Load dataframe with scada data
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    ftr_path = os.path.join(root_dir, '../demo_dataset/demo_dataset_60s.ftr')
+    ftr_path = os.path.join(root_dir, '..', 'demo_dataset',
+                            'demo_dataset_60s.ftr')
     if not os.path.exists(ftr_path):
         raise FileNotFoundError('Please run ./examples/demo_dataset/' +
                                 'generate_demo_dataset.py before try' +
@@ -40,7 +41,6 @@ def load_floris():
     file_path = os.path.dirname(os.path.abspath(__file__))
     fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.json")
     fi = wfct.floris_interface.FlorisInterface(fi_path)
-    # fi.vis_layout()
     return fi
 
 
@@ -49,31 +49,58 @@ if __name__ == '__main__':
     df = load_data()
     fi = load_floris()
 
-    # Preprocess dataframes using floris
-    df = dff.filter_df_by_status(df)
-    df = dfm.set_wd_by_all_turbines(df)
-    df_upstream = fsatools.get_upstream_turbs_floris(fi, wd_step=5.0)
-    df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
-    df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
+    # Visualize layout
+    fi.vis_layout()
 
-    # limit df to narrow wind direction region
+    # We first need to define a wd against which we plot the energy ratios
+    # In this example, we set the wind direction to be equal to the mean
+    # wind direction between all turbines
+    df = dfm.set_wd_by_all_turbines(df)
+
+    # We reduce the dataframe to only data where the wind direction
+    # is between 20 and 90 degrees.
     df = dfm.filter_df_by_wd(df=df, wd_range=[20., 90.])
     df = df.reset_index(drop=True)
 
-    # Initialize energy ratio object for the dataframe
-    era = energy_ratio.energy_ratio(
-        df_in=df,
+    # We also need to define a reference wind speed and a reference power
+    # production against to normalize the energy ratios with. In this
+    # example, we set the wind speed equal to the mean wind speed
+    # of all upstream turbines. The upstream turbines are automatically
+    # derived from the turbine layout and the wind direction signal in
+    # the dataframe, df['wd']. The reference power production is set
+    # as the average power production of turbines 0 and 6, which are
+    # always upstream for wind directions between 20 and 90 deg.
+    df_upstream = fsatools.get_upstream_turbs_floris(fi)
+    df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
+    df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
+
+    # # Initialize energy ratio object for the dataframe
+    era = energy_ratio.energy_ratio(df_in=df, verbose=True)
+
+    # Get energy ratio without uncertainty quantification
+    era.get_energy_ratio(
         test_turbines=[1],
         wd_step=2.0,
         ws_step=1.0,
-        verbose=True
-        )
+        wd_bin_width=3.0,
+    )
+    fig, ax = era.plot_energy_ratio()
+    ax[0].set_title("Energy ratios for turbine 001 without UQ")
+    plt.tight_layout()
 
-    # Without bootstrapping
-    result = era.get_energy_ratio()
-    era.plot_energy_ratio()
+    # Get energy ratio with uncertainty quantification
+    # using N=50 bootstrap samples and 5-95 percent conf. bounds.
+    era.get_energy_ratio(
+        test_turbines=[1],
+        wd_step=2.0,
+        ws_step=1.0,
+        wd_bin_width=3.0,
+        N=50,
+        percentiles=[5.0, 95.0]
+    )
+    fig, ax = era.plot_energy_ratio()
+    ax[0].set_title("Energy ratios for turbine 001 with UQ "
+                    + "(N=50, 90% confidence interval)")
+    plt.tight_layout()
 
-    # With bootstrapping
-    result = era.get_energy_ratio(N=10, percentiles=[10., 90.])
-    era.plot_energy_ratio()
     plt.show()
