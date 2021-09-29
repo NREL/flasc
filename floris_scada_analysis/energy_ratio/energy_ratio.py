@@ -24,7 +24,13 @@ from floris_scada_analysis.energy_ratio import \
 
 
 class energy_ratio:
-    """"""
+    """This class is used to calculate the energy ratios for a single
+    dataframe with measurements, either from FLORIS or from SCADA data.
+    This class supports bootstrapping for uncertainty quantification,
+    automatic derivation of the frequency of bins based on occurrence
+    in the provided dataset, and various choices for binning and daa
+    discretization.
+    """
     def __init__(
         self,
         df_in,
@@ -308,6 +314,8 @@ class energy_ratio:
         """
         return ervis.plot(self.energy_ratio_out)
 
+
+# Support functions not included in energy_ratio class
 
 def _get_energy_ratios_all_wd_bins_bootstrapping(
     df_binned, df_freq=None, N=1, percentiles=[5., 95.]):
