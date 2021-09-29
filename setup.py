@@ -21,6 +21,7 @@ requirements = [
     'SALib>=1.4.0.2',
     'scipy>=1.1',
     'sklearn>=0.0',
+    'streamlit>=0.89.0'
 ]
 
 setup_requirements = [
