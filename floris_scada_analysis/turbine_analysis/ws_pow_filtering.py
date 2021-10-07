@@ -397,6 +397,8 @@ class ws_pw_curve_filtering:
         m_pow_lb=1.01,
         m_ws_rb=1.05,
         m_pow_rb=0.99,
+        ws_deadband=0.50,
+        pow_deadband=20.0,
         no_iterations=10,
     ):
         """Filter the data by offset from the mean power curve in x-
@@ -436,15 +438,15 @@ class ws_pw_curve_filtering:
                 pow_array = np.array(self.df["pow_%03d" % ti], dtype=float)
                 ws_lb = np.interp(
                     x=pow_array,
-                    xp=y * m_pow_lb,
-                    fp=x * m_ws_lb,
+                    xp=y * m_pow_lb + pow_deadband / 2.0,
+                    fp=x * m_ws_lb - ws_deadband / 2.0,
                     left=np.nan,
                     right=np.nan,
                 )
                 ws_rb = np.interp(
                     x=pow_array,
-                    xp=y * m_pow_rb,
-                    fp=x * m_ws_rb,
+                    xp=y * m_pow_rb - pow_deadband / 2.0,
+                    fp=x * m_ws_rb + ws_deadband / 2.0,
                     left=np.nan,
                     right=np.nan,
                 )
@@ -455,15 +457,15 @@ class ws_pw_curve_filtering:
                 # Write left and right bound to own curve
                 self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
                     x=x,
-                    xp=x * m_ws_lb,
-                    fp=y * m_pow_lb,
+                    xp=x * m_ws_lb - ws_deadband / 2.0,
+                    fp=y * m_pow_lb + pow_deadband / 2.0,
                     left=np.nan,
                     right=np.nan,
                 )
                 self.pw_curve_df_bounds["pow_%03d_rb" % ti] = np.interp(
                     x=x,
-                    xp=x * m_ws_rb,
-                    fp=y * m_pow_rb,
+                    xp=x * m_ws_rb + ws_deadband / 2.0,
+                    fp=y * m_pow_rb - pow_deadband / 2.0,
                     left=np.nan,
                     right=np.nan,
                 )
@@ -783,7 +785,10 @@ class ws_pw_curve_filtering:
             ax[0].set_title("Turbine %03d" % ti)
             ax[0].set_ylabel("Power (kW)")
             ax[0].set_xlabel("Wind speed (m/s)")
-            ax[0].legend()
+            lgd = ax[0].legend()
+            for l in lgd.legendHandles:
+                # Force alpha in legend to 1.0
+                l._legmarker.set_alpha(1)
 
             if confirm_plot:
                 ut._make_confirmation_plot(df, ti=ti, ax=ax[1])
