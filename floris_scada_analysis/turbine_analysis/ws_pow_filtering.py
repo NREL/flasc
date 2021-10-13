@@ -430,23 +430,82 @@ class ws_pw_curve_filtering:
             df_xy = self.pw_curve_df.copy()
             x = np.array(df_xy["ws"], dtype=float)
             self.pw_curve_df_bounds = pd.DataFrame({"ws": x})
+
             for ti in self.turbine_list:
                 y = np.array(df_xy["pow_%03d" % ti], dtype=float)
+                if np.all(np.isnan(y)):
+                    self.pw_curve_df_bounds["pow_%03d_lb" % ti] = None
+                    self.pw_curve_df_bounds["pow_%03d_rb" % ti] = None
+                    continue
 
                 # Create interpolants to left and right of mean curve
                 ws_array = np.array(self.df["ws_%03d" % ti], dtype=float)
                 pow_array = np.array(self.df["pow_%03d" % ti], dtype=float)
+
+                # Specify left side bound and non-decreasing
+                lb_ws = x * m_ws_lb - ws_deadband / 2.0
+                lb_pow = y * m_pow_lb + pow_deadband / 2.0
+
+                # Make sure first couple entries are not NaN
+                jjj = 0
+                while np.isnan(lb_pow[jjj]):
+                    lb_pow[jjj] = jjj / 1000.0
+                    jjj = jjj + 1
+
+                # Ensure non-decreasing for lower half of wind speeds
+                id_center = np.argmin(np.abs(lb_ws - 9.0))  # Assume value is fine near 9 m/s
+                lb_ws_l = lb_ws[0:id_center]
+                lb_pow_l = lb_pow[0:id_center]
+                good_ids = (
+                    np.hstack([(np.diff(lb_pow_l) >= 0.0), True])
+                    & 
+                    (~np.isnan(lb_pow[0:id_center]))
+                )
+                good_ids[0] = True
+                lb_pow_l = np.interp(lb_ws_l, lb_ws_l[good_ids], lb_pow_l[good_ids])
+                lb_pow[0:id_center] = lb_pow_l
+                non_nans = (~np.isnan(lb_pow) & ~np.isnan(lb_ws))
+                lb_pow = lb_pow[non_nans]
+                lb_ws = lb_ws[non_nans]
+
+                # Specify right side bound and ensure monotonically increasing
+                rb_ws = x * m_ws_rb + ws_deadband / 2.0
+                rb_pow = y * m_pow_rb - pow_deadband / 2.0
+
+                # Make sure first couple entries are not NaN
+                jjj = 0
+                while np.isnan(rb_pow[jjj]):
+                    rb_pow[jjj] = jjj / 1000.0
+                    jjj = jjj + 1
+
+                # Ensure non-decreasing for lower half of wind speeds
+                id_center = np.argmin(np.abs(rb_ws - 9.0))  # Assume value is fine near 9 m/s
+                rb_ws_l = rb_ws[0:id_center]
+                rb_pow_l = rb_pow[0:id_center]
+                good_ids = (
+                    np.hstack([(np.diff(rb_pow_l) >= 0.0), True])
+                    & 
+                    (~np.isnan(rb_pow[0:id_center]))
+                )
+                good_ids[0] = True
+                rb_pow_l = np.interp(rb_ws_l, rb_ws_l[good_ids], rb_pow_l[good_ids])
+                rb_pow[0:id_center] = rb_pow_l
+                non_nans = (~np.isnan(rb_pow) & ~np.isnan(rb_ws))
+                rb_pow = rb_pow[non_nans]
+                rb_ws = rb_ws[non_nans]
+
+                # Finally interpolate
                 ws_lb = np.interp(
                     x=pow_array,
-                    xp=y * m_pow_lb + pow_deadband / 2.0,
-                    fp=x * m_ws_lb - ws_deadband / 2.0,
+                    xp=lb_pow,
+                    fp=lb_ws,
                     left=np.nan,
                     right=np.nan,
                 )
                 ws_rb = np.interp(
                     x=pow_array,
-                    xp=y * m_pow_rb - pow_deadband / 2.0,
-                    fp=x * m_ws_rb + ws_deadband / 2.0,
+                    xp=rb_pow,
+                    fp=rb_ws,
                     left=np.nan,
                     right=np.nan,
                 )
@@ -457,15 +516,15 @@ class ws_pw_curve_filtering:
                 # Write left and right bound to own curve
                 self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
                     x=x,
-                    xp=x * m_ws_lb - ws_deadband / 2.0,
-                    fp=y * m_pow_lb + pow_deadband / 2.0,
+                    xp=lb_ws,
+                    fp=lb_pow,
                     left=np.nan,
                     right=np.nan,
                 )
                 self.pw_curve_df_bounds["pow_%03d_rb" % ti] = np.interp(
                     x=x,
-                    xp=x * m_ws_rb + ws_deadband / 2.0,
-                    fp=y * m_pow_rb - pow_deadband / 2.0,
+                    xp=rb_ws,
+                    fp=rb_pow,
                     left=np.nan,
                     right=np.nan,
                 )
@@ -791,7 +850,7 @@ class ws_pw_curve_filtering:
                 l._legmarker.set_alpha(1)
 
             if confirm_plot:
-                ut._make_confirmation_plot(df, ti=ti, ax=ax[1])
+                ut._make_confirmation_plot(df, self.df_filters, ti=ti, ax=ax[1])
                 ax[1].set_ylabel("")
 
             fig.tight_layout()
