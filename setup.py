@@ -21,7 +21,9 @@ requirements = [
     'SALib>=1.4.0.2',
     'scipy>=1.1',
     'sklearn>=0.0',
-    'streamlit>=0.89.0'
+    'sqlalchemy>=1.4.23',
+    'streamlit>=0.89.0',
+    'tkcalendar>=1.6.1',
 ]
 
 setup_requirements = [
