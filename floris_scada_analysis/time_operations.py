@@ -305,7 +305,6 @@ def df_resample_by_filling_gaps(df, time_array):
 
 def df_resample_by_interpolation(df, time_array, circular_cols,
                               interp_method='nearest', interp_margin=None):
-    _resample_fill_gaps(df, time_array)
     # Copy with properties but no actual data
     df_res = df.head(0).copy()
 

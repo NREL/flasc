@@ -17,11 +17,13 @@ import numpy as np
 import scipy.optimize as opt
 import scipy.stats as spst
 
-from floris.utilities import wrap_360
+from floris.utilities import wrap_180, wrap_360
 
 from floris_scada_analysis import circular_statistics as css
 from floris_scada_analysis import floris_tools as ftools
 from floris_scada_analysis import utilities as fsut
+
+from floris_scada_analysis import time_operations as fsato
 
 
 def find_timeshift_between_dfs(df1, df2, cols_df1, cols_df2,
@@ -54,12 +56,12 @@ def find_timeshift_between_dfs(df1, df2, cols_df1, cols_df2,
           'This may take a while...')
     time_array = [min_time + i * dt for i in
                   range(int(np.ceil((max_time-min_time)/dt)))]
-    df1 = fsato.df_resample_to_time_array(
+    df1 = fsato.df_resample_by_interpolation(
         df1, time_array=time_array,
         circular_cols=use_circular_statistics,
         interp_method='linear', interp_margin=dt
         )
-    df2 = fsato.df_resample_to_time_array(
+    df2 = fsato.df_resample_by_interpolation(
         df2, time_array=time_array,
         circular_cols=use_circular_statistics,
         interp_method='linear', interp_margin=dt
@@ -183,10 +185,10 @@ def find_bias_x(x_1, y_1, x_2, y_2, search_range, search_dx):
 def match_wd_curves_by_offset(wd_ref, wd_turb, dwd=2.0):
     J_opt = np.nan
     dwd_opt = np.nan
-    for dx in np.arange(0., 360., dwd):
+    for dx in np.arange(-180., 180., dwd):
         wd_turb_cor = wrap_360(wd_turb - dx)
-        wd_error = np.abs(wd_ref-wd_turb_cor)
-        wd_error[wd_error > 180.] = 360. - wd_error[wd_error > 180.]
+        wd_error = np.abs(wrap_180(wd_ref-wd_turb_cor))
+        # wd_error[wd_error > 180.] = 360. - wd_error[wd_error > 180.]
         J = np.nanmean(wd_error**2.0)
         if np.isnan(J_opt):
             if not np.isnan(J):
