@@ -14,111 +14,38 @@
 import numpy as np
 import os
 import pandas as pd
-import re
+# import re
 
-from floris_scada_analysis import time_operations as fsato
-from floris_scada_analysis import utilities as fsut
+# from floris_scada_analysis import time_operations as fsato
+# from floris_scada_analysis import utilities as fsut
 
 
-def batch_load_and_concat_dfs(df_filelist):
-    """Function to batch load and concatenate dataframe files. Data
-    in floris_scada_analysis is typically split up in monthly data
-    files to accommodate very large data files and easy debugging
-    and batch processing. A common method for loading data is:
+def batch_load_data(fn_path):
+    ii = 0
+    df_list = []
+    while os.path.exists(fn_path + ".%d" % ii):
+        fn_path_ii = fn_path + ".%d" % ii
+        print("Found file %s. Loading..." % os.path.basename(fn_path_ii))
+        df_list.append(pd.read_feather(fn_path_ii))
+        ii += 1
+    print("Loaded %d files. Concatenating." % ii)
+    return pd.concat(df_list)
 
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(root_path, 'data')
-    df_filelist = sqldbm.browse_datafiles(data_path=data_path,
-                                          scada_table='scada_data')
-    df = dfm.batch_load_and_concat_dfs(df_filelist=df_filelist)
 
-    Args:
-        df_filelist ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """    
-    df_array = []
-    for dfn in df_filelist:
-        df_array.append(pd.read_feather(dfn))
-
-    if len(df_array) == 0:
-        df_out = pd.DataFrame()
+def batch_save_data(df, fn_path, no_rows_per_file=10000):
+    N = df.shape[0]
+    if 'time' in df.columns:
+        df = df.reset_index(drop=True).copy()
     else:
-        df_out = pd.concat(df_array, ignore_index=True)
-        df_out = df_out.reset_index(drop=('time' in df_out.columns))
-        df_out = df_out.sort_values(by='time')
-    return df_out
+        df = df.reset_index(drop=False).copy()
 
-
-def batch_split_and_save_dfs(df, save_path, table_name='scada_data'):
-    df = df.copy()
-    if 'time' not in df.columns:
-        df = df.reset_index(drop=False)
-    else:
-        df = df.reset_index(drop=True)
-
-    time_array = pd.to_datetime(df['time'])
-    dt = fsut.estimate_dt(time_array)
-
-    # Check if dataframe is continually ascending
-    if (any([float(i) for i in np.diff(time_array)]) <= 0):
-        raise KeyError("Time column in dataframe is not ascending.")
-
-    df_array = []
-    # time_start = list(time_array)[0]
-    # time_end = list(time_array)[-1]
-
-    df_time_windows = []
-    years = np.unique([t.year for t in time_array])
-    for yr in years:
-        months = np.unique([t.month for t in time_array
-                            if t.year == yr])
-        for mo in months:
-            tw0 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo)) + dt
-            if mo == 12:
-                tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr+1, 1))
-            else:
-                tw1 = pd.to_datetime('%04d-%02d-01 00:00:00' % (yr, mo+1))
-            df_time_windows.append([tw0, tw1])
-
-    # Create output folder
-    os.makedirs(save_path, exist_ok=True)
-
-    # Extract time indices
-    print('Splitting the data into %d separate months.' % len(df_time_windows))
-    id_map = fsato.find_window_in_time_array(time_array, df_time_windows)
-    for ii in range(len(id_map)):
-        df_sub = df.copy().loc[id_map[ii]].reset_index(drop=True)
-        year = list(pd.to_datetime(df_sub.time))[0].year
-        month = list(pd.to_datetime(df_sub.time))[0].month
-        fn = '%04d-%02d' % (year, month) + '_' + table_name + '.ftr'
-        df_sub.to_feather(os.path.join(save_path, fn))
-        df_array.append(df_sub)
-    print('Saved the output files to %s.' % save_path)
-
-    return df_array
-
-
-def browse_downloaded_datafiles(data_path, table_name=''):
-    fn_pattern = re.compile('\d\d\d\d-\d\d_' + table_name + '.ftr')
-    files_list = []
-    for root, _, files in os.walk(data_path):
-        for name in files:
-            fn_item = fn_pattern.findall(name)
-            if len(fn_item) > 0:
-                fn_item = fn_item[0]
-                fn_path = os.path.join(root, fn_item)
-                files_list.append(fn_path)
-
-    # path_files = os.path.join(data_path, '*_' + table_name) + '.ftr'
-    # files_list = glob.glob(path_files)
-
-    # Sort alphabetically/numerically
-    files_list = list(np.sort(files_list))
-    files_list = [str(f) for f in files_list]
-
-    if len(files_list) == 0:
-        print('No data files found in %s.' % data_path)
-
-    return files_list
+    splits = np.arange(0, N - 1, no_rows_per_file)
+    splits = np.append(splits, N - 1)
+    splits = np.unique(splits)
+    for ii in range(len(splits) - 1):
+        lb = splits[ii]
+        ub = splits[ii+1]
+        df_subset = df[lb:ub].reset_index(drop=True).copy()
+        fn_path_ii = fn_path + ".%d" % ii
+        print("Saving file to %s." % fn_path_ii)
+        df_subset.to_feather(fn_path_ii)

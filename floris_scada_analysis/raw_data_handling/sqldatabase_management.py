@@ -108,6 +108,39 @@ class sql_database_manager:
     def get_column_names(self, table_name):
         return self._get_column_names(table_name)
 
+    def batch_get_data(self, table_name, columns=None, start_time=None,
+                       end_time=None, fn_out=None, no_rows_per_file=10000):
+        if fn_out is None:
+            fn_out = table_name + ".ftr"
+        if not (fn_out[-4::] == ".ftr"):
+            fn_out = fn_out + ".ftr"
+
+        # Ensure 'time' in database
+        column_names = self._get_column_names(table_name=table_name)
+        if 'time' not in column_names:
+            raise KeyError("Cannot find 'time' column in database table.")
+
+        # Get time column from database
+        time_in_db = self.get_data(table_name=table_name, columns=['time'],
+                                   start_time=start_time, end_time=end_time)
+        time_in_db = list(time_in_db['time'])
+
+        splits = np.arange(0, len(time_in_db) - 1, no_rows_per_file, dtype=int)
+        splits = np.append(splits, len(time_in_db) - 1)
+        splits = np.unique(splits)
+
+        for ii in range(len(splits) - 1):
+            print("Downloading subset %d out of %d." % (ii, len(splits) - 1))
+            df = self.get_data(
+                table_name=table_name,
+                columns=columns,
+                start_time=time_in_db[splits[ii]],
+                end_time=time_in_db[splits[ii+1]]
+            )
+            fn_out_ii = fn_out + '.%d' % ii
+            print("Saving file to %s." % fn_out_ii)
+            df.to_feather(fn_out_ii)
+
     def get_data(
         self, table_name, columns=None, start_time=None, end_time=None
     ):
@@ -213,6 +246,7 @@ class sql_database_manager:
                 eta = datetime.datetime.now() + td(seconds=est_time_left)
                 eta = eta.strftime("%a, %d %b %Y %H:%M:%S")
                 print("Data insertion took %.1f s. ETA: %s." % (time_i, eta))
+
 
 class sql_db_explorer_gui:
     def __init__(self, master, dbc):
