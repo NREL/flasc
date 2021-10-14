@@ -192,10 +192,13 @@ class sql_database_manager:
             df_chunks_id = np.append(df_chunks_id, df.shape[0])
             df_chunks_id = np.unique(df_chunks_id)
 
+            time_start_total = timerpc()
             for i in range(len(df_chunks_id)-1):
-                print("Inserting rows %d to %d" % (df_chunks_id[i],  df_chunks_id[i+1]))
-                time_start = timerpc()
-                df_sub = df[df_chunks_id[i]:df_chunks_id[i+1]]
+                Nl = df_chunks_id[i]
+                Nu = df_chunks_id[i+1]
+                print("Inserting rows %d to %d." % (Nl, Nu))
+                time_start_i = timerpc()
+                df_sub = df[Nl:Nu]
                 df_sub.to_sql(
                     table_name,
                     self.engine,
@@ -204,9 +207,12 @@ class sql_database_manager:
                     method="multi",
                     chunksize=sql_chunk_size,
                 )
-                time_end = timerpc()
-                print("Data insertion took %.1f s." % (time_end - time_start))
-
+                time_i = timerpc() - time_start_i
+                total_time = timerpc() - time_start_total
+                est_time_left = (total_time / Nu) * (N - Nu)
+                eta = datetime.datetime.now() + td(seconds=est_time_left)
+                eta = eta.strftime("%a, %d %b %Y %H:%M:%S")
+                print("Data insertion took %.1f s. ETA: %s." % (time_i, eta))
 
 class sql_db_explorer_gui:
     def __init__(self, master, dbc):
