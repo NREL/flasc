@@ -60,25 +60,29 @@ class sql_database_manager:
 
     def _get_first_time_entry(self, table_name):
         tn = table_name
-        df_time = pd.read_sql_query(
-            sql="SELECT time FROM %s ORDER BY time asc LIMIT 1" % tn,
-            con=self.engine
-        )
-        if df_time.shape[0] == 0:
-            return None
-        else:
-            return df_time["time"][0]
+        column_names = self._get_column_names(tn)
+        if 'time' in column_names:
+            df_time = pd.read_sql_query(
+                sql="SELECT time FROM %s ORDER BY time asc LIMIT 1" % tn,
+                con=self.engine
+            )
+            if df_time.shape[0] > 0:
+                return df_time["time"][0]
+
+        return None
 
     def _get_last_time_entry(self, table_name):
         tn = table_name
-        df_time = pd.read_sql_query(
-            sql="SELECT time FROM %s ORDER BY time desc LIMIT 1" % tn,
-            con=self.engine
-        )
-        if df_time.shape[0] == 0:
-            return None
-        else:
-            return df_time["time"][0]
+        column_names = self._get_column_names(tn)
+        if 'time' in column_names:
+            df_time = pd.read_sql_query(
+                sql="SELECT time FROM %s ORDER BY time desc LIMIT 1" % tn,
+                con=self.engine
+            )
+            if df_time.shape[0] > 0:
+                return df_time["time"][0]
+
+        return None
 
     # General info functions from data
     def print_properties(self):
