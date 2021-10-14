@@ -145,7 +145,8 @@ class sql_database_manager:
     ):
         # Check for
         # If 'append_new', find existing columns and remove from df
-        table_names = self._get_table_names()
+        table_name = table_name.lower()
+        table_names = [t.lower() for t in self._get_table_names()]
         if (if_exists == "append_new") and (table_name in table_names):
             if len(unique_cols) > 1:
                 raise NotImplementedError("Not yet implemented.")
@@ -181,7 +182,7 @@ class sql_database_manager:
         if N < 1:
             print("Skipping data upload. Dataframe is empty.")
         else:
-            print("Inserting  %d rows into table '%s'."
+            print("Attempting to insert %d rows into table '%s'."
                 % (df.shape[0], table_name))
             df_chunks_id = np.arange(0, df.shape[0], df_chunk_size)
             df_chunks_id = np.append(df_chunks_id, df.shape[0])
