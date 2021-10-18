@@ -180,10 +180,13 @@ class sql_database_manager:
         df_chunk_size=2000,
         sql_chunk_size=50
     ):
-        # Check for
-        # If 'append_new', find existing columns and remove from df
         table_name = table_name.lower()
         table_names = [t.lower() for t in self._get_table_names()]
+
+        if (if_exists == "append"):
+            print("Warning: risk of adding duplicate rows using 'append'.")
+            print("You are suggested to use 'append_new' instead.")
+
         if (if_exists == "append_new") and (table_name in table_names):
             if len(unique_cols) > 1:
                 raise NotImplementedError("Not yet implemented.")
@@ -199,30 +202,34 @@ class sql_database_manager:
                     "Column '%s' is not unique in the SQL database." % col
                 )
 
-            idx_in_db = list(idx_in_db)
-            already_in_db = np.array(
-                [t in idx_in_db for t in df[col]], dtype=bool
-            )
+            idx_in_df = set(df[col])
+            idx_in_db = set(idx_in_db)
+            idx_to_add = np.sort(list(idx_in_db - idx_in_df))
             print(
-                "%d entries already exist in SQL database."
-                % already_in_db.sum()
+                "{:d} entries already exist in SQL database.".format(
+                    len(idx_in_df) - len(idx_to_add)
+                )
             )
 
-            print("Adding %d new entries..." % (~already_in_db).sum())
-            df = df[~already_in_db].copy()
+            print("Adding {:d} new entries...".format(len(idx_to_add)))
+            df_subset = df.set_index('time').loc[idx_to_add].reset_index(
+                drop=False)
+
+        else:
+            df_subset = df
 
         if (if_exists == "append_new"):
             if_exists = "append"
 
         # Upload data
-        N = df.shape[0]
+        N = df_subset.shape[0]
         if N < 1:
             print("Skipping data upload. Dataframe is empty.")
         else:
             print("Attempting to insert %d rows into table '%s'."
-                % (df.shape[0], table_name))
-            df_chunks_id = np.arange(0, df.shape[0], df_chunk_size)
-            df_chunks_id = np.append(df_chunks_id, df.shape[0])
+                % (df_subset.shape[0], table_name))
+            df_chunks_id = np.arange(0, df_subset.shape[0], df_chunk_size)
+            df_chunks_id = np.append(df_chunks_id, df_subset.shape[0])
             df_chunks_id = np.unique(df_chunks_id)
 
             time_start_total = timerpc()
@@ -231,7 +238,7 @@ class sql_database_manager:
                 Nu = df_chunks_id[i+1]
                 print("Inserting rows %d to %d." % (Nl, Nu))
                 time_start_i = timerpc()
-                df_sub = df[Nl:Nu]
+                df_sub = df_subset[Nl:Nu]
                 df_sub.to_sql(
                     table_name,
                     self.engine,
