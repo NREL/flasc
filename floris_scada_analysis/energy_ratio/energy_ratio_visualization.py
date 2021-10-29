@@ -325,22 +325,44 @@ def table_analysis(df_list, name_list, t_list, wd_bins, ws_bins, excel_filename,
         worksheet.set_column(c+first_data_col,c+first_data_col,1,fmt_black)
         
     # Add data bars to the bins counts
-    change_list = [i for i in range(len(cols)) if 'count' in cols[i]]
+    change_list = [i for i in range(len(cols)) if 'bin' in cols[i]]
     for c in change_list:
         worksheet.conditional_format(first_data_row,c+first_data_col,df_table_final.shape[0]+first_data_row,c+first_data_col, {'type': 'data_bar','max_value':100})
         
     # Add color to the change columns
     change_list = [i for i in range(len(cols)) if 'change' in cols[i]]
+
     for c in change_list:
-        worksheet.conditional_format(first_data_row,c+first_data_col,df_table_final.shape[0]+first_data_row,c+first_data_col, {'type': 'data_bar','bar_axis_position': 'middle','bar_negative_border_color_same': True})
-    
+        #worksheet.conditional_format(first_data_row,c+first_data_col,df_table_final.shape[0]+first_data_row,c+first_data_col, {'type': 'data_bar','bar_axis_position': 'middle','bar_negative_border_color_same': True})
+
+        worksheet.conditional_format(first_data_row,c+first_data_col,df_table_final.shape[0]+first_data_row,c+first_data_col, {'type': '3_color_scale',
+                                                                     'min_value': -1.0,
+                                                                     'min_type':'num',
+                                                                     'max_value': 1.0,
+                                                                     'mid_value':0.0,
+                                                                     'mid_type':'num',
+                                                                     'min_color':'#FF0000',
+                                                                     'mid_color':'#FFFFFF',
+                                                                     'max_color':'#00FF00',
+                                                                     'max_type':'num'})
+
     # Add color to energy ratios
     change_list = [i for i in range(len(cols)) if ('er_' in cols[i]) and not ('change' in cols[i])]
     for c in change_list:
+        # worksheet.conditional_format(first_data_row,c+first_data_col,df_table_final.shape[0]+first_data_row,c+first_data_col, {'type': '3_color_scale',
+        #                                                              'min_value': 0.25,
+        #                                                              'min_type':'num',
+        #                                                              'max_value': 1.0,
+        #                                                              'max_type':'num'})
         worksheet.conditional_format(first_data_row,c+first_data_col,df_table_final.shape[0]+first_data_row,c+first_data_col, {'type': '3_color_scale',
                                                                      'min_value': 0.25,
                                                                      'min_type':'num',
-                                                                     'max_value': 1.0,
+                                                                     'max_value': 2.0,
+                                                                     'mid_value':1.0,
+                                                                     'mid_type':'num',
+                                                                     'min_color':'#0000FF',
+                                                                     'mid_color':'#FFFFFF',
+                                                                     'max_color':'#00FF00',
                                                                      'max_type':'num'})
     
     
