@@ -19,6 +19,7 @@ from floris_scada_analysis.energy_ratio import energy_ratio as er
 from floris_scada_analysis.energy_ratio import \
     energy_ratio_visualization as vis
 
+
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import utilities as fsut
 
@@ -282,6 +283,53 @@ class energy_ratio_suite():
         """Clear the energy ratio results for all datasets."""
         for ii in range(len(self.df_list)):
             self.clear_energy_ratio_results_of_dataset(ii)
+
+    def get_energy_tables(
+        self,
+        test_turbines,
+        wd_bins,
+        ws_bins,
+        excel_filename = 'energy_table.xlsx',
+        fi = None,
+        verbose=False
+    ):
+        """This function will calculate an energy table saved to excel
+
+        Args:
+            test_turbines ([iteratible]): List with the test turbine(s)
+                which will be calculated in the spreadsheet
+            wd_bins (np.array): Wind direction bins to analyze
+            ws_bins (np.array): Wind speed bins to analyze
+            excel_filename (str, optional): The filename the
+                excel file will be saved to Defaults to energy_table.xlsx.
+            fi ([type], optional): FLORIS object used to 
+                make visuals of wind direction within the sheets.
+                Defaults to None
+            verbose (bool, optional): Print to console. Defaults to False.
+
+        Returns:
+        """
+
+        # Get the list of dfs and names
+        df_list = []
+        name_list = []
+        for ii in range(len(self.df_list)):
+            df_list.append(self.df_list[ii]['df_subset'])
+            name_list.append(self.df_list[ii]['name'])
+        
+
+
+        # # Build the table, assuming that we don't need to balance
+        vis.table_analysis(
+            df_list = df_list,
+            name_list = name_list,
+            t_list = test_turbines,
+            wd_bins = wd_bins, 
+            ws_bins = ws_bins, 
+            excel_filename = excel_filename, 
+            fi=fi
+        )
+
 
     def get_energy_ratios(
         self,
