@@ -553,7 +553,7 @@ def _get_energy_ratio_single_wd_bin_nominal(
 
     # If we want to calculate ER without additional outputs, speed things up
     if (df_freq is None) and not return_detailed_output:
-        return df_binned["pow_ref"].sum() / df_binned["pow_test"].sum()
+        return (df_binned["pow_test"].sum() / df_binned["pow_ref"].sum())
 
     # Reference and test turbine energy
     df["freq"] = 1
