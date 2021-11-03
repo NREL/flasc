@@ -137,17 +137,8 @@ class energy_ratio:
         wd_step = self.wd_step
         wd_bin_width = self.wd_bin_width
 
-        ws_labels = np.arange(
-            np.min(self.df["ws"]) - 1.0e-6 + ws_step / 2.0,
-            np.max(self.df["ws"]) + 1.0e-6 + ws_step / 2.0,
-            ws_step,
-        )
-
-        wd_labels = np.arange(
-            np.min(self.df["wd"]) - 1.0e-6 + wd_step / 2.0,
-            np.max(self.df["wd"]) + 1.0e-6 + wd_step / 2.0,
-            wd_step,
-        )
+        ws_labels = np.arange(0.0, 30.0, ws_step)
+        wd_labels = np.arange(0.0, 360.0, wd_step)
 
         # Bin according to wind speed. Note that data never falls into
         # multiple wind speed bins at the same time.
@@ -168,7 +159,7 @@ class energy_ratio:
         for ii, wd in enumerate(wd_labels):
             wd_min = float(wrap_360(wd - wd_bin_width / 2.0))
             wd_max = float(wrap_360(wd + wd_bin_width / 2.0))
-            wd_interval = pd.Interval(wd_min, wd_max, "right")
+            wd_interval = pd.Interval(wd_min, wd_min + wd_bin_width, "right")
             ids = (self.df["wd"] > wd_min) & (self.df["wd"] <= wd_max)
             df_subset = self.df.loc[ids].copy()
             df_subset["wd_bin"] = wd
@@ -313,16 +304,24 @@ class energy_ratio:
             self.df_freq = None
 
         # Calculate the energy ratio for all bins
-        energy_ratios = _get_energy_ratios_all_wd_bins_bootstrapping(
+        out = _get_energy_ratios_all_wd_bins_bootstrapping(
             df_binned=self.df,
             df_freq=self.df_freq,
             N=N,
             percentiles=percentiles,
             return_detailed_output=return_detailed_output,
         )
+        if return_detailed_output:
+            energy_ratios = out[0]
+            dict_out = out[1]
+        else:
+            energy_ratios = out
 
         self.energy_ratio_out = energy_ratios
         self.energy_ratio_N = N
+
+        if return_detailed_output:
+            return energy_ratios, dict_out
 
         return energy_ratios
 
@@ -391,7 +390,15 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
     """
     # Extract minimal dataframe
     if "ti" in df_binned.columns:
-        min_cols = ["wd", "ws", "ti", "ws_bin", "wd_bin", "pow_ref", "pow_test"]
+        min_cols = [
+            "wd",
+            "ws",
+            "ti",
+            "ws_bin",
+            "wd_bin",
+            "pow_ref",
+            "pow_test",
+        ]
     else:
         min_cols = ["wd", "ws", "ws_bin", "wd_bin", "pow_ref", "pow_test"]
     df = df_binned[min_cols]
@@ -402,28 +409,49 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
 
     # Now calculate the actual energy ratios
     result = np.zeros([len(unique_wd_bins), 3])
+    dict_out_list = [None for _ in range(len(unique_wd_bins))]
+
     for wd_idx, wd in enumerate(unique_wd_bins):
         df_subset = df[df["wd_bin"] == wd]
         if df_freq is None:
             df_freq_subset = None
         else:
             df_freq_subset = df_freq[df_freq["wd_bin"] == wd]
-        result[wd_idx, :] = _get_energy_ratio_single_wd_bin_bootstrapping(
-            df_binned=df_subset,
-            df_freq=df_freq_subset,
-            N=N,
-            percentiles=percentiles,
-            return_detailed_output=return_detailed_output,
+
+        out = _get_energy_ratio_single_wd_bin_bootstrapping(
+                df_binned=df_subset,
+                df_freq=df_freq_subset,
+                N=N,
+                percentiles=percentiles,
+                return_detailed_output=return_detailed_output,
         )
+        if return_detailed_output:
+            result[wd_idx, :] = out[0]
+            dict_out_list[wd_idx] = out[1]
+        else:
+            result[wd_idx, :] = out
 
     # Save energy ratios to the dataframe
     df_out = pd.DataFrame(
-        result, columns=["baseline", "baseline_l", "baseline_u"]
+        result, columns=["baseline", "baseline_lb", "baseline_ub"]
     )
 
     # Save wind direction bins and bin count to dataframe
     df_out["wd_bin"] = unique_wd_bins
-    _, df_out["N_bin"] = np.unique(df["wd_bin"], return_counts=True)
+    _, df_out["bin_count"] = np.unique(df["wd_bin"], return_counts=True)
+    df_out["bin_count"] = df_out["bin_count"].astype(int)
+
+    if return_detailed_output:
+        # Concatenate dataframes and produce a new dict_out
+        df_per_wd_bin = pd.concat([d["df_per_wd_bin"] for d in dict_out_list])
+        df_per_ws_bin = pd.concat([d["df_per_ws_bin"] for d in dict_out_list])
+        df_per_ws_bin = df_per_ws_bin.reset_index(drop=False)
+        df_per_ws_bin = df_per_ws_bin.set_index(["wd_bin"])
+        dict_out = {
+            "df_per_wd_bin": df_per_wd_bin,
+            "df_per_ws_bin": df_per_ws_bin,
+        }
+        return df_out, dict_out
 
     return df_out
 
@@ -446,39 +474,50 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
         df_freq["freq"] = df_freq["freq"] / df_freq["freq"].sum()
 
     # Get results excluding uncertainty
-    results = _get_energy_ratio_single_wd_bin_nominal(
-        df_binned=df_binned, df_freq=df_freq, randomize_df=False,
-        return_detailed_output=return_detailed_output
-    )
+    if return_detailed_output:
+        energy_ratio_nominal, dict_info = _get_energy_ratio_single_wd_bin_nominal(
+            df_binned=df_binned,
+            df_freq=df_freq,
+            return_detailed_output=return_detailed_output,
+        )
+    else:
+        energy_ratio_nominal = _get_energy_ratio_single_wd_bin_nominal(
+            df_binned=df_binned,
+            df_freq=df_freq,
+            return_detailed_output=return_detailed_output,
+        )
 
     # Add bootstrapping results, if necessary
     if N <= 1:
-        results_array = np.array([results, results, results])
+        results_array = np.array([energy_ratio_nominal] * 3, dtype=float)
     else:
         # Get a bootstrap sample of range
         bootstrap_results = np.zeros([N, 1])
         for i in range(N):
+            df_randomized = df_binned.sample(frac=1, replace=True).copy()
             bootstrap_results[i, :] = _get_energy_ratio_single_wd_bin_nominal(
-                df_binned=df_binned,
+                df_binned=df_randomized,
                 df_freq=df_freq,
-                randomize_df=True,
-                return_detailed_output=False
+                return_detailed_output=False,
             )
 
         # Return the results in the order used in previous versions
         results_array = np.array(
             [
-                results,
+                energy_ratio_nominal,
                 np.nanpercentile(bootstrap_results[:, 0], percentiles)[0],
                 np.nanpercentile(bootstrap_results[:, 0], percentiles)[1],
             ]
         )
 
-    return results_array
+    if return_detailed_output:
+        return results_array, dict_info
+    else:
+        return results_array
 
 
 def _get_energy_ratio_single_wd_bin_nominal(
-    df_binned, df_freq=None, randomize_df=False, return_detailed_output=False
+    df_binned, df_freq=None, return_detailed_output=False
 ):
     """Get the energy ratio for one particular wind direction bin and
     an array of wind speed bins. This function performs a single
@@ -486,11 +525,19 @@ def _get_energy_ratio_single_wd_bin_nominal(
     """
     # Copy minimal dataframe
     if "ti" in df_binned.columns:
-        min_cols = ["wd", "ws", "ti", "ws_bin", "pow_ref", "pow_test"]
+        min_cols = [
+            "wd",
+            "ws",
+            "ti",
+            "wd_bin",
+            "ws_bin",
+            "pow_ref",
+            "pow_test",
+        ]
         mean_cols = ["wd", "ws", "ti", "pow_ref", "pow_test"]
         std_cols = ["wd", "ws", "ti", "pow_ref", "pow_test"]
     else:
-        min_cols = ["wd", "ws", "ws_bin", "pow_ref", "pow_test"]
+        min_cols = ["wd", "ws", "wd_bin", "ws_bin", "pow_ref", "pow_test"]
         mean_cols = ["wd", "ws", "pow_ref", "pow_test"]
         std_cols = ["wd", "ws", "pow_ref", "pow_test"]
     df = df_binned[min_cols]
@@ -499,12 +546,13 @@ def _get_energy_ratio_single_wd_bin_nominal(
     if np.any(np.isnan(df)):
         raise DataError("All entries in dataframe must be non-NaN.")
 
-    # If resampling for boot-strapping, randomize dataframe
-    if randomize_df:
-        df = df.sample(frac=1, replace=True)
+    # Check if only one wd_bin present in data
+    wd_bin = df_binned["wd_bin"].unique()
+    if len(wd_bin) > 1:
+        raise DataError("More than one wd_bin present in data.")
 
     # If we want to calculate ER without additional outputs, speed things up
-    if ((df_freq is None) and not return_detailed_output):
+    if (df_freq is None) and not return_detailed_output:
         return df_binned["pow_ref"].sum() / df_binned["pow_test"].sum()
 
     # Reference and test turbine energy
@@ -513,7 +561,7 @@ def _get_energy_ratio_single_wd_bin_nominal(
     df_sums.columns = [
         "energy_ref_unbalanced",
         "energy_test_unbalanced",
-        "bin_count"
+        "bin_count",
     ]
 
     if return_detailed_output:
@@ -526,18 +574,19 @@ def _get_energy_ratio_single_wd_bin_nominal(
         df_means.columns = ["{}_mean".format(c) for c in df_means.columns]
 
         # Collect into a single dataframe
-        df_info = pd.concat([df_means, df_stds, df_sums], axis=1)
+        df_per_ws_bin = pd.concat([df_means, df_stds, df_sums], axis=1)
+        df_per_ws_bin["wd_bin"] = wd_bin[0]
 
         # Calculate unbalanced energy ratio for each wind speed bin
-        df_info["energy_ratio_unbalanced"] = (
-            df_info["energy_test_unbalanced"] /
-            df_info["energy_ref_unbalanced"]
+        df_per_ws_bin["energy_ratio_unbalanced"] = (
+            df_per_ws_bin["energy_test_unbalanced"]
+            / df_per_ws_bin["energy_ref_unbalanced"]
         )
 
         # Calculate (total) unbalanced energy ratio for all wind speeds
         energy_ratio_total_unbalanced = (
-            df_info["energy_test_unbalanced"].sum() /
-            df_info["energy_ref_unbalanced"].sum()
+            df_per_ws_bin["energy_test_unbalanced"].sum()
+            / df_per_ws_bin["energy_ref_unbalanced"].sum()
         )
 
         # Calculate total statistics
@@ -566,63 +615,70 @@ def _get_energy_ratio_single_wd_bin_nominal(
             {
                 "pow_ref": "energy_ref_unbalanced",
                 "pow_test": "energy_test_unbalanced",
-                "freq": "bin_count"
+                "freq": "bin_count",
             }
         )
 
-        df_total = pd.concat([total_means, total_stds, total_sums])
-        df_total["energy_ratio_unbalanced"] = energy_ratio_total_unbalanced
+        df_per_wd_bin = pd.concat([total_means, total_stds, total_sums])
+        df_per_wd_bin["wd_bin"] = wd_bin[0]
+        df_per_wd_bin[
+            "energy_ratio_unbalanced"
+        ] = energy_ratio_total_unbalanced
 
     else:
-        df_info = pd.DataFrame(
+        df_per_ws_bin = pd.DataFrame(
             {
                 "pow_ref_mean": (
-                    df_sums["energy_ref_unbalanced"] /
-                    df_sums["bin_count"]
-                    ),
-                "pow_test_mean": (
-                    df_sums["energy_test_unbalanced"] /
-                    df_sums["bin_count"]
+                    df_sums["energy_ref_unbalanced"] / df_sums["bin_count"]
                 ),
-                "bin_count": df_sums["bin_count"]
+                "pow_test_mean": (
+                    df_sums["energy_test_unbalanced"] / df_sums["bin_count"]
+                ),
+                "bin_count": df_sums["bin_count"],
             }
         )
 
     if df_freq is None:
         # Balanced energy ratio is equal to unbalanced energy ratio
-        df_info["freq_balanced"] = (
-            df_info["bin_count"] /
-            df_info["bin_count"].sum()
+        df_per_ws_bin["freq_balanced"] = (
+            df_per_ws_bin["bin_count"] / df_per_ws_bin["bin_count"].sum()
         )
     else:
         # Derive
-        df_info["freq_balanced"] = df_freq["freq"]
-        if (np.abs(df_info["freq_balanced"].sum() - 1.0) > 0.00001):
+        df_per_ws_bin["freq_balanced"] = df_freq["freq"]
+        if np.abs(df_per_ws_bin["freq_balanced"].sum() - 1.0) > 0.00001:
             raise DataError("Provided bin frequencies do not add up to 1.0.")
 
-    df_info["energy_ref_balanced_norm"] = df_info["pow_ref_mean"] * df_info["freq_balanced"]
-    df_info["energy_test_balanced_norm"] = df_info["pow_test_mean"] * df_info["freq_balanced"]
+    df_per_ws_bin["energy_ref_balanced_norm"] = (
+        df_per_ws_bin["pow_ref_mean"] * df_per_ws_bin["freq_balanced"]
+    )
+    df_per_ws_bin["energy_test_balanced_norm"] = (
+        df_per_ws_bin["pow_test_mean"] * df_per_ws_bin["freq_balanced"]
+    )
 
     # Compute total balanced energy ratio over all wind speeds
     energy_ratio_total_balanced = (
-        df_info["energy_test_balanced_norm"].sum() /
-        df_info["energy_ref_balanced_norm"].sum()
+        df_per_ws_bin["energy_test_balanced_norm"].sum()
+        / df_per_ws_bin["energy_ref_balanced_norm"].sum()
     )
 
     if return_detailed_output:
-        df_info["energy_ratio_balanced"] = (
-            df_info["energy_test_balanced_norm"] /
-            df_info["energy_ref_balanced_norm"]
+        df_per_ws_bin["energy_ratio_balanced"] = (
+            df_per_ws_bin["energy_test_balanced_norm"]
+            / df_per_ws_bin["energy_ref_balanced_norm"]
         )
-        df_total["energy_ratio_balanced"] = energy_ratio_total_balanced
+        df_per_wd_bin["energy_ratio_balanced"] = energy_ratio_total_balanced
 
         # Formatting
-        df_total = pd.DataFrame(df_total).T
-        df_total["bin_count"] = df_total["bin_count"].astype(int)
+        df_per_wd_bin = pd.DataFrame(df_per_wd_bin).T
+        df_per_wd_bin["bin_count"] = df_per_wd_bin["bin_count"].astype(int)
+        df_per_wd_bin = df_per_wd_bin.set_index("wd_bin")
 
-        df_info["bin_count"] = df_info["bin_count"].astype(int)
-        df_info = df_info.reset_index(drop=False)  # Reset ws_bin as a column
-        dict_out = {"df_total": df_total, "df_per_ws_bin": df_info}
+        df_per_ws_bin["bin_count"] = df_per_ws_bin["bin_count"].astype(int)
+        dict_out = {
+            "df_per_wd_bin": df_per_wd_bin,
+            "df_per_ws_bin": df_per_ws_bin,
+        }
         return energy_ratio_total_balanced, dict_out
 
     return energy_ratio_total_balanced
