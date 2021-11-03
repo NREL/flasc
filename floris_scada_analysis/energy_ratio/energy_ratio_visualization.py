@@ -134,7 +134,7 @@ def plot(energy_ratios, labels=None):
 
 
 def table_analysis(
-    df_list, name_list, t_list, wd_bins, ws_bins, excel_filename, fi=None
+    df_list, name_list, test_turbines, wd_bin_edges, ws_bin_edges, fout_xlsx, fi=None
 ):
 
     # Save some useful info
@@ -142,22 +142,24 @@ def table_analysis(
     first_data_row = header_row + 1
     first_data_col = 1
 
-    # If t_list is none put in all possible turbines
+    # If test_turbines is none put in all possible turbines
     # TODO
 
     # Save the basename, always assumed to be the first dataframe
     basename = name_list[0]
 
-    # Stitch the dataframes together
+    # Stitch the dataframes together and name accordingly
     df_full = pd.DataFrame()
     for dfx, namex in zip(df_list, name_list):
-        df_temp = dfx.copy()
+        relevant_cols = [c for c in dfx.columns if c[0:4] == "pow_"]
+        relevant_cols.extend(["wd", "ws", "ti"])
+        df_temp = dfx[relevant_cols].copy()
         df_temp["name"] = namex
         df_full = df_full.append(df_temp)
 
     # Cut wd and ws into bins
-    df_full["wd_bin"] = pd.cut(df_full.wd, wd_bins)
-    df_full["ws_bin"] = pd.cut(df_full.ws, ws_bins)
+    df_full["wd_bin"] = pd.cut(df_full.wd, wd_bin_edges)
+    df_full["ws_bin"] = pd.cut(df_full.ws, ws_bin_edges)
 
     # Save the original bins
     df_save_bin = df_full[["wd_bin", "ws_bin"]]
@@ -229,7 +231,7 @@ def table_analysis(
     df_table["___"] = None
 
     # Add the rest via turbine
-    for t in t_list:
+    for t in test_turbines:
         for n in name_list:
 
             # Add the power
@@ -330,7 +332,7 @@ def table_analysis(
             )
 
         # Correct the energy ratios
-        for t in t_list:
+        for t in test_turbines:
             for n in name_list:
 
                 # Not sure what the total power should be so just to nan
@@ -380,7 +382,7 @@ def table_analysis(
         df_table_final = df_table_final.append(df_sub)
 
     # Write out the dataframe with xslxwriter
-    writer = pd.ExcelWriter(excel_filename, engine="xlsxwriter")
+    writer = pd.ExcelWriter(fout_xlsx, engine="xlsxwriter")
     df_table_final.to_excel(
         writer,
         index=False,
@@ -536,7 +538,7 @@ def table_analysis(
 
         # Get a list of blank columns indicating turbine starts
         blank_cols = [i for i in range(len(cols)) if "___" in cols[i]]
-        for t_idx, t in enumerate(t_list):
+        for t_idx, t in enumerate(test_turbines):
 
             # Plot the layout
             fig, ax = plt.subplots(figsize=(3, 2))

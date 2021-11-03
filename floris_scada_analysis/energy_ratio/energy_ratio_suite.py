@@ -345,10 +345,10 @@ class energy_ratio_suite:
         vis.table_analysis(
             df_list=df_list,
             name_list=name_list,
-            t_list=test_turbines,
-            wd_bins=wd_bins,
-            ws_bins=ws_bins,
-            excel_filename=excel_filename,
+            test_turbines=test_turbines,
+            wd_bin_edges=wd_bins,
+            ws_bin_edges=ws_bins,
+            fout_xlsx=excel_filename,
             fi=fi,
         )
 
