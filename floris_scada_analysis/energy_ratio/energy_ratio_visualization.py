@@ -97,18 +97,18 @@ def plot(energy_ratios, labels=None):
         ax[0].plot(x, df["baseline"], "-o", markersize=3.0, label=labels[ii])
 
         # Plot uncertainty bounds from bootstrapping, if applicable
-        has_uq = np.max(np.abs(df["baseline"] - df["baseline_l"])) > 0.001
+        has_uq = np.max(np.abs(df["baseline"] - df["baseline_lb"])) > 0.001
         if has_uq:
             ax[0].fill_between(
                 x,
-                df["baseline_l"],
-                df["baseline_u"],
+                df["baseline_lb"],
+                df["baseline_ub"],
                 alpha=0.25,
                 label=uq_labels[ii],
             )
 
         # Plot the bin count
-        ax[1].bar(x - (ii - N / 2) * bar_width, df["N_bin"], width=bar_width)
+        ax[1].bar(x - (ii - N / 2) * bar_width, df["bin_count"], width=bar_width)
 
     # Format the energy ratio plot
     ax[0].set_ylabel("Energy ratio (-)")
