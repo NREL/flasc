@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 
 from floris.utilities import wrap_360
+from pandas.core.base import DataError
 
 from floris_scada_analysis.dataframe_operations import (
     dataframe_manipulations as dfm,
@@ -233,6 +234,7 @@ class energy_ratio:
         wd_bin_width=None,
         N=1,
         percentiles=[5.0, 95.0],
+        return_detailed_output=False,
     ):
         """This is the main function used to calculate the energy ratios
         for dataframe provided to the class during initialization. One
@@ -316,6 +318,7 @@ class energy_ratio:
             df_freq=self.df_freq,
             N=N,
             percentiles=percentiles,
+            return_detailed_output=return_detailed_output,
         )
 
         self.energy_ratio_out = energy_ratios
@@ -339,7 +342,11 @@ class energy_ratio:
 
 
 def _get_energy_ratios_all_wd_bins_bootstrapping(
-    df_binned, df_freq=None, N=1, percentiles=[5.0, 95.0]
+    df_binned,
+    df_freq=None,
+    N=1,
+    percentiles=[5.0, 95.0],
+    return_detailed_output=False,
 ):
     """Wrapper function that calculates the energy ratio for every wind
     direction bin in the provided dataframe. This function wraps around
@@ -406,6 +413,7 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
             df_freq=df_freq_subset,
             N=N,
             percentiles=percentiles,
+            return_detailed_output=return_detailed_output,
         )
 
     # Save energy ratios to the dataframe
@@ -421,7 +429,11 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
 
 
 def _get_energy_ratio_single_wd_bin_bootstrapping(
-    df_binned, df_freq=None, N=1, percentiles=[5.0, 95.0]
+    df_binned,
+    df_freq=None,
+    N=1,
+    percentiles=[5.0, 95.0],
+    return_detailed_output=False,
 ):
     """Get the energy ratio for one particular wind direction bin and
     an array of wind speed bins. This function also includes bootstrapping
@@ -435,7 +447,8 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
 
     # Get results excluding uncertainty
     results = _get_energy_ratio_single_wd_bin_nominal(
-        df_binned=df_binned, df_freq=df_freq, randomize_df=False
+        df_binned=df_binned, df_freq=df_freq, randomize_df=False,
+        return_detailed_output=return_detailed_output
     )
 
     # Add bootstrapping results, if necessary
@@ -446,7 +459,10 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
         bootstrap_results = np.zeros([N, 1])
         for i in range(N):
             bootstrap_results[i, :] = _get_energy_ratio_single_wd_bin_nominal(
-                df_binned=df_binned, df_freq=df_freq, randomize_df=True
+                df_binned=df_binned,
+                df_freq=df_freq,
+                randomize_df=True,
+                return_detailed_output=False
             )
 
         # Return the results in the order used in previous versions
@@ -462,7 +478,7 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
 
 
 def _get_energy_ratio_single_wd_bin_nominal(
-    df_binned, df_freq=None, randomize_df=False
+    df_binned, df_freq=None, randomize_df=False, return_detailed_output=False
 ):
     """Get the energy ratio for one particular wind direction bin and
     an array of wind speed bins. This function performs a single
@@ -479,9 +495,22 @@ def _get_energy_ratio_single_wd_bin_nominal(
         std_cols = ["wd", "ws", "pow_ref", "pow_test"]
     df = df_binned[min_cols]
 
-    # If resampling for boot-strapping
+    # Check for faulty measurements
+    if np.any(np.isnan(df)):
+        raise DataError("All entries in dataframe must be non-NaN.")
+
+    # If resampling for boot-strapping, randomize dataframe
     if randomize_df:
         df = df.sample(frac=1, replace=True)
+
+    # Reference and test turbine energy
+    df["freq"] = 1
+    df_sums = df.groupby("ws_bin")[["pow_ref", "pow_test", "freq"]].sum()
+    df_sums.columns = [
+        "energy_ref_unbalanced",
+        "energy_test_unbalanced",
+        "bin_count"
+    ]
 
     # Calculate bin information
     df_stds = df.groupby("ws_bin")[std_cols].std()
@@ -491,55 +520,80 @@ def _get_energy_ratio_single_wd_bin_nominal(
     df_means = df.groupby("ws_bin")[mean_cols].mean()
     df_means.columns = ["{}_mean".format(c) for c in df_means.columns]
 
-    # Reference and test turbine energy
-    df["freq"] = 1
-    df_sums = df.groupby("ws_bin")[["pow_ref", "pow_test", "freq"]].sum()
-    df_sums.columns = [
-        "energy_ref_unbalanced",
-        "energy_test_unbalanced",
-        "bin_count_unbalanced"
-    ]
+    # Collect into a single dataframe
+    df_info = pd.concat([df_means, df_stds, df_sums], axis=1)
 
-    df_out = pd.concat([df_means, df_stds, df_sums], axis=1)
-    df_out = df_out.reset_index(drop=False)  # Reset ws_bin to a column
+    # Calculate unbalanced energy ratio for each wind speed bin
+    df_info["energy_ratio_unbalanced"] = (
+        df_info["energy_test_unbalanced"] /
+        df_info["energy_ref_unbalanced"]
+    )
+
+    # Calculate (total) unbalanced energy ratio for all wind speeds
+    energy_ratio_total_unbalanced = (
+        df_info["energy_test_unbalanced"].sum() /
+        df_info["energy_ref_unbalanced"].sum()
+    )
+
+    # Calculate total statistics
+    total_means = df[mean_cols].mean()
+    total_means = total_means.rename(
+        {
+            "wd": "wd_mean",
+            "ws": "ws_mean",
+            "pow_ref": "pow_ref_mean",
+            "pow_test": "pow_test_mean",
+        }
+    )
+    total_stds = df[std_cols].std()
+    total_stds = total_stds.rename(
+        {
+            "wd": "wd_std",
+            "ws": "ws_std",
+            "pow_ref": "pow_ref_std",
+            "pow_test": "pow_test_std",
+        }
+    )
+    total_sums = df[["pow_ref", "pow_test", "freq"]].sum()
+    total_sums = total_sums.rename(
+        {
+            "pow_ref": "energy_ref_unbalanced",
+            "pow_test": "energy_test_unbalanced",
+            "freq": "bin_count"
+        }
+    )
+    df_total = pd.concat([total_means, total_stds, total_sums])
+    df_total["energy_ratio_unbalanced"] = energy_ratio_total_unbalanced
 
     if df_freq is None:
-        ref_energy = np.sum(df_out["energy_ref_unbalanced"])
-        test_energy = np.sum(df_out["energy_test_unbalanced"])
-
+        # Balanced energy ratio is equal to unbalanced energy ratio
+        df_info["freq_balanced"] = df_info["bin_count"] / df_info["bin_count"].sum()
     else:
-        df_freq = df_freq[["ws_bin", "freq"]].copy()
+        # Derive
+        df_info["freq_balanced"] = df_freq["freq"]
+        if (np.abs(df_info["freq_balanced"].sum() - 1.0) > 0.00001):
+            raise DataError("Provided bin frequencies do not add up to 1.0.")
 
-        # Group and sort by pow_ref and pow_test
-        df_freq = df_freq.groupby(["ws_bin"]).sum()
-        df_grouped = df.groupby(["ws_bin"]).mean()
-        df_ref = df_grouped["pow_ref"]
-        df_test = df_grouped["pow_test"]
+    df_info["energy_ref_balanced_norm"] = df_info["pow_ref_mean"] * df_info["freq_balanced"]
+    df_info["energy_test_balanced_norm"] = df_info["pow_test_mean"] * df_info["freq_balanced"]
+    df_info["energy_ratio_balanced"] = (
+        df_info["energy_test_balanced_norm"] /
+        df_info["energy_ref_balanced_norm"]
+    )
 
-        # Ensure that dimensions match
-        ws_bins = np.array(df_ref.index, dtype=float)
-        ws_bins_freq = np.array(df_freq.index, dtype=float)
-        if not np.array_equal(ws_bins, ws_bins_freq):
-            ws_bins_array = np.concatenate([ws_bins, ws_bins_freq])
-            ws_bins_array = np.unique(ws_bins_array)
+    # Compute energy ratio
+    energy_ratio_total_balanced = (
+        df_info["energy_test_balanced_norm"].sum() /
+        df_info["energy_ref_balanced_norm"].sum()
+    )
+    df_total["energy_ratio_balanced"] = energy_ratio_total_balanced
 
-            y = np.interp(ws_bins_array, ws_bins, df_ref)
-            df_ref = pd.Series(data=y, index=ws_bins_array, name="pow_ref")
+    # Formatting
+    df_total = pd.DataFrame(df_total).T
+    df_total["bin_count"] = df_total["bin_count"].astype(int)
+    df_info["bin_count"] = df_info["bin_count"].astype(int)
 
-            y = np.interp(ws_bins_array, ws_bins, df_test)
-            df_test = pd.Series(data=y, index=ws_bins_array, name="pow_test")
-
-            # df_freq = df_freq.append({'ws_bin': i, 'observed_freq': np.nan, 'annual_freq': np.nan}, ignore_index=True)
-            # df_freq = df_freq.sort(by='ws_bin')
-
-        # Compute energy ratio
-        ref_energy = np.dot(df_ref, df_freq["freq"])
-        test_energy = np.dot(df_test, df_freq["freq"])
-        # ref_energy = compute_expectation(df_ref, df_freq["freq"])
-        # test_energy = compute_expectation(df_test, df_freq["freq"])
-
-    energy_ratio = test_energy / ref_energy
-    return energy_ratio
+    return energy_ratio_total_balanced
 
 
 # def compute_expectation(fx, p_X):
