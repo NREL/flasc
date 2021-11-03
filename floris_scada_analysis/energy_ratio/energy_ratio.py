@@ -11,7 +11,6 @@
 # the License.
 
 
-from itertools import product
 import numpy as np
 import pandas as pd
 
@@ -35,7 +34,7 @@ class energy_ratio:
     discretization.
     """
 
-    def __init__(self, df_in, wind_rose_function=None, verbose=False):
+    def __init__(self, df_in, inflow_freq_interpolant=None, verbose=False):
         """Initialization of the class.
 
         Args:
@@ -46,10 +45,11 @@ class energy_ratio:
                 * Power production of every turbine: pow_000, pow_001, ...
                 * Reference power production used to normalize the energy
                     ratio: 'pow_ref'
-            wind_rose_function ([pd.DataFrame], optional): This defines the
-            occurrence of each wind direction and wind speed bin. If None is
-            specified, the occurrence of each bin is derived from the provided
-            data, df_in. Defaults to None.
+            inflow_freq_interpolant (interpolant, optional): This is an
+            interpolant that takes as inputs the wind direction and wind
+            speed, and then returns the frequency of occurrence for that set
+            of inflow conditions. If None is specified, the occurrence of each
+            bin is derived from the provided data, df_in. Defaults to None.
             verbose (bool, optional): Print to console. Defaults to False.
         """
         self.verbose = verbose
@@ -58,7 +58,7 @@ class energy_ratio:
         self._set_df(df_in)
 
         # Initialize frequency functions
-        self.wind_rose_function = wind_rose_function
+        self.inflow_freq_interpolant = inflow_freq_interpolant
 
     # Private methods
 
@@ -182,38 +182,28 @@ class energy_ratio:
         power productions of each bin according to their frequency of
         occurrence.
         """
-        # Determine observed or annual freq
-        if self.wind_rose_function is None:
-            df_freq_observed = self.df[["ws_bin", "wd_bin"]].copy()
-            df_freq_observed["freq"] = 1
-            df_freq_observed = df_freq_observed.groupby(
-                ["ws_bin", "wd_bin"]
-            ).sum()
-            df_freq_observed["freq"] = df_freq_observed["freq"].astype(int)
+        # Determine observed frequency
+        df_freq_observed = self.df[["ws_bin", "wd_bin"]].copy()
+        df_freq_observed["freq"] = 1
+        df_freq_observed = df_freq_observed.groupby(
+            ["wd_bin", "ws_bin"]
+        ).sum()
 
-            indices = list(product(self.ws_labels, self.wd_labels))
-            df_freq_observed = (
-                df_freq_observed.reindex(indices).fillna(0).reset_index()
+        df_freq_observed = df_freq_observed.reset_index(drop=False)
+        df_freq = df_freq_observed
+
+        if self.inflow_freq_interpolant is not None:
+            # Overwrite freq of bin occurrence with user-specified function
+            df_freq["freq"] = self.inflow_freq_interpolant(
+                df_freq["wd_bin"],
+                df_freq["ws_bin"],
             )
-            self.df_freq = df_freq_observed
 
-        else:
-            self.df_freq = pd.DataFrame()  # ...
-            raise NotImplementedError(
-                "This functionality is not yet implemented."
-            )
-            # num_bins = len(self.ws_labels) * len(self.wd_labels)
-            # ws_array = np.zeros(num_bins)
-            # wd_array = np.zeros(num_bins)
-            # freq_array = np.zeros(num_bins)
+        # Set index to "ws_bin" and save to self
+        df_freq = df_freq.reset_index(drop=True).set_index("ws_bin")
+        self.df_freq = df_freq
 
-            # for idx, (ws, wd) in enumerate(product(self.ws_labels, self.wd_labels)):
-            #     ws_array[idx] = ws
-            #     wd_array[idx] = wd
-            #     freq_array[idx] = annual_interp_function(ws, wd)
-            # self.df_freq_annual = pd.DataFrame(
-            #     {"ws_bin": ws_array, "wd_bin": wd_array, "freq": freq_array}
-            # )
+        return df_freq
 
     # Public methods
 
@@ -298,10 +288,7 @@ class energy_ratio:
         self._calculate_bins()
 
         # Get probability distribution of bins
-        if N > 1:
-            self._get_df_freq()
-        else:
-            self.df_freq = None
+        self._get_df_freq()
 
         # Calculate the energy ratio for all bins
         out = _get_energy_ratios_all_wd_bins_bootstrapping(
@@ -342,7 +329,7 @@ class energy_ratio:
 
 def _get_energy_ratios_all_wd_bins_bootstrapping(
     df_binned,
-    df_freq=None,
+    df_freq,
     N=1,
     percentiles=[5.0, 95.0],
     return_detailed_output=False,
@@ -413,10 +400,7 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
 
     for wd_idx, wd in enumerate(unique_wd_bins):
         df_subset = df[df["wd_bin"] == wd]
-        if df_freq is None:
-            df_freq_subset = None
-        else:
-            df_freq_subset = df_freq[df_freq["wd_bin"] == wd]
+        df_freq_subset = df_freq[df_freq["wd_bin"] == wd]
 
         out = _get_energy_ratio_single_wd_bin_bootstrapping(
                 df_binned=df_subset,
@@ -458,7 +442,7 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
 
 def _get_energy_ratio_single_wd_bin_bootstrapping(
     df_binned,
-    df_freq=None,
+    df_freq,
     N=1,
     percentiles=[5.0, 95.0],
     return_detailed_output=False,
@@ -468,11 +452,6 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
     functionality by increasing the number of bootstrap evaluations (N) to
     larger than 1. The bootstrap percentiles default to 5 % and 95 %.
     """
-    if df_freq is not None:
-        # Renormalize frequencies
-        df_freq = df_freq[["ws_bin", "freq"]].copy()
-        df_freq["freq"] = df_freq["freq"] / df_freq["freq"].sum()
-
     # Get results excluding uncertainty
     if return_detailed_output:
         energy_ratio_nominal, dict_info = _get_energy_ratio_single_wd_bin_nominal(
@@ -492,10 +471,11 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
         results_array = np.array([energy_ratio_nominal] * 3, dtype=float)
     else:
         # Get a bootstrap sample of range
-        bootstrap_results = np.zeros([N, 1])
-        for i in range(N):
+        bootstrap_results = np.zeros(N)
+        bootstrap_results[0] = energy_ratio_nominal
+        for i in range(1, N):
             df_randomized = df_binned.sample(frac=1, replace=True).copy()
-            bootstrap_results[i, :] = _get_energy_ratio_single_wd_bin_nominal(
+            bootstrap_results[i] = _get_energy_ratio_single_wd_bin_nominal(
                 df_binned=df_randomized,
                 df_freq=df_freq,
                 return_detailed_output=False,
@@ -505,8 +485,8 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
         results_array = np.array(
             [
                 energy_ratio_nominal,
-                np.nanpercentile(bootstrap_results[:, 0], percentiles)[0],
-                np.nanpercentile(bootstrap_results[:, 0], percentiles)[1],
+                np.nanpercentile(bootstrap_results, percentiles)[0],
+                np.nanpercentile(bootstrap_results, percentiles)[1],
             ]
         )
 
@@ -526,11 +506,11 @@ def _get_energy_ratio_single_wd_bin_nominal(
     # Copy minimal dataframe
     if "ti" in df_binned.columns:
         min_cols = [
+            "wd_bin",
+            "ws_bin",
             "wd",
             "ws",
             "ti",
-            "wd_bin",
-            "ws_bin",
             "pow_ref",
             "pow_test",
         ]
@@ -550,10 +530,6 @@ def _get_energy_ratio_single_wd_bin_nominal(
     wd_bin = df_binned["wd_bin"].unique()
     if len(wd_bin) > 1:
         raise DataError("More than one wd_bin present in data.")
-
-    # If we want to calculate ER without additional outputs, speed things up
-    if (df_freq is None) and not return_detailed_output:
-        return (df_binned["pow_test"].sum() / df_binned["pow_ref"].sum())
 
     # Reference and test turbine energy
     df["freq"] = 1
@@ -638,17 +614,11 @@ def _get_energy_ratio_single_wd_bin_nominal(
             }
         )
 
-    if df_freq is None:
-        # Balanced energy ratio is equal to unbalanced energy ratio
-        df_per_ws_bin["freq_balanced"] = (
-            df_per_ws_bin["bin_count"] / df_per_ws_bin["bin_count"].sum()
-        )
-    else:
-        # Derive
-        df_per_ws_bin["freq_balanced"] = df_freq["freq"]
-        if np.abs(df_per_ws_bin["freq_balanced"].sum() - 1.0) > 0.00001:
-            raise DataError("Provided bin frequencies do not add up to 1.0.")
+    # Write bin frequencies to the dataframe and ensure normalization
+    df_per_ws_bin["freq_balanced"] = df_freq["freq"] / df_freq["freq"].sum()
+    df_per_ws_bin["freq_balanced"] = df_per_ws_bin["freq_balanced"].fillna(0)
 
+    # Calculate normalized balanced energy for ref and test turbine
     df_per_ws_bin["energy_ref_balanced_norm"] = (
         df_per_ws_bin["pow_ref_mean"] * df_per_ws_bin["freq_balanced"]
     )
