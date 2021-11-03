@@ -503,6 +503,10 @@ def _get_energy_ratio_single_wd_bin_nominal(
     if randomize_df:
         df = df.sample(frac=1, replace=True)
 
+    # If we want to calculate ER without additional outputs, speed things up
+    if ((df_freq is None) and not return_detailed_output):
+        return df_binned["pow_ref"].sum() / df_binned["pow_test"].sum()
+
     # Reference and test turbine energy
     df["freq"] = 1
     df_sums = df.groupby("ws_bin")[["pow_ref", "pow_test", "freq"]].sum()
@@ -512,62 +516,84 @@ def _get_energy_ratio_single_wd_bin_nominal(
         "bin_count"
     ]
 
-    # Calculate bin information
-    df_stds = df.groupby("ws_bin")[std_cols].std()
-    df_stds.columns = ["{}_std".format(c) for c in df_stds.columns]
+    if return_detailed_output:
+        # Calculate bin information
+        df_stds = df.groupby("ws_bin")[std_cols].std()
+        df_stds.columns = ["{}_std".format(c) for c in df_stds.columns]
 
-    # Mean values of bins and power values
-    df_means = df.groupby("ws_bin")[mean_cols].mean()
-    df_means.columns = ["{}_mean".format(c) for c in df_means.columns]
+        # Mean values of bins and power values
+        df_means = df.groupby("ws_bin")[mean_cols].mean()
+        df_means.columns = ["{}_mean".format(c) for c in df_means.columns]
 
-    # Collect into a single dataframe
-    df_info = pd.concat([df_means, df_stds, df_sums], axis=1)
+        # Collect into a single dataframe
+        df_info = pd.concat([df_means, df_stds, df_sums], axis=1)
 
-    # Calculate unbalanced energy ratio for each wind speed bin
-    df_info["energy_ratio_unbalanced"] = (
-        df_info["energy_test_unbalanced"] /
-        df_info["energy_ref_unbalanced"]
-    )
+        # Calculate unbalanced energy ratio for each wind speed bin
+        df_info["energy_ratio_unbalanced"] = (
+            df_info["energy_test_unbalanced"] /
+            df_info["energy_ref_unbalanced"]
+        )
 
-    # Calculate (total) unbalanced energy ratio for all wind speeds
-    energy_ratio_total_unbalanced = (
-        df_info["energy_test_unbalanced"].sum() /
-        df_info["energy_ref_unbalanced"].sum()
-    )
+        # Calculate (total) unbalanced energy ratio for all wind speeds
+        energy_ratio_total_unbalanced = (
+            df_info["energy_test_unbalanced"].sum() /
+            df_info["energy_ref_unbalanced"].sum()
+        )
 
-    # Calculate total statistics
-    total_means = df[mean_cols].mean()
-    total_means = total_means.rename(
-        {
-            "wd": "wd_mean",
-            "ws": "ws_mean",
-            "pow_ref": "pow_ref_mean",
-            "pow_test": "pow_test_mean",
-        }
-    )
-    total_stds = df[std_cols].std()
-    total_stds = total_stds.rename(
-        {
-            "wd": "wd_std",
-            "ws": "ws_std",
-            "pow_ref": "pow_ref_std",
-            "pow_test": "pow_test_std",
-        }
-    )
-    total_sums = df[["pow_ref", "pow_test", "freq"]].sum()
-    total_sums = total_sums.rename(
-        {
-            "pow_ref": "energy_ref_unbalanced",
-            "pow_test": "energy_test_unbalanced",
-            "freq": "bin_count"
-        }
-    )
-    df_total = pd.concat([total_means, total_stds, total_sums])
-    df_total["energy_ratio_unbalanced"] = energy_ratio_total_unbalanced
+        # Calculate total statistics
+        total_means = df[mean_cols].mean()
+        total_means = total_means.rename(
+            {
+                "wd": "wd_mean",
+                "ws": "ws_mean",
+                "pow_ref": "pow_ref_mean",
+                "pow_test": "pow_test_mean",
+            }
+        )
+        total_stds = df[std_cols].std()
+        total_stds = total_stds.rename(
+            {
+                "wd": "wd_std",
+                "ws": "ws_std",
+                "pow_ref": "pow_ref_std",
+                "pow_test": "pow_test_std",
+            }
+        )
+
+        # Get summation of energy and bin frequencies
+        total_sums = df[["pow_ref", "pow_test", "freq"]].sum()
+        total_sums = total_sums.rename(
+            {
+                "pow_ref": "energy_ref_unbalanced",
+                "pow_test": "energy_test_unbalanced",
+                "freq": "bin_count"
+            }
+        )
+
+        df_total = pd.concat([total_means, total_stds, total_sums])
+        df_total["energy_ratio_unbalanced"] = energy_ratio_total_unbalanced
+
+    else:
+        df_info = pd.DataFrame(
+            {
+                "pow_ref_mean": (
+                    df_sums["energy_ref_unbalanced"] /
+                    df_sums["bin_count"]
+                    ),
+                "pow_test_mean": (
+                    df_sums["energy_test_unbalanced"] /
+                    df_sums["bin_count"]
+                ),
+                "bin_count": df_sums["bin_count"]
+            }
+        )
 
     if df_freq is None:
         # Balanced energy ratio is equal to unbalanced energy ratio
-        df_info["freq_balanced"] = df_info["bin_count"] / df_info["bin_count"].sum()
+        df_info["freq_balanced"] = (
+            df_info["bin_count"] /
+            df_info["bin_count"].sum()
+        )
     else:
         # Derive
         df_info["freq_balanced"] = df_freq["freq"]
@@ -576,37 +602,27 @@ def _get_energy_ratio_single_wd_bin_nominal(
 
     df_info["energy_ref_balanced_norm"] = df_info["pow_ref_mean"] * df_info["freq_balanced"]
     df_info["energy_test_balanced_norm"] = df_info["pow_test_mean"] * df_info["freq_balanced"]
-    df_info["energy_ratio_balanced"] = (
-        df_info["energy_test_balanced_norm"] /
-        df_info["energy_ref_balanced_norm"]
-    )
 
-    # Compute energy ratio
+    # Compute total balanced energy ratio over all wind speeds
     energy_ratio_total_balanced = (
         df_info["energy_test_balanced_norm"].sum() /
         df_info["energy_ref_balanced_norm"].sum()
     )
-    df_total["energy_ratio_balanced"] = energy_ratio_total_balanced
 
-    # Formatting
-    df_total = pd.DataFrame(df_total).T
-    df_total["bin_count"] = df_total["bin_count"].astype(int)
-    df_info["bin_count"] = df_info["bin_count"].astype(int)
+    if return_detailed_output:
+        df_info["energy_ratio_balanced"] = (
+            df_info["energy_test_balanced_norm"] /
+            df_info["energy_ref_balanced_norm"]
+        )
+        df_total["energy_ratio_balanced"] = energy_ratio_total_balanced
+
+        # Formatting
+        df_total = pd.DataFrame(df_total).T
+        df_total["bin_count"] = df_total["bin_count"].astype(int)
+
+        df_info["bin_count"] = df_info["bin_count"].astype(int)
+        df_info = df_info.reset_index(drop=False)  # Reset ws_bin as a column
+        dict_out = {"df_total": df_total, "df_per_ws_bin": df_info}
+        return energy_ratio_total_balanced, dict_out
 
     return energy_ratio_total_balanced
-
-
-# def compute_expectation(fx, p_X):
-#         """
-#         Compute expected value of f(X), X ~ p_X(x).
-#         Inputs:
-#             fx - pandas Series / 1-D numpy - array of possible outcomes.
-#             p_X - pandas Series / 1-D numpy - distribution of X.
-#                                               May be supplied as
-#                                               nonnormalized frequencies.
-#         Outputs:
-#             (anon) - float - Expected value of f(X)
-#         """
-#         p_X = p_X/p_X.sum()  # Make sure distribution is valid
-
-#         return fx @ p_X
