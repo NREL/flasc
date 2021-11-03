@@ -16,15 +16,16 @@ import pandas as pd
 from pandas.core.base import DataError
 
 from floris_scada_analysis.energy_ratio import energy_ratio as er
-from floris_scada_analysis.energy_ratio import \
-    energy_ratio_visualization as vis
+from floris_scada_analysis.energy_ratio import (
+    energy_ratio_visualization as vis,
+)
 
 
 from floris_scada_analysis import time_operations as fsato
 from floris_scada_analysis import utilities as fsut
 
 
-class energy_ratio_suite():
+class energy_ratio_suite:
     """Wrapping class that relies internally on the energy_ratio class to
     import one or multiple datasets, mask data to specific atmospheric
     conditions, calculate the respective energy ratios, and plot everything.
@@ -33,6 +34,7 @@ class energy_ratio_suite():
     is comparing the energy ratios with and without wake steering in field
     campaigns.
     """
+
     def __init__(self, verbose=False):
         """Initialization of the class. This creates several empty variables
         which can be populated using functions such as add_df.
@@ -56,7 +58,7 @@ class energy_ratio_suite():
         self.verbose = verbose
 
         if verbose:
-            print('Initialized energy_ratio_suite() object.')
+            print("Initialized energy_ratio_suite() object.")
 
     # Public methods
 
@@ -80,9 +82,11 @@ class energy_ratio_suite():
             ImportError: This error is raised if the user-provided dataframe
                 does not contain all necessary columns.
         """
-        if not ('wd' in df.columns and 'ws' in df.columns):
-            raise ImportError("Could not find all columns. Ensure that" +
-                              "you have columns 'wd' and 'ws' in your df.")
+        if not ("wd" in df.columns and "ws" in df.columns):
+            raise ImportError(
+                "Could not find all columns. Ensure that"
+                + "you have columns 'wd' and 'ws' in your df."
+            )
 
         num_turbines = fsut.get_num_turbines(df)
         if len(self.df_list) < 1:
@@ -90,12 +94,14 @@ class energy_ratio_suite():
             self.turbine_names = [str(i) for i in range(num_turbines)]
 
         if self.num_turbines != num_turbines:
-            print('Added dataframe seems to have a different number of ' +
-                  'turbines than the existing dataframe(s). Skipping ' +
-                  'addition.')
+            print(
+                "Added dataframe seems to have a different number of "
+                + "turbines than the existing dataframe(s). Skipping "
+                + "addition."
+            )
             return None
 
-        new_entry = dict({'df': df, 'name': name})
+        new_entry = dict({"df": df, "name": name})
         self.df_list.append(new_entry)
 
         default_ids = np.array([True for _ in range(df.shape[0])])
@@ -114,11 +120,13 @@ class energy_ratio_suite():
         self.ws_range = None
         self.ti_range = None
         self.time_range = None
-        self.set_masks(ws_range=ws_range_tmp,
-                       wd_range=wd_range_tmp,
-                       ti_range=ti_range_tmp,
-                       time_range=time_range_tmp,
-                       df_ids=[idx])
+        self.set_masks(
+            ws_range=ws_range_tmp,
+            wd_range=wd_range_tmp,
+            ti_range=ti_range_tmp,
+            time_range=time_range_tmp,
+            df_ids=[idx],
+        )
 
     def remove_df(self, index):
         """Remove a dataframe from the class.
@@ -127,8 +135,11 @@ class energy_ratio_suite():
             index ([int]): Index of the to-be-removed dataframe.
         """
         if self.verbose:
-            print("Removing dataframe with name '" +
-                  self.df_list[index]['name'] + "'.")
+            print(
+                "Removing dataframe with name '"
+                + self.df_list[index]["name"]
+                + "'."
+            )
 
         # Remove dataframe
         self.df_list.pop(index)
@@ -147,21 +158,32 @@ class energy_ratio_suite():
         """Print an overview of the contents and settings of all the
         dataframes currently in the class."""
         for ii in range(len(self.df_list)):
-            print('___ DATAFRAME %d ___' % ii)
+            print("___ DATAFRAME %d ___" % ii)
             keys = [c for c in self.df_list[ii].keys()]
             for c in keys:
                 var = self.df_list[ii][c]
                 if isinstance(var, pd.DataFrame):
                     print(
-                        '  [' + str(ii) + '] ' + c + ': ' +
-                        'pd.Dataframe() with shape ', var.shape
-                        )
+                        "  ["
+                        + str(ii)
+                        + "] "
+                        + c
+                        + ": "
+                        + "pd.Dataframe() with shape ",
+                        var.shape,
+                    )
                 else:
-                    print('  [' + str(ii) + '] ' + c + ': ', var)
-            print(' ')
+                    print("  [" + str(ii) + "] " + c + ": ", var)
+            print(" ")
 
-    def set_masks(self, ws_range=None, wd_range=None, ti_range=None,
-                  time_range=None, df_ids=None):
+    def set_masks(
+        self,
+        ws_range=None,
+        wd_range=None,
+        ti_range=None,
+        time_range=None,
+        df_ids=None,
+    ):
         """Mask all dataframes to a certain subset of data. One can
         mask data based on the wind speed (ws_range), wind direction
         (wd_range), turbulence intensity (ti_range), time (time_range)
@@ -204,44 +226,45 @@ class energy_ratio_suite():
         if (ws_range is not None) and not (ws_range == self.ws_range):
             self.ws_range = ws_range
             for ii in df_ids:
-                df = self.df_list[ii]['df']
-                ids = (df['ws'] > ws_range[0]) & (df['ws'] <= ws_range[1])
+                df = self.df_list[ii]["df"]
+                ids = (df["ws"] > ws_range[0]) & (df["ws"] <= ws_range[1])
                 self.ws_range_ids[ii] = np.array(ids)
 
         if (wd_range is not None) and not (wd_range == self.wd_range):
             self.wd_range = wd_range
             for ii in df_ids:
-                df = self.df_list[ii]['df']
-                ids = (df['wd'] > wd_range[0]) & (df['wd'] <= wd_range[1])
+                df = self.df_list[ii]["df"]
+                ids = (df["wd"] > wd_range[0]) & (df["wd"] <= wd_range[1])
                 self.wd_range_ids[ii] = np.array(ids)
 
         if (ti_range is not None) and not (ti_range == self.ti_range):
             self.ti_range = ti_range
             for ii in df_ids:
-                df = self.df_list[ii]['df']
-                ids = (df['ti'] > ti_range[0]) & (df['ti'] <= ti_range[1])
+                df = self.df_list[ii]["df"]
+                ids = (df["ti"] > ti_range[0]) & (df["ti"] <= ti_range[1])
                 self.ti_range_ids[ii] = np.array(ids)
 
         if (time_range is not None) and not (time_range == self.time_range):
             self.time_range = time_range
             for ii in df_ids:
-                df = self.df_list[ii]['df']
+                df = self.df_list[ii]["df"]
                 ids = np.array([False for _ in range(df.shape[0])])
                 indices_out = fsato.find_window_in_time_array(
-                    df['time'], seek_time_windows=[list(time_range)])
+                    df["time"], seek_time_windows=[list(time_range)]
+                )
                 ids[indices_out[0]] = True
                 self.time_range_ids[ii] = ids
 
         # Update masked dataframe(s)
         for ii in df_ids:
             mask = (
-                (self.wd_range_ids[ii]) &
-                (self.ws_range_ids[ii]) &
-                (self.ti_range_ids[ii]) &
-                (self.time_range_ids[ii])
+                (self.wd_range_ids[ii])
+                & (self.ws_range_ids[ii])
+                & (self.ti_range_ids[ii])
+                & (self.time_range_ids[ii])
             )
-            df_full = self.df_list[ii]['df']
-            self.df_list[ii]['df_subset'] = df_full[mask]
+            df_full = self.df_list[ii]["df"]
+            self.df_list[ii]["df_subset"] = df_full[mask]
 
     def set_turbine_names(self, turbine_names):
         """Assign turbine names/labels instead of just their index number.
@@ -258,9 +281,10 @@ class energy_ratio_suite():
         """
         if not len(turbine_names) == self.num_turbines:
             raise DataError(
-                'The length of turbine_names is incorrect.'
-                'Length should  be %d (specified: %d).'
-                % (self.num_turbines, len(turbine_names)))
+                "The length of turbine_names is incorrect."
+                "Length should  be %d (specified: %d)."
+                % (self.num_turbines, len(turbine_names))
+            )
         self.turbine_names = turbine_names
 
     def clear_energy_ratio_results_of_dataset(self, ii):
@@ -270,14 +294,14 @@ class energy_ratio_suite():
         Args:
             ii ([int]): Dataset number/identifier
         """
-        self.df_list[ii].pop('er_results')
-        self.df_list[ii].pop('er_test_turbines')
-        self.df_list[ii].pop('er_ref_turbines')
-        self.df_list[ii].pop('er_dep_turbines')
-        self.df_list[ii].pop('er_wd_step')
-        self.df_list[ii].pop('er_ws_step')
-        self.df_list[ii].pop('er_wd_bin_width')
-        self.df_list[ii].pop('er_bootstrap_N')
+        self.df_list[ii].pop("er_results")
+        self.df_list[ii].pop("er_test_turbines")
+        self.df_list[ii].pop("er_ref_turbines")
+        self.df_list[ii].pop("er_dep_turbines")
+        self.df_list[ii].pop("er_wd_step")
+        self.df_list[ii].pop("er_ws_step")
+        self.df_list[ii].pop("er_wd_bin_width")
+        self.df_list[ii].pop("er_bootstrap_N")
 
     def clear_energy_ratio_results_all(self):
         """Clear the energy ratio results for all datasets."""
@@ -289,9 +313,9 @@ class energy_ratio_suite():
         test_turbines,
         wd_bins,
         ws_bins,
-        excel_filename = 'energy_table.xlsx',
-        fi = None,
-        verbose=False
+        excel_filename="energy_table.xlsx",
+        fi=None,
+        verbose=False,
     ):
         """This function will calculate an energy table saved to excel
 
@@ -314,32 +338,29 @@ class energy_ratio_suite():
         df_list = []
         name_list = []
         for ii in range(len(self.df_list)):
-            df_list.append(self.df_list[ii]['df_subset'])
-            name_list.append(self.df_list[ii]['name'])
-        
-
+            df_list.append(self.df_list[ii]["df_subset"])
+            name_list.append(self.df_list[ii]["name"])
 
         # # Build the table, assuming that we don't need to balance
         vis.table_analysis(
-            df_list = df_list,
-            name_list = name_list,
-            t_list = test_turbines,
-            wd_bins = wd_bins, 
-            ws_bins = ws_bins, 
-            excel_filename = excel_filename, 
-            fi=fi
+            df_list=df_list,
+            name_list=name_list,
+            t_list=test_turbines,
+            wd_bins=wd_bins,
+            ws_bins=ws_bins,
+            excel_filename=excel_filename,
+            fi=fi,
         )
-
 
     def get_energy_ratios(
         self,
         test_turbines,
-        wd_step=3.,
-        ws_step=5.,
+        wd_step=3.0,
+        ws_step=5.0,
         wd_bin_width=None,
         N=1,
-        percentiles=[5., 95.],
-        verbose=False
+        percentiles=[5.0, 95.0],
+        verbose=False,
     ):
         """This is the main function used to calculate the energy ratios
         for dataframe provided to the class during initialization. One
@@ -395,25 +416,22 @@ class energy_ratio_suite():
                         with UQ.
         """
         for ii in range(len(self.df_list)):
-            df_subset = self.df_list[ii]['df_subset']
-            era = er.energy_ratio(
-                df_in=df_subset,
-                verbose=verbose
-            )
+            df_subset = self.df_list[ii]["df_subset"]
+            era = er.energy_ratio(df_in=df_subset, verbose=verbose)
             er_result = era.get_energy_ratio(
                 test_turbines=test_turbines,
                 wd_step=wd_step,
                 ws_step=ws_step,
                 wd_bin_width=wd_bin_width,
                 N=N,
-                percentiles=percentiles
+                percentiles=percentiles,
             )
 
-            self.df_list[ii]['er_results'] = er_result
-            self.df_list[ii]['er_test_turbines'] = test_turbines
-            self.df_list[ii]['er_wd_step'] = wd_step
-            self.df_list[ii]['er_ws_step'] = ws_step
-            self.df_list[ii]['er_bootstrap_N'] = N
+            self.df_list[ii]["er_results"] = er_result
+            self.df_list[ii]["er_test_turbines"] = test_turbines
+            self.df_list[ii]["er_wd_step"] = wd_step
+            self.df_list[ii]["er_ws_step"] = ws_step
+            self.df_list[ii]["er_bootstrap_N"] = N
 
         return self.df_list
 
@@ -440,7 +458,7 @@ class energy_ratio_suite():
         else:
             ax = []
             for df in self.df_list:
-                fig, axi = vis.plot(df['er_results'], df["name"])
+                fig, axi = vis.plot(df["er_results"], df["name"])
                 ax.append(axi)
 
         return ax
