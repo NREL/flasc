@@ -140,252 +140,389 @@ def table_analysis(df_list, fout_xlsx, fi=None):
     first_data_row = header_row + 1
     first_data_col = 1
 
+    # Extract variables
+    ws_step = df_list[0]["er_ws_step"]
+    wd_bin_width = df_list[0]["er_wd_bin_width"]
+
     # Extract relevant details
     name_list = [df["name"] for df in df_list]
-    df_list = [df["df_subset"] for df in df_list]
+    df_per_wd_bin_list = [
+        d["er_results_info_dict"]["df_per_wd_bin"]for d in df_list
+    ]
+    df_per_ws_bin_list = [
+        d["er_results_info_dict"]["df_per_ws_bin"] for d in df_list
+    ]
+    # df_subset_list = [d["df_subset"] for d in df_list]
+    test_turbines = np.array(
+        [d["er_test_turbines"] for d in df_list],
+        dtype=int
+    ).flatten()
 
-    # If test_turbines is none put in all possible turbines
-    # TODO
+    # Append column names with data label for df_per_wd_bin
+    for ii, df in enumerate(df_per_wd_bin_list):
+        name = name_list[ii]
+        df.columns = ["{:s}_{:s}".format(c, name) for c in df.columns]
 
-    # Save the basename, always assumed to be the first dataframe
-    basename = name_list[0]
+    # Append column names with data label for df_per_ws_bin
+    for ii, df in enumerate(df_per_ws_bin_list):
+        name = name_list[ii]
+        df = df.reset_index(drop=False).set_index(["wd_bin", "ws_bin"])
+        df.columns = ["{:s}_{:s}".format(c, name) for c in df.columns]
+        df_per_ws_bin_list[ii] = df
 
-    # Stitch the dataframes together and name accordingly
-    df_full = pd.DataFrame()
-    for dfx, namex in zip(df_list, name_list):
-        relevant_cols = [c for c in dfx.columns if c[0:4] == "pow_"]
-        relevant_cols.extend(["wd", "ws", "ti"])
-        df_temp = dfx[relevant_cols].copy()
-        df_temp["name"] = namex
-        df_full = df_full.append(df_temp)
+    # Concatenate information from different dataframes
+    df_per_wd_bin = pd.concat(df_per_wd_bin_list, axis=1)
+    df_per_ws_bin = pd.concat(df_per_ws_bin_list, axis=1)
 
-    # Cut wd and ws into bins
-    df_full["wd_bin"] = pd.cut(df_full.wd, wd_bin_edges)
-    df_full["ws_bin"] = pd.cut(df_full.ws, ws_bin_edges)
+    # Merge df_per_wd_bin information into df_per_ws_bin
+    df_per_ws_bin = df_per_ws_bin.reset_index(drop=False).set_index("wd_bin")
+    df_per_wd_bin["ws_bin"] = 999999.9  # very high number
+    df_merged = pd.concat([df_per_ws_bin, df_per_wd_bin])
+    df_merged = df_merged.sort_values(by=["wd_bin", "ws_bin"])
+    df_merged = df_merged.reset_index(drop=False)
 
-    # Save the original bins
-    df_save_bin = df_full[["wd_bin", "ws_bin"]]
+    wd_intervals = [pd.Interval(a, b) for a, b in zip(
+        df_merged["wd_bin"] - wd_bin_width / 2.0,
+        df_merged["wd_bin"] + wd_bin_width / 2.0
+        )
+    ]
+    ws_intervals = [pd.Interval(a, b) for a, b in zip(
+        df_merged["ws_bin"] - ws_step / 2.0,
+        df_merged["ws_bin"] + ws_step / 2.0
+        )
+    ]
 
-    # Drop out of range
-    df_full = df_full.dropna(subset=["wd_bin", "ws_bin"])
-
-    # Sort by bins
-    df_full = df_full.sort_values(["name", "wd_bin", "ws_bin"])
-
-    # Add a bin count column
-    df_full["bin_count"] = 1
-
-    # So we don't lose precision multiply TI by 100
-    df_full["ti"] = 100 * df_full["ti"]
-
-    # Convert all to sums and means
-    df_group = df_full.groupby(["wd_bin", "ws_bin", "name"]).agg(
-        [np.sum, np.mean]
+    df_table = pd.DataFrame(
+        {
+            "wd_bin": wd_intervals,
+            "ws_bin": ws_intervals,
+        }
     )
 
-    # Flatten the columns
-    df_group.columns = ["_".join(c) for c in df_group.columns]
+    # Overwrite placeholder large numbers with new interval
+    total_ids = [i.right >= 999999.9 for i in ws_intervals]
+    df_table.loc[total_ids, "ws_bin"] = "TOTALS"
 
-    # Spin the name out to the columns
-    df_group = df_group.unstack()
+    # Add bin counts for the dataframes
+    cols = ["bin_count_{:s}".format(n) for n in name_list]
+    for c in cols:
+        df_table[c] = df_merged[c].fillna(0).astype(int)
 
-    # Flatten the columns
-    df_group.columns = ["_".join(c) for c in df_group.columns]
+    # Add balanced bin count per ws and in total
+    df_table["bin_count_balanced"] = df_table[cols].min(axis=1).astype(int)
+    df_merged["bin_count_balanced_tot"] = df_table.loc[total_ids, "bin_count_balanced"]
+    df_merged["bin_count_balanced_tot"] = df_merged["bin_count_balanced_tot"].bfill().astype(int)
 
-    # Round the numerical columns to one decimal place
-    df_group = df_group.round(1)
+    # add ws_mean and ti_mean for all dataframes
+    for col in ["ws_mean", "ti_mean"]:
+        for n in name_list:
+            c = "{:s}_{:s}".format(col, n)
+            if c in df_merged.columns:
+                df_table[c] = df_merged[c]
 
-    # Reset the index
-    df_group = df_group.reset_index()
-
-    # Put together the final table
-    df_table = df_group[["wd_bin", "ws_bin"]].copy()
-
-    # Add the bin counts,
+    # Add reference power and energy
+    bin_totals = np.array(df_merged["bin_count_balanced_tot"])
     for n in name_list:
-        df_table["bin_count_sum_%s" % n] = df_group["bin_count_sum_%s" % n]
+        pow_mean = df_merged["pow_ref_mean_{:s}".format(n)]
+        energy = df_merged["energy_ref_unbalanced_{:s}".format(n)]
+        energy_bal_norm = df_merged["energy_ref_balanced_norm_{:s}".format(n)]
+        energy_bal = bin_totals * energy_bal_norm
 
-    # Add a balanced bin count, the sum of the others, unless any are 0, in which case 0
+        df_table["ref_pow_{:s}".format(n)] = pow_mean
+        df_table["ref_energy_{:s}".format(n)] = energy
+        df_table["ref_energy_balanced_{:s}".format(n)] = energy_bal
 
-    # Actually let's try it this way, use the minimum
-    bin_cols = ["bin_count_sum_%s" % n for n in name_list]
-    df_table["bin_balanced"] = df_table[bin_cols].min(axis=1)
-
-    # Add mean wind speeds, and reference power
-    for n in name_list:
-        df_table["ws_mean_%s" % n] = df_group["ws_mean_%s" % n]
-    for n in name_list:
-        df_table["ti_mean_%s" % n] = (
-            df_group["ti_mean_%s" % n] / 100.0
-        )  # Back to decimal
-
-    # Reference energy and power, and balanced energy
-    for n in name_list:
-        df_table["ref_pow_%s" % n] = (
-            df_group["pow_ref_sum_%s" % n] / df_group["bin_count_sum_%s" % n]
+        # Fill empty entries with 0.0 for energy
+        df_table["ref_energy_{:s}".format(n)] = (
+            df_table["ref_energy_{:s}".format(n)].fillna(0.0)
         )
-        df_table["ref_energy_%s" % n] = df_group["pow_ref_sum_%s" % n]
-        df_table["ref_energy_balanced_%s" % n] = (
-            df_table["ref_pow_%s" % n] * df_table["bin_balanced"]
+        df_table["ref_energy_balanced_{:s}".format(n)] = (
+            df_table["ref_energy_balanced_{:s}".format(n)].fillna(0.0)
         )
 
-    # Add an empty column
+    # Add empty column/spacer
     df_table["___"] = None
 
-    # Add the rest via turbine
-    for t in test_turbines:
-        for n in name_list:
+    # Add test power and energy
+    bin_totals = np.array(df_merged["bin_count_balanced_tot"])
+    for n in name_list:
+        pow_mean = df_merged["pow_test_mean_{:s}".format(n)]
+        energy = df_merged["energy_test_unbalanced_{:s}".format(n)]
+        energy_bal_norm = df_merged["energy_test_balanced_norm_{:s}".format(n)]
+        energy_bal = bin_totals * energy_bal_norm
+        energy_ratio = df_merged["energy_ratio_unbalanced_{:s}".format(n)]
+        energy_ratio_bal = df_merged["energy_ratio_balanced_{:s}".format(n)]
 
-            # Add the power
-            df_table["pow_%03d_%s" % (t, n)] = (
-                df_group["pow_%03d_sum_%s" % (t, n)]
-                / df_table["bin_count_sum_%s" % n]
-            )
+        df_table["test_pow_{:s}".format(n)] = pow_mean
+        df_table["test_energy_{:s}".format(n)] = energy
+        df_table["test_energy_balanced_{:s}".format(n)] = energy_bal
+        df_table["energy_ratio_{:s}".format(n)] = energy_ratio
+        df_table["energy_ratio_balanced_{:s}".format(n)] = energy_ratio_bal
 
-            # Add the energy
-            df_table["energy_%03d_%s" % (t, n)] = df_group[
-                "pow_%03d_sum_%s" % (t, n)
-            ]
-
-            # Add the balanced enegy
-            df_table["energy_balanced_%03d_%s" % (t, n)] = (
-                df_table["pow_%03d_%s" % (t, n)] * df_table["bin_balanced"]
-            )
-
-            # Add the energy ratio
-            df_table["er_%03d_%s" % (t, n)] = np.round(
-                df_table["energy_%03d_%s" % (t, n)]
-                / df_table["ref_energy_%s" % n],
-                3,
-            )
-
-            # Add the balanced energy ratio
-            df_table["er_balanced_%03d_%s" % (t, n)] = np.round(
-                df_table["energy_balanced_%03d_%s" % (t, n)]
-                / df_table["ref_energy_balanced_%s" % n],
-                3,
-            )
-
-            # Only do this if not first
-            if not n == name_list[0]:
-                # Add the change in energy ratio from baseline (whichever name is first)
-                df_table["er_change_%03d_%s" % (t, n)] = np.round(
-                    1
-                    * (
-                        df_table["er_%03d_%s" % (t, n)]
-                        - df_table["er_%03d_%s" % (t, basename)]
-                    )
-                    / df_table["er_%03d_%s" % (t, basename)],
-                    3,
-                )
-                # Add the change in energy ratio from baseline (whichever name is first)
-                df_table["er_change_balanced_%03d_%s" % (t, n)] = np.round(
-                    1
-                    * (
-                        df_table["er_balanced_%03d_%s" % (t, n)]
-                        - df_table["er_balanced_%03d_%s" % (t, basename)]
-                    )
-                    / df_table["er_balanced_%03d_%s" % (t, basename)],
-                    3,
-                )
-
-        # Add an empty column
-        df_table["___%d" % t] = None
-
-    # Add the totals by direction
-    df_table_final = pd.DataFrame()
-    for wd_bin in df_table.wd_bin.unique():
-        df_sub_pre = df_table[df_table.wd_bin == wd_bin]
-
-        # Make a new df which is a sum of the other
-        df_sub = df_sub_pre.append(
-            df_sub_pre.sum(numeric_only=True), ignore_index=True
-        )  # .to_frame()
-
-        # Go through the columns of this frame and fix the last row
-        last_row = df_sub.shape[0] - 1
-
-        # Fix ws and wd
-        df_sub.loc[last_row, "wd_bin"] = df_sub.loc[last_row - 1, "wd_bin"]
-        df_sub["ws_bin"] = df_sub["ws_bin"].astype(str)
-        df_sub.loc[last_row, "ws_bin"] = "TOTALS"
-
-        # Remove the total for reference power
-        for n in name_list:
-            df_sub.loc[last_row, "ref_pow_%s" % n] = np.nan
-
-        # Correct ws and ti to be a mean
-        for n in name_list:
-            df_sub.loc[last_row, "ws_mean_%s" % n] = np.round(
-                np.sum(
-                    df_sub_pre["bin_count_sum_%s" % n]
-                    * df_sub_pre["ws_mean_%s" % n]
-                )
-                / df_sub_pre["bin_count_sum_%s" % n].sum(),
-                1,
-            )
-            df_sub.loc[last_row, "ti_mean_%s" % n] = np.round(
-                np.sum(
-                    df_sub_pre["bin_count_sum_%s" % n]
-                    * df_sub_pre["ti_mean_%s" % n]
-                )
-                / df_sub_pre["bin_count_sum_%s" % n].sum(),
-                3,
-            )
-
-        # Correct the energy ratios
-        for t in test_turbines:
-            for n in name_list:
-
-                # Not sure what the total power should be so just to nan
-                df_sub.loc[last_row, "pow_%03d_%s" % (t, n)] = np.nan
-
-                # Recompute the energy ratio (overwrite the sum)
-                df_sub["er_%03d_%s" % (t, n)] = np.round(
-                    df_sub["energy_%03d_%s" % (t, n)]
-                    / df_sub["ref_energy_%s" % n],
-                    3,
-                )
-                df_sub["er_balanced_%03d_%s" % (t, n)] = np.round(
-                    df_sub["energy_balanced_%03d_%s" % (t, n)]
-                    / df_sub["ref_energy_balanced_%s" % n],
-                    3,
-                )
-                # df_sub.loc[last_row,'er_%03d_%s' % (t,n)] = df_sub.loc[last_row,'energy_%03d_%s' % (t,n)] / df_sub.loc[last_row,'ref_energy_%s' % n]
-
-                # Only do this if not first
-                if not n == name_list[0]:
-                    # Recompute the change in energy ratio (overwrite the sum)
-                    df_sub["er_change_%03d_%s" % (t, n)] = np.round(
-                        1
-                        * (
-                            df_sub["er_%03d_%s" % (t, n)]
-                            - df_sub["er_%03d_%s" % (t, basename)]
-                        )
-                        / df_sub["er_%03d_%s" % (t, basename)],
-                        3,
-                    )
-                    df_sub["er_change_balanced_%03d_%s" % (t, n)] = np.round(
-                        1
-                        * (
-                            df_sub["er_balanced_%03d_%s" % (t, n)]
-                            - df_sub["er_balanced_%03d_%s" % (t, basename)]
-                        )
-                        / df_sub["er_balanced_%03d_%s" % (t, basename)],
-                        3,
-                    )
-
-        # Add an empty row
-        df_sub = df_sub.append(
-            pd.DataFrame([[""] * len(df_sub.columns)], columns=df_sub.columns)
+        # Fill empty entries with 0.0 for energy
+        df_table["test_energy_{:s}".format(n)] = (
+            df_table["test_energy_{:s}".format(n)].fillna(0.0)
+        )
+        df_table["test_energy_balanced_{:s}".format(n)] = (
+            df_table["test_energy_balanced_{:s}".format(n)].fillna(0.0)
         )
 
-        # Append to the final
-        df_table_final = df_table_final.append(df_sub)
+    # Define change in unbalanced and balanced energy ratios
+    bl = df_table["energy_ratio_{:s}".format(name_list[0])]
+    bl_bal = df_table["energy_ratio_balanced_{:s}".format(name_list[0])]
+
+    for n in name_list[1::]:
+        df_table["change_energy_ratio_{:s}".format(n)] = (
+            (df_table["energy_ratio_{:s}".format(n)] - bl) / bl
+        )
+        df_table["change_energy_ratio_balanced_{:s}".format(n)] = (
+            (df_table["energy_ratio_balanced_{:s}".format(n)] - bl_bal)
+            / bl_bal
+        )
+
+    # Add empty column/spacer
+    df_table["___0"] = None
+
+    print("done")
+
+    df_save_bin = df_table[["wd_bin", "ws_bin"]]
+
+    # # Stitch the dataframes together and name accordingly
+    # df_full = pd.DataFrame()
+    # for dfx, namex in zip(df_list, name_list):
+    #     relevant_cols = [c for c in dfx.columns if c[0:4] == "pow_"]
+    #     relevant_cols.extend(["wd", "ws", "ti"])
+    #     df_temp = dfx[relevant_cols].copy()
+    #     df_temp["name"] = namex
+    #     df_full = df_full.append(df_temp)
+
+    # # Cut wd and ws into bins
+    # df_full["wd_bin"] = pd.cut(df_full.wd, wd_bin_edges)
+    # df_full["ws_bin"] = pd.cut(df_full.ws, ws_bin_edges)
+
+    # # Save the original bins
+    # df_save_bin = df_full[["wd_bin", "ws_bin"]]
+
+    # # Drop out of range
+    # df_full = df_full.dropna(subset=["wd_bin", "ws_bin"])
+
+    # # Sort by bins
+    # df_full = df_full.sort_values(["name", "wd_bin", "ws_bin"])
+
+    # # Add a bin count column
+    # df_full["bin_count"] = 1
+
+    # # So we don't lose precision multiply TI by 100
+    # df_full["ti"] = 100 * df_full["ti"]
+
+    # # Convert all to sums and means
+    # df_group = df_full.groupby(["wd_bin", "ws_bin", "name"]).agg(
+    #     [np.sum, np.mean]
+    # )
+
+    # # Flatten the columns
+    # df_group.columns = ["_".join(c) for c in df_group.columns]
+
+    # # Spin the name out to the columns
+    # df_group = df_group.unstack()
+
+    # # Flatten the columns
+    # df_group.columns = ["_".join(c) for c in df_group.columns]
+
+    # # Round the numerical columns to one decimal place
+    # df_group = df_group.round(1)
+
+    # # Reset the index
+    # df_group = df_group.reset_index()
+
+    # # Put together the final table
+    # df_merged = df_group[["wd_bin", "ws_bin"]].copy()
+
+    # # Add the bin counts,
+    # for n in name_list:
+    #     df_merged["bin_count_sum_%s" % n] = df_group["bin_count_sum_%s" % n]
+
+    # # Add a balanced bin count, the sum of the others, unless any are 0, in which case 0
+
+    # # Actually let's try it this way, use the minimum
+    # bin_cols = ["bin_count_sum_%s" % n for n in name_list]
+    # df_merged["bin_count_balanced"] = df_merged[bin_cols].min(axis=1)
+
+    # # Add mean wind speeds, and reference power
+    # for n in name_list:
+    #     df_merged["ws_mean_%s" % n] = df_group["ws_mean_%s" % n]
+    # for n in name_list:
+    #     df_merged["ti_mean_%s" % n] = (
+    #         df_group["ti_mean_%s" % n] / 100.0
+    #     )  # Back to decimal
+
+    # # Reference energy and power, and balanced energy
+    # for n in name_list:
+    #     df_merged["ref_pow_%s" % n] = (
+    #         df_group["pow_ref_sum_%s" % n] / df_group["bin_count_sum_%s" % n]
+    #     )
+    #     df_merged["ref_energy_%s" % n] = df_group["pow_ref_sum_%s" % n]
+    #     df_merged["ref_energy_balanced_%s" % n] = (
+    #         df_merged["ref_pow_%s" % n] * df_merged["bin_count_balanced"]
+    #     )
+
+    # # Add an empty column
+    # df_merged["___"] = None
+
+    # # Add the rest via turbine
+    # for t in test_turbines:
+    #     for n in name_list:
+
+    #         # Add the power
+    #         df_merged["pow_%03d_%s" % (t, n)] = (
+    #             df_group["pow_%03d_sum_%s" % (t, n)]
+    #             / df_merged["bin_count_sum_%s" % n]
+    #         )
+
+    #         # Add the energy
+    #         df_merged["energy_%03d_%s" % (t, n)] = df_group[
+    #             "pow_%03d_sum_%s" % (t, n)
+    #         ]
+
+    #         # Add the balanced enegy
+    #         df_merged["energy_balanced_%03d_%s" % (t, n)] = (
+    #             df_merged["pow_%03d_%s" % (t, n)] * df_merged["bin_count_balanced"]
+    #         )
+
+    #         # Add the energy ratio
+    #         df_merged["er_%03d_%s" % (t, n)] = np.round(
+    #             df_merged["energy_%03d_%s" % (t, n)]
+    #             / df_merged["ref_energy_%s" % n],
+    #             3,
+    #         )
+
+    #         # Add the balanced energy ratio
+    #         df_merged["er_balanced_%03d_%s" % (t, n)] = np.round(
+    #             df_merged["energy_balanced_%03d_%s" % (t, n)]
+    #             / df_merged["ref_energy_balanced_%s" % n],
+    #             3,
+    #         )
+
+    #         # Only do this if not first
+    #         if not n == name_list[0]:
+    #             # Add the change in energy ratio from baseline (whichever name is first)
+    #             df_merged["er_change_%03d_%s" % (t, n)] = np.round(
+    #                 1
+    #                 * (
+    #                     df_merged["er_%03d_%s" % (t, n)]
+    #                     - df_merged["er_%03d_%s" % (t, basename)]
+    #                 )
+    #                 / df_merged["er_%03d_%s" % (t, basename)],
+    #                 3,
+    #             )
+    #             # Add the change in energy ratio from baseline (whichever name is first)
+    #             df_merged["er_change_balanced_%03d_%s" % (t, n)] = np.round(
+    #                 1
+    #                 * (
+    #                     df_merged["er_balanced_%03d_%s" % (t, n)]
+    #                     - df_merged["er_balanced_%03d_%s" % (t, basename)]
+    #                 )
+    #                 / df_merged["er_balanced_%03d_%s" % (t, basename)],
+    #                 3,
+    #             )
+
+    #     # Add an empty column
+    #     df_merged["___%d" % t] = None
+
+    # # Add the totals by direction
+    # df_table = pd.DataFrame()
+    # for wd_bin in df_merged.wd_bin.unique():
+    #     df_sub_pre = df_merged[df_merged.wd_bin == wd_bin]
+
+    #     # Make a new df which is a sum of the other
+    #     df_sub = df_sub_pre.append(
+    #         df_sub_pre.sum(numeric_only=True), ignore_index=True
+    #     )  # .to_frame()
+
+    #     # Go through the columns of this frame and fix the last row
+    #     last_row = df_sub.shape[0] - 1
+
+    #     # Fix ws and wd
+    #     df_sub.loc[last_row, "wd_bin"] = df_sub.loc[last_row - 1, "wd_bin"]
+    #     df_sub["ws_bin"] = df_sub["ws_bin"].astype(str)
+    #     df_sub.loc[last_row, "ws_bin"] = "TOTALS"
+
+    #     # Remove the total for reference power
+    #     for n in name_list:
+    #         df_sub.loc[last_row, "ref_pow_%s" % n] = np.nan
+
+    #     # Correct ws and ti to be a mean
+    #     for n in name_list:
+    #         df_sub.loc[last_row, "ws_mean_%s" % n] = np.round(
+    #             np.sum(
+    #                 df_sub_pre["bin_count_sum_%s" % n]
+    #                 * df_sub_pre["ws_mean_%s" % n]
+    #             )
+    #             / df_sub_pre["bin_count_sum_%s" % n].sum(),
+    #             1,
+    #         )
+    #         df_sub.loc[last_row, "ti_mean_%s" % n] = np.round(
+    #             np.sum(
+    #                 df_sub_pre["bin_count_sum_%s" % n]
+    #                 * df_sub_pre["ti_mean_%s" % n]
+    #             )
+    #             / df_sub_pre["bin_count_sum_%s" % n].sum(),
+    #             3,
+    #         )
+
+    #     # Correct the energy ratios
+    #     for t in test_turbines:
+    #         for n in name_list:
+
+    #             # Not sure what the total power should be so just to nan
+    #             df_sub.loc[last_row, "pow_%03d_%s" % (t, n)] = np.nan
+
+    #             # Recompute the energy ratio (overwrite the sum)
+    #             df_sub["er_%03d_%s" % (t, n)] = np.round(
+    #                 df_sub["energy_%03d_%s" % (t, n)]
+    #                 / df_sub["ref_energy_%s" % n],
+    #                 3,
+    #             )
+    #             df_sub["er_balanced_%03d_%s" % (t, n)] = np.round(
+    #                 df_sub["energy_balanced_%03d_%s" % (t, n)]
+    #                 / df_sub["ref_energy_balanced_%s" % n],
+    #                 3,
+    #             )
+    #             # df_sub.loc[last_row,'er_%03d_%s' % (t,n)] = df_sub.loc[last_row,'energy_%03d_%s' % (t,n)] / df_sub.loc[last_row,'ref_energy_%s' % n]
+
+    #             # Only do this if not first
+    #             if not n == name_list[0]:
+    #                 # Recompute the change in energy ratio (overwrite the sum)
+    #                 df_sub["er_change_%03d_%s" % (t, n)] = np.round(
+    #                     1
+    #                     * (
+    #                         df_sub["er_%03d_%s" % (t, n)]
+    #                         - df_sub["er_%03d_%s" % (t, basename)]
+    #                     )
+    #                     / df_sub["er_%03d_%s" % (t, basename)],
+    #                     3,
+    #                 )
+    #                 df_sub["er_change_balanced_%03d_%s" % (t, n)] = np.round(
+    #                     1
+    #                     * (
+    #                         df_sub["er_balanced_%03d_%s" % (t, n)]
+    #                         - df_sub["er_balanced_%03d_%s" % (t, basename)]
+    #                     )
+    #                     / df_sub["er_balanced_%03d_%s" % (t, basename)],
+    #                     3,
+    #                 )
+
+    #     # Add an empty row
+    #     df_sub = df_sub.append(
+    #         pd.DataFrame([[""] * len(df_sub.columns)], columns=df_sub.columns)
+    #     )
+
+    #     # Append to the final
+    #     df_table = df_table.append(df_sub)
 
     # Write out the dataframe with xslxwriter
     writer = pd.ExcelWriter(fout_xlsx, engine="xlsxwriter")
-    df_table_final.to_excel(
+    df_table.to_excel(
         writer,
         index=False,
         sheet_name="results",
@@ -400,7 +537,7 @@ def table_analysis(df_list, fout_xlsx, fi=None):
     # Make change and TI into a percentage
     # Adding percentage format.
     fmt_rate = workbook.add_format({"num_format": "%0.0", "bold": False})
-    cols = df_table_final.columns
+    cols = df_table.columns
     change_list = [
         i
         for i in range(len(cols))
@@ -425,7 +562,7 @@ def table_analysis(df_list, fout_xlsx, fi=None):
         worksheet.conditional_format(
             first_data_row,
             c + first_data_col,
-            df_table_final.shape[0] + first_data_row,
+            df_table.shape[0] + first_data_row,
             c + first_data_col,
             {"type": "data_bar", "max_value": 100},
         )
@@ -434,12 +571,12 @@ def table_analysis(df_list, fout_xlsx, fi=None):
     change_list = [i for i in range(len(cols)) if "change" in cols[i]]
 
     for c in change_list:
-        # worksheet.conditional_format(first_data_row,c+first_data_col,df_table_final.shape[0]+first_data_row,c+first_data_col, {'type': 'data_bar','bar_axis_position': 'middle','bar_negative_border_color_same': True})
+        # worksheet.conditional_format(first_data_row,c+first_data_col,df_table.shape[0]+first_data_row,c+first_data_col, {'type': 'data_bar','bar_axis_position': 'middle','bar_negative_border_color_same': True})
 
         worksheet.conditional_format(
             first_data_row,
             c + first_data_col,
-            df_table_final.shape[0] + first_data_row,
+            df_table.shape[0] + first_data_row,
             c + first_data_col,
             {
                 "type": "3_color_scale",
@@ -462,7 +599,7 @@ def table_analysis(df_list, fout_xlsx, fi=None):
         if ("er_" in cols[i]) and not ("change" in cols[i])
     ]
     for c in change_list:
-        # worksheet.conditional_format(first_data_row,c+first_data_col,df_table_final.shape[0]+first_data_row,c+first_data_col, {'type': '3_color_scale',
+        # worksheet.conditional_format(first_data_row,c+first_data_col,df_table.shape[0]+first_data_row,c+first_data_col, {'type': '3_color_scale',
         #                                                              'min_value': 0.25,
         #                                                              'min_type':'num',
         #                                                              'max_value': 1.0,
@@ -470,7 +607,7 @@ def table_analysis(df_list, fout_xlsx, fi=None):
         worksheet.conditional_format(
             first_data_row,
             c + first_data_col,
-            df_table_final.shape[0] + first_data_row,
+            df_table.shape[0] + first_data_row,
             c + first_data_col,
             {
                 "type": "3_color_scale",
@@ -498,7 +635,7 @@ def table_analysis(df_list, fout_xlsx, fi=None):
             "border": 1,
         }
     )
-    for col, value in enumerate(df_table_final.columns.values):
+    for col, value in enumerate(df_table.columns.values):
         worksheet.write(header_row, col + first_data_col, value, fmt_header)
 
     # If an fi is provided, use it to make layout images to help with directions of things
@@ -557,3 +694,4 @@ def table_analysis(df_list, fout_xlsx, fi=None):
     worksheet.freeze_panes(first_data_row, first_data_col)
 
     writer.save()
+    print("File successfully written to {:s}.".format(fout_xlsx))
