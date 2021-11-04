@@ -14,6 +14,7 @@
 import numpy as np
 import pandas as pd
 from pandas.core.base import DataError
+from scipy.interpolate import NearestNDInterpolator
 
 from floris_scada_analysis.energy_ratio import energy_ratio as er
 from floris_scada_analysis.energy_ratio import (
@@ -360,7 +361,8 @@ class energy_ratio_suite:
         wd_bin_width=None,
         N=1,
         percentiles=[5.0, 95.0],
-        verbose=False,
+        balance_bins_between_dfs=True,
+        verbose=True,
     ):
         """This is the main function used to calculate the energy ratios
         for dataframe provided to the class during initialization. One
@@ -415,9 +417,74 @@ class energy_ratio_suite:
                         value is equal to baseline without UQ and higher
                         with UQ.
         """
-        for ii in range(len(self.df_list)):
+        # Define number of dataframes specified by user
+        N_df = len(self.df_list)
+
+        # Load energy ratio class for dfs without bin frequency interpolant
+        era_list = [None for _ in range(N_df)]
+        for ii in range(N_df):
             df_subset = self.df_list[ii]["df_subset"]
-            era = er.energy_ratio(df_in=df_subset, verbose=verbose)
+            era_list[ii] = er.energy_ratio(df_in=df_subset, verbose=verbose)
+
+        if balance_bins_between_dfs:
+            # First check if necessary
+            balance_bins_between_dfs = False
+            wd_ref = np.array(self.df_list[0]["df_subset"]["wd"])
+            ws_ref = np.array(self.df_list[0]["df_subset"]["ws"])
+            for d in self.df_list:
+                if (
+                    (not np.array_equal(wd_ref, d["df_subset"]["wd"])) or
+                    (not np.array_equal(ws_ref, d["df_subset"]["ws"]))
+                ):
+                    balance_bins_between_dfs = True
+
+            if balance_bins_between_dfs:
+                print("Dataframes differ in wd and ws. Rebalancing.")
+                df_binned_list = [None for _ in range(N_df)]
+                for ii, era in enumerate(era_list):
+                    # Calculate how data would be binned in era
+                    era._set_test_turbines(test_turbines)
+                    era._set_binning_properties(
+                        ws_step=ws_step,
+                        wd_step=wd_step,
+                        wd_bin_width=wd_bin_width
+                    )
+                    era._calculate_bins()
+
+                    # Extract dataframe and calculate bin counts
+                    df_binned = era.df[["wd_bin", "ws_bin"]].copy()
+                    df_binned["bin_count_df{:d}".format(ii)] = 1
+                    df_binned = df_binned.groupby(["wd_bin", "ws_bin"]).sum()
+                    df_binned_list[ii] = df_binned
+
+                # Now merge bin counts from each separate dataframe
+                df_binned_merged = pd.concat(df_binned_list, axis=1)
+                df_binned_merged = df_binned_merged.fillna(0).astype(int)
+
+                # Determine minimum bin count for every ws/wd
+                df_binned_merged["bin_count_balanced"] = (
+                    df_binned_merged.min(axis=1)
+                )
+
+                # Define a bin frequency interpolant. Can be nearest-neighbor
+                # since every data point from all dataframes is covered.
+                df_binned_merged = df_binned_merged.reset_index(drop=False)
+                freq_interpolant = NearestNDInterpolator(
+                    x=df_binned_merged[["wd_bin", "ws_bin"]],
+                    y=df_binned_merged["bin_count_balanced"],
+                )
+
+                # Assign frequency interpolant to each energy ratio object
+                for era in era_list:
+                    era._set_inflow_freq_interpolant(freq_interpolant)
+
+            else:
+                print(
+                    "Dataframes share underlying wd and ws." +
+                    " Skipping rebalancing -- not necessary."
+                )
+
+        for ii, era in enumerate(era_list):
             er_result = era.get_energy_ratio(
                 test_turbines=test_turbines,
                 wd_step=wd_step,
