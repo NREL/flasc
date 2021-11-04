@@ -120,7 +120,12 @@ class energy_ratio:
             test_turbines = [test_turbines]
         self.test_turbines = test_turbines
 
-        self.df = self.df_full[["wd", "ws", "pow_ref"]].copy()
+        if "ti" in self.df_full.columns:
+            cols = ["wd", "ws", "ti", "pow_ref"]
+        else:
+            cols = ["wd", "ws", "pow_ref"]
+
+        self.df = self.df_full[cols].copy()
         self.df["pow_test"] = dfm.get_column_mean(
             df=self.df_full,
             col_prefix="pow",
@@ -571,6 +576,7 @@ def _get_energy_ratio_single_wd_bin_nominal(
         ]
         mean_cols = ["wd", "ws", "ti", "pow_ref", "pow_test"]
         std_cols = ["wd", "ws", "ti", "pow_ref", "pow_test"]
+
     else:
         min_cols = ["wd", "ws", "wd_bin", "ws_bin", "pow_ref", "pow_test"]
         mean_cols = ["wd", "ws", "pow_ref", "pow_test"]
@@ -625,21 +631,11 @@ def _get_energy_ratio_single_wd_bin_nominal(
         # Calculate total statistics
         total_means = df[mean_cols].mean()
         total_means = total_means.rename(
-            {
-                "wd": "wd_mean",
-                "ws": "ws_mean",
-                "pow_ref": "pow_ref_mean",
-                "pow_test": "pow_test_mean",
-            }
+            dict(zip(mean_cols, ["{:s}_mean".format(c) for c in mean_cols]))
         )
         total_stds = df[std_cols].std()
         total_stds = total_stds.rename(
-            {
-                "wd": "wd_std",
-                "ws": "ws_std",
-                "pow_ref": "pow_ref_std",
-                "pow_test": "pow_test_std",
-            }
+            dict(zip(std_cols, ["{:s}_std".format(c) for c in std_cols]))
         )
 
         # Get summation of energy and bin frequencies
@@ -684,9 +680,16 @@ def _get_energy_ratio_single_wd_bin_nominal(
     )
 
     # Compute total balanced energy ratio over all wind speeds
-    energy_ratio_total_balanced = (
+    df_per_wd_bin["energy_test_balanced_norm"] = (
         df_per_ws_bin["energy_test_balanced_norm"].sum()
-        / df_per_ws_bin["energy_ref_balanced_norm"].sum()
+    )
+    df_per_wd_bin["energy_ref_balanced_norm"] = (
+        df_per_ws_bin["energy_ref_balanced_norm"].sum()
+    )
+
+    energy_ratio_total_balanced = (
+        df_per_wd_bin["energy_test_balanced_norm"] /
+        df_per_wd_bin["energy_ref_balanced_norm"]
     )
 
     if return_detailed_output:
@@ -699,6 +702,8 @@ def _get_energy_ratio_single_wd_bin_nominal(
         # Formatting
         df_per_wd_bin = pd.DataFrame(df_per_wd_bin).T
         df_per_wd_bin["bin_count"] = df_per_wd_bin["bin_count"].astype(int)
+
+        df_per_wd_bin["wd_bin_edges"] = df_freq.iloc[0]["wd_bin_edges"]
         df_per_wd_bin = df_per_wd_bin.set_index("wd_bin")
 
         df_per_ws_bin["bin_count"] = df_per_ws_bin["bin_count"].astype(int)
