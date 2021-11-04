@@ -58,9 +58,12 @@ class energy_ratio:
         self._set_df(df_in)
 
         # Initialize frequency functions
-        self.inflow_freq_interpolant = inflow_freq_interpolant
+        self._set_inflow_freq_interpolant(inflow_freq_interpolant)
 
     # Private methods
+
+    def _set_inflow_freq_interpolant(self, inflow_freq_interpolant):
+        self.inflow_freq_interpolant = inflow_freq_interpolant
 
     def _set_df(self, df_in):
         """This function writes the dataframe provided by the user to the
@@ -124,6 +127,15 @@ class energy_ratio:
             turbine_list=self.test_turbines,
             circular_mean=False,
         )
+
+    def _set_binning_properties(self, ws_step, wd_step, wd_bin_width=None):
+        # Define bin centers and bin widths
+        self.ws_step = ws_step
+        self.wd_step = wd_step
+        if wd_bin_width is None:
+            self.wd_bin_width = wd_step
+        else:
+            self.wd_bin_width = wd_bin_width
 
     def _calculate_bins(self):
         """This function bins the data in the minimal dataframe, self.df,
@@ -199,8 +211,27 @@ class energy_ratio:
                 df_freq["ws_bin"],
             )
 
-        # Set index to "ws_bin" and save to self
-        df_freq = df_freq.reset_index(drop=True).set_index("ws_bin")
+        # Set bin edges
+        ws_intervals = [
+            pd.Interval(a, b) for a, b in zip(
+                df_freq["ws_bin"] - self.ws_step,
+                df_freq["ws_bin"] + self.ws_step
+            )
+        ]
+        wd_intervals = [
+            pd.Interval(a, b) for a, b in zip(
+                df_freq["wd_bin"] - self.wd_bin_width,
+                df_freq["wd_bin"] + self.wd_bin_width
+            )
+        ]
+
+        df_freq = df_freq.reset_index(drop=True)
+        df_freq["ws_bin_edges"] = ws_intervals
+        df_freq["wd_bin_edges"] = wd_intervals
+
+        # Sort by 'ws_bin' as index
+        df_freq = df_freq.set_index("ws_bin")
+
         self.df_freq = df_freq
 
         return df_freq
@@ -279,12 +310,8 @@ class energy_ratio:
         # Set up a 'pow_test' column in the dataframe
         self._set_test_turbines(test_turbines)
 
-        # Set up binning
-        self.ws_step = ws_step
-        self.wd_step = wd_step
-        if wd_bin_width is None:
-            wd_bin_width = wd_step
-        self.wd_bin_width = wd_bin_width
+        # Set up bins
+        self._set_binning_properties(ws_step, wd_step, wd_bin_width)
         self._calculate_bins()
 
         # Get probability distribution of bins
@@ -520,7 +547,7 @@ def _get_energy_ratio_single_wd_bin_nominal(
         min_cols = ["wd", "ws", "wd_bin", "ws_bin", "pow_ref", "pow_test"]
         mean_cols = ["wd", "ws", "pow_ref", "pow_test"]
         std_cols = ["wd", "ws", "pow_ref", "pow_test"]
-    df = df_binned[min_cols]
+    df = df_binned[min_cols].copy()
 
     # Check for faulty measurements
     if np.any(np.isnan(df)):
@@ -552,6 +579,8 @@ def _get_energy_ratio_single_wd_bin_nominal(
         # Collect into a single dataframe
         df_per_ws_bin = pd.concat([df_means, df_stds, df_sums], axis=1)
         df_per_ws_bin["wd_bin"] = wd_bin[0]
+        df_per_ws_bin["wd_bin_edges"] = df_freq["wd_bin_edges"]
+        df_per_ws_bin["ws_bin_edges"] = df_freq["ws_bin_edges"]
 
         # Calculate unbalanced energy ratio for each wind speed bin
         df_per_ws_bin["energy_ratio_unbalanced"] = (
