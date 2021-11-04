@@ -283,6 +283,20 @@ class energy_ratio:
             percentiles (list, optional): Confidence bounds for the
                 uncertainty quantification in percents. This value is only
                 relevant if N > 1 is specified. Defaults to [5., 95.].
+            return_detailed_output (bool, optional): Also calculate and
+                return detailed energy ratio information useful for debugging
+                and figuring out flaws in the data. This slows down the
+                calculations but can be very useful. The additional info is
+                written to self.df_lists[i]["er_results_info_dict"]. The
+                dictionary variable therein contains two fields, being
+                "df_per_wd_bin" and "df_per_ws_bin". The first gives an
+                overview of the energy ratio for every wind direction bin,
+                covering the collective effect of all wind speeds in the
+                data. The latter one, "df_per_ws_bin", yields even more
+                information and displays the energy ratio for every wind
+                direction and wind speed bin, among others. This is
+                particularly helpful in figuring out if the bins are well
+                balanced. Defaults to False.
 
         Returns:
             energy_ratios ([pd.DataFrame]): Dataframe containing the found
@@ -387,6 +401,20 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
         percentiles (list, optional): Confidence bounds for the
             uncertainty quantification in percents. This value is only
             relevant if N > 1 is specified. Defaults to [5., 95.].
+        return_detailed_output (bool, optional): Also calculate and
+            return detailed energy ratio information useful for debugging
+            and figuring out flaws in the data. This slows down the
+            calculations but can be very useful. The additional info is
+            written to self.df_lists[i]["er_results_info_dict"]. The
+            dictionary variable therein contains two fields, being
+            "df_per_wd_bin" and "df_per_ws_bin". The first gives an
+            overview of the energy ratio for every wind direction bin,
+            covering the collective effect of all wind speeds in the
+            data. The latter one, "df_per_ws_bin", yields even more
+            information and displays the energy ratio for every wind
+            direction and wind speed bin, among others. This is
+            particularly helpful in figuring out if the bins are well
+            balanced. Defaults to False.
 
     Returns:
         energy_ratios ([pd.DataFrame]): Dataframe containing the found

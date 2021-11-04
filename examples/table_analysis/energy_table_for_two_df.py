@@ -86,22 +86,24 @@ if __name__ == "__main__":
     # dataset.
     fsc = energy_ratio_suite.energy_ratio_suite()
     fsc.add_df(df, "Baseline")
+    # fsc.add_df(df, "Random WD Perturbation")
     fsc.add_df(df2, "Random WD Perturbation")
 
     # Print the dataframes to see if everything is imported properly
     fsc.print_dfs()
     fsc.set_masks(ws_range=(5.0, 12.0), wd_range=(40.0, 48.0))
 
-    # # Get energy ratios for test_turbine 1
-    # energy_ratios_t1 = fsc.get_energy_ratios(
-    #     test_turbines=[1],
-    #     wd_step=2.0,
-    #     ws_step=1.0,
-    #     wd_bin_width=2.0,
-    #     N=1,
-    #     percentiles=[5.0, 95.0],
-    #     verbose=True
-    # )
+    # Get energy ratios for test_turbine 1
+    energy_ratios_t1 = fsc.get_energy_ratios(
+        test_turbines=[1],
+        wd_step=2.0,
+        ws_step=1.0,
+        wd_bin_width=2.0,
+        N=1,
+        percentiles=[5.0, 95.0],
+        return_detailed_output=True,
+        verbose=True
+    )
 
     # # Get energy ratios for test_turbine 4
     # energy_ratios_t4 = fsc.get_energy_ratios(
@@ -116,11 +118,7 @@ if __name__ == "__main__":
 
     # Visualize table
     root_path = os.path.dirname(os.path.abspath(__file__))
-    fsc.get_energy_tables(
-        [1, 4],
-        wd_bins,
-        ws_bins,
-        excel_filename=os.path.join(root_path, "energy_table.xlsx"),
+    fsc.export_detailed_energy_info_to_xlsx(
+        fout_xlsx=os.path.join(root_path, "energy_table.xlsx"),
         fi=fi,
-        verbose=False,
     )

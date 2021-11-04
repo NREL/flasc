@@ -133,14 +133,16 @@ def plot(energy_ratios, labels=None):
     return fig, ax
 
 
-def table_analysis(
-    df_list, name_list, test_turbines, wd_bin_edges, ws_bin_edges, fout_xlsx, fi=None
-):
+def table_analysis(df_list, fout_xlsx, fi=None):
 
     # Save some useful info
     header_row = 2
     first_data_row = header_row + 1
     first_data_col = 1
+
+    # Extract relevant details
+    name_list = [df["name"] for df in df_list]
+    df_list = [df["df_subset"] for df in df_list]
 
     # If test_turbines is none put in all possible turbines
     # TODO

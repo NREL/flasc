@@ -309,50 +309,6 @@ class energy_ratio_suite:
         for ii in range(len(self.df_list)):
             self.clear_energy_ratio_results_of_dataset(ii)
 
-    def get_energy_tables(
-        self,
-        test_turbines,
-        wd_bins,
-        ws_bins,
-        excel_filename="energy_table.xlsx",
-        fi=None,
-        verbose=False,
-    ):
-        """This function will calculate an energy table saved to excel
-
-        Args:
-            test_turbines ([iteratible]): List with the test turbine(s)
-                which will be calculated in the spreadsheet
-            wd_bins (np.array): Wind direction bins to analyze
-            ws_bins (np.array): Wind speed bins to analyze
-            excel_filename (str, optional): The filename the
-                excel file will be saved to Defaults to energy_table.xlsx.
-            fi ([type], optional): FLORIS object used to 
-                make visuals of wind direction within the sheets.
-                Defaults to None
-            verbose (bool, optional): Print to console. Defaults to False.
-
-        Returns:
-        """
-
-        # Get the list of dfs and names
-        df_list = []
-        name_list = []
-        for ii in range(len(self.df_list)):
-            df_list.append(self.df_list[ii]["df_subset"])
-            name_list.append(self.df_list[ii]["name"])
-
-        # # Build the table, assuming that we don't need to balance
-        vis.table_analysis(
-            df_list=df_list,
-            name_list=name_list,
-            test_turbines=test_turbines,
-            wd_bin_edges=wd_bins,
-            ws_bin_edges=ws_bins,
-            fout_xlsx=excel_filename,
-            fi=fi,
-        )
-
     def get_energy_ratios(
         self,
         test_turbines,
@@ -362,6 +318,7 @@ class energy_ratio_suite:
         N=1,
         percentiles=[5.0, 95.0],
         balance_bins_between_dfs=True,
+        return_detailed_output=False,
         verbose=True,
     ):
         """This is the main function used to calculate the energy ratios
@@ -399,7 +356,31 @@ class energy_ratio_suite:
             percentiles (list, optional): Confidence bounds for the
                 uncertainty quantification in percents. This value is only
                 relevant if N > 1 is specified. Defaults to [5., 95.].
-            verbose (bool, optional): Print to console. Defaults to False.
+            balance_bins_between_dfs (bool, optional): Balance the bins by
+                the frequency of occurrence for each wind direction and wind
+                speed bin in the collective of dataframes. Frequency of a
+                certain bin is equal to the minimum number of occurrences
+                among all the dataframes. This ensures we are comparing
+                apples to apples. Recommended to set to 'True'. It will
+                avoid bin rebalancing if the underlying wd and ws occurrences
+                are identical between all dataframes, e.g., when we are
+                comparing SCADA data to FLORIS predictions of the same data.
+                Defaults to True.
+            return_detailed_output (bool, optional): Also calculate and
+                return detailed energy ratio information useful for debugging
+                and figuring out flaws in the data. This slows down the
+                calculations but can be very useful. The additional info is
+                written to self.df_lists[i]["er_results_info_dict"]. The
+                dictionary variable therein contains two fields, being
+                "df_per_wd_bin" and "df_per_ws_bin". The first gives an
+                overview of the energy ratio for every wind direction bin,
+                covering the collective effect of all wind speeds in the
+                data. The latter one, "df_per_ws_bin", yields even more
+                information and displays the energy ratio for every wind
+                direction and wind speed bin, among others. This is
+                particularly helpful in figuring out if the bins are well
+                balanced. Defaults to False.
+            verbose (bool, optional): Print to console. Defaults to True.
 
         Returns:
             self.df_list (iterable): List of Pandas DataFrames containing
@@ -484,17 +465,24 @@ class energy_ratio_suite:
                     " Skipping rebalancing -- not necessary."
                 )
 
+        # Now calculate energy ratios using each object
         for ii, era in enumerate(era_list):
-            er_result = era.get_energy_ratio(
+            out = era.get_energy_ratio(
                 test_turbines=test_turbines,
                 wd_step=wd_step,
                 ws_step=ws_step,
                 wd_bin_width=wd_bin_width,
                 N=N,
                 percentiles=percentiles,
+                return_detailed_output=return_detailed_output,
             )
 
-            self.df_list[ii]["er_results"] = er_result
+            # Save each output to self
+            if return_detailed_output:
+                self.df_list[ii]["er_results"] = out[0]
+                self.df_list[ii]["er_results_info_dict"] = out[1]
+            else:
+                self.df_list[ii]["er_results"] = out
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
@@ -529,3 +517,32 @@ class energy_ratio_suite:
                 ax.append(axi)
 
         return ax
+
+    def export_detailed_energy_info_to_xlsx(self, fout_xlsx, fi=None):
+        """This function will calculate an energy table saved to excel.
+
+        Args:
+            test_turbines ([iteratible]): List with the test turbine(s)
+                which will be calculated in the spreadsheet
+            wd_bins (np.array): Wind direction bins to analyze
+            ws_bins (np.array): Wind speed bins to analyze
+            fout_xlsx (str): The path and filename to which the .xlsx
+                excel file will be saved.
+            fi ([type], optional): FLORIS object for the wind farm that can
+                be used to generate visuals of wind direction within the
+                sheets. Defaults to None.
+        """
+        # Check if detailed information available. If not, return error.
+        if not ("er_results_info_dict" in self.df_list[0].keys()):
+            raise DataError(
+                "Did not find detailed energy ratio information. " +
+                "Make sure you run .get_energy_ratios() with "
+                " `return_detailed_output=True` before calling this function."
+            )
+
+        # # Build the table, assuming that we don't need to balance
+        vis.table_analysis(
+            df_list=self.df_list,
+            fout_xlsx=fout_xlsx,
+            fi=fi,
+        )
