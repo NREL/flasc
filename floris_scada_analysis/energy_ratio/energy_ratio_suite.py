@@ -486,6 +486,7 @@ class energy_ratio_suite:
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
+            self.df_list[ii]["er_wd_bin_width"] = era.wd_bin_width
             self.df_list[ii]["er_bootstrap_N"] = N
 
         return self.df_list
