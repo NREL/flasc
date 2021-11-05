@@ -177,12 +177,12 @@ def table_analysis(df_list, fout_xlsx, fi=None):
     df_merged = df_merged.sort_values(by=["wd_bin", "ws_bin"])
     df_merged = df_merged.reset_index(drop=False)
 
-    wd_intervals = [pd.Interval(a, b) for a, b in zip(
+    wd_intervals = [pd.Interval(a, b, "left") for a, b in zip(
         df_merged["wd_bin"] - wd_bin_width / 2.0,
         df_merged["wd_bin"] + wd_bin_width / 2.0
         )
     ]
-    ws_intervals = [pd.Interval(a, b) for a, b in zip(
+    ws_intervals = [pd.Interval(a, b, "left") for a, b in zip(
         df_merged["ws_bin"] - ws_step / 2.0,
         df_merged["ws_bin"] + ws_step / 2.0
         )
@@ -198,6 +198,7 @@ def table_analysis(df_list, fout_xlsx, fi=None):
     # Overwrite placeholder large numbers with new interval
     total_ids = [i.right >= 999999.9 for i in ws_intervals]
     df_table.loc[total_ids, "ws_bin"] = "TOTALS"
+    df_merged.loc[total_ids, "ws_bin"] = "TOTALS"
 
     # Add bin counts for the dataframes
     cols = ["bin_count_{:s}".format(n) for n in name_list]
@@ -206,6 +207,10 @@ def table_analysis(df_list, fout_xlsx, fi=None):
 
     # Add balanced bin count per ws and in total
     df_table["bin_count_balanced"] = df_table[cols].min(axis=1).astype(int)
+    df_table.loc[total_ids, "bin_count_balanced"] = int(0)
+    Ntot = df_table.groupby(["wd_bin"])["bin_count_balanced"].sum()
+    df_table.loc[total_ids, "bin_count_balanced"] = np.array(Ntot, dtype=int)
+
     df_merged["bin_count_balanced_tot"] = df_table.loc[total_ids, "bin_count_balanced"]
     df_merged["bin_count_balanced_tot"] = df_merged["bin_count_balanced_tot"].bfill().astype(int)
 
@@ -309,7 +314,7 @@ def table_analysis(df_list, fout_xlsx, fi=None):
 
     # FORMATTING
 
-    # Format large numbers to 1 decimal
+    # Format large numbers to 2 decimal
     fmt_rate = workbook.add_format({"num_format": "0.00", "bold": False})
     cols = df_table.columns
     change_list = [
@@ -319,6 +324,15 @@ def table_analysis(df_list, fout_xlsx, fi=None):
             ("_energy_" in cols[i]) and not ("energy_ratio_" in cols[i])
         )
     ]
+    for c in change_list:
+        worksheet.set_column(
+            c + first_data_col, c + first_data_col, 10, fmt_rate
+        )
+
+    # Format energy ratios to 3 decimal
+    fmt_rate = workbook.add_format({"num_format": "0.000", "bold": False})
+    cols = df_table.columns
+    change_list = [i for i in range(len(cols)) if "energy_ratio" in cols[i]]
     for c in change_list:
         worksheet.set_column(
             c + first_data_col, c + first_data_col, 10, fmt_rate
