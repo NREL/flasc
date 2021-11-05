@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import numpy as np
@@ -52,10 +51,6 @@ if __name__ == "__main__":
     # wind direction between all turbines
     df = dfm.set_wd_by_all_turbines(df)
 
-    # Choose the ws and wd bins
-    wd_bins = np.arange(40, 50, 2)
-    ws_bins = np.arange(5, 12, 1)
-
     # We also need to define a reference wind speed and a reference power
     # production against to normalize the energy ratios with. In this
     # example, we set the wind speed equal to the mean wind speed
@@ -78,22 +73,20 @@ if __name__ == "__main__":
 
     # Also make a gap between 8 and 10 m/s
     df2 = df2[(df2.ws < 8) | (df2.ws > 10)]
-
     # df2['ws'] = df2['ws'] + np.random.normal(0,0.5,df2.ws.values.shape)
 
     # Initialize the energy ratio suite object and add each dataframe
     # separately. We will import the original data and the manipulated
     # dataset.
     fsc = energy_ratio_suite.energy_ratio_suite()
-    fsc.add_df(df, "Baseline")
-    # fsc.add_df(df, "Random WD Perturbation")
-    fsc.add_df(df2, "Random WD Perturbation")
+    fsc.add_df(df, "baseline")
+    fsc.add_df(df2, "random_wd_perturbation")
 
     # Print the dataframes to see if everything is imported properly
     fsc.print_dfs()
-    fsc.set_masks(ws_range=(5.0, 12.0), wd_range=(40.0, 48.0))
+    fsc.set_masks(ws_range=(5.0, 11.0), wd_range=(40.0, 48.0))
 
-    # Get energy ratios for test_turbine 1
+    # Get energy ratios for test_turbine 1 with return_detailed_output=True
     energy_ratios_t1 = fsc.get_energy_ratios(
         test_turbines=[1],
         wd_step=2.0,
@@ -105,20 +98,9 @@ if __name__ == "__main__":
         verbose=True
     )
 
-    # # Get energy ratios for test_turbine 4
-    # energy_ratios_t4 = fsc.get_energy_ratios(
-    #     test_turbines=[4],
-    #     wd_step=2.0,
-    #     ws_step=1.0,
-    #     wd_bin_width=2.0,
-    #     N=1,
-    #     percentiles=[5.0, 95.0],
-    #     verbose=True
-    # )
-
-    # Visualize table
+    # Generate table
     root_path = os.path.dirname(os.path.abspath(__file__))
     fsc.export_detailed_energy_info_to_xlsx(
-        fout_xlsx=os.path.join(root_path, "energy_table.xlsx"),
+        fout_xlsx=os.path.join(root_path, "energy_table_t1.xlsx"),
         fi=fi,
     )
