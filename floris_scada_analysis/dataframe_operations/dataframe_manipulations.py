@@ -27,20 +27,20 @@ from floris_scada_analysis import utilities as fsut
 
 # Functions related to wind farm analysis for df
 def filter_df_by_ws(df, ws_range):
-    df = df[df['ws'] > ws_range[0]]
-    df = df[df['ws'] <= ws_range[1]]
+    df = df[df['ws'] >= ws_range[0]]
+    df = df[df['ws'] < ws_range[1]]
     return df
 
 
 def filter_df_by_wd(df, wd_range):
-    df = df[df['wd'] > wd_range[0]]
-    df = df[df['wd'] <= wd_range[1]]
+    df = df[df['wd'] >= wd_range[0]]
+    df = df[df['wd'] < wd_range[1]]
     return df
 
 
 def filter_df_by_ti(df, ti_range):
-    df = df[df['ti'] > ti_range[0]]
-    df = df[df['ti'] <= ti_range[1]]
+    df = df[df['ti'] >= ti_range[0]]
+    df = df[df['ti'] < ti_range[1]]
     return df
 
 
