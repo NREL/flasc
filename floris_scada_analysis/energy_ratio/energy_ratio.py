@@ -154,16 +154,17 @@ class energy_ratio:
         wd_step = self.wd_step
         wd_bin_width = self.wd_bin_width
 
-        ws_labels = np.arange(0.0, 30.0, ws_step)
-        wd_labels = np.arange(0.0, 360.0, wd_step)
+        wd_min = np.min([wd_step / 2.0, wd_bin_width / 2.0])
+        ws_labels = np.arange(ws_step/2.0, 30.0001, ws_step)
+        wd_labels = np.arange(wd_min, 360.0001, wd_step)
 
         # Bin according to wind speed. Note that data never falls into
         # multiple wind speed bins at the same time.
         for ws in ws_labels:
             ws_min = float(ws - ws_step / 2.0)
             ws_max = float(ws + ws_step / 2.0)
-            ws_interval = pd.Interval(ws_min, ws_max, "right")
-            ids = (self.df["ws"] > ws_min) & (self.df["ws"] <= ws_max)
+            ws_interval = pd.Interval(ws_min, ws_max, "left")
+            ids = (self.df["ws"] >= ws_min) & (self.df["ws"] < ws_max)
             self.df.loc[ids, "ws_bin"] = ws
             self.df.loc[ids, "ws_bin_edges"] = ws_interval
 
@@ -176,8 +177,8 @@ class energy_ratio:
         for ii, wd in enumerate(wd_labels):
             wd_min = float(wrap_360(wd - wd_bin_width / 2.0))
             wd_max = float(wrap_360(wd + wd_bin_width / 2.0))
-            wd_interval = pd.Interval(wd_min, wd_min + wd_bin_width, "right")
-            ids = (self.df["wd"] > wd_min) & (self.df["wd"] <= wd_max)
+            wd_interval = pd.Interval(wd_min, wd_min + wd_bin_width, "left")
+            ids = (self.df["wd"] >= wd_min) & (self.df["wd"] < wd_max)
             df_subset = self.df.loc[ids].copy()
             df_subset["wd_bin"] = wd
             df_subset["wd_bin_edges"] = wd_interval
@@ -218,15 +219,15 @@ class energy_ratio:
 
         # Set bin edges
         ws_intervals = [
-            pd.Interval(a, b) for a, b in zip(
-                df_freq["ws_bin"] - self.ws_step,
-                df_freq["ws_bin"] + self.ws_step
+            pd.Interval(a, b, "left") for a, b in zip(
+                df_freq["ws_bin"] - self.ws_step / 2.0,
+                df_freq["ws_bin"] + self.ws_step / 2.0,
             )
         ]
         wd_intervals = [
-            pd.Interval(a, b) for a, b in zip(
-                df_freq["wd_bin"] - self.wd_bin_width,
-                df_freq["wd_bin"] + self.wd_bin_width
+            pd.Interval(a, b, "left") for a, b in zip(
+                df_freq["wd_bin"] - self.wd_bin_width / 2.0,
+                df_freq["wd_bin"] + self.wd_bin_width / 2.0
             )
         ]
 
