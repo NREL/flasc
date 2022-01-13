@@ -14,7 +14,6 @@ requirements = [
     'feather-format>=0.4.1',
     'matplotlib>=3',
     'numba',
-    'numpy>=1.17',
     'openoa>=2.0.1',
     'pandas>=0.24',
     'pyproj>=2.1',
