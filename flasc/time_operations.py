@@ -13,7 +13,9 @@
 
 from datetime import timedelta as td
 from itertools import product
+
 import numpy as np
+import pandas as pd
 
 from floris.utilities import wrap_360
 
@@ -310,7 +312,8 @@ def df_resample_by_interpolation(
 
     # Remove timezones, if any
     df = df.copy()
-    time_array = time_array.tz_localize(None)
+    time_array = [pd.to_datetime(t).tz_localize(None) for t in time_array]
+    time_array = np.array(time_array, dtype='datetime64')
     df["time"] = df["time"].dt.tz_localize(None)
 
     # Fill with np.nan values and the correct time array (without tz)

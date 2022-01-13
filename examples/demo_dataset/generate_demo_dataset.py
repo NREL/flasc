@@ -261,17 +261,17 @@ if __name__ == "__main__":
         columns={"ws": "ws_truth", "wd": "wd_truth", "ti": "ti_truth"}
     )
 
-    # Now rename variables and turbine names
-    tnames = ["A1", "A2", "A3", "B1", "B2", "C1", "C2"]
-    for ti in range(7):
-        df_fi = df_fi.rename(columns={
-            "ws_{:03d}".format(ti): "NacWSpeed_{:s}".format(tnames[ti]),
-            "wd_{:03d}".format(ti): "NacWDir_{:s}".format(tnames[ti]),
-            "ti_{:03d}".format(ti): "NacTI_{:s}".format(tnames[ti]),
-            "pow_{:03d}".format(ti): "ActivePower_{:s}".format(tnames[ti]),
-            "is_operation_normal_{:03d}".format(ti): \
-                "is_operation_normal_{:s}".format(tnames[ti]),
-    })
+    # # Now rename variables and turbine names
+    # tnames = ["A1", "A2", "A3", "B1", "B2", "C1", "C2"]
+    # for ti in range(7):
+    #     df_fi = df_fi.rename(columns={
+    #         "ws_{:03d}".format(ti): "NacWSpeed_{:s}".format(tnames[ti]),
+    #         "wd_{:03d}".format(ti): "NacWDir_{:s}".format(tnames[ti]),
+    #         "ti_{:03d}".format(ti): "NacTI_{:s}".format(tnames[ti]),
+    #         "pow_{:03d}".format(ti): "ActivePower_{:s}".format(tnames[ti]),
+    #         "is_operation_normal_{:03d}".format(ti): \
+    #             "is_operation_normal_{:s}".format(tnames[ti]),
+    # })
 
     fout = os.path.join(root_path, "demo_dataset_scada_60s.ftr")
     df_fi.to_feather(fout)

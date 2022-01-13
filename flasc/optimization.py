@@ -110,8 +110,8 @@ def find_timeshift_between_dfs(
     output_list = []
     print('Estimating required timeshift for df1.')
     while current_time < max_time:
-        t0 = current_time
-        t1 = current_time + t_step
+        t0 = np.array(current_time, dtype='datetime64')
+        t1 = np.array(current_time + t_step, dtype='datetime64')
         id_sub = (df1.time >= t0) & (df1.time < t1)
         df1_sub = df1[id_sub]
         df2_sub = df2[id_sub]
@@ -129,6 +129,7 @@ def find_timeshift_between_dfs(
         def cost_fun(x_shift):
             # Shift data along x-axis and then fit along y-axis, if necessary
             y1_cor = fsut.interp_with_max_gap(x, x - x_shift, y1, max_gap=max_gap, kind='linear')
+
             if correct_y_shift:
                 y_bias, J = match_y_curves_by_offset(
                     y1_cor, y2, dy_eval=y_shift_range,
@@ -138,8 +139,11 @@ def find_timeshift_between_dfs(
                 if use_circular_statistics:
                     y1_cor = wrap_360(y1_cor)
 
-            # Remove NaNs
-            ids = (~np.isnan(y1_cor)) & (~np.isnan(y2))
+            # Remove NaNs and infs
+            ids = (
+                (~np.isnan(y1_cor)) & (~np.isnan(y2)) &
+                (~np.isinf(y1_cor)) & (~np.isinf(y2))
+            )
             y2_cor = y2[ids]
             y1_cor = y1_cor[ids]
 
