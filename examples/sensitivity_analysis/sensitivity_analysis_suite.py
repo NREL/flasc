@@ -7,8 +7,9 @@ import pickle
 
 import floris.tools as wfct
 
-from flasc import floris_sensitivity_analysis as fsasa
-
+from flasc.model_estimation.floris_sensitivity_analysis import (
+    floris_sobol_analysis,
+)
 
 def _save_pickle(dict_in, fn):
     with open(fn, 'wb') as handle:
@@ -79,7 +80,7 @@ def calculate_sensitivity(fi, N, calc_second_order, num_threads=8):
             ]
         }
 
-    fsba = fsasa.floris_sobol_analysis(fi=fi, problem=problem,
+    fsba = floris_sobol_analysis(fi=fi, problem=problem,
                                        calc_second_order=calc_second_order)
     fsba.generate_samples(N)
     print('Generated %d samples.' % fsba.samples_x.shape[0])
@@ -137,7 +138,7 @@ def _case_wrapper(nrows, ncols, row_spacing, N, calc_second_order, wd=270.):
 
 def plot_results(si_dict, fi):
     plot_hor_flowfield(fi)
-    fsba = fsasa.floris_sobol_analysis(
+    fsba = floris_sobol_analysis(
         fi=fi,
         problem=si_dict['problem'],
         calc_second_order=si_dict['calc_second_order']

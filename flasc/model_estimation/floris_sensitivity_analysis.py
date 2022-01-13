@@ -125,7 +125,7 @@ class floris_sobol_analysis():
         df['ws'] = self.fi.floris.farm.wind_speed[0]
 
         # Calculate floris predictions
-        df_out = ftools.calc_floris(df, self.fi, num_threads)
+        df_out = ftools.calc_floris(df, self.fi, num_threads=10, num_workers=2)
         pow_cols = ['pow_%03d' % ti for ti in range(len(self.fi.layout_x))]
         self.samples_y = np.array(df_out[pow_cols].sum(axis=1), dtype=float)
 
