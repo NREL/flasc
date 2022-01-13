@@ -56,19 +56,17 @@ if __name__ == "__main__":
     for ii, tn in enumerate(turbine_names):
         scada_dict.update(
             {
-                "pow_{:03d}".format(ii): "ActivePower_{:s}".format(tn),
-                "ws_{:03d}".format(ii): "NacWSpeed_{:s}".format(tn),
-                "ti_{:03d}".format(ii): "NacTI_{:s}".format(tn),
-                "wd_{:03d}".format(ii): "NacWDir_{:s}".format(tn),
-                "is_operation_normal_{:03d}".format(ii): (
-                    "is_operation_normal_{:s}".format(tn)
-                ),
+                "ActivePower_{:s}".format(tn): "pow_{:03d}".format(ii),
+                "NacWSpeed_{:s}".format(tn): "ws_{:03d}".format(ii),
+                "NacTI_{:s}".format(tn): "ti_{:03d}".format(ii),
+                "NacWDir_{:s}".format(tn): "wd_{:03d}".format(ii),
+                "is_operation_normal_{:s}".format(tn): "is_operation_normal_{:03d}".format(ii),
             }
         )
 
     df_list = []
     print("formatting Dataframe...")
-    df = dfm.restructure_single_df(df, scada_dict)
+    df = df.rename(columns=scada_dict)
 
     # Sort dataframe and save
     df = df.sort_values(axis=0, by="time")

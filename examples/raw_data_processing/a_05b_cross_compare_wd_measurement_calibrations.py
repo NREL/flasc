@@ -130,8 +130,10 @@ if __name__ == "__main__":
                 wd_turb = wrap_360(wd_turb)
 
                 if sum(np.isnan(wd_turb)) / len(wd_turb) < nan_thrshld:
-                    dx_opt, J_opt = opt.match_wd_curves_by_offset(
-                        wd_ref, wd_turb
+                    dx_opt, J_opt = opt.match_y_curves_by_offset(
+                        yref=wd_ref, 
+                        ytest=wd_turb,
+                        angle_wrapping=True,
                     )
                     # fig, ax = plt.subplots()
                     # ax.plot(wrap_360(wd_turb_sub - dx_opt), 'o')

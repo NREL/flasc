@@ -20,8 +20,6 @@ from floris.tools import floris_interface as wfct
 
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 
-# from floris_scada_analysis import sqldatabase_management as sqldbm
-
 
 def load_floris():
     root_path = os.path.dirname(os.path.abspath(__file__))
