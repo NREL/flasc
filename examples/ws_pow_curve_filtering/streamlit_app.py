@@ -32,7 +32,7 @@ st.set_page_config(layout="wide")
 def load_data():
     print("Loading .ftr data.")
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    ftr_path = os.path.join(root_dir, "../demo_dataset/demo_dataset_60s.ftr")
+    ftr_path = os.path.join(root_dir, "../demo_dataset/demo_dataset_scada_60s.ftr")
     if not os.path.exists(ftr_path):
         raise FileNotFoundError(
             "Please run ./examples/demo_dataset/"
