@@ -22,3 +22,6 @@ _build
 *.csv
 *.ftr
 *.png
+
+# Documentation build files
+docs/build
