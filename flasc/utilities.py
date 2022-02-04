@@ -13,7 +13,7 @@
 
 import datetime
 
-import numba
+# import numba
 import numpy as np
 from numpy.core.defchararray import not_equal
 import scipy.interpolate as interp
@@ -82,7 +82,7 @@ def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
 
 # Credits to 'np8', from https://stackoverflow.com/questions/64045034/interpolate-values-and-replace-with-nans-within-a-long-gap
 # Adapted to include nearest-neighbor interpolation
-@numba.njit()
+# @numba.njit()
 def _interpolate_with_max_gap(
     x, xp, fp, max_gap, assume_sorted=False, kind="linear", extrapolate=True,
 ):
@@ -161,13 +161,18 @@ def _interpolate_with_max_gap(
         ij = ij + 1  # Do nothing, leave values as nans
 
     # Loop through all cases that fall inside xp
+    exit_loop = False
     for ii in range(ij, len(x)):
         # Move left interp point, if necessary
         while x[ii] > xp_full[idx_left_interp_point + 1]:
             idx_left_interp_point += 1
             if ((idx_left_interp_point + 1) >= len(xp_full)):
                 # Exit, we are now to the right of max. point xp
+                exit_loop=True
                 break
+
+        if exit_loop:
+            break
 
         # Calculate coordinates to interpolate
         x1 = xp_full[idx_left_interp_point]
