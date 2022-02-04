@@ -29,4 +29,6 @@ The FLASC repository is intended as a community driven toolbox, available on its
    overview
    installation
    getting_started
+   data_processing
+   data_analysis
    licensing
