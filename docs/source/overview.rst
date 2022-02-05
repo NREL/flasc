@@ -139,4 +139,4 @@ this module allows the user to analyze SCADA data on a turbine level. Outliers
 can be detected and removed. Filtering methods include sensor-stuck type of
 fault detection and analysis of the turbine wind speed-power curve.
 
-`Return to table of contents <index.html>`_
+.. seealso:: `Return to table of contents <index.html>`_ 

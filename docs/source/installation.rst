@@ -23,4 +23,4 @@ In terms of dependencies, the flasc toolbox currently relies on floris
 v2.4, and is not yet compatible with floris v3.0rc1.
 
 
-`Return to table of contents <index.html>`_ 
+.. seealso:: `Return to table of contents <index.html>`_ 

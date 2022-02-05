@@ -371,3 +371,6 @@ the example and documentation surrounding the energy ratio analysis suite.
    :scale: 50 %
    :alt: alternate text
    :align: center
+
+
+.. seealso:: `Return to table of contents <index.html>`_ 

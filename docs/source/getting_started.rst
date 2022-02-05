@@ -6,13 +6,13 @@ then follow the examples. The correct order is:
 
 Install FLASC
 =============
-Install hte repository following the instructions `here <installation.html>`_.
+Install the repository following the instructions `here <installation.html>`_.
 
 Generating an artificial dataset
 ================================
 You can generate a demo dataset using the script at
 ``examples/demo_dataset/``. The script ``generate_demo_dataset.py`` downloads
-historical a meteorological measurement tower at the United States National
+historical data from a meteorological measurement tower at the U.S. National
 Wind Technology Center (NWTC), part of the National Renewable Energy
 Laboratory (NREL). This data is made readily available to the public on its
 corresponding `website <https://midcdmz.nrel.gov/>`_. This script downloads
@@ -52,3 +52,5 @@ Once the artificial dataset has been postprocessed, one can start performing
 analyses. See `Data analysis <data_analysis.html>`_ for examples on how to
 derive useful information from the data, such as for model tuning and model
 validation.
+
+.. seealso:: `Return to table of contents <index.html>`_ 

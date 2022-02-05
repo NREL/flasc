@@ -17,7 +17,8 @@ FLASC also largely relies on the energy ratio to, among others, quantify wake
 losses in synthetic and historical data, to perform turbine northing
 calibrations, and for model parameter estimation.
 
-The FLASC repository is intended as a community driven toolbox, available on its `GitHub Repository <https://github.com/NREL/flasc>`_.
+The FLASC repository is intended as a community driven toolbox, available on
+its `GitHub Repository <https://github.com/NREL/flasc>`_.
 
 
 **Documentation Directory**
