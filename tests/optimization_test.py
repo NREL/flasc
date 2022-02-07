@@ -16,7 +16,7 @@ class TestOptimization(unittest.TestCase):
         yref = 180 + 180 * np.sin(0.01 * t)
 
         # Define a shifted signal with 360 deg angle wrapping
-        ytest = 44.3 + yref
+        ytest = 44.0 + yref
         ytest = ytest + 5 * np.random.randn(1000)
         ytest[ytest >= 360.0] += -360.0
 
