@@ -24,6 +24,11 @@ For technical questions, please send an email to bart.doekemeijer@nrel.gov.
    
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
+    :alt: Code formatting style
+
+.. image:: https://img.shields.io/badge/License-Apache_2.0-blue.svg
+    :target: https://opensource.org/licenses/Apache-2.0
+    :alt: Apache 2.0 License
 
 Installation
 ------------
