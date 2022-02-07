@@ -1,0 +1,12 @@
+feather-format>=0.4.1
+matplotlib>=3
+openoa>=2.0.1
+numba
+pandas>=0.24
+pyproj>=2.1
+pytest>=4
+SALib>=1.4.0.2
+scipy>=1.1
+sqlalchemy>=1.4.23
+streamlit>=0.89.0
+tkcalendar>=1.6.1
