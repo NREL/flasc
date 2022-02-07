@@ -34,7 +34,7 @@ def find_timeshift_between_dfs(
     cols_df1,
     cols_df2,
     use_circular_statistics=False,
-    t_step=td(days=30),
+    t_step=np.timedelta64(30*24, 'h'),
     correct_y_shift=False,
     y_shift_range=np.arange(-180.0, 180.0, 2.0),
     opt_bounds=None,
@@ -89,7 +89,7 @@ def find_timeshift_between_dfs(
 
     print('Resampling dataframes to a common time vector. ' +
           'This may take a while...')
-    time_array = min_time + np.arange(0, max_time - min_time + dt, dt)
+    time_array = min_time + np.arange(0, max_time - min_time + np.timedelta64(dt), dt)
     max_gap = 1.5 * dt
     df1 = fsato.df_resample_by_interpolation(
         df1,

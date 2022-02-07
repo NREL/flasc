@@ -63,7 +63,7 @@ def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
 
     # Check format of max_gap: needs to be an integer/float
     if not isinstance(max_gap, (float, int)):
-        max_gap = max_gap / np.timedelta64(1, 's')
+        max_gap = np.timedelta64(max_gap) / np.timedelta64(1, 's')
 
     if wrap_around_360:
         fp_cos = np.cos(fp * np.pi / 180.0)
