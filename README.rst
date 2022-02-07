@@ -1,6 +1,9 @@
 ==========
 FLORIS-based Analysis for SCADA data (FLASC)
 ==========
+
+**Further documentation is available at http://flasc.readthedocs.io/.**
+
 FLASC provides a rich suite of analysis tools for SCADA data
 filtering & analysis, wind farm model validation, field experiment design,
 and field experiment monitoring. The repository is centrally built around
@@ -10,6 +13,7 @@ to, among others, quantify wake losses in synthetic and historical data, to
 perform turbine northing calibrations, and for model parameter estimation.
 
 For technical questions, please send an email to bart.doekemeijer@nrel.gov.
+
 
 Installation
 ------------
@@ -29,13 +33,3 @@ FLASC consists of multiple modules, including:
 * *flasc.raw_data_handling*: this module contains functions that supports importing and processing raw SCADA data files. Specifically, it provides a class called "sql_database_manager" which can be used to up- and download data between your local system and a remote SQL database. This class also  contains a GUI to visualize data existent in the remote repository. This repository also includes data handling for very large datasets. Data is saved in feather format for optimal balance of storage size and load/write speed. Additionally, can split one large dataframe into multiple dataframes and feather files.
 * *flasc.time_operations*: This module allows the user to easily downsample, upsample and calculate moving averages of a data frame with SCADA and/or FLORIS data. These functions allow the user to specify which columns contain angular variables, and consequently 360 deg wrapping is taken care	of. It also allows the user to calculate the min, max, std and median for downsampled data frames. It leverages efficient functions inherent in	pandas to maximize performance.
 * *flasc.turbine_analysis*: this module allows the user to analyze SCADA data on a turbine level. Outliers can be detected and removed. Filtering methods include sensor-stuck type of fault detection and analysis of the turbine wind speed-power curve.
-
-Feature wishlist
---------
-* Add additional filtering functions (e.g., Local Outlier Factor)
-* Add circular bootstrapping
-* Add in-function documentation
-* Add Readthedocs documentation
-* Add automated testing
-* Rely on OpenOA functions as possible
-* Optional: add additional demo wind farms
