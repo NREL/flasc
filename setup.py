@@ -11,6 +11,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
+    'floris==2.4',
     'feather-format>=0.4.1',
     'matplotlib>=3',
     'numba',
