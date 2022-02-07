@@ -15,7 +15,6 @@ import datetime
 
 import numba
 import numpy as np
-from pandas.core.groupby import DataError
 # import scipy.interpolate as interp
 
 from floris.utilities import wrap_360
@@ -46,7 +45,7 @@ def estimate_dt(time_array):
 
     # Check if data is all ascending
     if dt <= datetime.timedelta(0):
-        raise DataError('Please only insert time ascending data.')
+        raise UserWarning('Please only insert time ascending data.')
 
     return dt
 
