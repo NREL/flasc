@@ -184,13 +184,13 @@ for this are ``ws`` and ``vane``. The signals are selected in the
 
 
 ++++++++++++++++++++++++++++++
-a_04_wspowercurve_filtering.py
+a_04_wspowercurve_filtering_code.py
 ++++++++++++++++++++++++++++++
 
-The script ``a_04_wspowercurve_filtering.py`` is a fairly exhaustive filtering class that can identify
-the nominal turbine wind-speed power curve and remove outliers. Outliers can
-be simply faulty sensor measurements, but can also be periods of curtailment
-and periods of turbine maintenance.
+The script ``a_04_wspowercurve_filtering_code.py`` is a fairly exhaustive
+filtering class that can identify the nominal turbine wind-speed power curve
+and remove outliers. Outliers can be simply faulty sensor measurements, but
+can also be periods of curtailment and periods of turbine maintenance.
 
 .. image:: images/example_04_wspowcurve_filtering.png
    :scale: 50 %
@@ -225,6 +225,47 @@ is enforced by the ``ws_pow_filtering.filter_by_power_curve()`` function.
 In the figure above, the allowable deviations from the median power curve
 are denoted in the brown and pink dashed line.
 
+
+++++++++++++++++++++++++++++++
+a_04_wspowercurve_filtering_gui.py (optional)
+++++++++++++++++++++++++++++++
+
+The script ``a_04_wspowercurve_filtering_gui.py`` is a GUI front for the
+windspeed-power curve filtering class, and is for comparable usage as the
+``a_04_wspowercurve_filtering_code.py`` script. Both functions serve the
+same function and thus typically this script (``_gui.py``) can be ignored
+in the filtering process. Generally, we strongly recommend users to use
+``a_04_wspowercurve_filtering_code.py`` instead of
+``a_04_wspowercurve_filtering_gui.py`` for any real data processing.
+
+
+This script should be run by:
+
+ .. code-block:: bash
+
+    streamlit run a_04_wspowercurve_filtering_gui.py
+
+
+.. image:: images/example_04_wspowcurve_filtering_streamlit.png
+   :scale: 50 %
+   :alt: alternate text
+   :align: center
+
+
+Using this GUI, the user can analyze specific turbines, interactively add or
+remove filter windows, and adjust settings to the filtering method based on
+deviations from the median power curve. The user can also analyze specific
+time periods of the data to speed up computations and plotting. Finally, it
+is important to note that the user should set the ``Turbines to analyze`` to
+``all``, in case the filtered dataframe is to be exported and saved locally.
+
+.. warning::
+
+   For most applications, we recommend you to use the
+   ``a_04_wspowercurve_filtering_code.py`` as it has gone through more tests and
+   usage. The streamlit app is useful for exploring the options within the
+   windspeed-power curve filtering class, but its not recommend for widespread
+   usage.
 
 +++++++++++++++++++++++++++++++++++++++++++
 a_05a_plot_faults_with_layout.py (optional)

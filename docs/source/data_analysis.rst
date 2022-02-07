@@ -179,8 +179,17 @@ The function produces an Excel sheet which looks as follows:
    :alt: alternate text
    :align: center
 
-This provides useful insights into, for example, what wind direction and
-wind speed bins a model-predicted dataset significantly deviates from the
-historical data.
+Each set of rows displays information about a single wind direction bin.
+Information displayed for each wind direction bin is, for each wind speed
+bin therein, the bin counts for the two dataframes (e.g., experimental data
+and model-predicted data, or experimental baseline-operation data and
+experimental optimal-operation data), the mean wind speed in each bin,
+the mean turbulence intensity in each bin (if available in data), the
+reference power production, the test power production, and the energy
+ratios. Each set of rows is also accompanied by a flow field on the left
+displaying the wind farm layout and the nominal wake situation for this
+wind direction bin. All of this provides useful insights into, for example,
+for what wind direction and wind speed bins the model-predicted dataset
+significantly deviates from the experimental data.
 
 .. seealso:: `Return to table of contents <index.html>`_ 
