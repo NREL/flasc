@@ -15,7 +15,7 @@ def get_df_upstream():
     return df_upstream
 
 
-def load_data(noisy_reference=True):
+def load_data():
     N = 10000
     ws = np.ones(N) * 8.
     cp = 0.45
