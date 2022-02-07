@@ -13,12 +13,10 @@
 
 import datetime
 
-# import numba
+import numba
 import numpy as np
-from numpy.core.defchararray import not_equal
-import scipy.interpolate as interp
-
-from sklearn.metrics import pairwise_distances_argmin_min as pwdist
+from pandas.core.groupby import DataError
+# import scipy.interpolate as interp
 
 from floris.utilities import wrap_360
 
@@ -82,7 +80,7 @@ def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
 
 # Credits to 'np8', from https://stackoverflow.com/questions/64045034/interpolate-values-and-replace-with-nans-within-a-long-gap
 # Adapted to include nearest-neighbor interpolation
-# @numba.njit()
+@numba.njit()
 def _interpolate_with_max_gap(
     x, xp, fp, max_gap, assume_sorted=False, kind="linear", extrapolate=True,
 ):
