@@ -1,0 +1,3 @@
+# Requirements list for flasc documentation
+Sphinx>=2.0
+sphinxcontrib-bibtex
