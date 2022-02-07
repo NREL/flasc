@@ -13,12 +13,9 @@
 
 import datetime
 
-# import numba
+import numba
 import numpy as np
-from numpy.core.defchararray import not_equal
-import scipy.interpolate as interp
-
-from sklearn.metrics import pairwise_distances_argmin_min as pwdist
+# import scipy.interpolate as interp
 
 from floris.utilities import wrap_360
 
@@ -48,7 +45,7 @@ def estimate_dt(time_array):
 
     # Check if data is all ascending
     if dt <= datetime.timedelta(0):
-        raise DataError('Please only insert time ascending data.')
+        raise UserWarning('Please only insert time ascending data.')
 
     return dt
 
@@ -66,7 +63,7 @@ def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
 
     # Check format of max_gap: needs to be an integer/float
     if not isinstance(max_gap, (float, int)):
-        max_gap = max_gap / np.timedelta64(1, 's')
+        max_gap = np.timedelta64(max_gap) / np.timedelta64(1, 's')
 
     if wrap_around_360:
         fp_cos = np.cos(fp * np.pi / 180.0)
@@ -82,7 +79,7 @@ def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
 
 # Credits to 'np8', from https://stackoverflow.com/questions/64045034/interpolate-values-and-replace-with-nans-within-a-long-gap
 # Adapted to include nearest-neighbor interpolation
-# @numba.njit()
+@numba.njit()
 def _interpolate_with_max_gap(
     x, xp, fp, max_gap, assume_sorted=False, kind="linear", extrapolate=True,
 ):

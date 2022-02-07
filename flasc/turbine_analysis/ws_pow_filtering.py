@@ -671,7 +671,7 @@ class ws_pw_curve_filtering:
             np.hstack([x, x[::-1]]),
             np.hstack([yl, yu[::-1]]),
             color="tab:red",
-            label="Uncertainty bounds ($2 \sigma$)",
+            label="Uncertainty bounds (2 std. dev.)",
             alpha=0.30,
         )
         ax.plot(x, pow_mean_array, color="tab:red", label="Mean curve")

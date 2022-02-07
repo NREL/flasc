@@ -175,6 +175,8 @@ class yaw_pow_fitting():
         self.x_opt = x_opt
         self.bins_y_opt = y_opt
 
+        return x_opt
+
     def plot(self, save_path=None, fig_dpi=250):
         # for ti in self.turbine_list:
         bins_x = self.bins_x
