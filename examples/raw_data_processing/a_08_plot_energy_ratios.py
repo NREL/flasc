@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     # Calculate and plot energy ratios
     s = energy_ratio_suite.energy_ratio_suite(verbose=False)
-    s.add_df(df, "SCADA data (wind direction calibrated)")
+    s.add_df(df, "SCADA data (wind direction uncalibrated)")
     s.add_df(df_fi, "FLORIS")
 
     print("Calculating energy ratios with bootstrapping (N={}).".format(N))

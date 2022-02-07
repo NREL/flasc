@@ -24,23 +24,33 @@ from flasc.dataframe_operations import (
 from flasc.turbine_analysis import ws_pow_filtering as wspcf
 
 
+# In this script, we filter the data by looking at the wind-speed vs.
+# power curves using a GUI, through 'streamlit'. It holds the same
+# function as a_04_wspowercurve_filtering_code.py, but is much more
+# intuitive since the user can directly see the effect of the applied
+# filters. You can run this script by:
+#
+# streamlit run a_04b_wspowercurve_filtering_gui.py
+#
+# Though, we recommend you to use the a_04_wspowercurve_filtering_code.py
+# as it has gone through more tests and usage. The streamlit app can be
+# useful to explore the options within the windspeed-power curve filtering
+# class, but its not recommend for widespread usage.
+#
+
+
 # Use the full page for figures
 st.set_page_config(layout="wide")
 
 
 @st.cache()
 def load_data():
-    print("Loading .ftr data.")
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    ftr_path = os.path.join(root_dir, "../demo_dataset/demo_dataset_scada_60s.ftr")
-    if not os.path.exists(ftr_path):
-        raise FileNotFoundError(
-            "Please run ./examples/demo_dataset/"
-            + "generate_demo_dataset.py before try"
-            + "ing any of the other examples."
-        )
-    df_60s = pd.read_feather(ftr_path)
-    return df_60s
+    # Load the data
+    print("Loading .ftr data. This may take a minute or two...")
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(root_path, "data", "03_sensor_faults_filtered")
+    df = pd.read_feather(os.path.join(data_path, "scada_data_60s.ftr"))
+    return df
 
 
 @st.cache(allow_output_mutation=True)
@@ -224,8 +234,12 @@ if filter_wsdev:
 
 # Saving dataframe
 st.sidebar.markdown("## Export filtered dataframe")
+root_path = os.path.dirname(os.path.abspath(__file__))
 savepath = st.sidebar.text_input(
-    "Specify path", "examples/ws_pow_curve_filtering/df_filtered.ftr"
+    "Specify path",
+    os.path.join(
+        root_path, "data", "04_wspowcurve_filtered", "scada_data_60s.ftr"
+    )
 )
 if st.sidebar.button("Save"):
     ws_pow_filtering.df.to_feather(savepath)

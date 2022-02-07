@@ -24,7 +24,7 @@ from floris.tools import floris_interface as wfct
 from flasc.dataframe_operations import dataframe_filtering as dff
 from flasc.turbine_analysis import ws_pow_filtering as wspcf
 from flasc import time_operations as top
-
+   
 
 def load_floris():
     root_path = os.path.dirname(os.path.abspath(__file__))
