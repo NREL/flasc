@@ -9,7 +9,7 @@ from flasc.optimization import (
 )
 
 
-class TestDataFrameResamplingInterpolation(unittest.TestCase):
+class TestOptimization(unittest.TestCase):
     def test_estimation_dy_offset(self):
         # Define a reference signal
         t = np.linspace(0, 4*np.pi, 1000)
