@@ -14,6 +14,16 @@ perform turbine northing calibrations, and for model parameter estimation.
 
 For technical questions, please send an email to bart.doekemeijer@nrel.gov.
 
+.. image:: https://readthedocs.org/projects/flasc/badge/?version=main
+   :target: http://flasc.readthedocs.io/
+   :alt: Documentation Status
+
+.. image:: https://github.com/NREL/flasc/actions/workflows/continuous-integration-workflow.yaml/badge.svg?branch=main
+   :target: https://github.com/NREL/flasc/actions
+   :alt: Automated Tests Success
+   
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
 
 Installation
 ------------
