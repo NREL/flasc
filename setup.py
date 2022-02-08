@@ -17,7 +17,7 @@ requirements = [
     'numpy<=1.20',
     'numba',
     'openoa>=2.0.1',
-    'pandas>=0.24',
+    'pandas>=1.3.0',
     'pyproj>=2.1',
     'pytest>=4',
     'SALib>=1.4.0.2',
