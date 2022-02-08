@@ -64,6 +64,7 @@ def calculate_wd_statistics(angles_array_deg, axis=0,
     """
 
     # Preprocessing
+    angles_array_deg = np.array(angles_array_deg, dtype=float)
     angles_array_deg = wrap_360(angles_array_deg)
 
     # Check for unique cases
