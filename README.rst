@@ -16,12 +16,16 @@ For technical questions, please send an email to bart.doekemeijer@nrel.gov.
 
 .. image:: https://readthedocs.org/projects/flasc/badge/?version=main
    :target: http://flasc.readthedocs.io/
-   :alt: Documentation Status
+   :alt: Documentation status
 
 .. image:: https://github.com/NREL/flasc/actions/workflows/continuous-integration-workflow.yaml/badge.svg?branch=main
    :target: https://github.com/NREL/flasc/actions
-   :alt: Automated Tests Success
-   
+   :alt: Automated tests success
+
+.. image:: https://codecov.io/gh/nrel/flasc/branch/main/graph/badge.svg
+   :target: https://app.codecov.io/gh/nrel/flasc/
+   :alt: Code coverage
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
     :alt: Code formatting style
