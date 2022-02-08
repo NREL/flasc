@@ -238,7 +238,7 @@ def df_downsample(
             lb = windows_min[ii]
             ub = windows_max[ii]
             if not ((lb == -1) | (ub == -1)):
-                ind = np.arange(lb, ub, dtype=int)
+                ind = np.arange(lb, ub + 1, dtype=int)
                 data_indices[ii, ind - lb] = ind
 
     # Calculate median, min, max, std if necessary
