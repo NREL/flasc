@@ -95,7 +95,7 @@ def df_movingaverage(
         for ii in range(len(windows_min)):
             lb = windows_min[ii]
             ub = windows_max[ii]
-            ind = np.arange(lb, ub, dtype=int)
+            ind = np.arange(lb, ub + 1, dtype=int)
             data_indices[ii, ind - lb] = ind
 
     # Calculate median, min, max, std if necessary
