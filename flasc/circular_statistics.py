@@ -68,7 +68,10 @@ def calculate_wd_statistics(angles_array_deg, axis=0,
 
     # Check for unique cases
     if angles_array_deg.shape[0] <= 0:
-        return np.nan, np.nan, np.nan, np.nan, np.nan
+        if calc_median_min_max_std:
+            return np.nan, np.nan, np.nan, np.nan, np.nan
+        else:
+            return np.nan
 
     if np.unique(angles_array_deg).shape[0] == 1:
         mean_wd = angles_array_deg[0]

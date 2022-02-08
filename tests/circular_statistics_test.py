@@ -7,7 +7,51 @@ from flasc import circular_statistics as cs
 
 
 class TestDataframeManipulations(unittest.TestCase):
-    def test_circular_statistics(self):
+    def test_empty_array(self):
+        # Try empty array with all statistics
+        mean_wd, median_wd, std_wd, min_wd, max_wd = (
+            cs.calculate_wd_statistics([], calc_median_min_max_std=True)
+        )
+        self.assertTrue(np.isnan(mean_wd))
+        self.assertTrue(np.isnan(median_wd))
+        self.assertTrue(np.isnan(std_wd))
+        self.assertTrue(np.isnan(min_wd))
+        self.assertTrue(np.isnan(max_wd))
+
+        # Try empty array with just mean
+        mean = cs.calculate_wd_statistics([], calc_median_min_max_std=False)
+        self.assertTrue(np.isnan(mean))
+
+    def test_single_value(self):
+        # Single value
+        mean = cs.calculate_wd_statistics([12], calc_median_min_max_std=False)
+        self.assertAlmostEqual(mean, 12.0)
+
+        # Single value with wrapping
+        mean = cs.calculate_wd_statistics([-5], calc_median_min_max_std=False)
+        self.assertAlmostEqual(mean, 355.0)
+
+        # Multiple values without wrapping
+        mean_wd, median_wd, std_wd, min_wd, max_wd = (
+            cs.calculate_wd_statistics([12], calc_median_min_max_std=True)
+        )
+        self.assertAlmostEqual(mean_wd, 12.0)
+        self.assertAlmostEqual(median_wd, 12.0)
+        self.assertAlmostEqual(std_wd, 0.0)
+        self.assertAlmostEqual(min_wd, 12.0)
+        self.assertAlmostEqual(max_wd, 12.0)
+
+        # Multiple values with wrapping
+        mean_wd, median_wd, std_wd, min_wd, max_wd = (
+            cs.calculate_wd_statistics([365], calc_median_min_max_std=True)
+        )
+        self.assertAlmostEqual(mean_wd, 5.0)
+        self.assertAlmostEqual(median_wd, 5.0)
+        self.assertAlmostEqual(std_wd, 0.0)
+        self.assertAlmostEqual(min_wd, 5.0)
+        self.assertAlmostEqual(max_wd, 5.0)
+
+    def test_mean_median_min_max_std(self):
         angles_array = np.array(
             [
                 [355.0, 341.2, 2.1],
