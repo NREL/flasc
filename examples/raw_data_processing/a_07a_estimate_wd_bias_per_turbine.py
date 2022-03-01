@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 
 from floris.utilities import wrap_360
-from floris.tools import floris_interface as wfct
+from floris import tools as wfct
 
 from flasc.energy_ratio import energy_ratio_wd_bias_estimation as best
 from flasc.dataframe_operations import dataframe_manipulations as dfm
@@ -31,11 +31,13 @@ from flasc import floris_tools as ftools
 
 
 def load_floris():
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    fi = wfct.FlorisInterface(
-        os.path.join(root_path, "..", "demo_dataset", "demo_floris_input.json")
-    )
+    # Initialize the FLORIS interface fi
+    print('Initializing the FLORIS object for our demo wind farm')
+    file_path = os.path.dirname(os.path.abspath(__file__))
+    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.yaml")
+    fi = wfct.floris_interface.FlorisInterface(fi_path)
     return fi
+
 
 
 def load_data():

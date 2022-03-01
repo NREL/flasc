@@ -11,7 +11,7 @@
 # the License.
 
 
-from copy import deepcopy
+from copy import deepcopy as dcopy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -45,11 +45,20 @@ def _run_fi_serial(df_subset, fi, include_unc=False,
         pow_00N.
     """
     nturbs = len(fi.layout_x)
-    df_out = df_subset
+    df_out = df_subset.sort_values(by=["wd", "ws"])
 
     use_model_params = ('model_params_dict' in df_subset.columns)
     use_yaw = ('yaw_000' in df_subset.columns)
 
+    if (use_model_params | include_unc):
+        raise NotImplementedError("Functionality not yet implemented since moving to floris v3.0.")
+
+    # Specify dataframe columns
+    pow_cols = ["pow_{:03d}".format(ti) for ti in range(nturbs)]
+    ws_cols = ["ws_{:03d}".format(ti) for ti in range(nturbs)]
+    wd_cols = ["wd_{:03d}".format(ti) for ti in range(nturbs)]
+    ti_cols = ["ti_{:03d}".format(ti) for ti in range(nturbs)]
+    
     yaw_rel = np.zeros((df_out.shape[0], nturbs))
     if use_yaw:
         yaw_cols = ['yaw_%03d' % ti for ti in range(nturbs)]
@@ -61,44 +70,120 @@ def _run_fi_serial(df_subset, fi, include_unc=False,
             )
         )
 
-        if np.any(np.abs(yaw_rel) > 30.):
+        if np.any(np.abs(yaw_rel) > 30.0):
             raise DataError('Yaw should be defined in domain [0, 360) deg.')
 
     if 'ti' not in df_out.columns:
         df_out['ti'] = np.min(fi.floris.farm.turbulence_intensity)
 
-    for iii, idx in enumerate(df_out.index):
-        if (
-            verbose and
-            ((np.remainder(idx, 100) == 0) or idx == df_out.shape[0]-1)
-        ): 
-            print('  Progress: finished %.1f percent (%d/%d cases).'
-                  % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
+    # Perform grid-style calculation, if possible
+    n_unq = (
+        df_out["ws"].nunique() *
+        df_out["wd"].nunique() *
+        df_out["ti"].nunique()
+    )
+    if n_unq == df_out.shape[0]:
+        # Reformat things to grid style calculation
+        wd_array = np.sort(df_out["wd"].unique())
+        ws_array = np.sort(df_out["ws"].unique())
+        ti = df_out["ti"].unique()[0]
 
-        # Update model parameters, if present in dataframe
-        if use_model_params:
-            params = df_out.loc[idx, 'model_params_dict']
-            fi.set_model_parameters(params=params, verbose=False)
+        # Specify interpolant to map data appropriately
+        X, Y = np.meshgrid(wd_array, ws_array, indexing='ij')
+        if use_yaw:
+            # Map the yaw angles in the appropriate format
+            F = interpolate.NearestNDInterpolator(
+                df_out[["wd", "ws"]],
+                yaw_rel
+            )
+            yaw_angles = F(X, Y)
+        else:
+            yaw_angles = np.zeros((len(wd_array), len(ws_array), nturbs))
 
-        fi.reinitialize_flow_field(wind_speed=df_out.loc[idx, 'ws'],
-                                   wind_direction=df_out.loc[idx, 'wd'],
-                                   turbulence_intensity=df_out.loc[idx, 'ti'])
+        # Calculate the FLORIS solutions in grid-style
+        fi.reinitialize(
+            wind_directions=wd_array,
+            wind_speeds=ws_array,
+            turbulence_intensity=ti,
+        )
+        fi.calculate_wake(yaw_angles=yaw_angles)
+        turbine_powers = fi.get_turbine_powers(
+            # include_unc=include_unc,
+            # unc_pmfs=unc_pmfs,
+            # unc_options=unc_options
+        )
 
-        fi.calculate_wake(yaw_rel[iii, :])
-        turbine_powers = fi.get_turbine_power(include_unc=include_unc,
-                                              unc_pmfs=unc_pmfs,
-                                              unc_options=unc_options)
-        for ti in range(nturbs):
-            df_out.loc[idx, 'pow_%03d' % ti] = turbine_powers[ti] / 1000.
-            df_out.loc[idx, 'wd_%03d' % ti] = df_out.loc[idx, 'wd']  # Assume uniform for now
-            df_out.loc[idx, 'ws_%03d' % ti] = fi.floris.farm.turbines[ti].average_velocity
-            df_out.loc[idx, 'ti_%03d' % ti] = fi.floris.farm.turbines[ti]._turbulence_intensity
+        # Format the found solutions back to the dataframe format
+        Fp = interpolate.NearestNDInterpolator(
+            np.vstack([X.flatten(), Y.flatten()]).T,
+            np.reshape(turbine_powers, (-1, nturbs))
+        )
+        Fws = interpolate.NearestNDInterpolator(
+            np.vstack([X.flatten(), Y.flatten()]).T,
+            np.reshape(
+                np.mean(fi.floris.flow_field.u, axis=(3, 4)),
+                (-1, nturbs)
+            )
+        )
+        Fti = interpolate.NearestNDInterpolator(
+            np.vstack([X.flatten(), Y.flatten()]).T,
+            np.reshape(
+                fi.floris.flow_field.turbulence_intensity_field[:, :, :, 0, 0],
+                (-1, nturbs)
+            )
+        )
+
+        # Finally save solutions to the dataframe
+        df_out.loc[df_out.index, pow_cols] = Fp(df_out[["wd", "ws"]]) / 1000.0
+        df_out.loc[df_out.index, wd_cols] = np.tile(df_out["wd"], (nturbs, 1)).T
+        df_out.loc[df_out.index, ws_cols] = Fws(df_out[["wd", "ws"]])
+        df_out.loc[df_out.index, ti_cols] = Fti(df_out[["wd", "ws"]])
+
+    else:
+        # If cannot process in grid-style format, process one by one (SLOW)
+        for iii, idx in enumerate(df_out.index):
+            if (
+                verbose and
+                ((np.remainder(idx, 100) == 0) or idx == df_out.shape[0]-1)
+            ): 
+                print('  Progress: finished %.1f percent (%d/%d cases).'
+                    % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
+
+            # # Update model parameters, if present in dataframe
+            # if use_model_params:
+            #     params = df_out.loc[idx, 'model_params_dict']
+            #     fi.set_model_parameters(params=params, verbose=False)
+
+            fi.reinitialize(
+                wind_speeds=[df_out.loc[idx, 'ws']],
+                wind_directions=[df_out.loc[idx, 'wd']],
+                turbulence_intensity=df_out.loc[idx, 'ti']
+            )
+
+            fi.calculate_wake(np.expand_dims(yaw_rel[iii, :], axis=[0, 1]))
+            turbine_powers = np.squeeze(
+                fi.get_turbine_powers(
+                # include_unc=include_unc,
+                # unc_pmfs=unc_pmfs,
+                # unc_options=unc_options
+                )
+            )
+            df_out.loc[idx, pow_cols] = turbine_powers / 1000.
+            df_out.loc[idx, wd_cols] = np.repeat(
+                df_out.loc[idx, 'wd'],
+                nturbs   # Assumed to be uniform
+            ) 
+            df_out.loc[idx, ws_cols] = np.squeeze(
+                np.mean(fi.floris.flow_field.u, axis=(3, 4))
+            )
+            df_out.loc[idx, ti_cols] = np.squeeze(
+                fi.floris.flow_field.turbulence_intensity_field
+            )
 
     return df_out
 
 
-# Define an approximate calc_floris() function
-def calc_floris(df, fi, num_workers, num_threads, include_unc=False,
+def calc_floris(df, fi, num_workers, job_worker_ratio=5, include_unc=False,
                 unc_pmfs=None, unc_options=None, use_mpi=False):
     """Calculate the FLORIS predictions for a particular wind direction, wind speed
     and turbulence intensity set. This function calculates the exact solutions.
@@ -119,14 +204,6 @@ def calc_floris(df, fi, num_workers, num_threads, include_unc=False,
         [type]: [description]
     """
 
-    if (num_threads > 1) or (num_workers > 1):
-        if num_threads < (5 * num_workers):
-            print("Found 'num_threads < 2 * num_workers'.")
-            print("Try num_threads = (5..10) * num_workers for performance.")
-        elif num_threads > (10 * num_workers):
-            print("Found 'num_threads > 10 * num_workers'.")
-            print("Try num_threads = (5...10) * num_workers for performance.")
-
     nturbs = len(fi.layout_x)
 
     # Create placeholders
@@ -138,37 +215,57 @@ def calc_floris(df, fi, num_workers, num_threads, include_unc=False,
     if len(yaw_cols) > 0:
         if np.any(df[yaw_cols] < 0.):
             raise DataError('Yaw should be defined in domain [0, 360) deg.')
-        # df_out[yaw_cols] = df[yaw_cols].copy()
 
-    # Split dataframe into smaller dataframes
-    N = df.shape[0]
-    dN = int(np.ceil(N / num_threads))
-    df_list = []
-    for ii in range(num_threads):
-        if ii == num_threads - 1:
-            df_list.append(df.iloc[ii*dN::])
+    # Split dataframe into subset dataframes for parallelization, if necessary
+    if num_workers > 1:
+        df_list = []
+
+        # See if we can simply split the problem up into a grid of conditions
+        num_jobs = num_workers * job_worker_ratio
+        n_unq = df["ws"].nunique() * df["wd"].nunique() * df["ti"].nunique()
+        if n_unq == df.shape[0]:
+            # Data is a grid of atmospheric conditions. Can divide and exploit
+            # the benefit of grid processing in floris v3.0.
+            Nconds_per_ti = df["ws"].nunique() * df["wd"].nunique()
+            Njobs_per_ti = int(np.floor(num_jobs / df["ti"].nunique()))
+            dN = int(np.ceil(Nconds_per_ti / Njobs_per_ti))
+
+            for ti in df["ti"].unique():
+                df_subset = df[df["ti"] == ti]
+                for ij in range(Njobs_per_ti):
+                    df_list.append(df_subset.iloc[(ij*dN):((ij+1)*dN)])
+                
         else:
-            df_list.append(df.iloc[ii*dN:(ii+1)*dN])
+            # If cannot be formatted to grid style, split blindly
+            dN = int(np.ceil(df.shape[0] / num_jobs))
+            for ij in range(num_jobs):
+                df_list.append(df.iloc[(ij*dN):((ij+1)*dN)])
+
 
     # Calculate solutions
-    print('Calculating with num_threads = %d and num_workers = %d.'
-          % (num_threads, num_workers))
-    print('Each thread contains about %d FLORIS evaluations.' % dN)
     start_time = timerpc()
-    if num_workers == 1:
-        df_out = _run_fi_serial(df_subset=df,
-                                fi=fi,
-                                include_unc=include_unc,
-                                unc_pmfs=unc_pmfs,
-                                unc_options=unc_options,
-                                verbose=True)
+    if num_workers <= 1:
+        print("Calculating floris solutions (non-parallelized)")
+        df_out = _run_fi_serial(
+            df_subset=df,
+            fi=fi,
+            include_unc=include_unc,
+            unc_pmfs=unc_pmfs,
+            unc_options=unc_options,
+            verbose=True
+        )
     else:
+        print('Calculating with num_workers = %d and job_worker_ratio = %d'
+            % (num_workers, job_worker_ratio))
+        print('Each thread contains about %d FLORIS evaluations.' % dN)
+
         # Define a tuple of arguments
         multiargs = []
         for df_mp in df_list:
             df_mp = df_mp.reset_index(drop=True)
-            multiargs.append((df_mp, deepcopy(fi), include_unc,
-                              unc_pmfs, unc_options, False))
+            multiargs.append(
+                (df_mp, dcopy(fi), include_unc, unc_pmfs, unc_options, False)
+            )
 
         if use_mpi:
             # Use an MPI implementation, useful for HPC
@@ -187,7 +284,7 @@ def calc_floris(df, fi, num_workers, num_threads, include_unc=False,
     t = timerpc() - start_time
     print('Finished calculating the FLORIS solutions for the dataframe.')
     print('Total wall time: %.3f s.' % t)
-    print('Mean wall time / function evaluation: %.3f s.' % (t/N))
+    print('Mean wall time / function evaluation: %.3f s.' % (t/df.shape[0]))
     return df_out
 
 
@@ -296,7 +393,7 @@ def calc_floris_approx_table(
     ws_array=np.arange(0., 20., 0.5),
     ti_array=None,
     num_workers=1,
-    num_threads=1,
+    job_worker_ratio=5,
     include_unc=False,
     unc_pmfs=None,
     unc_options=None,
@@ -312,9 +409,12 @@ def calc_floris_approx_table(
             )
         )
     df_approx = pd.DataFrame(
-        {'wd': np.reshape(xyz_grid[0], [-1, 1]).flatten(),
-         'ws': np.reshape(xyz_grid[1], [-1, 1]).flatten(),
-         'ti': np.reshape(xyz_grid[2], [-1, 1]).flatten()})
+        {
+            'wd': np.reshape(xyz_grid[0], [-1, 1]).flatten(),
+            'ws': np.reshape(xyz_grid[1], [-1, 1]).flatten(),
+            'ti': np.reshape(xyz_grid[2], [-1, 1]).flatten()
+        }
+    )
     N_approx = df_approx.shape[0]
 
     print(
@@ -326,7 +426,7 @@ def calc_floris_approx_table(
         df=df_approx,
         fi=fi,
         num_workers=num_workers,
-        num_threads=num_threads,
+        job_worker_ratio=job_worker_ratio,
         include_unc=include_unc,
         unc_pmfs=unc_pmfs,
         unc_options=unc_options,
@@ -412,8 +512,9 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
     # Get farm layout
     x = fi.layout_x
     y = fi.layout_y
-    D = np.array([t.rotor_diameter for t in fi.floris.farm.turbines])
     n_turbs = len(x)
+    D = [t["rotor_diameter"] for t in fi.floris.farm.turbine_definitions]
+    D = np.array(D, dtype=float)
 
     # Setup output list
     upstream_turbs_ids = []  # turbine numbers that are freestream

@@ -1,0 +1,65 @@
+description: Example FLORIS Input file for FLASC
+farm:
+  layout_x:
+  - 1630.222
+  - 1176.733
+  - 816.389
+  - 755.938
+  - 0.0
+  - 1142.24
+  - 1553.102
+  layout_y:
+  - 0.0
+  - 297.357
+  - 123.431
+  - 575.544
+  - 647.779
+  - 772.262
+  - 504.711
+  turbine_type:
+  - nrel_5MW
+floris_version: 3.0
+flow_field:
+  air_density: 1.225
+  reference_wind_height: 90
+  turbulence_intensity: 0.08
+  wind_directions:
+  - - 90.0
+  wind_shear: 0.12
+  wind_speeds:
+  - - 9.0
+  wind_veer: 0.0
+logging:
+  console:
+    enable: true
+    level: INFO
+  file:
+    enable: false
+    level: INFO
+name: floris_input_file_example
+solver:
+  turbine_grid_points: 5
+  type: turbine_grid
+wake:
+  enable_secondary_steering: true
+  enable_transverse_velocities: true
+  enable_yaw_added_recovery: true
+  model_strings:
+    combination_model: sosfs
+    deflection_model: gauss
+    turbulence_model: crespo_hernandez
+    velocity_model: gauss
+  wake_deflection_parameters:
+    gauss:
+      dm: 1.0
+      eps_gain: 0.2
+  wake_turbulence_parameters:
+    crespo_hernandez:
+      ai: 0.8
+      constant: 0.5
+      downstream: -0.32
+      initial: 0.1
+  wake_velocity_parameters:
+    gauss:
+      ka: 0.38
+      kb: 0.004

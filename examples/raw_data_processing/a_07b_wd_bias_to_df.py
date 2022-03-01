@@ -12,21 +12,10 @@
 
 
 import os
-
 import pandas as pd
 
-from floris.utilities import wrap_180, wrap_360
-from floris.tools import floris_interface as wfct
-
+from floris.utilities import wrap_360
 from flasc.dataframe_operations import dataframe_manipulations as dfm
-
-
-def load_floris():
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    fi = wfct.FlorisInterface(
-        os.path.join(root_path, "..", "demo_dataset", "demo_floris_input.json")
-    )
-    return fi
 
 
 def load_data():
