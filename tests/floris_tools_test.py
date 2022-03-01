@@ -15,15 +15,14 @@ def load_floris():
     # Initialize the FLORIS interface fi
     print('Initializing the FLORIS object for our demo wind farm')
     file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.yaml")
+    fi_path = os.path.join(file_path, "../examples/demo_dataset/demo_floris_input.yaml")
     fi = wfct.floris_interface.FlorisInterface(fi_path)
     return fi
 
 
 class TestFlorisTools(unittest.TestCase):
     def test_floris_approx_table(self):
-# if __name__ == "__main__":
-#     if True:
+        # Load FLORIS object
         fi = load_floris()
 
         # Single core calculation
@@ -33,7 +32,6 @@ class TestFlorisTools(unittest.TestCase):
             ws_array=[8.0, 9.0],
             ti_array=[0.08],
             num_workers=1,
-            num_threads=1,
         )
 
         # Multi core calculation
@@ -43,7 +41,6 @@ class TestFlorisTools(unittest.TestCase):
             ws_array=[8.0, 9.0],
             ti_array=[0.08],
             num_workers=2,
-            num_threads=2,
         )
 
         # Make sure singlecore and multicore solutions are equal
