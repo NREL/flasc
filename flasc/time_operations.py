@@ -80,8 +80,8 @@ def df_movingaverage(
         df_tmp = df_tmp.rolling(window_width, center=center, axis=0, on="time")["tmp"]
 
         # Grab index of first and last time entry for each window
-        windows_min = df_tmp.apply(lambda x: x.index[0]).astype(int)
-        windows_max = df_tmp.apply(lambda x: x.index[-1]).astype(int)
+        windows_min = list(df_tmp.apply(lambda x: x.index[0]).astype(int))
+        windows_max = list(df_tmp.apply(lambda x: x.index[-1]).astype(int))
 
         # Now create a large array that contains the array of indices, with
         # the values in each row corresponding to the indices upon which that
@@ -206,7 +206,7 @@ def df_downsample(
 
     # Figure out which indices/data points belong to each window
     if (return_index_mapping or calc_median_min_max_std):
-        df_tmp = df[[]].copy().reset_index(drop=False)
+        df_tmp = df[[]].copy().reset_index()
         df_tmp["tmp"] = 1
         df_tmp = df_tmp.resample(window_width, on="time", label="right", axis=0)["tmp"]
 
@@ -222,8 +222,8 @@ def df_downsample(
             else:
                 return x.index[-1]
 
-        windows_min = df_tmp.apply(get_first_index).astype(int)
-        windows_max = df_tmp.apply(get_last_index).astype(int)
+        windows_min = list(df_tmp.apply(get_first_index).astype(int))
+        windows_max = list(df_tmp.apply(get_last_index).astype(int))
 
         # Now create a large array that contains the array of indices, with
         # the values in each row corresponding to the indices upon which that
