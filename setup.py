@@ -37,7 +37,7 @@ test_requirements = [
 
 setup(
     name='flasc',
-    version='0.1.0',
+    version='1.0',
     description="FLASC provides a rich suite of analysis tools for SCADA data filtering & analysis, wind farm model validation, field experiment design, and field experiment monitoring.",
     long_description=readme + '\n\n' + history,
     author="Bart Doekemeijer",

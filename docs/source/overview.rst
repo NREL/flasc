@@ -24,7 +24,7 @@ Citation
 If FLASC played a role in your research, please cite it. This software can be
 cited as:
 
-   FLASC. Version 0.1 (2022). Available at https://github.com/NREL/flasc.
+   FLASC. Version 1.0 (2022). Available at https://github.com/NREL/flasc.
 
 For LaTeX users:
 
@@ -32,7 +32,7 @@ For LaTeX users:
 
     @misc{flasc2022,
       author = {NREL},
-      title = {FLASC. Version 0.1},
+      title = {FLASC. Version 1.0},
       year = {2022},
       publisher = {GitHub},
       journal = {GitHub repository},
