@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from floris.tools import floris_interface as wfct
+from floris import tools as wfct
 
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio_suite
@@ -13,10 +13,11 @@ from flasc import floris_tools as ftools
 
 
 def load_floris():
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    fi = wfct.FlorisInterface(
-        os.path.join(root_path, "..", "demo_dataset", "demo_floris_input.json")
-    )
+    # Initialize the FLORIS interface fi
+    print('Initializing the FLORIS object for our demo wind farm')
+    file_path = os.path.dirname(os.path.abspath(__file__))
+    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.yaml")
+    fi = wfct.floris_interface.FlorisInterface(fi_path)
     return fi
 
 
@@ -49,8 +50,15 @@ if __name__ == "__main__":
     df = load_data()
     fi = load_floris()
 
-    # Plot wind farm layout
-    fi.vis_layout()
+    # Visualize layout
+    fig, ax = plt.subplots()
+    ax.plot(fi.layout_x, fi.layout_y, 'ko')
+    for ti in range(len(fi.layout_x)):
+        ax.text(fi.layout_x[ti], fi.layout_y[ti], "T{:02d}".format(ti))
+    ax.axis("equal")
+    ax.grid(True)
+    ax.set_xlabel("x-direction (m)")
+    ax.set_ylabel("y-direction (m)")
 
     # Get dataframe defining which turbines are upstream for what wind dirs
     df_upstream = ftools.get_upstream_turbs_floris(fi)

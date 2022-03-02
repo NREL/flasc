@@ -17,7 +17,7 @@ from datetime import timedelta as td
 import numpy as np
 import pandas as pd
 
-import floris.tools as wfct
+from floris.tools.floris_interface import FlorisInterface
 from floris.utilities import wrap_360
 
 from flasc.dataframe_operations import dataframe_manipulations as dfm
@@ -75,8 +75,8 @@ if __name__ == "__main__":
     # Initialize the FLORIS interface fi
     print("Initializing the FLORIS object for our demo wind farm")
     file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "demo_floris_input.json")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
+    fi_path = os.path.join(file_path, "demo_floris_input.yaml")
+    fi = FlorisInterface(fi_path)
 
     # Format columns to generic names
     print("Formatting the dataframe with met mast data...")
@@ -106,10 +106,6 @@ if __name__ == "__main__":
             wd_array=np.arange(0.0, 360.0, 3.0),
             ws_array=np.arange(0.0, 27.0, 1.0),
             ti_array=np.arange(0.03, 0.30, 0.03),
-            num_workers=4,
-            num_threads=20,
-            include_unc=False,
-            use_mpi=False,
         )
         df_approx.to_feather(fn_approx)
 

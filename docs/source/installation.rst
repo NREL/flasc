@@ -19,8 +19,4 @@ code will be available directly through your local Python. Remember
 to re-import the FLASC module when changes are made if you are working
 in an interactive environment like Jupyter.
 
-In terms of dependencies, the flasc toolbox currently relies on floris
-v2.4, and is not yet compatible with floris v3.0rc1.
-
-
 .. seealso:: `Return to table of contents <index.html>`_ 

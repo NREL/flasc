@@ -39,7 +39,7 @@ def load_floris():
     # Initialize the FLORIS interface fi
     print('Initializing the FLORIS object for our demo wind farm')
     file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.json")
+    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.yaml")
     fi = wfct.floris_interface.FlorisInterface(fi_path)
     return fi
 
@@ -50,7 +50,14 @@ if __name__ == '__main__':
     fi = load_floris()
 
     # Visualize layout
-    fi.vis_layout()
+    fig, ax = plt.subplots()
+    ax.plot(fi.layout_x, fi.layout_y, 'ko')
+    for ti in range(len(fi.layout_x)):
+        ax.text(fi.layout_x[ti], fi.layout_y[ti], "T{:02d}".format(ti))
+    ax.axis("equal")
+    ax.grid(True)
+    ax.set_xlabel("x-direction (m)")
+    ax.set_ylabel("y-direction (m)")
 
     # We first need to define a wd against which we plot the energy ratios
     # In this example, we set the wind direction to be equal to the mean
