@@ -1,4 +1,4 @@
-floris>=3.0
+floris>=3.0rc4
 feather-format>=0.4.1
 matplotlib>=3
 openoa>=2.0.1

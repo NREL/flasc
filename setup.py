@@ -11,7 +11,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'floris>=3.0',
+    'floris>=3.0rc4',
     'feather-format>=0.4.1',
     'matplotlib>=3',
     'numpy==1.21',
@@ -55,17 +55,11 @@ setup(
     zip_safe=False,
     keywords='flasc',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: Release',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
     ],
     test_suite='tests',
     tests_require=test_requirements,
