@@ -7,9 +7,6 @@ from setuptools import setup, find_packages
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
 requirements = [
     'floris>=3.0',
     'feather-format>=0.4.1',
@@ -39,7 +36,7 @@ setup(
     name='flasc',
     version='1.0',
     description="FLASC provides a rich suite of analysis tools for SCADA data filtering & analysis, wind farm model validation, field experiment design, and field experiment monitoring.",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     author="Bart Doekemeijer",
     author_email='bart.doekemeijer@nrel.gov',
     url='https://github.com/NREL/flasc',
