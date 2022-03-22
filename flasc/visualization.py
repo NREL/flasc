@@ -15,7 +15,50 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-def plot_with_wrapping(x, y, ax=None, high=360.0, linestyle="-", marker=None, color="black", label=None):
+def plot_with_wrapping(
+    x,
+    y,
+    ax=None,
+    high=360.0,
+    linestyle="-",
+    marker=None,
+    color="black",
+    label=None
+):
+    """Plot a line on an axis that deals with angle wrapping. Normally, using
+    pyplot will blindly connects points that wrap around 360 degrees, e.g.,
+    going from 357 degrees to 2 degrees. This will create a strong vertical
+    line through the plot that connects the two points, while actually these
+    two coordinates should be connecting by going through 360/0 deg (i.e.,
+    going up from 357 deg to 360 deg and then reappearing at 0 deg, and
+    connecting to 2 deg). This function automates this process and ensures
+    angles are wrapped around 0/360 deg appropriately.
+
+    Args:
+        x (iteratible): NumPy array or list containing indices/time stamps of
+        the data.
+        y (iteratible): NumPy array containing direction/angle data that
+        requires 360 deg angle wrapping. These are typically wind directions
+        or nacelle headings.
+        ax (plt.Axis, optional): Axis object of the matplotlib.pyplot class.
+        The line will be plotted on this axis. If None specified, will create
+        a figure and axis, and plot the line in there. Defaults to None.
+        high (float, optional): Upper limit at which the angles should be
+        wrapped. When using degrees, this should be 360.0. When using radians,
+        this should be 2 * np.pi. Defaults to 360.0.
+        linestyle (str, optional): Linestyle for the plot. Defaults to "-".
+        marker (str, optional): Marker style for the plot. If None is
+        specified, will not use markers. Defaults to None.
+        color (str, optional): Color of the line and markers. Defaults to
+        "black".
+        label (string, optional): Label for the line and markers. If None is
+        specified, will not label the line. Defaults to None.
+
+    Returns:
+        ax: Axis object of the matplotlib.pyplot class on which the line (and
+        optionally markers) are plotted.
+    """
+
     # Create figure, if not provided
     if ax is None:
         fig, ax = plt.subplots()
@@ -58,10 +101,13 @@ def plot_with_wrapping(x, y, ax=None, high=360.0, linestyle="-", marker=None, co
 
     # Now plot lines, without markers
     if (marker is None):
-        ax.plot(xw, yw, linestyle=linestyle, color=color, label=label)  # Plot without marker, but with label
+        # Plot without marker, but with label
+        ax.plot(xw, yw, linestyle=linestyle, color=color, label=label)
     else:
-        ax.plot(xw, yw, linestyle=linestyle, color=color)  # Plot lines, without markers
-        ax.scatter(x, y, marker=marker, color=color)  # Now plot markers, only at non-transition points
+        # Plot lines, without markers
+        ax.plot(xw, yw, linestyle=linestyle, color=color)
+        # Now plot markers, only at non-transition points
+        ax.scatter(x, y, marker=marker, color=color)
 
         # Now add a placeholder (empty) line with right marker for the legend
         if label is not None:
