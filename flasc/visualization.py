@@ -81,14 +81,19 @@ def plot_with_wrapping(x, y, ax=None, high=360.0, linestyle="-", marker=None, co
 if __name__ == "__main__":
     # Demonstrate use case
     y = 180.0 + 200.0 * np.sin(np.linspace(0.0, 10.0, 50))
+    y = np.remainder(y, 360.0)
     t = np.arange(len(y))
 
+    # Create figure and produce plots using pyplot and using flasc
     fig, ax = plt.subplots()
-    ax.plot(t, np.remainder(y, 360.0), color="gray", label="Raw")
-    ax.grid(True)
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Wind direction (deg)")
+    ax.plot(t, y, color="gray", label="Raw")
     plot_with_wrapping(t, y, ax=ax, high=360.0, color="orange", marker="o", label="Wrapped")
+
+    # Format plot and show
+    ax.grid(True)
     ax.legend()
     ax.set_ylim([0, 360.0])
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Wind direction (deg)")
+
     plt.show()
