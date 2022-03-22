@@ -19,6 +19,7 @@ def plot_with_wrapping(
     x,
     y,
     ax=None,
+    low=0.0,
     high=360.0,
     linestyle="-",
     marker=None,
@@ -43,9 +44,17 @@ def plot_with_wrapping(
         ax (plt.Axis, optional): Axis object of the matplotlib.pyplot class.
         The line will be plotted on this axis. If None specified, will create
         a figure and axis, and plot the line in there. Defaults to None.
+        low (float, optional): Lower limit at which the angles should be
+        wrapped. When using degrees, this should be typically 0.0 deg for wind
+        directions and nacelle directions (i.e., compass directions). When using
+        vane signals, this is typically -180.0 deg. When using radians,
+        this should be the equivalent in radians (e.g., 0 or - np.pi).
+        Defaults to 0.0.
         high (float, optional): Upper limit at which the angles should be
-        wrapped. When using degrees, this should be 360.0. When using radians,
-        this should be 2 * np.pi. Defaults to 360.0.
+        wrapped. When using degrees, this should be 360.0 deg for wind
+        directions and nacelle directions (i.e., compass directions).
+        When using radians, this should be the equivalent in radians.
+        Defaults to 360.0.
         linestyle (str, optional): Linestyle for the plot. Defaults to "-".
         marker (str, optional): Marker style for the plot. If None is
         specified, will not use markers. Defaults to None.
@@ -63,41 +72,48 @@ def plot_with_wrapping(
     if ax is None:
         fig, ax = plt.subplots()
 
+    if (low >= high):
+        raise UserWarning("'low' must be lower than 'high'.")
     # Format inputs to numpy arrays
     x = np.array(x, copy=True)
-    y = np.array(y, copy=True, dtype=float)
-    y = np.remainder(y, high)
+    y = np.array(y, copy=True, dtype=float) - low  # Normalize at 0
+    high_norm = high - low
+    y = np.remainder(y, high_norm)
 
     # Initialize empty arrays
     xw = np.array(x, copy=True)[0:0]
     yw = np.array(y, copy=True)[0:0]
 
     # Deal with wrapping
-    id_wrap_array = np.where(np.abs(np.diff(y)) > high / 2.0)[0]
+    id_wrap_array = np.where(np.abs(np.diff(y)) > high_norm / 2.0)[0]
     id_min = 0
     for id_wrap in id_wrap_array:
         # Step size in x direction
         dx = x[id_wrap+1] - x[id_wrap]
 
         # Wrap around 0 deg
-        if np.diff(y)[id_wrap] > high / 2.0:  
-            dy = y[id_wrap] - y[id_wrap + 1] + high
+        if np.diff(y)[id_wrap] > high_norm / 2.0:  
+            dy = y[id_wrap] - y[id_wrap + 1] + high_norm
             xtp = x[id_wrap] + dx * (y[id_wrap]) / dy  # transition point
             xw = np.hstack([xw, x[id_min:id_wrap + 1], xtp - 0.001 * dx, xtp, xtp + 0.001 * dx])
-            yw = np.hstack([yw, y[id_min:id_wrap + 1], 0.0, np.nan, high])
+            yw = np.hstack([yw, y[id_min:id_wrap + 1], 0.0, np.nan, high_norm])
 
         # Wrap around 360 deg
-        elif np.diff(y)[id_wrap] < - high / 2.0:
-            dy = y[id_wrap+1] - y[id_wrap] + high
-            xtp = x[id_wrap] + dx * (high - y[id_wrap]) / dy  # transition point
+        elif np.diff(y)[id_wrap] < - high_norm / 2.0:
+            dy = y[id_wrap+1] - y[id_wrap] + high_norm
+            xtp = x[id_wrap] + dx * (high_norm - y[id_wrap]) / dy  # transition point
             xw = np.hstack([xw, x[id_min:id_wrap + 1], xtp - 0.001, xtp, xtp + 0.001])
-            yw = np.hstack([yw, y[id_min:id_wrap + 1], high, np.nan, 0.0])
+            yw = np.hstack([yw, y[id_min:id_wrap + 1], high_norm, np.nan, 0.0])
 
         id_min = id_wrap + 1
 
     # Append remaining data
     xw = np.hstack([xw, x[id_min::]])
     yw = np.hstack([yw, y[id_min::]])
+
+    # Reintroduce offset from 'low'
+    yw = yw + low
+    y = y + low
 
     # Now plot lines, without markers
     if (marker is None):
@@ -125,21 +141,35 @@ def plot_with_wrapping(
 
 
 if __name__ == "__main__":
-    # Demonstrate use case
-    y = 180.0 + 200.0 * np.sin(np.linspace(0.0, 10.0, 50))
-    y = np.remainder(y, 360.0)
-    t = np.arange(len(y))
+    for ii in range(2):
+        if ii == 0:
+            # Do case with compass directions (from 0 to +360 deg)
+            y = 180 + 200.0 * np.sin(np.linspace(0.0, 10.0, 100))
+            y = np.remainder(y, 360.0)
+            low = 0.0
+            high = 360.0
+        if ii == 1:
+            # Do case with vane directions (from -180 to +180 deg)
+            y = 200.0 * np.sin(np.linspace(0.0, 10.0, 100))
+            y[y < -180.0] += 360.0
+            y[y >  180.0] -= 360.0
+            low = -180.0
+            high = 180.0
 
-    # Create figure and produce plots using pyplot and using flasc
-    fig, ax = plt.subplots()
-    ax.plot(t, y, color="gray", label="Raw")
-    plot_with_wrapping(t, y, ax=ax, high=360.0, color="orange", marker="o", label="Wrapped")
 
-    # Format plot and show
-    ax.grid(True)
-    ax.legend()
-    ax.set_ylim([0, 360.0])
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Wind direction (deg)")
+        t = np.arange(len(y))
+
+        # Create figure and produce plots using pyplot and using flasc
+        fig, ax = plt.subplots()
+        ax.plot(t, y, color="gray", label="Raw")
+        plot_with_wrapping(t, y, ax=ax, low=low, high=high, color="orange", marker="o", label="Wrapped")
+
+        # Format plot and show
+        ax.grid(True)
+        ax.legend()
+        ax.set_ylim([low - 10.0, high + 10.0])
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Direction wrapped around \n low={:.1f}, high={:.1f} (deg)".format(low, high))
+        plt.tight_layout()
 
     plt.show()
