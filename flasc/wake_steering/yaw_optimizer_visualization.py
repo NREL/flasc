@@ -134,7 +134,7 @@ def _plot_bins(x, y, yn, xlabel=None, ylabel=None, labels=None):
         ax[0].grid(True)
 
         ax[1].bar(x=x[dii] + (dii - 0.5) * dx, height=yn[dii], width=dx, label=labels[dii])
-        ax[1].set_ylabel('Number of \n data points (-)')
+        ax[1].set_ylabel('Frequency (-)')
         ax[1].set_xlabel(xlabel)
         ax[1].grid(True)
         ax[1].set_xticks(x[dii])

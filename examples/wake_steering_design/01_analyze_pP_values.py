@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     # Plot as a table/colormap
     df_result = df_result.set_index(["pP_opt", "pP_eval"]).unstack()
-    df_result.columns = ["AEP Uplift (%),\n pP_eval={:.2f}".format(p) for p in pP_list]
+    df_result.columns = ["pP_eval={:.2f}".format(p) for p in pP_list]
     ax = sns.heatmap(df_result, linecolor="black", linewidths=1, annot=True, fmt=".2f")
     ax.set_title("AEP uplift (%)")
     plt.tight_layout()
