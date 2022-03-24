@@ -17,37 +17,39 @@ import pandas as pd
 import seaborn as sns
 
 from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-
 from _local_helper_functions import load_floris, optimize_yaw_angles, evaluate_optimal_yaw_angles
 
 
 if __name__ == "__main__":
-    # Define pP range
-    pP_list = [1.0, 1.88, 2.0, 3.0]
+    # Define turbulence intensity range
+    ti_list = [0.06, 0.095, 0.130]
     result_list = []
 
-    # Compare optimizing over different pPs and evaluating over different pPs
-    for pP_opt in pP_list:
+    # Compare optimizing and evaluating over different turbulence intensities
+    for ti_opt in ti_list:
+        print("Optimizing yaw angles with turbulence_intensity={:.2f}".format(ti_opt))
         # Optimize yaw angles
-        df_opt = optimize_yaw_angles(
-            fi=load_floris(pP=pP_opt),
-        )
+        df_opt = optimize_yaw_angles(opt_turbulence_intensity=ti_opt)
 
         # Make an interpolant
         yaw_angle_interpolant = get_yaw_angles_interpolant(df_opt)  # Create yaw angle interpolant
 
         # Calculate AEP uplift
-        for pP_eval in pP_list:
+        for ti_eval in ti_list:
             AEP_baseline, AEP_opt, _ = evaluate_optimal_yaw_angles(
-                fi=load_floris(pP=pP_eval),
                 yaw_angle_interpolant=yaw_angle_interpolant,
+                eval_ti=ti_eval,
             )
 
             # Calculate AEP uplift
             uplift = 100.0 * (AEP_opt - AEP_baseline) / AEP_baseline
             result_list.append(
                 pd.DataFrame(
-                    {"pP_opt": [pP_opt], "pP_eval": [pP_eval], "AEP uplift (%)": [uplift]},
+                    {
+                        "ti_opt": [ti_opt],
+                        "ti_eval": [ti_eval],
+                        "AEP uplift (%)": [uplift]
+                    },
                 )
             )
 
@@ -57,8 +59,8 @@ if __name__ == "__main__":
         print(df_result)
 
     # Plot as a table/colormap
-    df_result = df_result.set_index(["pP_opt", "pP_eval"]).unstack()
-    df_result.columns = ["pP_eval={:.2f}".format(p) for p in pP_list]
+    df_result = df_result.set_index(["ti_opt", "ti_eval"]).unstack()
+    df_result.columns = ["ti_eval={:.2f}".format(p) for p in ti_list]
     ax = sns.heatmap(df_result, linecolor="black", linewidths=1, annot=True, fmt=".2f")
     ax.set_title("AEP uplift (%)")
     plt.tight_layout()
