@@ -847,7 +847,7 @@ class ws_pw_curve_filtering:
             lgd = ax[0].legend()
             for l in lgd.legendHandles:
                 # Force alpha in legend to 1.0
-                l._legmarker.set_alpha(1)
+                l.set_alpha(1)
 
             if confirm_plot:
                 ut._make_confirmation_plot(df, self.df_filters, ti=ti, ax=ax[1])
