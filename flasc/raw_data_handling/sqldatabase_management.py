@@ -88,7 +88,7 @@ class sql_database_manager:
     def print_properties(self):
         table_names = self._get_table_names()
         print("")
-        print("Connected to: %s." % str(self.engine.url))
+        print("Connected to: %s." % str(self.engine.url.host))
         print("Existent tables: ", table_names)
         for tn in table_names:
             t0 = self._get_first_time_entry(tn)
@@ -204,7 +204,7 @@ class sql_database_manager:
 
             idx_in_df = set(df[col])
             idx_in_db = set(idx_in_db)
-            idx_to_add = np.sort(list(idx_in_db - idx_in_df))
+            idx_to_add = np.sort(list(idx_in_df - idx_in_db))
             print(
                 "{:d} entries already exist in SQL database.".format(
                     len(idx_in_df) - len(idx_to_add)
