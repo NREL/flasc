@@ -111,7 +111,10 @@ def find_timeshift_between_dfs(
     print('Estimating required timeshift for df1.')
     while current_time < max_time:
         t0 = np.array(current_time, dtype='datetime64')
-        t1 = np.array(current_time + t_step, dtype='datetime64')
+        t1 = np.array(
+            np.datetime64(current_time) + np.timedelta64(t_step),
+            dtype='datetime64'
+        )
         id_sub = (df1.time >= t0) & (df1.time < t1)
         df1_sub = df1[id_sub]
         df2_sub = df2[id_sub]
@@ -198,7 +201,7 @@ def find_timeshift_between_dfs(
             'J': J_all
         })
 
-        current_time = current_time + t_step
+        current_time = np.datetime64(current_time) + np.timedelta64(t_step)
 
     return output_list
 
