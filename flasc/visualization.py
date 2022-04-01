@@ -102,7 +102,7 @@ def plot_with_wrapping(
         elif np.diff(y)[id_wrap] < - high_norm / 2.0:
             dy = y[id_wrap+1] - y[id_wrap] + high_norm
             xtp = x[id_wrap] + dx * (high_norm - y[id_wrap]) / dy  # transition point
-            xw = np.hstack([xw, x[id_min:id_wrap + 1], xtp - 0.001, xtp, xtp + 0.001])
+            xw = np.hstack([xw, x[id_min:id_wrap + 1], xtp - 0.001 * dx, xtp, xtp + 0.001 * dx])
             yw = np.hstack([yw, y[id_min:id_wrap + 1], high_norm, np.nan, 0.0])
 
         id_min = id_wrap + 1
@@ -171,7 +171,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     ax[0] = plt.gca()
 
     if plot_terrain:
-        hub_heights = fi.floris.farm.hub_heights[0, 0, :].flatten()
+        hub_heights = fi.floris.farm.hub_heights.flatten()
         cntr = ax[0].tricontourf(
             fi.layout_x,
             fi.layout_y,
