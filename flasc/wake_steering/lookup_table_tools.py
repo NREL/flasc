@@ -85,7 +85,12 @@ def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12])
     )
 
     # Now create a wrapper function with ramp-up and ramp-down
-    def interpolant_with_ramps(wd_array, ws_array, ti_array):
+    def interpolant_with_ramps(wd_array, ws_array, ti_array=None):
+        # Deal with missing ti_array
+        if ti_array is None:
+            ti_ref = float(np.median(interpolant.points[:, 2]))
+            ti_array = np.ones(np.shape(wd_array), dtype=float) * ti_ref
+
         # Format inputs
         wd_array = np.array(wd_array, dtype=float)
         ws_array = np.array(ws_array, dtype=float)
