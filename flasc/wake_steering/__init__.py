@@ -8,4 +8,4 @@ __version__ = '0.1.0'
 
 from pathlib import Path
 
-from . import lookup_table_tools
+from . import lookup_table_tools, yaw_optimizer_visualization
