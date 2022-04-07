@@ -8,7 +8,7 @@ with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    'floris>=3.0',
+    'floris>=3.1',
     'feather-format>=0.4.1',
     'matplotlib>=3',
     'numpy==1.21',
