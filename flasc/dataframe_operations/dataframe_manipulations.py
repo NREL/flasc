@@ -36,8 +36,13 @@ def filter_df_by_ws(df, ws_range):
 
 
 def filter_df_by_wd(df, wd_range):
-    lb = wrap_360(wd_range[0])
-    ub = wrap_360(wd_range[1])
+    lb = wd_range[0]
+    ub = wd_range[1]
+
+    lb = wrap_360(lb)
+    if ub > 360.0:
+        ub = wrap_360(ub)
+
     wd_array = wrap_360(df["wd"])
     if lb > ub:
         df = df[((wd_array >= lb) | (wd_array < ub))]
