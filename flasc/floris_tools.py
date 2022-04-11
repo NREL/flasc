@@ -383,6 +383,7 @@ def interpolate_floris_from_df_approx(
             points=(wd_array_approx, ws_array_approx, ti_array_approx),
             values=grid_dict[varname],
             method=method,
+            bounds_error=False,
         )
         df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
 
