@@ -23,7 +23,7 @@ def plot_with_wrapping(
     high=360.0,
     linestyle="-",
     marker=None,
-    color="black",
+    color=None,
     label=None
 ):
     """Plot a line on an axis that deals with angle wrapping. Normally, using
@@ -71,6 +71,10 @@ def plot_with_wrapping(
     # Create figure, if not provided
     if ax is None:
         fig, ax = plt.subplots()
+
+    if color is None:
+        # Use matplotlib's internal color cycler
+        color = ax._get_lines.prop_cycler.__next__()['color']
 
     if (low >= high):
         raise UserWarning("'low' must be lower than 'high'.")
