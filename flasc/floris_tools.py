@@ -397,6 +397,11 @@ def calc_floris_approx_table(
     ti_array=None,
     ):
 
+    # if ti_array is None, use the current value in the FLORIS object
+    if ti_array is None:
+        ti = fi.floris.flow_field.turbulence_intensity
+        ti_array = np.array([ti], dtype=float)
+
     fi = fi.copy()  # Create independent copy that we can manipulate
     num_turbines = len(fi.layout_x)
 
