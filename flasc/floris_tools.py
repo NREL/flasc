@@ -392,8 +392,8 @@ def interpolate_floris_from_df_approx(
 
 def calc_floris_approx_table(
     fi,
-    wd_array=np.arange(0., 360., 1.0),
-    ws_array=np.arange(0., 20., 0.5),
+    wd_array=np.arange(0.0, 360.0, 1.0),
+    ws_array=np.arange(0.001, 25.001, 1.0),
     ti_array=None,
     ):
 
