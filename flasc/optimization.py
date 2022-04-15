@@ -53,8 +53,12 @@ def find_timeshift_between_dfs(
         raise NotImplementedError("Incompatible input specified.")
 
     # Get min and max time for dataframes
-    min_time = np.max([df1.head(1)["time"], df2.head(1)["time"]])
-    max_time = np.min([df1.tail(1)["time"], df2.tail(1)["time"]])
+    min_time = np.datetime64(
+        np.max([df1.head(1)["time"], df2.head(1)["time"]])
+    )
+    max_time = np.datetime64(
+        np.min([df1.tail(1)["time"], df2.tail(1)["time"]])
+    )
 
     # Convert to arrays of a single mean quantity
     print('Determining one column-average per dataframe to sync.')
