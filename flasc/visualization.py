@@ -174,8 +174,8 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     ax = [None, None, None]
     ax[0] = plt.gca()
 
+    hub_heights = fi.floris.farm.hub_heights.flatten()
     if plot_terrain:
-        hub_heights = fi.floris.farm.hub_heights.flatten()
         cntr = ax[0].tricontourf(
             fi.layout_x,
             fi.layout_y,

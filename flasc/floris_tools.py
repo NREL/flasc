@@ -19,7 +19,7 @@ from pandas.core.base import DataError
 from scipy import interpolate
 from time import perf_counter as timerpc
 
-from . import utilities as fsut
+from flasc import utilities as fsut
 
 from floris.utilities import wrap_360, wrap_180
 
@@ -288,11 +288,32 @@ def calc_floris(df, fi, num_workers, job_worker_ratio=5, include_unc=False,
     return df_out
 
 
-def interpolate_floris_from_df_approx(df, df_approx, method='linear',
-                                      verbose=True):
+def interpolate_floris_from_df_approx(
+    df,
+    df_approx,
+    method='linear',
+    verbose=True
+):
     # Format dataframe and get number of turbines
     df = df.reset_index(drop=('time' in df.columns))
     nturbs = fsut.get_num_turbines(df_approx)
+
+    # Check if turbulence intensity is provided in the dataframe 'df'
+    if 'ti' not in df.columns:
+        if df_approx["ti"].nunique() > 3:
+            raise ValueError("You must include a 'ti' column in your df.")
+        ti_ref = np.median(df_approx["ti"])
+        print("No 'ti' column found in dataframe. Assuming {}".format(ti_ref))
+        df["ti"] = ti_ref
+
+    # Define which variables we must map from df_approx to df
+    varnames = ['pow']
+    if 'ws_000' in df_approx.columns:
+        varnames.append('ws')
+    if 'wd_000' in df_approx.columns:
+        varnames.append('wd')
+    if 'ti_000' in df_approx.columns:
+        varnames.append('ti')
 
     # Map individual data entries to full DataFrame
     if verbose:
@@ -307,82 +328,64 @@ def interpolate_floris_from_df_approx(df, df_approx, method='linear',
         df_subset["wd"] = 360.0
         df_approx = pd.concat([df_approx, df_subset], axis=0).reset_index(drop=True)
 
-    wd_array_approx = np.unique(df_approx['wd'].astype(float))
-    ws_array_approx = np.unique(df_approx['ws'].astype(float))
-    if len(df_approx['ti'].unique()) == 1:
-        ti_array_approx = 0.08  # Placeholder, does not matter
-    else:
-        ti_array_approx = np.unique(df_approx['ti'].astype(float))
-    xyz_grid = np.array(np.meshgrid(
-        wd_array_approx, ws_array_approx, ti_array_approx, indexing='ij'))
+    # Copy TI to lower and upper bound
+    df_ti_lb = df_approx.loc[df_approx["ti"] == df_approx['ti'].min()].copy()
+    df_ti_ub = df_approx.loc[df_approx["ti"] == df_approx['ti'].max()].copy()
+    df_ti_lb["ti"] = 0.0
+    df_ti_ub["ti"] = 1.0
+    df_approx = pd.concat(
+        [df_approx, df_ti_lb, df_ti_ub],
+        axis=0
+    ).reset_index(drop=True)
 
-    # Create interpolant
-    if xyz_grid.shape[3] == 1:
-        if verbose:
-            print('    Performing 2D interpolation')
-        shape_y = [len(wd_array_approx),
-                   len(ws_array_approx)]
-        xyz_tuple = (wd_array_approx,
-                     ws_array_approx)
-        values = np.reshape(np.array(df_approx['pow_000']), shape_y)
-    else:
-        if verbose:
-            print('    Performing 3D interpolation')
-        shape_y = [len(wd_array_approx),
-                   len(ws_array_approx),
-                   len(ti_array_approx)]
-        xyz_tuple = (wd_array_approx,
-                     ws_array_approx,
-                     ti_array_approx)
-        values = np.reshape(np.array(df_approx['pow_000']), shape_y)
+    # Copy WS to lower and upper bound
+    df_ws_lb = df_approx.loc[df_approx["ws"] == df_approx['ws'].min()].copy()
+    df_ws_ub = df_approx.loc[df_approx["ws"] == df_approx['ws'].max()].copy()
+    df_ws_lb["ws"] = 0.0
+    df_ws_ub["ws"] = 99.0
+    df_approx = pd.concat(
+        [df_approx, df_ws_lb, df_ws_ub],
+        axis=0
+    ).reset_index(drop=True)
 
-    f = interpolate.RegularGridInterpolator(
-        xyz_tuple,
-        values,
-        method='linear',
-        bounds_error=False,
-        fill_value=np.nan
+    # Convert df_approx dataframe into a regular grid
+    wd_array_approx = np.sort(df_approx["wd"].unique())
+    ws_array_approx = np.sort(df_approx["ws"].unique())
+    ti_array_approx = np.sort(df_approx["ti"].unique())
+    xg, yg, zg = np.meshgrid(
+        wd_array_approx,
+        ws_array_approx,
+        ti_array_approx,
+        indexing='ij',
     )
 
-    # Create a new dataframe based on df
-    if 'ti' not in df.columns:
-        df = df.copy()
-        df_out = df[['time', 'wd', 'ws']].copy()
+    grid_dict = dict()
+    for varname in varnames:
+        colnames = ['{:s}_{:03d}'.format(varname, ti) for ti in range(nturbs)]
+        f = interpolate.NearestNDInterpolator(
+            df_approx[["wd", "ws", "ti"]],
+            df_approx[colnames]
+        )
+        grid_dict["{:s}".format(varname)] = f(xg, yg, zg)
 
-        df_out.loc[df_out.index, 'ti'] = np.median(ti_array_approx)
-        df.loc[df.index, "ti"] = np.median(ti_array_approx)
-    else:
-        df_out = df[['time', 'wd', 'ws', 'ti']].copy()
+    # Prepare an minimal output dataframe
+    cols_to_copy = ["wd", "ws", "ti"]
+    if "time" in df.columns:
+        cols_to_copy.append("time")
+    df_out = df[cols_to_copy].copy()
 
     # Use interpolant to determine values for all turbines and variables
-    varnames = ['pow']
-    if 'ws_000' in df_approx.columns:
-        varnames.append('ws')
-    if 'wd_000' in df_approx.columns:
-        varnames.append('wd')
-    if 'ti_000' in df_approx.columns:
-        varnames.append('ti')
-
-    M = np.ones((df_out.shape[0], nturbs * len(varnames))) * np.nan
-    miii = 0
     for varname in varnames:
         if verbose:
             print('     Interpolating ' + varname + ' for all turbines...')
-        for ti in range(nturbs):
-            colname = varname + '_%03d' % ti
-            f.values = np.reshape(np.array(df_approx[colname]), shape_y)
-            if xyz_grid.shape[3] == 1:
-                M[:, miii] = f(df[['wd', 'ws']])
-            else:
-                M[:, miii] = f(df[['wd', 'ws', 'ti']])
-
-            miii = miii + 1
-
-    colnames = [
-        "{:s}_{:03d}".format(vn, ti) for vn in varnames
-        for ti in range(nturbs)
-    ]
-    df_out.loc[df_out.index, colnames] = M
+        colnames = ['{:s}_{:03d}'.format(varname, ti) for ti in range(nturbs)]
+        f = interpolate.RegularGridInterpolator(
+            points=(wd_array_approx, ws_array_approx, ti_array_approx),
+            values=grid_dict[varname],
+            method=method,
+            bounds_error=False,
+        )
+        df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
 
     return df_out
 
@@ -392,48 +395,45 @@ def calc_floris_approx_table(
     wd_array=np.arange(0., 360., 1.0),
     ws_array=np.arange(0., 20., 0.5),
     ti_array=None,
-    num_workers=1,
-    job_worker_ratio=5,
-    include_unc=False,
-    unc_pmfs=None,
-    unc_options=None,
-    use_mpi=False
     ):
 
-    xyz_grid = np.array(
-        np.meshgrid(
-            wd_array,
-            ws_array,
-            ti_array,
-            indexing='ij'
-            )
-        )
-    df_approx = pd.DataFrame(
-        {
-            'wd': np.reshape(xyz_grid[0], [-1, 1]).flatten(),
-            'ws': np.reshape(xyz_grid[1], [-1, 1]).flatten(),
-            'ti': np.reshape(xyz_grid[2], [-1, 1]).flatten()
-        }
-    )
-    N_approx = df_approx.shape[0]
+    fi = fi.copy()  # Create independent copy that we can manipulate
+    num_turbines = len(fi.layout_x)
 
+    # Format input arrays
+    wd_array = np.sort(wd_array)
+    ws_array = np.sort(ws_array)
+    ti_array = np.sort(ti_array)
+    wd_mesh, ws_mesh = np.meshgrid(wd_array, ws_array, indexing='ij')
+    N_approx = len(wd_array) * len(ws_array) * len(ti_array)
     print(
         'Generating a df_approx table of FLORIS solutions ' +
-        'covering a total of %d cases.' % (N_approx)
+        'covering a total of {:d} cases.'.format(N_approx)
     )
 
-    df_approx = calc_floris(
-        df=df_approx,
-        fi=fi,
-        num_workers=num_workers,
-        job_worker_ratio=job_worker_ratio,
-        include_unc=include_unc,
-        unc_pmfs=unc_pmfs,
-        unc_options=unc_options,
-        use_mpi=use_mpi
-    )
+    # Create solutions, one set per turbulence intensity
+    df_list = []
+    for turb_intensity in ti_array:
+        # Calculate solutions
+        fi.reinitialize(
+            wind_directions=wd_array,
+            wind_speeds=ws_array,
+            turbulence_intensity=turb_intensity,
+        )
+        fi.calculate_wake()
+        turbine_powers = fi.get_turbine_powers()
+
+        # Create a dictionary to save solutions in
+        solutions_dict = {"wd": wd_mesh.flatten(), "ws": ws_mesh.flatten()}
+        solutions_dict["ti"] = turb_intensity * np.ones(len(wd_array) * len(ws_array))
+        for turbi in range(num_turbines):
+            solutions_dict["pow_{:03d}".format(turbi)] = \
+                turbine_powers[:, :, turbi].flatten()
+        df_list.append(pd.DataFrame(solutions_dict))
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
+    df_approx = pd.concat(df_list, axis=0).sort_values(by=["ti", "ws", "wd"])
+    df_approx = df_approx.reset_index(drop=True)
 
     return df_approx
 

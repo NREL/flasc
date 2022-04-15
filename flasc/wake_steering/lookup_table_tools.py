@@ -85,9 +85,19 @@ def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12])
     )
 
     # Now create a wrapper function with ramp-up and ramp-down
-    def interpolant_with_ramps(wd_array, ws_array, ti_array):
+    def interpolant_with_ramps(wd_array, ws_array, ti_array=None):
+        # Deal with missing ti_array
+        if ti_array is None:
+            ti_ref = float(np.median(interpolant.points[:, 2]))
+            ti_array = np.ones(np.shape(wd_array), dtype=float) * ti_ref
+
+        # Format inputs
+        wd_array = np.array(wd_array, dtype=float)
+        ws_array = np.array(ws_array, dtype=float)
+        ti_array = np.array(ti_array, dtype=float)
         yaw_angles = interpolant(wd_array, ws_array, ti_array)
-    
+        yaw_angles = np.array(yaw_angles, dtype=float)
+
         # Define ramp down factor
         rampdown_factor = np.interp(
             x=ws_array,
@@ -96,13 +106,14 @@ def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12])
         )
 
         # Saturate yaw offsets to threshold
-        nturbs = np.shape(yaw_angles)[2]
+        axis = len(np.shape(yaw_angles)) - 1
+        nturbs = np.shape(yaw_angles)[-1]
         yaw_lb = np.expand_dims(
-            minimum_yaw_angle * rampdown_factor, axis=2
-        ).repeat(nturbs, axis=2)
+            minimum_yaw_angle * rampdown_factor, axis=axis
+        ).repeat(nturbs, axis=axis)
         yaw_ub = np.expand_dims(
-            maximum_yaw_angle * rampdown_factor, axis=2
-        ).repeat(nturbs, axis=2)
+            maximum_yaw_angle * rampdown_factor, axis=axis
+        ).repeat(nturbs, axis=axis)
 
         return np.clip(yaw_angles, yaw_lb, yaw_ub)
 
