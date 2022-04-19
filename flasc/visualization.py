@@ -24,7 +24,8 @@ def plot_with_wrapping(
     linestyle="-",
     marker=None,
     color=None,
-    label=None
+    label=None,
+    rasterized=False,
 ):
     """Plot a line on an axis that deals with angle wrapping. Normally, using
     pyplot will blindly connects points that wrap around 360 degrees, e.g.,
@@ -62,6 +63,10 @@ def plot_with_wrapping(
         "black".
         label (string, optional): Label for the line and markers. If None is
         specified, will not label the line. Defaults to None.
+        rasterize (bool, optional): Rasterize the plot/line and thereby remove
+        its vectorized properties. This can help reduce the size of a .pdf or
+        .eps file when this figure is saved, at the cost of a potential
+        reduction in image quality.
 
     Returns:
         ax: Axis object of the matplotlib.pyplot class on which the line (and
@@ -122,12 +127,12 @@ def plot_with_wrapping(
     # Now plot lines, without markers
     if (marker is None):
         # Plot without marker, but with label
-        ax.plot(xw, yw, linestyle=linestyle, color=color, label=label)
+        ax.plot(xw, yw, linestyle=linestyle, color=color, label=label, rasterized=rasterized)
     else:
         # Plot lines, without markers
-        ax.plot(xw, yw, linestyle=linestyle, color=color)
+        ax.plot(xw, yw, linestyle=linestyle, color=color, rasterized=rasterized)
         # Now plot markers, only at non-transition points
-        ax.scatter(x, y, marker=marker, color=color)
+        ax.scatter(x, y, marker=marker, color=color, rasterized=rasterized)
 
         # Now add a placeholder (empty) line with right marker for the legend
         if label is not None:
@@ -137,7 +142,8 @@ def plot_with_wrapping(
                 linestyle=linestyle,
                 marker=marker,
                 label=label,
-                color=color
+                color=color,
+                rasterized=rasterized
             )
 
     return ax
