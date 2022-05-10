@@ -533,6 +533,158 @@ class ws_pw_curve_filtering:
             verbose = ii == no_iterations - 1  # Only print final iteration
             self._update_status_flags(verbose=verbose)
 
+    def filter_by_floris_power_curve(
+        self,
+        fi,
+        m_ws_lb=0.95,
+        m_pow_lb=1.01,
+        m_ws_rb=1.05,
+        m_pow_rb=0.99,
+        ws_deadband=0.50,
+        pow_deadband=20.0,
+        cutoff_ws=25.0,
+    ):
+        """Filter the data by offset from the floris power curve in x-
+        directions.
+
+        Args:
+            fi (FlorisInterface): The FlorisInterface object for the farm
+            m_ws_lb (float, optional): Multiplier on the wind speed defining
+            the left bound for the power curve. Any data to the left of this
+            curve is considered faulty. Defaults to 0.95.
+            m_pow_lb (float, optional): Multiplier on the power defining
+            the left bound for the power curve. Any data to the left of this
+            curve is considered faulty. Defaults to 1.01.
+            m_ws_rb (float, optional): Multiplier on the wind speed defining
+            the right bound for the power curve. Any data to the right of this
+            curve is considered faulty. Defaults to 1.05.
+            m_pow_rb (float, optional): Multiplier on the power defining
+            the right bound for the power curve. Any data to the right of this
+            curve is considered faulty. Defaults to 0.99.
+        """
+        print("Filtering data by deviations from the floris power curve...")
+
+        # Create upper and lower bounds around floris curve
+        df_xy = self.pw_curve_df.copy()
+        rho = fi.floris.flow_field.air_density
+        for ti in range(len(fi.layout_x)):
+            fi_turb = fi.floris.farm.turbine_definitions[ti]
+            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
+            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
+            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
+            pow_array = (
+                0.5 * rho * ws_array ** 3.0 * Ad * cp_array * 1.0e-3
+            )
+            df_xy.loc[df_xy.index, "pow_{:03d}".format(ti)] = (
+                np.interp(xp=ws_array, fp=pow_array, x=df_xy["ws"])
+            )
+
+        x_full = np.array(df_xy["ws"], dtype=float)
+        x = x_full[x_full < cutoff_ws]
+        self.pw_curve_df_bounds = pd.DataFrame({"ws": x})
+
+        for ti in self.turbine_list:
+            y = np.array(df_xy["pow_%03d" % ti], dtype=float)
+            y = y[x_full < cutoff_ws]
+            if np.all(np.isnan(y)):
+                self.pw_curve_df_bounds["pow_%03d_lb" % ti] = None
+                self.pw_curve_df_bounds["pow_%03d_rb" % ti] = None
+                continue
+
+            # Create interpolants to left and right of mean curve
+            ws_array = np.array(self.df["ws_%03d" % ti], dtype=float)
+            pow_array = np.array(self.df["pow_%03d" % ti], dtype=float)
+
+            # Specify left side bound and non-decreasing
+            lb_ws = x * m_ws_lb - ws_deadband / 2.0
+            lb_pow = y * m_pow_lb + pow_deadband / 2.0
+
+            # Make sure first couple entries are not NaN
+            jjj = 0
+            while np.isnan(lb_pow[jjj]):
+                lb_pow[jjj] = jjj / 1000.0
+                jjj = jjj + 1
+
+            # Ensure non-decreasing for lower half of wind speeds
+            id_center = np.argmin(np.abs(lb_ws - 9.0))  # Assume value is fine near 9 m/s
+            lb_ws_l = lb_ws[0:id_center]
+            lb_pow_l = lb_pow[0:id_center]
+            good_ids = (
+                np.hstack([(np.diff(lb_pow_l) >= 0.0), True])
+                & 
+                (~np.isnan(lb_pow[0:id_center]))
+            )
+            good_ids[0] = True
+            lb_pow_l = np.interp(lb_ws_l, lb_ws_l[good_ids], lb_pow_l[good_ids])
+            lb_pow[0:id_center] = lb_pow_l
+            non_nans = (~np.isnan(lb_pow) & ~np.isnan(lb_ws))
+            lb_pow = lb_pow[non_nans]
+            lb_ws = lb_ws[non_nans]
+
+            # Specify right side bound and ensure monotonically increasing
+            rb_ws = x * m_ws_rb + ws_deadband / 2.0
+            rb_pow = y * m_pow_rb - pow_deadband / 2.0
+
+            # Make sure first couple entries are not NaN
+            jjj = 0
+            while np.isnan(rb_pow[jjj]):
+                rb_pow[jjj] = jjj / 1000.0
+                jjj = jjj + 1
+
+            # Ensure non-decreasing for lower half of wind speeds
+            id_center = np.argmin(np.abs(rb_ws - 9.0))  # Assume value is fine near 9 m/s
+            rb_ws_l = rb_ws[0:id_center]
+            rb_pow_l = rb_pow[0:id_center]
+            good_ids = (
+                np.hstack([(np.diff(rb_pow_l) >= 0.0), True])
+                & 
+                (~np.isnan(rb_pow[0:id_center]))
+            )
+            good_ids[0] = True
+            rb_pow_l = np.interp(rb_ws_l, rb_ws_l[good_ids], rb_pow_l[good_ids])
+            rb_pow[0:id_center] = rb_pow_l
+            non_nans = (~np.isnan(rb_pow) & ~np.isnan(rb_ws))
+            rb_pow = rb_pow[non_nans]
+            rb_ws = rb_ws[non_nans]
+
+            # Finally interpolate
+            ws_lb = np.interp(
+                x=pow_array,
+                xp=lb_pow,
+                fp=lb_ws,
+                left=np.nan,
+                right=np.nan,
+            )
+            ws_rb = np.interp(
+                x=pow_array,
+                xp=rb_pow,
+                fp=rb_ws,
+                left=np.nan,
+                right=np.nan,
+            )
+
+            out_of_bounds = (ws_array < ws_lb) | (ws_array > ws_rb)
+            self.df_filters[ti]["mean_pow_curve_outlier"] = out_of_bounds
+
+            # Write left and right bound to own curve
+            self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
+                x=x,
+                xp=lb_ws,
+                fp=lb_pow,
+                left=np.nan,
+                right=np.nan,
+            )
+            self.pw_curve_df_bounds["pow_%03d_rb" % ti] = np.interp(
+                x=x,
+                xp=rb_ws,
+                fp=rb_pow,
+                left=np.nan,
+                right=np.nan,
+            )
+
+        # Update status flags and re-estimate mean power curve
+        self._update_status_flags(verbose=True)
+
     def filter_by_wsdev(
         self, pow_bin_width=20.0, max_ws_dev=2.0, pow_min=20.0, pow_max=None
     ):
@@ -900,75 +1052,3 @@ class ws_pw_curve_filtering:
                 plt.savefig(fp, dpi=dpi)
 
         return fig_list
-
-    def apply_filtering_to_other_df(self, df_target, fout=None):
-        """This function enables the user to implement the changes made in
-        the dataframe at hand in other dataframes. For example, if the data
-        in the dataframe self.df is sampled at 60 s, one may want to apply
-        the changes made back to the original 1 s dataset.
-
-        Args:
-            df_target ([pd.DataFrame]): Targetted dataframe to apply the
-            changes to.
-            fout ([str], optional): Output path for the formatted Dataframe.
-            Defaults to None.
-
-        Returns:
-            df_target ([pd.DataFrame]): Formatted dataframe.
-        """
-        turbines_in_target_df = [
-            ti
-            for ti in self.full_turbs_list
-            if "pow_%03d" % ti in df_target.columns
-        ]
-
-        if df_target.shape[0] <= 2:
-            print("Dataframe is too small to estimate dt from. Skipping...")
-            if fout is not None:
-                print("Saving dataframe to ", fout)
-                df_target = df_target.reset_index(
-                    drop=("time" in df_target.columns)
-                )
-                df_target.to_feather(fout)
-            return df_target
-
-        time_array_target = df_target["time"].values
-        dt_target = fsut.estimate_dt(time_array_target)
-        if dt_target >= self.dt:
-            raise UserWarning(
-                "This function only works with higher "
-                + "resolution data. If you want to map this"
-                + "to lower resolution data, simply use the"
-                + "dataframe downsampling function."
-            )
-
-        for ti in turbines_in_target_df:
-            print(
-                "Applying filtering to target_df with dt = %.1f s, turbine %03d."
-                % (dt_target.seconds, ti)
-            )
-            status_bad = self.df[("status_%03d" % ti)] == 0
-            time_array_src_bad = self.df.loc[status_bad, "time"].values
-            time_array_src_bad = pd.to_datetime(time_array_src_bad)
-            stws = [[t - self.dt, t] for t in time_array_src_bad]
-            bad_ids = fsato.find_window_in_time_array(
-                time_array_src=time_array_target, seek_time_windows=stws
-            )
-
-            if bad_ids is not None:
-                bad_ids = np.concatenate(bad_ids)
-                print(
-                    "  Marking entries as faulty in higher resolution dataframe..."
-                )
-                df_target = dff.df_mark_turbdata_as_faulty(
-                    df=df_target, cond=bad_ids, turbine_list=ti, verbose=True
-                )
-
-        if fout is not None:
-            print("Saving dataframe to ", fout)
-            df_target = df_target.reset_index(
-                drop=("time" in df_target.columns)
-            )
-            df_target.to_feather(fout)
-
-        return df_target
