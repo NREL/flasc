@@ -15,7 +15,7 @@ import numpy as np
 from scipy.interpolate import LinearNDInterpolator
 
 
-def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12]):
+def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12], minimum_yaw_angle=None, maximum_yaw_angle=None):
     """Create an interpolant for the optimal yaw angles from a dataframe
     'df_opt', which contains the rows 'wind_direction', 'wind_speed',
     'turbulence_intensity', and 'yaw_angles_opt'. This dataframe is typically
@@ -50,8 +50,10 @@ def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12])
     values = np.vstack(df_opt["yaw_angles_opt"])
 
     # Derive maximum and minimum yaw angle (deg)
-    minimum_yaw_angle = np.min(values)
-    maximum_yaw_angle = np.max(values)
+    if minimum_yaw_angle is None:
+        minimum_yaw_angle = np.min(values)
+    if maximum_yaw_angle is None:
+        maximum_yaw_angle = np.max(values)
 
     # Expand wind direction range to cover 0 deg to 360 deg
     points_copied = points[points["wind_direction"] == 0.0].copy()
