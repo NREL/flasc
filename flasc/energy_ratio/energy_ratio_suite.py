@@ -90,12 +90,11 @@ class energy_ratio_suite:
             self.turbine_names = [str(i) for i in range(num_turbines)]
 
         if self.num_turbines != num_turbines:
-            print(
+            raise UserWarning(
                 "Added dataframe seems to have a different number of "
                 + "turbines than the existing dataframe(s). Skipping "
                 + "addition."
             )
-            return None
 
         new_entry = dict({"df": df, "name": name})
         self.df_list.append(new_entry)
