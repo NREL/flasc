@@ -65,7 +65,7 @@ def plot(energy_ratios, labels=None):
 
     # Calculate bar width for bin counts
     bar_width = (0.7 / N) * np.min(
-        [np.diff(er["wd_bin"])[0] for er in energy_ratios]
+        [er["wd_bin"].diff().min() for er in energy_ratios]
     )
 
     for ii, df in enumerate(energy_ratios):
