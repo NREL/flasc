@@ -173,8 +173,12 @@ def df_downsample(
     # Now calculate cos and sin components for angular columns
     sin_cols = ["{:s}_sin".format(c) for c in cols_angular]
     cos_cols = ["{:s}_cos".format(c) for c in cols_angular]
-    df[sin_cols] = np.sin(df[cols_angular] * np.pi / 180.0)
-    df[cos_cols] = np.cos(df[cols_angular] * np.pi / 180.0)
+
+    # Rewriting these lines to avoid fragmentation warngins
+    # df[sin_cols] = np.sin(df[cols_angular] * np.pi / 180.0)
+    # df[cos_cols] = np.cos(df[cols_angular] * np.pi / 180.0)
+    df = pd.concat([df, np.sin(df[cols_angular] * np.pi / 180.0).set_axis(sin_cols, axis=1)], axis=1)
+    df = pd.concat([df, np.cos(df[cols_angular] * np.pi / 180.0).set_axis(cos_cols, axis=1)], axis=1)
 
     # Drop angular columns
     df = df.drop(columns=cols_angular)
@@ -252,7 +256,10 @@ def df_downsample(
         # Add statistics for regular columns
         funs = ["median", "min", "max", "std"]
         cols_reg_stats = ["_".join(i) for i in product(cols_regular, funs)]
-        df_out[cols_reg_stats] = df_resample[cols_regular].agg(funs).copy()
+
+        # Rewrite to avoid fragmentation warning
+        # df_out[cols_reg_stats] = df_resample[cols_regular].agg(funs).copy()
+        df_out = pd.concat([df_out, df_resample[cols_regular].agg(funs).copy().set_axis(cols_reg_stats, axis=1)], axis=1)
 
         # Add statistics for angular columns
         # Firstly, create matrix with indices for the mean values
@@ -286,11 +293,17 @@ def df_downsample(
         values_max = wrap_360(np.nanmax(values, axis=1))
         values_std = wrap_360(np.nanstd(values, axis=1))
 
-        # Save to dataframe
-        df_out[["{:s}_median".format(c) for c in cols_angular]] = values_median
-        df_out[["{:s}_min".format(c) for c in cols_angular]] = values_min
-        df_out[["{:s}_max".format(c) for c in cols_angular]] = values_max
-        df_out[["{:s}_std".format(c) for c in cols_angular]] = values_std
+        # # Save to dataframe
+        # df_out[["{:s}_median".format(c) for c in cols_angular]] = values_median
+        # df_out[["{:s}_min".format(c) for c in cols_angular]] = values_min
+        # df_out[["{:s}_max".format(c) for c in cols_angular]] = values_max
+        # df_out[["{:s}_std".format(c) for c in cols_angular]] = values_std
+
+        # Rewrite to avoid fragmentation
+        df_out = pd.concat([df_out, pd.DataFrame(values_median, columns=["{:s}_median".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_min, columns=["{:s}_min".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_max, columns=["{:s}_max".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_std, columns=["{:s}_std".format(c) for c in cols_angular])], axis=1)
 
     if center:
         # Shift time column towards center of the bin
