@@ -182,7 +182,10 @@ def df_downsample(
     # Add _N for each variable to keep track of n.o. data points
     cols_all = df.columns
     cols_N = ["{:s}_N".format(c) for c in cols_all]
-    df[cols_N] = 1 - df[cols_all].isna().astype(int)
+    
+    # Rewrite this line to avoid fragmentation warning
+    # df[cols_N] = 1 - df[cols_all].isna().astype(int)
+    df = pd.concat([df, 1 - df[cols_all].isna().astype(int).set_axis(cols_N, axis=1)], axis=1)
 
     # Now calculate downsampled dataframe, automatically
     # mark by label on the right (i.e., "past 10 minutes").
