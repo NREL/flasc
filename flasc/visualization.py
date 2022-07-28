@@ -149,7 +149,8 @@ def plot_with_wrapping(
     return ax
 
 
-def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
+def plot_floris_layout(fi, turbine_names=None, plot_terrain=True, 
+    include_names=True):
     """Plot the wind farm layout and turbine performance curves for the
     floris object of interest. This visualization function includes some
     useful checks such as checking which turbine curves are identical,
@@ -209,12 +210,13 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
         ax[0].plot(fi.layout_x[ids], fi.layout_y[ids], "o", label=tt)
 
     # Plot turbine names and hub heights
-    for ti in range(len(fi.layout_x)):
-        ax[0].text(
-            fi.layout_x[ti],
-            fi.layout_y[ti],
-            turbine_names[ti] + " ({:.1f} m)".format(hub_heights[ti])
-        )
+    if include_names:
+        for ti in range(len(fi.layout_x)):
+            ax[0].text(
+                fi.layout_x[ti],
+                fi.layout_y[ti],
+                turbine_names[ti] + " ({:.1f} m)".format(hub_heights[ti])
+            )
 
     ax[0].axis("equal")
     ax[0].legend()
