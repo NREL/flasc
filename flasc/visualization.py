@@ -197,6 +197,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
         }
         plot_layout_only(fi, plotting_dict, ax=ax[0])
     ax[0].legend()
+    ax[0].set_title("Farm layout")
 
     # Power and thrust curve plots
     ax[1] = fig.add_subplot(222)
@@ -281,7 +282,6 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
     ax.grid(True)
     ax.set_xlabel("x coordinate (m)")
     ax.set_ylabel("y coordinate (m)")
-    ax.set_title("Farm layout")
 
     return ax
 
@@ -296,15 +296,14 @@ def plot_power_curve_only(pt, plotting_dict={}, ax=None):
 
     default_plotting_dict = {
         "color" : "black", 
-        "marker" : ".",
-        "markersize" : 10,
+        "linestyle" : "solid",
+        "linewidth" : 2,
         "label" : None
     }
     plotting_dict = {**default_plotting_dict, **plotting_dict}
 
     # Plot power and thrust curves for groups of turbines
-    ax.plot(pt["wind_speed"], pt["power"], color=plotting_dict["color"], 
-        label=plotting_dict["label"])
+    ax.plot(pt["wind_speed"], pt["power"], **plotting_dict)
     ax.set_xlabel("Wind speed (m/s)")
     ax.set_ylabel("Power coefficient (-)")
     ax.set_xlim([pt["wind_speed"][0], pt["wind_speed"][-1]])
@@ -324,15 +323,14 @@ def plot_thrust_curve_only(pt, plotting_dict, ax=None):
 
     default_plotting_dict = {
         "color" : "black", 
-        "marker" : ".",
-        "markersize" : 10,
+        "linestyle" : "solid",
+        "linewidth" : 2,
         "label" : None
     }
     plotting_dict = {**default_plotting_dict, **plotting_dict}
 
     # Plot power and thrust curves for groups of turbines
-    ax.plot(pt["wind_speed"], pt["thrust"], color=plotting_dict["color"], 
-        label=plotting_dict["label"])
+    ax.plot(pt["wind_speed"], pt["thrust"], **plotting_dict)
     ax.set_xlabel("Wind speed (m/s)")
     ax.set_ylabel("Thrust coefficient (-)")
     ax.set_xlim([pt["wind_speed"][0], pt["wind_speed"][-1]])
