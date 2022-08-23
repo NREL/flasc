@@ -14,7 +14,7 @@ requirements = [
     'numpy',
     'numba',
     'openoa',
-    'pandas',
+    'pandas>=1.4.3',
     'pyproj',
     'pytest',
     'SALib',
@@ -22,6 +22,7 @@ requirements = [
     'sqlalchemy',
     'streamlit',
     'tkcalendar',
+    'seaborn'
 ]
 
 setup_requirements = [

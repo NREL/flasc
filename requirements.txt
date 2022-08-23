@@ -4,7 +4,7 @@ matplotlib
 openoa
 numpy
 numba
-pandas
+pandas>=1.4.3
 pyproj
 pytest
 SALib
@@ -12,3 +12,4 @@ scipy
 sqlalchemy
 streamlit
 tkcalendar
+seaborn
