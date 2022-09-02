@@ -13,19 +13,20 @@ AUTHOR = "NREL National Wind Technology Center"
 # What packages are required for this module to be executed?
 REQUIRED = [
     'floris>=3.1',
-    'feather-format>=0.4.1',
-    'matplotlib>=3',
-    'numpy==1.21',
-    'numba>=0.55.0',
-    'openoa>=2.0.1',
-    'pandas>=1.3.0,<=1.4.0',
-    'pyproj>=2.1',
-    'pytest>=4',
-    'SALib>=1.4.0.2',
-    'scipy>=1.1',
-    'sqlalchemy>=1.4.23',
-    'streamlit>=0.89.0',
-    'tkcalendar>=1.6.1',
+    'feather-format',
+    'matplotlib',
+    'numpy',
+    'numba',
+    'openoa',
+    'pandas>=1.4.3',
+    'pyproj',
+    'pytest',
+    'SALib',
+    'scipy',
+    'sqlalchemy',
+    'streamlit',
+    'tkcalendar',
+    'seaborn'
 ]
 
 ROOT = Path(__file__).parent
