@@ -100,9 +100,10 @@ class sql_database_manager:
             print("    N.o. columns: %d." % len(cols))
         print("")
 
-    def launch_gui(self):
+    def launch_gui(self, turbine_names=None):
         root = tk.Tk()
-        sql_db_explorer_gui(master=root, dbc=self)
+
+        sql_db_explorer_gui(master=root, dbc=self, turbine_names=turbine_names)
         root.mainloop()
 
     def get_column_names(self, table_name):
@@ -256,7 +257,7 @@ class sql_database_manager:
 
 
 class sql_db_explorer_gui:
-    def __init__(self, master, dbc):
+    def __init__(self, master, dbc, turbine_names = None):
 
         # Create the options container
         frame_1 = tk.Frame(master)
@@ -408,6 +409,9 @@ class sql_db_explorer_gui:
         # Set up the database connection
         self.dbc = dbc
 
+        # Save the turbine names
+        self.turbine_names = turbine_names
+
     def channel_add(self):
         if self.N_channels < self.N_channels_max:
             ci = self.N_channels  # New channel
@@ -463,6 +467,14 @@ class sql_db_explorer_gui:
                 ]
                 col_mapping = dict(zip(old_col_names, new_col_names))
                 df = df.rename(columns=col_mapping)
+
+                # If specific turbine names are supplied apply them here
+                if self.turbine_names is not None:
+                    columns = df.columns
+                    for t in range(len(self.turbine_names)):
+                        columns = [c.replace('%03d' % t,self.turbine_names[t]) for c in columns]
+                    df.columns = columns
+
                 df_array.append(df)
 
         # Merge dataframes
