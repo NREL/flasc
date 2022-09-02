@@ -1,0 +1,21 @@
+name: Documentation
+description: Report incorrect documentation or describe new documentation
+title: "[Documentation]: <title>"
+labels: "Type: Documentation"
+body: 
+  - type: textarea
+    id: doc-issue
+    attributes:
+      label: Description
+      description: What should be improved?
+      placeholder: |
+        Example: The instructions for doing X in Y aren't clear. I looked at http://... and the following lines are not complete...
+    validations:
+      required: true
+  - type: textarea
+    id: doc-link
+    attributes:
+      label: URL
+      description: If this issue references online documentation, enter the complete url here.
+      placeholder:
+        http://flasc.readthedocs.io/<full link here>.html
