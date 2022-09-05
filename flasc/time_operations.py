@@ -75,13 +75,16 @@ def df_movingaverage(
 
     # Figure out which indices/data points belong to each window
     if (return_index_mapping or calc_median_min_max_std):
-        df_tmp = df_ma[[]].copy().reset_index(drop=False)
-        df_tmp["tmp"] = 1
-        df_tmp = df_tmp.rolling(window_width, center=center, axis=0, on="time")["tmp"]
-
-        # Grab index of first and last time entry for each window
-        windows_min = list(df_tmp.apply(lambda x: x.index[0]).astype(int))
-        windows_max = list(df_tmp.apply(lambda x: x.index[-1]).astype(int))
+        # Use next for loops to determine starting and inding indices for 
+        # window operations. Avoids pandas version issues for rolling(). 
+        # May be slow for large datasets.
+        timestamps = df_ma.index.to_list()
+        windows_min = [np.where([t2 >= t - window_width/2 \
+                                for t2 in timestamps])[0][0]
+                       for t in timestamps]
+        windows_max = [np.where([t2 < t + window_width/2 \
+                                for t2 in timestamps])[0][-1]
+                       for t in timestamps]
 
         # Now create a large array that contains the array of indices, with
         # the values in each row corresponding to the indices upon which that
