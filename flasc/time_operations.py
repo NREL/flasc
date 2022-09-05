@@ -300,10 +300,10 @@ def df_downsample(
         # df_out[["{:s}_std".format(c) for c in cols_angular]] = values_std
 
         # Rewrite to avoid fragmentation
-        df_out = pd.concat([df_out, pd.DataFrame(values_median, columns=["{:s}_median".format(c) for c in cols_angular])], axis=1)
-        df_out = pd.concat([df_out, pd.DataFrame(values_min, columns=["{:s}_min".format(c) for c in cols_angular])], axis=1)
-        df_out = pd.concat([df_out, pd.DataFrame(values_max, columns=["{:s}_max".format(c) for c in cols_angular])], axis=1)
-        df_out = pd.concat([df_out, pd.DataFrame(values_std, columns=["{:s}_std".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_median, index=df_out.index, columns=["{:s}_median".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_min, index=df_out.index, columns=["{:s}_min".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_max, index=df_out.index, columns=["{:s}_max".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_std, index=df_out.index, columns=["{:s}_std".format(c) for c in cols_angular])], axis=1)
 
     if center:
         # Shift time column towards center of the bin
