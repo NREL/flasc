@@ -149,8 +149,7 @@ def plot_with_wrapping(
     return ax
 
 
-def plot_floris_layout(fi, turbine_names=None, plot_terrain=True, 
-    include_names=True):
+def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     """Plot the wind farm layout and turbine performance curves for the
     floris object of interest. This visualization function includes some
     useful checks such as checking which turbine curves are identical,
@@ -173,138 +172,189 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True,
     # Plot turbine configurations
     fig = plt.figure(figsize=(16, 8))
 
+    # Get names if not provided
     if turbine_names is None:
-        nturbs = len(fi.layout_x)
-        turbine_names = ["T{:02d}".format(ti) for ti in range(nturbs)]
-
-    plt.subplot(1, 2, 1)
+        turbine_names = generate_labels_with_hub_heights(fi)
+    
     ax = [None, None, None]
-    ax[0] = plt.gca()
+    ax[0] = fig.add_subplot(121)
 
-    hub_heights = fi.floris.farm.hub_heights.flatten()
     if plot_terrain:
-        cntr = ax[0].tricontourf(
-            fi.layout_x,
-            fi.layout_y,
-            hub_heights,
-            levels=14,
-            cmap="RdBu_r"
-        )
-        fig.colorbar(
-            cntr,
-            ax=ax[0],
-            label='Terrain-corrected hub height (m)',
-            ticks=np.linspace(
-                np.min(hub_heights) - 10.0,
-                np.max(hub_heights) + 10.0,
-                15,
-            )
-        )
+        plot_farm_terrain(fi, fig, ax[0])
 
+    # Generate plotting dictionary based on turbine; plot locations
     turbine_types = (
         [t["turbine_type"] for t in fi.floris.farm.turbine_definitions]
     )
     turbine_types = np.array(turbine_types, dtype="str")
-    for tt in np.unique(turbine_types):
-        ids = (turbine_types == tt)
-        ax[0].plot(fi.layout_x[ids], fi.layout_y[ids], "o", label=tt)
-
-    # Plot turbine names and hub heights
-    if include_names:
-        for ti in range(len(fi.layout_x)):
-            ax[0].text(
-                fi.layout_x[ti],
-                fi.layout_y[ti],
-                turbine_names[ti] + " ({:.1f} m)".format(hub_heights[ti])
-            )
-
-    ax[0].axis("equal")
+    for ti, tt in enumerate(np.unique(turbine_types)):
+        plotting_dict = {
+            "turbine_indices" : np.array(range(len(fi.layout_x)))\
+                [turbine_types == tt],
+            "turbine_names" : turbine_names,
+            "color" : "C%s" % ti,
+            "label" : tt
+        }
+        plot_layout_only(fi, plotting_dict, ax=ax[0])
     ax[0].legend()
-    ax[0].grid(True)
-    ax[0].set_xlabel("x coordinate (m)")
-    ax[0].set_ylabel("y coordinate (m)")
     ax[0].set_title("Farm layout")
 
-    # Plot turbine power and thrust curves
-    plt.subplot(2, 2, 2)
-    ax[1] = plt.gca()
-    plt.subplot(2, 2, 4)
-    ax[2] = plt.gca()
+    # Power and thrust curve plots
+    ax[1] = fig.add_subplot(222)
+    ax[2] = fig.add_subplot(224)
+
     # Identify unique power-thrust curves and group turbines accordingly
-    for ti in range(len(fi.layout_x)):
-        pt = fi.floris.farm.turbine_definitions[ti]["power_thrust_table"]
-        if ti == 0:
-            unique_pt = [pt]
-            unique_turbines = [[ti]]
-            continue
+    unique_turbine_types, utt_ids = np.unique(turbine_types, return_index=True)
+    for ti, (tt, tti) in enumerate(zip(unique_turbine_types, utt_ids)):
+        pt = fi.floris.farm.turbine_definitions[tti]["power_thrust_table"]
 
-        # Check if power-thrust curve already exists somewhere
-        is_unique = True
-        for tii in range(len(unique_pt)):
-            if (unique_pt[tii] == pt):
-                unique_turbines[tii].append(ti)
-                is_unique = False
-                continue
-
-        # If not, append as new entry
-        if is_unique:
-            unique_pt.append(pt)
-            unique_turbines.append([ti])
-
-    for tii, pt in enumerate(unique_pt):
-        # Convert a very long string of turbine identifiers to ranges,
-        # e.g., from "A01, A02, A03, A04" to "A01-A04"
-        labels = [turbine_names[i] for i in unique_turbines[tii]]
-        prev_turb_in_list = np.zeros(len(labels), dtype=bool)
-        next_turb_in_list = np.zeros(len(labels), dtype=bool)
-        for ii, lb in enumerate(labels):
-            # Split initial string from sequence of texts
-            idx = 0
-            while lb[0:idx+1].isalpha():
-                idx += 1
-            
-            # Now check various choices of numbers, i.e., A001, A01, A1
-            turb_prev_if_range = [
-                lb[0:idx] + "{:01d}".format(int(lb[idx::]) - 1),
-                lb[0:idx] + "{:02d}".format(int(lb[idx::]) - 1),
-                lb[0:idx] + "{:03d}".format(int(lb[idx::]) - 1)
-            ]
-            turb_next_if_range = [
-                lb[0:idx] + "{:01d}".format(int(lb[idx::]) + 1),
-                lb[0:idx] + "{:02d}".format(int(lb[idx::]) + 1),
-                lb[0:idx] + "{:03d}".format(int(lb[idx::]) + 1)
-            ]
-
-            prev_turb_in_list[ii] = np.any([t in labels for t in turb_prev_if_range])
-            next_turb_in_list[ii] = np.any([t in labels for t in turb_next_if_range])
-
-        # Remove label for turbines in the middle of ranges
-        for id in np.where(prev_turb_in_list & next_turb_in_list)[0]:
-            labels[id] = ""
-
-        # Append a dash to labels for turbines at the start of a range
-        for id in np.where(~prev_turb_in_list & next_turb_in_list)[0]:
-            labels[id] += "-"
-
-        # Append a comma to turbines at the end of a range
-        for id in np.where(~next_turb_in_list)[0]:
-            labels[id] += ","
-
-        # Now join all strings to a single label and remove last comma
-        label = "".join(labels)[0:-1]
-
-        # Plot power and thrust curves for groups of turbines
-        tn = fi.floris.farm.turbine_definitions[unique_turbines[tii][0]]["turbine_type"]
-        ax[1].plot(pt["wind_speed"], pt["power"], label=label + " ({:s})".format(tn))
-        ax[2].plot(pt["wind_speed"], pt["thrust"], label=label + " ({:s})".format(tn))
-
-        ax[1].set_xlabel("Wind speed (m/s)")
-        ax[2].set_xlabel("Wind speed (m/s)")
-        ax[1].set_ylabel("Power coefficient (-)")
-        ax[2].set_ylabel("Thrust coefficient (-)")
-        ax[1].grid(True)
-        ax[2].grid(True)
-        ax[1].legend()
-        ax[2].legend()
+        plotting_dict = {
+            "color" : "C%s" % ti,
+            "label" : tt
+        }
+        plot_power_curve_only(pt, plotting_dict, ax=ax[1])
+        plot_thrust_curve_only(pt, plotting_dict, ax=ax[2])
 
     return fig, ax
+
+def generate_default_labels(fi):
+    labels = ["T{0:02d}".format(ti) for ti in range(len(fi.layout_x))]
+    return labels
+
+def generate_labels_with_hub_heights(fi):
+    labels = ["T{0:02d} ({1:.1f} m)".format(ti, h) for ti, h in 
+        enumerate(fi.floris.farm.hub_heights.flatten())]
+    return labels
+
+def plot_layout_only(fi, plotting_dict={}, ax=None):
+    """
+    Inputs:
+    - plotting_dict: dictionary of plotting parameters, with the 
+        following (optional) fields and their (default) values:
+            "turbine_indices" : (range(len(fi.layout_x))) (turbines to 
+                                plot, default to all turbines)
+            "turbine_names" : (["TX" for X in range(len(fi.layout_x)])
+            "color" : ("black")
+            "marker" : (".")
+            "markersize" : (10)
+            "label" : (None) (for legend, if desired)
+    - ax: axes to plot on (if None, creates figure and axes)
+    - NOTE: turbine_names should be a complete list of all turbine names; only
+            those in turbine_indeces will be plotted though.
+    """
+
+    # Generate axis, if needed
+    if ax is None:
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111)
+
+    # Generate plotting dictionary
+    default_plotting_dict = {
+        "turbine_indices" : range(len(fi.layout_x)),
+        "turbine_names" : generate_default_labels(fi),
+        "color" : "black", 
+        "marker" : ".",
+        "markersize" : 10,
+        "label" : None
+    }
+    plotting_dict = {**default_plotting_dict, **plotting_dict}
+    if len(plotting_dict["turbine_names"]) == 0: # empty list provided
+        plotting_dict["turbine_names"] = [""]*len(fi.layout_x)
+
+    # Plot
+    ax.plot(
+        fi.layout_x[plotting_dict["turbine_indices"]], 
+        fi.layout_y[plotting_dict["turbine_indices"]],
+        marker=plotting_dict["marker"],
+        markersize=plotting_dict["markersize"],
+        linestyle="None",
+        color=plotting_dict["color"],
+        label=plotting_dict["label"]
+    )
+
+    # Add labels to plot, if desired
+    for ti in plotting_dict["turbine_indices"]:
+       ax.text(fi.layout_x[ti], fi.layout_y[ti], 
+           plotting_dict["turbine_names"][ti])
+
+    # Plot labels and aesthetics
+    ax.axis("equal")
+    ax.grid(True)
+    ax.set_xlabel("x coordinate (m)")
+    ax.set_ylabel("y coordinate (m)")
+
+    return ax
+
+def plot_power_curve_only(pt, plotting_dict={}, ax=None):
+    """
+    pt expected to have keys "wind_speed" and "power"
+    """
+    # Generate axis, if needed
+    if ax is None:
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111)
+
+    default_plotting_dict = {
+        "color" : "black", 
+        "linestyle" : "solid",
+        "linewidth" : 2,
+        "label" : None
+    }
+    plotting_dict = {**default_plotting_dict, **plotting_dict}
+
+    # Plot power and thrust curves for groups of turbines
+    ax.plot(pt["wind_speed"], pt["power"], **plotting_dict)
+    ax.set_xlabel("Wind speed (m/s)")
+    ax.set_ylabel("Power coefficient (-)")
+    ax.set_xlim([pt["wind_speed"][0], pt["wind_speed"][-1]])
+    ax.grid(True)
+
+    return ax
+
+def plot_thrust_curve_only(pt, plotting_dict, ax=None):
+    """
+    pt expected to have keys "wind_speed" and "thrust"
+    """
+    
+    # Generate axis, if needed
+    if ax is None:
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111)
+
+    default_plotting_dict = {
+        "color" : "black", 
+        "linestyle" : "solid",
+        "linewidth" : 2,
+        "label" : None
+    }
+    plotting_dict = {**default_plotting_dict, **plotting_dict}
+
+    # Plot power and thrust curves for groups of turbines
+    ax.plot(pt["wind_speed"], pt["thrust"], **plotting_dict)
+    ax.set_xlabel("Wind speed (m/s)")
+    ax.set_ylabel("Thrust coefficient (-)")
+    ax.set_xlim([pt["wind_speed"][0], pt["wind_speed"][-1]])
+    ax.grid(True)
+
+    return ax
+
+def plot_farm_terrain(fi, fig, ax):
+    hub_heights = fi.floris.farm.hub_heights.flatten()
+    cntr = ax.tricontourf(
+        fi.layout_x,
+        fi.layout_y,
+        hub_heights,
+        levels=14,
+        cmap="RdBu_r"
+    )
+    
+    fig.colorbar(
+        cntr,
+        ax=ax,
+        label='Terrain-corrected hub height (m)',
+        ticks=np.linspace(
+            np.min(hub_heights) - 10.0,
+            np.max(hub_heights) + 10.0,
+            15,
+        )
+    )
