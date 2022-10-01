@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from floris.utilities import wrap_360
-from pandas.core.base import DataError
+from pandas.errors import DataError
 
 from ..dataframe_operations import dataframe_manipulations as dfm
 from ..energy_ratio import energy_ratio_visualization as ervis
