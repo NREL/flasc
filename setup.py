@@ -18,7 +18,7 @@ REQUIRED = [
     'numpy',
     'numba',
     'openoa',
-    'pandas>=1.4.3',
+    'pandas>=1.5',
     'pyproj',
     'pytest',
     'SALib',
