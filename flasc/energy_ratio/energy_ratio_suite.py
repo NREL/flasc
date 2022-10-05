@@ -13,7 +13,7 @@
 
 import numpy as np
 import pandas as pd
-from pandas.core.base import DataError
+from pandas.errors import DataError
 from scipy.interpolate import NearestNDInterpolator
 
 from ..energy_ratio import energy_ratio as er
