@@ -38,7 +38,7 @@ logging:
     level: INFO
 name: floris_input_file_example
 solver:
-  turbine_grid_points: 5
+  turbine_grid_points: 3
   type: turbine_grid
 wake:
   enable_secondary_steering: true
