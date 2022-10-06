@@ -298,13 +298,23 @@ def interpolate_floris_from_df_approx(
     df = df.reset_index(drop=('time' in df.columns))
     nturbs = fsut.get_num_turbines(df_approx)
 
-    # Check if turbulence intensity is provided in the dataframe 'df'
-    if 'ti' not in df.columns:
-        if df_approx["ti"].nunique() > 3:
-            raise ValueError("You must include a 'ti' column in your df.")
-        ti_ref = np.median(df_approx["ti"])
-        print("No 'ti' column found in dataframe. Assuming {}".format(ti_ref))
-        df["ti"] = ti_ref
+    # Check if all values in df fall within the precalculated solutions ranges
+    for col in ["wd", "ws", "ti"]:
+        # Check if all columns are defined
+        if col not in df.columns:
+            raise ValueError("Your SCADA dataframe is missing a column called '{:s}'.".format(col))
+        if col not in df_approx.columns:
+            raise ValueError("Your precalculated solutions dataframe is missing a column called '{:s}'.".format(col))
+
+        # Check if approximate solutions cover the entire problem space
+        if (
+            (df[col].min() < (df_approx[col].min() - 1.0e-6)) |
+            (df[col].max() > (df_approx[col].max() + 1.0e-6))
+        ):
+            print("Warning: the values in df[{:s}] exceed the range in the precalculated solutions df_fi_approx[{:s}].".format(col, col))
+            print("   minimum/maximum value in df:        ({:.3f}, {:.3f})".format(df[col].min(), df[col].max()))
+            print("   minimum/maximum value in df_approx: ({:.3f}, {:.3f})".format(df_approx[col].min(), df_approx[col].max()))
+
 
     # Define which variables we must map from df_approx to df
     varnames = ['pow']
@@ -323,7 +333,7 @@ def interpolate_floris_from_df_approx(
               "interpolation method '%s'." % method)
 
     # Make a copy from wd=0.0 deg to wd=360.0 deg for wrapping
-    if not (df_approx["wd"] == 360.0).any():
+    if not (df_approx["wd"] > 359.999999).any():
         df_subset = df_approx[df_approx["wd"] == 0.0].copy()
         df_subset["wd"] = 360.0
         df_approx = pd.concat([df_approx, df_subset], axis=0).reset_index(drop=True)
@@ -392,9 +402,9 @@ def interpolate_floris_from_df_approx(
 
 def calc_floris_approx_table(
     fi,
-    wd_array=np.arange(0.0, 360.0, 1.0),
-    ws_array=np.arange(0.001, 26.001, 1.0),
-    ti_array=None,
+    wd_array=np.arange(0.0, 360.1, 1.0),
+    ws_array=np.arange(0.001, 26.1, 1.0),
+    ti_array=np.array([0.03, 0.06, 0.09, 0.12, 0.15, 0.18], dtype=float),
     ):
 
     # if ti_array is None, use the current value in the FLORIS object
