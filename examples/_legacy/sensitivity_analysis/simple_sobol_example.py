@@ -5,7 +5,7 @@ import pandas as pd
 
 import floris.tools as wfct
 from floris.logging_manager import configure_console_log
-from pandas.core.base import DataError
+from pandas.errors import DataError
 
 from flasc import floris_sensitivity_analysis as fsasa
 

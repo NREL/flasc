@@ -15,7 +15,7 @@ from copy import deepcopy as dcopy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pandas.core.base import DataError
+from pandas.errors import DataError
 from scipy import interpolate
 from time import perf_counter as timerpc
 
