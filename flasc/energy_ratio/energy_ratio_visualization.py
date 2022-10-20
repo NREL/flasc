@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from floris import tools as wfct
 
 
-def plot(energy_ratios, labels=None, label_uq=False):
+def plot(energy_ratios, labels=None, hide_uq_labels=True):
     """This function plots energy ratios against the reference wind
     direction. The plot may or may not include uncertainty bounds,
     depending on the information contained in the provided energy ratio
@@ -43,6 +43,8 @@ def plot(energy_ratios, labels=None, label_uq=False):
                         with UQ.
         labels ([iteratible], optional): Label for each of the energy ratio
             dataframes. Defaults to None.
+        hide_uq_labels (boolean, optional): If true, do not specifically label
+            the confidence intervals in the plot
 
     Returns:
         fig ([plt.Figure]): Figure in which energy ratios are plotted.
@@ -60,7 +62,7 @@ def plot(energy_ratios, labels=None, label_uq=False):
     else:
         uq_labels = ["%s confidence bounds" % lb for lb in labels]
 
-    if not label_uq:
+    if hide_uq_labels:
         uq_labels = ['_nolegend_' for l in uq_labels]
 
     N = len(energy_ratios)
