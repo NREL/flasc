@@ -43,7 +43,7 @@ def plot(energy_ratios, labels=None, hide_uq_labels=True):
                         with UQ.
         labels ([iteratible], optional): Label for each of the energy ratio
             dataframes. Defaults to None.
-        hide_uq_labels (boolean, optional): If true, do not specifically label
+        hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
 
     Returns:
