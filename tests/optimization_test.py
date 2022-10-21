@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from pandas.core.base import DataError
+from pandas.errors import DataError
 
 import unittest
 from flasc.optimization import (
