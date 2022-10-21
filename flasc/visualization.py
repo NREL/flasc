@@ -228,9 +228,11 @@ def generate_labels_with_hub_heights(fi):
 
 def plot_layout_only(fi, plotting_dict={}, ax=None):
     """
-    Inputs:
-    - plotting_dict: dictionary of plotting parameters, with the 
-        following (optional) fields and their (default) values:
+    Plot the farm layout.
+
+    Args:
+        plotting_dict: dictionary of plotting parameters, with the 
+            following (optional) fields and their (default) values:
             "turbine_indices" : (range(len(fi.layout_x))) (turbines to 
                                 plot, default to all turbines)
             "turbine_names" : (["TX" for X in range(len(fi.layout_x)])
@@ -238,9 +240,13 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
             "marker" : (".")
             "markersize" : (10)
             "label" : (None) (for legend, if desired)
-    - ax: axes to plot on (if None, creates figure and axes)
-    - NOTE: turbine_names should be a complete list of all turbine names; only
-            those in turbine_indeces will be plotted though.
+        ax: axes to plot on (if None, creates figure and axes)
+    
+    Returns:
+        ax: the current axes for the layout plot
+
+    turbine_names should be a complete list of all turbine names; only
+    those in turbine_indices will be plotted though.
     """
 
     # Generate axis, if needed
@@ -287,7 +293,21 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
 
 def plot_power_curve_only(pt, plotting_dict={}, ax=None):
     """
-    pt expected to have keys "wind_speed" and "power"
+    Generate plot of turbine power curve. 
+
+    Args:
+        pt: power-thrust table as a dictionary. Expected to contain 
+            keys "wind_speed" and "power"
+        plotting_dict: dictionary of plotting parameters, with the 
+            following (optional) fields and their (default) values:
+            "color" : ("black"), 
+            "linestyle" : ("solid"),
+            "linewidth" : (2),
+            "label" : (None)
+        ax: axes to plot on (if None, creates figure and axes)
+    
+    Returns:
+        ax: the current axes for the power curve plot
     """
     # Generate axis, if needed
     if ax is None:
@@ -313,7 +333,21 @@ def plot_power_curve_only(pt, plotting_dict={}, ax=None):
 
 def plot_thrust_curve_only(pt, plotting_dict, ax=None):
     """
-    pt expected to have keys "wind_speed" and "thrust"
+    Generate plot of turbine thrust curve. 
+
+    Args:
+        pt: power-thrust table as a dictionary. Expected to contain 
+            keys "wind_speed" and "thrust"
+        plotting_dict: dictionary of plotting parameters, with the 
+            following (optional) fields and their (default) values:
+            "color" : ("black"), 
+            "linestyle" : ("solid"),
+            "linewidth" : (2),
+            "label" : (None)
+        ax: axes to plot on (if None, creates figure and axes)
+    
+    Returns:
+        ax: the current axes for the thrust curve plot
     """
     
     # Generate axis, if needed
