@@ -162,7 +162,8 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
         each entry being a string. It is recommended that this is something
         like one or two letters, and then a number to indicate the turbine.
         For example, A01, A02, A03, ... If None is specified, will assume
-        turbine names T01, T02, T03, .... Defaults to None.
+        turbine names T01, T02, T03, .... Defaults to None. To avoid printing
+        names, specify turbine_names=[].
         plot_terrain (bool, optional): Plot the terrain as a colormap.
         Defaults to True.
 
