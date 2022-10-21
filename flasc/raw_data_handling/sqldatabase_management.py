@@ -100,10 +100,10 @@ class sql_database_manager:
             print("    N.o. columns: %d." % len(cols))
         print("")
 
-    def launch_gui(self, turbine_names=None):
+    def launch_gui(self, turbine_names=None, sort_columns=False):
         root = tk.Tk()
 
-        sql_db_explorer_gui(master=root, dbc=self, turbine_names=turbine_names)
+        sql_db_explorer_gui(master=root, dbc=self, turbine_names=turbine_names, sort_columns=sort_columns)
         root.mainloop()
 
     def get_column_names(self, table_name):
