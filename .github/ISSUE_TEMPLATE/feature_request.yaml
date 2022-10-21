@@ -1,0 +1,20 @@
+name: Feature
+description: Submit a detailed feature request
+title: "[Feature]: <title>"
+labels: 'Type: Enhancement'
+body: 
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Description
+      description: Describe the suggested feature in as much detail as possible. If the idea is not fully developed, first open a Discussion to work through aspects of the feature with the NREL team prior to creating an Issue.
+      placeholder: |
+        Example: FLASC should support parallelization. Based on _this_ paper, it seems possible that the algorithms could all be modified with this line of code `call parallelize()` from an open source library. A good case to demonstrate this feature is ...
+
+    validations:
+      required: true
+  - type: textarea
+    id: relevant-links
+    attributes:
+      label: Related URLs
+      description: If this feature request is derived from a GitHub Issue or Discussion, enter the url here.
