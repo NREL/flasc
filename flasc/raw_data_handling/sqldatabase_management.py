@@ -257,7 +257,7 @@ class sql_database_manager:
 
 
 class sql_db_explorer_gui:
-    def __init__(self, master, dbc, turbine_names = None):
+    def __init__(self, master, dbc, turbine_names = None, sort_columns=False):
 
         # Create the options container
         frame_1 = tk.Frame(master)
@@ -412,6 +412,9 @@ class sql_db_explorer_gui:
         # Save the turbine names
         self.turbine_names = turbine_names
 
+        # Save the sort columns
+        self.sort_columns = sort_columns
+
     def channel_add(self):
         if self.N_channels < self.N_channels_max:
             ci = self.N_channels  # New channel
@@ -479,6 +482,10 @@ class sql_db_explorer_gui:
 
         # Merge dataframes
         self.df = pd.concat(df_array, axis=1).reset_index(drop=False)
+
+        # If sorting the columns do it now
+        if self.sort_columns:
+            self.df = self.df[sorted(self.df.columns)]
 
         self.update_channel_cols()
         self.create_figures()
