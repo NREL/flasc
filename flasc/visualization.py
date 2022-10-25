@@ -188,10 +188,6 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
         [t["turbine_type"] for t in fi.floris.farm.turbine_definitions]
     )
     turbine_types = np.array(turbine_types, dtype="str")
-<<<<<<< HEAD
-
-=======
->>>>>>> 81c82c7fd164f06a47673ea3971164387a8377eb
     for ti, tt in enumerate(np.unique(turbine_types)):
         plotting_dict = {
             "turbine_indices" : np.array(range(len(fi.layout_x)))\
@@ -201,10 +197,6 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
             "label" : tt
         }
         plot_layout_only(fi, plotting_dict, ax=ax[0])
-<<<<<<< HEAD
-
-=======
->>>>>>> 81c82c7fd164f06a47673ea3971164387a8377eb
     ax[0].legend()
     ax[0].set_title("Farm layout")
 
@@ -401,3 +393,206 @@ def plot_farm_terrain(fi, fig, ax):
             15,
         )
     )
+
+def plot_layout_with_waking_directions(
+    fi, 
+    layout_plotting_dict={}, 
+    wake_plotting_dict={},
+    D=None,
+    limit_dist=None,
+    ax=None
+    ):
+    """
+    If D not supplied, defaults to that of the first turbine.
+    """
+ 
+    ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
+    
+    # Combine default plotting options
+    default_plotting_dict = {
+        "color" : "black", 
+        "linestyle" : "solid",
+        "linewidth" : 0.5
+    }
+    wake_plotting_dict = {**default_plotting_dict, **wake_plotting_dict}
+
+    N_turbs = len(fi.floris.farm.turbine_definitions)
+    
+    if D is None:
+        D = fi.floris.farm.turbine_definitions[0]['rotor_diameter']
+        # TODO: build out capability to use multiple diameters, if of interest.
+        # D = np.array([turb['rotor_diameter'] for turb in 
+        #      fi.floris.farm.turbine_definitions])
+    #else:
+        #D = D*np.ones(N_turbs)
+
+    dists_m = np.zeros((N_turbs, N_turbs))
+    angles_d = np.zeros((N_turbs, N_turbs))
+
+    for i in range(N_turbs):
+        for j in range(N_turbs):
+            dists_m[i,j] = np.linalg.norm(
+                [fi.layout_x[i]-fi.layout_x[j], fi.layout_y[i]-fi.layout_y[j]]
+            )
+            angles_d[i,j] = wake_angle(
+                fi.layout_x[i], fi.layout_y[i], fi.layout_x[j], fi.layout_y[j]
+            )
+
+    # Mask based on the limit distance (assumed to be in measurement D)
+    if limit_dist is not None:
+        mask = dists_m >= D*limit_dist
+        dists_m[mask] = np.nan
+        angles_d[mask] = np.nan
+
+    # Loop over pairs, plot
+    for i in range(N_turbs):
+        for j in range(N_turbs):
+            if ~np.isnan(dists_m[i, j]) and \
+                dists_m[i, j] != 0.0 and \
+                fi.layout_x[i] <= fi.layout_x[j]:
+
+                (l,) = ax.plot(fi.layout_x[[i,j]], fi.layout_y[[i,j]],
+                               **wake_plotting_dict)
+               
+                linetext = "{0:.1f} D --- {1:.0f}/{2:.0f}".format(
+                    dists_m[i, j] / D,
+                    angles_d[i,j], 
+                    angles_d[j,i],
+                )
+
+                label_line(
+                    l, linetext, ax, near_i=1, near_x=None, near_y=None, 
+                    rotation_offset=0
+                )
+
+    
+def wake_angle(x_i, y_i, x_j, y_j):
+    """
+    Get angles between turbines in wake direction
+
+    Args:
+        x_i: x location of turbine i
+        y_i: y location of turbine i
+        x_j: x location of turbine j
+        y_j: y location of turbine j
+        
+    Returns:
+        wakeAngle (float): angle between turbines relative to compass
+    """
+    wakeAngle = (
+        np.arctan2(y_i - y_j, x_i - x_j) * 180.0 / np.pi
+    )  # Angle in normal cartesian coordinates
+
+    # Convert angle to compass angle
+    wakeAngle = 270.0 - wakeAngle
+    if wakeAngle < 0:
+        wakeAngle = wakeAngle + 360.0
+    if wakeAngle > 360:
+        wakeAngle = wakeAngle - 360.0
+
+    return wakeAngle
+
+def label_line(
+    line,
+    label_text,
+    ax,
+    near_i=None,
+    near_x=None,
+    near_y=None,
+    rotation_offset=0.0,
+    offset=(0, 0),
+):
+    """
+    [summary]
+
+    Args:
+        line (matplotlib.lines.Line2D): line to label.
+        label_text (str): label to add to line.
+        ax (:py:class:`matplotlib.pyplot.axes` optional): figure axes.
+        near_i (int, optional): Catch line near index i.
+            Defaults to None.
+        near_x (float, optional): Catch line near coordinate x.
+            Defaults to None.
+        near_y (float, optional): Catch line near coordinate y.
+            Defaults to None.
+        rotation_offset (float, optional): label rotation in degrees.
+            Defaults to 0.
+        offset (tuple, optional): label offset from turbine location.
+            Defaults to (0, 0).
+
+    Raises:
+        ValueError: ("Need one of near_i, near_x, near_y") raised if
+            insufficient information is passed in.
+    """
+
+    def put_label(i):
+        """
+        Add a label to index.
+
+        Args:
+            i (int): index to label.
+        """
+        i = min(i, len(x) - 2)
+        dx = sx[i + 1] - sx[i]
+        dy = sy[i + 1] - sy[i]
+        rotation = np.rad2deg(np.arctan2(dy, dx)) + rotation_offset
+        pos = [(x[i] + x[i + 1]) / 2.0 + offset[0], (y[i] + y[i + 1]) / 2 + offset[1]]
+        plt.text(
+            pos[0],
+            pos[1],
+            label_text,
+            size=7,
+            rotation=rotation,
+            color=line.get_color(),
+            ha="center",
+            va="center",
+            bbox=dict(ec="1", fc="1", alpha=0.8),
+        )
+
+    # extract line data
+    x = line.get_xdata()
+    y = line.get_ydata()
+
+    # define screen spacing
+    if ax.get_xscale() == "log":
+        sx = np.log10(x)
+    else:
+        sx = x
+    if ax.get_yscale() == "log":
+        sy = np.log10(y)
+    else:
+        sy = y
+
+    # find index
+    if near_i is not None:
+        i = near_i
+        if i < 0:  # sanitize negative i
+            i = len(x) + i
+        put_label(i)
+    elif near_x is not None:
+        for i in range(len(x) - 2):
+            if (x[i] < near_x and x[i + 1] >= near_x) or (
+                x[i + 1] < near_x and x[i] >= near_x
+            ):
+                put_label(i)
+    elif near_y is not None:
+        for i in range(len(y) - 2):
+            if (y[i] < near_y and y[i + 1] >= near_y) or (
+                y[i + 1] < near_y and y[i] >= near_y
+            ):
+                put_label(i)
+    else:
+        raise ValueError("Need one of near_i, near_x, near_y")
+
+
+
+
+
+    
+    
+
+    
+
+
+
+    
