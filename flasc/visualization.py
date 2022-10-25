@@ -455,7 +455,7 @@ def plot_layout_with_waking_directions(
                                **wake_plotting_dict)
                
                 linetext = "{0:.1f} D --- {1:.0f}/{2:.0f}".format(
-                    dists_m[i, j] / D,
+                    dists_m[i,j] / D,
                     angles_d[i,j], 
                     angles_d[j,i],
                 )

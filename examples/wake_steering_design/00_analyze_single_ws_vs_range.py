@@ -16,7 +16,7 @@ from matplotlib import pyplot as plt
 
 from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
 from flasc.wake_steering.yaw_optimizer_visualization import plot_uplifts_by_atmospheric_conditions
-from flasc.visualization import plot_floris_layout
+from flasc.visualization import plot_floris_layout, plot_layout_with_waking_directions
 
 from _local_helper_functions import load_floris, optimize_yaw_angles, evaluate_optimal_yaw_angles
 
@@ -25,6 +25,7 @@ if __name__ == "__main__":
     # Load FLORIS model and plot layout (and additional information)
     fi = load_floris()
     plot_floris_layout(fi)
+    plot_layout_with_waking_directions(fi, limit_dist=5)
 
     # Compare optimizing over all wind speeds vs. optimizing over a single wind speed
     AEP_baseline_array = []
