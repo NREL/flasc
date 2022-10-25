@@ -194,10 +194,12 @@ def plot_offsets_wswd_heatmap(df_offsets, turb_id, ax=None):
 
     if ax == None:
         fig, ax = plt.subplots(1,1)
-
+    d_wd = (wd_array[1]-wd_array[0])/2
+    d_ws = (ws_array[1]-ws_array[0])/2
     im = ax.imshow(
         offsets_array, interpolation=None, 
-        extent=[wd_array[0], wd_array[-1], ws_array[0], ws_array[-1]], 
+        extent=[wd_array[0]-d_wd, wd_array[-1]+d_wd, 
+                ws_array[0]-d_ws, ws_array[-1]+d_ws], 
         aspect='auto'
     )
     ax.set_xlabel('Wind direction')
