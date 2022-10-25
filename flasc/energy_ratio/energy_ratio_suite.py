@@ -13,7 +13,7 @@
 
 import numpy as np
 import pandas as pd
-from pandas.core.base import DataError
+from pandas.errors import DataError
 from scipy.interpolate import NearestNDInterpolator
 
 from ..energy_ratio import energy_ratio as er
@@ -625,7 +625,7 @@ class energy_ratio_suite:
 
         return self.df_list
 
-    def plot_energy_ratios(self, superimpose=True):
+    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
@@ -636,6 +636,8 @@ class energy_ratio_suite:
             of all datasets into the same figure. If False, will plot the
             energy ratio of each dataset into a separate figure. Defaults
             to True.
+            hide_uq_labels (bool, optional): If true, do not specifically label
+            the confidence intervals in the plot
 
         Returns:
             ax [plt.Axes]: Axis handle for the figure.
@@ -643,12 +645,12 @@ class energy_ratio_suite:
         if superimpose:
             results_array = [df["er_results"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
-            fig, ax = vis.plot(results_array, labels_array)
+            fig, ax = vis.plot(results_array, labels_array, hide_uq_labels=hide_uq_labels)
 
         else:
             ax = []
             for df in self.df_list:
-                fig, axi = vis.plot(df["er_results"], df["name"])
+                fig, axi = vis.plot(df["er_results"], df["name"], hide_uq_labels=hide_uq_labels)
                 ax.append(axi)
 
         return ax

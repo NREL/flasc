@@ -187,6 +187,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
         [t["turbine_type"] for t in fi.floris.farm.turbine_definitions]
     )
     turbine_types = np.array(turbine_types, dtype="str")
+
     for ti, tt in enumerate(np.unique(turbine_types)):
         plotting_dict = {
             "turbine_indices" : np.array(range(len(fi.layout_x)))\
@@ -196,6 +197,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
             "label" : tt
         }
         plot_layout_only(fi, plotting_dict, ax=ax[0])
+
     ax[0].legend()
     ax[0].set_title("Farm layout")
 
