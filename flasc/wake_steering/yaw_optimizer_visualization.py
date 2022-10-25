@@ -218,7 +218,7 @@ def plot_offsets_wd(df_offsets, turb_id, ws_plot, color="black", alpha=1.0,
        - wind_speed,
        - turbine identifiers (possibly multiple)
 
-    if ws+plot is scalar, only that wind speed is plotted. If ws_plot is 
+    if ws_plot is scalar, only that wind speed is plotted. If ws_plot is 
     a two-element tuple or list, that range of wind speeds is plotted.
 
     label only allowed is single wind speed is given.

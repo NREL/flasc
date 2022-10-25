@@ -399,11 +399,39 @@ def plot_layout_with_waking_directions(
     layout_plotting_dict={}, 
     wake_plotting_dict={},
     D=None,
-    limit_dist=None,
+    limit_dist_D=None,
+    limit_dist_m=None,
+    limit_num=None,
     ax=None
     ):
     """
-    If D not supplied, defaults to that of the first turbine.
+    Plot waking directions and distances between turbines.
+
+    Args:
+        fi: Instantiated FlorisInterface object
+        layout_plotting_dict: dictionary of plotting parameters for 
+            turbine locations. Defaults to the defaults of 
+            plot_layout_only.
+        wake_plotting_dict: dictionary of plotting parameters for the 
+            waking directions, with the following (optional) fields and 
+            their (default) values:
+            "color" : ("black"), 
+            "linestyle" : ("solid"),
+            "linewidth" : (0.5)
+        D: rotor diamter. Defaults to the rotor diamter of the first 
+            turbine in the Floris object.
+        limit_dist_D: limit on the distance between turbines to plot, 
+            specified in rotor diamters.
+        limit_dist_m: limit on the distance between turbines to plot, 
+            specified in meters. If specified, overrides limit_dist_D.
+        limit_num: limit on number of outgoing neighbors to include. 
+            If specified, only the limit_num closest turbines are 
+            plotted. However, directions already plotted from other 
+            turbines are not considered in the count.
+        ax: axes to plot on (if None, creates figure and axes)
+    
+    Returns:
+        ax: the current axes for the thrust curve plot
     """
  
     ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
@@ -439,31 +467,45 @@ def plot_layout_with_waking_directions(
             )
 
     # Mask based on the limit distance (assumed to be in measurement D)
-    if limit_dist is not None:
-        mask = dists_m >= D*limit_dist
+    if limit_dist_D is not None and limit_dist_m is None:
+        limit_dist_m = limit_dist_D * D
+    if limit_dist_m is not None:
+        mask = dists_m > limit_dist_m
         dists_m[mask] = np.nan
         angles_d[mask] = np.nan
 
+    # Handle default limit number case
+    if limit_num is None:
+        limit_num = -1
+
     # Loop over pairs, plot
+    label_exists = np.full((N_turbs, N_turbs), False)
     for i in range(N_turbs):
         for j in range(N_turbs):
+            #import ipdb; ipdb.set_trace()
             if ~np.isnan(dists_m[i, j]) and \
                 dists_m[i, j] != 0.0 and \
-                fi.layout_x[i] <= fi.layout_x[j]:
+                ~(dists_m[i, j] > np.sort(dists_m[i,:])[limit_num]):
 
                 (l,) = ax.plot(fi.layout_x[[i,j]], fi.layout_y[[i,j]],
                                **wake_plotting_dict)
-               
-                linetext = "{0:.1f} D --- {1:.0f}/{2:.0f}".format(
-                    dists_m[i,j] / D,
-                    angles_d[i,j], 
-                    angles_d[j,i],
-                )
 
-                label_line(
-                    l, linetext, ax, near_i=1, near_x=None, near_y=None, 
-                    rotation_offset=0
-                )
+                # Only label in one direction
+                if ~label_exists[i,j]:
+               
+                    linetext = "{0:.1f} D --- {1:.0f}/{2:.0f}".format(
+                        dists_m[i,j] / D,
+                        angles_d[i,j], 
+                        angles_d[j,i],
+                    )
+
+                    label_line(
+                        l, linetext, ax, near_i=1, near_x=None, near_y=None, 
+                        rotation_offset=0
+                    )
+
+                    label_exists[i,j] = True
+                    label_exists[j,i] = True
 
     
 def wake_angle(x_i, y_i, x_j, y_j):

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # Load FLORIS model and plot layout (and additional information)
     fi = load_floris()
     plot_floris_layout(fi)
-    plot_layout_with_waking_directions(fi, limit_dist=5)
+    plot_layout_with_waking_directions(fi, limit_dist_D=5, limit_num=3)
 
     # Compare optimizing over all wind speeds vs. optimizing over a single wind speed
     AEP_baseline_array = []
