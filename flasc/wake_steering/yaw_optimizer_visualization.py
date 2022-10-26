@@ -150,3 +150,124 @@ def _plot_bins(x, y, yn, xlabel=None, ylabel=None, labels=None):
         ax[1].legend()
 
     return fig, ax
+
+def plot_offsets_wswd_heatmap(df_offsets, turb_id, ax=None):
+    """
+    df_offsets should be a dataframe with columns: 
+       - wind_direction, 
+       - wind_speed,
+       - turbine identifiers (possibly multiple)
+    
+    Produces a heat map of the offsets for all wind directions and 
+    wind speeds for turbine specified by turb_id. Dataframe is assumed 
+    to contain individual turbine offsets in distinct columns (unlike 
+    the yaw_angles_opt column from FLORIS.
+
+    """
+
+    if type(turb_id) is int:
+        if "yaw_angles_opt" in df_offsets.columns:
+            offsets = np.vstack(
+                df_offsets.yaw_angles_opt.to_numpy()
+            )[:,turb_id]
+            df_offsets = pd.DataFrame({
+                "wind_direction":df_offsets.wind_direction,
+                "wind_speed":df_offsets.wind_speed,
+                "yaw_offset":offsets
+            })
+            turb_id = "yaw_offset"
+        else:
+            raise TypeError("Specify turb_id as a full string for the "+\
+                "correct dataframe column.")
+
+    ws_array = np.unique(df_offsets.wind_speed)
+    wd_array = np.unique(df_offsets.wind_direction)
+
+    # Construct array of offets
+    offsets_array = np.zeros((len(ws_array), len(wd_array)))
+    for i, ws in enumerate(ws_array):
+        offsets_array[-i,:] = (df_offsets
+                [df_offsets.wind_speed == ws]
+                [turb_id]
+                .values
+        )
+
+    if ax == None:
+        fig, ax = plt.subplots(1,1)
+    d_wd = (wd_array[1]-wd_array[0])/2
+    d_ws = (ws_array[1]-ws_array[0])/2
+    im = ax.imshow(
+        offsets_array, interpolation=None, 
+        extent=[wd_array[0]-d_wd, wd_array[-1]+d_wd, 
+                ws_array[0]-d_ws, ws_array[-1]+d_ws], 
+        aspect='auto'
+    )
+    ax.set_xlabel('Wind direction')
+    ax.set_ylabel('Wind speed')
+    cbar = plt.colorbar(im, ax=ax, orientation='vertical')
+    cbar.set_label('Yaw offset')
+
+    return ax, cbar
+
+
+def plot_offsets_wd(df_offsets, turb_id, ws_plot, color="black", alpha=1.0,
+    label=None, ax=None):
+    """
+    df_offsets should be a dataframe with columns: 
+       - wind_direction, 
+       - wind_speed,
+       - turbine identifiers (possibly multiple)
+
+    if ws_plot is scalar, only that wind speed is plotted. If ws_plot is 
+    a two-element tuple or list, that range of wind speeds is plotted.
+
+    label only allowed is single wind speed is given.
+    """
+
+    if type(turb_id) is int:
+        if "yaw_angles_opt" in df_offsets.columns:
+            offsets = np.vstack(
+                df_offsets.yaw_angles_opt.to_numpy()
+            )[:,turb_id]
+            df_offsets = pd.DataFrame({
+                "wind_direction":df_offsets.wind_direction,
+                "wind_speed":df_offsets.wind_speed,
+                "yaw_offset":offsets
+            })
+            turb_id = "yaw_offset"
+        else:
+            raise TypeError("Specify turb_id as a full string for the "+\
+                "correct dataframe column.")
+
+    if hasattr(ws_plot, '__len__') and label is not None:
+        label = None
+        print("label option can only be used for signle wind speed plot.")
+    
+    ws_array = np.unique(df_offsets.wind_speed)
+    wd_array = np.unique(df_offsets.wind_direction)
+    
+    if hasattr(ws_plot, '__len__'):
+        offsets_list = []
+        for ws in ws_array:
+            if ws >= ws_plot[0] and ws <= ws_plot[-1]:
+                offsets_list.append(df_offsets
+                    [df_offsets.wind_speed == ws]
+                    [turb_id]
+                    .values
+                )
+    else:
+        offsets_list = [df_offsets
+                    [df_offsets.wind_speed == ws_plot]
+                    [turb_id]
+                    .values]
+
+    if ax == None:
+        fig, ax = plt.subplots(1,1)
+
+    for offsets in offsets_list:
+        ax.plot(wd_array, offsets, color=color, alpha=alpha, label=label)
+
+    ax.set_xlabel('Wind direction')
+    ax.set_ylabel('Yaw offset')
+    
+    return ax               
