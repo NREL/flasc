@@ -66,28 +66,25 @@ class TestDataFrameResampling(unittest.TestCase):
 
     def test_moving_average(self):
         df = load_data()
-        df_ma, data_indices = df_movingaverage(
+        df_ma = df_movingaverage(
             df_in=df,
             cols_angular=["wd_000"],
             window_width=td(seconds=5),
             min_periods=1,
             center=True,
             calc_median_min_max_std=True,
-            return_index_mapping=True,
         )
 
         # Check solutions: for first row which just used one value for mov avg
         self.assertAlmostEqual(df_ma.iloc[0]["ws_000_mean"], 7.0)
         self.assertTrue(np.isnan(df_ma.iloc[0]["ws_000_std"]))
-        self.assertTrue(np.all(np.unique(data_indices[0, :]) == [-1, 0]))
+        #self.assertTrue(np.all(np.unique(data_indices[0, :]) == [-1, 0]))
 
         # Check solutions: second row with multiple values
-        self.assertTrue(np.all(np.unique(data_indices[1, :]) == [-1, 1, 2, 3]))
         self.assertAlmostEqual(df_ma.iloc[1]["wd_000_mean"], 359.667246, places=4)  # confirm circular averaging
-        self.assertAlmostEqual(df_ma.iloc[1]["wd_000_std"], 2.624669, places=4)  # confirm circular std
+        self.assertAlmostEqual(df_ma.iloc[1]["wd_000_std"], 2.625014, places=4)  # confirm circular std
 
         # Check solutions: sixth row, for good measure
-        self.assertTrue(np.all(np.unique(data_indices[6, :]) == [-1, 6]))
         self.assertAlmostEqual(df_ma.iloc[6]["wd_000_mean"], 0.0)  # confirm circular averaging
         self.assertTrue(np.isnan(df_ma.iloc[6]["ws_000_std"]))
         self.assertTrue(np.isnan(df_ma.iloc[6]["vane_000_std"]))

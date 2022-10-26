@@ -18,7 +18,7 @@ import pandas as pd
 from SALib.sample import saltelli
 from SALib.analyze import sobol
 
-from pandas.core.base import DataError
+from pandas.errors import DataError
 
 from .. import floris_tools as ftools
 

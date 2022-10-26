@@ -15,8 +15,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-from flasc.wake_steering.yaw_optimizer_visualization import plot_uplifts_by_atmospheric_conditions
-from flasc.visualization import plot_floris_layout
+from flasc.wake_steering.yaw_optimizer_visualization import \
+    plot_uplifts_by_atmospheric_conditions, plot_offsets_wswd_heatmap, plot_offsets_wd
+from flasc.visualization import plot_floris_layout, plot_layout_with_waking_directions
 
 from _local_helper_functions import load_floris, optimize_yaw_angles, evaluate_optimal_yaw_angles
 
@@ -25,6 +26,7 @@ if __name__ == "__main__":
     # Load FLORIS model and plot layout (and additional information)
     fi = load_floris()
     plot_floris_layout(fi)
+    plot_layout_with_waking_directions(fi, limit_dist_D=5, limit_num=3)
 
     # Compare optimizing over all wind speeds vs. optimizing over a single wind speed
     AEP_baseline_array = []
@@ -46,6 +48,18 @@ if __name__ == "__main__":
         AEP_baseline_array.append(AEP_baseline)
         AEP_opt_array.append(AEP_opt)
         df_out_array.append(df_out.copy())
+
+    # Vizualize optimal wake steering schedule for all wind speeds
+    # for a single turbine (index 2)
+    ax, cbar = plot_offsets_wswd_heatmap(df_offsets=df_opt, turb_id=2)
+    ax.set_title("T02 offset schedule")
+
+    ax = plot_offsets_wd(df_offsets=df_opt, turb_id=2, ws_plot=[5, 12], 
+                         alpha=0.5)
+    ax = plot_offsets_wd(df_offsets=df_opt, turb_id=2, ws_plot=7.0, 
+                         color="C0", label="7.0 m/s", ax=ax)
+    ax.set_title("T02 offset schedule")
+    ax.legend()
 
     # Calculate AEP uplifts
     uplift_one_ws = (
