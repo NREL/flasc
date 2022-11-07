@@ -372,3 +372,28 @@ def flatten_cols (df):
     for vals in df.columns.to_flat_index ()]
     df.columns = cols
     return df
+
+
+def downsample_types(df_in, verbose=False):
+    
+    df_out = df_in.copy()
+    dtypes = df_in.dtypes
+    
+    for c in df_in.columns:
+        datatype = str(dtypes[c])
+        if datatype == 'float64':
+            df_out = df_out.assign(**{c: df_out[c].astype(np.float32)})
+
+            if verbose:
+                max_error = np.max(np.abs(df_out[c]-df_in[c]))
+                print("Column %s has datatype '%s'. Downsampled to float32. Max error:"
+                    % (c, datatype), max_error)
+        else:
+            if verbose:
+                print("Datatype '%s' not recognized. Not downsampling." % datatype)
+            # df_out[c] = df_in[c] # No longer necessary right?
+    
+    # Cancel out any column re-arranging
+    df_out = df_out[df_in.columns]
+
+    return df_out
