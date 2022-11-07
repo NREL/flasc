@@ -13,6 +13,7 @@
 
 import numpy as np
 import pandas as pd
+from random import choices
 
 from floris.utilities import wrap_360
 from pandas.errors import DataError
@@ -299,6 +300,8 @@ class energy_ratio:
         N=1,
         percentiles=[5.0, 95.0],
         return_detailed_output=False,
+        block_bootstrapping = False, 
+        num_blocks = 10
     ):
         """This is the main function used to calculate the energy ratios
         for dataframe provided to the class during initialization. One
@@ -405,6 +408,8 @@ class energy_ratio:
             N=N,
             percentiles=percentiles,
             return_detailed_output=return_detailed_output,
+            block_bootstrapping = block_bootstrapping, 
+            num_blocks = num_blocks
         )
         if return_detailed_output:
             energy_ratios = out[0]
@@ -504,6 +509,8 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
     N=1,
     percentiles=[5.0, 95.0],
     return_detailed_output=False,
+    block_bootstrapping = False, 
+    num_blocks = 10
 ):
     """Wrapper function that calculates the energy ratio for every wind
     direction bin in the provided dataframe. This function wraps around
@@ -593,6 +600,8 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
                 N=N,
                 percentiles=percentiles,
                 return_detailed_output=return_detailed_output,
+                block_bootstrapping = block_bootstrapping, 
+                num_blocks = num_blocks
         )
         if return_detailed_output:
             result[wd_idx, :] = out[0]
@@ -631,6 +640,8 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
     N=1,
     percentiles=[5.0, 95.0],
     return_detailed_output=False,
+    block_bootstrapping = False, 
+    num_blocks = 10
 ):
     """Get the energy ratio for one particular wind direction bin and
     an array of wind speed bins. This function also includes bootstrapping
@@ -655,11 +666,33 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
     if N <= 1:
         results_array = np.array([energy_ratio_nominal] * 3, dtype=float)
     else:
+
+        # If using block-bootstrapping, set up blocks
+        if block_bootstrapping:
+            block_list = list(range(num_blocks))  # List of all block names
+            block_indices = np.arange(df_binned.shape[0]) # Simple index for iloc
+            block_length = int(len(block_indices) / num_blocks) # Length of each block
+            block_labels = np.zeros(len(block_indices)).astype(int) # Labels to assign each index
+            for b_i in range(num_blocks):
+                block_labels[block_length * b_i:block_length * (b_i+1)] = b_i
+
         # Get a bootstrap sample of range
         bootstrap_results = np.zeros(N)
         bootstrap_results[0] = energy_ratio_nominal
         for i in range(1, N):
-            df_randomized = df_binned.sample(frac=1, replace=True).copy()
+            if not block_bootstrapping:
+                df_randomized = df_binned.sample(frac=1, replace=True).copy()
+            else:
+                test_blocks = choices(block_list, k = num_blocks) # Choose a set of blocks
+                
+                # Indices of these blocks
+                test_indices = []
+                for b in test_blocks:
+                    m = block_labels == b # Mask to find this block's indices
+                    test_indices = np.append(test_indices,block_indices[m]) #Append indices
+
+                df_randomized = df_binned.iloc[test_indices].reset_index().copy()
+
             bootstrap_results[i] = _get_energy_ratio_single_wd_bin_nominal(
                 df_binned=df_randomized,
                 df_freq=df_freq,
