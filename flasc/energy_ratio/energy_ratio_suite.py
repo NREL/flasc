@@ -315,6 +315,8 @@ class energy_ratio_suite:
         percentiles=[5.0, 95.0],
         balance_bins_between_dfs=True,
         return_detailed_output=False,
+        block_bootstrapping = False, 
+        num_blocks = 10,
         verbose=True,
     ):
         """This is the main function used to calculate the energy ratios
@@ -497,6 +499,8 @@ class energy_ratio_suite:
                 N=N,
                 percentiles=percentiles,
                 return_detailed_output=return_detailed_output,
+                block_bootstrapping = block_bootstrapping, 
+                num_blocks = num_blocks
             )
 
             # Save each output to self
