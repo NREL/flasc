@@ -110,4 +110,19 @@ if __name__ == '__main__':
                     + "(N=50, 90% confidence interval)")
     plt.tight_layout()
 
+    # Get energy ratio with uncertainty quantification
+    # using N=10 bootstrap samples and block bootstrapping
+    era.get_energy_ratio(
+        test_turbines=[1],
+        wd_step=2.0,
+        ws_step=1.0,
+        wd_bin_width=3.0,
+        N=50,
+        block_bootstrapping=True
+    )
+    fig, ax = era.plot_energy_ratio()
+    ax[0].set_title("Energy ratios for turbine 001 with UQ "
+                    + "(N=10, Block Bootstrapping)")
+    plt.tight_layout()
+
     plt.show()
