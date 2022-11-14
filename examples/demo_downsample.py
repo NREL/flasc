@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 
-from flasc.time_operations import downsample_types
+from flasc.dataframe_operations.dataframe_manipulations import df_reduce_precision
 
 
 def load_data():
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     df = load_data()
 
     # Downsample the types
-    df_out = downsample_types(df, verbose=True)
+    df_out = df_reduce_precision(df, verbose=True)
 
     print()
     print('---------------')
