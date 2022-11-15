@@ -300,8 +300,8 @@ class energy_ratio:
         N=1,
         percentiles=[5.0, 95.0],
         return_detailed_output=False,
-        block_bootstrapping = False, 
-        num_blocks = 10
+        block_bootstrapping=False, 
+        num_blocks=10
     ):
         """This is the main function used to calculate the energy ratios
         for dataframe provided to the class during initialization. One
@@ -408,8 +408,8 @@ class energy_ratio:
             N=N,
             percentiles=percentiles,
             return_detailed_output=return_detailed_output,
-            block_bootstrapping = block_bootstrapping, 
-            num_blocks = num_blocks
+            block_bootstrapping=block_bootstrapping, 
+            num_blocks=num_blocks
         )
         if return_detailed_output:
             energy_ratios = out[0]
@@ -509,8 +509,8 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
     N=1,
     percentiles=[5.0, 95.0],
     return_detailed_output=False,
-    block_bootstrapping = False, 
-    num_blocks = 10
+    block_bootstrapping=False, 
+    num_blocks=10
 ):
     """Wrapper function that calculates the energy ratio for every wind
     direction bin in the provided dataframe. This function wraps around
