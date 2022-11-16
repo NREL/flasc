@@ -12,7 +12,7 @@ https://github.com/nrel/floris. FLASC also largely relies on the `energy ratio`
 to, among others, quantify wake losses in synthetic and historical data, to
 perform turbine northing calibrations, and for model parameter estimation.
 
-For technical questions, please send an email to bart.doekemeijer@nrel.gov.
+For technical questions, please send an email to paul.fleming@nrel.gov.
 
 .. image:: https://readthedocs.org/projects/flasc/badge/?version=main
    :target: http://flasc.readthedocs.io/
