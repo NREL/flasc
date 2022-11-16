@@ -402,6 +402,7 @@ def plot_layout_with_waking_directions(
     limit_dist_D=None,
     limit_dist_m=None,
     limit_num=None,
+    wake_label_size=7,
     ax=None
     ):
     """
@@ -418,7 +419,7 @@ def plot_layout_with_waking_directions(
             "color" : ("black"), 
             "linestyle" : ("solid"),
             "linewidth" : (0.5)
-        D: rotor diamter. Defaults to the rotor diamter of the first 
+        D: rotor diameter. Defaults to the rotor diamter of the first 
             turbine in the Floris object.
         limit_dist_D: limit on the distance between turbines to plot, 
             specified in rotor diamters.
@@ -428,6 +429,7 @@ def plot_layout_with_waking_directions(
             If specified, only the limit_num closest turbines are 
             plotted. However, directions already plotted from other 
             turbines are not considered in the count.
+        wake_label_size: font size for labels of direction/distance.
         ax: axes to plot on (if None, creates figure and axes)
     
     Returns:
@@ -438,7 +440,7 @@ def plot_layout_with_waking_directions(
     def_wake_plotting_dict = {
         "color" : "black", 
         "linestyle" : "solid",
-        "linewidth" : 0.5
+        "linewidth" : 0.5,
     }
     wake_plotting_dict = {**def_wake_plotting_dict, **wake_plotting_dict}
     
@@ -506,7 +508,7 @@ def plot_layout_with_waking_directions(
 
                     label_line(
                         l, linetext, ax, near_i=1, near_x=None, near_y=None, 
-                        rotation_offset=0
+                        rotation_offset=0, size=wake_label_size
                     )
 
                     label_exists[i,j] = True
@@ -549,6 +551,7 @@ def label_line(
     near_y=None,
     rotation_offset=0.0,
     offset=(0, 0),
+    size=7,
 ):
     """
     [summary]
@@ -567,18 +570,20 @@ def label_line(
             Defaults to 0.
         offset (tuple, optional): label offset from turbine location.
             Defaults to (0, 0).
+        size (float): font size. Defaults to 7.
 
     Raises:
         ValueError: ("Need one of near_i, near_x, near_y") raised if
             insufficient information is passed in.
     """
 
-    def put_label(i):
+    def put_label(i, size):
         """
         Add a label to index.
 
         Args:
             i (int): index to label.
+            size: font size
         """
         i = min(i, len(x) - 2)
         dx = sx[i + 1] - sx[i]
@@ -589,7 +594,7 @@ def label_line(
             pos[0],
             pos[1],
             label_text,
-            size=7,
+            size=size,
             rotation=rotation,
             color=line.get_color(),
             ha="center",
@@ -616,19 +621,19 @@ def label_line(
         i = near_i
         if i < 0:  # sanitize negative i
             i = len(x) + i
-        put_label(i)
+        put_label(i, size)
     elif near_x is not None:
         for i in range(len(x) - 2):
             if (x[i] < near_x and x[i + 1] >= near_x) or (
                 x[i + 1] < near_x and x[i] >= near_x
             ):
-                put_label(i)
+                put_label(i, size)
     elif near_y is not None:
         for i in range(len(y) - 2):
             if (y[i] < near_y and y[i + 1] >= near_y) or (
                 y[i + 1] < near_y and y[i] >= near_y
             ):
-                put_label(i)
+                put_label(i, size)
     else:
         raise ValueError("Need one of near_i, near_x, near_y")
 
