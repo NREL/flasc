@@ -433,16 +433,19 @@ def plot_layout_with_waking_directions(
     Returns:
         ax: the current axes for the thrust curve plot
     """
- 
-    ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
     
     # Combine default plotting options
-    default_plotting_dict = {
+    def_wake_plotting_dict = {
         "color" : "black", 
         "linestyle" : "solid",
         "linewidth" : 0.5
     }
-    wake_plotting_dict = {**default_plotting_dict, **wake_plotting_dict}
+    wake_plotting_dict = {**def_wake_plotting_dict, **wake_plotting_dict}
+    
+    def_layout_plotting_dict = {"turbine_indices" : range(len(fi.layout_x))}
+    layout_plotting_dict = {**def_layout_plotting_dict, **layout_plotting_dict}
+
+    ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
 
     N_turbs = len(fi.floris.farm.turbine_definitions)
     
@@ -485,7 +488,9 @@ def plot_layout_with_waking_directions(
             #import ipdb; ipdb.set_trace()
             if ~np.isnan(dists_m[i, j]) and \
                 dists_m[i, j] != 0.0 and \
-                ~(dists_m[i, j] > np.sort(dists_m[i,:])[limit_num]):
+                ~(dists_m[i, j] > np.sort(dists_m[i,:])[limit_num]) and \
+                i in layout_plotting_dict["turbine_indices"] and \
+                j in layout_plotting_dict["turbine_indices"]:
 
                 (l,) = ax.plot(fi.layout_x[[i,j]], fi.layout_y[[i,j]],
                                **wake_plotting_dict)
@@ -507,6 +512,7 @@ def plot_layout_with_waking_directions(
                     label_exists[i,j] = True
                     label_exists[j,i] = True
 
+    return ax
     
 def wake_angle(x_i, y_i, x_j, y_j):
     """
