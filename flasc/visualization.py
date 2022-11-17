@@ -577,13 +577,12 @@ def label_line(
             insufficient information is passed in.
     """
 
-    def put_label(i, size):
+    def put_label(i):
         """
         Add a label to index.
 
         Args:
             i (int): index to label.
-            size: font size
         """
         i = min(i, len(x) - 2)
         dx = sx[i + 1] - sx[i]
@@ -621,19 +620,19 @@ def label_line(
         i = near_i
         if i < 0:  # sanitize negative i
             i = len(x) + i
-        put_label(i, size)
+        put_label(i)
     elif near_x is not None:
         for i in range(len(x) - 2):
             if (x[i] < near_x and x[i + 1] >= near_x) or (
                 x[i + 1] < near_x and x[i] >= near_x
             ):
-                put_label(i, size)
+                put_label(i)
     elif near_y is not None:
         for i in range(len(y) - 2):
             if (y[i] < near_y and y[i + 1] >= near_y) or (
                 y[i + 1] < near_y and y[i] >= near_y
             ):
-                put_label(i, size)
+                put_label(i)
     else:
         raise ValueError("Need one of near_i, near_x, near_y")
 
