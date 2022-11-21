@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # Set up FLORIS interface
     print('Initializing the FLORIS object for our demo wind farm')
     file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.yaml")
+    fi_path = os.path.join(file_path, '../demo_dataset/demo_floris_input.yaml')
     fi = wfct.floris_interface.FlorisInterface(fi_path)
 
     # Defines alternative names for each turbine with 1-index
@@ -59,6 +59,8 @@ if __name__ == "__main__":
     # (using custom options)
     plot_layout_with_waking_directions(fi,
         limit_num = 3, # limit to 3 lines per turbine
+        layout_plotting_dict = {'turbine_names':turbine_names, 
+                                'turbine_indices':range(2,len(fi.layout_x))},
         wake_plotting_dict={'color':'r'}
     )
 
