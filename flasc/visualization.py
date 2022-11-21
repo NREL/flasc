@@ -402,6 +402,7 @@ def plot_layout_with_waking_directions(
     limit_dist_D=None,
     limit_dist_m=None,
     limit_num=None,
+    wake_label_size=7,
     ax=None
     ):
     """
@@ -418,7 +419,7 @@ def plot_layout_with_waking_directions(
             "color" : ("black"), 
             "linestyle" : ("solid"),
             "linewidth" : (0.5)
-        D: rotor diamter. Defaults to the rotor diamter of the first 
+        D: rotor diameter. Defaults to the rotor diamter of the first 
             turbine in the Floris object.
         limit_dist_D: limit on the distance between turbines to plot, 
             specified in rotor diamters.
@@ -428,21 +429,25 @@ def plot_layout_with_waking_directions(
             If specified, only the limit_num closest turbines are 
             plotted. However, directions already plotted from other 
             turbines are not considered in the count.
+        wake_label_size: font size for labels of direction/distance.
         ax: axes to plot on (if None, creates figure and axes)
     
     Returns:
         ax: the current axes for the thrust curve plot
     """
- 
-    ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
     
     # Combine default plotting options
-    default_plotting_dict = {
+    def_wake_plotting_dict = {
         "color" : "black", 
         "linestyle" : "solid",
-        "linewidth" : 0.5
+        "linewidth" : 0.5,
     }
-    wake_plotting_dict = {**default_plotting_dict, **wake_plotting_dict}
+    wake_plotting_dict = {**def_wake_plotting_dict, **wake_plotting_dict}
+    
+    def_layout_plotting_dict = {"turbine_indices" : range(len(fi.layout_x))}
+    layout_plotting_dict = {**def_layout_plotting_dict, **layout_plotting_dict}
+
+    ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
 
     N_turbs = len(fi.floris.farm.turbine_definitions)
     
@@ -485,7 +490,9 @@ def plot_layout_with_waking_directions(
             #import ipdb; ipdb.set_trace()
             if ~np.isnan(dists_m[i, j]) and \
                 dists_m[i, j] != 0.0 and \
-                ~(dists_m[i, j] > np.sort(dists_m[i,:])[limit_num]):
+                ~(dists_m[i, j] > np.sort(dists_m[i,:])[limit_num]) and \
+                i in layout_plotting_dict["turbine_indices"] and \
+                j in layout_plotting_dict["turbine_indices"]:
 
                 (l,) = ax.plot(fi.layout_x[[i,j]], fi.layout_y[[i,j]],
                                **wake_plotting_dict)
@@ -501,12 +508,13 @@ def plot_layout_with_waking_directions(
 
                     label_line(
                         l, linetext, ax, near_i=1, near_x=None, near_y=None, 
-                        rotation_offset=0
+                        rotation_offset=0, size=wake_label_size
                     )
 
                     label_exists[i,j] = True
                     label_exists[j,i] = True
 
+    return ax
     
 def wake_angle(x_i, y_i, x_j, y_j):
     """
@@ -543,6 +551,7 @@ def label_line(
     near_y=None,
     rotation_offset=0.0,
     offset=(0, 0),
+    size=7,
 ):
     """
     [summary]
@@ -561,6 +570,7 @@ def label_line(
             Defaults to 0.
         offset (tuple, optional): label offset from turbine location.
             Defaults to (0, 0).
+        size (float): font size. Defaults to 7.
 
     Raises:
         ValueError: ("Need one of near_i, near_x, near_y") raised if
@@ -583,7 +593,7 @@ def label_line(
             pos[0],
             pos[1],
             label_text,
-            size=7,
+            size=size,
             rotation=rotation,
             color=line.get_color(),
             ha="center",
