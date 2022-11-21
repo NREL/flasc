@@ -31,12 +31,14 @@ def df_movingaverage(
     calc_median_min_max_std=False,
     return_index_mapping=False,
 ):
-
-    # Copy and ensure dataframe is indexed by time
-    df = df_in.copy()
-    if "time" in df.columns:
-        df = df.set_index("time")
-
+    """
+    Note that median, minimum, and maximum do not handle angular 
+    quantities and should be treated carefully. 
+    Standard deviation handles angular quantities.
+    """
+    
+    df = df_in.set_index('time').copy()
+    
     # Find non-angular columns
     if isinstance(cols_angular, bool):
         if cols_angular:
@@ -44,112 +46,93 @@ def df_movingaverage(
         else:
             cols_angular = []
     cols_regular = [c for c in df.columns if c not in cols_angular]
+    
+    # Save the full columns
+    full_columns = df.columns
+    
+    # Carry out the mean calculations
+    df_regular = (df
+                  [cols_regular] # Select only non-angular columns
+                  .rolling(window_width,
+                      center=center,
+                      axis=0,
+                      min_periods=min_periods
+                  )
+                  .mean()
+                 )
 
-    # Now calculate cos and sin components for angular columns
-    sin_cols = ["{:s}_sin".format(c) for c in cols_angular]
-    cos_cols = ["{:s}_cos".format(c) for c in cols_angular]
-    df[sin_cols] = np.sin(df[cols_angular] * np.pi / 180.0)
-    df[cos_cols] = np.cos(df[cols_angular] * np.pi / 180.0)
 
-    # Drop angular columns
-    df = df.drop(columns=cols_angular)
+    df_cos = (df
+              [cols_angular] # Select only angular columns
+              .pipe(lambda df_: np.cos(df_ * np.pi / 180.))
+              .rolling(window_width,
+                  center=center,
+                  axis=0,
+                  min_periods=min_periods
+              )
+              .mean()
+             )
 
-    # Now calculate rolling (moving) average
-    df_roll = df.rolling(
-        window_width,
-        center=center,
-        axis=0,
-        min_periods=min_periods
-    )
-
-    # First calculate mean values of non-angular columns
-    df_ma = df_roll[cols_regular].mean().copy()
-
-    # Now add mean values of angular columns
-    df_ma[cols_angular] = wrap_360(
-        np.arctan2(
-            df_roll[sin_cols].mean().values,
-            df_roll[cos_cols].mean().values
-        ) * 180.0 / np.pi
-    )
-
-    # Figure out which indices/data points belong to each window
-    if (return_index_mapping or calc_median_min_max_std):
-        df_tmp = df_ma[[]].copy().reset_index(drop=False)
-        df_tmp["tmp"] = 1
-        df_tmp = df_tmp.rolling(window_width, center=center, axis=0, on="time")["tmp"]
-
-        # Grab index of first and last time entry for each window
-        windows_min = list(df_tmp.apply(lambda x: x.index[0]).astype(int))
-        windows_max = list(df_tmp.apply(lambda x: x.index[-1]).astype(int))
-
-        # Now create a large array that contains the array of indices, with
-        # the values in each row corresponding to the indices upon which that
-        # row's moving/rolling average is based. Note that we purposely create
-        # a larger matrix than necessary, since some rows/windows rely on more
-        # data (indices) than others. This is the case e.g., at the start of
-        # the dataset, at the end, and when there are gaps in the data. We fill
-        # the remaining matrix entries with "-1".
-        dn = int(np.ceil(window_width/fsut.estimate_dt(df_in["time"]))) + 5
-        data_indices = -1 * np.ones((df_ma.shape[0], dn), dtype=int)
-        for ii in range(len(windows_min)):
-            lb = windows_min[ii]
-            ub = windows_max[ii]
-            ind = np.arange(lb, ub + 1, dtype=int)
-            data_indices[ii, ind - lb] = ind
-
-    # Calculate median, min, max, std if necessary
-    if calc_median_min_max_std:
-        # Append all current columns with "_mean"
-        df_ma.columns = ["{:s}_mean".format(c) for c in df_ma.columns]
-
-        # Add statistics for regular columns
-        funs = ["median", "min", "max", "std"]
-        cols_reg_stats = ["_".join(i) for i in product(cols_regular, funs)]
-        df_ma[cols_reg_stats] = df_roll[cols_regular].agg(funs).copy()
-
-        # Add statistics for angular columns
-        # Firstly, create matrix with indices for the mean values
-        data_indices_mean = np.tile(np.arange(0, df_ma.shape[0]), (dn, 1)).T
-
-        # Grab raw and mean data and format as numpy arrays
-        D = df_in[cols_angular].values
-        M = df_ma[["{:s}_mean".format(c) for c in cols_angular]].values
-
-        # Add NaN row as last row. This corresponds to the -1 indices
-        # that we use as placeholders. This way, those indices do not
-        # count towards the final statistics (median, min, max, std).
-        D = np.vstack([D, np.nan * np.ones(D.shape[1])])
-        M = np.vstack([M, np.nan * np.ones(M.shape[1])])
-
-        # Now create a 3D matrix containing all values. The three dimensions
-        # come from:
-        #  > [0] one dimension containing the rolling windows,
-        #  > [1] one with the raw data underlying each rolling window,
-        #  > [2] one for each angular column within the dataset
-        values = D[data_indices, :]
-        values_mean = M[data_indices_mean, :]
-
-        # Center values around values_mean
-        values[values > (values_mean + 180.0)] += -360.0
-        values[values < (values_mean - 180.0)] += 360.0
-
-        # Calculate statistical properties and wrap to [0, 360)
-        values_median = wrap_360(np.nanmedian(values, axis=1))
-        values_min = wrap_360(np.nanmin(values, axis=1))
-        values_max = wrap_360(np.nanmax(values, axis=1))
-        values_std = wrap_360(np.nanstd(values, axis=1))
-
-        # Save to dataframe
-        df_ma[["{:s}_median".format(c) for c in cols_angular]] = values_median
-        df_ma[["{:s}_min".format(c) for c in cols_angular]] = values_min
-        df_ma[["{:s}_max".format(c) for c in cols_angular]] = values_max
-        df_ma[["{:s}_std".format(c) for c in cols_angular]] = values_std
-
-    if return_index_mapping:
-        return df_ma, data_indices
-
-    return df_ma
+    df_sin = (df
+              [cols_angular] # Select only angular columns
+              .pipe(lambda df_: np.sin(df_ * np.pi / 180.))
+              .rolling(window_width,
+                  center=center,
+                  axis=0,
+                  min_periods=min_periods
+               )
+               .mean()
+             )
+    
+    dfm =  (df_regular
+            .join((np.arctan2(df_sin,df_cos) * 180. / np.pi) % 360)
+            [full_columns] # put back in order
+           )
+    
+    if not calc_median_min_max_std:
+        
+        return dfm
+    
+    
+    if calc_median_min_max_std: # if including other statistics        
+   
+        df_regular_stats = (df
+                            .rolling(window_width,
+                                center=center,
+                                axis=0,
+                                min_periods=min_periods
+                            )
+                            .agg(["median", "min", "max", "std"])
+                            .pipe(lambda df_: flatten_cols(df_))
+                            )
+        
+        # Apply scipy.stats.circstd() step by step for performance reasons
+        df_angular_std = (df_sin
+                          .pow(2)
+                          .add(df_cos.pow(2))
+                          .pow(1/2) # sqrt()
+                          .apply(np.log) # log()
+                          .mul(-2)
+                          .pow(1/2) # sqrt()
+                          .mul(180/np.pi)
+                          .rename(
+                               {c: c + '_std' for c in dfm.columns},
+                               axis='columns'
+                          )
+                         )
+        
+        # Merge the stats
+        df_stats = (df_regular_stats
+                    [[c for c in df_regular_stats.columns if \
+                        c not in df_angular_std.columns]]
+                    .join(df_angular_std)
+                   )
+                
+        # Now merge in means and return
+        return (dfm
+                .rename({c: c + '_mean' for c in dfm.columns},axis='columns')
+                .join(df_stats)    
+               )
 
 
 def df_downsample(
@@ -300,10 +283,10 @@ def df_downsample(
         # df_out[["{:s}_std".format(c) for c in cols_angular]] = values_std
 
         # Rewrite to avoid fragmentation
-        df_out = pd.concat([df_out, pd.DataFrame(values_median, columns=["{:s}_median".format(c) for c in cols_angular])], axis=1)
-        df_out = pd.concat([df_out, pd.DataFrame(values_min, columns=["{:s}_min".format(c) for c in cols_angular])], axis=1)
-        df_out = pd.concat([df_out, pd.DataFrame(values_max, columns=["{:s}_max".format(c) for c in cols_angular])], axis=1)
-        df_out = pd.concat([df_out, pd.DataFrame(values_std, columns=["{:s}_std".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_median, index=df_out.index, columns=["{:s}_median".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_min, index=df_out.index, columns=["{:s}_min".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_max, index=df_out.index, columns=["{:s}_max".format(c) for c in cols_angular])], axis=1)
+        df_out = pd.concat([df_out, pd.DataFrame(values_std, index=df_out.index, columns=["{:s}_std".format(c) for c in cols_angular])], axis=1)
 
     if center:
         # Shift time column towards center of the bin
@@ -382,3 +365,10 @@ def df_resample_by_interpolation(
         df_res[c] = y
 
     return df_res
+
+# Function from "EFFECTIVE PANDAS" for flattening multi-level column names
+def flatten_cols (df):
+    cols = ['_'. join(map(str , vals ))
+    for vals in df.columns.to_flat_index ()]
+    df.columns = cols
+    return df

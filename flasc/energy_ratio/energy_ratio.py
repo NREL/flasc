@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from floris.utilities import wrap_360
-from pandas.core.base import DataError
+from pandas.errors import DataError
 
 from ..dataframe_operations import dataframe_manipulations as dfm
 from ..energy_ratio import energy_ratio_visualization as ervis
@@ -479,16 +479,20 @@ class energy_ratio:
         energy_ratios = df_summed.reset_index(drop=False)
         return energy_ratios
 
-    def plot_energy_ratio(self):
+    def plot_energy_ratio(self, hide_uq_labels=True):
         """This function plots the energy ratio against the wind direction,
         potentially with uncertainty bounds if N > 1 was specified by
         the user. One must first run get_energy_ratio() before attempting
         to plot the energy ratios.
 
+        Args:
+            hide_uq_labels (bool, optional): If true, do not specifically label
+                the confidence intervals in the plot
+
         Returns:
             ax [plt.Axes]: Axis handle for the figure.
         """
-        return ervis.plot(self.energy_ratio_out)
+        return ervis.plot(self.energy_ratio_out, hide_uq_labels=hide_uq_labels)
 
 
 # Support functions not included in energy_ratio class
