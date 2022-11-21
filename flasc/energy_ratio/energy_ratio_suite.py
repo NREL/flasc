@@ -315,7 +315,6 @@ class energy_ratio_suite:
         percentiles=[5.0, 95.0],
         balance_bins_between_dfs=True,
         return_detailed_output=False,
-        block_bootstrapping=False, 
         num_blocks=10,
         verbose=True,
     ):
@@ -400,6 +399,10 @@ class energy_ratio_suite:
                 direction and wind speed bin, among others. This is
                 particularly helpful in figuring out if the bins are well
                 balanced. Defaults to False.
+            num_blocks (int, optional): Number of blocks to use in block
+                boostrapping.  If = -1 then don't use block bootstrapping
+                and follow normal approach of sampling num_samples randomly
+                with replacement.  Defaults to -1.
             verbose (bool, optional): Print to console. Defaults to True.
 
         Returns:
@@ -499,7 +502,6 @@ class energy_ratio_suite:
                 N=N,
                 percentiles=percentiles,
                 return_detailed_output=return_detailed_output,
-                block_bootstrapping = block_bootstrapping, 
                 num_blocks = num_blocks
             )
 
