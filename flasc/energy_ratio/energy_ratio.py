@@ -300,8 +300,7 @@ class energy_ratio:
         N=1,
         percentiles=[5.0, 95.0],
         return_detailed_output=False,
-        block_bootstrapping=False, 
-        num_blocks=10
+        num_blocks=-1
     ):
         """This is the main function used to calculate the energy ratios
         for dataframe provided to the class during initialization. One
@@ -364,6 +363,10 @@ class energy_ratio:
                 direction and wind speed bin, among others. This is
                 particularly helpful in figuring out if the bins are well
                 balanced. Defaults to False.
+            num_blocks (int, optional): Number of blocks to use in block
+                boostrapping.  If = -1 then don't use block bootstrapping
+                and follow normal approach of sampling num_samples randomly
+                with replacement.  Defaults to -1.
 
         Returns:
             energy_ratios ([pd.DataFrame]): Dataframe containing the found
@@ -408,7 +411,6 @@ class energy_ratio:
             N=N,
             percentiles=percentiles,
             return_detailed_output=return_detailed_output,
-            block_bootstrapping=block_bootstrapping, 
             num_blocks=num_blocks
         )
         if return_detailed_output:
@@ -509,8 +511,7 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
     N=1,
     percentiles=[5.0, 95.0],
     return_detailed_output=False,
-    block_bootstrapping=False, 
-    num_blocks=10
+    num_blocks=-1
 ):
     """Wrapper function that calculates the energy ratio for every wind
     direction bin in the provided dataframe. This function wraps around
@@ -552,6 +553,10 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
             direction and wind speed bin, among others. This is
             particularly helpful in figuring out if the bins are well
             balanced. Defaults to False.
+        num_blocks (int, optional): Number of blocks to use in block
+            boostrapping.  If = -1 then don't use block bootstrapping
+            and follow normal approach of sampling num_samples randomly
+            with replacement.  Defaults to -1.
 
     Returns:
         energy_ratios ([pd.DataFrame]): Dataframe containing the found
@@ -600,7 +605,6 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
                 N=N,
                 percentiles=percentiles,
                 return_detailed_output=return_detailed_output,
-                block_bootstrapping = block_bootstrapping, 
                 num_blocks = num_blocks
         )
         if return_detailed_output:
@@ -640,13 +644,57 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
     N=1,
     percentiles=[5.0, 95.0],
     return_detailed_output=False,
-    block_bootstrapping = False, 
-    num_blocks = 10
+    num_blocks = -1
 ):
     """Get the energy ratio for one particular wind direction bin and
     an array of wind speed bins. This function also includes bootstrapping
     functionality by increasing the number of bootstrap evaluations (N) to
     larger than 1. The bootstrap percentiles default to 5 % and 95 %.
+
+    Args:
+        df_binned ([pd.DataFrame]): Dataframe containing the binned
+        data. This dataframe must contain, at the minimum, the following
+        columns:
+            * ws_bin: The wind speed bin
+            * wd_bin: The wind direction bin
+            * pow_ref: The reference power production, previously specified
+                by the user outside of this function/class. This value
+                belongs in the denominator in the energy ratio equation.
+            * pow_test: The test power production. This value belongs in the
+                nominator in the energy ratio equation.
+        df_freq ([pd.DataFrame]): Dataframe containing the frequency of every
+            wind direction and wind speed bin. This dataframe is typically
+            derived from the data itself but can also be a separate dataframe
+            based on the wind rose of the site.
+        N (int, optional): Number of bootstrap evaluations for
+            uncertainty quantification (UQ). If N=1, will not perform any
+            uncertainty quantification. Defaults to 1.
+        percentiles (list, optional): Confidence bounds for the
+            uncertainty quantification in percents. This value is only
+            relevant if N > 1 is specified. Defaults to [5., 95.].
+        return_detailed_output (bool, optional): Also calculate and
+            return detailed energy ratio information useful for debugging
+            and figuring out flaws in the data. This slows down the
+            calculations but can be very useful. The additional info is
+            written to self.df_lists[i]["er_results_info_dict"]. The
+            dictionary variable therein contains two fields, being
+            "df_per_wd_bin" and "df_per_ws_bin". The first gives an
+            overview of the energy ratio for every wind direction bin,
+            covering the collective effect of all wind speeds in the
+            data. The latter one, "df_per_ws_bin", yields even more
+            information and displays the energy ratio for every wind
+            direction and wind speed bin, among others. This is
+            particularly helpful in figuring out if the bins are well
+            balanced. Defaults to False.
+        num_blocks (int, optional): Number of blocks to use in block
+            boostrapping.  If = -1 then don't use block bootstrapping
+            and follow normal approach of sampling num_samples randomly
+            with replacement.  Defaults to -1.
+
+    Returns:
+        results_array ([np.array]): Numpy array of statistical results
+            [nominal energy ratio, low result, high result]
+            if bootstrapping disabled nominal result 3 times in row
     """
     # Get results excluding uncertainty
     if return_detailed_output:
@@ -667,8 +715,12 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
         results_array = np.array([energy_ratio_nominal] * 3, dtype=float)
     else:
 
+        # Check that num_blocks is an allowable number
+        if (num_blocks < -1) or (num_blocks == 0) or (num_blocks == 1) or (num_blocks > df_binned.shape[0]):
+            raise ValueError("num_blocks should either be -1 (don't use block bootstrapping) or else a number between 2 and num_samples")
+
         # If using block-bootstrapping, set up blocks
-        if block_bootstrapping:
+        if num_blocks > 0:
             block_list = list(range(num_blocks))  # List of all block names
             block_indices = np.arange(df_binned.shape[0]) # Simple index for iloc
             block_length = int(len(block_indices) / num_blocks) # Length of each block
@@ -680,7 +732,7 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
         bootstrap_results = np.zeros(N)
         bootstrap_results[0] = energy_ratio_nominal
         for i in range(1, N):
-            if not block_bootstrapping:
+            if num_blocks <= 0:
                 df_randomized = df_binned.sample(frac=1, replace=True).copy()
             else:
                 test_blocks = choices(block_list, k = num_blocks) # Choose a set of blocks
