@@ -58,7 +58,7 @@ class energy_ratio_suite:
 
     # Public methods
 
-    def add_df(self, df, name):
+    def add_df(self, df, name, color=None):
         """Add a dataframe to the class. This function verifies if the
         dataframe inserted matches in formatting with the already existing
         dataframes in the class. It also verifies if the right columns
@@ -96,7 +96,7 @@ class energy_ratio_suite:
                 + "addition."
             )
 
-        new_entry = dict({"df": df, "name": name})
+        new_entry = dict({"df": df, "name": name, "color":color})
         self.df_list.append(new_entry)
 
         default_ids = np.array([True for _ in range(df.shape[0])])
@@ -651,12 +651,13 @@ class energy_ratio_suite:
         if superimpose:
             results_array = [df["er_results"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
-            fig, ax = vis.plot(results_array, labels_array, hide_uq_labels=hide_uq_labels)
+            colors_array = [df["color"] for df in self.df_list]
+            fig, ax = vis.plot(results_array, labels_array, colors=colors_array, hide_uq_labels=hide_uq_labels)
 
         else:
             ax = []
             for df in self.df_list:
-                fig, axi = vis.plot(df["er_results"], df["name"], hide_uq_labels=hide_uq_labels)
+                fig, axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
                 ax.append(axi)
 
         return ax
