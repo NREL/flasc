@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from floris import tools as wfct
 
 
-def plot(energy_ratios, labels=None, hide_uq_labels=True):
+def plot(energy_ratios, labels=None, colors=None, hide_uq_labels=True):
     """This function plots energy ratios against the reference wind
     direction. The plot may or may not include uncertainty bounds,
     depending on the information contained in the provided energy ratio
@@ -45,6 +45,7 @@ def plot(energy_ratios, labels=None, hide_uq_labels=True):
             dataframes. Defaults to None.
         hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
+        color (str, optional): Color specified to plot the energy ratio
 
     Returns:
         fig ([plt.Figure]): Figure in which energy ratios are plotted.
@@ -64,6 +65,11 @@ def plot(energy_ratios, labels=None, hide_uq_labels=True):
 
     if hide_uq_labels:
         uq_labels = ['_nolegend_' for l in uq_labels]
+
+    # If colors is a list that contains None, assume colors not assigned
+    if isinstance(colors, (list, tuple)):
+        if None in colors:
+            colors = None
 
     N = len(energy_ratios)
     fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(10, 5))
@@ -99,21 +105,38 @@ def plot(energy_ratios, labels=None, hide_uq_labels=True):
         ax[0].plot(xlims, [1.0, 1.0], color="black")
 
         # Plot energy ratios
-        ax[0].plot(x, df["baseline"], "-o", markersize=3.0, label=labels[ii])
+        if colors is None:
+            ax[0].plot(x, df["baseline"], "-o", markersize=3.0, label=labels[ii])
+        else:
+            ax[0].plot(x, df["baseline"], "-o", markersize=3.0, label=labels[ii], color=colors[ii])
 
         # Plot uncertainty bounds from bootstrapping, if applicable
         has_uq = np.max(np.abs(df["baseline"] - df["baseline_lb"])) > 0.001
         if has_uq:
-            ax[0].fill_between(
-                x,
-                df["baseline_lb"],
-                df["baseline_ub"],
-                alpha=0.25,
-                label=uq_labels[ii],
-            )
+
+            if colors is None:
+                ax[0].fill_between(
+                    x,
+                    df["baseline_lb"],
+                    df["baseline_ub"],
+                    alpha=0.25,
+                    label=uq_labels[ii],
+                )
+            else:
+                ax[0].fill_between(
+                    x,
+                    df["baseline_lb"],
+                    df["baseline_ub"],
+                    alpha=0.25,
+                    label=uq_labels[ii],
+                    color=colors[ii]
+                )
 
         # Plot the bin count
-        ax[1].bar(x - (ii - N / 2) * bar_width, df["bin_count"], width=bar_width)
+        if colors is None:
+            ax[1].bar(x - (ii - N / 2) * bar_width, df["bin_count"], width=bar_width)
+        else:
+            ax[1].bar(x - (ii - N / 2) * bar_width, df["bin_count"], width=bar_width, color=colors[ii])
 
     # Format the energy ratio plot
     ax[0].set_ylabel("Energy ratio (-)")
