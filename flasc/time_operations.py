@@ -28,8 +28,7 @@ def df_movingaverage(
     window_width=td(seconds=60),
     min_periods=1,
     center=True,
-    calc_median_min_max_std=False,
-    return_index_mapping=False,
+    calc_median_min_max_std=False
 ):
     """
     Note that median, minimum, and maximum do not handle angular 
@@ -141,8 +140,7 @@ def df_downsample(
     window_width=td(seconds=60),
     min_periods=1,
     center=False,
-    calc_median_min_max_std=False,
-    return_index_mapping=False,
+    calc_median_min_max_std=False
 ):
 
     # Copy and ensure dataframe is indexed by time
