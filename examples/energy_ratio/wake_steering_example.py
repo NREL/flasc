@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
+import seaborn as sns
 
 from floris import tools as wfct
 from floris.utilities import wrap_360
@@ -118,15 +119,20 @@ if __name__ == "__main__":
         'pow_002':power_wakesteering_downstream
     })
 
+    # Make a color palette that visually links the nominal and noisy data sets together
+    color_palette = sns.color_palette("Paired",4)[::-1]
+    # color_palette = ['r','g','b','k']
 
     # Initialize the energy ratio suite object and add each dataframe
     # separately. 
     fsc = energy_ratio_suite.energy_ratio_suite()
-    fsc.add_df(df_baseline, 'Baseline')
-    fsc.add_df(df_wakesteering, 'WakeSteering')
-    fsc.add_df(df_baseline_noisy, 'Baseline (Noisy)')
-    fsc.add_df(df_wakesteering_noisy, 'WakeSteering (Noisy)')
+    fsc.add_df(df_baseline, 'Baseline', color_palette[0])
+    fsc.add_df(df_wakesteering, 'WakeSteering', color_palette[1])
+    fsc.add_df(df_baseline_noisy, 'Baseline (Noisy)', color_palette[2])
+    fsc.add_df(df_wakesteering_noisy, 'WakeSteering (Noisy)', color_palette[3])
 
+    # Print out the energy ratio
+    fsc.print_dfs()
 
 
     # Calculate and plot the energy ratio for the downstream turbine [2]
