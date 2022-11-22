@@ -294,6 +294,7 @@ def interpolate_floris_from_df_approx(
     method='linear',
     verbose=True
 ):
+
     # Format dataframe and get number of turbines
     df = df.reset_index(drop=('time' in df.columns))
     nturbs = fsut.get_num_turbines(df_approx)
@@ -395,7 +396,55 @@ def calc_floris_approx_table(
     wd_array=np.arange(0.0, 360.0, 1.0),
     ws_array=np.arange(0.001, 26.001, 1.0),
     ti_array=None,
+    save_turbine_inflow_conditions_to_df=False,
     ):
+    """This function calculates a large number of floris solutions for a rectangular grid
+    of wind directions ('wd_array'), wind speeds ('ws_array'), and optionally turbulence
+    intensities ('ti_array'). The variables that are saved are each turbine's power
+    production, and optionally also each turbine's inflow wind direction, wind speed and
+    turbulence intensity if 'save_turbine_inflow_conditions_to_df==True'.
+
+    Args:
+        fi (FlorisInterface): FlorisInterface object.
+        wd_array (array, optional): Array of wind directions to evaluate in [deg]. This expands with the
+          number of wind speeds and turbulence intensities. Defaults to np.arange(0.0, 360.0, 1.0).
+        ws_array (array, optional): Array of wind speeds to evaluate in [m/s]. This expands with the
+          number of wind directions and turbulence intensities. Defaults to np.arange(0.001, 26.001, 1.0).
+        ti_array (array, optional): Array of turbulence intensities to evaluate in [-]. This expands with the
+          number of wind directions and wind speeds. If None is specified, will only evaluate the current
+          turbulence intensity in floris. Defaults to None.
+        save_turbine_inflow_conditions_to_df (bool, optional): When set to True, will also write each turbine's
+        inflow wind direction, wind speed and turbulence intensity to the output dataframe. This increases the
+        dataframe size but can provide useful information. Defaults to False.
+
+    Returns:
+        df_approx (pd.DataFrame): A Pandas DataFrame containing the floris simulation results for all wind
+          direction, wind speed and turbulence intensity combinations. The outputs are the power production
+          for each turbine, 'pow_000' until 'pow_{nturbs-1}', and optionally als each turbine's inflow wind
+          direction, wind speed and turbulence intensity when save_turbine_inflow_conditions_to_df==True.
+
+        Example for a 7-turbine floris object with
+            wd_array=np.arange(0.0, 360.0, 3.0)
+            ws_array=np.arange(0.001, 26.001, 1.0)
+            ti_array=np.arange(0.03, 0.3001, 0.3)
+            save_turbine_inflow_conditions_to_df=True
+
+        Yields:
+        
+        df_approx=
+                  wd    ws    ti    pow_000     ws_000  wd_000  ti_000  pow_001  ...    pow_006     ws_006  wd_006  ti_006
+        0        0.0   0.0  0.03        NaN        NaN     0.0     NaN      NaN  ...        NaN        NaN     0.0     NaN
+        1        3.0   0.0  0.03        NaN        NaN     3.0     NaN      NaN  ...        NaN        NaN     3.0     NaN
+        2        6.0   0.0  0.03        NaN        NaN     6.0     NaN      NaN  ...        NaN        NaN     6.0     NaN
+        3        9.0   0.0  0.03        NaN        NaN     9.0     NaN      NaN  ...        NaN        NaN     9.0     NaN
+        4       12.0   0.0  0.03        NaN        NaN    12.0     NaN      NaN  ...        NaN        NaN    12.0     NaN
+        ...      ...   ...   ...        ...        ...     ...     ...           ...        ...        ...     ...     ...       
+        32395  345.0  26.0  0.30        0.0  25.880843   345.0     0.3      0.0  ...        0.0  25.881165   345.0     0.3
+        32396  348.0  26.0  0.30        0.0  25.880781   348.0     0.3      0.0  ...        0.0  25.881165   348.0     0.3
+        32397  351.0  26.0  0.30        0.0  25.880755   351.0     0.3      0.0  ...        0.0  25.881165   351.0     0.3
+        32398  354.0  26.0  0.30        0.0  25.880772   354.0     0.3      0.0  ...        0.0  25.881165   354.0     0.3
+        32399  357.0  26.0  0.30        0.0  25.880829   357.0     0.3      0.0  ...        0.0  25.881165   357.0     0.3
+    """
 
     # if ti_array is None, use the current value in the FLORIS object
     if ti_array is None:
@@ -432,8 +481,14 @@ def calc_floris_approx_table(
         solutions_dict = {"wd": wd_mesh.flatten(), "ws": ws_mesh.flatten()}
         solutions_dict["ti"] = turb_intensity * np.ones(len(wd_array) * len(ws_array))
         for turbi in range(num_turbines):
-            solutions_dict["pow_{:03d}".format(turbi)] = \
-                turbine_powers[:, :, turbi].flatten()
+            solutions_dict["pow_{:03d}".format(turbi)] = turbine_powers[:, :, turbi].flatten()
+            if save_turbine_inflow_conditions_to_df:
+                solutions_dict["ws_{:03d}".format(turbi)] = \
+                    fi.floris.flow_field.u.mean(axis=4).mean(axis=3)[:, :, turbi].flatten()
+                solutions_dict["wd_{:03d}".format(turbi)] = \
+                    wd_mesh.flatten()  # Uniform wind direction
+                solutions_dict["ti_{:03d}".format(turbi)] = \
+                    fi.floris.flow_field.turbulence_intensity_field[:, :, turbi, 0, 0].flatten()
         df_list.append(pd.DataFrame(solutions_dict))
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
