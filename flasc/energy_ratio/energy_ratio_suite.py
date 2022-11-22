@@ -315,7 +315,7 @@ class energy_ratio_suite:
         percentiles=[5.0, 95.0],
         balance_bins_between_dfs=True,
         return_detailed_output=False,
-        num_blocks=10,
+        num_blocks=-1,
         verbose=True,
     ):
         """This is the main function used to calculate the energy ratios
