@@ -140,7 +140,8 @@ def df_downsample(
     window_width=td(seconds=60),
     min_periods=1,
     center=False,
-    calc_median_min_max_std=False
+    calc_median_min_max_std=False,
+    return_index_mapping=False
 ):
 
     # Copy and ensure dataframe is indexed by time
@@ -286,8 +287,46 @@ def df_downsample(
         # Shift time column towards center of the bin
         df_out.index = df_out.index - window_width / 2.0
 
-    return df_out.reset_index() # Conform to new standard that, between functions, time is a column
+    if return_index_mapping:
+        df_tmp = df[[]].copy().reset_index()
+        df_tmp["tmp"] = 1
+        df_tmp = df_tmp.resample(window_width, on="time", label="right", axis=0)["tmp"]
 
+
+        # Grab index of first and last time entry for each window
+        def get_first_index(x):
+            if len(x) <= 0:
+                return -1
+            else:
+                return x.index[0]
+        def get_last_index(x):
+            if len(x) <= 0:
+                return -1
+            else:
+                return x.index[-1]
+
+        windows_min = list(df_tmp.apply(get_first_index).astype(int))
+        windows_max = list(df_tmp.apply(get_last_index).astype(int))
+
+        # Now create a large array that contains the array of indices, with
+        # the values in each row corresponding to the indices upon which that
+        # row's moving/rolling average is based. Note that we purposely create
+        # a larger matrix than necessary, since some rows/windows rely on more
+        # data (indices) than others. This is the case e.g., at the start of
+        # the dataset, at the end, and when there are gaps in the data. We fill
+        # the remaining matrix entries with "-1".
+        dn = int(np.ceil(window_width/fsut.estimate_dt(df_in["time"]))) + 5
+        data_indices = -1 * np.ones((df_out.shape[0], dn), dtype=int)
+        for ii in range(len(windows_min)):
+            lb = windows_min[ii]
+            ub = windows_max[ii]
+            if not ((lb == -1) | (ub == -1)):
+                ind = np.arange(lb, ub + 1, dtype=int)
+                data_indices[ii, ind - lb] = ind
+        
+        return df_out.reset_index(), data_indices
+    else:
+        return df_out.reset_index() # Conform to new standard that, between functions, time is a column
 
 def df_resample_by_interpolation(
     df,
