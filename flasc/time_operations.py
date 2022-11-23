@@ -293,7 +293,7 @@ def df_downsample(
                     "tmp":1}
             )
             .resample(window_width, on="time", label="right", axis=0)
-        )["tmp"]
+        )
 
         # Grab index of first and last time entry for each window
         def get_first_index(x):
@@ -307,8 +307,8 @@ def df_downsample(
             else:
                 return x.index[-1]
 
-        windows_min = list(df_tmp.apply(get_first_index).astype(int))
-        windows_max = list(df_tmp.apply(get_last_index).astype(int))
+        windows_min = df_tmp.apply(get_first_index)["tmp"].to_list()
+        windows_max = df_tmp.apply(get_last_index)["tmp"].to_list()
 
         # Now create a large array that contains the array of indices, with
         # the values in each row corresponding to the indices upon which that
