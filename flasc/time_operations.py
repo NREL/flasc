@@ -288,10 +288,12 @@ def df_downsample(
         df_out.index = df_out.index - window_width / 2.0
 
     if return_index_mapping:
-        df_tmp = df[[]].copy().reset_index()
-        df_tmp["tmp"] = 1
-        df_tmp = df_tmp.resample(window_width, on="time", label="right", axis=0)["tmp"]
-
+        df_tmp = (pd.DataFrame(
+            data = {"time":df.reset_index()["time"],
+                    "tmp":1}
+            )
+            .resample(window_width, on="time", label="right", axis=0)
+        )["tmp"]
 
         # Grab index of first and last time entry for each window
         def get_first_index(x):
