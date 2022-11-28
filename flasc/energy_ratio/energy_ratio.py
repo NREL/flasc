@@ -715,6 +715,10 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
         results_array = np.array([energy_ratio_nominal] * 3, dtype=float)
     else:
 
+        # First check, if num_blocks is > number of points, assign number of points
+        if num_blocks > df_binned.shape[0]:
+            num_blocks = df_binned.shape[0]
+
         # Check that num_blocks is an allowable number
         if (num_blocks < -1) or (num_blocks == 0) or (num_blocks == 1) or (num_blocks > df_binned.shape[0]):
             raise ValueError("num_blocks should either be -1 (don't use block bootstrapping) or else a number between 2 and num_samples")
