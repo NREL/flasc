@@ -39,26 +39,30 @@ class TestDataFrameResampling(unittest.TestCase):
 #     if True:
     def test_downsampling(self):
         df = load_data()
-        df_ds = df_downsample(
+        df_ds, data_indices = df_downsample(
             df_in=df,
             cols_angular=["wd_000"],
             window_width=td(seconds=5),
             min_periods=1,
             center=True,
-            calc_median_min_max_std=True
+            calc_median_min_max_std=True,
+            return_index_mapping=True
         )
 
         # Check solutions: for first row
         self.assertAlmostEqual(df_ds.iloc[0]["ws_000_mean"], 7.10)
         self.assertAlmostEqual(df_ds.iloc[0]["ws_000_std"], 0.10)
         self.assertAlmostEqual(df_ds.iloc[0]["wd_000_std"], 2.625014, places=4)
+        self.assertTrue(np.all(np.unique(data_indices[0, :]) == [-1, 0, 1, 2]))
 
         # Check solutions: for big chunk of data in middle of dataframe (Nones)
         self.assertTrue(df_ds.drop(columns=["time"]).\
             iloc[4:11].isna().all().all())
+        self.assertTrue(np.all(np.unique(data_indices[4:11, :]) == [-1]))
 
         # Check solutions: for one but last row
         self.assertAlmostEqual(df_ds.iloc[-2]["ws_000_mean"], 7.0)
+        self.assertTrue(np.all(np.unique(data_indices[-2, :]) == [-1, 6]))
         self.assertTrue(np.isnan(df_ds.iloc[-2]["vane_000_std"]))
 
     def test_moving_average(self):
