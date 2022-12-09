@@ -68,7 +68,10 @@ def plot(energy_ratios, labels=None, colors=None, hide_uq_labels=True):
 
     # If colors is a list that contains None, assume colors not assigned
     if isinstance(colors, (list, tuple)):
+
         if None in colors:
+            if not all(v is None for v in colors):
+                print("It's possible some but not all colors are supplied, therefore reverting to defaults")
             colors = None
 
     N = len(energy_ratios)
