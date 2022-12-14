@@ -148,5 +148,15 @@ if __name__ == "__main__":
     )
     fsc.plot_energy_ratios(superimpose=True)
 
+    fsc.get_energy_ratios_gain(
+        test_turbines=[2],
+        wd_step=2.0,
+        ws_step=1.0,
+        N=10,
+        percentiles=[5., 95.],
+        verbose=False
+    )
+    fsc.plot_energy_ratio_gains(superimpose=True)
+
     plt.show()
 
