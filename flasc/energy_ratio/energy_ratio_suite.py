@@ -13,7 +13,7 @@
 
 import numpy as np
 import pandas as pd
-from pandas.core.base import DataError
+from pandas.errors import DataError
 from scipy.interpolate import NearestNDInterpolator
 
 from ..energy_ratio import energy_ratio as er
@@ -58,7 +58,7 @@ class energy_ratio_suite:
 
     # Public methods
 
-    def add_df(self, df, name):
+    def add_df(self, df, name, color=None):
         """Add a dataframe to the class. This function verifies if the
         dataframe inserted matches in formatting with the already existing
         dataframes in the class. It also verifies if the right columns
@@ -96,7 +96,7 @@ class energy_ratio_suite:
                 + "addition."
             )
 
-        new_entry = dict({"df": df, "name": name})
+        new_entry = dict({"df": df, "name": name, "color":color})
         self.df_list.append(new_entry)
 
         default_ids = np.array([True for _ in range(df.shape[0])])
@@ -315,6 +315,7 @@ class energy_ratio_suite:
         percentiles=[5.0, 95.0],
         balance_bins_between_dfs=True,
         return_detailed_output=False,
+        num_blocks=-1,
         verbose=True,
     ):
         """This is the main function used to calculate the energy ratios
@@ -398,6 +399,10 @@ class energy_ratio_suite:
                 direction and wind speed bin, among others. This is
                 particularly helpful in figuring out if the bins are well
                 balanced. Defaults to False.
+            num_blocks (int, optional): Number of blocks to use in block
+                boostrapping.  If = -1 then don't use block bootstrapping
+                and follow normal approach of sampling num_samples randomly
+                with replacement.  Defaults to -1.
             verbose (bool, optional): Print to console. Defaults to True.
 
         Returns:
@@ -497,6 +502,7 @@ class energy_ratio_suite:
                 N=N,
                 percentiles=percentiles,
                 return_detailed_output=return_detailed_output,
+                num_blocks = num_blocks
             )
 
             # Save each output to self
@@ -625,7 +631,7 @@ class energy_ratio_suite:
 
         return self.df_list
 
-    def plot_energy_ratios(self, superimpose=True):
+    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
@@ -636,6 +642,8 @@ class energy_ratio_suite:
             of all datasets into the same figure. If False, will plot the
             energy ratio of each dataset into a separate figure. Defaults
             to True.
+            hide_uq_labels (bool, optional): If true, do not specifically label
+            the confidence intervals in the plot
 
         Returns:
             ax [plt.Axes]: Axis handle for the figure.
@@ -643,12 +651,13 @@ class energy_ratio_suite:
         if superimpose:
             results_array = [df["er_results"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
-            fig, ax = vis.plot(results_array, labels_array)
+            colors_array = [df["color"] for df in self.df_list]
+            fig, ax = vis.plot(results_array, labels_array, colors=colors_array, hide_uq_labels=hide_uq_labels)
 
         else:
             ax = []
             for df in self.df_list:
-                fig, axi = vis.plot(df["er_results"], df["name"])
+                fig, axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
                 ax.append(axi)
 
         return ax

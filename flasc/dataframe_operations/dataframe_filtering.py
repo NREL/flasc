@@ -92,7 +92,7 @@ def plot_highlight_data_by_conds(df, conds, ti):
         conds = [conds]
 
     # Convert time arrays to a string with 'year+week'
-    tfull = [int('%04d%02d' % (i.year, i.week)) for i in df.time]
+    tfull = [int('%04d%02d' % (i.isocalendar().year, i.isocalendar().week)) for i in df.time]
     time_array = np.unique(tfull)
 
     # Get number of non-NaN entries before filtering
@@ -113,7 +113,7 @@ def plot_highlight_data_by_conds(df, conds, ti):
         # Convert time array of occurrences to year+week no.
         conds_new = conds[ii] & (~conds_combined)
         conds_combined = (conds_combined | np.array(conds[ii], dtype=bool))
-        subset_time_array = [int('%04d%02d' % (i.year, i.week)) for i in df.loc[conds_new, 'time']]
+        subset_time_array = [int('%04d%02d' % (i.isocalendar().year, i.isocalendar().week)) for i in df.loc[conds_new, 'time']]
 
         for iii in range(len(time_array)):
             # Count occurrences for condition

@@ -14,7 +14,7 @@
 import copy
 from datetime import timedelta as td
 import numpy as np
-from pandas.core.base import DataError
+from pandas.errors import DataError
 import scipy.optimize as opt
 import scipy.stats as spst
 
