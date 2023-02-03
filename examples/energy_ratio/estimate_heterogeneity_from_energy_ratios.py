@@ -1,12 +1,13 @@
 import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
+import seaborn
 from floris.utilities import wrap_360
 
-from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
+from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio_suite
 from flasc.visualization import plot_floris_layout
 
@@ -146,7 +147,7 @@ if __name__ == "__main__":
     # an unreliable wind direction measurement. Here, for explanation purposes,
     # we just exclude turbine 3 from our analysis.
     nturbs = len(fi.layout_x)
-    bad_turbs = [3]  # Just hypothetical situation: assume turbine 3 gave faulty wind directions so we ignore it
+    bad_turbs = [3]  # hypothetical situation: assume turbs 3 gave faulty wind dirs so ignore it
     turb_wd_measurement = [i for i in range(nturbs) if i not in bad_turbs]
 
     # We use a wind direction bin width of 15 deg. Thus, if we look at
