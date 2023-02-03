@@ -16,13 +16,12 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from floris.tools.visualization import visualize_cut_plane
+from floris.utilities import wrap_360
 
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio_suite
 from flasc.visualization import plot_floris_layout
-
-from floris.tools.visualization import visualize_cut_plane
-from floris.utilities import wrap_360
 
 
 def load_data():
