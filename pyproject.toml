@@ -1,0 +1,111 @@
+[build-system]
+requires = ["setuptools >= 40.6.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[coverage.run]
+# Coverage.py configuration file
+# https://coverage.readthedocs.io/en/latest/config.html
+branch = true
+source = "flasc/*"
+omit = [
+    "setup.py",
+    "tests/*"
+]
+
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+filterwarnings = [
+    "ignore::DeprecationWarning:pandas.*:"
+]
+
+
+[tool.ruff]
+src = ["flasc", "tests"]
+line-length = 100
+target-version = "py310"
+
+# See https://github.com/charliermarsh/ruff#supported-rules
+# for rules included and matching to prefix.
+select = ["E", "F"]
+
+# F401 unused-import: Ignore until all used isort flags are adopted in ruff
+ignore = ["F401"]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+# fixable = ["A", "B", "C", "D", "E", "F"]
+fixable = ["E", "F"]
+unfixable = []
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# [tool.ruff.per-file-ignores]
+# # F841 unused-variable: ignore since this file uses numexpr and many variables look unused
+# "floris/simulation/wake_deflection/jimenez.py" = ["F841"]
+# "floris/simulation/wake_velocity/jensen.py" = ["F841"]
+# "floris/simulation/wake_velocity/gauss.py" = ["F841"]
+
+# # FIXME
+# "floris/tools/interface_utilities.py" = ["F821"]
+# "floris/tools/wind_rose.py" = ["F821"]
+
+[tool.ruff.isort]
+combine-as-imports = true
+known-first-party = ["flasc"]
+order-by-type = false
+
+# [tool.ruff.mccabe]
+# # Unlike Flake8, default to a complexity level of 10.
+# max-complexity = 10
+
+
+[tool.isort]
+sections = [
+    "FUTURE",
+    "STDLIB",
+    "THIRDPARTY",
+    "FIRSTPARTY",
+    "LOCALFOLDER"
+]
+known_first_party = [
+    "flasc"
+]
+multi_line_output = 3
+combine_as_imports = true
+force_grid_wrap = 3
+include_trailing_comma = false
+use_parentheses = true
+lines_after_imports = 2
+line_length = 100
+order_by_type = false
+
+# length_sort = true
+# case_sensitive: False
+# force_sort_within_sections: True
+# reverse_relative: True
+# sort_relative_in_force_sorted_sections: True
