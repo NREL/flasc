@@ -10,20 +10,19 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-import numpy as np
-import matplotlib.pyplot as plt
 import os
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-
 from floris import tools as wfct
 from floris.utilities import wrap_360
 
 from flasc.energy_ratio import energy_ratio_suite
+
 # from flasc import floris_tools as fsatools
-
 from flasc.visualization import plot_layout_with_waking_directions
-
 
 if __name__ == "__main__":
 
