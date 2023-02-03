@@ -5,7 +5,9 @@ from setuptools import setup, find_packages
 
 # Package meta-data.
 NAME = "flasc"
-DESCRIPTION = "FLASC provides a rich suite of analysis tools for SCADA data filtering & analysis, wind farm model validation, field experiment design, and field experiment monitoring."
+DESCRIPTION = "FLASC provides a rich suite of analysis tools for SCADA data filtering" \
+              " & analysis, wind farm model validation, field experiment design, and " \
+              " field experiment monitoring."
 URL = "https://github.com/NREL/flasc"
 EMAIL = "paul.fleming@nrel.gov"
 AUTHOR = "NREL National Wind Technology Center"
