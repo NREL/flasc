@@ -11,15 +11,15 @@
 # the License.
 
 
-import matplotlib.pyplot as plt
 import os
-import pandas as pd
 
+import matplotlib.pyplot as plt
+import pandas as pd
 from floris import tools as wfct
-from flasc.energy_ratio import energy_ratio
-from flasc.dataframe_operations import \
-    dataframe_manipulations as dfm
+
 from flasc import floris_tools as fsatools
+from flasc.dataframe_operations import dataframe_manipulations as dfm
+from flasc.energy_ratio import energy_ratio
 
 
 def load_data():
