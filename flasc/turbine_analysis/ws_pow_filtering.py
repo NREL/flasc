@@ -764,16 +764,7 @@ class ws_pw_curve_filtering:
         # Finally, update status columns in dataframe
         self._update_status_flags()
 
-    def save_df(self, fout):
-        """Apply all filters to the dataframe by marking any fauilty data
-        as None/np.nan. Then, save the dataframe to the specified path.
-
-        Args:
-            fout ([str]): Destination path for the output .ftr file.
-
-        Returns:
-            df ([pd.DataFrame]): Processed dataframe.
-        """
+    def get_df(self):
         if not (self.turbine_list == self.full_turbs_list):
             print(
                 "Skipping saving dataframe since not all turbines are filtered."
@@ -795,7 +786,20 @@ class ws_pw_curve_filtering:
             df = df.reset_index(drop=True)
         else:
             df = df.reset_index(drop=False)
+        
+        return df
 
+    def save_df(self, fout):
+        """Apply all filters to the dataframe by marking any fauilty data
+        as None/np.nan. Then, save the dataframe to the specified path.
+
+        Args:
+            fout ([str]): Destination path for the output .ftr file.
+
+        Returns:
+            df ([pd.DataFrame]): Processed dataframe.
+        """
+        df = self.get_df()
         df.to_feather(fout)
         return df
 
