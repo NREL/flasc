@@ -158,19 +158,41 @@ class TableAnalysis():
 
 
     #TODO Could this name be more clear?
-    def get_energy_in_range(self, ws_min, ws_max, wd_min, wd_max, turbine):
+    def get_energy_in_range(self, 
+                            turbine, 
+                            ws_min=None, 
+                            ws_max=None, 
+                            wd_min=None,
+                            wd_max=None,
+                            minutes_per_point=10.0):
         """Calculate the energy in a range of wind speed and wind direction.
 
         Args:
+            turbine (_type_): _description_
             ws_min (_type_): _description_
             ws_max (_type_): _description_
             wd_min (_type_): _description_
             wd_max (_type_): _description_
-            turbine (_type_): _description_
+            minutes_per_point (_type_): _description_
+            
 
         Returns:
             _type_: _description_
         """            
+
+        #TODO I think this right now returns the average power so needs to be scaled up
+        # by number of hours to get energy
+
+        # Set the default values for the wind speed and wind direction bins
+        if ws_min is None:
+            ws_min = self.ws_bin_centers[0]
+        if ws_max is None:
+            ws_max = self.ws_bin_centers[-1]
+        if wd_min is None:
+            wd_min = self.wd_bin_centers[0]
+        if wd_max is None:
+            wd_max = self.wd_bin_centers[-1]
+
         
         # Get the indices of the wind speed and wind direction bins
         ws_ind = np.where((self.ws_bin_centers >= ws_min) & (self.ws_bin_centers <= ws_max))[0]
@@ -324,7 +346,7 @@ if __name__ == '__main__':
 
    
 
-    print(ta.get_energy_in_range(8, 12, 0, 90, 0))
+    print(ta.get_energy_in_range(0, 8, 12, 0, 90))
 
     print(ta.get_energy_by_wd_bin(0, 8, 12)[0].shape)
 
