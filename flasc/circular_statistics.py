@@ -17,6 +17,11 @@ from floris.utilities import wrap_360
 
 
 def calc_wd_mean_radial(angles_array_deg, axis=0):
+    
+    # Prevent calculation if all inputs are NaNs
+    if np.isnan(angles_array_deg).all():
+        return np.nan
+    
     # Use unit vectors to calculate the mean
     wd_x = np.cos(angles_array_deg * np.pi / 180.)
     wd_y = np.sin(angles_array_deg * np.pi / 180.)
