@@ -50,6 +50,16 @@ class TableAnalysis():
         # Make a copy of the dataframe
         df = df_in.copy()
 
+        # Check that the dataframe has the correct columns
+        if not 'wd' in df.columns:
+            raise ValueError("Dataframe must have a column named 'wd'")
+        if not 'ws' in df.columns:
+            raise ValueError("Dataframe must have a column named 'ws'")
+        for c in df.columns:
+            if not ('wd' in c or 'ws' in c or 'pow_' in c):
+                raise ValueError("Dataframe must only have columns named 'wd', 'ws', or 'pow_*'")
+        
+
         #Add a dataframe to the list of dataframes
         self.df_list.append(df)
         self.df_names.append(name)
@@ -89,7 +99,7 @@ class TableAnalysis():
 
         # # Get a matrix of count values with dimensions: ws, wd, turbine whose shape
         # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
-        count_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].count().reset_index().power.to_numpy()
+        count_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].count().reset_index().fillna(0).power.to_numpy()
         count_matrix = count_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
 
         #TODO For these matrices are what we want to build the new uncertainty bands off of but
@@ -164,7 +174,8 @@ class TableAnalysis():
                             ws_max=None, 
                             wd_min=None,
                             wd_max=None,
-                            minutes_per_point=10.0):
+                            minutes_per_point=10.0,
+                            mean_or_median='mean',):
         """Calculate the energy in a range of wind speed and wind direction.
 
         Args:
@@ -174,6 +185,7 @@ class TableAnalysis():
             wd_min (_type_): _description_
             wd_max (_type_): _description_
             minutes_per_point (_type_): _description_
+            mean_or_median (_type_): _description_
             
 
         Returns:
@@ -192,6 +204,9 @@ class TableAnalysis():
             wd_min = self.wd_bin_centers[0]
         if wd_max is None:
             wd_max = self.wd_bin_centers[-1]
+
+        if mean_or_median not in ['mean', 'median']:
+            raise ValueError('mean_or_median must be either "mean" or "median"')
 
         
         # Get the indices of the wind speed and wind direction bins
@@ -214,10 +229,13 @@ class TableAnalysis():
         for i in range(len(self.mean_matrix_list)):
 
             # Get the mean matrix for the wind speed and wind direction bins
-            mean_matrix = self.mean_matrix_list[i][wd_ind, :][:, ws_ind, turbine]
+            if mean_or_median == 'mean':
+                power_matrix = self.mean_matrix_list[i][wd_ind, :][:, ws_ind, turbine]
+            elif mean_or_median == 'median':
+                power_matrix = self.median_matrix_list[i][wd_ind, :][:, ws_ind, turbine]
     
             # Calculate the energy
-            energy = np.nansum(freq_matrix * mean_matrix)
+            energy = np.nansum(freq_matrix * power_matrix)
             
             # Append the energy to the list
             energy_list_mean.append(energy)
@@ -313,6 +331,27 @@ class TableAnalysis():
         ax.set_xlabel('Wind speed [m/s]')
         ax.set_ylabel('Energy [kWh]')
         ax.set_title('Energy by wind speed bin')
+        ax.legend()
+        ax.grid(True)       
+        plt.show()
+
+        return ax
+    
+    def plot_energy_diff_by_ws_bin(self, turbine, wd_min=None, wd_max=None, ax=None, **kwargs):
+        
+        # Get the energy list
+        energy_list = self.get_energy_by_ws_bin(turbine, wd_min, wd_max)
+        
+        # Plot the energy list
+        if ax is None:
+            fig, ax = plt.subplots()
+        
+        ax.plot(self.ws_bin_centers, energy_list[1] - energy_list[0], **kwargs, 
+                label=f'{self.df_names[1]} - {self.df_names[0]}')
+        
+        ax.set_xlabel('Wind speed [m/s]')
+        ax.set_ylabel('Energy [kWh]')
+        ax.set_title('Difference energy by wind speed bin')
         ax.legend()
         ax.grid(True)       
         plt.show()
