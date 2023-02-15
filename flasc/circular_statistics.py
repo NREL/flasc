@@ -17,6 +17,20 @@ from floris.utilities import wrap_360
 
 
 def calc_wd_mean_radial(angles_array_deg, axis=0):
+    """
+    Compute the mean wind direction over a given axis. Assumes that the 
+    input angles are specified in degrees, and returns the mean wind 
+    direction in degrees.
+
+    Inputs:
+        angles_array_deg - numpy array or pandas dataframe of input 
+            wind directions.
+        axis - axis of array/dataframe to take average over
+
+    Outputs:
+        mean_wd - numpy array of mean wind directions over the provided
+            axis
+    """
     
     # Generate mask for all NaN rows/columns
     nan_mask = np.isnan(angles_array_deg).all(axis=axis)
