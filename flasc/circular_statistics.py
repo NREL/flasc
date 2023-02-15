@@ -18,17 +18,19 @@ from floris.utilities import wrap_360
 
 def calc_wd_mean_radial(angles_array_deg, axis=0):
     
-    # Prevent calculation if all inputs are NaNs
-    if np.isnan(angles_array_deg).all():
-        return np.nan
+    # Generate mask for all NaN rows/columns
+    nan_mask = np.isnan(angles_array_deg).all(axis=axis)
     
     # Use unit vectors to calculate the mean
     wd_x = np.cos(angles_array_deg * np.pi / 180.)
     wd_y = np.sin(angles_array_deg * np.pi / 180.)
 
-    mean_wd = np.arctan2(np.sum(wd_y, axis=axis),
-                         np.sum(wd_x, axis=axis))
+    mean_wd = np.arctan2(np.nansum(wd_y, axis=axis),
+                         np.nansum(wd_x, axis=axis))
     mean_wd = wrap_360(mean_wd * 180. / np.pi)
+    
+    # Replace values based on all NaNs with NaN
+    mean_wd[nan_mask] = np.nan
 
     return mean_wd
 
