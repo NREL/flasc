@@ -157,6 +157,10 @@ class TableAnalysis():
         # that way if a turbine is missing data in a bin then the frequency matrix
         # will be 0 for that bin
 
+        # MS: I think that this should be the sum, not the min? But somehow 
+        # it should deal with missing data bins, and I see how the min is good 
+        # for that.
+
         # print(self.count_matrix_list[:][:, :, turbine])
 
         frequency_matrix = np.min(self.count_matrix_list[:], axis=0)[:, :, turbine].squeeze()
@@ -365,6 +369,7 @@ if __name__ == '__main__':
     # with N elements each ws are random numbers between 3 and 25
     # wd are random numbers between 0 and 360
     # pow_000 is random numbers between 0 and 1000
+    np.random.seed(0)
     df_baseline = pd.DataFrame({
         'ws': np.random.uniform(3, 25, 1000),
         'wd': np.random.uniform(0, 360, 1000),
@@ -383,8 +388,6 @@ if __name__ == '__main__':
 
     ta.print_df_names()
 
-   
-
     print(ta.get_energy_in_range(0, 8, 12, 0, 90))
 
     print(ta.get_energy_by_wd_bin(0, 8, 12)[0].shape)
@@ -392,3 +395,5 @@ if __name__ == '__main__':
     print(ta.get_energy_by_ws_bin(0, 0, 90)[0].shape)
 
     ta.plot_energy_by_ws_bin(0, 0, 90)
+
+    import ipdb; ipdb.set_trace()
