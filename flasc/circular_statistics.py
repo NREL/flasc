@@ -12,41 +12,31 @@
 
 
 import numpy as np
+from scipy.stats import circmean
 
 from floris.utilities import wrap_360
 
 
-def calc_wd_mean_radial(angles_array_deg, axis=0):
+def calc_wd_mean_radial(angles_array_deg, axis=0, nan_policy="omit"):
     """
     Compute the mean wind direction over a given axis. Assumes that the 
     input angles are specified in degrees, and returns the mean wind 
-    direction in degrees.
+    direction in degrees. Wrapper for scipy.stats.circmean
 
     Inputs:
         angles_array_deg - numpy array or pandas dataframe of input 
             wind directions.
         axis - axis of array/dataframe to take average over
+        nan_policy - option to pass to scipy.stats.circmean; defaults to
+           'omit'. (Options: 'propagate', 'raise', 'omit')
 
     Outputs:
         mean_wd - numpy array of mean wind directions over the provided
             axis
     """
-    
-    # Generate mask for all NaN rows/columns
-    nan_mask = np.isnan(angles_array_deg).all(axis=axis)
-    
-    # Use unit vectors to calculate the mean
-    wd_x = np.cos(angles_array_deg * np.pi / 180.)
-    wd_y = np.sin(angles_array_deg * np.pi / 180.)
 
-    mean_wd = np.arctan2(np.nansum(wd_y, axis=axis),
-                         np.nansum(wd_x, axis=axis))
-    mean_wd = wrap_360(mean_wd * 180. / np.pi)
-    
-    # Replace values based on all NaNs with NaN
-    mean_wd[nan_mask] = np.nan
-
-    return mean_wd
+    return circmean(angles_array_deg, high=360., axis=axis, 
+        nan_policy=nan_policy)
 
 
 # def calc_wd_mean_radial_list(angles_array_list):
