@@ -391,38 +391,15 @@ class TableAnalysis():
 
         return turbine_list
 
-    def get_energy_in_range_per_turbine(self, 
-                                        turbine, 
-                                        ws_min=0., 
-                                        ws_max=100., 
-                                        wd_min=0.,
-                                        wd_max=360.,
-                                        min_points_per_bin=1,
-                                        mean_or_median='mean',
-                                        frequency_matrix_type='turbine',
-        ):
-
-        energy_per_turbine = self.compute_expected_turbine_power(
-            turbine=turbine, 
-            wd_range=[wd_min, wd_max],
-            ws_range=[ws_min, ws_max], 
-            condition_on=None,
-            min_points_per_bin=min_points_per_bin,
-            mean_or_median=mean_or_median,
-            frequency_matrix_type=frequency_matrix_type
-        ).squeeze()
-
-        return energy_per_turbine
-
-    def get_energy_in_range_across_turbines(self,
-                                            turbine_list=None,
-                                            ws_min=0., 
-                                            ws_max=100., 
-                                            wd_min=0.,
-                                            wd_max=360.,
-                                            min_points_per_bin=1,
-                                            mean_or_median='mean',
-                                            frequency_matrix_type='turbine'
+    def get_energy_in_range(self,
+                            turbine_list=None,
+                            ws_min=0., 
+                            ws_max=100., 
+                            wd_min=0.,
+                            wd_max=360.,
+                            min_points_per_bin=1,
+                            mean_or_median='mean',
+                            frequency_matrix_type='turbine'
         ):
 
         energy = self.compute_expected_power_across_turbines(
@@ -437,13 +414,13 @@ class TableAnalysis():
 
         return energy
 
-    def get_energy_per_wd_bin_across_turbines(self,
-                                              turbine_list=None,
-                                              ws_min=0., 
-                                              ws_max=100., 
-                                              min_points_per_bin=1,
-                                              mean_or_median='mean',
-                                              frequency_matrix_type='turbine'):
+    def get_energy_per_wd_bin(self,
+                              turbine_list=None,
+                              ws_min=0., 
+                              ws_max=100., 
+                              min_points_per_bin=1,
+                              mean_or_median='mean',
+                              frequency_matrix_type='turbine'):
         """Calculate the energy in a range of wind speed and wind direction across the turbines
         in turbine list
         """
@@ -460,13 +437,13 @@ class TableAnalysis():
 
         return energy_per_wd_bin
     
-    def get_energy_per_ws_bin_across_turbines(self,
-                                              turbine_list=None,
-                                              wd_min=0., 
-                                              wd_max=360., 
-                                              min_points_per_bin=1,
-                                              mean_or_median='mean',
-                                              frequency_matrix_type='turbine'):
+    def get_energy_per_ws_bin(self,
+                              turbine_list=None,
+                              wd_min=0., 
+                              wd_max=360., 
+                              min_points_per_bin=1,
+                              mean_or_median='mean',
+                              frequency_matrix_type='turbine'):
         """Calculate the energy in a range of wind speed and wind direction across the turbines
         in turbine list
         """
@@ -498,13 +475,13 @@ class TableAnalysis():
                 turbine_list = [turbine_list]
         
         # Get the energy list
-        energy_list = self.get_energy_per_ws_bin_across_turbines(turbine_list,
-                                                                  wd_min, 
-                                                                  wd_max,
-                                                                  min_points_per_bin,
-                                                                  mean_or_median,
-                                                                  frequency_matrix_type,)
-        
+        energy_list = self.get_energy_per_ws_bin(turbine_list,
+                                                 wd_min, 
+                                                 wd_max,
+                                                 min_points_per_bin,
+                                                 mean_or_median,
+                                                 frequency_matrix_type,)
+
         # Plot the energy list
         if ax is None:
             fig, ax = plt.subplots()
@@ -535,12 +512,12 @@ class TableAnalysis():
                 turbine_list = [turbine_list]
         
         # Get the energy list
-        energy_list = self.get_energy_per_wd_bin_across_turbines(turbine_list,
-                                                                  ws_min, 
-                                                                  ws_max,
-                                                                  min_points_per_bin,
-                                                                  mean_or_median,
-                                                                  frequency_matrix_type,)
+        energy_list = self.get_energy_per_wd_bin(turbine_list,
+                                                 ws_min, 
+                                                 ws_max,
+                                                 min_points_per_bin,
+                                                 mean_or_median,
+                                                 frequency_matrix_type,)
         
         # Plot the energy list
         if ax is None:
@@ -586,11 +563,9 @@ if __name__ == '__main__':
 
     ta.get_overall_frequency_matrix()
 
-    print(ta.get_energy_in_range_per_turbine(0))
-
-    print(ta.get_energy_in_range_across_turbines(0))
+    print(ta.get_energy_in_range(0))
     
-    print(ta.get_energy_per_ws_bin_across_turbines(0))
+    print(ta.get_energy_per_ws_bin(0))
 
     ta.plot_energy_by_wd_bin()
 
