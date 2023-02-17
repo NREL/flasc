@@ -84,7 +84,7 @@ class TableAnalysis():
         df = df.melt(id_vars=['wd_bin', 'ws_bin'], var_name='turbine', value_name='power')
 
         # Get a list of unique turbine names
-        turbine_names = df['turbine'].unique()
+        turbine_names = sorted(df['turbine'].unique())
 
         # Determine the number of turbines
         self.n_turbines = len(turbine_names)
