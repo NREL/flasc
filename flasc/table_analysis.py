@@ -246,340 +246,246 @@ class TableAnalysis():
         
         return frequency_matrix
 
+    def compute_expected_turbine_power(self, 
+                            turbine, 
+                            wd_range=None,
+                            ws_range=None, 
+                            condition_on=None,
+                            min_points_per_bin=1,
+                            mean_or_median='mean',
+                            frequency_matrix_type='turbine'
+                            ):
+        """Calculate the expected power.
+
+        Args:
+
+        Returns:
+            _type_: _description_
+        """            
+
+        #TODO I think this right now returns the average power so needs to be scaled up
+        # by number of hours to get energy
+
+        # Set the default values for the wind speed and wind direction bins
+        if ws_range is None or ws_range:
+            ws_range = (self.ws_bin_centers[0], self.ws_bin_centers[-1])
+        if wd_range is None:
+            wd_range = (self.wd_bin_centers[0], self.wd_bin_centers[-1])
+
+        # Get the base frequency matrix
+        frequency_matrix = self.get_frequency_matrix(frequency_matrix_type, turbine)
+
+        # Get the axis for summing over, initialize expected_value size
+        if condition_on == None:
+            sum_axis = None # Sum over both wind speed and wind direction
+            expected_value = np.zeros((self.n_cases, 1, 1))
+        elif condition_on == "wd":
+            sum_axis = 1 # Sum over wind speeds
+            expected_value = np.zeros((self.n_cases, self.n_wd_bins, 1))
+        elif condition_on == "ws":
+            sum_axis = 0 # Sum over wind directions
+            expected_value = np.zeros((self.n_cases, 1, self.n_ws_bins))
+        else:
+            raise ValueError("condition_on must be either 'wd', 'ws', or None.")
+
+        # Get the base frequency matrix
+        frequency_matrix = self.get_frequency_matrix(frequency_matrix_type, turbine)
+        
+        # Get indices of the wind speed and wind direction bins that are outside the range
+        ws_ind_outside = np.where((self.ws_bin_centers < ws_range[0]) | 
+                                  (self.ws_bin_centers > ws_range[1]))[0]
+        wd_ind_outside = np.where((self.wd_bin_centers < wd_range[0]) | 
+                                  (self.wd_bin_centers > wd_range[1]))[0]
+
+        # Set the value to 0 for all bins that are not inside the range
+        frequency_matrix[wd_ind_outside, :][:, ws_ind_outside] = 0
+
+        # Check that the frequency matrix is not all zeros
+        if np.sum(frequency_matrix) == 0:
+            raise ValueError('Frequency matrix is all zeros')
+        
+        # Re-normalize the frequency matrix, taking into account conditionals
+        # np.divide allows us to handle 0/0 cases
+        frequency_matrix = np.divide(frequency_matrix,
+            np.sum(frequency_matrix, axis=sum_axis, keepdims=True), 
+            out=np.zeros_like(frequency_matrix),
+            where=frequency_matrix!=0
+        ) 
+        
+        for i in range(self.n_cases):
+
+            # Get the mean matrix for the wind speed and wind direction bins
+            if mean_or_median == 'mean':
+                power_matrix = self.mean_matrix_list[i][:, :, turbine]
+            elif mean_or_median == 'median':
+                power_matrix = self.median_matrix_list[i][:, :, turbine]
+            else:
+                raise ValueError('mean_or_median must be either "mean" or "median"')
+
+            # Set to 0 all bins where the turbine availability mask is false
+            turbine_availability_mask = self.get_turbine_availability_mask(turbine, min_points_per_bin=min_points_per_bin)
+            power_matrix[~turbine_availability_mask] = 0.0 #
+            # Is this necessary? These are NaNs anyway, aren't they?
+    
+            # Calculate the energy
+            expected_value[i, :, :] = np.nansum(frequency_matrix * power_matrix, axis=sum_axis, keepdims=True)
+            
+        return expected_value
+
+    def compute_expected_power_across_turbines(self, 
+                            turbine_list=None, 
+                            wd_range=None,
+                            ws_range=None, 
+                            condition_on=None,
+                            min_points_per_bin=1,
+                            mean_or_median='mean',
+                            frequency_matrix_type='turbine'
+                            ):
+        """Calculate the energy in a range of wind speed and wind direction across the turbines
+        in turbine list
+        """
+        if turbine_list is not None:
+            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
+                raise ValueError('turbine_list must be a list')
+
+        if turbine_list is None:
+            turbine_list = list(range(self.n_turbines))
+
+        # Get the axis for summing over, initialize expected_value size
+        if condition_on == None:
+            expected_value_total = np.zeros((self.n_cases, 1, 1))
+        elif condition_on == "wd":
+            expected_value_total = np.zeros((self.n_cases, self.n_wd_bins, 1))
+        elif condition_on == "ws":
+            expected_value_total = np.zeros((self.n_cases, 1, self.n_ws_bins))
+        else:
+            raise ValueError("condition_on must be either 'wd', 'ws', or None.")
+
+        for t_i in turbine_list:
+            
+            expected_value_t_i = self.compute_expected_turbine_power( 
+                            turbine=t_i, 
+                            ws_range=ws_range, 
+                            wd_range=wd_range,
+                            condition_on=condition_on,
+                            min_points_per_bin=min_points_per_bin,
+                            mean_or_median=mean_or_median,
+                            frequency_matrix_type=frequency_matrix_type
+                            )
+            expected_value_total += expected_value_t_i
+
+        return expected_value_total
+
+    # Redifine some wrappers for convenience
+    def _check_turbine_list(self, turbine_list):
+        
+        if isinstance(turbine_list, int):
+            turbine_list = [turbine_list]
+
+        if turbine_list is not None:
+            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
+                raise ValueError('turbine_list must be a list')
+
+        if turbine_list is None:
+            turbine_list = list(range(self.n_turbines))
+
+        return turbine_list
 
     def get_energy_in_range_per_turbine(self, 
-                            turbine, 
-                            ws_min=None, 
-                            ws_max=None, 
-                            wd_min=None,
-                            wd_max=None,
-                            min_points_per_bin=1,
-                            mean_or_median='mean',
-                            frequency_matrix_type='turbine',):
-        """Calculate the energy in a range of wind speed and wind direction.
+                                        turbine, 
+                                        ws_min=0., 
+                                        ws_max=100., 
+                                        wd_min=0.,
+                                        wd_max=360.,
+                                        min_points_per_bin=1,
+                                        mean_or_median='mean',
+                                        frequency_matrix_type='turbine',
+        ):
 
-        Args:
-            turbine (_type_): _description_
-            ws_min (_type_): _description_
-            ws_max (_type_): _description_
-            wd_min (_type_): _description_
-            wd_max (_type_): _description_
-            min_points_per_bin (_type_): _description_
-            minutes_per_point (_type_): _description_
-            mean_or_median (_type_): _description_
-            
+        energy_per_turbine = self.compute_expected_turbine_power(
+            turbine=turbine, 
+            wd_range=[wd_min, wd_max],
+            ws_range=[ws_min, ws_max], 
+            condition_on=None,
+            min_points_per_bin=min_points_per_bin,
+            mean_or_median=mean_or_median,
+            frequency_matrix_type=frequency_matrix_type
+        ).squeeze()
 
-        Returns:
-            _type_: _description_
-        """            
+        return energy_per_turbine
 
-        #TODO I think this right now returns the average power so needs to be scaled up
-        # by number of hours to get energy
-
-        # Set the default values for the wind speed and wind direction bins
-        if ws_min is None:
-            ws_min = self.ws_bin_centers[0]
-        if ws_max is None:
-            ws_max = self.ws_bin_centers[-1]
-        if wd_min is None:
-            wd_min = self.wd_bin_centers[0]
-        if wd_max is None:
-            wd_max = self.wd_bin_centers[-1]
-
-        # Get the frequency matrix
-        frequency_matrix = self.get_frequency_matrix(frequency_matrix_type, turbine)
-        
-        # Get indices of the wind speed and wind direction bins that are outside the range
-        ws_ind_outside = np.where((self.ws_bin_centers < ws_min) | (self.ws_bin_centers > ws_max))[0]
-        wd_ind_outside = np.where((self.wd_bin_centers < wd_min) | (self.wd_bin_centers > wd_max))[0]
-
-        # Set the value to 0 for all bins that are not inside the range
-        frequency_matrix[wd_ind_outside, :] = 0
-        frequency_matrix[:, ws_ind_outside] = 0
-        
-        # Check that the frequency matrix is not all zeros
-        if np.sum(frequency_matrix) == 0:
-            raise ValueError('Frequency matrix is all zeros')
-
-        # Re-normalize the frequency matrix
-        frequency_matrix = frequency_matrix / np.sum(frequency_matrix)
-
-        # Initialize the energy list
-        energy_list_result = np.zeros(self.n_cases)
-        
-        for i in range(self.n_cases):
-
-            # Get the mean matrix for the wind speed and wind direction bins
-            if mean_or_median == 'mean':
-                power_matrix = self.mean_matrix_list[i][:, :, turbine]
-            elif mean_or_median == 'median':
-                power_matrix = self.median_matrix_list[i][:, :, turbine]
-            else:
-                raise ValueError('mean_or_median must be either "mean" or "median"')
-
-            # Set to 0 all bins where the turbine availability mask is false
-            turbine_availability_mask = self.get_turbine_availability_mask(turbine, min_points_per_bin=min_points_per_bin)
-            power_matrix[~turbine_availability_mask] = 0.0
-    
-            # Calculate the energy
-            energy_list_result[i]  = np.nansum(frequency_matrix * power_matrix)
-            
-
-        return energy_list_result
-    
     def get_energy_in_range_across_turbines(self,
-                                            turbine_list= None,
-                                            ws_min=None, 
-                                            ws_max=None, 
-                                            wd_min=None,
-                                            wd_max=None,
+                                            turbine_list=None,
+                                            ws_min=0., 
+                                            ws_max=100., 
+                                            wd_min=0.,
+                                            wd_max=360.,
                                             min_points_per_bin=1,
                                             mean_or_median='mean',
-                                            frequency_matrix_type='turbine',):
-        """Calculate the energy in a range of wind speed and wind direction across the turbines
-        in turbine list
-        """
-        if turbine_list is not None:
-            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-                raise ValueError('turbine_list must be a list')
+                                            frequency_matrix_type='turbine'
+        ):
 
-        if turbine_list is None:
-            turbine_list = list(range(self.n_turbines))
+        energy = self.compute_expected_power_across_turbines(
+            turbine_list=self._check_turbine_list(turbine_list),  
+            wd_range=[wd_min, wd_max],
+            ws_range=[ws_min, ws_max],
+            condition_on=None,
+            min_points_per_bin=min_points_per_bin,
+            mean_or_median=mean_or_median,
+            frequency_matrix_type=frequency_matrix_type
+        ).squeeze()
 
-        # Initialize the energy list
-        energy_list_result = np.zeros(self.n_cases)
+        return energy
 
-        for t_i in turbine_list:
-            
-            energy_list = self.get_energy_in_range_per_turbine(t_i, 
-                                                            ws_min=ws_min, 
-                                                            ws_max=ws_max, 
-                                                            wd_min=wd_min,
-                                                            wd_max=wd_max,
-                                                            min_points_per_bin=min_points_per_bin,
-                                                            mean_or_median=mean_or_median,
-                                                            frequency_matrix_type=frequency_matrix_type,)
-            energy_list_result += energy_list
-
-        return energy_list_result
-            
-            
-        
-    def get_energy_per_wd_bin_per_turbine(self, 
-                            turbine, 
-                            ws_min=None, 
-                            ws_max=None, 
-                            min_points_per_bin=1,
-                            mean_or_median='mean',
-                            frequency_matrix_type='turbine',):
-        """Calculate the energy in a range of wind speed and wind direction.
-
-        Args:
-            turbine (_type_): _description_
-            ws_min (_type_): _description_
-            ws_max (_type_): _description_
-            min_points_per_bin (_type_): _description_
-            minutes_per_point (_type_): _description_
-            mean_or_median (_type_): _description_
-            
-
-        Returns:
-            _type_: _description_
-        """            
-
-        #TODO I think this right now returns the average power so needs to be scaled up
-        # by number of hours to get energy
-
-        # Set the default values for the wind speed and wind direction bins
-        if ws_min is None:
-            ws_min = self.ws_bin_centers[0]
-        if ws_max is None:
-            ws_max = self.ws_bin_centers[-1]
-
-
-        # Get the frequency matrix
-        frequency_matrix = self.get_frequency_matrix(frequency_matrix_type, turbine)
-        
-        # Get indices of the wind speed and wind direction bins that are outside the range
-        ws_ind_outside = np.where((self.ws_bin_centers < ws_min) | (self.ws_bin_centers > ws_max))[0]
-
-        # Set the value to 0 for all bins that are not inside the range
-        frequency_matrix[:, ws_ind_outside] = 0
-        
-        # Check that the frequency matrix is not all zeros
-        if np.sum(frequency_matrix) == 0:
-            raise ValueError('Frequency matrix is all zeros')
-
-        # Re-normalize the frequency matrix by wind direction bin so 
-        # that the sum of the frequency matrix is 1 for each wind direction bin
-        frequency_matrix = frequency_matrix / np.sum(frequency_matrix, axis=1)[:, None]
-
-        # Initialize the energy list
-        energy_list_result = np.zeros([self.n_cases, self.n_wd_bins])
-        
-        for i in range(self.n_cases):
-
-            # Get the mean matrix for the wind speed and wind direction bins
-            if mean_or_median == 'mean':
-                power_matrix = self.mean_matrix_list[i][:, :, turbine]
-            elif mean_or_median == 'median':
-                power_matrix = self.median_matrix_list[i][:, :, turbine]
-            else:
-                raise ValueError('mean_or_median must be either "mean" or "median"')
-
-            # Set to 0 all bins where the turbine availability mask is false
-            turbine_availability_mask = self.get_turbine_availability_mask(turbine, min_points_per_bin=min_points_per_bin)
-            power_matrix[~turbine_availability_mask] = 0.0
-
-            # Calculate the energy
-            energy_list_result[i, :]  = np.nansum(frequency_matrix * power_matrix, axis=1)
-            
-
-        return energy_list_result
-    
     def get_energy_per_wd_bin_across_turbines(self,
-                                            turbine_list= None,
-                                            ws_min=None, 
-                                            ws_max=None, 
-                                            min_points_per_bin=1,
-                                            mean_or_median='mean',
-                                            frequency_matrix_type='turbine',):
+                                              turbine_list=None,
+                                              ws_min=0., 
+                                              ws_max=100., 
+                                              min_points_per_bin=1,
+                                              mean_or_median='mean',
+                                              frequency_matrix_type='turbine'):
         """Calculate the energy in a range of wind speed and wind direction across the turbines
         in turbine list
         """
-        if turbine_list is not None:
-            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-                raise ValueError('turbine_list must be a list')
 
-        if turbine_list is None:
-            turbine_list = list(range(self.n_turbines))
+        energy_per_wd_bin = self.compute_expected_power_across_turbines(
+            turbine_list=self._check_turbine_list(turbine_list),  
+            wd_range=None,
+            ws_range=[ws_min, ws_max],
+            condition_on="wd",
+            min_points_per_bin=min_points_per_bin,
+            mean_or_median=mean_or_median,
+            frequency_matrix_type=frequency_matrix_type
+        ).squeeze()
 
-        # Initialize the energy list
-        energy_list_result = np.zeros([self.n_cases, self.n_wd_bins])
-
-        for t_i in turbine_list:
-            
-            energy_list = self.get_energy_per_wd_bin_per_turbine(t_i, 
-                                                            ws_min=ws_min, 
-                                                            ws_max=ws_max, 
-                                                            min_points_per_bin=min_points_per_bin,
-                                                            mean_or_median=mean_or_median,
-                                                            frequency_matrix_type=frequency_matrix_type,)
-            energy_list_result += energy_list
-
-        return energy_list_result
+        return energy_per_wd_bin
     
     def get_energy_per_ws_bin_across_turbines(self,
-                                            turbine_list= None,
-                                            wd_min=None, 
-                                            wd_max=None, 
-                                            min_points_per_bin=1,
-                                            mean_or_median='mean',
-                                            frequency_matrix_type='turbine',):
+                                              turbine_list=None,
+                                              wd_min=0., 
+                                              wd_max=360., 
+                                              min_points_per_bin=1,
+                                              mean_or_median='mean',
+                                              frequency_matrix_type='turbine'):
         """Calculate the energy in a range of wind speed and wind direction across the turbines
         in turbine list
         """
-        if turbine_list is not None:
-            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-                raise ValueError('turbine_list must be a list')
+        energy_per_ws_bin = self.compute_expected_power_across_turbines( 
+            turbine_list=self._check_turbine_list(turbine_list), 
+            wd_range=[wd_min, wd_max],
+            ws_range=None, 
+            condition_on="ws",
+            min_points_per_bin=min_points_per_bin,
+            mean_or_median=mean_or_median,
+            frequency_matrix_type=frequency_matrix_type
+        ).squeeze()
 
-        if turbine_list is None:
-            turbine_list = list(range(self.n_turbines))
-
-        # Initialize the energy list
-        energy_list_result = np.zeros([self.n_cases, self.n_ws_bins])
-
-        for t_i in turbine_list:
-            
-            energy_list = self.get_energy_per_ws_bin_per_turbine(t_i, 
-                                                            wd_min=wd_min, 
-                                                            wd_max=wd_max, 
-                                                            min_points_per_bin=min_points_per_bin,
-                                                            mean_or_median=mean_or_median,
-                                                            frequency_matrix_type=frequency_matrix_type,)
-            energy_list_result += energy_list
-
-        return energy_list_result
-    
-    # Define the ws version of the above function
-    def get_energy_per_ws_bin_per_turbine(self, 
-                            turbine, 
-                            wd_min=None, 
-                            wd_max=None, 
-                            min_points_per_bin=1,
-                            mean_or_median='mean',
-                            frequency_matrix_type='turbine',):
-        """Calculate the energy in a range of wind speed and wind direction.
-
-        Args:
-            turbine (_type_): _description_
-            ws_min (_type_): _description_
-            ws_max (_type_): _description_
-            min_points_per_bin (_type_): _description_
-            minutes_per_point (_type_): _description_
-            mean_or_median (_type_): _description_
-            
-
-        Returns:
-            _type_: _description_
-        """            
-
-        #TODO I think this right now returns the average power so needs to be scaled up
-        # by number of hours to get energy
-
-        # Set the default values for the wind speed and wind direction bins
-        if wd_min is None:
-            wd_min = self.wd_bin_centers[0]
-        if wd_max is None:
-            wd_max = self.wd_bin_centers[-1]
-
-
-        # Get the frequency matrix
-        frequency_matrix = self.get_frequency_matrix(frequency_matrix_type, turbine)
-        
-        # Get indices of the wind speed and wind direction bins that are outside the range
-        wd_ind_outside = np.where((self.wd_bin_centers < wd_min) | (self.wd_bin_centers > wd_max))[0]
-
-        # Set the value to 0 for all bins that are not inside the range
-        frequency_matrix[wd_ind_outside, :] = 0
-        
-        # Check that the frequency matrix is not all zeros
-        if np.sum(frequency_matrix) == 0:
-            raise ValueError('Frequency matrix is all zeros')
-
-        # Re-normalize the frequency matrix by wind direction bin so 
-        # that the sum of the frequency matrix is 1 for each wind direction bin
-        frequency_matrix = frequency_matrix / np.sum(frequency_matrix, axis=0)[None, :]
-
-        # Initialize the energy list
-        energy_list_result = np.zeros([self.n_cases, self.n_ws_bins])
-        
-        for i in range(self.n_cases):
-
-            # Get the mean matrix for the wind speed and wind direction bins
-            if mean_or_median == 'mean':
-                power_matrix = self.mean_matrix_list[i][:, :, turbine]
-            elif mean_or_median == 'median':
-                power_matrix = self.median_matrix_list[i][:, :, turbine]
-            else:
-                raise ValueError('mean_or_median must be either "mean" or "median"')
-
-            # Set to 0 all bins where the turbine availability mask is false
-            turbine_availability_mask = self.get_turbine_availability_mask(turbine, min_points_per_bin=min_points_per_bin)
-            power_matrix[~turbine_availability_mask] = 0.0
-
-            # Calculate the energy
-            energy_list_result[i, :]  = np.nansum(frequency_matrix * power_matrix, axis=0)
-            
-
-        return energy_list_result
-        
-
+        return energy_per_ws_bin
     
     def plot_energy_by_ws_bin(self, 
                                 turbine_list=None, 
-                                wd_min=None,
-                                wd_max=None, 
+                                wd_min=0.,
+                                wd_max=360., 
                                 min_points_per_bin=1,
                                 mean_or_median='mean',
                                 frequency_matrix_type='turbine',
@@ -615,8 +521,8 @@ class TableAnalysis():
     
     def plot_energy_by_wd_bin(self, 
                                 turbine_list=None, 
-                                ws_min=None,
-                                ws_max=None, 
+                                ws_min=0.,
+                                ws_max=100., 
                                 min_points_per_bin=1,
                                 mean_or_median='mean',
                                 frequency_matrix_type='turbine',
@@ -682,20 +588,12 @@ if __name__ == '__main__':
 
     print(ta.get_energy_in_range_per_turbine(0))
 
-    print(ta.get_energy_per_ws_bin_per_turbine(0))
+    print(ta.get_energy_in_range_across_turbines(0))
+    
+    print(ta.get_energy_per_ws_bin_across_turbines(0))
 
     ta.plot_energy_by_wd_bin()
 
     ta.plot_energy_by_ws_bin()
 
     plt.show()
-
-   
-
-    # print(ta.get_energy_in_range(0, 8, 12, 0, 90))
-
-    # print(ta.get_energy_by_wd_bin(0, 8, 12)[0].shape)
-
-    # print(ta.get_energy_by_ws_bin(0, 0, 90)[0].shape)
-
-    # ta.plot_energy_by_ws_bin(0, 0, 90)
