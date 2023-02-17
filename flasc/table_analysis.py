@@ -198,7 +198,7 @@ class TableAnalysis():
         # normalize the frequency matrix
         user_defined_frequency_matrix = user_defined_frequency_matrix / np.sum(user_defined_frequency_matrix)
 
-        self.set_user_defined_frequency_matrix = user_defined_frequency_matrix
+        self.user_defined_frequency_matrix = user_defined_frequency_matrix
 
     def get_user_defined_frequency_matrix(self):
 
@@ -388,6 +388,9 @@ class TableAnalysis():
 
         if turbine_list is None:
             turbine_list = list(range(self.n_turbines))
+
+        if np.max(turbine_list) >= self.n_turbines:
+            raise ValueError('turbine_list contains a turbine index that is greater than the number of turbines')
 
         return turbine_list
 
