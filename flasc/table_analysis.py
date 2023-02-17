@@ -44,7 +44,7 @@ class TableAnalysis():
         self.median_matrix_list = [] # Median power per wind speed and wind direction and turbine bin
         self.count_matrix_list = []  # Count of power per wind speed and wind direction and turbine bin
         self.std_matrix_list = [] # Standard deviation of power per wind speed and wind direction and turbine bin
-        self.ci_matrix_list = [] # Confidence interval of power per wind speed and wind direction and turbine bin
+        self.se_matrix_list = [] # Standard error of power per wind speed and wind direction and turbine bin
         self.mu_matrix_list = [] # Guassian mu value3
 
         # Initialize user_defined_frequency_matrix to None
@@ -130,10 +130,10 @@ class TableAnalysis():
         std_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].std().reset_index().power.to_numpy()
         std_matrix = std_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
 
-        # # Get a matrix of confidence interval values with dimensions: ws, wd, turbine whose shape
+        # # Get a matrix of standard error values with dimensions: ws, wd, turbine whose shape
         # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
-        ci_matrix = std_matrix / np.sqrt(count_matrix)
-        ci_matrix = ci_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+        se_matrix = std_matrix / np.sqrt(count_matrix)
+        se_matrix = se_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
 
         #TODO How to calculate mu?
         mu_matrix = np.zeros_like(mean_matrix)
@@ -143,7 +143,7 @@ class TableAnalysis():
         self.median_matrix_list.append(median_matrix)
         self.count_matrix_list.append(count_matrix)
         self.std_matrix_list.append(std_matrix)
-        self.ci_matrix_list.append(ci_matrix)
+        self.se_matrix_list.append(se_matrix)
         self.mu_matrix_list.append(mu_matrix)
         
         # # Fill missing values of the confidence interval matrix with the maximum value
@@ -555,6 +555,15 @@ class TableAnalysis():
         ax.grid(True)       
 
         return ax
+
+    def simple_ratio_confidence_interval(self, 
+                                         numerator_case,
+                                         denominator_case
+        ):
+
+        return None
+
+
 
 
     
