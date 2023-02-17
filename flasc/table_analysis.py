@@ -12,6 +12,7 @@
 
 import pandas as pd
 import numpy as np
+import scipy.stats as stats
 import matplotlib.pyplot as plt
 
 #TODO: Do we want to follow FLORIS' method of keeping 3 dimensions for all matrices?
@@ -533,15 +534,67 @@ class TableAnalysis():
 
         return ax
 
-    def simple_ratio_confidence_interval(self, 
-                                         numerator_case,
-                                         denominator_case
-        ):
+    def _case_index(self, case):
+        if isinstance(case, int):
+            return case
+        elif isinstance(case, str):
+            return self.case_names.index(case)
 
-        return None
+    def simple_ratio(self,
+                     numerator_case=1,
+                     denominator_case=0,
+                     mean_or_median="mean"
+    ):
+        """
+        numerator_case and denominator_case can either by strings which match
+        a case_name or integers for direct indexing.
+        """
 
+        # TODO: add zero, NaN handling
 
+        if mean_or_median == "mean":
+            ratio_matrix = self.mean_matrix_list[self._case_index(numerator_case)] /\
+                self.mean_matrix_list[self._case_index(denominator_case)]
+        elif mean_or_median == "median":
+            ratio_matrix = self.median_matrix_list[self._case_index(numerator_case)] /\
+                self.median_matrix_list[self._case_index(denominator_case)]
+        else:
+            raise ValueError('mean_or_median must be either "mean" or "median"')
 
+        return ratio_matrix
+    
+    def simple_ratio_with_confidence_interval(self, 
+                                              numerator_case=1,
+                                              denominator_case=0,
+                                              confidence_level=0.90,
+                                              mean_or_median="mean"
+        ): 
+        
+        # For now, always uses the mean. Unsure how to use median.
+        if mean_or_median == "median":
+            raise NotImplementedError("Must use mean for confidence interval.")
+        elif mean_or_median != "mean":
+            raise ValueError("mean_or_median must be 'mean' for this calculaiton.")
+
+        # Extract values for convenience
+        A = self.mean_matrix_list[self._case_index(numerator_case)]
+        B = self.mean_matrix_list[self._case_index(denominator_case)]
+        Q = self.simple_ratio(numerator_case, denominator_case)
+
+        se_A = self.se_matrix_list[self._case_index(numerator_case)]
+        se_B = self.se_matrix_list[self._case_index(denominator_case)]
+
+        count_A = self.count_matrix_list[self._case_index(numerator_case)]
+        count_B = self.count_matrix_list[self._case_index(denominator_case)]
+
+        se_Q = Q * np.sqrt((se_A/A)**2 + (se_B/B)**2)
+
+        t_score = stats.t.ppf((confidence_level+1)/2, count_A+count_B-2)
+
+        ci_low = Q - t_score*se_Q
+        ci_high = Q + t_score*se_Q
+
+        return Q, ci_low, ci_high
 
     
 
@@ -568,16 +621,19 @@ if __name__ == '__main__':
     ta.add_df(df_baseline, 'baseline')
     ta.add_df(df_control, 'control')
 
-    ta.print_df_names()
+    # ta.print_df_names()
 
-    ta.get_overall_frequency_matrix()
+    # ta.get_overall_frequency_matrix()
 
-    print(ta.get_energy_in_range(0))
+    # print(ta.get_energy_in_range(0))
     
-    print(ta.get_energy_per_ws_bin(0))
+    # print(ta.get_energy_per_ws_bin(0))
 
-    ta.plot_energy_by_wd_bin()
+    # ta.plot_energy_by_wd_bin()
 
-    ta.plot_energy_by_ws_bin()
+    # ta.plot_energy_by_ws_bin()
 
-    plt.show()
+    quo, low, hig = ta.simple_ratio_with_confidence_interval(1, 0, 0.9, "mean")
+    import ipdb; ipdb.set_trace()
+
+#    plt.show()
