@@ -76,10 +76,10 @@ class TableAnalysisBootstrap():
                 
                 num_rows = df.shape[0]
                 
-                # Declare a vector of blocks whose length is the number of rows in the dataframe
-                # and whose values are 0 through n_blocks-1 in blocks
-                blocks = np.repeat(np.arange(self.n_blocks), num_rows/self.n_blocks)
-    
+                # Declare a vector of blocks whose length is equal to df.shape[0] and whose values are 0,1,...,n_blocks-1
+                
+                blocks = np.repeat(np.arange(self.n_blocks), np.ceil(num_rows / self.n_blocks).astype(int))[:num_rows]
+
                 # Add blocks as a column to the dataframe
                 df['block'] = blocks
     
@@ -260,6 +260,10 @@ class TableAnalysisBootstrap():
             mean_or_median=mean_or_median,
             frequency_matrix_type=frequency_matrix_type,
         )
+            
+        print(energy_bootstrap.shape)
+
+        print(energy_bootstrap[0,:, 3])
 
         # Built the results array
         results_array = np.array(
@@ -270,8 +274,12 @@ class TableAnalysisBootstrap():
                 ]
         ) 
 
+        
+
         # Transpose to dimensions are order cases, ws, [nominal, lower, upper]
         results_array = np.transpose(results_array, (1, 2, 0))
+
+        print(results_array[0, 3, :])
 
         return results_array
     
@@ -350,6 +358,12 @@ class TableAnalysisBootstrap():
             percentiles=percentiles,
         )
 
+        print(results_array.shape)
+
+        print(results_array[0, :, :])
+
+        print(results_array[1, :, :])
+
         # Grab values for conveience
         ws_bin_centers = self.nominal_table.ws_bin_centers
 
@@ -364,8 +378,8 @@ class TableAnalysisBootstrap():
                     label=self.case_names[c_i],
                     color=self.case_colors[c_i],)
             ax.fill_between(ws_bin_centers, 
-                            results_array[c_i, :, 1],
-                              results_array[c_i, :, 2], 
+                            results_array[c_i, :, 1].flatten(),
+                              results_array[c_i, :, 2].flatten(), 
                               alpha=0.3,
                               color=self.case_colors[c_i],)
 
