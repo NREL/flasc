@@ -345,13 +345,8 @@ class TableAnalysis():
         """Calculate the energy in a range of wind speed and wind direction across the turbines
         in turbine list
         """
-        if turbine_list is not None:
-            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-                raise ValueError('turbine_list must be a list')
-
-        if turbine_list is None:
-            turbine_list = list(range(self.n_turbines))
-
+        turbine_list = self._check_turbine_list(turbine_list)
+        
         # Get the axis for summing over, initialize expected_value size
         if condition_on == None:
             expected_value_total = np.zeros((self.n_cases, 1, 1))
@@ -508,9 +503,7 @@ class TableAnalysis():
                                 **kwargs):
         
         # Check if turbine list is a scalar
-        if turbine_list is not None:
-            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-                turbine_list = [turbine_list]
+        turbine_list = self._check_turbine_list(turbine_list)
         
         # Get the energy list
         energy_list = self.get_energy_per_wd_bin(turbine_list,
@@ -541,6 +534,7 @@ class TableAnalysis():
             return self.case_names.index(case)
 
     def simple_ratio(self,
+                     turbine_list=None,
                      numerator_case=1,
                      denominator_case=0,
                      mean_or_median="mean"
@@ -549,43 +543,72 @@ class TableAnalysis():
         numerator_case and denominator_case can either by strings which match
         a case_name or integers for direct indexing.
         """
-
-        # TODO: add zero, NaN handling
+        turbine_list = np.array(self._check_turbine_list(turbine_list))
 
         if mean_or_median == "mean":
-            ratio_matrix = self.mean_matrix_list[self._case_index(numerator_case)] /\
-                self.mean_matrix_list[self._case_index(denominator_case)]
+            A = self.mean_matrix_list[self._case_index(numerator_case)]\
+                [:,:,turbine_list].sum(axis=2)
+            B = self.mean_matrix_list[self._case_index(denominator_case)]\
+                [:,:,turbine_list].sum(axis=2)
         elif mean_or_median == "median":
-            ratio_matrix = self.median_matrix_list[self._case_index(numerator_case)] /\
-                self.median_matrix_list[self._case_index(denominator_case)]
+            # median(x+y+z) is not equal to median(x)+median(y)+median(z)!
+            # Nonlinear operator.
+            if len(turbine_list) > 1:
+                raise ValueError("Cannot use 'median' with multiple turbines.")
+            A = self.median_matrix_list[self._case_index(numerator_case)]\
+                [:,:,turbine_list].sum(axis=2)
+            B = self.median_matrix_list[self._case_index(denominator_case)]\
+                [:,:,turbine_list].sum(axis=2)
         else:
             raise ValueError('mean_or_median must be either "mean" or "median"')
+
+        # A NaN in any potion in A or B will produce NaN. Divide by 0 
+        # produces warning. TODO: do we need divide by zero handling?
+        ratio_matrix = A / B
 
         return ratio_matrix
     
     def simple_ratio_with_confidence_interval(self, 
+                                              turbine_list=None,
                                               numerator_case=1,
                                               denominator_case=0,
                                               confidence_level=0.90,
                                               mean_or_median="mean"
         ): 
+        """
+        From Harvey Motulsky text.
+        """
         
         # For now, always uses the mean. Unsure how to use median.
         if mean_or_median == "median":
             raise NotImplementedError("Must use mean for confidence interval.")
         elif mean_or_median != "mean":
-            raise ValueError("mean_or_median must be 'mean' for this calculaiton.")
+            raise ValueError("mean_or_median must be 'mean' for ratio with "+\
+                "confidence interval calculaiton.")
+        
+        turbine_list = np.array(self._check_turbine_list(turbine_list))
+        if len(turbine_list) > 1:
+            raise NotImplementedError("Confidence interval around ratio of "+\
+                "sum power is not yet implemented.")
 
         # Extract values for convenience
-        A = self.mean_matrix_list[self._case_index(numerator_case)]
-        B = self.mean_matrix_list[self._case_index(denominator_case)]
-        Q = self.simple_ratio(numerator_case, denominator_case)
+        A = self.mean_matrix_list[self._case_index(numerator_case)]\
+             [:,:,turbine_list].sum(axis=2) # Prep for sum power case
+        B = self.mean_matrix_list[self._case_index(denominator_case)]\
+             [:,:,turbine_list].sum(axis=2) # Prep for sum power case
+        Q = self.simple_ratio(turbine_list, numerator_case, denominator_case)
 
-        se_A = self.se_matrix_list[self._case_index(numerator_case)]
-        se_B = self.se_matrix_list[self._case_index(denominator_case)]
+        # TODO: Combine standard errors for mutliple turbine case
+        se_A = self.se_matrix_list[self._case_index(numerator_case)]\
+            [:,:,turbine_list].squeeze()
+        se_B = self.se_matrix_list[self._case_index(denominator_case)]\
+            [:,:,turbine_list].squeeze()
 
-        count_A = self.count_matrix_list[self._case_index(numerator_case)]
-        count_B = self.count_matrix_list[self._case_index(denominator_case)]
+        # TODO: Combine counts for multiple turbine case
+        count_A = self.count_matrix_list[self._case_index(numerator_case)]\
+            [:,:,turbine_list].squeeze()
+        count_B = self.count_matrix_list[self._case_index(denominator_case)]\
+            [:,:,turbine_list].squeeze()
 
         se_Q = Q * np.sqrt((se_A/A)**2 + (se_B/B)**2)
 
@@ -617,7 +640,7 @@ if __name__ == '__main__':
     df_control['pow_000'] = df_control['pow_000'] * 1.05
     df_control['pow_000'] = np.clip(df_control['pow_000'], 0, 1000)
 
-    ta = TableAnalysis()
+    ta = TableAnalysis(wd_step=60., ws_step=7)
     ta.add_df(df_baseline, 'baseline')
     ta.add_df(df_control, 'control')
 
@@ -633,7 +656,6 @@ if __name__ == '__main__':
 
     # ta.plot_energy_by_ws_bin()
 
-    quo, low, hig = ta.simple_ratio_with_confidence_interval(1, 0, 0.9, "mean")
-    import ipdb; ipdb.set_trace()
+    print(ta.simple_ratio_with_confidence_interval(0))
 
 #    plt.show()
