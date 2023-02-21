@@ -114,8 +114,6 @@ class TableAnalysisBootstrap():
             # Add this table analysis object to the list of tables
             self.bootstrap_tables[b_i] = table_analysis
 
-        return df_list, self.nominal_table, self.bootstrap_tables
-
 
     def get_energy_in_range(self, 
         turbine_list=None, 
@@ -294,8 +292,6 @@ class TableAnalysisBootstrap():
         # Transpose to dimensions are order cases, ws, [nominal, lower, upper]
         results_array = np.transpose(results_array)
 
-        # print(results_array[0, 3, :])
-
         return results_array
     
     def plot_energy_per_wd_bin(self,
@@ -373,12 +369,6 @@ class TableAnalysisBootstrap():
             frequency_matrix_type=frequency_matrix_type,
             percentiles=percentiles,
         )
-
-        # print(results_array.shape)
-
-        # print(results_array[0, :, :])
-
-        # print(results_array[1, :, :])
 
         # Grab values for conveience
         ws_bin_centers = self.nominal_table.ws_bin_centers
