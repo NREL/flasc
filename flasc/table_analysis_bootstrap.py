@@ -8,7 +8,9 @@ import seaborn as sns
 from flasc.table_analysis import TableAnalysis
 
 
-np.random.seed(0)
+# np.random.seed(0)
+
+# NOTE WE TOOK THE DECISION THAT BOOTSTRAPPING WILL BE ONLY FOR COMPARING TWO CASES
 
 class TableAnalysisBootstrap():
 
@@ -47,12 +49,16 @@ class TableAnalysisBootstrap():
         self.n_cases += 1
 
         # Update the color pallette for plotting
-        self.case_colors = sns.color_palette(seaborn_color_palette, self.n_cases)
+        # self.case_colors = sns.color_palette(seaborn_color_palette, self.n_cases)
 
 
     def build_bootstrap_tables(self,
                 n_bootstraps = 20,
                 n_blocks = 10,):
+        
+        # Make sure there are two cases
+        if self.n_cases != 2:
+            raise ValueError("There must be two cases to perform bootstrapping")
 
         # Make sure the number of bootstraps is an integer
         if not isinstance(n_bootstraps, int):
@@ -328,8 +334,7 @@ class TableAnalysisBootstrap():
 
         ax.plot(wd_bin_centers, 
                 results_array[:, 0], 
-                # label=self.case_names[c_i],
-                # color=self.case_colors[c_i],)
+                label=f'{self.case_names[1]} / {self.case_names[0]}',
         )
         ax.fill_between(wd_bin_centers, 
                         results_array[:, 1],
@@ -380,9 +385,9 @@ class TableAnalysisBootstrap():
         # Loop through the cases and plot the nominal and the percentiles
         # for c_i in range(self.n_cases):
         ax.plot(ws_bin_centers, 
-                results_array[:, 0], )
-                # label=self.case_names[c_i],
-                # color=self.case_colors[c_i],)
+                results_array[:, 0], 
+                label=f'{self.case_names[1]} / {self.case_names[0]}',
+        )
         ax.fill_between(ws_bin_centers, 
                         results_array[:, 1].flatten(),
                             results_array[:, 2].flatten(), 
@@ -390,9 +395,9 @@ class TableAnalysisBootstrap():
                             # color=self.case_colors[c_i],)
 
         # Set the labels
-        ax.set_xlabel('Wind Direction [deg]')
+        ax.set_xlabel('Wind Speed [m/s]')
         ax.set_ylabel('Energy [kWh]')
-        ax.set_title('Energy per Wind Direction Bin')
+        ax.set_title('Energy per Wind Speed Bin')
         ax.grid(True)
         ax.legend()
 
