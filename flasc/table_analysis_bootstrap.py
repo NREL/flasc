@@ -144,12 +144,14 @@ class TableAnalysisBootstrap():
             frequency_matrix_type=frequency_matrix_type,
         )
 
+        energy_nominal = energy_nominal[1]/ energy_nominal[0]
+
         # Initialize the energy as a list of zeros whose dimensions are n_bootstraps x n_cases
-        energy_bootstrap = np.zeros([self.n_cases, self.n_bootstraps])
+        energy_bootstrap = np.zeros([self.n_bootstraps])
 
         # Loop through the bootstraps and add the energy in range
         for b_i in range(self.n_bootstraps):
-            energy_bootstrap[:,b_i] = self.bootstrap_tables[b_i].get_energy_in_range(
+            energy_bi = self.bootstrap_tables[b_i].get_energy_in_range(
             turbine_list=turbine_list,
             ws_min=ws_min,
             ws_max=ws_max,
@@ -158,20 +160,21 @@ class TableAnalysisBootstrap():
             min_points_per_bin=min_points_per_bin,
             mean_or_median=mean_or_median,
             frequency_matrix_type=frequency_matrix_type,
-        )
+            )
+            energy_bootstrap[b_i] = energy_bi[1] / energy_bi[0]
         
 
         # Built the results array
         results_array = np.array(
                 [
                 energy_nominal,
-                np.percentile(energy_bootstrap, percentiles[0], axis=1),
-                np.percentile(energy_bootstrap, percentiles[1], axis=1),
+                np.percentile(energy_bootstrap, percentiles[0]),
+                np.percentile(energy_bootstrap, percentiles[1]),
                 ]
         )
         
         # Transpose to dimensions are order cases then [nominal, lower, upper]
-        results_array = np.transpose(results_array, (1, 0))
+        # results_array = np.transpose(results_array, (1, 0))
 
         return results_array
 
@@ -201,31 +204,35 @@ class TableAnalysisBootstrap():
             frequency_matrix_type=frequency_matrix_type,
         )
 
+        energy_nominal = energy_nominal[1,:]/ energy_nominal[0,:]
+
         # Initialize the energy as a list of zeros whose dimensions are n_bootstraps x n_cases x n_ws_bins
-        energy_bootstrap = np.zeros([self.n_cases, self.n_bootstraps, n_wd_bins])
+        energy_bootstrap = np.zeros([self.n_bootstraps, n_wd_bins])
 
         # Loop through the bootstraps and add the energy in range
         for b_i in range(self.n_bootstraps):
-            energy_bootstrap[:,b_i, :] = self.bootstrap_tables[b_i].get_energy_per_wd_bin(
-            turbine_list=turbine_list,
-            ws_min=ws_min,
-            ws_max=ws_max,
-            min_points_per_bin=min_points_per_bin,
-            mean_or_median=mean_or_median,
-            frequency_matrix_type=frequency_matrix_type,
-        )
+            energy_bi = self.bootstrap_tables[b_i].get_energy_per_wd_bin(
+                turbine_list=turbine_list,
+                ws_min=ws_min,
+                ws_max=ws_max,
+                min_points_per_bin=min_points_per_bin,
+                mean_or_median=mean_or_median,
+                frequency_matrix_type=frequency_matrix_type,
+                )
+            
+            energy_bootstrap[b_i,:] = energy_bi[1,:] / energy_bi[0,:]
 
         # Built the results array
         results_array = np.array(
                 [
                 energy_nominal,
-                np.percentile(energy_bootstrap, percentiles[0], axis=1),
-                np.percentile(energy_bootstrap, percentiles[1], axis=1),
+                np.percentile(energy_bootstrap, percentiles[0], axis=0),
+                np.percentile(energy_bootstrap, percentiles[1], axis=0),
                 ]
         ) 
 
-        # Transpose to dimensions are order cases, wd, [nominal, lower, upper]
-        results_array = np.transpose(results_array, (1, 2, 0))
+        # Transpose to dimensions are order wd, [nominal, lower, upper]
+        results_array = np.transpose(results_array)
 
         return results_array
 
@@ -256,39 +263,36 @@ class TableAnalysisBootstrap():
             frequency_matrix_type=frequency_matrix_type,
         )
 
+        energy_nominal = energy_nominal[1,:]/ energy_nominal[0,:]
+
         # Initialize the energy as a list of zeros whose dimensions are n_bootstraps x n_cases x n_ws_bins
-        energy_bootstrap = np.zeros([self.n_cases, self.n_bootstraps, n_ws_bins])
+        energy_bootstrap = np.zeros([self.n_bootstraps, n_ws_bins])
 
         # Loop through the bootstraps and add the energy in range
         for b_i in range(self.n_bootstraps):
-            energy_bootstrap[:,b_i, :] = self.bootstrap_tables[b_i].get_energy_per_ws_bin(
-            turbine_list=turbine_list,
-            wd_min=wd_min,
-            wd_max=wd_max,
-            min_points_per_bin=min_points_per_bin,
-            mean_or_median=mean_or_median,
-            frequency_matrix_type=frequency_matrix_type,
-        )
+            energy_bi = self.bootstrap_tables[b_i].get_energy_per_ws_bin(
+                turbine_list=turbine_list,
+                wd_min=wd_min,
+                wd_max=wd_max,
+                min_points_per_bin=min_points_per_bin,
+                mean_or_median=mean_or_median,
+                frequency_matrix_type=frequency_matrix_type,
+                )
             
-        print(energy_bootstrap)
-            
-        # print(energy_bootstrap.shape)
-
-        # print(energy_bootstrap[0,:, 3])
+            energy_bootstrap[b_i,:] = energy_bi[1,:] / energy_bi[0,:]
 
         # Built the results array
         results_array = np.array(
                 [
                 energy_nominal,
-                np.percentile(energy_bootstrap, percentiles[0], axis=1),
-                np.percentile(energy_bootstrap, percentiles[1], axis=1),
+                np.percentile(energy_bootstrap, percentiles[0], axis=0),
+                np.percentile(energy_bootstrap, percentiles[1], axis=0),
                 ]
         ) 
-
-        
+       
 
         # Transpose to dimensions are order cases, ws, [nominal, lower, upper]
-        results_array = np.transpose(results_array, (1, 2, 0))
+        results_array = np.transpose(results_array)
 
         # print(results_array[0, 3, :])
 
@@ -325,16 +329,17 @@ class TableAnalysisBootstrap():
             fig, ax = plt.subplots()
 
         # Loop through the cases and plot the nominal and the percentiles
-        for c_i in range(self.n_cases):
-            ax.plot(wd_bin_centers, 
-                    results_array[c_i, :, 0], 
-                    label=self.case_names[c_i],
-                    color=self.case_colors[c_i],)
-            ax.fill_between(wd_bin_centers, 
-                            results_array[c_i, :, 1],
-                              results_array[c_i, :, 2], 
-                              alpha=0.3,
-                              color=self.case_colors[c_i],)
+
+        ax.plot(wd_bin_centers, 
+                results_array[:, 0], 
+                # label=self.case_names[c_i],
+                # color=self.case_colors[c_i],)
+        )
+        ax.fill_between(wd_bin_centers, 
+                        results_array[:, 1],
+                            results_array[:, 2], 
+                            alpha=0.3),
+                            # color=self.case_colors[c_i],)
 
         # Set the labels
         ax.set_xlabel('Wind Direction [deg]')
@@ -383,16 +388,16 @@ class TableAnalysisBootstrap():
             fig, ax = plt.subplots()
 
         # Loop through the cases and plot the nominal and the percentiles
-        for c_i in range(self.n_cases):
-            ax.plot(ws_bin_centers, 
-                    results_array[c_i, :, 0], 
-                    label=self.case_names[c_i],
-                    color=self.case_colors[c_i],)
-            ax.fill_between(ws_bin_centers, 
-                            results_array[c_i, :, 1].flatten(),
-                              results_array[c_i, :, 2].flatten(), 
-                              alpha=0.3,
-                              color=self.case_colors[c_i],)
+        # for c_i in range(self.n_cases):
+        ax.plot(ws_bin_centers, 
+                results_array[:, 0], )
+                # label=self.case_names[c_i],
+                # color=self.case_colors[c_i],)
+        ax.fill_between(ws_bin_centers, 
+                        results_array[:, 1].flatten(),
+                            results_array[:, 2].flatten(), 
+                            alpha=0.3,)
+                            # color=self.case_colors[c_i],)
 
         # Set the labels
         ax.set_xlabel('Wind Direction [deg]')
