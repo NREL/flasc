@@ -269,7 +269,7 @@ class TableAnalysis():
         # by number of hours to get energy
 
         # Set the default values for the wind speed and wind direction bins
-        if ws_range is None or ws_range:
+        if ws_range is None:
             ws_range = (self.ws_bin_centers[0], self.ws_bin_centers[-1])
         if wd_range is None:
             wd_range = (self.wd_bin_centers[0], self.wd_bin_centers[-1])
@@ -302,13 +302,15 @@ class TableAnalysis():
         wd_ind_outside = np.where((self.wd_bin_centers < wd_range[0]) | 
                                   (self.wd_bin_centers > wd_range[1]))[0]
 
+
         # Set the value to 0 for all bins that are not inside the range
-        frequency_matrix[wd_ind_outside, :][:, ws_ind_outside] = 0
+        frequency_matrix[:, ws_ind_outside] = 0
+        frequency_matrix[wd_ind_outside, :] = 0
 
         # Check that the frequency matrix is not all zeros
         if np.sum(frequency_matrix) == 0:
             raise ValueError('Frequency matrix is all zeros')
-        
+
         # Re-normalize the frequency matrix, taking into account conditionals
         # np.divide allows us to handle 0/0 cases
         frequency_matrix = np.divide(frequency_matrix,
@@ -321,14 +323,15 @@ class TableAnalysis():
 
             # Get the mean matrix for the wind speed and wind direction bins
             if mean_or_median == 'mean':
-                power_matrix = self.mean_matrix_list[i][:, :, turbine]
+                power_matrix = self.mean_matrix_list[i][:, :, turbine].copy()
             elif mean_or_median == 'median':
-                power_matrix = self.median_matrix_list[i][:, :, turbine]
+                power_matrix = self.median_matrix_list[i][:, :, turbine].copy()
             else:
                 raise ValueError('mean_or_median must be either "mean" or "median"')
 
             # Set to 0 all bins where the turbine availability mask is false
             turbine_availability_mask = self.get_turbine_availability_mask(turbine, min_points_per_bin=min_points_per_bin)
+
             power_matrix[~turbine_availability_mask] = np.nan # 0.0 #
             # Is this necessary? These are NaNs anyway, aren't they?
 
@@ -382,9 +385,9 @@ class TableAnalysis():
         else:
             raise ValueError("condition_on must be either 'wd', 'ws', or None.")
         
-        for t_i in turbine_list:
+        for idx, t_i in enumerate(turbine_list):
             
-            expected_value_total[:, :, :, t_i] = self.compute_expected_turbine_power( 
+            expected_value_total[:, :, :, idx] = self.compute_expected_turbine_power( 
                             turbine=t_i, 
                             ws_range=ws_range, 
                             wd_range=wd_range,
@@ -591,18 +594,27 @@ if __name__ == '__main__':
 
     ta = TableAnalysis()
     ta.add_df(df_baseline, 'baseline')
-    ta.add_df(df_control, 'control')
+    # ta.add_df(df_control, 'control')
 
-    ta.print_df_names()
+    # ta.print_df_names()
 
-    ta.get_overall_frequency_matrix()
+    # ta.get_overall_frequency_matrix()
 
-    print(ta.get_energy_in_range(0))
+    # print(ta.compute_expected_turbine_power( 0,min_points_per_bin=1))
+    # print(ta.compute_expected_turbine_power( 0,min_points_per_bin=2))
+    # print(ta.compute_expected_turbine_power( 0,min_points_per_bin=1))
+
+
+
+
+    print(ta.get_energy_in_range(0, wd_min=0))
+    print(ta.get_energy_in_range(0, wd_min=100))
+    print(ta.get_energy_in_range(0, wd_min=0))
     
-    print(ta.get_energy_per_ws_bin(0))
+    # print(ta.get_energy_per_ws_bin(0))
 
-    ta.plot_energy_by_wd_bin()
+    # ta.plot_energy_by_wd_bin()
 
-    ta.plot_energy_by_ws_bin()
+    # ta.plot_energy_by_ws_bin()
 
-    plt.show()
+    # plt.show()
