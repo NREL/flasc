@@ -344,23 +344,7 @@ class TableAnalysis():
                 expected_value_temp[nan_incidences] = np.nan
 
             expected_value[i, :, :] =  np.expand_dims(expected_value_temp, axis=expand_dims)
-
-            # # nan_indices = np.expand_dims(np.where(np.isnan(frequency_matrix * power_matrix).all(axis=sum_axis))[0], axis=sum_axis)
-            # print('nan_incides shape', nan_indices.shape)
-    
-            # # Calculate the energy
-            # expected_value[i, :, :] = np.nansum(frequency_matrix * power_matrix, axis=sum_axis, keepdims=True)
-
-            # # If power_matrix ia all NaNs across the sum_axis, put nan back into expected value
-            # print('expected shape', expected_value[i, :, :].shape)
-            
-            
-            
-            # expected_value[i, :, :] = np.put_along_axis(expected_value[i, :, :], nan_indices, np.nan, axis=sum_axis)
-             
-
-
-            
+         
         return expected_value
 
     def compute_expected_power_across_turbines(self, 
