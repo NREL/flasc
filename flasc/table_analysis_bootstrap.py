@@ -8,6 +8,8 @@ import seaborn as sns
 from flasc.table_analysis import TableAnalysis
 
 
+np.random.seed(0)
+
 class TableAnalysisBootstrap():
 
     def __init__(self, 
@@ -92,6 +94,8 @@ class TableAnalysisBootstrap():
         # Intialize a list of tables whose dimensions are n_bootstraps
         self.bootstrap_tables = np.zeros(self.n_bootstraps, dtype=object)
 
+        df_list = np.zeros([self.n_cases, self.n_bootstraps], dtype=object)
+
         # Get a list of table_analysis from n_bootstraps resamplings of the dataframe
         for b_i in range(self.n_bootstraps):
             sampled_blocks = np.random.choice(list(range(self.n_blocks)), size=self.n_blocks, replace=True)
@@ -102,11 +106,15 @@ class TableAnalysisBootstrap():
             for c_i in range(self.n_cases):
                 df_sampled = pd.concat([block_data_frame_list[c_i][sb_i] for sb_i in sampled_blocks])
 
+                df_list[c_i, b_i] = df_sampled
+
                 # Add the dataframe to the table analysis object
                 table_analysis.add_df(df_sampled, self.case_names[c_i])
 
             # Add this table analysis object to the list of tables
             self.bootstrap_tables[b_i] = table_analysis
+
+        return df_list, self.nominal_table, self.bootstrap_tables
 
 
     def get_energy_in_range(self, 
@@ -151,6 +159,7 @@ class TableAnalysisBootstrap():
             mean_or_median=mean_or_median,
             frequency_matrix_type=frequency_matrix_type,
         )
+        
 
         # Built the results array
         results_array = np.array(
@@ -261,9 +270,11 @@ class TableAnalysisBootstrap():
             frequency_matrix_type=frequency_matrix_type,
         )
             
-        print(energy_bootstrap.shape)
+        print(energy_bootstrap)
+            
+        # print(energy_bootstrap.shape)
 
-        print(energy_bootstrap[0,:, 3])
+        # print(energy_bootstrap[0,:, 3])
 
         # Built the results array
         results_array = np.array(
@@ -279,7 +290,7 @@ class TableAnalysisBootstrap():
         # Transpose to dimensions are order cases, ws, [nominal, lower, upper]
         results_array = np.transpose(results_array, (1, 2, 0))
 
-        print(results_array[0, 3, :])
+        # print(results_array[0, 3, :])
 
         return results_array
     
@@ -358,11 +369,11 @@ class TableAnalysisBootstrap():
             percentiles=percentiles,
         )
 
-        print(results_array.shape)
+        # print(results_array.shape)
 
-        print(results_array[0, :, :])
+        # print(results_array[0, :, :])
 
-        print(results_array[1, :, :])
+        # print(results_array[1, :, :])
 
         # Grab values for conveience
         ws_bin_centers = self.nominal_table.ws_bin_centers

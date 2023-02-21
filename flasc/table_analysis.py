@@ -214,14 +214,16 @@ class TableAnalysis():
 
         # turbine_availability_mask is true if each matrix has at least N points in each bin
         # Dimensions of turbine_mast are num_wd_bins x num_ws_bins
-        turbine_availability_mask = (np.min(self.count_matrix_list[:], axis=0)[:, :, turbine].squeeze() >= min_points_per_bin)
+        # turbine_availability_mask = (np.min(self.count_matrix_list[:], axis=0)[:, :, turbine].squeeze() >= min_points_per_bin)
+        turbine_availability_mask = (np.min(self.count_matrix_list[:], axis=0)[:, :, turbine] >= min_points_per_bin)
 
         return turbine_availability_mask
 
     def get_turbine_frequency_matrix(self, turbine):
 
         # turbine_frequency_matrix is the sum of the count matrix over all time
-        turbine_frequency_matrix = np.sum(self.count_matrix_list[:], axis=0)[:, :, turbine].squeeze()
+        # turbine_frequency_matrix = np.sum(self.count_matrix_list[:], axis=0)[:, :, turbine].squeeze()
+        turbine_frequency_matrix = np.sum(self.count_matrix_list[:], axis=0)[:, :, turbine]
 
         # Normalize the frequency matrix
         turbine_frequency_matrix = turbine_frequency_matrix / np.sum(turbine_frequency_matrix)
@@ -324,11 +326,18 @@ class TableAnalysis():
 
             # Set to 0 all bins where the turbine availability mask is false
             turbine_availability_mask = self.get_turbine_availability_mask(turbine, min_points_per_bin=min_points_per_bin)
-            power_matrix[~turbine_availability_mask] = 0.0 #
+            power_matrix[~turbine_availability_mask] = np.nan # 0.0 #
             # Is this necessary? These are NaNs anyway, aren't they?
     
             # Calculate the energy
             expected_value[i, :, :] = np.nansum(frequency_matrix * power_matrix, axis=sum_axis, keepdims=True)
+
+            # If power_matrix ia all NaNs across the sum_axis, put nan back into expected value
+            nan_indicies = np.isnan(expected_value[i, :, :]).all(axis=sum_axis)
+            expected_value[i, nan_indicies] = np.nan
+             
+
+
             
         return expected_value
 
@@ -413,7 +422,7 @@ class TableAnalysis():
             min_points_per_bin=min_points_per_bin,
             mean_or_median=mean_or_median,
             frequency_matrix_type=frequency_matrix_type
-        ).squeeze()
+        )# [:,:,0]# .squeeze()
 
         return energy
 
@@ -436,7 +445,7 @@ class TableAnalysis():
             min_points_per_bin=min_points_per_bin,
             mean_or_median=mean_or_median,
             frequency_matrix_type=frequency_matrix_type
-        ).squeeze()
+        )[:,:,0]# .squeeze()
 
         return energy_per_wd_bin
     
@@ -458,7 +467,7 @@ class TableAnalysis():
             min_points_per_bin=min_points_per_bin,
             mean_or_median=mean_or_median,
             frequency_matrix_type=frequency_matrix_type
-        ).squeeze()
+        )[:,0,:]# .squeeze()
 
         return energy_per_ws_bin
     
