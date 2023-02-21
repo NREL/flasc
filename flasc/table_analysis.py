@@ -280,12 +280,15 @@ class TableAnalysis():
         # Get the axis for summing over, initialize expected_value size
         if condition_on == None:
             sum_axis = None # Sum over both wind speed and wind direction
+            expand_dims = (0, 1)
             expected_value = np.zeros((self.n_cases, 1, 1))
         elif condition_on == "wd":
             sum_axis = 1 # Sum over wind speeds
+            expand_dims = (1)
             expected_value = np.zeros((self.n_cases, self.n_wd_bins, 1))
         elif condition_on == "ws":
             sum_axis = 0 # Sum over wind directions
+            expand_dims = (0)
             expected_value = np.zeros((self.n_cases, 1, self.n_ws_bins))
         else:
             raise ValueError("condition_on must be either 'wd', 'ws', or None.")
@@ -328,13 +331,32 @@ class TableAnalysis():
             turbine_availability_mask = self.get_turbine_availability_mask(turbine, min_points_per_bin=min_points_per_bin)
             power_matrix[~turbine_availability_mask] = np.nan # 0.0 #
             # Is this necessary? These are NaNs anyway, aren't they?
-    
-            # Calculate the energy
-            expected_value[i, :, :] = np.nansum(frequency_matrix * power_matrix, axis=sum_axis, keepdims=True)
 
-            # If power_matrix ia all NaNs across the sum_axis, put nan back into expected value
-            nan_indicies = np.isnan(expected_value[i, :, :]).all(axis=sum_axis)
-            expected_value[i, nan_indicies] = np.nan
+            # Check for NaNs in the power matrix
+            product_matrix = power_matrix * frequency_matrix
+            expected_value_temp = np.nansum(product_matrix, axis=sum_axis)
+
+            if (condition_on == None):
+                if (np.isnan(product_matrix).all(axis=sum_axis)):
+                    expected_value_temp = np.nan
+            else:
+                nan_incidences = np.isnan(product_matrix).all(axis=sum_axis)
+                expected_value_temp[nan_incidences] = np.nan
+
+            expected_value[i, :, :] =  np.expand_dims(expected_value_temp, axis=expand_dims)
+
+            # # nan_indices = np.expand_dims(np.where(np.isnan(frequency_matrix * power_matrix).all(axis=sum_axis))[0], axis=sum_axis)
+            # print('nan_incides shape', nan_indices.shape)
+    
+            # # Calculate the energy
+            # expected_value[i, :, :] = np.nansum(frequency_matrix * power_matrix, axis=sum_axis, keepdims=True)
+
+            # # If power_matrix ia all NaNs across the sum_axis, put nan back into expected value
+            # print('expected shape', expected_value[i, :, :].shape)
+            
+            
+            
+            # expected_value[i, :, :] = np.put_along_axis(expected_value[i, :, :], nan_indices, np.nan, axis=sum_axis)
              
 
 
@@ -353,26 +375,32 @@ class TableAnalysis():
         """Calculate the energy in a range of wind speed and wind direction across the turbines
         in turbine list
         """
-        if turbine_list is not None:
-            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-                raise ValueError('turbine_list must be a list')
 
-        if turbine_list is None:
-            turbine_list = list(range(self.n_turbines))
+        # Check that turbine_list is a list
+        turbine_list = self._check_turbine_list(turbine_list)
+
+        # if turbine_list is not None:
+        #     if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
+        #         raise ValueError('turbine_list must be a list')
+
+        # if turbine_list is None:
+        #     turbine_list = list(range(self.n_turbines))
+            
+        num_turbines_in_list = len(turbine_list)
 
         # Get the axis for summing over, initialize expected_value size
         if condition_on == None:
-            expected_value_total = np.zeros((self.n_cases, 1, 1))
+            expected_value_total = np.zeros((self.n_cases, 1, 1,num_turbines_in_list))
         elif condition_on == "wd":
-            expected_value_total = np.zeros((self.n_cases, self.n_wd_bins, 1))
+            expected_value_total = np.zeros((self.n_cases, self.n_wd_bins, 1,num_turbines_in_list))
         elif condition_on == "ws":
-            expected_value_total = np.zeros((self.n_cases, 1, self.n_ws_bins))
+            expected_value_total = np.zeros((self.n_cases, 1, self.n_ws_bins,num_turbines_in_list))
         else:
             raise ValueError("condition_on must be either 'wd', 'ws', or None.")
-
+        
         for t_i in turbine_list:
             
-            expected_value_t_i = self.compute_expected_turbine_power( 
+            expected_value_total[:, :, :, t_i] = self.compute_expected_turbine_power( 
                             turbine=t_i, 
                             ws_range=ws_range, 
                             wd_range=wd_range,
@@ -381,7 +409,17 @@ class TableAnalysis():
                             mean_or_median=mean_or_median,
                             frequency_matrix_type=frequency_matrix_type
                             )
-            expected_value_total += expected_value_t_i
+
+        
+        # This code is to permissive
+        # nan_incidences = np.isnan(expected_value_total).all(axis=(3))
+        # expected_value_total = np.nansum(expected_value_total, axis=3)
+        # expected_value_total[nan_incidences] = np.nan
+
+        # This code is more strict
+        expected_value_total = np.sum(expected_value_total, axis=3)
+
+        
 
         return expected_value_total
 
@@ -422,7 +460,7 @@ class TableAnalysis():
             min_points_per_bin=min_points_per_bin,
             mean_or_median=mean_or_median,
             frequency_matrix_type=frequency_matrix_type
-        )# [:,:,0]# .squeeze()
+        )[:,0,0]# .squeeze()
 
         return energy
 
