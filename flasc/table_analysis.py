@@ -18,23 +18,45 @@ import matplotlib.pyplot as plt
 
 class TableAnalysis():
 
-    def __init__(self, ws_step=1.0, wd_step=2.0, minutes_per_point=10.0,):
+    def __init__(self, 
+                 wd_edges = np.arange(0,  360 + 2.0, 2.0),
+                 ws_edges = np.arange(0 - 0.5, 50, 1.0),
+                 pow_ref_edges = np.arange(0,  15000 + 100.0, 100.0), #kW
+                 use_pow_ref = False,
+                 minutes_per_point=10.0,):
         
-        # Set the wind speed and wind direction step sizes
-        self.ws_step = ws_step
-        self.wd_step = wd_step
+        # Check that the inputs are valid 
+        if len(ws_edges) < 2:
+            raise ValueError("ws_edges must have at least 2 elements")
+        if len(wd_edges) < 2:
+            raise ValueError("wd_edges must have at least 2 elements")
+        if len(pow_ref_edges) < 2:
+            raise ValueError("pow_ref_edges must have at least 2 elements")
+        
+        # Save the inputs
+        self.ws_edges = ws_edges
+        self.wd_edges = wd_edges
+        self.pow_ref_edges = pow_ref_edges
+        self.use_pow_ref = use_pow_ref
         self.minutes_per_point = minutes_per_point
 
-        # Set the wind speed and wind direction bins
-        self.ws_bins = np.arange(0 - ws_step/2.0, 50, ws_step)
-        self.wd_bins = np.arange(0,  360 + wd_step, wd_step)
+        # Get the steps
+        ws_step = ws_edges[1] - ws_edges[0]
+        wd_step = wd_edges[1] - wd_edges[0]
+        pow_ref_step = pow_ref_edges[1] - pow_ref_edges[0]
 
-        # Set the wind speed and wind direction bin centers
-        self.ws_bin_centers = self.ws_bins[:-1] + ws_step/2
-        self.wd_bin_centers = self.wd_bins[:-1] + wd_step/2
+        # Set the wind speed and wind direction and pow_ref bin centers
+        self.ws_bin_centers = self.ws_edges[:-1] + ws_step/2
+        self.wd_bin_centers = self.wd_edges[:-1] + wd_step/2
+        self.pow_ref_bin_centers = self.pow_ref_edges[:-1] + pow_ref_step/2
+
+        # Depending on use_pow_ref, set the number of bins
+        if self.use_pow_ref:
+            self.n_pow_ref_bins = len(self.pow_ref_bin_centers)
+        else:
+            self.n_ws_bins = len(self.ws_bin_centers)
 
         # Save the number of wind speed and wind direction bins
-        self.n_ws_bins = len(self.ws_bin_centers)
         self.n_wd_bins = len(self.wd_bin_centers)
 
         # Intialize list of matrices
@@ -66,22 +88,39 @@ class TableAnalysis():
         # Check that the dataframe has the correct columns
         if 'wd' not in df.columns:
             raise ValueError("Dataframe must have a column named 'wd'")
-        if 'ws' not in df.columns:
-            raise ValueError("Dataframe must have a column named 'ws'")
+        if (not self.use_pow_ref) and 'ws' not in df.columns:
+            raise ValueError("Dataframe must have a column named 'ws' when use_pow_ref is False")
+        if self.use_pow_ref and 'pow_ref' not in df.columns:
+            raise ValueError("Dataframe must have a column named 'pow_ref' when use_pow_ref is True")
         #TODO: Check that there is a pow column
         for c in df.columns:
-            if not ('wd' in c or 'ws' in c or 'pow_' in c):
-                raise ValueError("Dataframe must only have columns named 'wd', 'ws', or 'pow_*'")
+            if self.use_pow_ref:
+                if not ('wd' in c or 'pow_' in c or 'pow_ref' in c):
+                        raise ValueError("Dataframe must only have columns named 'wd', 'ws', or 'pow_*'")
+                if 'ws' in c:
+                    raise ValueError("Dataframe must not have a column named 'ws' when use_pow_ref is True")
+            else:
+                if not ('wd' in c or 'ws' in c or 'pow_' in c):
+                    raise ValueError("Dataframe must only have columns named 'wd', 'ws', or 'pow_*'")
+                if 'pow_ref' in c:
+                    raise ValueError("Dataframe must not have a column named 'pow_ref' when use_pow_ref is False")
         
-        # Bin the wind speed and wind direction
-        df['ws_bin'] = pd.cut(df['ws'], self.ws_bins,labels=self.ws_bin_centers)
-        df['wd_bin'] = pd.cut(df['wd'], self.wd_bins,labels=self.wd_bin_centers)
+        # Bin the wind speed and wind direction and drop original data
+        if self.use_pow_ref:
+            df['pow_ref_bin'] = pd.cut(df['pow_ref'], self.pow_ref_edges,labels=self.pow_ref_bin_centers)
+            df = df.drop(columns=['pow_ref'])
+        else:
+            df['ws_bin'] = pd.cut(df['ws'], self.ws_edges,labels=self.ws_bin_centers)
+            df = df.drop(columns=['ws'])
 
-        # Drop ws and wd
-        df = df.drop(columns=['ws', 'wd'])
+        df['wd_bin'] = pd.cut(df['wd'], self.wd_edges,labels=self.wd_bin_centers)
+        df = df.drop(columns=['wd'])
 
-        # Convert the turbines to a new column
-        df = df.melt(id_vars=['wd_bin', 'ws_bin'], var_name='turbine', value_name='power')
+        # Convert the turbine powers to a new column
+        if self.use_pow_ref:
+            df = df.melt(id_vars=['wd_bin', 'pow_ref_bin'], var_name='turbine', value_name='power')
+        else:
+            df = df.melt(id_vars=['wd_bin', 'ws_bin'], var_name='turbine', value_name='power')
 
         # Get a list of unique turbine names
         turbine_names = sorted(df['turbine'].unique())
@@ -92,8 +131,12 @@ class TableAnalysis():
         # Convert ws_bin and wd_bin to categorical with levels set to the bin centers
         # This enforces that the order of the bins is correct and the size of the matrix
         # matches the number of bins
+        if self.use_pow_ref:
+            df['pow_ref_bin'] = pd.Categorical(df['pow_ref_bin'], categories=self.pow_ref_bin_centers)
+        else:
+            df['ws_bin'] = pd.Categorical(df['ws_bin'], categories=self.ws_bin_centers)
         df['wd_bin'] = pd.Categorical(df['wd_bin'], categories=self.wd_bin_centers)
-        df['ws_bin'] = pd.Categorical(df['ws_bin'], categories=self.ws_bin_centers)
+        
         df['turbine'] = pd.Categorical(df['turbine'], categories=turbine_names)
 
         #Save the dataframe and name
@@ -103,20 +146,34 @@ class TableAnalysis():
         # increment the number of cases
         self.n_cases += 1
 
-        # # Get a matrix of mean values with dimensions: ws, wd, turbine whose shape
-        # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
-        mean_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].mean().reset_index().power.to_numpy()
-        mean_matrix = mean_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
-        
-        # # Get a matrix of median values with dimensions: ws, wd, turbine whose shape
-        # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
-        median_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].median().reset_index().power.to_numpy()
-        median_matrix = median_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+        # # Get a matrix of mean values with dimensions: wd, ws|pow_ref,turbine whose shape
+        # # is (len(wd_bin_centers), len(ws_bin_centers) | len(pow_ref_bin_centers), n_turbines)
+        if self.use_pow_ref:
+            mean_matrix = df.groupby(['wd_bin', 'pow_ref_bin', 'turbine'])['power'].mean().reset_index().power.to_numpy()
+            mean_matrix = mean_matrix.reshape((len(self.wd_bin_centers), len(self.pow_ref_bin_centers), self.n_turbines))
+        else:
+            mean_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].mean().reset_index().power.to_numpy()
+            mean_matrix = mean_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
 
-        # # Get a matrix of count values with dimensions: ws, wd, turbine whose shape
-        # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
-        count_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].count().reset_index().fillna(0).power.to_numpy()
-        count_matrix = count_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+        # # Get a matrix of median values with dimensions: wd, ws|pow_ref,turbine whose shape
+        # # is (len(wd_bin_centers), len(ws_bin_centers) | len(pow_ref_bin_centers), n_turbines)
+        if self.use_pow_ref:
+            median_matrix = df.groupby(['wd_bin', 'pow_ref_bin', 'turbine'])['power'].median().reset_index().power.to_numpy()
+            median_matrix = median_matrix.reshape((len(self.wd_bin_centers), len(self.pow_ref_bin_centers), self.n_turbines))
+        else:
+            median_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].median().reset_index().power.to_numpy()
+            median_matrix = median_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+
+        # # Get a matrix of count values with dimensions: wd, ws|pow_ref,turbine whose shape
+        # # is (len(wd_bin_centers), len(ws_bin_centers) | len(pow_ref_bin_centers), n_turbines)
+        if self.use_pow_ref:
+            count_matrix = df.groupby(['wd_bin', 'pow_ref_bin', 'turbine'])['power'].count().reset_index().power.to_numpy()
+            count_matrix = count_matrix.reshape((len(self.wd_bin_centers), len(self.pow_ref_bin_centers), self.n_turbines))
+        else:
+            count_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].count().reset_index().power.to_numpy()
+            count_matrix = count_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+        
+
 
         #TODO For these matrices are what we want to build the new uncertainty bands off of but
         # I'm not sure yet how
@@ -125,15 +182,23 @@ class TableAnalysis():
 
         # TODO For now just calculated the values likely used in such a formula
 
-        # # Get a matrix of standard deviation values with dimensions: ws, wd, turbine whose shape
-        # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
-        std_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].std().reset_index().power.to_numpy()
-        std_matrix = std_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+        # # Get a matrix of std values with dimensions: wd, ws|pow_ref,turbine whose shape
+        # # is (len(wd_bin_centers), len(ws_bin_centers) | len(pow_ref_bin_centers), n_turbines)
+        if self.use_pow_ref:
+            std_matrix = df.groupby(['wd_bin', 'pow_ref_bin', 'turbine'])['power'].std().reset_index().power.to_numpy()
+            std_matrix = std_matrix.reshape((len(self.wd_bin_centers), len(self.pow_ref_bin_centers), self.n_turbines))
+        else:
+            std_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].std().reset_index().power.to_numpy()
+            std_matrix = std_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+
 
         # # Get a matrix of confidence interval values with dimensions: ws, wd, turbine whose shape
         # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
         ci_matrix = std_matrix / np.sqrt(count_matrix)
-        ci_matrix = ci_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+        if self.use_pow_ref:
+            ci_matrix = ci_matrix.reshape((len(self.wd_bin_centers), len(self.pow_ref_bin_centers), self.n_turbines))
+        else:
+            ci_matrix = ci_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
 
         #TODO How to calculate mu?
         mu_matrix = np.zeros_like(mean_matrix)
@@ -174,9 +239,13 @@ class TableAnalysis():
         # Add a dummpy variable
         df_total['dummy'] = 1
         
-        # Get a matrix of count values with dimensions: ws, wd
-        overall_frequency_matrix = df_total.groupby(['wd_bin', 'ws_bin'])['dummy'].sum().reset_index().fillna(0).dummy.to_numpy()
-        overall_frequency_matrix = overall_frequency_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers)))
+        # Get a matrix of count values with dimensions: ws, wd | pow_ref
+        if self.use_pow_ref:
+            overall_frequency_matrix = df_total.groupby(['wd_bin', 'pow_ref_bin'])['dummy'].sum().reset_index().fillna(0).dummy.to_numpy()
+            overall_frequency_matrix = overall_frequency_matrix.reshape((len(self.wd_bin_centers), len(self.pow_ref_bin_centers)))
+        else:
+            overall_frequency_matrix = df_total.groupby(['wd_bin', 'ws_bin'])['dummy'].sum().reset_index().fillna(0).dummy.to_numpy()
+            overall_frequency_matrix = overall_frequency_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers)))
 
         # normalize the frequency matrix
         overall_frequency_matrix = overall_frequency_matrix / np.sum(overall_frequency_matrix)
@@ -185,8 +254,11 @@ class TableAnalysis():
     
     def get_uniform_frequency_matrix(self):
 
-        # Get a matrix of count values with dimensions: ws, wd
-        uniform_frequency_matrix = np.ones((len(self.wd_bin_centers), len(self.ws_bin_centers)))
+        # Get a matrix of count values with dimensions: ws, wd | pow_ref
+        if self.use_pow_ref:
+            uniform_frequency_matrix = np.ones((len(self.wd_bin_centers), len(self.pow_ref_bin_centers)))
+        else:
+            uniform_frequency_matrix = np.ones((len(self.wd_bin_centers), len(self.ws_bin_centers)))
 
         # normalize the frequency matrix
         uniform_frequency_matrix = uniform_frequency_matrix / np.sum(uniform_frequency_matrix)
@@ -194,6 +266,19 @@ class TableAnalysis():
         return uniform_frequency_matrix
     
     def set_user_defined_frequency_matrix(self, user_defined_frequency_matrix):
+
+        # Confirm user_defined_frequency_matrix is a numpy array
+        if not isinstance(user_defined_frequency_matrix, np.ndarray):
+            raise ValueError('User defined frequency matrix must be a numpy array')
+
+        # Confirm user_defined_frequency_matrix has dimensions: 
+        # wd, ws | pow_ref
+        if self.use_pow_ref:
+            if user_defined_frequency_matrix.shape != (len(self.wd_bin_centers), len(self.pow_ref_bin_centers)):
+                raise ValueError(f'User defined frequency matrix has incorrect dimensions, should be {len(self.wd_bin_centers)} x {len(self.pow_ref_bin_centers)}')
+        else:
+            if user_defined_frequency_matrix.shape != (len(self.wd_bin_centers), len(self.ws_bin_centers)):
+                raise ValueError(f'User defined frequency matrix has incorrect dimensions, should be {len(self.wd_bin_centers)} x {len(self.ws_bin_centers)}')
 
         # normalize the frequency matrix
         user_defined_frequency_matrix = user_defined_frequency_matrix / np.sum(user_defined_frequency_matrix)
@@ -252,6 +337,7 @@ class TableAnalysis():
                             turbine, 
                             wd_range=None,
                             ws_range=None, 
+                            pow_ref_range=None,
                             condition_on=None,
                             min_points_per_bin=1,
                             mean_or_median='mean',
@@ -268,44 +354,66 @@ class TableAnalysis():
         #TODO I think this right now returns the average power so needs to be scaled up
         # by number of hours to get energy
 
+        # Check that condition_on is consisten with self.use_pow_ref
+        if condition_on == 'pow_ref' and not self.use_pow_ref:
+            raise ValueError('condition_on cannot be "pow_ref" if self.use_pow_ref is False')
+        if condition_on == 'ws' and self.use_pow_ref:
+            raise ValueError('condition_on cannot be "ws" if self.use_pow_ref is True')
+
         # Set the default values for the wind speed and wind direction bins
-        if ws_range is None:
-            ws_range = (self.ws_bin_centers[0], self.ws_bin_centers[-1])
         if wd_range is None:
             wd_range = (self.wd_bin_centers[0], self.wd_bin_centers[-1])
+        if self.use_pow_ref:
+            if pow_ref_range is None:
+                pow_ref_range = (self.pow_ref_bin_centers[0], self.pow_ref_bin_centers[-1])
+        else:
+            if ws_range is None:
+                ws_range = (self.ws_bin_centers[0], self.ws_bin_centers[-1])
 
         # Get the base frequency matrix
         frequency_matrix = self.get_frequency_matrix(frequency_matrix_type, turbine)
 
         # Get the axis for summing over, initialize expected_value size
         if condition_on == None:
-            sum_axis = None # Sum over both wind speed and wind direction
+            sum_axis = None # Sum over both wind direction and wind speed | pow_ref
             expand_dims = (0, 1)
             expected_value = np.zeros((self.n_cases, 1, 1))
         elif condition_on == "wd":
             sum_axis = 1 # Sum over wind speeds
             expand_dims = (1)
             expected_value = np.zeros((self.n_cases, self.n_wd_bins, 1))
-        elif condition_on == "ws":
+        elif (condition_on == "ws") | (condition_on == "pow_ref"):
             sum_axis = 0 # Sum over wind directions
             expand_dims = (0)
-            expected_value = np.zeros((self.n_cases, 1, self.n_ws_bins))
+            if self.use_pow_ref:
+                expected_value = np.zeros((self.n_cases, 1, self.n_pow_ref_bins))
+            else:
+                expected_value = np.zeros((self.n_cases, 1, self.n_ws_bins))
         else:
-            raise ValueError("condition_on must be either 'wd', 'ws', or None.")
+            raise ValueError("condition_on must be either 'wd', 'ws','pow_ref, or None.")
 
         # Get the base frequency matrix
         frequency_matrix = self.get_frequency_matrix(frequency_matrix_type, turbine)
         
         # Get indices of the wind speed and wind direction bins that are outside the range
-        ws_ind_outside = np.where((self.ws_bin_centers < ws_range[0]) | 
-                                  (self.ws_bin_centers > ws_range[1]))[0]
         wd_ind_outside = np.where((self.wd_bin_centers < wd_range[0]) | 
-                                  (self.wd_bin_centers > wd_range[1]))[0]
+                            (self.wd_bin_centers > wd_range[1]))[0]
+        if self.use_pow_ref:
+            pow_ref_ind_outside = np.where((self.pow_ref_bin_centers < pow_ref_range[0]) | 
+                                      (self.pow_ref_bin_centers > pow_ref_range[1]))[0]
+        else:
+            ws_ind_outside = np.where((self.ws_bin_centers < ws_range[0]) | 
+                                      (self.ws_bin_centers > ws_range[1]))[0]
+
 
 
         # Set the value to 0 for all bins that are not inside the range
-        frequency_matrix[:, ws_ind_outside] = 0
         frequency_matrix[wd_ind_outside, :] = 0
+        if self.use_pow_ref:
+            frequency_matrix[:, pow_ref_ind_outside] = 0
+        else:
+            frequency_matrix[:, ws_ind_outside] = 0
+        
 
         # Check that the frequency matrix is not all zeros
         if np.sum(frequency_matrix) == 0:
@@ -354,6 +462,7 @@ class TableAnalysis():
                             turbine_list=None, 
                             wd_range=None,
                             ws_range=None, 
+                            pow_ref_range=None,
                             condition_on=None,
                             min_points_per_bin=1,
                             mean_or_median='mean',
@@ -363,15 +472,22 @@ class TableAnalysis():
         in turbine list
         """
 
+        # Check that condition_on is consisten with self.use_pow_ref
+        if condition_on == 'pow_ref' and not self.use_pow_ref:
+            raise ValueError('condition_on cannot be "pow_ref" if self.use_pow_ref is False')
+        if condition_on == 'ws' and self.use_pow_ref:
+            raise ValueError('condition_on cannot be "ws" if self.use_pow_ref is True')
+
+        # If self.use_pow_ref is True, and the value of ws_range is not None, raise an error
+        if self.use_pow_ref and ws_range is not None:
+            raise ValueError('ws_range cannot be specified if self.use_pow_ref is True')
+        
+        # If self.use_pow_ref is False, and the value of pow_ref_range is not None, raise an error
+        if not self.use_pow_ref and pow_ref_range is not None:
+            raise ValueError('pow_ref_range cannot be specified if self.use_pow_ref is False')
+
         # Check that turbine_list is a list
         turbine_list = self._check_turbine_list(turbine_list)
-
-        # if turbine_list is not None:
-        #     if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-        #         raise ValueError('turbine_list must be a list')
-
-        # if turbine_list is None:
-        #     turbine_list = list(range(self.n_turbines))
             
         num_turbines_in_list = len(turbine_list)
 
@@ -382,6 +498,8 @@ class TableAnalysis():
             expected_value_total = np.zeros((self.n_cases, self.n_wd_bins, 1,num_turbines_in_list))
         elif condition_on == "ws":
             expected_value_total = np.zeros((self.n_cases, 1, self.n_ws_bins,num_turbines_in_list))
+        elif condition_on == "pow_ref":
+            expected_value_total = np.zeros((self.n_cases, 1, self.n_pow_ref_bins,num_turbines_in_list))
         else:
             raise ValueError("condition_on must be either 'wd', 'ws', or None.")
         
@@ -391,22 +509,16 @@ class TableAnalysis():
                             turbine=t_i, 
                             ws_range=ws_range, 
                             wd_range=wd_range,
+                            pow_ref_range=pow_ref_range,
                             condition_on=condition_on,
                             min_points_per_bin=min_points_per_bin,
                             mean_or_median=mean_or_median,
                             frequency_matrix_type=frequency_matrix_type
                             )
 
-        
-        # This code is to permissive
-        # nan_incidences = np.isnan(expected_value_total).all(axis=(3))
-        # expected_value_total = np.nansum(expected_value_total, axis=3)
-        # expected_value_total[nan_incidences] = np.nan
-
         # This code is more strict
         expected_value_total = np.sum(expected_value_total, axis=3)
-
-        
+ 
 
         return expected_value_total
 
@@ -430,10 +542,9 @@ class TableAnalysis():
 
     def get_energy_in_range(self,
                             turbine_list=None,
-                            ws_min=0., 
-                            ws_max=100., 
-                            wd_min=0.,
-                            wd_max=360.,
+                            wd_range=None,
+                            ws_range=None,
+                            pow_ref_range=None,
                             min_points_per_bin=1,
                             mean_or_median='mean',
                             frequency_matrix_type='turbine'
@@ -441,8 +552,9 @@ class TableAnalysis():
 
         energy = self.compute_expected_power_across_turbines(
             turbine_list=self._check_turbine_list(turbine_list),  
-            wd_range=[wd_min, wd_max],
-            ws_range=[ws_min, ws_max],
+            wd_range=wd_range,
+            ws_range=ws_range,
+            pow_ref_range=pow_ref_range,
             condition_on=None,
             min_points_per_bin=min_points_per_bin,
             mean_or_median=mean_or_median,
@@ -453,8 +565,8 @@ class TableAnalysis():
 
     def get_energy_per_wd_bin(self,
                               turbine_list=None,
-                              ws_min=0., 
-                              ws_max=100., 
+                              ws_range=None,
+                              pow_ref_range=None,
                               min_points_per_bin=1,
                               mean_or_median='mean',
                               frequency_matrix_type='turbine'):
@@ -465,7 +577,8 @@ class TableAnalysis():
         energy_per_wd_bin = self.compute_expected_power_across_turbines(
             turbine_list=self._check_turbine_list(turbine_list),  
             wd_range=None,
-            ws_range=[ws_min, ws_max],
+            ws_range=ws_range,
+            pow_ref_range=pow_ref_range,
             condition_on="wd",
             min_points_per_bin=min_points_per_bin,
             mean_or_median=mean_or_median,
@@ -476,8 +589,7 @@ class TableAnalysis():
     
     def get_energy_per_ws_bin(self,
                               turbine_list=None,
-                              wd_min=0., 
-                              wd_max=360., 
+                              wd_range=None,
                               min_points_per_bin=1,
                               mean_or_median='mean',
                               frequency_matrix_type='turbine'):
@@ -486,8 +598,9 @@ class TableAnalysis():
         """
         energy_per_ws_bin = self.compute_expected_power_across_turbines( 
             turbine_list=self._check_turbine_list(turbine_list), 
-            wd_range=[wd_min, wd_max],
+            wd_range=wd_range,
             ws_range=None, 
+            pow_ref_range=None,
             condition_on="ws",
             min_points_per_bin=min_points_per_bin,
             mean_or_median=mean_or_median,
@@ -496,51 +609,38 @@ class TableAnalysis():
 
         return energy_per_ws_bin
     
-    def plot_energy_by_ws_bin(self, 
-                                turbine_list=None, 
-                                wd_min=0.,
-                                wd_max=360., 
-                                min_points_per_bin=1,
-                                mean_or_median='mean',
-                                frequency_matrix_type='turbine',
-                                ax=None, 
-                                **kwargs):
-        
-        # Check if turbine list is a scalar
-        if turbine_list is not None:
-            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-                turbine_list = [turbine_list]
-        
-        # Get the energy list
-        energy_list = self.get_energy_per_ws_bin(turbine_list,
-                                                 wd_min, 
-                                                 wd_max,
-                                                 min_points_per_bin,
-                                                 mean_or_median,
-                                                 frequency_matrix_type,)
+    def get_energy_per_pow_ref_bin(self,
+                              turbine_list=None,
+                              wd_range=None,
+                              min_points_per_bin=1,
+                              mean_or_median='mean',
+                              frequency_matrix_type='turbine'):
+        """Calculate the energy in a range of wind speed and wind direction across the turbines
+        in turbine list
+        """
+        energy_per_pow_ref_bin = self.compute_expected_power_across_turbines( 
+            turbine_list=self._check_turbine_list(turbine_list), 
+            wd_range=wd_range,
+            ws_range=None, 
+            pow_ref_range=None,
+            condition_on="pow_ref",
+            min_points_per_bin=min_points_per_bin,
+            mean_or_median=mean_or_median,
+            frequency_matrix_type=frequency_matrix_type
+        )[:,0,:]# .squeeze()
 
-        # Plot the energy list
-        if ax is None:
-            fig, ax = plt.subplots()
-        for i in range(len(energy_list)):
-            ax.plot(self.ws_bin_centers, energy_list[i,:], **kwargs, label=self.case_names[i])
-        
-        ax.set_xlabel('Wind speed [m/s]')
-        ax.set_ylabel('Energy [kWh]') #TODO Or expected power?
-        ax.set_title('Energy by wind speed bin')
-        ax.legend()
-        ax.grid(True)       
-
-        return ax
+        return energy_per_pow_ref_bin
     
+    # Plot energy by wd bin
     def plot_energy_by_wd_bin(self, 
                                 turbine_list=None, 
-                                ws_min=0.,
-                                ws_max=100., 
+                                ws_range=None,
+                                pow_ref_range=None,
                                 min_points_per_bin=1,
                                 mean_or_median='mean',
                                 frequency_matrix_type='turbine',
                                 ax=None, 
+                                labels=None,
                                 **kwargs):
         
         # Check if turbine list is a scalar
@@ -548,10 +648,18 @@ class TableAnalysis():
             if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
                 turbine_list = [turbine_list]
         
+        # Check if labels are None, and if not that they have the right length
+        if labels is None:
+            labels = self.case_names
+        else:
+            if len(labels) != len(self.case_names):
+                raise ValueError('labels must have the same length as case_names')
+
+
         # Get the energy list
         energy_list = self.get_energy_per_wd_bin(turbine_list,
-                                                 ws_min, 
-                                                 ws_max,
+                                                 ws_range, 
+                                                 pow_ref_range,
                                                  min_points_per_bin,
                                                  mean_or_median,
                                                  frequency_matrix_type,)
@@ -559,8 +667,8 @@ class TableAnalysis():
         # Plot the energy list
         if ax is None:
             fig, ax = plt.subplots()
-        for i in range(len(energy_list)):
-            ax.plot(self.wd_bin_centers, energy_list[i,:], **kwargs, label=self.case_names[i])
+        for i in range(self.n_cases):
+            ax.plot(self.wd_bin_centers, energy_list[i,:], **kwargs, label=labels[i])
         
         ax.set_xlabel('Wind direction [deg]')
         ax.set_ylabel('Energy [kWh]') #TODO Or expected power?
@@ -570,11 +678,111 @@ class TableAnalysis():
 
         return ax
 
+    # Plot energy by ws bin
+    def plot_energy_by_ws_bin(self, 
+                                turbine_list=None, 
+                                wd_range=None,
+                                min_points_per_bin=1,
+                                mean_or_median='mean',
+                                frequency_matrix_type='turbine',
+                                ax=None, 
+                                labels=None,
+                                **kwargs):
+        
+        # Check if self.use_pow_ref is False
+        if self.use_pow_ref:
+            raise ValueError('Cannot plot energy per ws bin if use_pow_ref is True')
+        
+        # Check if turbine list is a scalar
+        if turbine_list is not None:
+            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
+                turbine_list = [turbine_list]
+        
+        # Check if labels are None, and if not that they have the right length
+        if labels is None:
+            labels = self.case_names
+        else:
+            if len(labels) != len(self.case_names):
+                raise ValueError('labels must have the same length as case_names')
+
+
+        # Get the energy list
+        energy_list = self.get_energy_per_ws_bin(turbine_list,
+                                                 wd_range, 
+                                                 min_points_per_bin,
+                                                 mean_or_median,
+                                                 frequency_matrix_type,)
+        
+        # Plot the energy list
+        if ax is None:
+            fig, ax = plt.subplots()
+        for i in range(self.n_cases):
+            ax.plot(self.ws_bin_centers, energy_list[i,:], **kwargs, label=labels[i])
+        
+        ax.set_xlabel('Wind speed [m/s]')
+        ax.set_ylabel('Energy [kWh]') #TODO Or expected power?
+        ax.set_title('Energy by wind direction bin')
+        ax.legend()
+        ax.grid(True)       
+
+        return ax
+    
+    
+    # Plot energy by pow_ref bin
+    def plot_energy_by_pow_ref_bin(self, 
+                                turbine_list=None, 
+                                wd_range=None,
+                                min_points_per_bin=1,
+                                mean_or_median='mean',
+                                frequency_matrix_type='turbine',
+                                ax=None, 
+                                labels=None,
+                                **kwargs):
+        
+        # Check if self.use_pow_ref is True
+        if not self.use_pow_ref:
+            raise ValueError('Cannot plot energy per power reference bin if use_pow_ref is False')
+
+
+        # Check if turbine list is a scalar
+        if turbine_list is not None:
+            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
+                turbine_list = [turbine_list]
+        
+        # Check if labels are None, and if not that they have the right length
+        if labels is None:
+            labels = self.case_names
+        else:
+            if len(labels) != len(self.case_names):
+                raise ValueError('labels must have the same length as case_names')
+
+
+        # Get the energy list
+        energy_list = self.get_energy_per_pow_ref_bin(turbine_list,
+                                                 wd_range, 
+                                                 min_points_per_bin,
+                                                 mean_or_median,
+                                                 frequency_matrix_type,)
+        
+        # Plot the energy list
+        if ax is None:
+            fig, ax = plt.subplots()
+        for i in range(self.n_cases):
+            ax.plot(self.pow_ref_bin_centers, energy_list[i,:], **kwargs, label=labels[i])
+        
+        ax.set_xlabel('Reference power [kW]')
+        ax.set_ylabel('Energy [kWh]') #TODO Or expected power?
+        ax.set_title('Energy by reference power')
+        ax.legend()
+        ax.grid(True)       
+
+        return ax   
 
     
 
 if __name__ == '__main__':
     
+    # WIND SPEED TESTS
     # Generate a test dataframe with columns: ws, wd, pow_000, pow_001, pow_002 
     # with N elements each ws are random numbers between 3 and 25
     # wd are random numbers between 0 and 360
@@ -594,27 +802,33 @@ if __name__ == '__main__':
 
     ta = TableAnalysis()
     ta.add_df(df_baseline, 'baseline')
-    # ta.add_df(df_control, 'control')
+    ta.add_df(df_control, 'control')
 
-    # ta.print_df_names()
+    print(ta.get_energy_in_range())
 
-    # ta.get_overall_frequency_matrix()
+    ########################################################
+    # POW REF TESTS
+    print('~~~~POW REF TESTS~~~~')
+    df_baseline = pd.DataFrame({
+        # 'ws': np.random.uniform(3, 25, 1000),
+        'pow_ref': np.random.uniform(0, 1000, 1000),
+        'wd': np.random.uniform(0, 360, 1000),
+        'pow_000': np.random.uniform(0, 1000, 1000),
+        'pow_001': np.random.uniform(0, 1000, 1000),
+        'pow_002': np.random.uniform(0, 1000, 1000)
+    })
 
-    # print(ta.compute_expected_turbine_power( 0,min_points_per_bin=1))
-    # print(ta.compute_expected_turbine_power( 0,min_points_per_bin=2))
-    # print(ta.compute_expected_turbine_power( 0,min_points_per_bin=1))
+    df_control = df_baseline.copy()
+    df_control['pow_000'] = df_control['pow_000'] * 1.05
+    df_control['pow_000'] = np.clip(df_control['pow_000'], 0, 1000)
 
+    ta = TableAnalysis(use_pow_ref=True)
+    ta.add_df(df_baseline, 'baseline')
+    ta.add_df(df_control, 'control')
 
+    print(ta.get_energy_in_range())
 
+    print(ta.get_energy_per_pow_ref_bin())
 
-    print(ta.get_energy_in_range(0, wd_min=0))
-    print(ta.get_energy_in_range(0, wd_min=100))
-    print(ta.get_energy_in_range(0, wd_min=0))
-    
-    # print(ta.get_energy_per_ws_bin(0))
-
-    # ta.plot_energy_by_wd_bin()
-
-    # ta.plot_energy_by_ws_bin()
-
-    # plt.show()
+    ta.plot_energy_by_pow_ref_bin()
+    plt.show()
