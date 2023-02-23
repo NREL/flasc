@@ -609,6 +609,8 @@ class TableAnalysis():
         """
         From Harvey Motulsky text.
         """
+        n_idx = self._case_index(numerator_case)
+        d_idx = self._case_index(denominator_case)
         
         # For now, always uses the mean. Unsure how to use median.
         if mean_or_median == "median":
@@ -618,28 +620,38 @@ class TableAnalysis():
                 "confidence interval calculaiton.")
         
         turbine_list = np.array(self._check_turbine_list(turbine_list))
-        if len(turbine_list) > 1:
-            raise NotImplementedError("Confidence interval around ratio of "+\
-                "sum power is not yet implemented.")
+        # if len(turbine_list) > 1:
+        #     raise NotImplementedError("Confidence interval around ratio of "+\
+        #         "sum power is not yet implemented.")
 
         # Extract values for convenience
-        A = self.mean_matrix_list[self._case_index(numerator_case)]\
-             [:,:,turbine_list].sum(axis=2) # Prep for sum power case
-        B = self.mean_matrix_list[self._case_index(denominator_case)]\
-             [:,:,turbine_list].sum(axis=2) # Prep for sum power case
+        A = self.mean_matrix_list[n_idx][:,:,turbine_list].sum(axis=2)
+        B = self.mean_matrix_list[d_idx][:,:,turbine_list].sum(axis=2)
         Q = self.simple_ratio(turbine_list, numerator_case, denominator_case)
 
-        # TODO: Combine standard errors for mutliple turbine case
-        se_A = self.se_matrix_list[self._case_index(numerator_case)]\
-            [:,:,turbine_list].squeeze()
-        se_B = self.se_matrix_list[self._case_index(denominator_case)]\
-            [:,:,turbine_list].squeeze()
+        if len(turbine_list) == 1: # Take standard error directly
+            se_A = self.se_matrix_list[self._case_index(numerator_case)]\
+                [:,:,turbine_list].squeeze()
+            se_B = self.se_matrix_list[self._case_index(denominator_case)]\
+                [:,:,turbine_list].squeeze()
+            count_A = self.count_matrix_list[self._case_index(numerator_case)]\
+                [:,:,turbine_list].squeeze()
+            count_B = self.count_matrix_list[self._case_index(denominator_case)]\
+                [:,:,turbine_list].squeeze()
+        else: # Compute new, summed standard error
+            Var_A = (self.std_matrix_list[n_idx][:,:,turbine_list]**2 * 
+                (self.count_matrix_list[n_idx][:,:,turbine_list]-1))\
+                .sum(axis=2) /\
+                (self.count_matrix_list[n_idx][:,:,turbine_list].sum(axis=2)-2)
+            count_A = self.count_matrix_list[n_idx][:,:,turbine_list].sum(axis=2)
+            se_A = np.sqrt(Var_A/count_A)
 
-        # TODO: Combine counts for multiple turbine case
-        count_A = self.count_matrix_list[self._case_index(numerator_case)]\
-            [:,:,turbine_list].squeeze()
-        count_B = self.count_matrix_list[self._case_index(denominator_case)]\
-            [:,:,turbine_list].squeeze()
+            Var_B = (self.std_matrix_list[d_idx][:,:,turbine_list]**2 * 
+                (self.count_matrix_list[d_idx][:,:,turbine_list]-1))\
+                .sum(axis=2) /\
+                (self.count_matrix_list[d_idx][:,:,turbine_list].sum(axis=2)-2)
+            count_B = self.count_matrix_list[d_idx][:,:,turbine_list].sum(axis=2)
+            se_B = np.sqrt(Var_B/count_B)
 
         se_Q = Q * np.sqrt((se_A/A)**2 + (se_B/B)**2)
 
@@ -673,7 +685,7 @@ if __name__ == '__main__':
 
     ta = TableAnalysis(wd_step=60., ws_step=7)
     ta.add_df(df_baseline, 'baseline')
-    # ta.add_df(df_control, 'control')
+    ta.add_df(df_control, 'control')
 
     # ta.print_df_names()
 
@@ -690,20 +702,23 @@ if __name__ == '__main__':
 
     # print(ta.get_energy_in_range(0))
     
-    # print(ta.get_energy_per_ws_bin(0))
+    print(ta.get_energy_per_ws_bin(0))
 
     # ta.plot_energy_by_wd_bin()
 
     # ta.plot_energy_by_ws_bin()
 
-    print(ta.simple_ratio_with_confidence_interval(0))
+    q, l, h = ta.simple_ratio_with_confidence_interval()
+    print(q.shape)
+    print(l.shape)
+    print(h.shape)
 
 #    plt.show()
 
 
-    print(ta.get_energy_in_range(0, wd_min=0))
-    print(ta.get_energy_in_range(0, wd_min=100))
-    print(ta.get_energy_in_range(0, wd_min=0))
+    #print(ta.get_energy_in_range(0, wd_min=0))
+    #print(ta.get_energy_in_range(0, wd_min=100))
+    #print(ta.get_energy_in_range(0, wd_min=0))
     
     # print(ta.get_energy_per_ws_bin(0))
 
