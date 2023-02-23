@@ -18,6 +18,7 @@ import pandas as pd
 from pandas.errors import DataError
 from scipy import interpolate
 from time import perf_counter as timerpc
+import copy
 
 from flasc import utilities as fsut
 
@@ -669,6 +670,124 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
                                 'turbines': upstream_turbs_ids})
 
     return df_upstream
+
+def get_impacting_turbines_by_wd(fi_in, test_turbine, 
+    wd_array=np.arange(0., 360., 2.), change_threshold=0., limit_number=None, 
+    ws_test=9.):
+    """
+    Wrapper for get_dependent_turbines_by_wd() that loops over all 
+    turbines in the farm and packages their dependencies as a pandas 
+    dataframe.
+
+    Args:
+        fi ([floris object]): FLORIS object of the farm of interest.
+        test_turbine ([int]): Turbine for which dependencies are found.
+        wd_array ([np.array]): Wind directions at which to determine 
+            dependencies. Defaults to [0, 2, ... , 358].
+        change_threshold (float): Fractional change in power needed 
+            to denote a dependency. Defaults to 0. (any change in power 
+            is marked as a dependency)
+        limit_number (int | NoneType): Number of turbines that a 
+            turbine can depend on. If None, returns all turbines that 
+            impact test_turbine. Defaults to None.
+        ws_test (float): Wind speed at which FLORIS model is run to 
+            determine dependencies.
+        
+    Returns:
+        dep_indices_by_wd (list): A 2-dimensional list. Each element of 
+            the outer level list, which represents wind direction, 
+            contains a list of the turbines that impact test_turbine for 
+            that wind direction. The second-level list may be empty if 
+            no turbine impacts the test_turbine for that wind direciton 
+            (e.g., the turbine is in the front row).
+    """
+    # Copy fi to a local to not mess with incoming
+    fi = copy.deepcopy(fi_in)
+    
+    # Compute the base power
+    fi.reinitialize(
+        wind_speeds=[ws_test], 
+        wind_directions=wd_array
+    )
+    fi.calculate_wake()
+    base_power = fi.get_turbine_powers()[:,0,:] # remove unneeded dimension
+    
+    # Compute the test power
+    fi.floris.farm.turbine_type.pop(test_turbine) # Remove test turbine from list
+    fi.reinitialize(
+        layout_x=np.delete(fi.layout_x, [test_turbine]),
+        layout_y=np.delete(fi.layout_y, [test_turbine]),
+        wind_speeds=[ws_test],
+        wind_directions=wd_array
+    ) # This will reindex the turbines; undone in following steps.
+    fi.calculate_wake()
+    test_power = fi.get_turbine_powers()[:,0,:] # remove unneeded dimension
+    test_power = np.insert(test_power, test_turbine, 
+        base_power[:,test_turbine], axis=1)
+    
+    # Find the indices that have changed
+    dep_indices_by_wd = [None]*len(wd_array)
+    for i in range(len(wd_array)):
+        all_influences = np.abs(test_power[i,:] - base_power[i,:])/\
+                         base_power[i,:]
+        # Sort with highest influence first; trim to limit_number
+        influence_order = np.flip(np.argsort(all_influences))[:limit_number]
+        # Mask to only those that meet the threshold
+        influence_order = influence_order[
+            all_influences[influence_order] > change_threshold
+        ]
+        
+        # Store in output
+        dep_indices_by_wd[i] = list(influence_order)
+
+    # Remove the turbines own indice
+    return dep_indices_by_wd
+
+def get_all_impacting_turbines(fi_in, wd_array=np.arange(0., 360., 2.), 
+    change_threshold=0.0, limit_number=None, ws_test=9.):
+    """
+    Wrapper for get_impacting_turbines_by_wd() that loops over all 
+    turbines in the farm and packages their dependencies as a pandas 
+    dataframe.
+
+    Args:
+        fi ([floris object]): FLORIS object of the farm of interest.
+        wd_array ([np.array]): Wind directions at which to determine 
+            dependencies. Defaults to [0, 2, ... , 358].
+        change_threshold (float): Fractional change in power needed 
+            to denote a dependency. Defaults to 0. (any change in power 
+            is marked as a dependency)
+        limit_number (int | NoneType): Number of turbines that a 
+            turbine can depend on. If None, returns all turbines that 
+            impact each turbine. Defaults to None.
+        ws_test (float): Wind speed at which FLORIS model is run to 
+            determine dependencies.
+        
+    Returns:
+        df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
+            contains a wind direction, each column is a turbine, and 
+            each entry is the turbines that the column turbine depends 
+            on at the row wind direction. Dependencies can be extracted 
+            as: For wind direction wd, turbine T depends on 
+            df_out.loc[wd, T].
+    """
+
+    results = []
+    for t_i in range(len(fi_in.layout_x)):
+        results.append(
+            get_impacting_turbines_by_wd(
+                fi_in, t_i, wd_array, change_threshold, limit_number, ws_test
+            )
+        )
+    
+    # Package as a dataframe for return. Dependencies can be extracted as:
+    #   For wind direction wd, turbine T depends on df_out.loc[wd, T].
+    df_out = (pd.DataFrame(data=results, columns=wd_array)
+              .transpose()
+              .reset_index().rename(columns={"index":"wd"}).set_index("wd")
+             )
+    
+    return df_out
 
 
 # Wrapper function to easily set new TI values
