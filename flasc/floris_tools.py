@@ -671,13 +671,13 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
 
     return df_upstream
 
-def get_impacting_turbines_by_wd(fi_in, test_turbine, 
+def get_dependent_turbines_by_wd(fi_in, test_turbine, 
     wd_array=np.arange(0., 360., 2.), change_threshold=0., limit_number=None, 
     ws_test=9.):
     """
-    Wrapper for get_dependent_turbines_by_wd() that loops over all 
-    turbines in the farm and packages their dependencies as a pandas 
-    dataframe.
+    Computes all turbines that depend on the operation of a specified 
+    turbine (test_turbine) for each wind direction in wd_array, using 
+    the FLORIS model specified by fi_in to detect dependencies. 
 
     Args:
         fi ([floris object]): FLORIS object of the farm of interest.
@@ -688,18 +688,18 @@ def get_impacting_turbines_by_wd(fi_in, test_turbine,
             to denote a dependency. Defaults to 0. (any change in power 
             is marked as a dependency)
         limit_number (int | NoneType): Number of turbines that a 
-            turbine can depend on. If None, returns all turbines that 
-            impact test_turbine. Defaults to None.
+            turbine can have as dependencies. If None, returns all 
+            turbines that depend on each turbine. Defaults to None.
         ws_test (float): Wind speed at which FLORIS model is run to 
             determine dependencies.
         
     Returns:
         dep_indices_by_wd (list): A 2-dimensional list. Each element of 
             the outer level list, which represents wind direction, 
-            contains a list of the turbines that impact test_turbine for 
-            that wind direction. The second-level list may be empty if 
-            no turbine impacts the test_turbine for that wind direciton 
-            (e.g., the turbine is in the front row).
+            contains a list of the turbines that depend on test_turbine 
+            for that wind direction. The second-level list may be empty 
+            if no turbine depends on the test_turbine for that wind 
+            direciton (e.g., the turbine is in the back row).
     """
     # Copy fi to a local to not mess with incoming
     fi = copy.deepcopy(fi_in)
@@ -743,10 +743,10 @@ def get_impacting_turbines_by_wd(fi_in, test_turbine,
     # Remove the turbines own indice
     return dep_indices_by_wd
 
-def get_all_impacting_turbines(fi_in, wd_array=np.arange(0., 360., 2.), 
+def get_all_dependent_turbines(fi_in, wd_array=np.arange(0., 360., 2.), 
     change_threshold=0.0, limit_number=None, ws_test=9.):
     """
-    Wrapper for get_impacting_turbines_by_wd() that loops over all 
+    Wrapper for get_dependent_turbines_by_wd() that loops over all 
     turbines in the farm and packages their dependencies as a pandas 
     dataframe.
 
@@ -758,30 +758,28 @@ def get_all_impacting_turbines(fi_in, wd_array=np.arange(0., 360., 2.),
             to denote a dependency. Defaults to 0. (any change in power 
             is marked as a dependency)
         limit_number (int | NoneType): Number of turbines that a 
-            turbine can depend on. If None, returns all turbines that 
-            impact each turbine. Defaults to None.
+            turbine can have as dependencies. If None, returns all 
+            turbines that depend on each turbine. Defaults to None.
         ws_test (float): Wind speed at which FLORIS model is run to 
             determine dependencies.
         
     Returns:
         df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
             contains a wind direction, each column is a turbine, and 
-            each entry is the turbines that the column turbine depends 
-            on at the row wind direction. Dependencies can be extracted 
-            as: For wind direction wd, turbine T depends on 
-            df_out.loc[wd, T].
+            each entry is the turbines that depend on the column turbine 
+            at the row wind direction. Dependencies can be extracted 
+            as: For wind direction wd, the turbines that depend on 
+            turbine T are df_out.loc[wd, T].
     """
 
     results = []
     for t_i in range(len(fi_in.layout_x)):
         results.append(
-            get_impacting_turbines_by_wd(
+            get_dependent_turbines_by_wd(
                 fi_in, t_i, wd_array, change_threshold, limit_number, ws_test
             )
         )
     
-    # Package as a dataframe for return. Dependencies can be extracted as:
-    #   For wind direction wd, turbine T depends on df_out.loc[wd, T].
     df_out = (pd.DataFrame(data=results, columns=wd_array)
               .transpose()
               .reset_index().rename(columns={"index":"wd"}).set_index("wd")
