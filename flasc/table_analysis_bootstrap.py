@@ -85,7 +85,7 @@ class TableAnalysisBootstrap():
         self.n_blocks = n_blocks
 
         # Build the nomiminal table
-        self.nominal_table = TableAnalysis(wd_edges=self.ws_edges, 
+        self.nominal_table = TableAnalysis(wd_edges=self.wd_edges, 
                                             ws_edges=self.ws_edges, 
                                             pow_ref_edges=self.pow_ref_edges,
                                             use_pow_ref=self.use_pow_ref,
@@ -123,7 +123,7 @@ class TableAnalysisBootstrap():
             sampled_blocks = np.random.choice(list(range(self.n_blocks)), size=self.n_blocks, replace=True)
             
             # Create a table analysis object
-            table_analysis = TableAnalysis(wd_edges=self.ws_edges, 
+            table_analysis = TableAnalysis(wd_edges=self.wd_edges, 
                                             ws_edges=self.ws_edges, 
                                             pow_ref_edges=self.pow_ref_edges,
                                             use_pow_ref=self.use_pow_ref,
