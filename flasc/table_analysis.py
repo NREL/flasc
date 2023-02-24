@@ -34,22 +34,18 @@ class TableAnalysis():
             raise ValueError("pow_ref_edges must have at least 2 elements")
         
         # Save the inputs
-        self.ws_edges = ws_edges
         self.wd_edges = wd_edges
+        self.ws_edges = ws_edges
         self.pow_ref_edges = pow_ref_edges
         self.use_pow_ref = use_pow_ref
         self.minutes_per_point = minutes_per_point
 
-        # Get the steps
-        ws_step = ws_edges[1] - ws_edges[0]
-        wd_step = wd_edges[1] - wd_edges[0]
-        pow_ref_step = pow_ref_edges[1] - pow_ref_edges[0]
-
         # Set the wind speed and wind direction and pow_ref bin centers
-        self.ws_bin_centers = self.ws_edges[:-1] + ws_step/2
-        self.wd_bin_centers = self.wd_edges[:-1] + wd_step/2
-        self.pow_ref_bin_centers = self.pow_ref_edges[:-1] + pow_ref_step/2
-
+        self.wd_bin_centers = (self.wd_edges[:-1]+self.wd_edges[1:])/2
+        self.ws_bin_centers = (self.ws_edges[:-1]+self.ws_edges[1:])/2
+        self.pow_ref_bin_centers = (self.pow_ref_edges[:-1]+
+                                    self.pow_ref_edges[1:])/2
+    
         # Depending on use_pow_ref, set the number of bins
         if self.use_pow_ref:
             self.n_pow_ref_bins = len(self.pow_ref_bin_centers)
