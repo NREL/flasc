@@ -769,7 +769,8 @@ def get_all_dependent_turbines(fi_in, wd_array=np.arange(0., 360., 2.),
             each entry is the turbines that depend on the column turbine 
             at the row wind direction. Dependencies can be extracted 
             as: For wind direction wd, the turbines that depend on 
-            turbine T are df_out.loc[wd, T].
+            turbine T are df_out.loc[wd, T]. Dependencies are ordered, 
+            with strongest dependencies appearing first.
     """
 
     results = []
@@ -787,6 +788,75 @@ def get_all_dependent_turbines(fi_in, wd_array=np.arange(0., 360., 2.),
     
     return df_out
 
+def get_all_impacting_turbines(fi_in, wd_array=np.arange(0., 360., 2.), 
+    change_threshold=0.0, ws_test=9., df_dependencies=None):
+    """
+    Calculate which turbines impact a specified turbine based on the 
+    FLORIS model. Essentially a wrapper for get_all_dependent_turbines 
+    and a reordering of the output dataframe.
+
+    Args:
+        fi ([floris object]): FLORIS object of the farm of interest.
+        wd_array ([np.array]): Wind directions at which to determine 
+            dependencies. Defaults to [0, 2, ... , 358].
+        change_threshold (float): Fractional change in power needed 
+            to denote a dependency. Defaults to 0. (any change in power 
+            is marked as a dependency)
+        ws_test (float): Wind speed at which FLORIS model is run to 
+            determine dependencies.
+        df_dependencies (pd.DataFrame): Optional, can be provided to 
+            avoid recalculating the dependencies if they have already 
+            been calculated separately.
+
+    Returns:
+        df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
+            contains a wind direction, each column is a turbine, and 
+            each entry is the turbines that the column turbine depends 
+            on at the row wind direction. Dependencies can be extracted 
+            as: For wind direction wd, the turbines that impact turbine 
+            T are df_out.loc[wd, T]. Impacting turbines are simply 
+            ordered numerically, NOT by magnitude of impact.
+    """
+
+    if df_dependencies is None:
+        # Compute dependencies
+        # Note: No current method of applying a reasonable limit number, 
+        # as impact magnitudes are not stored by get_all_dependent_turbines.
+        df_dependencies = get_all_dependent_turbines(
+            fi_in=fi_in,
+            wd_array=wd_array, 
+            change_threshold=change_threshold, 
+            limit_number=None, 
+            ws_test=ws_test
+        )
+    else:
+        print("Proceeding using provided dependencies dataframe. If "+\
+            "a limit_number was specified when computing df_dependencies, "+\
+            "results may not be accurate!"
+        )
+    
+    # Convert to 3D list for easier looping
+    dependency_list = df_dependencies.to_numpy()
+
+    # Initialize an new 2D array of empty lists
+    impacted_by_list = np.empty((len(wd_array), len(fi_in.layout_x)), 
+                                dtype=object)
+    for i in np.ndindex(impacted_by_list.shape): 
+        impacted_by_list[i] = []
+
+    # Extract impacting turbines
+    for wd_i in range(len(wd_array)):
+        for t_u in range(len(fi_in.layout_x)):
+            for t_d in dependency_list[wd_i][t_u]:
+                impacted_by_list[wd_i, t_d].append(t_u)
+
+    # Package as dataframe of similar form to get_all_dependent_turbines
+    df_out = pd.DataFrame(
+        data=impacted_by_list, 
+        index=pd.Index(wd_array, name="wd")
+    )
+
+    return df_out
 
 # Wrapper function to easily set new TI values
 def _fi_set_ws_wd_ti(fi, wd=None, ws=None, ti=None):
