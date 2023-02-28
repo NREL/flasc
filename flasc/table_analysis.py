@@ -192,7 +192,6 @@ class TableAnalysis():
         # # Get a matrix of standard error values with dimensions: ws, wd, turbine whose shape
         # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
         se_matrix = std_matrix / np.sqrt(count_matrix)
-        se_matrix = se_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
         if self.use_pow_ref:
             se_matrix = se_matrix.reshape((len(self.wd_bin_centers), len(self.pow_ref_bin_centers), self.n_turbines))
         else:
@@ -497,7 +496,7 @@ class TableAnalysis():
         elif condition_on == "ws":
             expected_value_each = np.zeros((self.n_cases, 1, self.n_ws_bins, n_turbs))
         elif condition_on == "pow_ref":
-            expected_value_total = np.zeros((self.n_cases, 1, self.n_pow_ref_bins, n_turbs))
+            expected_value_each = np.zeros((self.n_cases, 1, self.n_pow_ref_bins, n_turbs))
         else:
             raise ValueError("condition_on must be either 'wd', 'ws', 'pow_ref', or None.")
         
@@ -515,7 +514,7 @@ class TableAnalysis():
                             )
 
         # This code is more strict
-        expected_value_total = np.sum(expected_value_total, axis=3)
+        expected_value_total = np.sum(expected_value_each, axis=3)
  
 
         return expected_value_total
@@ -814,16 +813,16 @@ class TableAnalysis():
         }
         imshow_kwargs = {**default_imshow_kwargs, **imshow_kwargs}
         
-        pos = ax.imshow(ratio_matrix*100, **imshow_kwargs)
+        pos = ax.imshow(ratio_matrix, **imshow_kwargs)
         cbar = fig.colorbar(pos, ax=ax)
-        cbar.set_label("Power uplift [%]")
+        cbar.set_label("Power ratio")
         if self.use_pow_ref:
             ax.set_xlabel("Reference power")
         else:
             ax.set_xlabel("Wind speed")
         ax.set_ylabel("Wind direction [deg]")
 
-        return ax 
+        return ax, cbar
 
     def simple_ratio(self,
                      turbine_list=None,
@@ -945,28 +944,28 @@ if __name__ == '__main__':
     df_control['pow_000'] = df_control['pow_000'] * 1.05
     df_control['pow_000'] = np.clip(df_control['pow_000'], 0, 1000)
 
-    ta = TableAnalysis(wd_step=60., ws_step=7)
-    ta.add_df(df_baseline, 'baseline')
-    ta.add_df(df_control, 'control')
+    #ta = TableAnalysis(wd_step=60., ws_step=7)
+    # ta.add_df(df_baseline, 'baseline')
+    # ta.add_df(df_control, 'control')
 
-    print(ta.get_energy_in_range())
+    # print(ta.get_energy_in_range())
 
-    # ta.print_df_names()
+    # # ta.print_df_names()
 
-    # ta.get_overall_frequency_matrix()
+    # # ta.get_overall_frequency_matrix()
 
-    # print(ta.get_energy_in_range(0))
+    # # print(ta.get_energy_in_range(0))
     
-    print(ta.get_energy_per_ws_bin(0))
+    # print(ta.get_energy_per_ws_bin(0))
 
-    # ta.plot_energy_by_wd_bin()
+    # # ta.plot_energy_by_wd_bin()
 
-    # ta.plot_energy_by_ws_bin()
+    # # ta.plot_energy_by_ws_bin()
 
-    q, l, h = ta.simple_ratio_with_confidence_interval()
-    print(q.shape)
-    print(l.shape)
-    print(h.shape)
+    # q, l, h = ta.simple_ratio_with_confidence_interval()
+    # print(q.shape)
+    # print(l.shape)
+    # print(h.shape)
 
 #    plt.show()
     ########################################################
@@ -994,4 +993,8 @@ if __name__ == '__main__':
     print(ta.get_energy_per_pow_ref_bin())
 
     ta.plot_energy_by_pow_ref_bin()
+
+    ax, cbar = ta.visualize_power_ratio_per_bin()
+    ax.set_xlim([0, 1000])
+
     plt.show()
