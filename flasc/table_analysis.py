@@ -570,6 +570,20 @@ class TableAnalysis():
 
         return ax
 
+    def visualize_power_ratio_per_bin(self, 
+                                      turbine_list=None, 
+                                      ax=None,
+                                      **imshow_kwargs):
+        
+        turbine_list = self._check_turbine_list(turbine_list)
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        return ax 
+
+                                 
+
 
     
 
