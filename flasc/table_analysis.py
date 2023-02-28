@@ -799,14 +799,28 @@ class TableAnalysis():
             fig, ax = plt.subplots()
         
         if self.use_pow_ref:
-            imshow_extent=(0, 29, 360, 0)
+            imshow_extent=(self.pow_ref_edges[0], self.pow_ref_edges[-1], 
+                           self.wd_edges[-1], self.wd_edges[0])
         else:
-            imshow_extent=(self.ws_edges[0], self.ws_edges[-1], 360, 0)
-        pos = ax.imshow(ratio_matrix*100, aspect="auto", 
-        interpolation="none", extent=(0, 29, 360, 0))
+            imshow_extent=(self.ws_edges[0], self.ws_edges[-1], 
+                           self.wd_edges[-1], self.wd_edges[0])
+
+        # Handle kwargs, defaults
+        default_imshow_kwargs = {
+            "aspect" : "auto", 
+            "interpolation" : "none",
+            "extent" : imshow_extent,
+            "label" : None
+        }
+        imshow_kwargs = {**default_imshow_kwargs, **imshow_kwargs}
+        
+        pos = ax.imshow(ratio_matrix*100, **imshow_kwargs)
         cbar = fig.colorbar(pos, ax=ax)
         cbar.set_label("Power uplift [%]")
-        ax.set_xlabel("Wind speed")
+        if self.use_pow_ref:
+            ax.set_xlabel("Reference power")
+        else:
+            ax.set_xlabel("Wind speed")
         ax.set_ylabel("Wind direction [deg]")
 
         return ax 
