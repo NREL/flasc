@@ -12,6 +12,7 @@
 
 import pandas as pd
 import numpy as np
+import scipy.stats as stats
 import matplotlib.pyplot as plt
 
 #TODO: Do we want to follow FLORIS' method of keeping 3 dimensions for all matrices?
@@ -44,7 +45,7 @@ class TableAnalysis():
         self.median_matrix_list = [] # Median power per wind speed and wind direction and turbine bin
         self.count_matrix_list = []  # Count of power per wind speed and wind direction and turbine bin
         self.std_matrix_list = [] # Standard deviation of power per wind speed and wind direction and turbine bin
-        self.ci_matrix_list = [] # Confidence interval of power per wind speed and wind direction and turbine bin
+        self.se_matrix_list = [] # Standard error of power per wind speed and wind direction and turbine bin
         self.mu_matrix_list = [] # Guassian mu value3
 
         # Initialize user_defined_frequency_matrix to None
@@ -130,10 +131,10 @@ class TableAnalysis():
         std_matrix = df.groupby(['wd_bin', 'ws_bin', 'turbine'])['power'].std().reset_index().power.to_numpy()
         std_matrix = std_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
 
-        # # Get a matrix of confidence interval values with dimensions: ws, wd, turbine whose shape
+        # # Get a matrix of standard error values with dimensions: ws, wd, turbine whose shape
         # # is (len(wd_bin_centers), len(ws_bin_centers), n_turbines)
-        ci_matrix = std_matrix / np.sqrt(count_matrix)
-        ci_matrix = ci_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
+        se_matrix = std_matrix / np.sqrt(count_matrix)
+        se_matrix = se_matrix.reshape((len(self.wd_bin_centers), len(self.ws_bin_centers), self.n_turbines))
 
         #TODO How to calculate mu?
         mu_matrix = np.zeros_like(mean_matrix)
@@ -143,7 +144,7 @@ class TableAnalysis():
         self.median_matrix_list.append(median_matrix)
         self.count_matrix_list.append(count_matrix)
         self.std_matrix_list.append(std_matrix)
-        self.ci_matrix_list.append(ci_matrix)
+        self.se_matrix_list.append(se_matrix)
         self.mu_matrix_list.append(mu_matrix)
         
         # # Fill missing values of the confidence interval matrix with the maximum value
@@ -362,32 +363,23 @@ class TableAnalysis():
         """Calculate the energy in a range of wind speed and wind direction across the turbines
         in turbine list
         """
-
-        # Check that turbine_list is a list
         turbine_list = self._check_turbine_list(turbine_list)
 
-        # if turbine_list is not None:
-        #     if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-        #         raise ValueError('turbine_list must be a list')
-
-        # if turbine_list is None:
-        #     turbine_list = list(range(self.n_turbines))
-            
-        num_turbines_in_list = len(turbine_list)
-
+        n_turbs = len(turbine_list)
+        
         # Get the axis for summing over, initialize expected_value size
         if condition_on == None:
-            expected_value_total = np.zeros((self.n_cases, 1, 1,num_turbines_in_list))
+            expected_value_each = np.zeros((self.n_cases, 1, 1, n_turbs))
         elif condition_on == "wd":
-            expected_value_total = np.zeros((self.n_cases, self.n_wd_bins, 1,num_turbines_in_list))
+            expected_value_each = np.zeros((self.n_cases, self.n_wd_bins, 1, n_turbs))
         elif condition_on == "ws":
-            expected_value_total = np.zeros((self.n_cases, 1, self.n_ws_bins,num_turbines_in_list))
+            expected_value_each = np.zeros((self.n_cases, 1, self.n_ws_bins, n_turbs))
         else:
             raise ValueError("condition_on must be either 'wd', 'ws', or None.")
         
         for idx, t_i in enumerate(turbine_list):
             
-            expected_value_total[:, :, :, idx] = self.compute_expected_turbine_power( 
+            expected_value_each[:, :, :, idx] = self.compute_expected_turbine_power( 
                             turbine=t_i, 
                             ws_range=ws_range, 
                             wd_range=wd_range,
@@ -399,14 +391,12 @@ class TableAnalysis():
 
         
         # This code is to permissive
-        # nan_incidences = np.isnan(expected_value_total).all(axis=(3))
-        # expected_value_total = np.nansum(expected_value_total, axis=3)
+        # nan_incidences = np.isnan(expected_value_each).all(axis=(3))
+        # expected_value_total = np.nansum(expected_value_each, axis=3)
         # expected_value_total[nan_incidences] = np.nan
 
         # This code is more strict
-        expected_value_total = np.sum(expected_value_total, axis=3)
-
-        
+        expected_value_total = np.sum(expected_value_each, axis=3)
 
         return expected_value_total
 
@@ -427,6 +417,12 @@ class TableAnalysis():
             raise ValueError('turbine_list contains a turbine index that is greater than the number of turbines')
 
         return turbine_list
+
+    def _case_index(self, case):
+        if isinstance(case, int):
+            return case
+        elif isinstance(case, str):
+            return self.case_names.index(case)
 
     def get_energy_in_range(self,
                             turbine_list=None,
@@ -544,9 +540,7 @@ class TableAnalysis():
                                 **kwargs):
         
         # Check if turbine list is a scalar
-        if turbine_list is not None:
-            if not isinstance(turbine_list, list) and not isinstance(turbine_list, np.ndarray):
-                turbine_list = [turbine_list]
+        turbine_list = self._check_turbine_list(turbine_list)
         
         # Get the energy list
         energy_list = self.get_energy_per_wd_bin(turbine_list,
@@ -582,8 +576,103 @@ class TableAnalysis():
 
         return ax 
 
-                                 
+    def simple_ratio(self,
+                     turbine_list=None,
+                     numerator_case=1,
+                     denominator_case=0,
+                     mean_or_median="mean"
+    ):
+        """
+        numerator_case and denominator_case can either by strings which match
+        a case_name or integers for direct indexing.
+        """
+        turbine_list = np.array(self._check_turbine_list(turbine_list))
 
+        if mean_or_median == "mean":
+            A = self.mean_matrix_list[self._case_index(numerator_case)]\
+                [:,:,turbine_list].sum(axis=2)
+            B = self.mean_matrix_list[self._case_index(denominator_case)]\
+                [:,:,turbine_list].sum(axis=2)
+        elif mean_or_median == "median":
+            # median(x+y+z) is not equal to median(x)+median(y)+median(z)!
+            # Nonlinear operator.
+            if len(turbine_list) > 1:
+                raise ValueError("Cannot use 'median' with multiple turbines.")
+            A = self.median_matrix_list[self._case_index(numerator_case)]\
+                [:,:,turbine_list].sum(axis=2)
+            B = self.median_matrix_list[self._case_index(denominator_case)]\
+                [:,:,turbine_list].sum(axis=2)
+        else:
+            raise ValueError('mean_or_median must be either "mean" or "median"')
+
+        # A NaN in any potion in A or B will produce NaN. Divide by 0 
+        # produces warning. TODO: do we need divide by zero handling?
+        ratio_matrix = A / B
+
+        return ratio_matrix
+    
+    def simple_ratio_with_confidence_interval(self, 
+                                              turbine_list=None,
+                                              numerator_case=1,
+                                              denominator_case=0,
+                                              confidence_level=0.90,
+                                              mean_or_median="mean"
+        ): 
+        """
+        From Harvey Motulsky text.
+        """
+        n_idx = self._case_index(numerator_case)
+        d_idx = self._case_index(denominator_case)
+        
+        # For now, always uses the mean. Unsure how to use median.
+        if mean_or_median == "median":
+            raise NotImplementedError("Must use mean for confidence interval.")
+        elif mean_or_median != "mean":
+            raise ValueError("mean_or_median must be 'mean' for ratio with "+\
+                "confidence interval calculaiton.")
+        
+        turbine_list = np.array(self._check_turbine_list(turbine_list))
+        # if len(turbine_list) > 1:
+        #     raise NotImplementedError("Confidence interval around ratio of "+\
+        #         "sum power is not yet implemented.")
+
+        # Extract values for convenience
+        A = self.mean_matrix_list[n_idx][:,:,turbine_list].sum(axis=2)
+        B = self.mean_matrix_list[d_idx][:,:,turbine_list].sum(axis=2)
+        Q = self.simple_ratio(turbine_list, numerator_case, denominator_case)
+
+        if len(turbine_list) == 1: # Take standard error directly
+            se_A = self.se_matrix_list[self._case_index(numerator_case)]\
+                [:,:,turbine_list].squeeze()
+            se_B = self.se_matrix_list[self._case_index(denominator_case)]\
+                [:,:,turbine_list].squeeze()
+            count_A = self.count_matrix_list[self._case_index(numerator_case)]\
+                [:,:,turbine_list].squeeze()
+            count_B = self.count_matrix_list[self._case_index(denominator_case)]\
+                [:,:,turbine_list].squeeze()
+        else: # Compute new, summed standard error
+            Var_A = (self.std_matrix_list[n_idx][:,:,turbine_list]**2 * 
+                (self.count_matrix_list[n_idx][:,:,turbine_list]-1))\
+                .sum(axis=2) /\
+                (self.count_matrix_list[n_idx][:,:,turbine_list].sum(axis=2)-2)
+            count_A = self.count_matrix_list[n_idx][:,:,turbine_list].sum(axis=2)
+            se_A = np.sqrt(Var_A/count_A)
+
+            Var_B = (self.std_matrix_list[d_idx][:,:,turbine_list]**2 * 
+                (self.count_matrix_list[d_idx][:,:,turbine_list]-1))\
+                .sum(axis=2) /\
+                (self.count_matrix_list[d_idx][:,:,turbine_list].sum(axis=2)-2)
+            count_B = self.count_matrix_list[d_idx][:,:,turbine_list].sum(axis=2)
+            se_B = np.sqrt(Var_B/count_B)
+
+        se_Q = Q * np.sqrt((se_A/A)**2 + (se_B/B)**2)
+
+        t_score = stats.t.ppf((confidence_level+1)/2, count_A+count_B-2)
+
+        ci_low = Q - t_score*se_Q
+        ci_high = Q + t_score*se_Q
+
+        return Q, ci_low, ci_high
 
     
 
@@ -606,9 +695,9 @@ if __name__ == '__main__':
     df_control['pow_000'] = df_control['pow_000'] * 1.05
     df_control['pow_000'] = np.clip(df_control['pow_000'], 0, 1000)
 
-    ta = TableAnalysis()
+    ta = TableAnalysis(wd_step=60., ws_step=7)
     ta.add_df(df_baseline, 'baseline')
-    # ta.add_df(df_control, 'control')
+    ta.add_df(df_control, 'control')
 
     # ta.print_df_names()
 
@@ -619,11 +708,29 @@ if __name__ == '__main__':
     # print(ta.compute_expected_turbine_power( 0,min_points_per_bin=1))
 
 
+    # ta.print_df_names()
+
+    # ta.get_overall_frequency_matrix()
+
+    # print(ta.get_energy_in_range(0))
+    
+    print(ta.get_energy_per_ws_bin(0))
+
+    # ta.plot_energy_by_wd_bin()
+
+    # ta.plot_energy_by_ws_bin()
+
+    q, l, h = ta.simple_ratio_with_confidence_interval()
+    print(q.shape)
+    print(l.shape)
+    print(h.shape)
+
+#    plt.show()
 
 
-    print(ta.get_energy_in_range(0, wd_min=0))
-    print(ta.get_energy_in_range(0, wd_min=100))
-    print(ta.get_energy_in_range(0, wd_min=0))
+    #print(ta.get_energy_in_range(0, wd_min=0))
+    #print(ta.get_energy_in_range(0, wd_min=100))
+    #print(ta.get_energy_in_range(0, wd_min=0))
     
     # print(ta.get_energy_per_ws_bin(0))
 
