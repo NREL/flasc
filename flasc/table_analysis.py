@@ -566,13 +566,28 @@ class TableAnalysis():
 
     def visualize_power_ratio_per_bin(self, 
                                       turbine_list=None, 
+                                      numerator_case=1,
+                                      denominator_case=0,
+                                      mean_or_median="mean",
                                       ax=None,
                                       **imshow_kwargs):
-        
-        turbine_list = self._check_turbine_list(turbine_list)
 
+        ratio_matrix = self.simple_ratio(
+            turbine_list,
+            numerator_case,
+            denominator_case,
+            mean_or_median
+        )
+        
         if ax is None:
             fig, ax = plt.subplots()
+        
+        pos = ax.imshow(steer_base_uplift*100, aspect="auto", 
+        interpolation="none", extent=(0, 29, 360, 0))
+        cbar = fig.colorbar(pos, ax=ax)
+        cbar.set_label("Power uplift [%]")
+        ax.set_xlabel("Wind speed")
+        ax.set_ylabel("Wind direction [deg]")
 
         return ax 
 
