@@ -796,6 +796,8 @@ class TableAnalysis():
         
         if ax is None:
             fig, ax = plt.subplots()
+        else:
+            fig = ax.get_figure()
         
         if self.use_pow_ref:
             imshow_extent=(self.pow_ref_edges[0], self.pow_ref_edges[-1], 
