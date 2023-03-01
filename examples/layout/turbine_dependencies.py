@@ -24,6 +24,14 @@ print("Turbines that depend on T002 at 226 degrees:",
       depend_on_2[round(226/2)]
      )
 
+# Can also return all influences as a matrix for other use (not ordered)
+depend_on_2, influence_magnitudes = fsatools.get_dependent_turbines_by_wd(
+    fi, 2, check_directions, return_influence_magnitudes=True)
+print("\nArray of all influences of T002 has shape (num_wds x num_turbs): ", 
+      influence_magnitudes.shape)
+print("Influence of T002 on T006 at 226 degrees: {0:.4f}".format( 
+      influence_magnitudes[round(226/2), 6]))
+
 df_dependencies = fsatools.get_all_dependent_turbines(fi, check_directions)
 print("\nAll turbine dependencies using default threshold "+\
       "(first 5 wind directions printed):")
