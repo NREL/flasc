@@ -672,7 +672,7 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
     return df_upstream
 
 def get_dependent_turbines_by_wd(fi_in, test_turbine, 
-    wd_array=np.arange(0., 360., 2.), change_threshold=0., limit_number=None, 
+    wd_array=np.arange(0., 360., 2.), change_threshold=0.001, limit_number=None, 
     ws_test=9., return_influence_magnitudes=False):
     """
     Computes all turbines that depend on the operation of a specified 
@@ -720,7 +720,11 @@ def get_dependent_turbines_by_wd(fi_in, test_turbine,
     base_power = fi.get_turbine_powers()[:,0,:] # remove unneeded dimension
     
     # Compute the test power
-    fi.floris.farm.turbine_type.pop(test_turbine) # Remove test turbine from list
+    if len(fi.floris.farm.turbine_type) > 1:
+        # Remove test turbine from list
+        fi.floris.farm.turbine_type.pop(test_turbine) 
+    else: # Only a single turbine type defined for the whole farm; do nothing
+        pass
     fi.reinitialize(
         layout_x=np.delete(fi.layout_x, [test_turbine]),
         layout_y=np.delete(fi.layout_y, [test_turbine]),
@@ -760,7 +764,7 @@ def get_dependent_turbines_by_wd(fi_in, test_turbine,
         return dep_indices_by_wd
 
 def get_all_dependent_turbines(fi_in, wd_array=np.arange(0., 360., 2.), 
-    change_threshold=0.0, limit_number=None, ws_test=9.):
+    change_threshold=0.001, limit_number=None, ws_test=9.):
     """
     Wrapper for get_dependent_turbines_by_wd() that loops over all 
     turbines in the farm and packages their dependencies as a pandas 
@@ -805,7 +809,7 @@ def get_all_dependent_turbines(fi_in, wd_array=np.arange(0., 360., 2.),
     return df_out
 
 def get_all_impacting_turbines(fi_in, wd_array=np.arange(0., 360., 2.), 
-    change_threshold=0.0, limit_number=None, ws_test=9.):
+    change_threshold=0.001, limit_number=None, ws_test=9.):
     """
     Calculate which turbines impact a specified turbine based on the 
     FLORIS model. Essentially a wrapper for 
