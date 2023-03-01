@@ -853,9 +853,14 @@ class TableAnalysis():
         else:
             raise ValueError('mean_or_median must be either "mean" or "median"')
 
-        # A NaN in any potion in A or B will produce NaN. Divide by 0 
-        # produces warning. TODO: do we need divide by zero handling?
-        ratio_matrix = A / B
+        # A NaN in any potion in A or B will produce NaN. 0 in denominator 
+        # returns NaN
+
+        ratio_matrix = np.divide(
+            A, B, 
+            out=np.nan*np.ones_like(A), 
+            where=B!=0
+        )
 
         return ratio_matrix
     
