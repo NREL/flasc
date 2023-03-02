@@ -6,6 +6,15 @@ from flasc import floris_tools as fsatools
 from flasc import visualization as fsaviz
 
 from floris import tools as wfct
+
+# Demonstrate the turbine dependency functions in floris_tools
+# Note a turbine is "dependent" on another if it is affected 
+# by the wake of the other turbine for a given wind direction.
+
+# A given turbine's dependent turbines are those that depend on it,
+# and a turbine's impacting turbines are those turbines that
+# it itself depends on.
+
     
 # Set up FLORIS interface
 print('Initializing the FLORIS object for our demo wind farm')

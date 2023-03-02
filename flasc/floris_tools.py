@@ -691,7 +691,7 @@ def get_dependent_turbines_by_wd(fi_in, test_turbine,
             turbine can have as dependencies. If None, returns all 
             turbines that depend on each turbine. Defaults to None.
         ws_test (float): Wind speed at which FLORIS model is run to 
-            determine dependencies.
+            determine dependencies.  Defaults to 9. m/s.
         return_influence_magnitudes (Bool): Flag for whether to return 
             an array containing the magnitude of the influence of the 
             test_turbine on all turbines.
@@ -781,7 +781,7 @@ def get_all_dependent_turbines(fi_in, wd_array=np.arange(0., 360., 2.),
             turbine can have as dependencies. If None, returns all 
             turbines that depend on each turbine. Defaults to None.
         ws_test (float): Wind speed at which FLORIS model is run to 
-            determine dependencies.
+            determine dependencies. Defaults to 9. m/s.
         
     Returns:
         df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
@@ -827,7 +827,7 @@ def get_all_impacting_turbines(fi_in, wd_array=np.arange(0., 360., 2.),
             turbine can depend on. If None, returns all 
             turbines that each turbine depends on. Defaults to None.
         ws_test (float): Wind speed at which FLORIS model is run to 
-            determine dependencies.
+            determine dependencies. Defaults to 9. m/s.
 
     Returns:
         df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
