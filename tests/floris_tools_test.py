@@ -5,7 +5,8 @@ import pandas as pd
 import unittest
 from flasc.floris_tools import (
     calc_floris_approx_table,
-    interpolate_floris_from_df_approx
+    interpolate_floris_from_df_approx,
+    get_dependent_turbines_by_wd
 )
 
 from floris import tools as wfct
@@ -68,3 +69,21 @@ class TestFlorisTools(unittest.TestCase):
         # self.assertTrue(("ti_002" in df.columns))
         self.assertTrue(("pow_003" in df.columns))
         self.assertAlmostEqual(df.shape[0], 3)
+
+    def test_get_dependent_turbines_by_wd(self):
+        # Load FLORIS object
+        fi = load_floris()
+
+        # compute the dependency on turbine 2 at 226 degrees
+        dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]))
+        self.assertEqual(dep[0], [1, 6])
+
+        # Test the change_threshold
+        dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]), 
+            change_threshold=0.01)
+        self.assertEqual(dep[0], [1])
+
+        # Test the limit_number
+        dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]), 
+            limit_number=1)
+        self.assertEqual(dep[0], [1])
