@@ -871,7 +871,7 @@ class energy_ratio_suite:
 
         return self.df_list
 
-    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True):
+    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True, axarr=None):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
@@ -884,25 +884,37 @@ class energy_ratio_suite:
             to True.
             hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
+            axarr([iteratible]): List of axes in the figure with length 2.
 
         Returns:
-            ax [plt.Axes]: Axis handle for the figure.
+            axarr([iteratible]): List of axes in the figure with length 2.
         """
         if superimpose:
             results_array = [df["er_results"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
             colors_array = [df["color"] for df in self.df_list]
-            fig, ax = vis.plot(results_array, labels_array, colors=colors_array, hide_uq_labels=hide_uq_labels)
+            _, axarr = vis.plot(results_array, 
+                                labels_array, 
+                                colors=colors_array, 
+                                hide_uq_labels=hide_uq_labels,
+                                axarr=axarr)
 
         else:
-            ax = []
+            # If superimpose is False, axarr must be None
+            if axarr is not None:
+                raise ValueError("If superimpose is False, axarr must be None")
+
+            axarr = []
             for df in self.df_list:
-                fig, axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
-                ax.append(axi)
+                _, axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
+                axarr.append(axi)
 
-        return ax
+        return axarr
 
-    def plot_energy_ratio_gains(self, superimpose=True, hide_uq_labels=True):
+    def plot_energy_ratio_gains(self, 
+                                superimpose=True, 
+                                hide_uq_labels=True,
+                                axarr=None):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
@@ -915,23 +927,35 @@ class energy_ratio_suite:
             to True.
             hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
+            axarr([iteratible]): List of axes in the figure with length 2.
 
         Returns:
-            ax [plt.Axes]: Axis handle for the figure.
+            axarr([iteratible]): List of axes in the figure with length 2.
         """
         if superimpose:
             results_array = [df["er_results"] for df in self.df_list_gains]
             labels_array = [df["name"] for df in self.df_list_gains]
             colors_array = [df["color"] for df in self.df_list_gains]
-            fig, ax = vis.plot(results_array, labels_array, colors=colors_array, hide_uq_labels=hide_uq_labels)
+            _, axarr = vis.plot(results_array, 
+                               labels_array, 
+                               colors=colors_array,
+                                 hide_uq_labels=hide_uq_labels,
+                                 axarr=axarr)
 
         else:
-            ax = []
+            # If superimpose is False, axarr must be None
+            if axarr is not None:
+                raise ValueError("If superimpose is False, axarr must be None")
+            axarr = []
             for df in self.df_list_gains:
-                fig, axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
-                ax.append(axi)
+                _, axi = vis.plot(df["er_results"],
+                                   df["name"], 
+                                   [df["color"]],
+                                    hide_uq_labels=hide_uq_labels,
+                                    axarr=axarr)
+                axarr.append(axi)
 
-        return ax
+        return axarr
 
 
     def export_detailed_energy_info_to_xlsx(

@@ -227,6 +227,6 @@ if __name__ == "__main__":
     print('In NOISY case (upper bound), energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering_ub, 100 * (total_energy_wakesteering_ub -total_energy_baseline )/total_energy_baseline))
 
 
-
+    plt.show()
 
 
