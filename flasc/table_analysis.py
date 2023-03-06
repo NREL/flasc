@@ -305,7 +305,13 @@ class TableAnalysis():
 
         # turbine_frequency_matrix is the sum of the count matrix over all time
         # turbine_frequency_matrix = np.sum(self.count_matrix_list[:], axis=0)[:, :, turbine].squeeze()
-        turbine_frequency_matrix = np.sum(self.count_matrix_list[:], axis=0)[:, :, turbine]
+        # turbine_frequency_matrix = np.sum(self.count_matrix_list[:], axis=0)[:, :, turbine]
+
+        # Switch to using the minimum per side, slightly changes interpretation of the 
+        # matrix however it has the advantage of downweighting unbalanced bins and also 
+        # sets low weigthing which are closer to being removed when 
+        # raising the min_points_per_bin option
+        turbine_frequency_matrix = np.min(self.count_matrix_list[:], axis=0)[:, :, turbine]
 
         # Normalize the frequency matrix
         turbine_frequency_matrix = turbine_frequency_matrix / np.sum(turbine_frequency_matrix)
