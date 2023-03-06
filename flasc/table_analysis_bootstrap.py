@@ -140,6 +140,22 @@ class TableAnalysisBootstrap():
             # Add this table analysis object to the list of tables
             self.bootstrap_tables[b_i] = table_analysis
 
+    def set_user_defined_frequency_matrix(self, user_defined_frequency_matrix):
+
+        # Set the user defined frequency matrix for the nominal and bootstrap tables
+
+        # Confirm that build_bootstrap_tables() has been run
+        if self.bootstrap_tables is None or self.nominal_table is None:
+            raise ValueError("Tables are not built. Run build_bootstrap_tables() first.")
+        
+        print('Setting user defined frequency matrix for nominal and bootstrap tables')
+        self.nominal_table.set_user_defined_frequency_matrix(user_defined_frequency_matrix)
+
+        for b_i in range(self.n_bootstraps):
+            self.bootstrap_tables[b_i].set_user_defined_frequency_matrix(user_defined_frequency_matrix)
+
+        self.user_defined_frequency_matrix = user_defined_frequency_matrix
+
 
     def get_energy_in_range(self, 
         turbine_list=None, 
