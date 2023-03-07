@@ -15,12 +15,13 @@ import numpy as np
 import pandas as pd
 import os
 
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 from floris import tools as wfct
 
 
-def plot(energy_ratios, labels=None, colors=None, hide_uq_labels=True):
+def plot(energy_ratios, df_freqs=None, labels=None, colors=None, hide_uq_labels=True, polar_plot=False):
     """This function plots energy ratios against the reference wind
     direction. The plot may or may not include uncertainty bounds,
     depending on the information contained in the provided energy ratio
@@ -54,8 +55,25 @@ def plot(energy_ratios, labels=None, colors=None, hide_uq_labels=True):
     # Format inputs if single case is inserted vs. lists
     if not isinstance(energy_ratios, (list, tuple)):
         energy_ratios = [energy_ratios]
-        if isinstance(labels, str):
-            labels = [labels]
+    if isinstance(labels, str):
+        labels = [labels]
+
+    # Format df_freqs
+    if df_freqs is not None:
+        if not isinstance(df_freqs, (list, tuple)):
+            df_freqs = [df_freqs]
+
+        # Simplify df_freqs to compare apples to apples
+        df_freqs = [df_freq[df_freq["freq"] > 0].reset_index(drop=True) for df_freq in df_freqs]
+
+        # Check if we can reduce to a single df_freq array
+        if len(df_freqs) > 1:
+            freq_numpy_array = [
+                np.array(df_freq.sort_values(by=["ws_bin", "wd_bin"])[["ws_bin", "wd_bin", "freq"]], dtype=float)
+                for df_freq in df_freqs
+            ]
+            if all([np.array_equal(freq_numpy_array[0], fi) for fi in freq_numpy_array]):
+                df_freqs = [df_freqs[0]]  # Simplify to first entry only
 
     if labels is None:
         labels = ["Nominal" for _ in energy_ratios]
@@ -68,26 +86,38 @@ def plot(energy_ratios, labels=None, colors=None, hide_uq_labels=True):
 
     # If colors is a list that contains None, assume colors not assigned
     if isinstance(colors, (list, tuple)):
-
         if None in colors:
             if not all(v is None for v in colors):
                 print("It's possible some but not all colors are supplied, therefore reverting to defaults")
             colors = None
 
-    N = len(energy_ratios)
-    fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(10, 5))
+    if colors is None:
+        # If nothing specified, use the default tableau colors from matplotlib.pyplot
+        colors = list(mcolors.TABLEAU_COLORS.keys())
+
+    if df_freqs is None:
+        N = len(energy_ratios)
+    else:
+        N = len(df_freqs)
+
+    if polar_plot:
+        fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
+    else:
+        fig, ax = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(10, 5))
 
     # Calculate bar width for bin counts
     bar_width = (0.7 / N) * np.min(
         [er["wd_bin"].diff().min() for er in energy_ratios]
     )
+    if polar_plot:
+        bar_width = bar_width * np.pi / 180.0
 
     for ii, df in enumerate(energy_ratios):
         df = df.copy()
 
         # Get x-axis values
         x = np.array(df["wd_bin"], dtype=float)
-
+    
         # Add NaNs to avoid connecting plots over gaps
         dwd = np.min(x[1::] - x[0:-1])
         jumps = np.where(np.diff(x) > dwd * 1.50)[0]
@@ -104,45 +134,82 @@ def plot(energy_ratios, labels=None, colors=None, hide_uq_labels=True):
             x = np.array(df["wd_bin"], dtype=float)
 
         # Plot horizontal black line at 1.
-        xlims = [np.min(x) - 4.0, np.max(x) + 4.0]
-        ax[0].plot(xlims, [1.0, 1.0], color="black")
+        xlims = np.linspace(np.min(x) - 4.0, np.max(x) + 4.0, 1000)
+
+        if polar_plot:
+            x = (90.0 - x) * np.pi / 180.0  # Convert to radians
+            xlims = (90.0 - xlims) * np.pi / 180.0  # Convert to radians
 
         # Plot energy ratios
-        if colors is None:
-            ax[0].plot(x, df["baseline"], "-o", markersize=3.0, label=labels[ii])
-        else:
-            ax[0].plot(x, df["baseline"], "-o", markersize=3.0, label=labels[ii], color=colors[ii])
+        ax[0].plot(xlims, np.ones_like(xlims), color="black")
+        ax[0].plot(x, df["baseline"], "-o", markersize=3.0, label=labels[ii], color=colors[ii])
 
         # Plot uncertainty bounds from bootstrapping, if applicable
         has_uq = np.max(np.abs(df["baseline"] - df["baseline_lb"])) > 0.001
         if has_uq:
+            ax[0].fill_between(
+                x,
+                df["baseline_lb"],
+                df["baseline_ub"],
+                alpha=0.25,
+                label=uq_labels[ii],
+                color=colors[ii]
+            )
 
-            if colors is None:
-                ax[0].fill_between(
-                    x,
-                    df["baseline_lb"],
-                    df["baseline_ub"],
-                    alpha=0.25,
-                    label=uq_labels[ii],
-                )
-            else:
-                ax[0].fill_between(
-                    x,
-                    df["baseline_lb"],
-                    df["baseline_ub"],
-                    alpha=0.25,
-                    label=uq_labels[ii],
-                    color=colors[ii]
+    # Plot the bin count
+    if df_freqs is not None:
+        # Plot labels
+        all_wd_bins = pd.concat(df_freqs)["wd_bin"].unique()
+        all_ws_labels = pd.concat(df_freqs)["ws_bin_edges"].unique()
+        ws_label_colors = [(list(mcolors.TABLEAU_COLORS.keys())*10)[i] for i, _ in enumerate(all_ws_labels)]
+        # Create labels
+        for wsii, ws_label in enumerate(all_ws_labels):
+            ax[1].bar(
+                x=all_wd_bins,
+                height=np.zeros_like(all_wd_bins),
+                label=str(ws_label),
+                color=ws_label_colors[wsii]
+            )
+
+        for ii, df_freq in enumerate(df_freqs):
+            wd_bins = df_freq["wd_bin"].unique()
+            bottom = np.zeros(len(wd_bins), dtype=float)
+
+            # Actual plots
+            for ws_bin_edges in df_freq["ws_bin_edges"].unique():
+                bar_color = ws_label_colors[np.where(ws_bin_edges == all_ws_labels)[0][0]]
+                bin_info = df_freq[df_freq["ws_bin_edges"] == ws_bin_edges]
+                bin_map = [np.where(wd == wd_bins)[0][0] for wd in bin_info["wd_bin"]]
+                y = np.zeros_like(wd_bins)
+                y[bin_map] = np.array(bin_info["freq"], dtype=float)
+        
+                if polar_plot:
+                    x = (90.0 - wd_bins) * np.pi / 180.0
+                    if N > 1:
+                        x = x - (ii - N / 2) * bar_width
+
+                if len(df_freqs) > 1:
+                    edge_color = colors[ii]
+                else:
+                    edge_color = None
+
+                # Plot the bar on top of existing bar
+                ax[1].bar(
+                    x=x,
+                    height=y,
+                    width=bar_width,
+                    bottom=bottom,
+                    label=None,
+                    color=bar_color,
+                    edgecolor=edge_color
                 )
 
-        # Plot the bin count
-        if colors is None:
-            ax[1].bar(x - (ii - N / 2) * bar_width, df["bin_count"], width=bar_width)
-        else:
-            ax[1].bar(x - (ii - N / 2) * bar_width, df["bin_count"], width=bar_width, color=colors[ii])
+                # Increment bar heights
+                bottom = bottom + y
+    else:
+        ax[1].bar(x - (ii - N / 2) * bar_width, df["bin_count"], width=bar_width, color=colors[ii])
 
     # Format the energy ratio plot
-    ax[0].set_ylabel("Energy ratio (-)")
     ax[0].legend()
     ax[0].grid(b=True, which="major", axis="both", color="gray")
     ax[0].grid(b=True, which="minor", axis="both", color="lightgray")
@@ -155,8 +222,20 @@ def plot(energy_ratios, labels=None, colors=None, hide_uq_labels=True):
     # Format the bin count plot
     ax[1].grid(b=True, which="major", axis="both", color="gray")
     ax[1].grid(b=True, which="minor", axis="both", color="lightgray")
-    ax[1].set_xlabel("Wind direction (deg)")
-    ax[1].set_ylabel("Number of data points (-)")
+    if df_freqs is not None:
+        ax[1].legend(ncols=2)
+
+    # Arrange xtick labels to align with FLORIS internal coordinate system
+    if polar_plot:
+        ax[0].set_title("Energy ratio (-)")
+        ax[1].set_title("Number of data points (-)")
+        for axx in ax:
+            xticks = np.remainder(90.0 - axx.get_xticks() * 180.0 / np.pi + 360.0, 360.0)
+            axx.set_xticklabels(["{:.0f}°".format(x) for x in xticks])
+    else:
+        ax[0].set_ylabel("Energy ratio (-)")
+        ax[1].set_xlabel("Wind direction (deg)")
+        ax[1].set_ylabel("Number of data points (-)")
 
     # Enforce a tight layout
     plt.tight_layout()
