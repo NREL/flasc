@@ -42,11 +42,27 @@ def plot(energy_ratios, df_freqs=None, labels=None, colors=None, hide_uq_labels=
                     * baseline_u: Upper bound for energy ratio. This
                         value is equal to baseline without UQ and higher
                         with UQ.
+        df_freqs ([iteratible], optional): List of Pandas DataFrames containing
+            the wind rose distributions for each dataset that is plotted. These
+            dataframes contain, at the minimum, the columns:
+                    * wd_bin_edges: a Pandas Interval specifying the bounds
+                         of the wind direction bin.
+                    * ws_bin_edges: a Pandas Interval specifying the bounds
+                         of the wind speed bin.
+                    * freq: a float specifying the frequency of occurrence
+                         of this particular wind speed and wind direction bin.
         labels ([iteratible], optional): Label for each of the energy ratio
             dataframes. Defaults to None.
+        colors ([iteratible], optional): Colors for the energy ratio plots,
+            being a list with one color for each dataset plotted. Thus,
+            colors is a list-like object with number of entries equal
+            to the length of the list 'energy_ratios'. If None, will
+            default to the matplotlib.pyplot tableau color palette.
         hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
-        color (str, optional): Color specified to plot the energy ratio
+        polar_plot (bool, optional): Plots the energy ratios in a polar
+           coordinate system, aligned with the wind direction coordinate
+           system of FLORIS. Defaults to False.
 
     Returns:
         fig ([plt.Figure]): Figure in which energy ratios are plotted.

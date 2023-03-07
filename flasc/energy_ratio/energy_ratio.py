@@ -495,6 +495,9 @@ class energy_ratio:
         Args:
             hide_uq_labels (bool, optional): If true, do not specifically label
                 the confidence intervals in the plot
+            polar_plot (bool, optional): Plots the energy ratios in a polar
+                coordinate system, aligned with the wind direction coordinate
+                system of FLORIS. Defaults to False.
 
         Returns:
             ax [plt.Axes]: Axis handle for the figure.

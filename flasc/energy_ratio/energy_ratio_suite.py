@@ -882,12 +882,15 @@ class energy_ratio_suite:
         before attempting to plot the energy ratios.
 
         Args:
-            superimpose (bool, optional): if True, plots the energy ratio
+        superimpose (bool, optional): if True, plots the energy ratio
             of all datasets into the same figure. If False, will plot the
             energy ratio of each dataset into a separate figure. Defaults
             to True.
-            hide_uq_labels (bool, optional): If true, do not specifically label
+        hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
+        polar_plot (bool, optional): Plots the energy ratios in a polar
+            coordinate system, aligned with the wind direction coordinate
+            system of FLORIS. Defaults to False.
 
         Returns:
             ax [plt.Axes]: Axis handle for the figure.
