@@ -291,6 +291,7 @@ class energy_ratio_suite:
             ii ([int]): Dataset number/identifier
         """
         self.df_list[ii].pop("er_results")
+        self.df_list[ii].pop("df_freq")
         self.df_list[ii].pop("er_test_turbines")
         self.df_list[ii].pop("er_ref_turbines")
         self.df_list[ii].pop("er_dep_turbines")
@@ -512,6 +513,7 @@ class energy_ratio_suite:
                 self.df_list[ii]["er_results_info_dict"] = out[1]
             else:
                 self.df_list[ii]["er_results"] = out
+            self.df_list[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
@@ -751,6 +753,7 @@ class energy_ratio_suite:
                 self.df_list_gains[ii]["er_results_info_dict"] = out[1]
             else:
                 self.df_list_gains[ii]["er_results"] = out
+            self.df_list_gains[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
             self.df_list_gains[ii]["er_test_turbines"] = test_turbines
             self.df_list_gains[ii]["er_wd_step"] = wd_step
             self.df_list_gains[ii]["er_ws_step"] = ws_step
@@ -863,6 +866,7 @@ class energy_ratio_suite:
 
             # Save each output to self
             self.df_list[ii]["er_results"] = out
+            self.df_list[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
@@ -871,7 +875,7 @@ class energy_ratio_suite:
 
         return self.df_list
 
-    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True):
+    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True, polar_plot=False):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
@@ -890,14 +894,15 @@ class energy_ratio_suite:
         """
         if superimpose:
             results_array = [df["er_results"] for df in self.df_list]
+            df_freq_array = [df["df_freq"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
             colors_array = [df["color"] for df in self.df_list]
-            fig, ax = vis.plot(results_array, labels_array, colors=colors_array, hide_uq_labels=hide_uq_labels)
+            fig, ax = vis.plot(results_array, df_freqs=df_freq_array, labels=labels_array, colors=colors_array, hide_uq_labels=hide_uq_labels, polar_plot=polar_plot)
 
         else:
             ax = []
             for df in self.df_list:
-                fig, axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
+                fig, axi = vis.plot(energy_ratios=df["er_results"], df_freqs=df["df_freq"], labels=df["name"], colors=[df["color"]], hide_uq_labels=hide_uq_labels, polar_plot=polar_plot)
                 ax.append(axi)
 
         return ax
