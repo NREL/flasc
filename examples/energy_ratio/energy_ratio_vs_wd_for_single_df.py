@@ -95,6 +95,10 @@ if __name__ == '__main__':
     ax[0].set_title("Energy ratios for turbine 001 without UQ")
     plt.tight_layout()
 
+    fig, ax = era.plot_energy_ratio(polar_plot=True)  # Plot in polar format too
+    ax[0].set_title("Energy ratios for turbine 001 without UQ")
+    plt.tight_layout()
+
     # Get energy ratio with uncertainty quantification
     # using N=50 bootstrap samples and 5-95 percent conf. bounds.
     era.get_energy_ratio(
