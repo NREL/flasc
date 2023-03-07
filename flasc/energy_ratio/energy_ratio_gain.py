@@ -502,7 +502,10 @@ class energy_ratio_gain:
 
         return energy_ratios
 
-    def plot_energy_ratio(self, hide_uq_labels=True):
+    def plot_energy_ratio(self, 
+                          hide_uq_labels=True,
+                          axarr=None
+                          ):
         """This function plots the energy ratio against the wind direction,
         potentially with uncertainty bounds if N > 1 was specified by
         the user. One must first run get_energy_ratio() before attempting
@@ -511,11 +514,14 @@ class energy_ratio_gain:
         Args:
             hide_uq_labels (bool, optional): If true, do not specifically label
                 the confidence intervals in the plot
+            axarr([iteratible]): List of axes in the figure with length 2.
 
         Returns:
-            ax [plt.Axes]: Axis handle for the figure.
+            axarr([iteratible]): List of axes in the figure with length 2.
         """
-        return ervis.plot(self.energy_ratio_out, hide_uq_labels=hide_uq_labels)
+        return ervis.plot(self.energy_ratio_out, 
+                          hide_uq_labels=hide_uq_labels,
+                            axarr=axarr)
 
 
 # Support functions not included in energy_ratio class
