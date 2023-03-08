@@ -235,8 +235,8 @@ def plot(
 
     # Format the energy ratio plot
     axarr[0].legend()
-    axarr[0].grid(b=True, which="major", axis="both", color="gray")
-    axarr[0].grid(b=True, which="minor", axis="both", color="lightgray")
+    axarr[0].grid(visible=True, which="major", axis="both", color="gray")
+    axarr[0].grid(visible=True, which="minor", axis="both", color="lightgray")
     axarr[0].minorticks_on()
     plt.grid(True)
 
@@ -244,8 +244,8 @@ def plot(
         axarr[0].legend()
 
     # Format the bin count plot
-    axarr[1].grid(b=True, which="major", axis="both", color="gray")
-    axarr[1].grid(b=True, which="minor", axis="both", color="lightgray")
+    axarr[1].grid(visible=True, which="major", axis="both", color="gray")
+    axarr[1].grid(visible=True, which="minor", axis="both", color="lightgray")
     if df_freqs is not None:
         axarr[1].legend(ncols=2)
 
