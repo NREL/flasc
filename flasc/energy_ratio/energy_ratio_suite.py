@@ -893,7 +893,7 @@ class energy_ratio_suite:
             results_array = [df["er_results"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
             colors_array = [df["color"] for df in self.df_list]
-            _, axarr = vis.plot(results_array, 
+            axarr = vis.plot(results_array, 
                                 labels_array, 
                                 colors=colors_array, 
                                 hide_uq_labels=hide_uq_labels,
@@ -906,7 +906,7 @@ class energy_ratio_suite:
 
             axarr = []
             for df in self.df_list:
-                _, axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
+                axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
                 axarr.append(axi)
 
         return axarr
@@ -936,7 +936,7 @@ class energy_ratio_suite:
             results_array = [df["er_results"] for df in self.df_list_gains]
             labels_array = [df["name"] for df in self.df_list_gains]
             colors_array = [df["color"] for df in self.df_list_gains]
-            _, axarr = vis.plot(results_array, 
+            axarr = vis.plot(results_array, 
                                labels_array, 
                                colors=colors_array,
                                  hide_uq_labels=hide_uq_labels,
@@ -948,7 +948,7 @@ class energy_ratio_suite:
                 raise ValueError("If superimpose is False, axarr must be None")
             axarr = []
             for df in self.df_list_gains:
-                _, axi = vis.plot(df["er_results"],
+                axi = vis.plot(df["er_results"],
                                    df["name"], 
                                    [df["color"]],
                                     hide_uq_labels=hide_uq_labels,
