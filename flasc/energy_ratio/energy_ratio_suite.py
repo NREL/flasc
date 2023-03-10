@@ -901,7 +901,7 @@ class energy_ratio_suite:
             df_freq_array = [df["df_freq"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
             colors_array = [df["color"] for df in self.df_list]
-            fig, ax = vis.plot(
+            axarr = vis.plot(
                 energy_ratios=results_array,
                 df_freqs=df_freq_array,
                 labels=labels_array,
@@ -957,7 +957,7 @@ class energy_ratio_suite:
             results_array = [df["er_results"] for df in self.df_list_gains]
             labels_array = [df["name"] for df in self.df_list_gains]
             colors_array = [df["color"] for df in self.df_list_gains]
-            _, axarr = vis.plot(
+            axarr = vis.plot(
                 energy_ratios=results_array, 
                 labels=labels_array, 
                 colors=colors_array,
@@ -971,7 +971,7 @@ class energy_ratio_suite:
                 raise ValueError("If superimpose is False, axarr must be None")
             axarr = []
             for df in self.df_list_gains:
-                _, axi = vis.plot(
+                axi = vis.plot(
                     energy_ratios=df["er_results"],
                     labels=df["name"], 
                     colors=[df["color"]],
