@@ -918,7 +918,7 @@ class energy_ratio_suite:
 
             axarr = []
             for df in self.df_list:
-                fig, axi = vis.plot(
+                axi = vis.plot(
                     energy_ratios=df["er_results"],
                     df_freqs=df["df_freq"],
                     labels=df["name"],
