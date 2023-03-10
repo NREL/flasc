@@ -263,7 +263,7 @@ def plot(
 
     # Enforce a tight layout
     plt.tight_layout()
-    return (plt.gcf(), axarr)
+    return axarr
 
 
 # def table_analysis(
