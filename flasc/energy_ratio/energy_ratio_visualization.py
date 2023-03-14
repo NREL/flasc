@@ -200,13 +200,14 @@ def plot(
             bottom = np.zeros(len(wd_bins), dtype=float)
 
             # Actual plots
+            x = wd_bins
             for ws_bin_edges in df_freq["ws_bin_edges"].unique():
                 bar_color = ws_label_colors[np.where(ws_bin_edges == all_ws_labels)[0][0]]
                 bin_info = df_freq[df_freq["ws_bin_edges"] == ws_bin_edges]
                 bin_map = [np.where(wd == wd_bins)[0][0] for wd in bin_info["wd_bin"]]
                 y = np.zeros_like(wd_bins)
                 y[bin_map] = np.array(bin_info["freq"], dtype=float)
-        
+
                 if polar_plot:
                     x = (90.0 - wd_bins) * np.pi / 180.0
                     if N > 1:
