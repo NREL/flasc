@@ -13,12 +13,9 @@
 
 import numpy as np
 import pandas as pd
-import os
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
-
-from floris import tools as wfct
 
 
 def plot(
@@ -86,18 +83,6 @@ def plot(
         if not isinstance(df_freqs, (list, tuple)):
             df_freqs = [df_freqs]
 
-        # Simplify df_freqs to compare apples to apples
-        df_freqs = [df_freq[df_freq["freq"] > 0].reset_index(drop=True) for df_freq in df_freqs]
-
-        # Check if we can reduce to a single df_freq array
-        if len(df_freqs) > 1:
-            freq_numpy_array = [
-                np.array(df_freq.sort_values(by=["ws_bin", "wd_bin"])[["ws_bin", "wd_bin", "freq"]], dtype=float)
-                for df_freq in df_freqs
-            ]
-            if all([np.array_equal(freq_numpy_array[0], fi) for fi in freq_numpy_array]):
-                df_freqs = [df_freqs[0]]  # Simplify to first entry only
-
     if labels is None:
         labels = ["Nominal" for _ in energy_ratios]
         uq_labels = ["Confidence bounds" for _ in energy_ratios]
@@ -106,6 +91,13 @@ def plot(
 
     if hide_uq_labels:
         uq_labels = ['_nolegend_' for l in uq_labels]
+
+    # Come up with hatch patterns
+    hatch_patterns = [
+        '//', '++', 'xx', 'oo', '\\\\', '--', 'OO', '..', '**', '||',
+        '/o', '\\|', '|*', '-\\', '+o', 'x*', 'o-', 'O|', 'O.', '*-',
+        '/', '\\', '|', '-', '+', 'x', 'o', 'O', '.', '*',
+    ] * 10  # Repeat 10 times to ensure always sufficiently large size
 
     # If colors is a list that contains None, assume colors not assigned
     if isinstance(colors, (list, tuple)):
@@ -116,18 +108,15 @@ def plot(
 
     if colors is None:
         # If nothing specified, use the default tableau colors from matplotlib.pyplot
-        colors = list(mcolors.TABLEAU_COLORS.keys())
+        colors = [mcolors.to_rgb(clr) for clr in mcolors.TABLEAU_COLORS.keys()]
 
-    if df_freqs is None:
-        N = len(energy_ratios)
-    else:
-        N = len(df_freqs)
 
+    N = len(energy_ratios)
     if axarr is None:
         if polar_plot:
-            fig, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
+            _, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
         else:
-            fig, axarr = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(10, 5))
+            _, axarr = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=(10, 5))
 
     # Calculate bar width for bin counts
     bar_width = (0.7 / N) * np.min(
@@ -182,27 +171,20 @@ def plot(
 
     # Plot the bin count
     if df_freqs is not None:
-        # Plot labels
-        all_wd_bins = pd.concat(df_freqs)["wd_bin"].unique()
-        all_ws_labels = pd.concat(df_freqs)["ws_bin_edges"].unique()
-        ws_label_colors = [(list(mcolors.TABLEAU_COLORS.keys())*10)[i] for i, _ in enumerate(all_ws_labels)]
-        # Create labels
-        for wsii, ws_label in enumerate(all_ws_labels):
-            axarr[1].bar(
-                x=all_wd_bins,
-                height=np.zeros_like(all_wd_bins),
-                label=str(ws_label),
-                color=ws_label_colors[wsii]
-            )
-
         for ii, df_freq in enumerate(df_freqs):
             wd_bins = df_freq["wd_bin"].unique()
-            bottom = np.zeros(len(wd_bins), dtype=float)
+            n_ws_bins = len(df_freq["ws_bin_edges"].unique())
+            alpha_array = np.linspace(0.0, 0.8, n_ws_bins)  # Bar colors are a transient from full color to mix of 20% color and 80% white
+            # # Actual plots
 
-            # Actual plots
             x = wd_bins
-            for ws_bin_edges in df_freq["ws_bin_edges"].unique():
-                bar_color = ws_label_colors[np.where(ws_bin_edges == all_ws_labels)[0][0]]
+            if N > 1:
+                x = x + (ii - N / 2) * bar_width
+
+            bottom = np.zeros(len(wd_bins), dtype=float)
+            for wsii, ws_bin_edges in enumerate(np.sort(df_freq["ws_bin_edges"].unique())):
+                # Mix nominal bar with white to mimic alpha but have no background transparency
+                bar_color = colors[ii] + alpha_array[wsii] * (1.0 - np.array(colors[ii]))
                 bin_info = df_freq[df_freq["ws_bin_edges"] == ws_bin_edges]
                 bin_map = [np.where(wd == wd_bins)[0][0] for wd in bin_info["wd_bin"]]
                 y = np.zeros_like(wd_bins)
@@ -210,13 +192,6 @@ def plot(
 
                 if polar_plot:
                     x = (90.0 - wd_bins) * np.pi / 180.0
-                    if N > 1:
-                        x = x - (ii - N / 2) * bar_width
-
-                if len(df_freqs) > 1:
-                    edge_color = colors[ii]
-                else:
-                    edge_color = None
 
                 # Plot the bar on top of existing bar
                 axarr[1].bar(
@@ -224,9 +199,11 @@ def plot(
                     height=y,
                     width=bar_width,
                     bottom=bottom,
-                    label=None,
+                    label="{:s}: {}".format(labels[ii], str(ws_bin_edges)),
+                    hatch=hatch_patterns[wsii],
                     color=bar_color,
-                    edgecolor=edge_color
+                    edgecolor=colors[ii],
+                    linewidth=0.5,
                 )
 
                 # Increment bar heights
@@ -248,7 +225,7 @@ def plot(
     axarr[1].grid(visible=True, which="major", axis="both", color="gray")
     axarr[1].grid(visible=True, which="minor", axis="both", color="lightgray")
     if df_freqs is not None:
-        axarr[1].legend(ncols=2)
+        axarr[1].legend(ncols=len(df_freqs), fontsize="small")
 
     # Arrange xtick labels to align with FLORIS internal coordinate system
     if polar_plot:
