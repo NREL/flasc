@@ -291,6 +291,7 @@ class energy_ratio_suite:
             ii ([int]): Dataset number/identifier
         """
         self.df_list[ii].pop("er_results")
+        self.df_list[ii].pop("df_freq")
         self.df_list[ii].pop("er_test_turbines")
         self.df_list[ii].pop("er_ref_turbines")
         self.df_list[ii].pop("er_dep_turbines")
@@ -512,6 +513,7 @@ class energy_ratio_suite:
                 self.df_list[ii]["er_results_info_dict"] = out[1]
             else:
                 self.df_list[ii]["er_results"] = out
+            self.df_list[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
@@ -751,6 +753,7 @@ class energy_ratio_suite:
                 self.df_list_gains[ii]["er_results_info_dict"] = out[1]
             else:
                 self.df_list_gains[ii]["er_results"] = out
+            self.df_list_gains[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
             self.df_list_gains[ii]["er_test_turbines"] = test_turbines
             self.df_list_gains[ii]["er_wd_step"] = wd_step
             self.df_list_gains[ii]["er_ws_step"] = ws_step
@@ -863,6 +866,7 @@ class energy_ratio_suite:
 
             # Save each output to self
             self.df_list[ii]["er_results"] = out
+            self.df_list[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
@@ -871,33 +875,41 @@ class energy_ratio_suite:
 
         return self.df_list
 
-    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True, axarr=None):
+    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True, polar_plot=False, axarr=None):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
         before attempting to plot the energy ratios.
 
         Args:
-            superimpose (bool, optional): if True, plots the energy ratio
+        superimpose (bool, optional): if True, plots the energy ratio
             of all datasets into the same figure. If False, will plot the
             energy ratio of each dataset into a separate figure. Defaults
             to True.
-            hide_uq_labels (bool, optional): If true, do not specifically label
+        hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
-            axarr([iteratible]): List of axes in the figure with length 2.
+        polar_plot (bool, optional): Plots the energy ratios in a polar
+            coordinate system, aligned with the wind direction coordinate
+            system of FLORIS. Defaults to False.
+        axarr([iteratible]): List of axes in the figure with length 2.
 
         Returns:
             axarr([iteratible]): List of axes in the figure with length 2.
         """
         if superimpose:
             results_array = [df["er_results"] for df in self.df_list]
+            df_freq_array = [df["df_freq"] for df in self.df_list]
             labels_array = [df["name"] for df in self.df_list]
             colors_array = [df["color"] for df in self.df_list]
-            axarr = vis.plot(results_array, 
-                                labels_array, 
-                                colors=colors_array, 
-                                hide_uq_labels=hide_uq_labels,
-                                axarr=axarr)
+            axarr = vis.plot(
+                energy_ratios=results_array,
+                df_freqs=df_freq_array,
+                labels=labels_array,
+                colors=colors_array,
+                hide_uq_labels=hide_uq_labels,
+                polar_plot=polar_plot,
+                axarr=axarr
+            )
 
         else:
             # If superimpose is False, axarr must be None
@@ -906,15 +918,24 @@ class energy_ratio_suite:
 
             axarr = []
             for df in self.df_list:
-                axi = vis.plot(df["er_results"], df["name"], [df["color"]],hide_uq_labels=hide_uq_labels)
+                axi = vis.plot(
+                    energy_ratios=df["er_results"],
+                    df_freqs=df["df_freq"],
+                    labels=df["name"],
+                    colors=[df["color"]],
+                    hide_uq_labels=hide_uq_labels,
+                    polar_plot=polar_plot
+                )
                 axarr.append(axi)
 
         return axarr
 
-    def plot_energy_ratio_gains(self, 
-                                superimpose=True, 
-                                hide_uq_labels=True,
-                                axarr=None):
+    def plot_energy_ratio_gains(
+            self, 
+            superimpose=True, 
+            hide_uq_labels=True,
+            axarr=None
+    ):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
@@ -936,11 +957,13 @@ class energy_ratio_suite:
             results_array = [df["er_results"] for df in self.df_list_gains]
             labels_array = [df["name"] for df in self.df_list_gains]
             colors_array = [df["color"] for df in self.df_list_gains]
-            axarr = vis.plot(results_array, 
-                               labels_array, 
-                               colors=colors_array,
-                                 hide_uq_labels=hide_uq_labels,
-                                 axarr=axarr)
+            axarr = vis.plot(
+                energy_ratios=results_array, 
+                labels=labels_array, 
+                colors=colors_array,
+                hide_uq_labels=hide_uq_labels,
+                axarr=axarr
+            )
 
         else:
             # If superimpose is False, axarr must be None
@@ -948,11 +971,13 @@ class energy_ratio_suite:
                 raise ValueError("If superimpose is False, axarr must be None")
             axarr = []
             for df in self.df_list_gains:
-                axi = vis.plot(df["er_results"],
-                                   df["name"], 
-                                   [df["color"]],
-                                    hide_uq_labels=hide_uq_labels,
-                                    axarr=axarr)
+                axi = vis.plot(
+                    energy_ratios=df["er_results"],
+                    labels=df["name"], 
+                    colors=[df["color"]],
+                    hide_uq_labels=hide_uq_labels,
+                    axarr=axarr
+                )
                 axarr.append(axi)
 
         return axarr
