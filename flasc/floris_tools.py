@@ -141,8 +141,8 @@ def interpolate_floris_from_df_approx(
 
 def calc_floris_approx_table(
     fi,
-    wd_array=np.arange(0.0, 360.01, 1.0),
-    ws_array=np.arange(0.001, 25.01, 1.0),
+    wd_array=np.arange(0.0, 360.0, 1.0),
+    ws_array=np.arange(1.0, 25.01, 1.0),
     ti_array=np.arange(0.03, 0.1801, 0.03),
     save_turbine_inflow_conditions_to_df=False,
     ):
@@ -157,10 +157,9 @@ def calc_floris_approx_table(
         wd_array (array, optional): Array of wind directions to evaluate in [deg]. This expands with the
           number of wind speeds and turbulence intensities. Defaults to np.arange(0.0, 360.0, 1.0).
         ws_array (array, optional): Array of wind speeds to evaluate in [m/s]. This expands with the
-          number of wind directions and turbulence intensities. Defaults to np.arange(0.001, 26.001, 1.0).
+          number of wind directions and turbulence intensities. Defaults to np.arange(1.0, 25.01, 1.0).
         ti_array (array, optional): Array of turbulence intensities to evaluate in [-]. This expands with the
-          number of wind directions and wind speeds. If None is specified, will only evaluate the current
-          turbulence intensity in floris. Defaults to None.
+          number of wind directions and wind speeds. Defaults to np.arange(0.03, 0.1801, 0.03).
         save_turbine_inflow_conditions_to_df (bool, optional): When set to True, will also write each turbine's
         inflow wind direction, wind speed and turbulence intensity to the output dataframe. This increases the
         dataframe size but can provide useful information. Defaults to False.
@@ -173,26 +172,26 @@ def calc_floris_approx_table(
 
         Example for a 7-turbine floris object with
             wd_array=np.arange(0.0, 360.0, 3.0)
-            ws_array=np.arange(0.001, 26.001, 1.0)
-            ti_array=np.arange(0.03, 0.3001, 0.3)
+            ws_array=np.arange(1.0, 25.001, 1.0)
+            ti_array=np.arange(0.03, 0.1801, 0.03)
             save_turbine_inflow_conditions_to_df=True
 
         Yields:
         
         df_approx=
                   wd    ws    ti    pow_000     ws_000  wd_000  ti_000  pow_001  ...    pow_006     ws_006  wd_006  ti_006
-        0        0.0   0.001  0.03      0.0      0.001     0.0     0.03     0.0  ...        0.0      0.001     0.0     0.03
-        1        3.0   0.001  0.03      0.0      0.001     3.0     0.03     0.0  ...        0.0      0.001     3.0     0.03
-        2        6.0   0.001  0.03      0.0      0.001     6.0     0.03     0.0  ...        0.0      0.001     6.0     0.03
-        3        9.0   0.001  0.03      0.0      0.001     9.0     0.03     0.0  ...        0.0      0.001     9.0     0.03
-        4       12.0   0.001  0.03      0.0      0.001    12.0     0.03     0.0  ...        0.0      0.001    12.0     0.03
-        ...      ...   ...   ...        ...        ...     ...     ...           ...        ...        ...     ...     ...       
-        32395  345.0  25.001  0.18      0.0  24.880843   345.0     0.18     0.0  ...        0.0  24.881165   345.0     0.18
-        32396  348.0  25.001  0.18      0.0  24.880781   348.0     0.18     0.0  ...        0.0  24.881165   348.0     0.18
-        32397  351.0  25.001  0.18      0.0  24.880755   351.0     0.18     0.0  ...        0.0  24.881165   351.0     0.18
-        32398  354.0  25.001  0.18      0.0  24.880772   354.0     0.18     0.0  ...        0.0  24.881165   354.0     0.18
-        32399  357.0  25.001  0.18      0.0  24.880829   357.0     0.18     0.0  ...        0.0  24.881165   357.0     0.18
-        32400  360.0  25.001  0.18      0.0  24.880829   360.0     0.18     0.0  ...        0.0  24.881165   360.0     0.18
+        0        0.0   1.0    0.03      0.0      1.0       0.0     0.03     0.0  ...        0.0      1.0       0.0     0.03
+        1        3.0   1.0    0.03      0.0      1.0       3.0     0.03     0.0  ...        0.0      1.0       3.0     0.03
+        2        6.0   1.0    0.03      0.0      1.0       6.0     0.03     0.0  ...        0.0      1.0       6.0     0.03
+        3        9.0   1.0    0.03      0.0      1.0       9.0     0.03     0.0  ...        0.0      1.0       9.0     0.03
+        4       12.0   1.0    0.03      0.0      1.0      12.0     0.03     0.0  ...        0.0      1.0      12.0     0.03
+        ...      ...   ...   ...        ...        ...     ...     ...           ...        ...        ...     ...     ...
+        32395  345.0  25.0    0.18      0.0  24.880843   345.0     0.18     0.0  ...        0.0  24.881165   345.0     0.18
+        32396  348.0  25.0    0.18      0.0  24.880781   348.0     0.18     0.0  ...        0.0  24.881165   348.0     0.18
+        32397  351.0  25.0    0.18      0.0  24.880755   351.0     0.18     0.0  ...        0.0  24.881165   351.0     0.18
+        32398  354.0  25.0    0.18      0.0  24.880772   354.0     0.18     0.0  ...        0.0  24.881165   354.0     0.18
+        32399  357.0  25.0    0.18      0.0  24.880829   357.0     0.18     0.0  ...        0.0  24.881165   357.0     0.18
+        32400  360.0  25.0    0.18      0.0  24.880829   360.0     0.18     0.0  ...        0.0  24.881165   360.0     0.18
     """
 
     # if ti_array is None, use the current value in the FLORIS object
