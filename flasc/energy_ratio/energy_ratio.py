@@ -486,7 +486,7 @@ class energy_ratio:
         energy_ratios = df_summed.reset_index(drop=False)
         return energy_ratios
 
-    def plot_energy_ratio(self, hide_uq_labels=True):
+    def plot_energy_ratio(self, hide_uq_labels=True, polar_plot=False):
         """This function plots the energy ratio against the wind direction,
         potentially with uncertainty bounds if N > 1 was specified by
         the user. One must first run get_energy_ratio() before attempting
@@ -495,11 +495,19 @@ class energy_ratio:
         Args:
             hide_uq_labels (bool, optional): If true, do not specifically label
                 the confidence intervals in the plot
+            polar_plot (bool, optional): Plots the energy ratios in a polar
+                coordinate system, aligned with the wind direction coordinate
+                system of FLORIS. Defaults to False.
 
         Returns:
             ax [plt.Axes]: Axis handle for the figure.
         """
-        return ervis.plot(self.energy_ratio_out, hide_uq_labels=hide_uq_labels)
+        return ervis.plot(
+            self.energy_ratio_out,
+            self.df_freq.reset_index(drop=False),
+            hide_uq_labels=hide_uq_labels,
+            polar_plot=polar_plot
+        )
 
 
 # Support functions not included in energy_ratio class
