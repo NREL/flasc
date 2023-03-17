@@ -86,8 +86,6 @@ if __name__ == "__main__":
             fi=fi,
             wd_array=np.arange(0.0, 360.0, 3.0),
             ws_array=np.arange(6.0, 10.0, 1.0),
-            num_workers=4,
-            num_threads=40,
         )
         df_fi_approx.to_feather(fn)
 

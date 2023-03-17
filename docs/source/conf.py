@@ -22,7 +22,7 @@ copyright = '2022, Bart Doekemeijer, Paul Fleming, Eric Simley'
 author = 'Bart Doekemeijer, Paul Fleming, Eric Simley'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1'
+release = '1.1'
 
 
 # -- General configuration ---------------------------------------------------

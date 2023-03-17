@@ -125,8 +125,6 @@ def get_bias_for_single_turbine(ti, opt_search_range=[-180.0, 180.0]):
             wd_array=np.arange(0., 360., 3.0),
             ws_array=np.arange(6.0, 10.01, 1.0),
             ti_array=None,
-            num_workers=4,
-            num_threads=20,
         )
         df_approx.to_feather(fout_df_fi_approx)
 

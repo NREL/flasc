@@ -22,20 +22,27 @@ from ..dataframe_operations import dataframe_manipulations as dfm
 from ..energy_ratio import energy_ratio_visualization as ervis
 
 
-class energy_ratio:
-    """This class is used to calculate the energy ratios for a single
-    dataframe with measurements, either from FLORIS or from SCADA data.
+class energy_ratio_gain:
+    """This class is used to calculate the energy ratios gain
+    for two dataframes with measurements, either from FLORIS or from SCADA data.
     This class supports bootstrapping for uncertainty quantification,
     automatic derivation of the frequency of bins based on occurrence
     in the provided dataset, and various choices for binning and daa
     discretization.
     """
 
-    def __init__(self, df_in, inflow_freq_interpolant=None, verbose=False):
+    def __init__(self, df_in_d, df_in_n, inflow_freq_interpolant=None, verbose=False):
         """Initialization of the class.
 
         Args:
-            df_in ([pd.DataFrame]): The dataframe provided by the user. This
+            df_in_d ([pd.DataFrame]): The dataframe to divide by provided by the user. This
+            dataframe should have the following columns:
+                * Reference wind direction for the test turbine, 'wd'
+                * Reference wind speed for the test turbine, 'ws'
+                * Power production of every turbine: pow_000, pow_001, ...
+                * Reference power production used to normalize the energy
+                    ratio: 'pow_ref'
+            df_in_n ([pd.DataFrame]): The dataframe to divide from provided by the user. This
             dataframe should have the following columns:
                 * Reference wind direction for the test turbine, 'wd'
                 * Reference wind speed for the test turbine, 'ws'
@@ -52,7 +59,7 @@ class energy_ratio:
         self.verbose = verbose
 
         # Initialize dataframe
-        self._set_df(df_in)
+        self._set_df(df_in_d, df_in_n)
 
         # Initialize frequency functions
         self._set_inflow_freq_interpolant(inflow_freq_interpolant)
@@ -62,7 +69,7 @@ class energy_ratio:
     def _set_inflow_freq_interpolant(self, inflow_freq_interpolant):
         self.inflow_freq_interpolant = inflow_freq_interpolant
 
-    def _set_df(self, df_in):
+    def _set_df(self, df_in_d, df_in_n):
         """This function writes the dataframe provided by the user to the
         class as self.df_full. This full dataframe will be used to create
         a minimal dataframe called self.df which contains the minimum
@@ -71,7 +78,14 @@ class energy_ratio:
         that dataframe is created in the _set_test_turbines() function.
 
         Args:
-            df_in ([pd.DataFrame]): The dataframe provided by the user. This
+            df_in_d ([pd.DataFrame]): The dataframe to divide by provided by the user. This
+            dataframe should have the following columns:
+                * Reference wind direction for the test turbine, 'wd'
+                * Reference wind speed for the test turbine, 'ws'
+                * Power production of every turbine: pow_000, pow_001, ...
+                * Reference power production used to normalize the energy
+                    ratio: 'pow_ref'
+            df_in_n ([pd.DataFrame]): The dataframe to divide from provided by the user. This
             dataframe should have the following columns:
                 * Reference wind direction for the test turbine, 'wd'
                 * Reference wind speed for the test turbine, 'ws'
@@ -79,7 +93,9 @@ class energy_ratio:
                 * Reference power production used to normalize the energy
                     ratio: 'pow_ref'
         """
-        if "pow_ref" not in df_in.columns:
+        if "pow_ref" not in df_in_d.columns:
+            raise KeyError("pow_ref column not in dataframe. Cannot proceed.")
+        if "pow_ref" not in df_in_n.columns:
             raise KeyError("pow_ref column not in dataframe. Cannot proceed.")
             # INFO: You can add such a column using:
             #   from flasc.dataframe_operations import \
@@ -89,8 +105,10 @@ class energy_ratio:
             #   ...
 
         # Copy full dataframe to self
-        self.df_full = df_in.copy()  # Full dataframe
-        self.df = None
+        self.df_full_d = df_in_d.copy()  # Full dataframe
+        self.df_full_n = df_in_n.copy()  # Full dataframe
+        self.df_d = None
+        self.df_n = None
 
     def _set_test_turbines(self, test_turbines):
         """This function calculates the power production upon which the
@@ -117,14 +135,23 @@ class energy_ratio:
             test_turbines = [test_turbines]
         self.test_turbines = test_turbines
 
-        if "ti" in self.df_full.columns:
+        if "ti" in self.df_full_d.columns:
             cols = ["wd", "ws", "ti", "pow_ref"]
         else:
             cols = ["wd", "ws", "pow_ref"]
 
-        self.df = self.df_full[cols].copy()
-        self.df["pow_test"] = dfm.get_column_mean(
-            df=self.df_full,
+        self.df_d = self.df_full_d[cols].copy()
+        self.df_n = self.df_full_n[cols].copy() 
+
+        self.df_d["pow_test"] = dfm.get_column_mean(
+            df=self.df_full_d,
+            col_prefix="pow",
+            turbine_list=self.test_turbines,
+            circular_mean=False,
+        )
+
+        self.df_n["pow_test"] = dfm.get_column_mean(
+            df=self.df_full_n,
             col_prefix="pow",
             turbine_list=self.test_turbines,
             circular_mean=False,
@@ -228,33 +255,56 @@ class energy_ratio:
         # multiple wind speed bins at the same time.
         for ws_bin in self.ws_bins:
             ws_interval = pd.Interval(ws_bin[0], ws_bin[1], "left")
-            ids = (self.df["ws"] >= ws_bin[0]) & (self.df["ws"] < ws_bin[1])
-            self.df.loc[ids, "ws_bin"] = np.mean(ws_bin)
-            self.df.loc[ids, "ws_bin_edges"] = ws_interval
+            ids_d = (self.df_d["ws"] >= ws_bin[0]) & (self.df_d["ws"] < ws_bin[1])
+            ids_n = (self.df_n["ws"] >= ws_bin[0]) & (self.df_n["ws"] < ws_bin[1])
+            self.df_d.loc[ids_d, "ws_bin"] = np.mean(ws_bin)
+            self.df_n.loc[ids_n, "ws_bin"] = np.mean(ws_bin)
+            self.df_d.loc[ids_d, "ws_bin_edges"] = ws_interval
+            self.df_n.loc[ids_n, "ws_bin_edges"] = ws_interval
 
         # Bin according to wind direction. Note that data can fall into
         # multiple wind direction bins at the same time, if wd_bin_width is
         # larger than the wind direction binning step size, wd_step. If so,
         # data will be copied and the sample size is effectively increased
         # so that every relevant bin has that particular measurement.
-        df_list = [None for _ in range(len(self.wd_labels))]
+        
+        # For denominator
+        df_list_d = [None for _ in range(len(self.wd_labels))]
         for ii, wd_bin in enumerate(self.wd_bins):
             wd_interval = pd.Interval(wd_bin[0], wd_bin[1], "left")
             lb = wrap_360(wd_bin[0])
             ub = wrap_360(wd_bin[1])
             if ub < lb:  # Deal with angle wrapping
-                ids = (self.df["wd"] >= lb) | (self.df["wd"] < ub)
+                ids = (self.df_d["wd"] >= lb) | (self.df_d["wd"] < ub)
             else:
-                ids = (self.df["wd"] >= lb) & (self.df["wd"] < ub)
-            df_subset = self.df.loc[ids].copy()
+                ids = (self.df_d["wd"] >= lb) & (self.df_d["wd"] < ub)
+            df_subset = self.df_d.loc[ids].copy()
             df_subset["wd_bin"] = np.mean(wd_bin)
             df_subset["wd_bin_edges"] = wd_interval
-            df_list[ii] = df_subset
-        self.df = pd.concat(df_list, copy=False)
+            df_list_d[ii] = df_subset
+        self.df_d = pd.concat(df_list_d, copy=False)
+
+        # For numerator
+        df_list_n = [None for _ in range(len(self.wd_labels))]
+        for ii, wd_bin in enumerate(self.wd_bins):
+            wd_interval = pd.Interval(wd_bin[0], wd_bin[1], "left")
+            lb = wrap_360(wd_bin[0])
+            ub = wrap_360(wd_bin[1])
+            if ub < lb:  # Deal with angle wrapping
+                ids = (self.df_n["wd"] >= lb) | (self.df_n["wd"] < ub)
+            else:
+                ids = (self.df_n["wd"] >= lb) & (self.df_n["wd"] < ub)
+            df_subset = self.df_n.loc[ids].copy()
+            df_subset["wd_bin"] = np.mean(wd_bin)
+            df_subset["wd_bin_edges"] = wd_interval
+            df_list_n[ii] = df_subset
+        self.df_n = pd.concat(df_list_n, copy=False)
 
         # Make sure a float
-        self.df["ws_bin"] = self.df["ws_bin"].astype(float)
-        self.df["wd_bin"] = self.df["wd_bin"].astype(float)
+        self.df_d["ws_bin"] = self.df_d["ws_bin"].astype(float)
+        self.df_d["wd_bin"] = self.df_d["wd_bin"].astype(float)
+        self.df_n["ws_bin"] = self.df_n["ws_bin"].astype(float)
+        self.df_n["wd_bin"] = self.df_n["wd_bin"].astype(float)
 
     def _get_df_freq(self):
         """This function derives the frequency of occurrence of each bin
@@ -263,16 +313,40 @@ class energy_ratio:
         power productions of each bin according to their frequency of
         occurrence.
         """
+
+        #TODO I'm not positive how best to do this, but I think it could
+        # be moot since I think this should anyway be balanced at the 
+        # energy ratio suite level, 
+
+        # But taking my best guess, I think the frequency weight should be
+        # the minimum value from the two dataframes
+
+        # df_combined = pd.concat([self.df_n, self.df_d])
+
         # Determine observed frequency
         cols = ["ws_bin", "wd_bin", "ws_bin_edges", "wd_bin_edges"]
-        df_freq_observed = self.df[cols].copy()
-        df_freq_observed["freq"] = 1
-        df_freq_observed = df_freq_observed.groupby(["wd_bin", "ws_bin"])
-        bin_edges = df_freq_observed[["ws_bin_edges", "wd_bin_edges"]].first()
-        bin_freq = df_freq_observed["freq"].sum()
-        df_freq_observed = pd.concat([bin_freq, bin_edges], axis=1)
-        df_freq_observed = df_freq_observed.reset_index(drop=False)
-        df_freq = df_freq_observed
+        df_freq_observed_d = self.df_d[cols].copy()
+        df_freq_observed_n = self.df_n[cols].copy()
+        df_freq_observed_d["freq"] = 1
+        df_freq_observed_n["freq"] = 1
+        df_freq_observed_d = df_freq_observed_d.groupby(["wd_bin", "ws_bin"])
+        df_freq_observed_n = df_freq_observed_n.groupby(["wd_bin", "ws_bin"])
+        bin_edges_d = df_freq_observed_d[["ws_bin_edges", "wd_bin_edges"]].first()
+        bin_edges_n = df_freq_observed_n[["ws_bin_edges", "wd_bin_edges"]].first()
+        bin_freq_d = df_freq_observed_d["freq"].sum()
+        bin_freq_n = df_freq_observed_n["freq"].sum()
+        df_freq_observed_d = pd.concat([bin_freq_d, bin_edges_d], axis=1).reset_index(drop=False)
+        df_freq_observed_n = pd.concat([bin_freq_n, bin_edges_n], axis=1).reset_index(drop=False)
+        
+        # Assign all combinations to df_freq, but assume the minimum value
+        df_freq  =  (df_freq_observed_d
+            .merge(df_freq_observed_n, on = ['ws_bin','wd_bin','ws_bin_edges','wd_bin_edges'], how='outer')
+            .fillna(0)
+            .assign(freq = lambda df_: df_[['freq_x','freq_y']].min(axis=1))
+            .drop(['freq_x','freq_y'], axis=1)
+        )
+        
+        # df_freq = df_freq_observed
 
         if self.inflow_freq_interpolant is not None:
             # Overwrite freq of bin occurrence with user-specified function
@@ -289,7 +363,7 @@ class energy_ratio:
 
     # Public methods
 
-    def get_energy_ratio(
+    def get_energy_ratio_gain(
         self,
         test_turbines,
         wd_step=2.0,
@@ -382,14 +456,14 @@ class energy_ratio:
                         value is equal to baseline without UQ and higher
                         with UQ.
         """
-        if self.df_full.shape[0] < 1:
+        if (self.df_full_d.shape[0] < 1) or (self.df_full_n.shape[0] < 1):
             # Empty dataframe, do nothing
             self.energy_ratio_out = pd.DataFrame()
             self.energy_ratio_N = N
             return None
 
         if self.verbose:
-            print("Calculating energy ratios with N = %d." % N)
+            print("Calculating energy ratio gains with N = %d." % N)
 
         # Set up a 'pow_test' column in the dataframe
         self._set_test_turbines(test_turbines)
@@ -405,8 +479,9 @@ class energy_ratio:
         self._get_df_freq()
 
         # Calculate the energy ratio for all bins
-        out = _get_energy_ratios_all_wd_bins_bootstrapping(
-            df_binned=self.df,
+        out = _get_energy_ratios_gain_all_wd_bins_bootstrapping(
+            df_binned_d=self.df_d,
+            df_binned_n=self.df_n,
             df_freq=self.df_freq,
             N=N,
             percentiles=percentiles,
@@ -427,66 +502,10 @@ class energy_ratio:
 
         return energy_ratios
 
-    def get_energy_ratio_fast(
-        self, test_turbines, ws_step, wd_step, wd_bin_width=None, 
-        ws_bins=None, wd_bins=None,
-    ):
-        """This function calculates the energy ratio in a fast manner
-        but completely ignores any frequency weighing to achieve these speed-
-        ups. It also does not support bootstrapping because of this.
-
-        Args:
-            test_turbines ([iteratible]): List with the test turbine(s)
-                used to calculate the power production in the nominator of
-                the energy ratio equation. Typically, this is a single
-                turbine, e.g., test_turbines=[0], but can also be multiple
-                turbines. If multiple turbines are specified, it averages
-                the power production between the turbines to come up with
-                the test power values.
-            wd_step (float, optional): Wind direction discretization step
-                size. This defines for what wind directions the energy ratio
-                is to be calculated. Note that this does not necessarily
-                also mean each bin has a width of this value. Namely, the
-                bin width can be specified separately. Defaults to 2.0.
-            ws_step (float, optional): Wind speed discretization step size.
-                This defines the resolution and widths of the wind speed
-                bins. Defaults to 1.0.
-            wd_bin_width ([type], optional): The wind direction bin width.
-                This value should be equal or larger than wd_step. When no
-                value is specified, will default to wd_bin_width = wd_step.
-                In the literature, it is not uncommon to specify a bin width
-                larger than the step size to cover for variability in the
-                wind direction measurements. By setting a large value for
-                wd_bin_width, one gets a better idea of the larger-scale
-                wake losses in the wind farm. Defaults to None.
-
-        Returns:
-            [type]: [description]
-        """
-        # Choose default option
-        if wd_bin_width is None:
-            wd_bin_width = wd_step
-
-        # Set up a 'pow_test' column in the dataframe
-        self._set_test_turbines(test_turbines)
-
-        # Set up bins
-        self._set_binning_properties(
-            ws_step, wd_step, wd_bin_width, ws_bins, wd_bins
-        )
-        self._calculate_bins()
-
-        df = self.df.dropna(how="any", subset=["pow_ref", "pow_test"]).copy()
-        df.loc[df.index, "bin_count"] = 1
-
-        df_summed = df.groupby("wd_bin")[["pow_ref", "pow_test", "bin_count"]].sum()
-        df_summed.loc[df_summed.index, ["baseline", "baseline_lb", "baseline_ub"]] = (
-            np.tile(df_summed["pow_test"] / df_summed["pow_ref"], (3, 1)).T
-        )
-        energy_ratios = df_summed.reset_index(drop=False)
-        return energy_ratios
-
-    def plot_energy_ratio(self, hide_uq_labels=True, polar_plot=False):
+    def plot_energy_ratio(self, 
+                          hide_uq_labels=True,
+                          axarr=None
+                          ):
         """This function plots the energy ratio against the wind direction,
         potentially with uncertainty bounds if N > 1 was specified by
         the user. One must first run get_energy_ratio() before attempting
@@ -495,26 +514,21 @@ class energy_ratio:
         Args:
             hide_uq_labels (bool, optional): If true, do not specifically label
                 the confidence intervals in the plot
-            polar_plot (bool, optional): Plots the energy ratios in a polar
-                coordinate system, aligned with the wind direction coordinate
-                system of FLORIS. Defaults to False.
+            axarr([iteratible]): List of axes in the figure with length 2.
 
         Returns:
-            ax [plt.Axes]: Axis handle for the figure.
+            axarr([iteratible]): List of axes in the figure with length 2.
         """
-        return ervis.plot(
-            self.energy_ratio_out,
-            self.df_freq.reset_index(drop=False),
-            hide_uq_labels=hide_uq_labels,
-            polar_plot=polar_plot
-        )
+        return ervis.plot(self.energy_ratio_out, 
+                          hide_uq_labels=hide_uq_labels,
+                            axarr=axarr)
 
 
 # Support functions not included in energy_ratio class
 
-
-def _get_energy_ratios_all_wd_bins_bootstrapping(
-    df_binned,
+def _get_energy_ratios_gain_all_wd_bins_bootstrapping(
+    df_binned_d,
+    df_binned_n,
     df_freq,
     N=1,
     percentiles=[5.0, 95.0],
@@ -527,8 +541,18 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
     calculates the energy ratio for a single wind direction bin.
 
     Args:
-        df_binned ([pd.DataFrame]): Dataframe containing the binned
-        data. This dataframe must contain, at the minimum, the following
+        df_binned_d ([pd.DataFrame]): Dataframe containing the binned
+        data to divde by. This dataframe must contain, at the minimum, the following
+        columns:
+            * ws_bin: The wind speed bin
+            * wd_bin: The wind direction bin
+            * pow_ref: The reference power production, previously specified
+                by the user outside of this function/class. This value
+                belongs in the denominator in the energy ratio equation.
+            * pow_test: The test power production. This value belongs in the
+                nominator in the energy ratio equation.
+        df_binned_n ([pd.DataFrame]): Dataframe containing the binned
+        data to be divided. This dataframe must contain, at the minimum, the following
         columns:
             * ws_bin: The wind speed bin
             * wd_bin: The wind direction bin
@@ -581,7 +605,7 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
                     with UQ.
     """
     # Extract minimal dataframe
-    if "ti" in df_binned.columns:
+    if "ti" in df_binned_d.columns:
         min_cols = [
             "wd",
             "ws",
@@ -593,10 +617,16 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
         ]
     else:
         min_cols = ["wd", "ws", "ws_bin", "wd_bin", "pow_ref", "pow_test"]
-    df = df_binned[min_cols]
+    
+    df_d = df_binned_d[min_cols]
+    df_n = df_binned_n[min_cols]
 
     # Save some relevant info
-    unique_wd_bins = np.unique(df.wd_bin)
+    unique_wd_bins_d = np.unique(df_d.wd_bin)
+    unique_wd_bins_n = np.unique(df_n.wd_bin)
+
+    # Keep only wd seen in both sets
+    unique_wd_bins = np.intersect1d(unique_wd_bins_d,unique_wd_bins_n )
     # unique_ws_bins = np.unique(df.ws_bin)
 
     # Now calculate the actual energy ratios
@@ -604,11 +634,13 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
     dict_out_list = [None for _ in range(len(unique_wd_bins))]
 
     for wd_idx, wd in enumerate(unique_wd_bins):
-        df_subset = df[df["wd_bin"] == wd]
+        df_subset_d = df_d[df_d["wd_bin"] == wd]
+        df_subset_n = df_n[df_n["wd_bin"] == wd]
         df_freq_subset = df_freq[df_freq["wd_bin"] == wd]
 
-        out = _get_energy_ratio_single_wd_bin_bootstrapping(
-                df_binned=df_subset,
+        out = _get_energy_ratio_gain_single_wd_bin_bootstrapping(
+                df_binned_d=df_subset_d,
+                df_binned_n=df_subset_n,
                 df_freq=df_freq_subset,
                 N=N,
                 percentiles=percentiles,
@@ -626,11 +658,19 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
         result, columns=["baseline", "baseline_lb", "baseline_ub"]
     )
 
-    # Save wind direction bins and bin count to dataframe
-    df_out["wd_bin"] = unique_wd_bins
-    _, df_out["bin_count"] = np.unique(df["wd_bin"], return_counts=True)
+    df_out["wd_bin"] = unique_wd_bins       
+
+    # # Save wind direction bins and bin count to dataframe
+    
+    _, bin_count_d = np.unique(df_d[df_d.wd_bin.isin(unique_wd_bins)]["wd_bin"], return_counts=True)
+    _, bin_count_n = np.unique(df_n[df_n.wd_bin.isin(unique_wd_bins)]["wd_bin"], return_counts=True)
+    
+    
+    
+    df_out["bin_count"] = np.min([bin_count_d,bin_count_n], axis=0)
     df_out["bin_count"] = df_out["bin_count"].astype(int)
 
+    #TODO THIS MAY NOT BE RIGHT:
     if return_detailed_output:
         # Concatenate dataframes and produce a new dict_out
         df_per_wd_bin = pd.concat([d["df_per_wd_bin"] for d in dict_out_list])
@@ -645,23 +685,34 @@ def _get_energy_ratios_all_wd_bins_bootstrapping(
 
     return df_out
 
-
-def _get_energy_ratio_single_wd_bin_bootstrapping(
-    df_binned,
+def _get_energy_ratio_gain_single_wd_bin_bootstrapping(
+    df_binned_d,
+    df_binned_n,
     df_freq,
     N=1,
     percentiles=[5.0, 95.0],
     return_detailed_output=False,
     num_blocks = -1
 ):
-    """Get the energy ratio for one particular wind direction bin and
-    an array of wind speed bins. This function also includes bootstrapping
+    """Get the energy ratio gain for one particular wind direction bin and
+    an array of wind speed bins between two provided dataframes.
+    This function also includes bootstrapping
     functionality by increasing the number of bootstrap evaluations (N) to
     larger than 1. The bootstrap percentiles default to 5 % and 95 %.
 
     Args:
-        df_binned ([pd.DataFrame]): Dataframe containing the binned
-        data. This dataframe must contain, at the minimum, the following
+        df_binned_d ([pd.DataFrame]): Dataframe containing the binned
+        data to divde by. This dataframe must contain, at the minimum, the following
+        columns:
+            * ws_bin: The wind speed bin
+            * wd_bin: The wind direction bin
+            * pow_ref: The reference power production, previously specified
+                by the user outside of this function/class. This value
+                belongs in the denominator in the energy ratio equation.
+            * pow_test: The test power production. This value belongs in the
+                nominator in the energy ratio equation.
+        df_binned_n ([pd.DataFrame]): Dataframe containing the binned
+        data to be divided. This dataframe must contain, at the minimum, the following
         columns:
             * ws_bin: The wind speed bin
             * wd_bin: The wind direction bin
@@ -706,77 +757,106 @@ def _get_energy_ratio_single_wd_bin_bootstrapping(
     """
     # Get results excluding uncertainty
     if return_detailed_output:
-        energy_ratio_nominal, dict_info = _get_energy_ratio_single_wd_bin_nominal(
-            df_binned=df_binned,
+        energy_ratio_nominal_d, dict_info_d = _get_energy_ratio_single_wd_bin_nominal(
+            df_binned=df_binned_d,
+            df_freq=df_freq,
+            return_detailed_output=return_detailed_output,
+        )
+        energy_ratio_nominal_n, dict_info_n = _get_energy_ratio_single_wd_bin_nominal(
+            df_binned=df_binned_n,
             df_freq=df_freq,
             return_detailed_output=return_detailed_output,
         )
     else:
-        energy_ratio_nominal = _get_energy_ratio_single_wd_bin_nominal(
-            df_binned=df_binned,
+        energy_ratio_nominal_d = _get_energy_ratio_single_wd_bin_nominal(
+            df_binned=df_binned_d,
+            df_freq=df_freq,
+            return_detailed_output=return_detailed_output,
+        )
+        energy_ratio_nominal_n = _get_energy_ratio_single_wd_bin_nominal(
+            df_binned=df_binned_n,
             df_freq=df_freq,
             return_detailed_output=return_detailed_output,
         )
 
     # Add bootstrapping results, if necessary
     if N <= 1:
-        results_array = np.array([energy_ratio_nominal] * 3, dtype=float)
+        results_array = np.array([energy_ratio_nominal_n/energy_ratio_nominal_d] * 3, dtype=float)
     else:
 
-        # First check, if num_blocks is > number of points, then assume normal bootstrapping
-        if num_blocks > df_binned.shape[0]:
+        # First check, if num_blocks is > number of points in either dataframe
+        # , then assume normal bootstrapping
+        if (num_blocks > df_binned_d.shape[0]) or (num_blocks > df_binned_n.shape[0]):
             num_blocks = -1
 
         # If after this revision, the number of blocks is very low, use normal bootstrapping
 
 
         # Check that num_blocks is an allowable number
-        if (num_blocks < -1) or (num_blocks == 0) or (num_blocks == 1) or (num_blocks > df_binned.shape[0]):
+        if (num_blocks < -1) or (num_blocks == 0) or (num_blocks == 1):
             raise ValueError("num_blocks should either be -1 (don't use block bootstrapping) or else a number between 2 and num_samples")
 
         # If using block-bootstrapping, set up blocks
         if num_blocks > 0:
             block_list = list(range(num_blocks))  # List of all block names
-            block_indices = np.arange(df_binned.shape[0]) # Simple index for iloc
-            block_length = int(len(block_indices) / num_blocks) # Length of each block
-            block_labels = np.zeros(len(block_indices)).astype(int) # Labels to assign each index
+            block_indices_d = np.arange(df_binned_d.shape[0]) # Simple index for iloc
+            block_indices_n = np.arange(df_binned_n.shape[0]) # Simple index for iloc
+            block_length_d = int(len(block_indices_d) / num_blocks) # Length of each block
+            block_length_n = int(len(block_indices_n) / num_blocks) # Length of each block
+            block_labels_d = np.zeros(len(block_indices_d)).astype(int) # Labels to assign each index
+            block_labels_n = np.zeros(len(block_indices_n)).astype(int) # Labels to assign each index
             for b_i in range(num_blocks):
-                block_labels[block_length * b_i:block_length * (b_i+1)] = b_i
+                block_labels_d[block_length_d * b_i:block_length_d * (b_i+1)] = b_i
+                block_labels_n[block_length_n * b_i:block_length_n * (b_i+1)] = b_i
 
         # Get a bootstrap sample of range
         bootstrap_results = np.zeros(N)
-        bootstrap_results[0] = energy_ratio_nominal
+        bootstrap_results[0] = energy_ratio_nominal_n/energy_ratio_nominal_d
         for i in range(1, N):
             if num_blocks <= 0:
-                df_randomized = df_binned.sample(frac=1, replace=True).copy()
+                df_randomized_d = df_binned_d.sample(frac=1, replace=True).copy()
+                df_randomized_n = df_binned_n.sample(frac=1, replace=True).copy()
             else:
-                test_blocks = choices(block_list, k = num_blocks) # Choose a set of blocks
+                test_blocks_d = choices(block_list, k = num_blocks) # Choose a set of blocks
+                test_blocks_n = choices(block_list, k = num_blocks) # Choose a set of blocks
                 
                 # Indices of these blocks
-                test_indices = []
-                for b in test_blocks:
-                    m = block_labels == b # Mask to find this block's indices
-                    test_indices = np.append(test_indices,block_indices[m]) #Append indices
+                test_indices_d = []
+                test_indices_n = []
+                for b_d, b_n in zip(test_blocks_d, test_blocks_n) :
+                    m_d = block_labels_d == b_d # Mask to find this block's indices
+                    m_n = block_labels_n == b_n # Mask to find this block's indices
+                    test_indices_d = np.append(test_indices_d,block_indices_d[m_d]) #Append indices
+                    test_indices_n = np.append(test_indices_n,block_indices_n[m_n]) #Append indices
 
-                df_randomized = df_binned.iloc[test_indices].reset_index().copy()
+                df_randomized_d = df_binned_d.iloc[test_indices_d].reset_index().copy()
+                df_randomized_n = df_binned_n.iloc[test_indices_n].reset_index().copy()
 
-            bootstrap_results[i] = _get_energy_ratio_single_wd_bin_nominal(
-                df_binned=df_randomized,
+            res_d = _get_energy_ratio_single_wd_bin_nominal(
+                df_binned=df_randomized_d,
                 df_freq=df_freq,
                 return_detailed_output=False,
             )
 
+            res_n = _get_energy_ratio_single_wd_bin_nominal(
+                df_binned=df_randomized_n,
+                df_freq=df_freq,
+                return_detailed_output=False,
+            )
+
+            bootstrap_results[i] = res_n / res_d
+
         # Return the results in the order used in previous versions
         results_array = np.array(
             [
-                energy_ratio_nominal,
+                energy_ratio_nominal_n/energy_ratio_nominal_d,
                 np.nanpercentile(bootstrap_results, percentiles)[0],
                 np.nanpercentile(bootstrap_results, percentiles)[1],
             ]
         )
 
     if return_detailed_output:
-        return results_array, dict_info
+        return results_array, dict_info_d, dict_info_n
     else:
         return results_array
 
@@ -939,3 +1019,6 @@ def _get_energy_ratio_single_wd_bin_nominal(
         return energy_ratio_total_balanced, dict_out
 
     return energy_ratio_total_balanced
+
+
+

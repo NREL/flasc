@@ -122,4 +122,5 @@ if __name__ == "__main__":
         percentiles=[5., 95.],
         verbose=False)
     fsc.plot_energy_ratios(superimpose=True)
+    fsc.plot_energy_ratios(superimpose=True, polar_plot=True)  # Also show in a polar plot
     plt.show()
