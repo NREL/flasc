@@ -761,6 +761,8 @@ def data_plot(
             alpha=0.5,
             marker='s'
         )
+
+    return ax
     
 # Small little demo of data plot, can delete
 if __name__ == "__main__":
