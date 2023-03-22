@@ -56,7 +56,13 @@ class TestFlorisTools(unittest.TestCase):
         self.assertAlmostEqual(df_fi_approx.shape[0], 10)
 
         # Now interpolate from table
-        df = pd.DataFrame({"wd": [2.2, 5.8, 6.9], "ws": [8.1, 8.3, 8.8]})
+        df = pd.DataFrame(
+            {
+                "wd": [2.2, 5.8, 6.9],
+                "ws": [8.1, 8.3, 8.8],
+                "ti": [0.06, 0.06, 0.06]
+            }
+        )
         df["time"] = 0.0  # Empty array
         df = interpolate_floris_from_df_approx(df, df_fi_approx)
 

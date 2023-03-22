@@ -131,10 +131,8 @@ class bias_estimation():
 
         # Get FLORIS predictions
         print('    Interpolating FLORIS predictions for dataframe.')
-        if "ti" in df_cor_all.columns:
-            df_fi_all = df_cor_all[["time", "wd", "ws", "ti"]].copy()
-        else:
-            df_fi_all = df_cor_all[["time", "wd", "ws"]].copy()
+        df_fi_all = df_cor_all[['time', 'wd', 'ws', 'ti']].copy()
+
         df_fi_all = ftools.interpolate_floris_from_df_approx(
             df=df_fi_all, df_approx=self.df_fi_approx, verbose=False)
         df_fi_all = self.df_pow_ref_mapping_func(df_fi_all)
