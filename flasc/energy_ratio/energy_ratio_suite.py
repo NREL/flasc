@@ -866,7 +866,7 @@ class energy_ratio_suite:
 
             # Save each output to self
             self.df_list[ii]["er_results"] = out
-            self.df_list[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
+            self.df_list[ii]["df_freq"] = None
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
