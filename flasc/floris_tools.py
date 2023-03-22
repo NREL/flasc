@@ -27,6 +27,7 @@ def interpolate_floris_from_df_approx(
     wrap_0deg_to_360deg=True,
     extrapolate_ws=True,
     extrapolate_ti=True,
+    mirror_nans=True,
     verbose=True
 ):
     """This function generates the FLORIS predictions for a set of historical
@@ -95,6 +96,13 @@ def interpolate_floris_from_df_approx(
         assumption that the solutions at 0% TI are equal to your solutions at 3% TI,
         and that your solutions at 100% TI are equal to your solutions at 18% TI.
         This may or may not be a valid assumption for your scenario. Defaults to True.
+        mirror_nans (bool, optional): The raw data for which the FLORIS predictions are
+        made may contain NaNs for specific turbines, e.g., due to sensor issues or due
+        to irregular turbine behavior. By setting mirror_nans=True, the NaNs for turbines
+        from the raw data will be copied such that NaNs in the raw data will also mean
+        NaNs in the FLORIS predictions. Recommended to set this to True to ensure the
+        remainder of the energy ratio analysis is a fair and accurate comparison. Defaults
+        to True.
         verbose (bool, optional): Print warnings and information to the console.
         Defaults to True.
 
@@ -115,6 +123,13 @@ def interpolate_floris_from_df_approx(
     # Format dataframe and get number of turbines
     df = df.reset_index(drop=('time' in df.columns))
     nturbs = fsut.get_num_turbines(df_approx)
+
+    # Check input
+    if mirror_nans:
+        if not ("pow_000" in df.columns) or not ("ws_000" in df.columns):
+            raise UserWarning("The option mirror_nans=True requires the raw data's wind speed and power measurements to be included in the dataframe 'df'.")
+    else:
+        print("Warning: not mirroring NaNs from the raw data to the FLORIS predictions. This may skew your energy ratios.")
 
     # Check if all values in df fall within the precalculated solutions ranges
     for col in ["wd", "ws", "ti"]:
@@ -218,6 +233,11 @@ def interpolate_floris_from_df_approx(
             bounds_error=False,
         )
         df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
+
+        if mirror_nans:
+            # Copy NaNs in the raw data to the FLORIS predictions
+            for c in colnames:
+                df_out.loc[df[c].isna(), c] = np.nan
 
     return df_out
 
