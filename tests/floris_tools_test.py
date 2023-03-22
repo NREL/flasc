@@ -80,8 +80,11 @@ class TestFlorisTools(unittest.TestCase):
         df["time"] = 0.0  # Empty array
         df = interpolate_floris_from_df_approx(df, df_fi_approx)
 
-        # Ensure there are no NaN entries
-        self.assertTrue(~df.isna().any().any())
+        # Ensure that NaNs are mimicked appropriately
+        self.assertTrue(~df[["pow_003", "pow_004"]].isna().any().any())
+        self.assertTrue(np.isnan(df.loc[2, "pow_000"]))
+        self.assertTrue(np.isnan(df.loc[2, "pow_001"]))
+        self.assertTrue(np.isnan(df.loc[0, "pow_006"]))
 
         # Ensure dataframe shape and columns
         # self.assertTrue(("wd_000" in df.columns))
