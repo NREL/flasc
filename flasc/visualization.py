@@ -772,14 +772,3 @@ def plot_binned_mean_and_ci(
         )
 
     return ax
-    
-# Small little demo of data plot, can delete
-if __name__ == "__main__":
-
-    # Declare some test data
-    x = np.random.uniform(0, 1, 1000)
-    y = 2 * x + 1 + np.random.normal(0, 0.1, 1000)
-
-    plot_binned_mean_and_ci(x,y, show_scatter=True)
-
-    plt.show()
