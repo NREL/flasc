@@ -110,6 +110,9 @@ def plot(
         # If nothing specified, use the default tableau colors from matplotlib.pyplot
         colors = [mcolors.to_rgb(clr) for clr in mcolors.TABLEAU_COLORS.keys()]
 
+    # In case colors is specified by a character, convert to RGB
+    colors = [mcolors.to_rgb(clr) for clr in colors]
+
 
     N = len(energy_ratios)
     if axarr is None:
