@@ -60,14 +60,31 @@ class TestFlorisTools(unittest.TestCase):
             {
                 "wd": [2.2, 5.8, 6.9],
                 "ws": [8.1, 8.3, 8.8],
-                "ti": [0.06, 0.06, 0.06]
+                "ti": [0.06, 0.06, 0.06],
+                "ws_000": [8, 8, 8],
+                "ws_001": [8, 8, 8],
+                "ws_002": [8, 8, np.nan],
+                "ws_003": [8, 8, 8],
+                "ws_004": [8, 8, 8],
+                "ws_005": [np.nan, 8, 8],
+                "ws_006": [8, 8, 8],
+                "pow_000": [1.0e6, 1.0e6, np.nan],
+                "pow_001": [1.1e6, 1.1e6, np.nan],
+                "pow_002": [1.2e6, 1.2e6, 1.2e6],
+                "pow_003": [1.3e6, 1.3e6, 1.3e6],
+                "pow_004": [1.4e6, 1.4e6, 1.4e6],
+                "pow_005": [1.5e6, 1.5e6, 1.5e6],
+                "pow_006": [np.nan, 1.6e6, 1.6e6],
             }
         )
         df["time"] = 0.0  # Empty array
         df = interpolate_floris_from_df_approx(df, df_fi_approx)
 
-        # Ensure there are no NaN entries
-        self.assertTrue(~df.isna().any().any())
+        # Ensure that NaNs are mimicked appropriately
+        self.assertTrue(~df[["pow_003", "pow_004"]].isna().any().any())
+        self.assertTrue(np.isnan(df.loc[2, "pow_000"]))
+        self.assertTrue(np.isnan(df.loc[2, "pow_001"]))
+        self.assertTrue(np.isnan(df.loc[0, "pow_006"]))
 
         # Ensure dataframe shape and columns
         # self.assertTrue(("wd_000" in df.columns))

@@ -74,6 +74,7 @@ def get_column_mean(df, col_prefix='pow', turbine_list=None,
 
     if circular_mean:
         # Use unit vectors to calculate the mean
+        warnings.simplefilter("ignore", category=RuntimeWarning)
         dir_x = np.nanmean(np.cos(array * np.pi / 180.), axis=1)
         dir_y = np.nanmean(np.sin(array * np.pi / 180.), axis=1)
 
