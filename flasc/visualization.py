@@ -14,6 +14,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import pandas as pd
+import scipy.stats as st
 
 
 def plot_with_wrapping(
@@ -638,9 +639,7 @@ def label_line(
         raise ValueError("Need one of near_i, near_x, near_y")
 
 
-
-
-def data_plot(
+def plot_binned_mean_and_ci(
     x,
     y,
     color="b",
@@ -651,6 +650,7 @@ def data_plot(
     show_bin_points=True,
     show_confidence=True,
     alpha_scatter=0.1,
+    confidenceLevel = 0.95,
 ):
     """
     Plot data to a single axis.  Method
@@ -676,6 +676,8 @@ def data_plot(
             confidence interval. Defaults to True.
         alpha_scatter (float, optional): Alpha for scatter
             plot. Defaults to 0.5.
+        confidenceLevel (float, optional): Confidence level for
+            confidence interval. Defaults to 0.95.
 
     """
 
@@ -697,7 +699,7 @@ def data_plot(
 
     # If x_edges not provided, use 50 bins over range of x
     if x_edges is None:
-        x_edges = np.linspace(df["x"].min(), df["x"].max(), 50)
+        x_edges = np.linspace(df["x"].min()*.95, df["x"].max()*1.05, 50)
 
     # Define x_labels as bin centers
     x_labels = (x_edges[1:] + x_edges[:-1]) / 2.0
@@ -707,7 +709,7 @@ def data_plot(
 
     # Get aggregate statistics
     df_agg = df.groupby("x_bin").agg(
-        {"y": ["count", "std", "min", "max", "mean"]}
+        {"y": ["count", "std", "min", "max", "mean", st.sem]}
     )
     # Flatten column names
     df_agg.columns = ["_".join(c) for c in df_agg.columns]
@@ -715,8 +717,15 @@ def data_plot(
     # Reset the index
     df_agg = df_agg.reset_index()
 
+    # Delete rows with no data
+    df_agg = df_agg[df_agg["y_count"] > 0]
+
     # Add the confidence interval of the mean to df_agg
-    df_agg["y_confidence"] = 1.96 * df_agg["y_std"] / np.sqrt(df_agg["y_count"])
+    df_agg["y_confidence"] = st.t.interval(confidenceLevel, 
+                                           df_agg["y_count"]-1,
+                                           loc=df_agg["y_mean"],
+                                            scale=df_agg["y_sem"])[1] - df_agg["y_mean"]
+
 
     # Plot the mean values
     ax.plot(df_agg.x_bin, df_agg.y_mean, color=color, label=label)
@@ -771,6 +780,6 @@ if __name__ == "__main__":
     x = np.random.uniform(0, 1, 1000)
     y = 2 * x + 1 + np.random.normal(0, 0.1, 1000)
 
-    data_plot(x,y, show_scatter=True)
+    plot_binned_mean_and_ci(x,y, show_scatter=True)
 
     plt.show()
