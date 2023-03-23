@@ -78,7 +78,7 @@ def filter_df_by_status(df, exclude_columns=[], drop_all_bad_status=True,
     return df
 
 
-def filter_df_by_faulty_waking_turbines(df, ti, df_impacting_turbines, verbose=True):
+def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbose=True):
     """Assigns a turbine's measurement to NaN for each timestamp for which any of the turbines
       that are shedding a wake on this turbine is reporting NaN measurements.
 
