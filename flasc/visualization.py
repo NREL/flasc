@@ -699,7 +699,7 @@ def plot_binned_mean_and_ci(
 
     # If x_edges not provided, use 50 bins over range of x
     if x_edges is None:
-        x_edges = np.linspace(df["x"].min()*.95, df["x"].max()*1.05, 50)
+        x_edges = np.linspace(df["x"].min()*.98, df["x"].max()*1.02, 50)
 
     # Define x_labels as bin centers
     x_labels = (x_edges[1:] + x_edges[:-1]) / 2.0
