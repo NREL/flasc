@@ -650,7 +650,7 @@ def plot_binned_mean_and_ci(
     show_bin_points=True,
     show_confidence=True,
     alpha_scatter=0.1,
-    confidenceLevel = 0.95,
+    confidence_level = 0.95,
 ):
     """
     Plot data to a single axis.  Method
@@ -721,11 +721,12 @@ def plot_binned_mean_and_ci(
     df_agg = df_agg[df_agg["y_count"] > 0]
 
     # Add the confidence interval of the mean to df_agg
-    df_agg["y_confidence"] = st.t.interval(confidenceLevel, 
-                                           df_agg["y_count"]-1,
-                                           loc=df_agg["y_mean"],
-                                            scale=df_agg["y_sem"])[1] - df_agg["y_mean"]
-
+    df_agg["y_ci_lower"], df_agg["y_ci_upper"] = st.t.interval(
+        confidence_level, 
+        df_agg["y_count"]-1,
+        loc=df_agg["y_mean"],
+        scale=df_agg["y_sem"]
+    )
 
     # Plot the mean values
     ax.plot(df_agg.x_bin, df_agg.y_mean, color=color, label=label)
@@ -734,8 +735,8 @@ def plot_binned_mean_and_ci(
     if show_confidence:
         ax.fill_between(
             df_agg.x_bin,
-            df_agg.y_mean - df_agg.y_confidence,
-            df_agg.y_mean + df_agg.y_confidence,
+            df_agg.y_ci_lower,
+            df_agg.y_ci_upper,
             color=color,
             alpha=0.2,
         )
@@ -743,14 +744,14 @@ def plot_binned_mean_and_ci(
         # Plot a dasshed line at confidence interval
         ax.plot(
             df_agg.x_bin,
-            df_agg.y_mean - df_agg.y_confidence,
+            df_agg.y_ci_lower,
             color=color,
             alpha=0.2,
             ls="--",
         )
         ax.plot(
             df_agg.x_bin,
-            df_agg.y_mean + df_agg.y_confidence,
+            df_agg.y_ci_upper,
             color=color,
             alpha=0.2,
             ls="--",
