@@ -17,7 +17,7 @@ import numpy as np
 import os
 
 from ..turbine_analysis.find_sensor_faults import find_sensor_stuck_faults
-from .. import time_operations as utilities as fsut
+from .. import utilities as flascutils
 from ..dataframe_operations import dataframe_filtering as dff
 
 
@@ -138,7 +138,7 @@ class ws_pw_curve_filtering:
         self.df = df.reset_index(drop=("time" in df.columns))
 
         # Derive the total number of turbines in the dataframe
-        self.n_turbines = fsut.get_num_turbines(df)
+        self.n_turbines = flascutils.get_num_turbines(df)
 
         # Get mean power curve from data to start with
         self._get_mean_power_curves()
