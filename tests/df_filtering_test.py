@@ -5,8 +5,10 @@ import os
 import unittest
 
 from floris.tools import FlorisInterface
+
 from flasc.dataframe_operations import dataframe_filtering as dff
 from flasc import floris_tools as ftools
+from flasc.turbine_analysis.ws_pow_filtering import ws_pw_curve_filtering
 
 
 def load_floris():
@@ -41,8 +43,49 @@ def load_data():
 
 
 class TestDataFrameFiltering(unittest.TestCase):
-    def test_impacting_filtering(self):
+    def test_ws_pow_filtering(self):
+# if __name__ == "__main__":
+        # Test basic filtering operations
+        df = load_data()
+        df["ws_001"] = np.nan
+        w = ws_pw_curve_filtering(df)
+        for ti in range(7):
+            # Filter for NaN wind speeds
+            w.filter_by_condition(
+                condition=w.df["ws_{:03d}".format(ti)].isna(),
+                label="Wind speed is NaN",
+                ti=ti,
+            )
 
+        # Verify that ws_001 and pow_001 are only NaNs
+        self.assertTrue(w.get_df()[["ws_001", "pow_001"]].isna().all().all())
+        self.assertTrue(not w.get_df()[[c for c in df.columns if not "001" in c]].isna().any().any())
+        self.assertTrue((w.df_filters["WTG_001"] =="Wind speed is NaN").all())
+
+        # Test basic filtering operations: sensor-stuck filtering
+        df = load_data()
+        df = pd.concat([df] * 10, axis=0).reset_index(drop=True)
+        df = df * (1 + 0.05 * np.random.randn(*np.shape(df.to_numpy())))
+        df.loc[[4, 5, 6, 7], "ws_004"] = 8.801  # Assign 4 measurements to be stuck
+
+        w = ws_pw_curve_filtering(df)
+        w.filter_by_sensor_stuck_faults(columns=["wd", "ws_004"], ti=4)
+        df_filtered = w.get_df()
+        array_is_stuck = np.array(df_filtered["ws_004"].isna(), dtype=bool)
+        self.assertTrue(np.all(array_is_stuck[[4, 5, 6, 7]]))
+        self.assertTrue(not np.any(array_is_stuck[[0, 1, 2, 3, 8, 9]]))
+
+        # Test interactive filtering. Not a real unit test but make sure it runs.
+        # Now filter iteratively by deviations from the median power curve
+        w.filter_by_power_curve(
+            ti=ti,
+            ws_deadband=1.5,
+            pow_deadband=70.0,
+            cutoff_ws=20.0,
+            m_pow_rb=0.97,
+        )
+
+    def test_impacting_filtering(self):
         # Read file and load FLORIS
         fi = load_floris()
         num_turbs = len(fi.layout_x)
