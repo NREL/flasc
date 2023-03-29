@@ -100,12 +100,21 @@ def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbos
     test_turbine_impacted = test_turbine_impacted_by_nan_ws | test_turbine_impacted_by_nan_pow
 
     # Assign test turbine's measurements to NaN if any turbine that is waking this turbine is reporting NaN measurements
+    N_pre = df_get_no_faulty_measurements(df, ti)
     df_out = df_mark_turbdata_as_faulty(
         df=df,
         cond=test_turbine_impacted,
         turbine_list=[ti],
-        verbose=verbose
     )
+    N_post = df_get_no_faulty_measurements(df_out, ti)
+
+    if verbose:
+        print(
+            "Faulty measurements for WTG {:02d} increased from {:.3f} % to {:.3f} %. Reason: 'Turbine is impacted by faulty upstream turbine'.".format(
+                ti, 100.0 * N_pre / df.shape[0], 100.0 * N_post / df.shape[0]
+            )
+        )
+
     return df_out
 
 
