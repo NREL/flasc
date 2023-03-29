@@ -16,12 +16,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-# from operational_analysis.toolkits import filters
-
 from ..turbine_analysis.find_sensor_faults import find_sensor_stuck_faults
-from .. import time_operations as fsato, utilities as fsut
+from .. import time_operations as utilities as fsut
 from ..dataframe_operations import dataframe_filtering as dff
-# from ..turbine_analysis import ws_pow_filtering_utilities as ut
 
 
 
@@ -166,15 +163,15 @@ class ws_pw_curve_filtering:
             df_in = df_in.copy()
 
         # Mark data as faulty on the dataframe
+        N_pre = [dff.df_get_no_faulty_measurements(df_in, tii) for tii in ti]
         df_out = dff.df_mark_turbdata_as_faulty(df=df_in, cond=condition, turbine_list=ti)
 
         if verbose:
-            for tii in ti:
-                N_pre = dff.df_get_no_faulty_measurements(df_in, tii)
+            for iii, tii in enumerate(ti):
                 N_post = dff.df_get_no_faulty_measurements(df_out, tii)
                 print(
                     "Faulty measurements for WTG {:03d} increased from {:.3f} % to {:.3f} %. Reason: '{:s}'.".format(
-                        tii, 100.0 * N_pre / df_in.shape[0], 100.0 * N_post / df_in.shape[0], label
+                        tii, 100.0 * N_pre[iii] / df_in.shape[0], 100.0 * N_post / df_in.shape[0], label
                     )
                 )
 
@@ -436,8 +433,8 @@ class ws_pw_curve_filtering:
             return self.df  # Do nothing
 
         # Create interpolants to left and right of mean curve
-        ws_array = np.array(df_iteration["ws_%03d" % ti], dtype=float)
-        pow_array = np.array(df_iteration["pow_%03d" % ti], dtype=float)
+        ws_array = np.array(self.df["ws_%03d" % ti], dtype=float)
+        pow_array = np.array(self.df["pow_%03d" % ti], dtype=float)
 
         # Specify left side bound and non-decreasing
         lb_ws = x * m_ws_lb - ws_deadband / 2.0
@@ -630,7 +627,7 @@ class ws_pw_curve_filtering:
         """
 
         if ax is None:
-            _, ax = plt.subplots()
+            _, ax = plt.subplots(figsize=(10, 5))
 
         # First use the custom filter plot to do the majority of the work
         self.plot_filters_custom_scatter(
@@ -775,6 +772,9 @@ class ws_pw_curve_filtering:
             "png".
             dpi (int, optional): Image resolution if saved. Defaults to 300.
         """
+        if ax is None:
+            _, ax = plt.subplots(figsize=(13, 7))
+
         # Get a list of all flags and then get colors correspondingly
         all_flags = self._get_all_unique_flags()
 
