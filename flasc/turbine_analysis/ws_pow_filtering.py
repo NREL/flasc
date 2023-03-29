@@ -52,34 +52,38 @@ class ws_pw_curve_filtering:
         self.reset_filters()
 
     # Private methods
-    def _reset_df(self):
-        """Format and save the provided dataframe to the class.
+    def _get_all_unique_flags(self):
+        """Private function that grabs all the unique filter flags
+        that are available in self.df_filters and returns them
+        as a list of strings. This is helpful when plotting the
+        various filter sources in a scatter plot, for example.
+
+        Returns:
+            all_flags (list): List with all unique flags available
+                in self.df_filters, each entry being a string.
+        """
+        # Get a list of all flags and then get colors correspondingly
+        all_flags = list(np.sort(np.unique(self.df_filters)))
+        if "clean" in all_flags:
+            # Sort to make sure "clean" is the first entry in the legend
+            all_flags.remove("clean")
+            all_flags = ["clean"] + all_flags
+
+        return all_flags
+
+    def _get_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5), df=None):
+        """Calculates the mean power production in bins of the wind speed,
+        for all turbines in the wind farm.
 
         Args:
+            ws_bins ([iteratible], optional): Wind speed bins. Defaults to
+                np.arange(0.0, 25.5, 0.5).
             df ([pd.DataFrame]): Dataframe containing the turbine data,
                 formatted in the generic SCADA data format. Namely, the
                 dataframe should at the very least contain the columns:
                   * Time of each measurement: time
                   * Wind speed of each turbine: ws_000, ws_001, ... 
                   * Power production of each turbine: pow_000, pow_001, ...
-        """
-        
-        df = self._df_initial  # Copy the original dataframe from self
-        self.df = df.reset_index(drop=("time" in df.columns))
-        self.dt = fsut.estimate_dt(self.df["time"])
-
-        # Get number of turbines in the dataframe
-        self.n_turbines = fsut.get_num_turbines(df)
-
-        # Get mean power curve to start with
-        self._get_mean_power_curves()
-
-    def _get_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5), df=None):
-        """Calculates the mean power production in bins of the wind speed.
-
-        Args:
-            ws_bins ([iteratible], optional): Wind speed bins. Defaults to
-                np.arange(0.0, 25.5, 0.5).
 
         Returns:
             pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
@@ -91,6 +95,7 @@ class ws_pw_curve_filtering:
         if df is None:
             df = self.df
 
+        # Create a dataframe to contain the averaged power curves
         ws_max = np.max(ws_bins)
         ws_min = np.min(ws_bins)
         pw_curve_df = pd.DataFrame(
@@ -101,14 +106,15 @@ class ws_pw_curve_filtering:
             }
         )
 
+        # Loop through every turbine
         for ti in range(self.n_turbines):
+            # Extract the measurements and calculate the bin average
             ws = df["ws_%03d" % ti]
             pw = df["pow_%03d" % ti]
-            clean_ids = (ws > ws_min) & (ws < ws_max)
-            ws_clean = ws[clean_ids]
-            pw_clean = pw[clean_ids]
+            bin_ids = (ws > ws_min) & (ws < ws_max)
+            ws_clean = ws[bin_ids]
+            pw_clean = pw[bin_ids]
 
-            # bin_array = np.digitize(ws_clean, ws_bins_l, right=False)
             bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
             bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
             pow_bins = [
@@ -118,16 +124,28 @@ class ws_pw_curve_filtering:
 
             # Write outputs to the dataframe
             pw_curve_df["pow_%03d" % ti] = pow_bins
-            self.pw_curve_df = pw_curve_df
 
+        # Save the finalized power curve to self and return it to the user
+        self.pw_curve_df = pw_curve_df
         return pw_curve_df
+
+    def _reset_df(self):
+        """Reset the 'filtered' dataframe, self.df, to its original form,
+        before any measurements were marked as faulty. """
+
+        # Copy the original dataframe from self
+        df = self._df_initial  
+        self.df = df.reset_index(drop=("time" in df.columns))
+
+        # Derive the total number of turbines in the dataframe
+        self.n_turbines = fsut.get_num_turbines(df)
+
+        # Get mean power curve from data to start with
+        self._get_mean_power_curves()
 
     # Public methods
     def reset_filters(self):
         """Reset all filter variables and assume all data is clean."""
-        # Reset certain variables
-        self.pw_curve_df_bounds = None
-
         # Reset the filtered dataframe to the original, unfiltered one
         self._reset_df()
 
@@ -150,6 +168,48 @@ class ws_pw_curve_filtering:
         verbose: bool = True,
         apply_filters_to_df: bool = True,
     ):
+        """This is a generic method to filter the dataframe for any particular
+        condition, for a specific turbine or specific set of turbines. This
+        provides a platform for user-specific queries to filter and then inspect
+        the data with. You can call this function multiple times and the filters
+        will aggregate chronologically. This filter directly cuts down the
+        dataframe self.df to a filtered subset.
+
+        A correct usage is, for example:
+            ws_pow_filtering.filter_by_condition(
+                condition=(ws_pow_filtering.df["pow_{:03d}".format(ti)] < -1.0e-6),
+                label="Power below zero",
+                ti=ti,
+                verbose=True,
+            )
+
+        and:
+            ws_pow_filtering.filter_by_condition(
+                condition=(ws_pow_filtering.df["is_operation_normal_{:03d}".format(ti)] == False),
+                label="Self-flagged (is_operation_normal==False)",
+                ti=ti,
+                verbose=True,
+            )
+
+        Args:
+            condition (iteratible): List or array-like variable with bool entries
+                depicting whether the condition is met or not. These should be
+                situations in which you classify the data as faulty. For example,
+                high wind speeds but low power productions, or NaNs, self-flagged
+                status variables.
+            label (str): Name or description of the fault/condition that is flagged.
+            ti (int): Turbine indentifier, typically an integer, but may also be a
+                list. This flags the measurements of all these turbines as faulty
+                for which condition==True.
+            verbose (bool, optional): Print information to console. Defaults to True.
+            apply_filters_to_df (bool, optional): Assign the flagged measurements in 
+                self.df directly as NaN. Defaults to True.
+
+        Returns:
+            df_out: The filtered dataframe. All measurements that are flagged as faulty
+                are overwritten by "None"/"NaN". If apply_filters_to_df==True, then this
+                dataframe is equal to the internally filtered dataframe 'self.df'.
+        """
 
         # Pour it into a list format
         if isinstance(ti, int):
@@ -166,6 +226,7 @@ class ws_pw_curve_filtering:
         N_pre = [dff.df_get_no_faulty_measurements(df_in, tii) for tii in ti]
         df_out = dff.df_mark_turbdata_as_faulty(df=df_in, cond=condition, turbine_list=ti)
 
+        # Print the reduction in useful data to the console, if verbose
         if verbose:
             for iii, tii in enumerate(ti):
                 N_post = dff.df_get_no_faulty_measurements(df_out, tii)
@@ -194,7 +255,51 @@ class ws_pw_curve_filtering:
             plot: bool = False,
             verbose: bool = True
         ):
-        # Filter sensor faults
+        """Filter the turbine measurements for sensor-stuck type of faults. This is
+        the situation where a turbine measurement reads the exact same value for
+        multiple consecutive timestamps. This typically indicates a "frozen" sensor
+        rather than a true physical effect. This is particularly the case for
+        signals that are known to change at a high rate and are measured with high
+        precision, e.g., wind speed and wind direction measurements.
+
+        Args:
+            columns (list): List of columns which should be checked for sensor-stuck
+                type of faults. A typical choice is ["ws_000", "wd_000"] with ti=0,
+                which are the wind speed and wind direction for turbine 0. We can
+                safely assume that those measurements should change between every
+                10-minute measurement. Note that you may not want to include "pow_000",
+                since that measurement may be constant for longer periods of time even
+                during normal operation, e.g., when the turbine is shutdown at very
+                low wind speeds or when the turbine is operating above rated wind
+                speed. Note that if any of the signals in 'columns' is flagged as
+                frozen ("stuck"), all measurements of that turbine will be marked 
+                faulty.
+            ti (int): The turbine identifier for which its measurements should be
+                flagged as faulty when the signals in the columns are found to be
+                frozen ("stuck"). This is typically the turbine number that corresponds
+                to the columns, e.g., if you use  columns=["ws_000", "wd_000"] then 
+                ti=0, and if you use  ["ws_003", "wd_003"] you use ti=3.
+            n_consecutive_measurements (int, optional): Number of consecutive
+                measurements that should read the same value for the measurement to be
+                considered "frozen". Defaults to 3.
+            stddev_threshold (float, optional): Threshold value, typically a low number.
+                If the set of consecutive measurements do not differ by more than this
+                value, then the measurements is considered stuck. Defaults to 0.001.
+            plot (bool, optional): Produce plots highlighting a handful of situations
+                in which the measurements are stuck in time. This is typically only
+                helpful if you have more than 1% of measurements being faulty, and
+                you would like to figure out whether this is a numerical issue or
+                this is actually happening. Defaults to False.
+            verbose (bool, optional): Print information to console. Defaults to True.
+
+        Returns:
+            self.df: Pandas DataFrame with the filtered data, in which faulty turbine
+                measurements are flagged as None/NaN. This is an aggregated filtering
+                variable, so it includes faulty-flagged measurements from filter
+                operations in previous steps.
+        """
+
+        # Filter sensor faults using the separate function call
         stuck_indices = find_sensor_stuck_faults(
             df=self.df,
             columns=columns,
@@ -208,6 +313,7 @@ class ws_pw_curve_filtering:
         flag_array = np.zeros(self.df.shape[0], dtype=bool)
         flag_array[stuck_indices] = True
 
+        # Apply the actual filter to the dataset
         self.filter_by_condition(
             condition=flag_array,
             label="Sensor-stuck fault",
@@ -228,7 +334,7 @@ class ws_pw_curve_filtering:
         ws_deadband=0.50,
         pow_deadband=20.0,
         no_iterations=10,
-        cutoff_ws=25.0,
+        cutoff_ws=20.0,
     ):
         """Filter the data by offset from the mean power curve in x-
         directions. This is an iterative process because the estimated mean
@@ -236,6 +342,8 @@ class ws_pw_curve_filtering:
         converges within a couple iterations.
 
         Args:
+            ti (int): The turbine identifier for which the data should be
+            filtered.
             m_ws_lb (float, optional): Multiplier on the wind speed defining
             the left bound for the power curve. Any data to the left of this
             curve is considered faulty. Defaults to 0.95.
@@ -252,8 +360,23 @@ class ws_pw_curve_filtering:
             solution typically converges in 2-3 steps, but as the process is
             very fast, it's better to run a higher number of iterations.
             Defaults to 10.
+            cutoff_ws (float, optional): Upper limit for the filtering to occur.
+            Typically, this is a value just below the cut-out wind speed. Namely,
+            issues arise if you put this wind speed above the cut-out wind speed,
+            because we effectively end up with two curves for the same power
+            production (one at region 2, one going down from cut-out wind speed).
+            This confuses the algorithm. Hence, suggested to put this somewhere
+            around 15-25 m/s. Defaults to 20 m/s.
         """
-
+        # Initialize the dataframe from self, as a starting point. Note
+        # that in each iteration, we do not want to build upon the
+        # filtered dataset from the previous iteration, because that
+        # erroneously removes too much data. Instead, we start with the
+        # same dataset every iteration but apply a slightly different filter.
+        # The filter differs because the data the classify as faulty (based on
+        # the estimated power curve) changes every iteration, and hence so
+        # do the estimated mean power curves again. This explains the
+        # iterative nature of the problem.
         df_initial_filtered = self.df.copy()
 
         # Iteratively filter data and recalculate the mean power curves
@@ -530,24 +653,25 @@ class ws_pw_curve_filtering:
         return self.df
 
     def get_df(self):
-        return self.df
-
-    def save_df(self, fout):
-        """Apply all filters to the dataframe by marking any fauilty data
-        as None/np.nan. Then, save the dataframe to the specified path.
-
-        Args:
-            fout ([str]): Destination path for the output .ftr file.
+        """Return the filtered dataframe to the user.
 
         Returns:
-            df ([pd.DataFrame]): Processed dataframe.
+            self.df: Pandas DataFrame with the filtered data, in which faulty turbine
+                measurements are flagged as None/NaN. This is an aggregated filtering
+                variable, so it includes faulty-flagged measurements from filter
+                operations in previous steps.
         """
-        return self.df.to_feather(fout)
+        return self.df
 
-    def save_power_curve(self, fout="power_curve.csv"):
-        """Save the estimated power curve as a .csv to a prespecified path.
+    def get_power_curve(self):
+        """Return the turbine estimated mean power curves to the user.
+
+        Returns:
+            pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
+                speed bins and the mean power production value for every
+                turbine.
         """
-        return self.pw_curve_df.to_csv(fout)
+        return self.pw_curve_df
 
     def plot_farm_mean_power_curve(self):
         """Plot all turbines' power curves in a single figure. Also estimate
@@ -578,6 +702,25 @@ class ws_pw_curve_filtering:
         return fig, ax
 
     def plot_filters_custom_scatter(self, ti, x_col, y_col, ax=None):
+        """Plot the filtered data in a scatter plot, categorized
+        by the source of their filter/fault. This is a generic
+        function that allows the user to plot various numeric
+        variables on the x and y axis.
+
+        Args:
+            ti (int): Turbine identifier. This is used to determine
+                which turbine's filter history should be looked at.
+            x_col (str): Column name to plot on the x-axis. A common
+                choice is "ws_000" for ti=0, for example.
+            y_col (str): Column name to plot on the y-axis. A common
+                choice is "pow_000" for ti=0, for example.
+            ax (plt.Axis, optional): Pyplot Figure axis in which the
+                figure should be produced. If None specified, then
+                 creates a new figure. Defaults to None.
+
+        Returns:
+            ax: The figure axis in which the scatter plot is drawn.
+        """
         # Create figure, if not specified
         if ax is None:
             _, ax = plt.subplots()
@@ -620,8 +763,8 @@ class ws_pw_curve_filtering:
 
         Args:
             ti (int): Turbine number which should be plotted.
-            fi ([type], optional): floris object. If specified, will use
-            this to plot the turbine power curves as implemented in floris.
+            fi (FlorisInterface, optional): floris object. If not None, will
+            use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
             ax (plt.Axis): Pyplot Axis object.
         """
@@ -687,8 +830,8 @@ class ws_pw_curve_filtering:
 
         Args:
             ti (int): Turbine number which should be plotted.
-            fi ([type], optional): floris object. If specified, will use
-            this to plot the turbine power curves as implemented in floris.
+            fi (FlorisInterface, optional): floris object. If not None, will
+            use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
         """
 
@@ -791,13 +934,3 @@ class ws_pw_curve_filtering:
         ax.grid(True)
 
         return ax
-
-    def _get_all_unique_flags(self):
-        # Get a list of all flags and then get colors correspondingly
-        all_flags = list(np.sort(np.unique(self.df_filters)))
-        if "clean" in all_flags:
-            # Sort to make sure "clean" is the first entry in the legend
-            all_flags.remove("clean")
-            all_flags = ["clean"] + all_flags
-
-        return all_flags
