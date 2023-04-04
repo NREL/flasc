@@ -17,7 +17,66 @@ import pandas as pd
 from scipy import interpolate
 import copy
 
+from floris.tools import FlorisInterface
 from flasc import utilities as fsut
+
+
+def merge_floris_objects(fi_list, reference_wind_height=None):
+    """Merge a list of FlorisInterface objects into a single FlorisInterface object. Note that it uses
+    the very first object specified in fi_list to build upon, so it uses those wake model parameters,
+    air density, and so on.
+
+    Args:
+        fi_list (list): Array-like of FlorisInterface objects.
+        reference_wind_height (float, optional): Height in meters at which the reference wind speed is
+        assigned. If None, will assume this value is equal to the reference wind height specified in
+        the FlorisInterface objects. This only works if all objects have the same value for their
+        reference_wind_height.
+
+    Returns:
+        fi_merged (FlorisInterface): The merged FlorisInterface object, merged in the same order as fi_list.
+        The objects are merged on the turbine locations and turbine types, but not on the wake parameters
+        or general solver settings.
+    """
+
+    # Make sure the entries in fi_list are FlorisInterface objects
+    if not isinstance(fi_list[0], FlorisInterface):
+        raise UserWarning("Incompatible input specified. Please merge FlorisInterface objects before inserting them into ParallelComputingInterface and UncertaintyInterface.")
+
+    # Get the turbine locations and specifications for each subset and save as a list
+    x_list = []
+    y_list = []
+    turbine_type_list = []
+    reference_wind_heights = []
+    for fi in fi_list:
+        x_list.extend(fi.layout_x)
+        y_list.extend(fi.layout_y)
+
+        fi_turbine_type = fi.floris.farm.turbine_type
+        if len(fi_turbine_type) == 1:
+            fi_turbine_type = [fi_turbine_type] * len(fi.layout_x)
+        elif not len(fi_turbine_type) == len(fi.layout_x):
+            raise UserWarning("Incompatible format of turbine_type in FlorisInterface.")
+
+        turbine_type_list.extend(fi_turbine_type)
+        reference_wind_heights.append(fi.floris.flow_field.reference_wind_height)
+
+    # Derive reference wind height, if unspecified by the user
+    if reference_wind_heights is None:
+        reference_wind_height = np.mean(reference_wind_heights)
+        if np.any(np.abs(np.array(reference_wind_heights) - reference_wind_height)) > 1.0e-3:
+            raise UserWarning("Cannot automatically derive a fitting reference_wind_height since they substantially differ between FlorisInterface objects. Please specify 'reference_wind_height' manually.")
+
+    # Construct the merged FLORIS model based on the first entry in fi_list
+    fi_merged = fi_list[0].copy()
+    fi_merged.reinitialize(
+        layout_x=x_list,
+        layout_y=y_list,
+        turbine_type=turbine_type_list,
+        reference_wind_height=reference_wind_height
+    )
+
+    return fi_merged
 
 
 def interpolate_floris_from_df_approx(
