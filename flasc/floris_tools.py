@@ -62,9 +62,9 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
         reference_wind_heights.append(fi.floris.flow_field.reference_wind_height)
 
     # Derive reference wind height, if unspecified by the user
-    if reference_wind_heights is None:
+    if reference_wind_height is None:
         reference_wind_height = np.mean(reference_wind_heights)
-        if np.any(np.abs(np.array(reference_wind_heights) - reference_wind_height)) > 1.0e-3:
+        if np.any(np.abs(np.array(reference_wind_heights) - reference_wind_height) > 1.0e-3):
             raise UserWarning("Cannot automatically derive a fitting reference_wind_height since they substantially differ between FlorisInterface objects. Please specify 'reference_wind_height' manually.")
 
     # Construct the merged FLORIS model based on the first entry in fi_list
