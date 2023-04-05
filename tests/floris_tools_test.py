@@ -5,6 +5,7 @@ import pandas as pd
 import unittest
 from flasc.floris_tools import (
     calc_floris_approx_table,
+    merge_floris_objects,
     interpolate_floris_from_df_approx,
     get_dependent_turbines_by_wd
 )
@@ -22,6 +23,27 @@ def load_floris():
 
 
 class TestFlorisTools(unittest.TestCase):
+    def test_floris_merge(self):
+        fi_1 = load_floris()
+        fi_2 = fi_1.copy()
+        fi_2.reinitialize(layout_x=[-500.0, -500.0], layout_y=[0.0, 500.0])
+
+        # Check if layouts are merged appropriately
+        fi_merged = merge_floris_objects([fi_1, fi_2])
+        self.assertTrue(np.all(fi_merged.layout_x == np.hstack([fi_1.layout_x, fi_2.layout_x])))
+        self.assertTrue(np.all(fi_merged.layout_y == np.hstack([fi_1.layout_y, fi_2.layout_y])))
+# 
+        # Check if layouts are merged appropriately
+        fi_merged = merge_floris_objects([fi_1, fi_2], reference_wind_height=200.0)
+        self.assertTrue(fi_merged.floris.flow_field.reference_wind_height == 200.0)
+
+        # Also test that we raise a UserWarning if we have two different reference wind heights and
+        # don't specify a reference_wind_height for the merged object
+        with self.assertRaises(UserWarning):
+            fi_1.reinitialize(reference_wind_height=90.0)
+            fi_2.reinitialize(reference_wind_height=91.0)
+            fi_merged = merge_floris_objects([fi_1, fi_2])
+
     def test_floris_approx_table(self):
         # Load FLORIS object
         fi = load_floris()
