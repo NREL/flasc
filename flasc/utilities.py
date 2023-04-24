@@ -49,13 +49,12 @@ def estimate_dt(time_array):
 
     return dt
 
-
+#TODO: I think this works in polars
 def get_num_turbines(df):
     nt = 0
     while ('pow_%03d' % nt) in df.columns:
         nt += 1
     return nt
-
 
 def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
     if not ((kind == "linear") or (kind == "nearest")):
