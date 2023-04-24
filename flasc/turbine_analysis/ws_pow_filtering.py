@@ -12,6 +12,7 @@
 
 
 import pandas as pd
+import polars as pl
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -39,7 +40,7 @@ class ws_pw_curve_filtering:
         """Initializes the class.
 
         Args:
-            df ([pd.DataFrame]): Dataframe containing the turbine data,
+            df ([pl.DataFrame]): Dataframe containing the turbine data,
                 formatted in the generic SCADA data format. Namely, the
                 dataframe should at the very least contain the columns:
                   * Time of each measurement: time
@@ -48,10 +49,11 @@ class ws_pw_curve_filtering:
         """
 
         # Write dataframe to self
-        self._df_initial = df.copy()
+        self._df_initial = df.clone()
         self.reset_filters()
 
     # Private methods
+    #TODO: Convert to polars
     def _get_all_unique_flags(self):
         """Private function that grabs all the unique filter flags
         that are available in self.df_filters and returns them
@@ -71,6 +73,7 @@ class ws_pw_curve_filtering:
 
         return all_flags
 
+    #TODO: Check this works
     def _get_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5), df=None):
         """Calculates the mean power production in bins of the wind speed,
         for all turbines in the wind farm.
@@ -78,7 +81,7 @@ class ws_pw_curve_filtering:
         Args:
             ws_bins ([iteratible], optional): Wind speed bins. Defaults to
                 np.arange(0.0, 25.5, 0.5).
-            df ([pd.DataFrame]): Dataframe containing the turbine data,
+            df ([pl.DataFrame]): Dataframe containing the turbine data,
                 formatted in the generic SCADA data format. Namely, the
                 dataframe should at the very least contain the columns:
                   * Time of each measurement: time
@@ -86,7 +89,7 @@ class ws_pw_curve_filtering:
                   * Power production of each turbine: pow_000, pow_001, ...
 
         Returns:
-            pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
+            pw_curve_df ([pl.DataFrame]): Dataframe containing the wind
                 speed bins and the mean power production value for every
                 turbine.
         """
@@ -98,7 +101,9 @@ class ws_pw_curve_filtering:
         # Create a dataframe to contain the averaged power curves
         ws_max = np.max(ws_bins)
         ws_min = np.min(ws_bins)
-        pw_curve_df = pd.DataFrame(
+        ws_step = ws_bins[1] - ws_bins[0]
+
+        pw_curve_df = pl.DataFrame(
             {
                 "ws": (ws_bins[1::] + ws_bins[0:-1]) / 2,
                 "ws_min": ws_bins[0:-1],
@@ -106,36 +111,64 @@ class ws_pw_curve_filtering:
             }
         )
 
+        def find_bin_center(x):
+            return ws_bins[np.searchsorted(ws_bins, x, side="left") - 1] + ws_step/2
+
         # Loop through every turbine
         for ti in range(self.n_turbines):
-            # Extract the measurements and calculate the bin average
-            ws = df["ws_%03d" % ti]
-            pw = df["pow_%03d" % ti]
-            bin_ids = (ws > ws_min) & (ws < ws_max)
-            ws_clean = ws[bin_ids]
-            pw_clean = pw[bin_ids]
 
-            bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
-            bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
-            pow_bins = [
-                np.median(pw_clean[bin_array == i])
-                for i in range(pw_curve_df.shape[0])
-            ]
+            df_centers = (df
+                          .filter(pl.col("ws_%03d" % ti) >= ws_min)
+                          .filter(pl.col("ws_%03d" % ti) < ws_max)
+                          .with_columns(
+                                ws=pl.col("ws_%03d" % ti).apply(find_bin_center),
+                            )
+                            .groupby('ws')
+                            .median()
+                            )
+            
+            pw_curve_df = pw_curve_df.join(df_centers.select(["pow_%03d" % ti,'ws']), 
+                                           on='ws',
+                                           how='left')
+            
+            
 
-            # Write outputs to the dataframe
-            pw_curve_df["pow_%03d" % ti] = pow_bins
+            # # Extract the measurements and calculate the bin average
+            # ws = df["ws_%03d" % ti]
+            # pw = df["pow_%03d" % ti]
+            # bin_ids = (ws > ws_min) & (ws < ws_max)
+            # ws_clean = ws[bin_ids]
+            # pw_clean = pw[bin_ids]
+
+            # bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
+            # bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
+            # pow_bins = [
+            #     np.median(pw_clean[bin_array == i])
+            #     for i in range(pw_curve_df.shape[0])
+            # ]
+
+            # # Write outputs to the dataframe
+            # pw_curve_df = pw_curve_df.with_columns(
+            #     pl.Series(name="pow_%03d" % ti, values=pow_bins)
+            # )
+
+            # # pw_curve_df["pow_%03d" % ti] = pow_bins
 
         # Save the finalized power curve to self and return it to the user
         self.pw_curve_df = pw_curve_df
         return pw_curve_df
 
+    #TODO: Confirm this works in POLARS
     def _reset_df(self):
         """Reset the 'filtered' dataframe, self.df, to its original form,
         before any measurements were marked as faulty. """
 
         # Copy the original dataframe from self
         df = self._df_initial  
-        self.df = df.reset_index(drop=("time" in df.columns))
+
+        # PF NOTE 2023/04/24 Not sure this has meaning in polars
+        # This being the reset
+        self.df = df# .reset_index(drop=("time" in df.columns))
 
         # Derive the total number of turbines in the dataframe
         self.n_turbines = flascutils.get_num_turbines(df)
@@ -144,6 +177,8 @@ class ws_pw_curve_filtering:
         self._get_mean_power_curves()
 
     # Public methods
+
+    #TODO: Check this works
     def reset_filters(self):
         """Reset all filter variables and assume all data is clean."""
         # Reset the filtered dataframe to the original, unfiltered one
@@ -154,12 +189,19 @@ class ws_pw_curve_filtering:
             ["clean" for _ in range(self.n_turbines)]
             for _ in range(self.df.shape[0])
         ]
-        self.df_filters = pd.DataFrame(
+        self.df_filters = pl.DataFrame(
             all_clean_array,
-            index=self.df.index,
-            columns=["WTG_{:03d}".format(ti) for ti in range(self.n_turbines)]
+            schema=["WTG_{:03d}".format(ti) for ti in range(self.n_turbines)]
         )
 
+        # Pandas style
+        # self.df_filters = pd.DataFrame(
+        #     all_clean_array,
+        #     index=self.df.index,
+        #     columns=["WTG_{:03d}".format(ti) for ti in range(self.n_turbines)]
+        # )
+
+    #TODO: Confirm this works in POLARS
     def filter_by_condition(
         self,
         condition,
@@ -220,7 +262,7 @@ class ws_pw_curve_filtering:
 
         # Create standalone copy that we can manipulate, if apply_filters_to_df==False
         if not apply_filters_to_df:
-            df_in = df_in.copy()
+            df_in = df_in.clone()
 
         # Mark data as faulty on the dataframe
         N_pre = [dff.df_get_no_faulty_measurements(df_in, tii) for tii in ti]
@@ -238,14 +280,23 @@ class ws_pw_curve_filtering:
 
         if apply_filters_to_df:
             # Update dataframe and filter labels
-            for tii in ti:  
-                self.df_filters.loc[condition, "WTG_{:03d}".format(tii)] = label
+            cols_to_filter = ["WTG_{:03d}".format(tii) for tii in ti]
+
+            self.df_filters = self.df_filters.with_columns(
+                pl.when(~pl.Series(condition)) # Negate so when true, label is applied
+                .then(pl.col(cols_to_filter))
+                .otherwise(pl.lit(label))   
+            )
+
+            # for tii in ti:  
+            #     self.df_filters.loc[condition, "WTG_{:03d}".format(tii)] = label
 
             # Recalculate mean power curves
             self._get_mean_power_curves()
 
         return df_out
 
+    #TODO: Convert to polars
     def filter_by_sensor_stuck_faults(
             self,
             columns: list,
@@ -324,6 +375,7 @@ class ws_pw_curve_filtering:
 
         return self.df
 
+    #TODO: Convert to polars
     def filter_by_power_curve(
         self,
         ti,
@@ -497,6 +549,7 @@ class ws_pw_curve_filtering:
 
         return self.df
 
+    #TODO: Convert to polars
     def filter_by_floris_power_curve(
         self,
         fi,
@@ -652,6 +705,7 @@ class ws_pw_curve_filtering:
 
         return self.df
 
+    #TODO: Convert to polars
     def get_df(self):
         """Return the filtered dataframe to the user.
 
@@ -663,6 +717,7 @@ class ws_pw_curve_filtering:
         """
         return self.df
 
+    #TODO: Convert to polars
     def get_power_curve(self):
         """Return the turbine estimated mean power curves to the user.
 
@@ -673,6 +728,7 @@ class ws_pw_curve_filtering:
         """
         return self.pw_curve_df
 
+    #TODO: Convert to polars
     def plot_farm_mean_power_curve(self):
         """Plot all turbines' power curves in a single figure. Also estimate
         and plot a mean turbine power curve.
@@ -701,6 +757,7 @@ class ws_pw_curve_filtering:
 
         return fig, ax
 
+    #TODO: Convert to polars
     def plot_filters_custom_scatter(self, ti, x_col, y_col, ax=None):
         """Plot the filtered data in a scatter plot, categorized
         by the source of their filter/fault. This is a generic
@@ -757,6 +814,7 @@ class ws_pw_curve_filtering:
     
         return ax
 
+    #TODO: Convert to polars
     def plot_filters_in_ws_power_curve(self, ti, fi=None, ax=None):
         """Plot the wind speed power curve and connect each faulty datapoint
         to the label it was classified as faulty with.
@@ -824,6 +882,7 @@ class ws_pw_curve_filtering:
 
         return ax
 
+    #TODO: Convert to polars
     def plot_postprocessed_in_ws_power_curve(self, ti, fi=None, ax=None):
         """Plot the wind speed power curve and mark faulty data according to
         their filters.
@@ -899,6 +958,7 @@ class ws_pw_curve_filtering:
 
         return ax
 
+    #TODO: Convert to polars
     def plot_filters_in_time(self, ti, ax=None):
         """Generate bar plot where each week of data is gathered and its
         filtering results will be shown relative to the data size of each
