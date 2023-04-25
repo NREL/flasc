@@ -269,6 +269,10 @@ class ws_pw_curve_filtering:
             # Recalculate mean power curves
             self._get_mean_power_curves()
 
+            # Apply the filters to the dataframe
+            self.df = df_out
+
+
         return df_out
 
     #TODO: Convert to polars

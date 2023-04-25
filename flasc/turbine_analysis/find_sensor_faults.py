@@ -14,6 +14,7 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import polars as pl
 
 
 def find_sensor_stuck_faults(
@@ -31,13 +32,14 @@ def find_sensor_stuck_faults(
     for c in columns:
         if verbose:
             print("Processing column %s" % c)
-        measurement_array = np.array(df[c])
+        # measurement_array = np.array(df[c])
+        measurement_array = df.select(c).to_numpy().flatten()
 
         index_faults = _find_sensor_stuck_single_timearray(
             measurement_array=measurement_array,
             no_consecutive_measurements=n_consecutive_measurements,
             stddev_threshold=stddev_threshold,
-            index_array=df.index,
+            index_array=None, #df.index,
         )
 
         if (plot_figures) & (len(index_faults) > 0):
