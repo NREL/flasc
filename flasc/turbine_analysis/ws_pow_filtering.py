@@ -735,7 +735,11 @@ class ws_pw_curve_filtering:
             ids = (df_f == flag)
             df_subset = self._df_initial.loc[ids]
             percentage = 100.0 * np.sum(ids) / N
-            if any(ids):
+            if (
+                any(ids) and
+                (not df_subset[x_col].isna().all()) and
+                (not df_subset[y_col].isna().all())
+            ):
                 ax.plot(
                     df_subset[x_col],
                     df_subset[y_col],
