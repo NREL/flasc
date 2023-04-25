@@ -730,7 +730,7 @@ def df_reduce_precision(df_in, verbose=False):
         elif ((datatype == 'int64') or
               (datatype == 'int32') or
               (datatype == 'int')):
-            if all(np.unique(df_in[c]) == [0, 1]):
+            if np.array_equal(np.unique(df_in[c]), [0, 1]):
                 df_out[c] = df_in[c].astype(bool)
             elif len(np.unique(df_in[c])) < 100:
                 df_out[c] = df_in[c].astype(np.int16)
