@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from ..turbine_analysis.find_sensor_faults import find_sensor_stuck_faults
+from .find_sensor_faults import find_sensor_stuck_faults
 from .. import utilities as flascutils
 from ..dataframe_operations import dataframe_filtering as dff
 
@@ -72,24 +72,22 @@ class ws_pw_curve_filtering:
             all_flags = ["clean"] + all_flags
 
         return all_flags
-
-    #TODO: Check this works
+    
+    #TODO: I think this could be further optimized
     def _get_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5), df=None):
         """Calculates the mean power production in bins of the wind speed,
         for all turbines in the wind farm.
-
         Args:
             ws_bins ([iteratible], optional): Wind speed bins. Defaults to
                 np.arange(0.0, 25.5, 0.5).
-            df ([pl.DataFrame]): Dataframe containing the turbine data,
+            df ([pd.DataFrame]): Dataframe containing the turbine data,
                 formatted in the generic SCADA data format. Namely, the
                 dataframe should at the very least contain the columns:
                   * Time of each measurement: time
                   * Wind speed of each turbine: ws_000, ws_001, ... 
                   * Power production of each turbine: pow_000, pow_001, ...
-
         Returns:
-            pw_curve_df ([pl.DataFrame]): Dataframe containing the wind
+            pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
                 speed bins and the mean power production value for every
                 turbine.
         """
@@ -101,8 +99,6 @@ class ws_pw_curve_filtering:
         # Create a dataframe to contain the averaged power curves
         ws_max = np.max(ws_bins)
         ws_min = np.min(ws_bins)
-        ws_step = ws_bins[1] - ws_bins[0]
-
         pw_curve_df = pl.DataFrame(
             {
                 "ws": (ws_bins[1::] + ws_bins[0:-1]) / 2,
@@ -111,48 +107,27 @@ class ws_pw_curve_filtering:
             }
         )
 
-        def find_bin_center(x):
-            return ws_bins[np.searchsorted(ws_bins, x, side="left") - 1] + ws_step/2
-
         # Loop through every turbine
         for ti in range(self.n_turbines):
+            # Extract the measurements and calculate the bin average
+            ws = df.select("ws_%03d" % ti).to_numpy()
+            pw = df.select("pow_%03d" % ti).to_numpy()
+            bin_ids = (ws > ws_min) & (ws < ws_max)
+            ws_clean = ws[bin_ids]
+            pw_clean = pw[bin_ids]
 
-            df_centers = (df
-                          .filter(pl.col("ws_%03d" % ti) >= ws_min)
-                          .filter(pl.col("ws_%03d" % ti) < ws_max)
-                          .with_columns(
-                                ws=pl.col("ws_%03d" % ti).apply(find_bin_center),
-                            )
-                            .groupby('ws')
-                            .median()
-                            )
-            
-            pw_curve_df = pw_curve_df.join(df_centers.select(["pow_%03d" % ti,'ws']), 
-                                           on='ws',
-                                           how='left')
-            
-            
+            bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
+            bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
+            pow_bins = [
+                np.median(pw_clean[bin_array == i])
+                for i in range(pw_curve_df.shape[0])
+            ]
 
-            # # Extract the measurements and calculate the bin average
-            # ws = df["ws_%03d" % ti]
-            # pw = df["pow_%03d" % ti]
-            # bin_ids = (ws > ws_min) & (ws < ws_max)
-            # ws_clean = ws[bin_ids]
-            # pw_clean = pw[bin_ids]
-
-            # bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
-            # bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
-            # pow_bins = [
-            #     np.median(pw_clean[bin_array == i])
-            #     for i in range(pw_curve_df.shape[0])
-            # ]
-
-            # # Write outputs to the dataframe
-            # pw_curve_df = pw_curve_df.with_columns(
-            #     pl.Series(name="pow_%03d" % ti, values=pow_bins)
-            # )
-
-            # # pw_curve_df["pow_%03d" % ti] = pow_bins
+            # Write outputs to the dataframe
+            pw_curve_df = pw_curve_df.with_columns(
+                pl.Series(name="pow_%03d" % ti, values=pow_bins)
+            )
+            # pw_curve_df["pow_%03d" % ti] = pow_bins
 
         # Save the finalized power curve to self and return it to the user
         self.pw_curve_df = pw_curve_df
