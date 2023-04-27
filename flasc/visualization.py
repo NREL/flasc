@@ -636,7 +636,75 @@ def label_line(
     else:
         raise ValueError("Need one of near_i, near_x, near_y")
 
+def shade_region(points, show_points=False, plotting_dict_region={}, 
+    plotting_dict_points={}, ax=None):
+    """
+    Shade a region defined by a series of vertices (points).
 
+    Args:
+        points: 2D array of vertices for the shaded region, shape N x 2, 
+            where each row contains a coordinate (x, y)
+        show_points: Boolean to dictate whether to plot the points as well 
+            as the shaded region
+        plotting_dict_region: dictionary of plotting parameters for the shaded
+            region, with the following (optional) fields and their (default) 
+            values:
+            "color" : ("black")
+            "edgecolor": (None)
+            "alpha" : (0.3)
+            "label" : (None) (for legend, if desired)
+        plotting_dict_region: dictionary of plotting parameters for the 
+            vertices (points), with the following (optional) fields and their 
+            (default) values:
+            "color" : "black", 
+            "marker" : (None)
+            "s" : (10)
+            "label" : (None) (for legend, if desired)
+        ax: axes to plot on (if None, creates figure and axes)
+    
+    Returns:
+        ax: the current axes for the layout plot
+
+    turbine_names should be a complete list of all turbine names; only
+    those in turbine_indices will be plotted though.
+    """
+
+    # Generate axis, if needed
+    if ax is None:
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111)
+
+    # Generate plotting dictionary
+    default_plotting_dict_region = {
+        "color" : "black", 
+        "edgecolor" : None,
+        "alpha" : 0.3,
+        "label" : None
+    }
+    plotting_dict_region = {**default_plotting_dict_region,
+                            **plotting_dict_region}
+
+    ax.fill(points[:,0], points[:,1], **plotting_dict_region)
+
+    if show_points:
+        default_plotting_dict_points = {
+            "color" : "black", 
+            "marker" : ".",
+            "s" : 10,
+            "label" : None
+        }
+        plotting_dict_points = {**default_plotting_dict_points, 
+                                **plotting_dict_points}
+
+        ax.scatter(points[:,0], points[:,1], **plotting_dict_points)
+
+    # Plot labels and aesthetics
+    ax.axis("equal")
+    ax.grid(True)
+    ax.set_xlabel("x coordinate (m)")
+    ax.set_ylabel("y coordinate (m)")
+
+    return ax
 
 
 
