@@ -408,7 +408,7 @@ class ws_pw_curve_filtering:
         # the estimated power curve) changes every iteration, and hence so
         # do the estimated mean power curves again. This explains the
         # iterative nature of the problem.
-        df_initial_filtered = self.df.copy()
+        df_initial_filtered = self.df.fill_null(np.nan) # Convert to nulls to nans
 
         # Iteratively filter data and recalculate the mean power curves
         for ii in range(no_iterations):
@@ -416,21 +416,33 @@ class ws_pw_curve_filtering:
             is_final_iteration = (ii == no_iterations - 1)
 
             # Create upper and lower bounds around mean curve
-            df_xy = self.pw_curve_df.copy()
-            x_full = np.array(df_xy["ws"], dtype=float)
-            x = x_full[x_full < cutoff_ws]  # Only filter until 15 m/s
-            self.pw_curve_df_bounds = pd.DataFrame({"ws": x})
+            df_xy = self.pw_curve_df.fill_null(np.nan) # Convert to nulls to nans
+            # x_full = np.array(df_xy["ws"], dtype=float)
+            x_full = df_xy.select('ws').to_numpy().flatten()
 
-            y = np.array(df_xy["pow_%03d" % ti], dtype=float)
+            x = x_full[x_full < cutoff_ws]  # Only filter until 15 m/s
+            self.pw_curve_df_bounds = pl.DataFrame({"ws": x})
+
+            # y = np.array(df_xy["pow_%03d" % ti], dtype=float)
+            y = df_xy.select("pow_%03d" % ti).to_numpy().flatten()
+
             y = y[x_full < cutoff_ws]  # Only filter until 15 m/s
             if np.all(np.isnan(y)):
-                self.pw_curve_df_bounds["pow_%03d_lb" % ti] = None
-                self.pw_curve_df_bounds["pow_%03d_rb" % ti] = None
+                self.pw_curve_df_bounds = self.pw_curve_df_bounds.with_columns(
+                    [pl.lit(None).alias("pow_%03d_lb" % ti),
+                     pl.lit(None).alias("pow_%03d_rb" % ti)]
+                )
+
+                # self.pw_curve_df_bounds["pow_%03d_lb" % ti] = None
+                # self.pw_curve_df_bounds["pow_%03d_rb" % ti] = None
                 continue
 
             # Create interpolants to left and right of mean curve
-            ws_array = np.array(df_initial_filtered["ws_%03d" % ti], dtype=float)
-            pow_array = np.array(df_initial_filtered["pow_%03d" % ti], dtype=float)
+            ws_array = df_initial_filtered.select("ws_%03d" % ti).to_numpy().flatten()
+            pow_array = df_initial_filtered.select("pow_%03d" % ti).to_numpy().flatten()
+
+            # ws_array = np.array(df_initial_filtered["ws_%03d" % ti], dtype=float)
+            # pow_array = np.array(df_initial_filtered["pow_%03d" % ti], dtype=float)
 
             # Specify left side bound and non-decreasing
             lb_ws = x * m_ws_lb - ws_deadband / 2.0
@@ -511,20 +523,42 @@ class ws_pw_curve_filtering:
 
             # Recalculate the mean power curve based on current iteration's filtered dataframe
             self._get_mean_power_curves(df=df_iteration)
-            self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
-                x=x,
-                xp=lb_ws,
-                fp=lb_pow,
-                left=np.nan,
-                right=np.nan,
+
+            self.pw_curve_df_bounds = self.pw_curve_df_bounds.with_columns(
+                [
+                    pl.Series(values=np.interp(
+                    x=x,
+                    xp=lb_ws,
+                    fp=lb_pow,
+                    left=np.nan,
+                    right=np.nan,
+                        ), name="pow_%03d_lb" % ti), 
+                    pl.Series(values=np.interp(
+                    x=x,
+                    xp=rb_ws,
+                    fp=rb_pow,
+                    left=np.nan,
+                    right=np.nan,
+                        ), name="pow_%03d_rb" % ti), 
+                ]
             )
-            self.pw_curve_df_bounds["pow_%03d_rb" % ti] = np.interp(
-                x=x,
-                xp=rb_ws,
-                fp=rb_pow,
-                left=np.nan,
-                right=np.nan,
-            )
+
+
+
+            # self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
+            #     x=x,
+            #     xp=lb_ws,
+            #     fp=lb_pow,
+            #     left=np.nan,
+            #     right=np.nan,
+            # )
+            # self.pw_curve_df_bounds["pow_%03d_rb" % ti] = np.interp(
+            #     x=x,
+            #     xp=rb_ws,
+            #     fp=rb_pow,
+            #     left=np.nan,
+            #     right=np.nan,
+            # )
 
         return self.df
 
