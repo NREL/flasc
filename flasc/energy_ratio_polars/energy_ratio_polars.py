@@ -332,12 +332,13 @@ def compute_energy_ratio(df_,
             ]
         )
         .groupby(['wd_bin','df_name'], maintain_order=True)
-        .agg([pl.sum("ref_energy"), pl.sum("test_energy")])
+        .agg([pl.sum("ref_energy"), pl.sum("test_energy"),pl.sum("count")])
         .with_columns(
             energy_ratio = pl.col('test_energy') / pl.col('ref_energy')
         )
-        .pivot(values='energy_ratio', columns='df_name', index='wd_bin',aggregate_function='first')
-
+        .pivot(values=['energy_ratio','count'], columns='df_name', index='wd_bin',aggregate_function='first')
+        .rename({f'energy_ratio_df_name_{n}' : n for n in df_names})
+        .rename({f'count_df_name_{n}' : f'count_{n}'  for n in df_names})
     )
 
     # This probably doesn't belong in here but for now
@@ -345,6 +346,9 @@ def compute_energy_ratio(df_,
         df_ = df_.with_columns(
             uplift = 100 * (pl.col(df_names[1]) - pl.col(df_names[0])) / pl.col(df_names[0])
         )
+
+    # Enforce a column order
+    df_ = df_.select(['wd_bin'] + df_names + ['uplift'] + [f'count_{n}' for n in df_names])
     
 
     return(df_)
@@ -381,13 +385,15 @@ def compute_energy_ratio_bootstrap(df_,
                          ) for i in range(N)])
     
     if 'uplift' in df_concat.columns:
-        df_names = df_names + ['uplift']
+        df_names_with_uplift = df_names + ['uplift']
+
 
     return(df_concat
            .groupby(['wd_bin'], maintain_order=True)
-           .agg([pl.first(n) for n in df_names] + 
-                [pl.quantile(n, 0.95).alias(n + "_ub") for n in df_names] +
-                [pl.quantile(n, 0.05).alias(n + "_lb") for n in df_names]
+           .agg([pl.first(n) for n in df_names_with_uplift] + 
+                [pl.quantile(n, 0.95).alias(n + "_ub") for n in df_names_with_uplift] +
+                [pl.quantile(n, 0.05).alias(n + "_lb") for n in df_names_with_uplift] + 
+                [pl.first(f'count_{n}') for n in df_names]
            )
            .sort('wd_bin')
     )
