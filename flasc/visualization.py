@@ -666,9 +666,6 @@ def shade_region(points, show_points=False, plotting_dict_region={},
     
     Returns:
         ax: the current axes for the layout plot
-
-    turbine_names should be a complete list of all turbine names; only
-    those in turbine_indices will be plotted though.
     """
 
     # Generate axis, if needed
@@ -708,7 +705,7 @@ def shade_region(points, show_points=False, plotting_dict_region={},
 
     return ax
 
-    
+
 def plot_binned_mean_and_ci(
     x,
     y,
