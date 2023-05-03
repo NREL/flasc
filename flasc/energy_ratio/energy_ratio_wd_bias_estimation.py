@@ -19,6 +19,7 @@ from scipy import stats as spst
 
 from floris.utilities import wrap_360
 
+from ..dataframe_operations import dataframe_manipulations as dfm
 from .. import floris_tools as ftools
 from ..utilities import printnow as print
 from ..energy_ratio import energy_ratio_suite
@@ -81,6 +82,7 @@ class bias_estimation():
 
         # Import inputs
         self.df = df.reset_index(drop=('time' in df.columns))
+        self.n_turbines = dfm.get_num_turbines(self.df)
         self.df_fi_approx = df_fi_approx
         self.df_ws_mapping_func = df_ws_mapping_func
         self.df_pow_ref_mapping_func = df_pow_ref_mapping_func
@@ -131,12 +133,16 @@ class bias_estimation():
 
         # Get FLORIS predictions
         print('    Interpolating FLORIS predictions for dataframe.')
-        if "ti" in df_cor_all.columns:
-            df_fi_all = df_cor_all[["time", "wd", "ws", "ti"]].copy()
-        else:
-            df_fi_all = df_cor_all[["time", "wd", "ws"]].copy()
+        ws_cols = ["ws_{:03d}".format(ti) for ti in range(self.n_turbines)]
+        pow_cols = ["pow_{:03d}".format(ti) for ti in range(self.n_turbines)]
+        df_fi_all = df_cor_all[['time', 'wd', 'ws', 'ti', *ws_cols, *pow_cols]].copy()
+
         df_fi_all = ftools.interpolate_floris_from_df_approx(
-            df=df_fi_all, df_approx=self.df_fi_approx, verbose=False)
+            df=df_fi_all,
+            df_approx=self.df_fi_approx,
+            verbose=False,
+            mirror_nans=True
+        )
         df_fi_all = self.df_pow_ref_mapping_func(df_fi_all)
 
         for ti in test_turbines:

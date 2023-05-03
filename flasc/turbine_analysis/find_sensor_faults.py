@@ -15,51 +15,35 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from flasc.dataframe_operations import (
-    dataframe_filtering as dff,
-    dataframe_manipulations as dfm,
-)
 
-
-def filter_sensor_faults(df, columns=["wd", "ws"], plot_figures=True, figure_save_path=None):
-    # Define which variables to check for. Here, that is the wind direction
-    # and the wind speed according to the turbines.
-    num_turbines = dfm.get_num_turbines(df)
-    columns_list = []
-    for ci in columns:
-        columns_list.extend(["{:s}_{:03d}".format(ci, ti) for ti in range(num_turbines)])
-
-    if figure_save_path is not None:
-        os.makedirs(figure_save_path, exist_ok=True)
-
+def find_sensor_stuck_faults(
+        df,
+        columns,
+        ti,
+        stddev_threshold=0.001,
+        n_consecutive_measurements=3,
+        plot_figures=True,
+        verbose=False,
+    ):
     # Settings which indicate a sensor-stuck type of fault: the standard
     # deviation between the [no_consecutive_measurements] number of
     # consecutive measurements is less than [stddev_threshold].
-    stddev_threshold = 0.001
-    no_consecutive_measurements = 10
-
-    for c in columns_list:
-        print("Processing column %s" % c)
+    for c in columns:
+        if verbose:
+            print("Processing column %s" % c)
         measurement_array = np.array(df[c])
-        turb_str = c[-3::]
 
         index_faults = _find_sensor_stuck_single_timearray(
             measurement_array=measurement_array,
-            no_consecutive_measurements=no_consecutive_measurements,
+            no_consecutive_measurements=n_consecutive_measurements,
             stddev_threshold=stddev_threshold,
             index_array=df.index,
         )
 
-        if ((plot_figures) | (figure_save_path is not None)) & (len(index_faults) > 0):
-            _plot_top_sensor_faults(df, c, index_faults, save_path=figure_save_path)
-            df = dff.df_mark_turbdata_as_faulty(
-                df, index_faults, int(turb_str), verbose=True
-            )
+        if (plot_figures) & (len(index_faults) > 0):
+            _plot_top_sensor_faults(df, c, index_faults)
 
-            if not plot_figures:
-                plt.close()
-
-    return df
+    return index_faults
 
 
 def _plot_top_sensor_faults(
@@ -169,8 +153,5 @@ def _find_sensor_stuck_single_timearray(
     # Get standard deviations and determine faults
     std_array = np.std(Cmeas, axis=1)
     indices_faulty = np.unique(Cindex[std_array < stddev_threshold, :])
-
-    print('Found %d faulty measurements. This is %.3f %% of your dataset.'
-          % (len(indices_faulty), 100*len(indices_faulty)/N))
 
     return indices_faulty

@@ -14,7 +14,7 @@ AUTHOR = "NREL National Wind Technology Center"
 REQUIRED = [
     'floris>=3.1',
     'feather-format',
-    'matplotlib',
+    'matplotlib>=3.6.3',
     'numpy',
     'numba',
     'openoa',

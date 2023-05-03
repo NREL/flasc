@@ -11,302 +11,202 @@
 # the License.
 
 
-from copy import deepcopy as dcopy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pandas.errors import DataError
 from scipy import interpolate
-from time import perf_counter as timerpc
 import copy
 
+from floris.tools import FlorisInterface
 from flasc import utilities as fsut
 
-from floris.utilities import wrap_360, wrap_180
 
-
-def _run_fi_serial(df_subset, fi, include_unc=False,
-                   unc_pmfs=None, unc_options=None, verbose=False):
-    """Evaluate the FLORIS solutions for a set of wind directions,
-    wind speeds and turbulence intensities in serial (non-
-    parallelized) mode.
+def merge_floris_objects(fi_list, reference_wind_height=None):
+    """Merge a list of FlorisInterface objects into a single FlorisInterface object. Note that it uses
+    the very first object specified in fi_list to build upon, so it uses those wake model parameters,
+    air density, and so on.
 
     Args:
-        df_subset ([pd.DataFrame]): Dataframe containing the columns
-        'wd', 'ws' and 'ti'. The FLORIS power predictions will be
-        calculated for each row/set of ambient conditions.
-        fi ([floris]): FLORIS object for the farm of interest.
-        verbose (bool, optional): Print information to terminal, used
-        for debugging. Defaults to False.
+        fi_list (list): Array-like of FlorisInterface objects.
+        reference_wind_height (float, optional): Height in meters at which the reference wind speed is
+        assigned. If None, will assume this value is equal to the reference wind height specified in
+        the FlorisInterface objects. This only works if all objects have the same value for their
+        reference_wind_height.
 
     Returns:
-        df_out ([pd.DataFrame]): Identical to the inserted dataframe,
-        df_subset, but now with additional columns containing the
-        predicted power production for each turbine, as pow_000, ...
-        pow_00N.
+        fi_merged (FlorisInterface): The merged FlorisInterface object, merged in the same order as fi_list.
+        The objects are merged on the turbine locations and turbine types, but not on the wake parameters
+        or general solver settings.
     """
-    nturbs = len(fi.layout_x)
-    df_out = df_subset.sort_values(by=["wd", "ws"])
 
-    use_model_params = ('model_params_dict' in df_subset.columns)
-    use_yaw = ('yaw_000' in df_subset.columns)
+    # Make sure the entries in fi_list are FlorisInterface objects
+    if not isinstance(fi_list[0], FlorisInterface):
+        raise UserWarning("Incompatible input specified. Please merge FlorisInterface objects before inserting them into ParallelComputingInterface and UncertaintyInterface.")
 
-    if (use_model_params | include_unc):
-        raise NotImplementedError("Functionality not yet implemented since moving to floris v3.0.")
+    # Get the turbine locations and specifications for each subset and save as a list
+    x_list = []
+    y_list = []
+    turbine_type_list = []
+    reference_wind_heights = []
+    for fi in fi_list:
+        x_list.extend(fi.layout_x)
+        y_list.extend(fi.layout_y)
 
-    # Specify dataframe columns
-    pow_cols = ["pow_{:03d}".format(ti) for ti in range(nturbs)]
-    ws_cols = ["ws_{:03d}".format(ti) for ti in range(nturbs)]
-    wd_cols = ["wd_{:03d}".format(ti) for ti in range(nturbs)]
-    ti_cols = ["ti_{:03d}".format(ti) for ti in range(nturbs)]
-    
-    yaw_rel = np.zeros((df_out.shape[0], nturbs))
-    if use_yaw:
-        yaw_cols = ['yaw_%03d' % ti for ti in range(nturbs)]
-        wd = np.array(df_out['wd'], dtype=float)
-        yaw_rel = wrap_180(
-            (
-                np.array(df_out[yaw_cols], dtype=float) -
-                np.stack((wd,) * nturbs, axis=0).T
-            )
-        )
+        fi_turbine_type = fi.floris.farm.turbine_type
+        if len(fi_turbine_type) == 1:
+            fi_turbine_type = [fi_turbine_type] * len(fi.layout_x)
+        elif not len(fi_turbine_type) == len(fi.layout_x):
+            raise UserWarning("Incompatible format of turbine_type in FlorisInterface.")
 
-        if np.any(np.abs(yaw_rel) > 30.0):
-            raise DataError('Yaw should be defined in domain [0, 360) deg.')
+        turbine_type_list.extend(fi_turbine_type)
+        reference_wind_heights.append(fi.floris.flow_field.reference_wind_height)
 
-    if 'ti' not in df_out.columns:
-        df_out['ti'] = np.min(fi.floris.farm.turbulence_intensity)
+    # Derive reference wind height, if unspecified by the user
+    if reference_wind_height is None:
+        reference_wind_height = np.mean(reference_wind_heights)
+        if np.any(np.abs(np.array(reference_wind_heights) - reference_wind_height) > 1.0e-3):
+            raise UserWarning("Cannot automatically derive a fitting reference_wind_height since they substantially differ between FlorisInterface objects. Please specify 'reference_wind_height' manually.")
 
-    # Perform grid-style calculation, if possible
-    n_unq = (
-        df_out["ws"].nunique() *
-        df_out["wd"].nunique() *
-        df_out["ti"].nunique()
+    # Construct the merged FLORIS model based on the first entry in fi_list
+    fi_merged = fi_list[0].copy()
+    fi_merged.reinitialize(
+        layout_x=x_list,
+        layout_y=y_list,
+        turbine_type=turbine_type_list,
+        reference_wind_height=reference_wind_height
     )
-    if n_unq == df_out.shape[0]:
-        # Reformat things to grid style calculation
-        wd_array = np.sort(df_out["wd"].unique())
-        ws_array = np.sort(df_out["ws"].unique())
-        ti = df_out["ti"].unique()[0]
 
-        # Specify interpolant to map data appropriately
-        X, Y = np.meshgrid(wd_array, ws_array, indexing='ij')
-        if use_yaw:
-            # Map the yaw angles in the appropriate format
-            F = interpolate.NearestNDInterpolator(
-                df_out[["wd", "ws"]],
-                yaw_rel
-            )
-            yaw_angles = F(X, Y)
-        else:
-            yaw_angles = np.zeros((len(wd_array), len(ws_array), nturbs))
-
-        # Calculate the FLORIS solutions in grid-style
-        fi.reinitialize(
-            wind_directions=wd_array,
-            wind_speeds=ws_array,
-            turbulence_intensity=ti,
-        )
-        fi.calculate_wake(yaw_angles=yaw_angles)
-        turbine_powers = fi.get_turbine_powers(
-            # include_unc=include_unc,
-            # unc_pmfs=unc_pmfs,
-            # unc_options=unc_options
-        )
-
-        # Format the found solutions back to the dataframe format
-        Fp = interpolate.NearestNDInterpolator(
-            np.vstack([X.flatten(), Y.flatten()]).T,
-            np.reshape(turbine_powers, (-1, nturbs))
-        )
-        Fws = interpolate.NearestNDInterpolator(
-            np.vstack([X.flatten(), Y.flatten()]).T,
-            np.reshape(
-                np.mean(fi.floris.flow_field.u, axis=(3, 4)),
-                (-1, nturbs)
-            )
-        )
-        Fti = interpolate.NearestNDInterpolator(
-            np.vstack([X.flatten(), Y.flatten()]).T,
-            np.reshape(
-                fi.floris.flow_field.turbulence_intensity_field[:, :, :, 0, 0],
-                (-1, nturbs)
-            )
-        )
-
-        # Finally save solutions to the dataframe
-        df_out.loc[df_out.index, pow_cols] = Fp(df_out[["wd", "ws"]]) / 1000.0
-        df_out.loc[df_out.index, wd_cols] = np.tile(df_out["wd"], (nturbs, 1)).T
-        df_out.loc[df_out.index, ws_cols] = Fws(df_out[["wd", "ws"]])
-        df_out.loc[df_out.index, ti_cols] = Fti(df_out[["wd", "ws"]])
-
-    else:
-        # If cannot process in grid-style format, process one by one (SLOW)
-        for iii, idx in enumerate(df_out.index):
-            if (
-                verbose and
-                ((np.remainder(idx, 100) == 0) or idx == df_out.shape[0]-1)
-            ): 
-                print('  Progress: finished %.1f percent (%d/%d cases).'
-                    % (100.*idx/df_out.shape[0], idx, df_out.shape[0]))
-
-            # # Update model parameters, if present in dataframe
-            # if use_model_params:
-            #     params = df_out.loc[idx, 'model_params_dict']
-            #     fi.set_model_parameters(params=params, verbose=False)
-
-            fi.reinitialize(
-                wind_speeds=[df_out.loc[idx, 'ws']],
-                wind_directions=[df_out.loc[idx, 'wd']],
-                turbulence_intensity=df_out.loc[idx, 'ti']
-            )
-
-            fi.calculate_wake(np.expand_dims(yaw_rel[iii, :], axis=[0, 1]))
-            turbine_powers = np.squeeze(
-                fi.get_turbine_powers(
-                # include_unc=include_unc,
-                # unc_pmfs=unc_pmfs,
-                # unc_options=unc_options
-                )
-            )
-            df_out.loc[idx, pow_cols] = turbine_powers / 1000.
-            df_out.loc[idx, wd_cols] = np.repeat(
-                df_out.loc[idx, 'wd'],
-                nturbs   # Assumed to be uniform
-            ) 
-            df_out.loc[idx, ws_cols] = np.squeeze(
-                np.mean(fi.floris.flow_field.u, axis=(3, 4))
-            )
-            df_out.loc[idx, ti_cols] = np.squeeze(
-                fi.floris.flow_field.turbulence_intensity_field
-            )
-
-    return df_out
-
-
-def calc_floris(df, fi, num_workers, job_worker_ratio=5, include_unc=False,
-                unc_pmfs=None, unc_options=None, use_mpi=False):
-    """Calculate the FLORIS predictions for a particular wind direction, wind speed
-    and turbulence intensity set. This function calculates the exact solutions.
-
-    Args:
-        df ([pd.DataFrame]): Dataframe with at least the columns 'time', 'wd'
-        and 'ws'. Can optionally also have the column 'ti' and 'time'.
-
-        If the dataframe has columns 'yaw_000' through 'yaw_<nturbs>', then it
-        will calculate the floris solutions for those yaw angles too.
-
-        If the dataframe has column 'model_params_dict', then it will change
-        the floris model parameters for every run with the values therein.
-
-        fi ([FlorisInterface]): Floris object for the wind farm of interest
-
-    Returns:
-        [type]: [description]
-    """
-
-    nturbs = len(fi.layout_x)
-
-    # Create placeholders
-    df[['pow_%03d' % ti for ti in range(nturbs)]] = np.nan
-
-    # Copy yaw angles, if possible
-    yaw_cols = ['yaw_%03d' % ti for ti in range(nturbs)]
-    yaw_cols = [c for c in yaw_cols if c in df.columns]
-    if len(yaw_cols) > 0:
-        if np.any(df[yaw_cols] < 0.):
-            raise DataError('Yaw should be defined in domain [0, 360) deg.')
-
-    # Split dataframe into subset dataframes for parallelization, if necessary
-    if num_workers > 1:
-        df_list = []
-
-        # See if we can simply split the problem up into a grid of conditions
-        num_jobs = num_workers * job_worker_ratio
-        n_unq = df["ws"].nunique() * df["wd"].nunique() * df["ti"].nunique()
-        if n_unq == df.shape[0]:
-            # Data is a grid of atmospheric conditions. Can divide and exploit
-            # the benefit of grid processing in floris v3.0.
-            Nconds_per_ti = df["ws"].nunique() * df["wd"].nunique()
-            Njobs_per_ti = int(np.floor(num_jobs / df["ti"].nunique()))
-            dN = int(np.ceil(Nconds_per_ti / Njobs_per_ti))
-
-            for ti in df["ti"].unique():
-                df_subset = df[df["ti"] == ti]
-                for ij in range(Njobs_per_ti):
-                    df_list.append(df_subset.iloc[(ij*dN):((ij+1)*dN)])
-                
-        else:
-            # If cannot be formatted to grid style, split blindly
-            dN = int(np.ceil(df.shape[0] / num_jobs))
-            for ij in range(num_jobs):
-                df_list.append(df.iloc[(ij*dN):((ij+1)*dN)])
-
-
-    # Calculate solutions
-    start_time = timerpc()
-    if num_workers <= 1:
-        print("Calculating floris solutions (non-parallelized)")
-        df_out = _run_fi_serial(
-            df_subset=df,
-            fi=fi,
-            include_unc=include_unc,
-            unc_pmfs=unc_pmfs,
-            unc_options=unc_options,
-            verbose=True
-        )
-    else:
-        print('Calculating with num_workers = %d and job_worker_ratio = %d'
-            % (num_workers, job_worker_ratio))
-        print('Each thread contains about %d FLORIS evaluations.' % dN)
-
-        # Define a tuple of arguments
-        multiargs = []
-        for df_mp in df_list:
-            df_mp = df_mp.reset_index(drop=True)
-            multiargs.append(
-                (df_mp, dcopy(fi), include_unc, unc_pmfs, unc_options, False)
-            )
-
-        if use_mpi:
-            # Use an MPI implementation, useful for HPC
-            from mpi4py.futures import MPIPoolExecutor as pool_executor
-        else:
-            # Use Pythons internal multiprocessing functionality
-            from multiprocessing import Pool as pool_executor
-
-        with pool_executor(num_workers) as pool:
-            df_list = pool.starmap(_run_fi_serial, multiargs)
-
-        df_out = pd.concat(df_list).reset_index(drop=True)
-        if 'index' in df_out.columns:
-            df_out = df_out.drop(columns='index')
-
-    t = timerpc() - start_time
-    print('Finished calculating the FLORIS solutions for the dataframe.')
-    print('Total wall time: %.3f s.' % t)
-    print('Mean wall time / function evaluation: %.3f s.' % (t/df.shape[0]))
-    return df_out
+    return fi_merged
 
 
 def interpolate_floris_from_df_approx(
     df,
     df_approx,
     method='linear',
+    wrap_0deg_to_360deg=True,
+    extrapolate_ws=True,
+    extrapolate_ti=True,
+    mirror_nans=True,
     verbose=True
 ):
+    """This function generates the FLORIS predictions for a set of historical
+    data, 'df', quickly by linearly interpolating from a precalculated set of
+    FLORIS solutions, 'df_approx'. We use linear interpolation to eliminate
+    dependency of the computation time on the size of the dataframe/number of
+    timeseries samples.
+
+    Args:
+        df (pd.DataFrame): A Pandas DataFrame containing the timeseries for
+        which the FLORIS predictions should be calculated. It should contain
+        at least the columns 'wd', 'ws', and 'ti', which are respectively the
+        ambient wind direction, ambient wind speed, and ambient turbulence
+        intensity to be used in the FLORIS predictions. An example:
+
+        df=
+                 time                    wd     ws      ti  
+        0       2018-01-01 00:10:00   213.1   7.81    0.08
+        1       2018-01-01 00:20:00   215.6   7.65    0.08
+        ...                     ...   ...      ...     ...
+        52103   2018-12-31 23:30:00    15.6   11.0    0.08
+        52104   2018-12-31 23:40:00    15.3   11.1    0.08
+
+        df_approx (pd.DataFrame): A Pandas DataFrame containing the precalculated
+        solutions of the FLORIS model for a large grid of ambient wind directions,
+        wind speeds and turbulence intensities. This table is typically calculated
+        using the 'calc_floris_approx_table(...)' function described below, but
+        can also be generated by hand using other tools like PyWake. df_approx
+        typically has the form:
+
+        df_approx=
+                  wd    ws    ti    pow_000     pow_001  ...    pow_006 
+        0        0.0   1.0    0.03      0.0         0.0  ...        0.0
+        1        3.0   1.0    0.03      0.0         0.0  ...        0.0
+        ...      ...   ...   ...        ...         ...  ...        ... 
+        32399  357.0  24.0    0.18    5.0e6       5.0e6  ...       5.0e6
+        32400  360.0  24.0    0.18    5.0e6       5.0e6  ...       5.0e6
+
+        method (str, optional): Interpolation method, options are 'nearest' and
+        'linear'. Defaults to 'linear'.
+        wrap_0deg_to_360deg (bool, optional): The precalculated set of FLORIS solutions
+        are typically calculates from 0 deg to 360 deg in steps of 2.0 deg or 3.0 deg.
+        This means the last wind direction in the precalculated table of solutions is
+        at 357.0 deg or 358.0 deg. If the user uses this for interpolation, any wind
+        directions in 'df' with a value between 358.0 deg and 360.0 deg cannot be
+        interpolated because it falls outside the bounds. This option copies the
+        precalculated table solutions from 0 deg over to 360 deg to allow interpolation
+        for the entire wind rose. Recommended to set to True. Defaults to True.
+        extrapolate_ws (bool, optional): The precalculated set of FLORIS solutions,
+        df_approx, only covers a finite range of wind speeds, typically from 1 m/s up
+        to 25 m/s. Any wind speed values below or above this range therefore cannot 
+        be interpolated using the 'linear' method and therefore becomes a NaN. To 
+        prevent this, we can copy over the lowest and highest wind speed value interpolated
+        to finite bounds to avoid this. For example, if our lowest wind speed calculated is
+        1 m/s, we copy the solutions at 1 m/s over to a wind speed of 0 m/s, implicitly
+        assuming these values are equal. This allows interpolation over wind speeds below
+        1 m/s. Additionally, we copy the highest wind speed solutions (e.g., 25 m/s) over
+        to a wind speed of 99 m/s to allow interpolation of values up to 99 m/s.
+        Defaults to True.
+        extrapolate_ti (bool, optional): The precalculated set of FLORIS solutions,
+        df_approx, only covers a finite range of turbulence intensities, typically from
+        0.03 to 0.18, being respectively 3% and 18%. In the same fashion at
+        'extrapolate_ws', we copy the lowest and highest turbulence intensity solutions
+        over to 0.00 and 1.00 turbulence intensity, to cover all possible conditions
+        we may find and to avoid any NaN interpolation. This implicitly makes the
+        assumption that the solutions at 0% TI are equal to your solutions at 3% TI,
+        and that your solutions at 100% TI are equal to your solutions at 18% TI.
+        This may or may not be a valid assumption for your scenario. Defaults to True.
+        mirror_nans (bool, optional): The raw data for which the FLORIS predictions are
+        made may contain NaNs for specific turbines, e.g., due to sensor issues or due
+        to irregular turbine behavior. By setting mirror_nans=True, the NaNs for turbines
+        from the raw data will be copied such that NaNs in the raw data will also mean
+        NaNs in the FLORIS predictions. Recommended to set this to True to ensure the
+        remainder of the energy ratio analysis is a fair and accurate comparison. Defaults
+        to True.
+        verbose (bool, optional): Print warnings and information to the console.
+        Defaults to True.
+
+    Returns:
+        df (pd.DataFrame): The Pandas Dataframe containing the timeseries 'wd', 'ws'
+        and 'ti', plus the power productions (and potentially local inflow conditions)
+        of the turbines interpolated from the precalculated solutions table. For example,
+
+        df=
+                 time                    wd     ws      ti    pow_000     pow_001  ...    pow_006 
+        0       2018-01-01 00:10:00   213.1   7.81    0.08  1251108.2    825108.2  ...   725108.9
+        1       2018-01-01 00:20:00   215.6   7.65    0.08  1202808.0    858161.8  ...   692111.2
+        ...                     ...   ...      ...     ...         ...        ...  ...        ...
+        52103   2018-12-31 23:30:00    15.6   11.0    0.08  4235128.7   3825108.4  ...  2725108.3
+        52104   2018-12-31 23:40:00    15.3   11.1    0.08  3860281.3   3987634.7  ...  2957021.7
+    """
 
     # Format dataframe and get number of turbines
     df = df.reset_index(drop=('time' in df.columns))
     nturbs = fsut.get_num_turbines(df_approx)
 
-    # Check if turbulence intensity is provided in the dataframe 'df'
-    if 'ti' not in df.columns:
-        if df_approx["ti"].nunique() > 3:
-            raise ValueError("You must include a 'ti' column in your df.")
-        ti_ref = np.median(df_approx["ti"])
-        print("No 'ti' column found in dataframe. Assuming {}".format(ti_ref))
-        df["ti"] = ti_ref
+    # Check input
+    if mirror_nans:
+        if not ("pow_000" in df.columns) or not ("ws_000" in df.columns):
+            raise UserWarning("The option mirror_nans=True requires the raw data's wind speed and power measurements to be included in the dataframe 'df'.")
+    else:
+        print("Warning: not mirroring NaNs from the raw data to the FLORIS predictions. This may skew your energy ratios.")
+
+    # Check if all values in df fall within the precalculated solutions ranges
+    for col in ["wd", "ws", "ti"]:
+        # Check if all columns are defined
+        if col not in df.columns:
+            raise ValueError("Your SCADA dataframe is missing a column called '{:s}'.".format(col))
+        if col not in df_approx.columns:
+            raise ValueError("Your precalculated solutions dataframe is missing a column called '{:s}'.".format(col))
+
+        # Check if approximate solutions cover the entire problem space
+        if (
+            (df[col].min() < (df_approx[col].min() - 1.0e-6)) |
+            (df[col].max() > (df_approx[col].max() + 1.0e-6))
+        ):
+            print("Warning: the values in df[{:s}] exceed the range in the precalculated solutions df_fi_approx[{:s}].".format(col, col))
+            print("   minimum/maximum value in df:        ({:.3f}, {:.3f})".format(df[col].min(), df[col].max()))
+            print("   minimum/maximum value in df_approx: ({:.3f}, {:.3f})".format(df_approx[col].min(), df_approx[col].max()))
+
 
     # Define which variables we must map from df_approx to df
     varnames = ['pow']
@@ -325,30 +225,34 @@ def interpolate_floris_from_df_approx(
               "interpolation method '%s'." % method)
 
     # Make a copy from wd=0.0 deg to wd=360.0 deg for wrapping
-    if not (df_approx["wd"] == 360.0).any():
+    if wrap_0deg_to_360deg and (not (df_approx["wd"] > 359.999999).any()):
+        if not np.any(df_approx["wd"] < 0.01):
+            raise UserWarning("wrap_0deg_to_360deg is set to True but no solutions at wd=0 deg in the precalculated solution table.")
         df_subset = df_approx[df_approx["wd"] == 0.0].copy()
         df_subset["wd"] = 360.0
         df_approx = pd.concat([df_approx, df_subset], axis=0).reset_index(drop=True)
 
     # Copy TI to lower and upper bound
-    df_ti_lb = df_approx.loc[df_approx["ti"] == df_approx['ti'].min()].copy()
-    df_ti_ub = df_approx.loc[df_approx["ti"] == df_approx['ti'].max()].copy()
-    df_ti_lb["ti"] = 0.0
-    df_ti_ub["ti"] = 1.0
-    df_approx = pd.concat(
-        [df_approx, df_ti_lb, df_ti_ub],
-        axis=0
-    ).reset_index(drop=True)
+    if extrapolate_ti:
+        df_ti_lb = df_approx.loc[df_approx["ti"] == df_approx['ti'].min()].copy()
+        df_ti_ub = df_approx.loc[df_approx["ti"] == df_approx['ti'].max()].copy()
+        df_ti_lb["ti"] = 0.0
+        df_ti_ub["ti"] = 1.0
+        df_approx = pd.concat(
+            [df_approx, df_ti_lb, df_ti_ub],
+            axis=0
+        ).reset_index(drop=True)
 
     # Copy WS to lower and upper bound
-    df_ws_lb = df_approx.loc[df_approx["ws"] == df_approx['ws'].min()].copy()
-    df_ws_ub = df_approx.loc[df_approx["ws"] == df_approx['ws'].max()].copy()
-    df_ws_lb["ws"] = 0.0
-    df_ws_ub["ws"] = 99.0
-    df_approx = pd.concat(
-        [df_approx, df_ws_lb, df_ws_ub],
-        axis=0
-    ).reset_index(drop=True)
+    if extrapolate_ws:
+        df_ws_lb = df_approx.loc[df_approx["ws"] == df_approx['ws'].min()].copy()
+        df_ws_ub = df_approx.loc[df_approx["ws"] == df_approx['ws'].max()].copy()
+        df_ws_lb["ws"] = 0.0
+        df_ws_ub["ws"] = 99.0
+        df_approx = pd.concat(
+            [df_approx, df_ws_lb, df_ws_ub],
+            axis=0
+        ).reset_index(drop=True)
 
     # Convert df_approx dataframe into a regular grid
     wd_array_approx = np.sort(df_approx["wd"].unique())
@@ -389,14 +293,19 @@ def interpolate_floris_from_df_approx(
         )
         df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
 
+        if mirror_nans:
+            # Copy NaNs in the raw data to the FLORIS predictions
+            for c in colnames:
+                df_out.loc[df[c].isna(), c] = np.nan
+
     return df_out
 
 
 def calc_floris_approx_table(
     fi,
     wd_array=np.arange(0.0, 360.0, 1.0),
-    ws_array=np.arange(0.001, 26.001, 1.0),
-    ti_array=None,
+    ws_array=np.arange(1.0, 25.01, 1.0),
+    ti_array=np.arange(0.03, 0.1801, 0.03),
     save_turbine_inflow_conditions_to_df=False,
     ):
     """This function calculates a large number of floris solutions for a rectangular grid
@@ -410,10 +319,9 @@ def calc_floris_approx_table(
         wd_array (array, optional): Array of wind directions to evaluate in [deg]. This expands with the
           number of wind speeds and turbulence intensities. Defaults to np.arange(0.0, 360.0, 1.0).
         ws_array (array, optional): Array of wind speeds to evaluate in [m/s]. This expands with the
-          number of wind directions and turbulence intensities. Defaults to np.arange(0.001, 26.001, 1.0).
+          number of wind directions and turbulence intensities. Defaults to np.arange(1.0, 25.01, 1.0).
         ti_array (array, optional): Array of turbulence intensities to evaluate in [-]. This expands with the
-          number of wind directions and wind speeds. If None is specified, will only evaluate the current
-          turbulence intensity in floris. Defaults to None.
+          number of wind directions and wind speeds. Defaults to np.arange(0.03, 0.1801, 0.03).
         save_turbine_inflow_conditions_to_df (bool, optional): When set to True, will also write each turbine's
         inflow wind direction, wind speed and turbulence intensity to the output dataframe. This increases the
         dataframe size but can provide useful information. Defaults to False.
@@ -426,25 +334,26 @@ def calc_floris_approx_table(
 
         Example for a 7-turbine floris object with
             wd_array=np.arange(0.0, 360.0, 3.0)
-            ws_array=np.arange(0.001, 26.001, 1.0)
-            ti_array=np.arange(0.03, 0.3001, 0.3)
+            ws_array=np.arange(1.0, 25.001, 1.0)
+            ti_array=np.arange(0.03, 0.1801, 0.03)
             save_turbine_inflow_conditions_to_df=True
 
         Yields:
         
         df_approx=
                   wd    ws    ti    pow_000     ws_000  wd_000  ti_000  pow_001  ...    pow_006     ws_006  wd_006  ti_006
-        0        0.0   0.0  0.03        NaN        NaN     0.0     NaN      NaN  ...        NaN        NaN     0.0     NaN
-        1        3.0   0.0  0.03        NaN        NaN     3.0     NaN      NaN  ...        NaN        NaN     3.0     NaN
-        2        6.0   0.0  0.03        NaN        NaN     6.0     NaN      NaN  ...        NaN        NaN     6.0     NaN
-        3        9.0   0.0  0.03        NaN        NaN     9.0     NaN      NaN  ...        NaN        NaN     9.0     NaN
-        4       12.0   0.0  0.03        NaN        NaN    12.0     NaN      NaN  ...        NaN        NaN    12.0     NaN
-        ...      ...   ...   ...        ...        ...     ...     ...           ...        ...        ...     ...     ...       
-        32395  345.0  26.0  0.30        0.0  25.880843   345.0     0.3      0.0  ...        0.0  25.881165   345.0     0.3
-        32396  348.0  26.0  0.30        0.0  25.880781   348.0     0.3      0.0  ...        0.0  25.881165   348.0     0.3
-        32397  351.0  26.0  0.30        0.0  25.880755   351.0     0.3      0.0  ...        0.0  25.881165   351.0     0.3
-        32398  354.0  26.0  0.30        0.0  25.880772   354.0     0.3      0.0  ...        0.0  25.881165   354.0     0.3
-        32399  357.0  26.0  0.30        0.0  25.880829   357.0     0.3      0.0  ...        0.0  25.881165   357.0     0.3
+        0        0.0   1.0    0.03      0.0      1.0       0.0     0.03     0.0  ...        0.0      1.0       0.0     0.03
+        1        3.0   1.0    0.03      0.0      1.0       3.0     0.03     0.0  ...        0.0      1.0       3.0     0.03
+        2        6.0   1.0    0.03      0.0      1.0       6.0     0.03     0.0  ...        0.0      1.0       6.0     0.03
+        3        9.0   1.0    0.03      0.0      1.0       9.0     0.03     0.0  ...        0.0      1.0       9.0     0.03
+        4       12.0   1.0    0.03      0.0      1.0      12.0     0.03     0.0  ...        0.0      1.0      12.0     0.03
+        ...      ...   ...   ...        ...        ...     ...     ...           ...        ...        ...     ...     ...
+        32395  345.0  25.0    0.18      0.0  24.880843   345.0     0.18     0.0  ...        0.0  24.881165   345.0     0.18
+        32396  348.0  25.0    0.18      0.0  24.880781   348.0     0.18     0.0  ...        0.0  24.881165   348.0     0.18
+        32397  351.0  25.0    0.18      0.0  24.880755   351.0     0.18     0.0  ...        0.0  24.881165   351.0     0.18
+        32398  354.0  25.0    0.18      0.0  24.880772   354.0     0.18     0.0  ...        0.0  24.881165   354.0     0.18
+        32399  357.0  25.0    0.18      0.0  24.880829   357.0     0.18     0.0  ...        0.0  24.881165   357.0     0.18
+        32400  360.0  25.0    0.18      0.0  24.880829   360.0     0.18     0.0  ...        0.0  24.881165   360.0     0.18
     """
 
     # if ti_array is None, use the current value in the FLORIS object

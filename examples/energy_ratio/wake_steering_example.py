@@ -22,7 +22,8 @@ from floris.utilities import wrap_360
 from flasc.energy_ratio import energy_ratio_suite
 # from flasc import floris_tools as fsatools
 
-from flasc.visualization import plot_layout_with_waking_directions
+from flasc.visualization import plot_layout_with_waking_directions, plot_binned_mean_and_ci
+
 
 
 if __name__ == "__main__":
@@ -118,6 +119,15 @@ if __name__ == "__main__":
         'pow_001':power_wakesteering_control,
         'pow_002':power_wakesteering_downstream
     })
+
+    # Use the function plot_binned_mean_and_ci to show the noise in wind speed
+    fig, ax = plt.subplots(1,1,sharex=True)
+    plot_binned_mean_and_ci(df_baseline.ws, df_baseline_noisy.ws, ax=ax)
+    ax.set_xlabel('Wind Speed (m/s) [Baseline]')
+    ax.set_ylabel('Wind Speed (m/s) [Baseline (Noisy)]')
+    ax.grid(True)
+    
+
 
     # Make a color palette that visually links the nominal and noisy data sets together
     color_palette = sns.color_palette("Paired",4)[::-1]
@@ -227,6 +237,6 @@ if __name__ == "__main__":
     print('In NOISY case (upper bound), energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering_ub, 100 * (total_energy_wakesteering_ub -total_energy_baseline )/total_energy_baseline))
 
 
-
+    plt.show()
 
 
