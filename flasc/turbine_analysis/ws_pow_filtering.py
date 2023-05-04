@@ -254,14 +254,20 @@ class ws_pw_curve_filtering:
                 )
 
         if apply_filters_to_df:
+            
             # Update dataframe and filter labels
             cols_to_filter = ["WTG_{:03d}".format(tii) for tii in ti]
+            for tii in ti:
+                col_to_filter = cols_to_filter[tii]
+            
 
-            self.df_filters = self.df_filters.with_columns(
-                pl.when(~pl.Series(condition)) # Negate so when true, label is applied
-                .then(pl.col(cols_to_filter))
-                .otherwise(pl.lit(label))   
-            )
+                
+                self.df_filters = self.df_filters.with_columns(
+                    (pl.when(pl.Series(condition))
+                    .then(pl.lit(label))
+                    .otherwise(pl.col(col_to_filter))).alias(col_to_filter)   
+                )
+            
 
             # for tii in ti:  
             #     self.df_filters.loc[condition, "WTG_{:03d}".format(tii)] = label
@@ -796,25 +802,44 @@ class ws_pw_curve_filtering:
             _, ax = plt.subplots()
 
         # Get filter dataframe
-        df_f = self.df_filters["WTG_{:03d}".format(ti)]
+        df_f = self.df_filters["WTG_{:03d}".format(ti)].to_numpy()
         all_flags = self._get_all_unique_flags()
         N = df_f.shape[0]
 
         # For each flagging condition, plot the results
         for flag in all_flags:
             ids = (df_f == flag)
-            df_subset = self._df_initial.loc[ids]
+            # df_subset = self._df_initial.loc[ids] # PANDAS STYLE
+            df_subset = self._df_initial.filter(pl.Series(ids))
+            df_subset = df_subset.drop_nulls([x_col, y_col])
             percentage = 100.0 * np.sum(ids) / N
+            
+
             if any(ids):
-                ax.plot(
-                    df_subset[x_col],
-                    df_subset[y_col],
-                    ".",
-                    markersize=5,
-                    alpha=0.15,
-                    rasterized=True,
-                    label="{:s} ({:.2f} %)".format(flag, percentage),
-                )
+
+                if df_subset.shape[0] == 0:
+                    
+                    # Plot a non point to get its lable information in
+                    ax.plot(
+                        [0],
+                        [0],
+                        ".",
+                        markersize=5,
+                        alpha=0.15,
+                        rasterized=True,
+                        label="{:s} ({:.2f} %)".format(flag, percentage),
+                    )
+
+                else:
+                    ax.plot(
+                        df_subset[x_col],
+                        df_subset[y_col],
+                        ".",
+                        markersize=5,
+                        alpha=0.15,
+                        rasterized=True,
+                        label="{:s} ({:.2f} %)".format(flag, percentage),
+                    )
 
         lgd = ax.legend()
         for l in lgd.legendHandles:
@@ -996,12 +1021,17 @@ class ws_pw_curve_filtering:
 
         # Manipulate dataframe to easily plot results
         df_f = self.df_filters["WTG_{:03d}".format(ti)]
-        df_conditional = pd.concat([pd.DataFrame({flag: np.array(df_f==flag, dtype=int)}) for flag in all_flags], axis=1)
-        df_merged = pd.concat([df_conditional, self.df["time"]], axis=1)
-        df_histogram = df_merged.groupby([df_merged["time"].dt.year, df_merged["time"].dt.isocalendar().week]).sum(numeric_only=True)
+        df_conditional = pl.concat([pl.DataFrame({flag: np.array(df_f==flag, dtype=int)}) for flag in all_flags], how='horizontal')
+        df_merged = pl.concat([df_conditional, self.df.select("time")], how='horizontal')
+        df_histogram = df_merged.with_columns([
+            pl.col("time").dt.year().alias("year"),
+            pl.col("time").dt.week().alias("week"),
+        ]).groupby(["year", "week"]).sum()
+        
+        # .groupby([df_merged["time"].dt.year, df_merged["time"].dt.week]).sum(numeric_only=True)
 
         # Plot the histogram information
-        ax = df_histogram.plot.bar(stacked=True, ax=ax)
+        ax = df_histogram.to_pandas().plot.bar(stacked=True, ax=ax)
         ax.set_ylabel("Count (-)")
         ax.set_title("WTG {:03d}".format(ti))
         ax.grid(True)
