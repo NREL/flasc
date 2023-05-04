@@ -470,7 +470,7 @@ def compute_uplift_in_region(df_,
             delta_power_ratio = pl.col(f'power_ratio_df_name_{df_names[1]}') - pl.col(f'power_ratio_df_name_{df_names[0]}'),
         )
         .with_columns(
-            delta_energy = pl.col('delta_power_ratio') * pl.col('f_norm') * pl.col(f'test_pow_df_name_{df_names[0]}'),
+            delta_energy = pl.col('delta_power_ratio') * pl.col('f_norm') * pl.col(f'ref_pow_df_name_{df_names[0]}'),
             base_test_energy = pl.col(f'test_pow_df_name_{df_names[0]}') * pl.col('f_norm')
         )
 
