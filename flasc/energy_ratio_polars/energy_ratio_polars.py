@@ -461,7 +461,7 @@ def compute_uplift_in_region(df_,
             ]
         )
 
-        .pivot(values=['power_ratio','test_pow','count_min'], columns='df_name', index=['wd_bin','ws_bin'],aggregate_function='first')
+        .pivot(values=['power_ratio','test_pow','ref_pow','count_min'], columns='df_name', index=['wd_bin','ws_bin'],aggregate_function='first')
         .drop_nulls()
         .with_columns(
             f_norm = pl.col(f'count_min_df_name_{df_names[0]}') / pl.col(f'count_min_df_name_{df_names[0]}').sum()
