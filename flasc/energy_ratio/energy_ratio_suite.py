@@ -875,7 +875,12 @@ class energy_ratio_suite:
 
         return self.df_list
 
-    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True, polar_plot=False, axarr=None):
+    def plot_energy_ratios(self, 
+                           superimpose=True, 
+                           hide_uq_labels=True, 
+                           polar_plot=False, 
+                           axarr=None,
+                           show_barplot_legend=True):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
@@ -892,6 +897,8 @@ class energy_ratio_suite:
             coordinate system, aligned with the wind direction coordinate
             system of FLORIS. Defaults to False.
         axarr([iteratible]): List of axes in the figure with length 2.
+        show_barplot_legend (bool, optional): Show the legend in the bar
+            plot figure?  Defaults to True
 
         Returns:
             axarr([iteratible]): List of axes in the figure with length 2.
@@ -908,7 +915,8 @@ class energy_ratio_suite:
                 colors=colors_array,
                 hide_uq_labels=hide_uq_labels,
                 polar_plot=polar_plot,
-                axarr=axarr
+                axarr=axarr,
+                show_barplot_legend=show_barplot_legend
             )
 
         else:
@@ -924,7 +932,8 @@ class energy_ratio_suite:
                     labels=df["name"],
                     colors=[df["color"]],
                     hide_uq_labels=hide_uq_labels,
-                    polar_plot=polar_plot
+                    polar_plot=polar_plot,
+                    show_barplot_legend=show_barplot_legend
                 )
                 axarr.append(axi)
 
@@ -934,7 +943,8 @@ class energy_ratio_suite:
             self, 
             superimpose=True, 
             hide_uq_labels=True,
-            axarr=None
+            axarr=None,
+            show_barplot_legend=True,
     ):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
@@ -949,6 +959,8 @@ class energy_ratio_suite:
             hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
             axarr([iteratible]): List of axes in the figure with length 2.
+            show_barplot_legend (bool, optional): Show the legend in the bar
+            plot figure?  Defaults to True
 
         Returns:
             axarr([iteratible]): List of axes in the figure with length 2.
@@ -962,7 +974,8 @@ class energy_ratio_suite:
                 labels=labels_array, 
                 colors=colors_array,
                 hide_uq_labels=hide_uq_labels,
-                axarr=axarr
+                axarr=axarr,
+                show_barplot_legend=show_barplot_legend
             )
 
         else:
@@ -976,7 +989,8 @@ class energy_ratio_suite:
                     labels=df["name"], 
                     colors=[df["color"]],
                     hide_uq_labels=hide_uq_labels,
-                    axarr=axarr
+                    axarr=axarr,
+                    show_barplot_legend=show_barplot_legend
                 )
                 axarr.append(axi)
 
