@@ -977,6 +977,7 @@ class energy_ratio_suite:
                 axarr=axarr,
                 show_barplot_legend=show_barplot_legend
             )
+            axarr[0].set_ylabel("Change in energy ratio (-)")
 
         else:
             # If superimpose is False, axarr must be None
@@ -992,6 +993,7 @@ class energy_ratio_suite:
                     axarr=axarr,
                     show_barplot_legend=show_barplot_legend
                 )
+                axi.set_ylabel("Change in energy ratio (-)")
                 axarr.append(axi)
 
         return axarr
