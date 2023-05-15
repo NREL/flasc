@@ -28,7 +28,7 @@ def load_data():
     ftr_path = os.path.join(root_dir, '..', 'demo_dataset',
                             'demo_dataset_scada_60s.ftr')
     if not os.path.exists(ftr_path):
-        raise FileNotFoundError('Please run ./examples/demo_dataset/' +
+        raise FileNotFoundError('Please run ./examples_artificial_data/demo_dataset/' +
                                 'generate_demo_dataset.py before try' +
                                 'ing any of the other examples.')
     df = pd.read_feather(ftr_path)
