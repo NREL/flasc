@@ -816,32 +816,3 @@ def _fi_set_ws_wd_ti(fi, wd=None, ws=None, ti=None):
         turbulence_intensity=ti
     )
     return fi
-
-
-# if __name__ == '__main__':
-#     import matplotlib.pyplot as plt
-#     import numpy as np
-
-#     import floris.tools as wfct
-
-#     wd = 240.
-#     D = 120.
-#     x = np.array([0., 5., 10., 15., 0., 5., 10., 15., 0., 5., 10., 15.]) * D
-#     y = np.array([0., 0., 0., 0., 5., 5., 5., 5., 10., 10., 10., 10.]) * D
-#     nTurbs = len(x)
-
-#     input_json = '/home/bdoekeme/python_scripts/flasc/examples/demo_dataset/demo_floris_input.json'
-#     fi = wfct.floris_interface.FlorisInterface(input_json)
-
-#     wd_step = 60.0
-#     for wd in np.arange(0., 360., wd_step):
-#         fi.reinitialize_flow_field(layout_array=(x, y), wind_direction=wd, turbulence_intensity=0.25)
-#         fi.calculate_wake()
-#         hor_plane = fi.get_hor_plane()
-#         fig, ax = plt.subplots()
-#         wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
-#         fi.vis_layout(ax=ax)
-#         ax.set_title('wind direction = %03d' % wd)
-
-#     get_upstream_turbs_floris(fi, wd_step=wd_step, plot_lines=True)
-#     plt.show()
