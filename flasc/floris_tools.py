@@ -54,7 +54,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
 
         fi_turbine_type = fi.floris.farm.turbine_type
         if len(fi_turbine_type) == 1:
-            fi_turbine_type = [fi_turbine_type] * len(fi.layout_x)
+            fi_turbine_type = fi_turbine_type * len(fi.layout_x)
         elif not len(fi_turbine_type) == len(fi.layout_x):
             raise UserWarning("Incompatible format of turbine_type in FlorisInterface.")
 
