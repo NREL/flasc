@@ -16,12 +16,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from operational_analysis.toolkits import filters
-
-from .. import time_operations as fsato, utilities as fsut
+from ..turbine_analysis.find_sensor_faults import find_sensor_stuck_faults
+from .. import utilities as flascutils
 from ..dataframe_operations import dataframe_filtering as dff
-from ..turbine_analysis import ws_pow_filtering_utilities as ut
-
 
 
 
@@ -38,13 +35,7 @@ class ws_pw_curve_filtering:
            it allows the user to consider variations in standard deviation
            per power bin.
     """
-    def __init__(
-        self,
-        df,
-        turbine_list="all",
-        add_default_windows=False,
-        rated_powers=None,
-    ):
+    def __init__(self, df):
         """Initializes the class.
 
         Args:
@@ -54,130 +45,57 @@ class ws_pw_curve_filtering:
                   * Time of each measurement: time
                   * Wind speed of each turbine: ws_000, ws_001, ... 
                   * Power production of each turbine: pow_000, pow_001, ...
-            turbine_list (iteratible, optional): List with turbine numbers
-                that should be filtered for. If "all" is specified, then
-                it will automatically determine the number of turbines and
-                assign turbine_list as range(num_turbs). Defaults to "all".
-            add_default_windows (bool, optional): Add default filtering
-                windows (filter method 1) based on the (estimated) rated
-                power of every turbine. Defaults to False.
-            rated_powers ([iteratible], optional): List with the rated
-                power production for every turbine. If only a single float
-                is provided it will assume all turbines have that value's
-                rated power. If left unspecified, the rated power for
-                every turbine will be derived from the provided data.
-                Defaults to None.
         """
-        self._set_df(df)
-        self._set_turbine_mode(turbine_list, initialization=True)
 
-        # Assign rated power for every turbine
-        if rated_powers is None:
-            self.rated_powers = ut.estimate_rated_powers_from_data(self.df)
-        else:
-            if isinstance(rated_powers, (int, float, np.integer, np.float64)):
-                self.rated_powers = np.full(self.nturbs_all, rated_powers)
-            else:
-                self.rated_powers = np.array(rated_powers, dtype=float)
-
-        # Prepare window filtering variables and defaults
-        self.window_remove_all()  # Initialize empty windows array
-        if add_default_windows:
-            self._add_default_windows()
-
-        # Initialize empty variables for filters
+        # Write dataframe to self
+        self._df_initial = df.copy()
         self.reset_filters()
 
     # Private methods
-    def _set_df(self, df):
-        """Format and save the provided dataframe to the class.
+    def _get_all_unique_flags(self):
+        """Private function that grabs all the unique filter flags
+        that are available in self.df_filters and returns them
+        as a list of strings. This is helpful when plotting the
+        various filter sources in a scatter plot, for example.
+
+        Returns:
+            all_flags (list): List with all unique flags available
+                in self.df_filters, each entry being a string.
+        """
+        # Get a list of all flags and then get colors correspondingly
+        all_flags = list(np.sort(np.unique(self.df_filters)))
+        if "clean" in all_flags:
+            # Sort to make sure "clean" is the first entry in the legend
+            all_flags.remove("clean")
+            all_flags = ["clean"] + all_flags
+
+        return all_flags
+
+    def _get_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5), df=None):
+        """Calculates the mean power production in bins of the wind speed,
+        for all turbines in the wind farm.
 
         Args:
+            ws_bins ([iteratible], optional): Wind speed bins. Defaults to
+                np.arange(0.0, 25.5, 0.5).
             df ([pd.DataFrame]): Dataframe containing the turbine data,
                 formatted in the generic SCADA data format. Namely, the
                 dataframe should at the very least contain the columns:
                   * Time of each measurement: time
                   * Wind speed of each turbine: ws_000, ws_001, ... 
                   * Power production of each turbine: pow_000, pow_001, ...
-        """
-        self.df = df.reset_index(drop=("time" in df.columns))
-        self.dt = fsut.estimate_dt(self.df["time"])
-        self.nturbs_all = fsut.get_num_turbines(df)
-        self.full_turbs_list = range(self.nturbs_all)
-
-    def _set_turbine_mode(self, turbine_list, initialization=False):
-        """Assign which turbine(s) should be considered for filtering and
-        plotting.
-
-        Args:
-            turbine_list (iteratible, optional): List with turbine numbers
-                that should be filtered for. If "all" is specified, then
-                it will automatically determine the number of turbines and
-                assign turbine_list as range(num_turbs). Defaults to "all".
-        """
-        if isinstance(turbine_list, str):
-            if turbine_list == "all":
-                num_turbines = fsut.get_num_turbines(self.df)
-                turbine_list = range(num_turbines)
-            else:
-                raise KeyError("Invalid turbine_list specified.")
-
-        self.turbine_list = turbine_list
-        self.num_turbines = len(turbine_list)
-        if not initialization:
-            self._get_mean_power_curves()
-
-    def _add_default_windows(self):
-        """Adds two windows to filter over based on the (estimated) rated
-        power production of each turbine."""
-        # First figure out which turbines can be clumped together (same rated pow.)
-        turbs_sorted = []
-        ratedpwrs = np.unique(self.rated_powers)
-        for ii in range(len(ratedpwrs)):
-            turbs = np.where(np.array(self.rated_powers) == ratedpwrs[ii])[0]
-            turbs = np.sort(turbs)
-            if len(turbs) > 2:
-                try_range = range(turbs[0], turbs[-1] + 1)
-                if np.array_equal(np.array(try_range), turbs):
-                    turbs = try_range
-            print(
-                "Estimated rated power of turbines %s in this dataset to be %.1f"
-                % (str(ut.convert_list_to_ranges((turbs))), ratedpwrs[ii])
-            )
-            turbs_sorted.append(np.array(turbs))
-
-        # Setup windows and binning properties
-        for ii, turbs in enumerate(turbs_sorted):
-            default_w0_ws = (0.0, 15.0)
-            default_w0_pw = (0.0, 0.95 * ratedpwrs[ii])
-            default_w1_ws = (0.0, 25.0)
-            default_w1_pw = (0.0, 1.04 * ratedpwrs[ii])
-
-            idx = len(self.window_list)
-            print(
-                "Adding window[%d] and window[%d] for turbines:"
-                % (idx, idx + 1),
-                ut.convert_list_to_ranges(turbs),
-            )
-            self.window_add(
-                default_w0_ws, default_w0_pw, axis=0, turbines=turbs
-            )
-            self.window_add(
-                default_w1_ws, default_w1_pw, axis=1, turbines=turbs
-            )
-
-    def _get_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5)):
-        """Calculates the mean power production in bins of the wind speed.
-
-        Args:
-            ws_bins ([iteratible], optional): Wind speed bins. Defaults to
-                np.arange(0.0, 25.5, 0.5).
 
         Returns:
             pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
                 speed bins and the mean power production value for every
-                turbine in self.turbine_list.
+                turbine.
         """
+
+        # If df unspecified, use the locally filtered variable
+        if df is None:
+            df = self.df
+
+        # Create a dataframe to contain the averaged power curves
         ws_max = np.max(ws_bins)
         ws_min = np.min(ws_bins)
         pw_curve_df = pd.DataFrame(
@@ -188,15 +106,15 @@ class ws_pw_curve_filtering:
             }
         )
 
-        for ti in self.turbine_list:
-            ws = self.df["ws_%03d" % ti]
-            pow = self.df["pow_%03d" % ti]
-            status = self.df_filters[ti]["status"]
-            clean_ids = (status == 1) & (ws > ws_min) & (ws < ws_max)
-            ws_clean = ws[clean_ids]
-            pw_clean = pow[clean_ids]
+        # Loop through every turbine
+        for ti in range(self.n_turbines):
+            # Extract the measurements and calculate the bin average
+            ws = df["ws_%03d" % ti]
+            pw = df["pow_%03d" % ti]
+            bin_ids = (ws > ws_min) & (ws < ws_max)
+            ws_clean = ws[bin_ids]
+            pw_clean = pw[bin_ids]
 
-            # bin_array = np.digitize(ws_clean, ws_bins_l, right=False)
             bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
             bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
             pow_bins = [
@@ -206,190 +124,209 @@ class ws_pw_curve_filtering:
 
             # Write outputs to the dataframe
             pw_curve_df["pow_%03d" % ti] = pow_bins
-            self.pw_curve_df = pw_curve_df
 
+        # Save the finalized power curve to self and return it to the user
+        self.pw_curve_df = pw_curve_df
         return pw_curve_df
 
-    def _update_status_flags(self, verbose=True):
-        """Update the status flags based on the filtering choices made.
-        The status flags are part of the self.df_filters dataframe which
-        contains the information on which data points are marked faulty
-        and by what filter(s)."""
-        for df_f in self.df_filters:
-            cols = [c for c in df_f.columns if "status" not in c]
-            df_f["status"] = ~df_f[cols].any(axis=1)
+    def _reset_df(self):
+        """Reset the 'filtered' dataframe, self.df, to its original form,
+        before any measurements were marked as faulty. """
 
-        if verbose:
-            N = self.df.shape[0]
-            for ti in self.turbine_list:
-                df_f = self.df_filters[ti]
+        # Copy the original dataframe from self
+        df = self._df_initial  
+        self.df = df.reset_index(drop=("time" in df.columns))
 
-                print("  Turbine %03d:" % ti)
-                Nc = df_f["status"].sum()
-                print("    Clean data: %d (%.3f%%)." % (Nc, 100.0 * Nc / N))
+        # Derive the total number of turbines in the dataframe
+        self.n_turbines = flascutils.get_num_turbines(df)
 
-                for c in cols:
-                    Nf = df_f[c].sum()
-                    print("    %s: %d (%.3f%%)." % (c, Nf, 100.0 * Nf / N))
-
-        self._get_mean_power_curves()  # Update mean power curve
+        # Get mean power curve from data to start with
+        self._get_mean_power_curves()
 
     # Public methods
     def reset_filters(self):
         """Reset all filter variables and assume all data is clean."""
-        # Reset certain variables
-        self.pw_curve_df_bounds = None
+        # Reset the filtered dataframe to the original, unfiltered one
+        self._reset_df()
 
-        # Reset filtering bool arrays
-        self.df_filters = [None for _ in range(self.nturbs_all)]
-        for ti in range(self.nturbs_all):
-            self.df_filters[ti] = pd.DataFrame(
-                {
-                    "is_nan": np.isnan(self.df["pow_%03d" % ti]),
-                    "window_outlier": [False] * self.df.shape[0],
-                    "ws_std_dev_outlier": [False] * self.df.shape[0],
-                    "mean_pow_curve_outlier": [False] * self.df.shape[0],
-                }
-            )
-        self._update_status_flags(verbose=False)
+        # Reset the dataframe with filter flags to mark all data as clean, initially
+        all_clean_array = [
+            ["clean" for _ in range(self.n_turbines)]
+            for _ in range(self.df.shape[0])
+        ]
+        self.df_filters = pd.DataFrame(
+            all_clean_array,
+            index=self.df.index,
+            columns=["WTG_{:03d}".format(ti) for ti in range(self.n_turbines)]
+        )
 
-    def window_add(self, ws_range, pow_range, axis=0, turbines="all"):
-        """Add a filtering window for all or a particular set of turbines.
-        Any data that falls outside of this window will be removed, either
-        along the x-axis (wind speed, axis = 0) or along the y-axis
-        (power, axis = 1).
+    def filter_by_condition(
+        self,
+        condition,
+        label,
+        ti: int,
+        verbose: bool = True,
+        apply_filters_to_df: bool = True,
+    ):
+        """This is a generic method to filter the dataframe for any particular
+        condition, for a specific turbine or specific set of turbines. This
+        provides a platform for user-specific queries to filter and then inspect
+        the data with. You can call this function multiple times and the filters
+        will aggregate chronologically. This filter directly cuts down the
+        dataframe self.df to a filtered subset.
 
-        Args:
-            ws_range ([list, tuple]): Wind speed range in which data is OK.
-
-            pow_range ([list, tuple]): Power measurement range in which data
-            is OK.
-
-            axis (int, optional): Specify the axis over which values outside
-            of the window will be removed. axis=0 means limiting values lower
-            and higher than the specified pow_range, within the ws_range.
-            axis=1 means limiting values lower/higher than the ws_range
-            and that fall within the pow_range. Defaults to 0.
-
-            turbines (list, optional): Turbines to which this filter should
-            apply. If unspecified, then it defaults to "all".
-        """
-
-        if isinstance(turbines, str):
-            if turbines == "all":
-                turbines = self.full_turbs_list
-        elif isinstance(turbines, (int, np.integer)):
-            turbines = [turbines]
-
-        idx = len(self.window_list)
-        new_entry = {
-            "idx": idx,
-            "ws_range": ws_range,
-            "pow_range": pow_range,
-            "axis": axis,
-            "turbines": turbines,
-        }
-        self.window_list.append(new_entry)
-
-    def window_remove(self, ids_to_remove):
-        """Remove the specified filtering window.
-
-        Args:
-            ids_to_remove ([int]): Index of the window to remove
-        """
-        if not isinstance(ids_to_remove, (list, np.array)):
-            ids_to_remove = [ids_to_remove]
-        ids_to_remove = np.sort(ids_to_remove)[::-1]
-        for i in ids_to_remove:
-            self.window_list.pop(i)
-
-        # Update indices
-        for i in range(len(self.window_list)):
-            self.window_list[i]["idx"] = i
-
-    def window_remove_all(self):
-        """Remove all filtering windows."""
-        self.window_list = []
-
-    def window_print_all(self):
-        """Print information of all filter windows to console"""
-        for i in range(len(self.window_list)):
-            window = self.window_list[i]
-            for k in window.keys():
-                if k == "turbines":
-                    str_short = ut.convert_list_to_ranges(
-                        self.window_list[i][k]
-                    )
-                    print("window_list[%d][%s] = " % (i, k), str_short)
-                elif not k == "idx":
-                    print(
-                        "window_list[%d][%s] = " % (i, k),
-                        self.window_list[i][k],
-                    )
-            print("")
-
-    def filter_by_windows(self):
-        """Apply window filters to the dataset for the turbines of interest.
-        """        
-        print("Filtering data by specified regions...")
-        for ti in self.turbine_list:
-            df = self.df.copy()
-
-            out_of_window_ids = np.zeros(df.shape[0])
-            window_list = [w for w in self.window_list if ti in w["turbines"]]
-            print(" ")
-            print(
-                "Applying %d window filters to the df for turbine %d"
-                % (len(window_list), ti)
+        A correct usage is, for example:
+            ws_pow_filtering.filter_by_condition(
+                condition=(ws_pow_filtering.df["pow_{:03d}".format(ti)] < -1.0e-6),
+                label="Power below zero",
+                ti=ti,
+                verbose=True,
             )
 
-            for window in window_list:
-                idx = window["idx"]
-                ws_range = window["ws_range"]
-                pow_range = window["pow_range"]
-                axis = window["axis"]
-                if axis == 0:
-                    ii_out_of_window = filters.window_range_flag(
-                        df["pow_%03d" % ti],
-                        pow_range[0],
-                        pow_range[1],
-                        df["ws_%03d" % ti],
-                        ws_range[0],
-                        ws_range[1],
-                    )
-                else:
-                    ii_out_of_window = filters.window_range_flag(
-                        df["ws_%03d" % ti],
-                        ws_range[0],
-                        ws_range[1],
-                        df["pow_%03d" % ti],
-                        pow_range[0],
-                        pow_range[1],
-                    )
+        and:
+            ws_pow_filtering.filter_by_condition(
+                condition=(ws_pow_filtering.df["is_operation_normal_{:03d}".format(ti)] == False),
+                label="Self-flagged (is_operation_normal==False)",
+                ti=ti,
+                verbose=True,
+            )
 
-                # Merge findings from all windows
-                out_of_window_ids[ii_out_of_window] = int(1)
+        Args:
+            condition (iteratible): List or array-like variable with bool entries
+                depicting whether the condition is met or not. These should be
+                situations in which you classify the data as faulty. For example,
+                high wind speeds but low power productions, or NaNs, self-flagged
+                status variables.
+            label (str): Name or description of the fault/condition that is flagged.
+            ti (int): Turbine indentifier, typically an integer, but may also be a
+                list. This flags the measurements of all these turbines as faulty
+                for which condition==True.
+            verbose (bool, optional): Print information to console. Defaults to True.
+            apply_filters_to_df (bool, optional): Assign the flagged measurements in 
+                self.df directly as NaN. Defaults to True.
+
+        Returns:
+            df_out: The filtered dataframe. All measurements that are flagged as faulty
+                are overwritten by "None"/"NaN". If apply_filters_to_df==True, then this
+                dataframe is equal to the internally filtered dataframe 'self.df'.
+        """
+
+        # Pour it into a list format
+        if isinstance(ti, int):
+            ti = [ti]
+
+        # Load the dataframe from self
+        df_in = self.df
+
+        # Create standalone copy that we can manipulate, if apply_filters_to_df==False
+        if not apply_filters_to_df:
+            df_in = df_in.copy()
+
+        # Mark data as faulty on the dataframe
+        N_pre = [dff.df_get_no_faulty_measurements(df_in, tii) for tii in ti]
+        df_out = dff.df_mark_turbdata_as_faulty(df=df_in, cond=condition, turbine_list=ti)
+
+        # Print the reduction in useful data to the console, if verbose
+        if verbose:
+            for iii, tii in enumerate(ti):
+                N_post = dff.df_get_no_faulty_measurements(df_out, tii)
                 print(
-                    "  Removed %d outliers using window[%d]."
-                    % (int(sum(ii_out_of_window)), idx)
+                    "Faulty measurements for WTG {:03d} increased from {:.3f} % to {:.3f} %. Reason: '{:s}'.".format(
+                        tii, 100.0 * N_pre[iii] / df_in.shape[0], 100.0 * N_post / df_in.shape[0], label
+                    )
                 )
 
-            print(
-                "Removed a total of %d outliers using the %d windows."
-                % (int(sum(out_of_window_ids)), len(window_list))
-            )
-            df_out_of_windows = np.zeros(self.df.shape[0])
-            out_of_window_indices = df.index[np.where(out_of_window_ids)[0]]
-            df_out_of_windows[out_of_window_indices] = 1
-            self.df_filters[ti]["window_outlier"] = [
-                bool(i) for i in df_out_of_windows
-            ]
+        if apply_filters_to_df:
+            # Update dataframe and filter labels
+            for tii in ti:  
+                self.df_filters.loc[condition, "WTG_{:03d}".format(tii)] = label
 
-        # Finally, update status columns in dataframe
-        self._update_status_flags()
+            # Recalculate mean power curves
+            self._get_mean_power_curves()
+
+        return df_out
+
+    def filter_by_sensor_stuck_faults(
+            self,
+            columns: list,
+            ti: int,
+            n_consecutive_measurements: int = 3,
+            stddev_threshold: float = 0.001,
+            plot: bool = False,
+            verbose: bool = True
+        ):
+        """Filter the turbine measurements for sensor-stuck type of faults. This is
+        the situation where a turbine measurement reads the exact same value for
+        multiple consecutive timestamps. This typically indicates a "frozen" sensor
+        rather than a true physical effect. This is particularly the case for
+        signals that are known to change at a high rate and are measured with high
+        precision, e.g., wind speed and wind direction measurements.
+
+        Args:
+            columns (list): List of columns which should be checked for sensor-stuck
+                type of faults. A typical choice is ["ws_000", "wd_000"] with ti=0,
+                which are the wind speed and wind direction for turbine 0. We can
+                safely assume that those measurements should change between every
+                10-minute measurement. Note that you may not want to include "pow_000",
+                since that measurement may be constant for longer periods of time even
+                during normal operation, e.g., when the turbine is shutdown at very
+                low wind speeds or when the turbine is operating above rated wind
+                speed. Note that if any of the signals in 'columns' is flagged as
+                frozen ("stuck"), all measurements of that turbine will be marked 
+                faulty.
+            ti (int): The turbine identifier for which its measurements should be
+                flagged as faulty when the signals in the columns are found to be
+                frozen ("stuck"). This is typically the turbine number that corresponds
+                to the columns, e.g., if you use  columns=["ws_000", "wd_000"] then 
+                ti=0, and if you use  ["ws_003", "wd_003"] you use ti=3.
+            n_consecutive_measurements (int, optional): Number of consecutive
+                measurements that should read the same value for the measurement to be
+                considered "frozen". Defaults to 3.
+            stddev_threshold (float, optional): Threshold value, typically a low number.
+                If the set of consecutive measurements do not differ by more than this
+                value, then the measurements is considered stuck. Defaults to 0.001.
+            plot (bool, optional): Produce plots highlighting a handful of situations
+                in which the measurements are stuck in time. This is typically only
+                helpful if you have more than 1% of measurements being faulty, and
+                you would like to figure out whether this is a numerical issue or
+                this is actually happening. Defaults to False.
+            verbose (bool, optional): Print information to console. Defaults to True.
+
+        Returns:
+            self.df: Pandas DataFrame with the filtered data, in which faulty turbine
+                measurements are flagged as None/NaN. This is an aggregated filtering
+                variable, so it includes faulty-flagged measurements from filter
+                operations in previous steps.
+        """
+
+        # Filter sensor faults using the separate function call
+        stuck_indices = find_sensor_stuck_faults(
+            df=self.df,
+            columns=columns,
+            ti=ti,
+            stddev_threshold=stddev_threshold,
+            n_consecutive_measurements=n_consecutive_measurements,
+            plot_figures=plot,
+        )
+
+        # Convert to a condition format
+        flag_array = np.zeros(self.df.shape[0], dtype=bool)
+        flag_array[stuck_indices] = True
+
+        # Apply the actual filter to the dataset
+        self.filter_by_condition(
+            condition=flag_array,
+            label="Sensor-stuck fault",
+            ti=ti,
+            verbose=verbose,
+            apply_filters_to_df=True,
+        )
+
+        return self.df
 
     def filter_by_power_curve(
         self,
+        ti,
         m_ws_lb=0.95,
         m_pow_lb=1.01,
         m_ws_rb=1.05,
@@ -397,7 +334,7 @@ class ws_pw_curve_filtering:
         ws_deadband=0.50,
         pow_deadband=20.0,
         no_iterations=10,
-        cutoff_ws=25.0,
+        cutoff_ws=20.0,
     ):
         """Filter the data by offset from the mean power curve in x-
         directions. This is an iterative process because the estimated mean
@@ -405,6 +342,8 @@ class ws_pw_curve_filtering:
         converges within a couple iterations.
 
         Args:
+            ti (int): The turbine identifier for which the data should be
+            filtered.
             m_ws_lb (float, optional): Multiplier on the wind speed defining
             the left bound for the power curve. Any data to the left of this
             curve is considered faulty. Defaults to 0.95.
@@ -421,179 +360,46 @@ class ws_pw_curve_filtering:
             solution typically converges in 2-3 steps, but as the process is
             very fast, it's better to run a higher number of iterations.
             Defaults to 10.
+            cutoff_ws (float, optional): Upper limit for the filtering to occur.
+            Typically, this is a value just below the cut-out wind speed. Namely,
+            issues arise if you put this wind speed above the cut-out wind speed,
+            because we effectively end up with two curves for the same power
+            production (one at region 2, one going down from cut-out wind speed).
+            This confuses the algorithm. Hence, suggested to put this somewhere
+            around 15-25 m/s. Defaults to 20 m/s.
         """
-        print("Filtering data by deviations from the mean power curve...")
+        # Initialize the dataframe from self, as a starting point. Note
+        # that in each iteration, we do not want to build upon the
+        # filtered dataset from the previous iteration, because that
+        # erroneously removes too much data. Instead, we start with the
+        # same dataset every iteration but apply a slightly different filter.
+        # The filter differs because the data the classify as faulty (based on
+        # the estimated power curve) changes every iteration, and hence so
+        # do the estimated mean power curves again. This explains the
+        # iterative nature of the problem.
+        df_initial_filtered = self.df.copy()
+
+        # Iteratively filter data and recalculate the mean power curves
         for ii in range(no_iterations):
+            # Only print final iteration
+            is_final_iteration = (ii == no_iterations - 1)
+
             # Create upper and lower bounds around mean curve
             df_xy = self.pw_curve_df.copy()
             x_full = np.array(df_xy["ws"], dtype=float)
             x = x_full[x_full < cutoff_ws]  # Only filter until 15 m/s
             self.pw_curve_df_bounds = pd.DataFrame({"ws": x})
 
-            for ti in self.turbine_list:
-                y = np.array(df_xy["pow_%03d" % ti], dtype=float)
-                y = y[x_full < cutoff_ws]  # Only filter until 15 m/s
-                if np.all(np.isnan(y)):
-                    self.pw_curve_df_bounds["pow_%03d_lb" % ti] = None
-                    self.pw_curve_df_bounds["pow_%03d_rb" % ti] = None
-                    continue
-
-                # Create interpolants to left and right of mean curve
-                ws_array = np.array(self.df["ws_%03d" % ti], dtype=float)
-                pow_array = np.array(self.df["pow_%03d" % ti], dtype=float)
-
-                # Specify left side bound and non-decreasing
-                lb_ws = x * m_ws_lb - ws_deadband / 2.0
-                lb_pow = y * m_pow_lb + pow_deadband / 2.0
-
-                # Make sure first couple entries are not NaN
-                jjj = 0
-                while np.isnan(lb_pow[jjj]):
-                    lb_pow[jjj] = jjj / 1000.0
-                    jjj = jjj + 1
-
-                # Ensure non-decreasing for lower half of wind speeds
-                id_center = np.argmin(np.abs(lb_ws - 9.0))  # Assume value is fine near 9 m/s
-                lb_ws_l = lb_ws[0:id_center]
-                lb_pow_l = lb_pow[0:id_center]
-                good_ids = (
-                    np.hstack([(np.diff(lb_pow_l) >= 0.0), True])
-                    & 
-                    (~np.isnan(lb_pow[0:id_center]))
-                )
-                good_ids[0] = True
-                lb_pow_l = np.interp(lb_ws_l, lb_ws_l[good_ids], lb_pow_l[good_ids])
-                lb_pow[0:id_center] = lb_pow_l
-                non_nans = (~np.isnan(lb_pow) & ~np.isnan(lb_ws))
-                lb_pow = lb_pow[non_nans]
-                lb_ws = lb_ws[non_nans]
-
-                # Specify right side bound and ensure monotonically increasing
-                rb_ws = x * m_ws_rb + ws_deadband / 2.0
-                rb_pow = y * m_pow_rb - pow_deadband / 2.0
-
-                # Make sure first couple entries are not NaN
-                jjj = 0
-                while np.isnan(rb_pow[jjj]):
-                    rb_pow[jjj] = jjj / 1000.0
-                    jjj = jjj + 1
-
-                # Ensure non-decreasing for lower half of wind speeds
-                id_center = np.argmin(np.abs(rb_ws - 9.0))  # Assume value is fine near 9 m/s
-                rb_ws_l = rb_ws[0:id_center]
-                rb_pow_l = rb_pow[0:id_center]
-                good_ids = (
-                    np.hstack([(np.diff(rb_pow_l) >= 0.0), True])
-                    & 
-                    (~np.isnan(rb_pow[0:id_center]))
-                )
-                good_ids[0] = True
-                rb_pow_l = np.interp(rb_ws_l, rb_ws_l[good_ids], rb_pow_l[good_ids])
-                rb_pow[0:id_center] = rb_pow_l
-                non_nans = (~np.isnan(rb_pow) & ~np.isnan(rb_ws))
-                rb_pow = rb_pow[non_nans]
-                rb_ws = rb_ws[non_nans]
-
-                # Finally interpolate
-                ws_lb = np.interp(
-                    x=pow_array,
-                    xp=lb_pow,
-                    fp=lb_ws,
-                    left=np.nan,
-                    right=np.nan,
-                )
-                ws_rb = np.interp(
-                    x=pow_array,
-                    xp=rb_pow,
-                    fp=rb_ws,
-                    left=np.nan,
-                    right=np.nan,
-                )
-
-                out_of_bounds = (ws_array < ws_lb) | (ws_array > ws_rb)
-                self.df_filters[ti]["mean_pow_curve_outlier"] = out_of_bounds
-
-                # Write left and right bound to own curve
-                self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
-                    x=x,
-                    xp=lb_ws,
-                    fp=lb_pow,
-                    left=np.nan,
-                    right=np.nan,
-                )
-                self.pw_curve_df_bounds["pow_%03d_rb" % ti] = np.interp(
-                    x=x,
-                    xp=rb_ws,
-                    fp=rb_pow,
-                    left=np.nan,
-                    right=np.nan,
-                )
-
-            # Update status flags and re-estimate mean power curve
-            verbose = ii == no_iterations - 1  # Only print final iteration
-            self._update_status_flags(verbose=verbose)
-
-    def filter_by_floris_power_curve(
-        self,
-        fi,
-        m_ws_lb=0.95,
-        m_pow_lb=1.01,
-        m_ws_rb=1.05,
-        m_pow_rb=0.99,
-        ws_deadband=0.50,
-        pow_deadband=20.0,
-        cutoff_ws=25.0,
-    ):
-        """Filter the data by offset from the floris power curve in x-
-        directions.
-
-        Args:
-            fi (FlorisInterface): The FlorisInterface object for the farm
-            m_ws_lb (float, optional): Multiplier on the wind speed defining
-            the left bound for the power curve. Any data to the left of this
-            curve is considered faulty. Defaults to 0.95.
-            m_pow_lb (float, optional): Multiplier on the power defining
-            the left bound for the power curve. Any data to the left of this
-            curve is considered faulty. Defaults to 1.01.
-            m_ws_rb (float, optional): Multiplier on the wind speed defining
-            the right bound for the power curve. Any data to the right of this
-            curve is considered faulty. Defaults to 1.05.
-            m_pow_rb (float, optional): Multiplier on the power defining
-            the right bound for the power curve. Any data to the right of this
-            curve is considered faulty. Defaults to 0.99.
-        """
-        print("Filtering data by deviations from the floris power curve...")
-
-        # Create upper and lower bounds around floris curve
-        df_xy = self.pw_curve_df.copy()
-        rho = fi.floris.flow_field.air_density
-        for ti in range(len(fi.layout_x)):
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
-            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
-            pow_array = (
-                0.5 * rho * ws_array ** 3.0 * Ad * cp_array * 1.0e-3
-            )
-            df_xy.loc[df_xy.index, "pow_{:03d}".format(ti)] = (
-                np.interp(xp=ws_array, fp=pow_array, x=df_xy["ws"])
-            )
-
-        x_full = np.array(df_xy["ws"], dtype=float)
-        x = x_full[x_full < cutoff_ws]
-        self.pw_curve_df_bounds = pd.DataFrame({"ws": x})
-
-        for ti in self.turbine_list:
             y = np.array(df_xy["pow_%03d" % ti], dtype=float)
-            y = y[x_full < cutoff_ws]
+            y = y[x_full < cutoff_ws]  # Only filter until 15 m/s
             if np.all(np.isnan(y)):
                 self.pw_curve_df_bounds["pow_%03d_lb" % ti] = None
                 self.pw_curve_df_bounds["pow_%03d_rb" % ti] = None
                 continue
 
             # Create interpolants to left and right of mean curve
-            ws_array = np.array(self.df["ws_%03d" % ti], dtype=float)
-            pow_array = np.array(self.df["pow_%03d" % ti], dtype=float)
+            ws_array = np.array(df_initial_filtered["ws_%03d" % ti], dtype=float)
+            pow_array = np.array(df_initial_filtered["pow_%03d" % ti], dtype=float)
 
             # Specify left side bound and non-decreasing
             lb_ws = x * m_ws_lb - ws_deadband / 2.0
@@ -663,10 +469,17 @@ class ws_pw_curve_filtering:
                 right=np.nan,
             )
 
-            out_of_bounds = (ws_array < ws_lb) | (ws_array > ws_rb)
-            self.df_filters[ti]["mean_pow_curve_outlier"] = out_of_bounds
+            # Filter the dataframe according to hypothetical power curve
+            df_iteration = self.filter_by_condition(
+                condition=(ws_array < ws_lb) | (ws_array > ws_rb),
+                label="Mean power curve outlier",
+                ti=ti,
+                verbose=is_final_iteration,  # If final iteration, be verbose
+                apply_filters_to_df=is_final_iteration,  # If final iteration, save dataframe to self
+            )
 
-            # Write left and right bound to own curve
+            # Recalculate the mean power curve based on current iteration's filtered dataframe
+            self._get_mean_power_curves(df=df_iteration)
             self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
                 x=x,
                 xp=lb_ws,
@@ -682,138 +495,194 @@ class ws_pw_curve_filtering:
                 right=np.nan,
             )
 
-        # Update status flags and re-estimate mean power curve
-        self._update_status_flags(verbose=True)
+        return self.df
 
-    def filter_by_wsdev(
-        self, pow_bin_width=20.0, max_ws_dev=2.0, pow_min=20.0, pow_max=None
+    def filter_by_floris_power_curve(
+        self,
+        fi,
+        ti,
+        m_ws_lb=0.95,
+        m_pow_lb=1.01,
+        m_ws_rb=1.05,
+        m_pow_rb=0.99,
+        ws_deadband=0.50,
+        pow_deadband=20.0,
+        cutoff_ws=25.0,
     ):
-        """Filter data that is too far off the mean curve w.r.t. the
-        standard deviation in x-direction. This is slightly different from
-        filtering by deviations from the mean curve as now the standard
-        deviation of the data is taken into account.
+        """Filter the data by offset from the floris power curve in x-
+        directions.
 
         Args:
-            pow_bin_width (float, optional): Bin width in the y-axis, thus
-            over the power production. Defaults to 20.0.
-            max_ws_dev (float, optional): Data points further than
-            max_ws_dev * ws_dev off the mean curve are considered faulty.
-            Defaults to 2.0, which is two standard deviations meaning
-            about 5% of the values will be marked faulty.
-            pow_min (float, optional): Lower bound on the power
-            production above which data should be filtered. Defaults to
-            20.0.
-            pow_max ([type], optional): Upper bound on the power
-            production below which data should be filtered. If none is
-            specified, will derive this value based on the estimated rated
-            power production. Defaults to None.
+            fi (FlorisInterface): The FlorisInterface object for the farm
+            m_ws_lb (float, optional): Multiplier on the wind speed defining
+            the left bound for the power curve. Any data to the left of this
+            curve is considered faulty. Defaults to 0.95.
+            m_pow_lb (float, optional): Multiplier on the power defining
+            the left bound for the power curve. Any data to the left of this
+            curve is considered faulty. Defaults to 1.01.
+            m_ws_rb (float, optional): Multiplier on the wind speed defining
+            the right bound for the power curve. Any data to the right of this
+            curve is considered faulty. Defaults to 1.05.
+            m_pow_rb (float, optional): Multiplier on the power defining
+            the right bound for the power curve. Any data to the right of this
+            curve is considered faulty. Defaults to 0.99.
         """
-        print("Filtering data by WS std. dev...")
+        print("Filtering data by deviations from the floris power curve...")
 
-        # Default properties: must be arrays with length equal to n.o. turbines
-        if pow_max is None:
-            # Derive maximum power as 0.95 times the rated power of every turbine
-            pow_max = 0.95 * np.array(self.est_rated_pow)
-
-        # Format input variables as arrays of length num_turbs
-        if isinstance(pow_min, (int, float)):
-            pow_min = np.repeat(pow_min, self.nturbs_all)
-        if isinstance(pow_max, (int, float)):
-            pow_max = np.repeat(pow_max, self.nturbs_all)
-        if isinstance(pow_bin_width, (int, float)):
-            pow_bin_width = np.repeat(pow_bin_width, self.nturbs_all)
-        if isinstance(max_ws_dev, (int, float)):
-            max_ws_dev = np.repeat(max_ws_dev, self.nturbs_all)
-
-        df = self.df
-        df_filters = self.df_filters
-        for ti in self.turbine_list:
-            # Extract appropriate subset from dataframe
-            ids = df_filters[ti]["status"] == 1
-            cols = ["ws_%03d" % ti, "pow_%03d" % ti]
-            df_ok = df.loc[ids, cols].copy()
-
-            # Filter by standard deviation for the subset
-            if all(np.isnan(df_ok["pow_%03d" % ti].astype(float))):
-                out_of_dev_series = [False] * df.shape[0]
-            else:
-                out_of_dev_series = filters.bin_filter(
-                    bin_col=df_ok["pow_%03d" % ti].astype(float),
-                    value_col=df_ok["ws_%03d" % ti].astype(float),
-                    bin_width=pow_bin_width[ti],
-                    threshold=max_ws_dev[ti],
-                    center_type="median",
-                    bin_min=pow_min[ti],
-                    bin_max=pow_max[ti],
-                    threshold_type="scalar",
-                    direction="all",
-                )
-
-            # Save found outliers to array
-            out_of_dev_indices = df_ok.index[np.where(out_of_dev_series)[0]]
-            df_out_of_ws_dev = np.zeros(self.df.shape[0])
-            df_out_of_ws_dev[out_of_dev_indices] = 1
-            self.df_filters[ti]["ws_std_dev_outlier"] = [
-                bool(i) for i in df_out_of_ws_dev
-            ]
-            print(
-                "Removed %d outliers using WS standard deviation filtering."
-                % (int(sum(df_out_of_ws_dev)))
+        # Create upper and lower bounds around floris curve
+        df_xy = self.pw_curve_df.copy()
+        rho = fi.floris.flow_field.air_density
+        for ti in range(len(fi.layout_x)):
+            fi_turb = fi.floris.farm.turbine_definitions[ti]
+            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
+            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
+            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
+            pow_array = (
+                0.5 * rho * ws_array ** 3.0 * Ad * cp_array * 1.0e-3
+            )
+            df_xy.loc[df_xy.index, "pow_{:03d}".format(ti)] = (
+                np.interp(xp=ws_array, fp=pow_array, x=df_xy["ws"])
             )
 
-        # Finally, update status columns in dataframe
-        self._update_status_flags()
+        x_full = np.array(df_xy["ws"], dtype=float)
+        x = x_full[x_full < cutoff_ws]
+        self.pw_curve_df_bounds = pd.DataFrame({"ws": x})
 
-    def save_df(self, fout):
-        """Apply all filters to the dataframe by marking any fauilty data
-        as None/np.nan. Then, save the dataframe to the specified path.
+        y = np.array(df_xy["pow_%03d" % ti], dtype=float)
+        y = y[x_full < cutoff_ws]
+        if np.all(np.isnan(y)):
+            self.pw_curve_df_bounds["pow_%03d_lb" % ti] = None
+            self.pw_curve_df_bounds["pow_%03d_rb" % ti] = None
+            return self.df  # Do nothing
 
-        Args:
-            fout ([str]): Destination path for the output .ftr file.
+        # Create interpolants to left and right of mean curve
+        ws_array = np.array(self.df["ws_%03d" % ti], dtype=float)
+        pow_array = np.array(self.df["pow_%03d" % ti], dtype=float)
+
+        # Specify left side bound and non-decreasing
+        lb_ws = x * m_ws_lb - ws_deadband / 2.0
+        lb_pow = y * m_pow_lb + pow_deadband / 2.0
+
+        # Make sure first couple entries are not NaN
+        jjj = 0
+        while np.isnan(lb_pow[jjj]):
+            lb_pow[jjj] = jjj / 1000.0
+            jjj = jjj + 1
+
+        # Ensure non-decreasing for lower half of wind speeds
+        id_center = np.argmin(np.abs(lb_ws - 9.0))  # Assume value is fine near 9 m/s
+        lb_ws_l = lb_ws[0:id_center]
+        lb_pow_l = lb_pow[0:id_center]
+        good_ids = (
+            np.hstack([(np.diff(lb_pow_l) >= 0.0), True])
+            & 
+            (~np.isnan(lb_pow[0:id_center]))
+        )
+        good_ids[0] = True
+        lb_pow_l = np.interp(lb_ws_l, lb_ws_l[good_ids], lb_pow_l[good_ids])
+        lb_pow[0:id_center] = lb_pow_l
+        non_nans = (~np.isnan(lb_pow) & ~np.isnan(lb_ws))
+        lb_pow = lb_pow[non_nans]
+        lb_ws = lb_ws[non_nans]
+
+        # Specify right side bound and ensure monotonically increasing
+        rb_ws = x * m_ws_rb + ws_deadband / 2.0
+        rb_pow = y * m_pow_rb - pow_deadband / 2.0
+
+        # Make sure first couple entries are not NaN
+        jjj = 0
+        while np.isnan(rb_pow[jjj]):
+            rb_pow[jjj] = jjj / 1000.0
+            jjj = jjj + 1
+
+        # Ensure non-decreasing for lower half of wind speeds
+        id_center = np.argmin(np.abs(rb_ws - 9.0))  # Assume value is fine near 9 m/s
+        rb_ws_l = rb_ws[0:id_center]
+        rb_pow_l = rb_pow[0:id_center]
+        good_ids = (
+            np.hstack([(np.diff(rb_pow_l) >= 0.0), True])
+            & 
+            (~np.isnan(rb_pow[0:id_center]))
+        )
+        good_ids[0] = True
+        rb_pow_l = np.interp(rb_ws_l, rb_ws_l[good_ids], rb_pow_l[good_ids])
+        rb_pow[0:id_center] = rb_pow_l
+        non_nans = (~np.isnan(rb_pow) & ~np.isnan(rb_ws))
+        rb_pow = rb_pow[non_nans]
+        rb_ws = rb_ws[non_nans]
+
+        # Finally interpolate
+        ws_lb = np.interp(
+            x=pow_array,
+            xp=lb_pow,
+            fp=lb_ws,
+            left=np.nan,
+            right=np.nan,
+        )
+        ws_rb = np.interp(
+            x=pow_array,
+            xp=rb_pow,
+            fp=rb_ws,
+            left=np.nan,
+            right=np.nan,
+        )
+
+        self.filter_by_condition(
+            condition=(ws_array < ws_lb) | (ws_array > ws_rb),
+            label="Outlier by FLORIS power curve",
+            ti=ti,
+            apply_filters_to_df=True,
+        )
+
+        # Write left and right bound to own curve
+        self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
+            x=x,
+            xp=lb_ws,
+            fp=lb_pow,
+            left=np.nan,
+            right=np.nan,
+        )
+        self.pw_curve_df_bounds["pow_%03d_rb" % ti] = np.interp(
+            x=x,
+            xp=rb_ws,
+            fp=rb_pow,
+            left=np.nan,
+            right=np.nan,
+        )
+
+        return self.df
+
+    def get_df(self):
+        """Return the filtered dataframe to the user.
 
         Returns:
-            df ([pd.DataFrame]): Processed dataframe.
+            self.df: Pandas DataFrame with the filtered data, in which faulty turbine
+                measurements are flagged as None/NaN. This is an aggregated filtering
+                variable, so it includes faulty-flagged measurements from filter
+                operations in previous steps.
         """
-        if not (self.turbine_list == self.full_turbs_list):
-            print(
-                "Skipping saving dataframe since not all turbines are filtered."
-            )
-            print(
-                "Please specify 'turbine_list' as 'full' and filter accordingly before saving."
-            )
-            return None
+        return self.df
 
-        df = self.df.copy()
-        for ti in self.turbine_list:
-            bad_ids = self.df_filters[ti]["status"] == 0
-            df = dff.df_mark_turbdata_as_faulty(
-                df=df, cond=bad_ids, turbine_list=ti, verbose=True
-            )
+    def get_power_curve(self):
+        """Return the turbine estimated mean power curves to the user.
 
-        # Reset index and save to file
-        if "time" in df.columns:
-            df = df.reset_index(drop=True)
-        else:
-            df = df.reset_index(drop=False)
-
-        df.to_feather(fout)
-        return df
-
-    def save_power_curve(self, fout="power_curve.csv"):
-        """Save the estimated power curve as a .csv to a prespecified path.
+        Returns:
+            pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
+                speed bins and the mean power production value for every
+                turbine.
         """
-        return self.pw_curve_df.to_csv(fout)
+        return self.pw_curve_df
 
-    def plot_power_curves(self):
+    def plot_farm_mean_power_curve(self):
         """Plot all turbines' power curves in a single figure. Also estimate
         and plot a mean turbine power curve.
         """
         fig, ax = plt.subplots()
         x = np.array(self.pw_curve_df["ws"], dtype=float)
-        for ti in self.turbine_list:
+        for ti in range(self.n_turbines):
             ax.plot(x, self.pw_curve_df["pow_%03d" % ti], color="lightgray")
 
-        pow_cols = ["pow_%03d" % ti for ti in self.turbine_list]
+        pow_cols = ["pow_%03d" % ti for ti in range(self.n_turbines)]
         pow_mean_array = self.pw_curve_df[pow_cols].mean(axis=1)
         pow_std_array = self.pw_curve_df[pow_cols].std(axis=1)
 
@@ -828,194 +697,209 @@ class ws_pw_curve_filtering:
         )
         ax.plot(x, pow_mean_array, color="tab:red", label="Mean curve")
         ax.legend()
+        ax.set_title("Mean of all turbine power curves with UQ")
 
         return fig, ax
 
-    def plot(
-        self,
-        draw_windows=True,
-        confirm_plot=False,
-        fi=None,
-        save_path=None,
-        fig_format="png",
-        dpi=300,
-    ):
+    def plot_filters_custom_scatter(self, ti, x_col, y_col, ax=None):
+        """Plot the filtered data in a scatter plot, categorized
+        by the source of their filter/fault. This is a generic
+        function that allows the user to plot various numeric
+        variables on the x and y axis.
+
+        Args:
+            ti (int): Turbine identifier. This is used to determine
+                which turbine's filter history should be looked at.
+            x_col (str): Column name to plot on the x-axis. A common
+                choice is "ws_000" for ti=0, for example.
+            y_col (str): Column name to plot on the y-axis. A common
+                choice is "pow_000" for ti=0, for example.
+            ax (plt.Axis, optional): Pyplot Figure axis in which the
+                figure should be produced. If None specified, then
+                 creates a new figure. Defaults to None.
+
+        Returns:
+            ax: The figure axis in which the scatter plot is drawn.
+        """
+        # Create figure, if not specified
+        if ax is None:
+            _, ax = plt.subplots()
+
+        # Get filter dataframe
+        df_f = self.df_filters["WTG_{:03d}".format(ti)]
+        all_flags = self._get_all_unique_flags()
+        N = df_f.shape[0]
+
+        # For each flagging condition, plot the results
+        for flag in all_flags:
+            ids = (df_f == flag)
+            df_subset = self._df_initial.loc[ids]
+            percentage = 100.0 * np.sum(ids) / N
+            if any(ids):
+                ax.plot(
+                    df_subset[x_col],
+                    df_subset[y_col],
+                    ".",
+                    markersize=5,
+                    alpha=0.15,
+                    rasterized=True,
+                    label="{:s} ({:.2f} %)".format(flag, percentage),
+                )
+
+        lgd = ax.legend()
+        for l in lgd.legendHandles:
+            l.set_alpha(1)  # Force alpha in legend to 1.0
+
+        ax.set_title("WTG {:03d}: Filters".format(ti))
+        ax.set_xlabel("Wind speed (m/s)")
+        ax.set_ylabel("Power (kW)")
+        ax.grid(True)
+    
+        return ax
+
+    def plot_filters_in_ws_power_curve(self, ti, fi=None, ax=None):
+        """Plot the wind speed power curve and connect each faulty datapoint
+        to the label it was classified as faulty with.
+
+        Args:
+            ti (int): Turbine number which should be plotted.
+            fi (FlorisInterface, optional): floris object. If not None, will
+            use this to plot the turbine power curves as implemented in floris.
+            Defaults to None.
+            ax (plt.Axis): Pyplot Axis object.
+        """
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=(10, 5))
+
+        # First use the custom filter plot to do the majority of the work
+        self.plot_filters_custom_scatter(
+            ti=ti,
+            x_col="ws_{:03d}".format(ti),
+            y_col="pow_{:03d}".format(ti),
+            ax=ax,
+        )
+
+        # Show the approximated power curves, bounds and FLORIS curve, if applicable
+        ax.plot(
+            self.pw_curve_df["ws"],
+            self.pw_curve_df["pow_%03d" % ti],
+            "--",
+            label="Approximate power curve",
+        )
+
+        if fi is not None:
+            fi_turb = fi.floris.farm.turbine_definitions[ti]
+            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
+            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
+            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
+            rho = fi.floris.flow_field.air_density
+            pow_array = (
+                0.5 * rho * ws_array ** 3.0 * Ad * cp_array * 1.0e-3
+            )
+            ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
+
+        if self.pw_curve_df_bounds is not None:
+            ax.plot(
+                self.pw_curve_df_bounds["ws"],
+                self.pw_curve_df_bounds["pow_%03d_lb" % ti],
+                "--",
+                label="Left bound for power curve",
+            )
+            ax.plot(
+                self.pw_curve_df_bounds["ws"],
+                self.pw_curve_df_bounds["pow_%03d_rb" % ti],
+                "--",
+                label="Right bound for power curve",
+            )
+
+        lgd = ax.legend()
+        for l in lgd.legendHandles:
+            l.set_alpha(1)  # Force alpha in legend to 1.0
+
+        ax.set_title("WTG {:03d}: Filters".format(ti))
+        ax.set_xlabel("Wind speed (m/s)")
+        ax.set_ylabel("Power (kW)")
+        ax.grid(True)
+
+        return ax
+
+    def plot_postprocessed_in_ws_power_curve(self, ti, fi=None, ax=None):
         """Plot the wind speed power curve and mark faulty data according to
         their filters.
 
         Args:
-            draw_windows (bool, optional): Plot the windows over which data
-            is filtered. Defaults to True.
-            confirm_plot (bool, optional): Add a secondary subplot showing
-            which data are faulty and which are fine. Useful for debugging.
-            Defaults to False.
-            fi ([type], optional): floris object. If specified, will use
-            this to plot the turbine power curves as implemented in floris.
+            ti (int): Turbine number which should be plotted.
+            fi (FlorisInterface, optional): floris object. If not None, will
+            use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
-            save_path ([str], optional): Path to save the figure to. If none
-            is specified, then will not save any figures. Defaults to None.
-            fig_format (str, optional): Figure format if saved. Defaults to
-            "png".
-            dpi (int, optional): Image resolution if saved. Defaults to 300.
         """
-        df = self.df
 
-        fig_list = []
-        for ti in self.turbine_list:
-            print("Generating ws-power plot for turbine %03d" % ti)
-            if confirm_plot:
-                fig, ax = plt.subplots(1, 2, figsize=(16, 5), sharey=True)
-            else:
-                fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-                ax = [ax]
+        if ax is None:
+            _, ax = plt.subplots(figsize=(10, 5))
 
-            fig_list.append(fig)
+        # Get filter dataframe
+        df_f = self.df_filters["WTG_{:03d}".format(ti)]
+        N = df_f.shape[0]
 
-            # Get filter dataframe
-            df_f = self.df_filters[ti]
-            N = df_f.shape[0]
+        # Plot the finalized dataframe results in a second subplot
+        percentage = 100.0 * np.sum(df_f == "clean") / N
+        ax.plot(
+            self.df["ws_%03d" % ti],
+            self.df["pow_%03d" % ti],
+            ".",
+            color="k",
+            markersize=5,
+            alpha=0.15,
+            rasterized=True,
+            label="Postprocessed dataset ({:.1f} %)".format(percentage),
+        )
 
-            # Show the acceptable points
-            ax[0].plot(
-                df.loc[df_f["status"] == 1, "ws_%03d" % ti],
-                df.loc[df_f["status"] == 1, "pow_%03d" % ti],
-                ".",
-                color="k",
-                markersize=5,
-                alpha=0.15,
-                rasterized=True,
-                label="Useful (%.1f %%)" % (100.0 * df_f["status"].sum() / N),
+        # Show the approximated power curves, bounds and FLORIS curve, if applicable
+        ax.plot(
+            self.pw_curve_df["ws"],
+            self.pw_curve_df["pow_%03d" % ti],
+            "--",
+            label="Approximate power curve",
+        )
+
+        if fi is not None:
+            fi_turb = fi.floris.farm.turbine_definitions[ti]
+            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
+            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
+            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
+            rho = fi.floris.flow_field.air_density
+            pow_array = (
+                0.5 * rho * ws_array ** 3.0 * Ad * cp_array * 1.0e-3
             )
+            ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
-            cols = [c for c in df_f.columns if "status" not in c]
-            for c in cols:
-                if df_f[c].sum() > 0:
-                    # Show the points from filter 'c'
-                    ax[0].plot(
-                        df.loc[df_f[c], "ws_%03d" % ti],
-                        df.loc[df_f[c], "pow_%03d" % ti],
-                        ".",
-                        markersize=5,
-                        alpha=0.15,
-                        rasterized=True,
-                        label="%s (%.1f %%)" % (c, 100.0 * df_f[c].sum() / N),
-                    )
-
-            # Show the approximated power curve, bounds and FLORIS curve, if applicable
-            ax[0].plot(
-                self.pw_curve_df["ws"],
-                self.pw_curve_df["pow_%03d" % ti],
+        if self.pw_curve_df_bounds is not None:
+            ax.plot(
+                self.pw_curve_df_bounds["ws"],
+                self.pw_curve_df_bounds["pow_%03d_lb" % ti],
                 "--",
-                label="Approximate power curve",
+                label="Left bound for power curve",
             )
-            if fi is not None:
-                fi_turb = fi.floris.farm.turbine_definitions[ti]
-                Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
-                ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-                cp_array = np.array(fi_turb["power_thrust_table"]["power"])
-                rho = fi.floris.flow_field.air_density
-                pow_array = (
-                    0.5 * rho * ws_array ** 3.0 * Ad * cp_array * 1.0e-3
-                )
-                ax[0].plot(ws_array, pow_array, "--", label="FLORIS curve")
+            ax.plot(
+                self.pw_curve_df_bounds["ws"],
+                self.pw_curve_df_bounds["pow_%03d_rb" % ti],
+                "--",
+                label="Right bound for power curve",
+            )
 
-            if self.pw_curve_df_bounds is not None:
-                ax[0].plot(
-                    self.pw_curve_df_bounds["ws"],
-                    self.pw_curve_df_bounds["pow_%03d_lb" % ti],
-                    "--",
-                    label="Left bound for power curve",
-                )
-                ax[0].plot(
-                    self.pw_curve_df_bounds["ws"],
-                    self.pw_curve_df_bounds["pow_%03d_rb" % ti],
-                    "--",
-                    label="Right bound for power curve",
-                )
+        lgd = ax.legend()
+        for l in lgd.legendHandles:
+            l.set_alpha(1)  # Force alpha in legend to 1.0
 
-            if draw_windows:
-                xlim = (0.0, 30.0)  # ax[0].get_xlim()
-                ylim = ax[0].get_ylim()
+        ax.set_title("WTG {:03d}: Postprocessed dataset".format(ti))
+        ax.set_xlabel("Wind speed (m/s)")
+        ax.set_ylabel("Power (kW)")
+        ax.grid(True)
 
-                window_list = [
-                    w for w in self.window_list if ti in w["turbines"]
-                ]
-                for window in window_list:
-                    ws_range = window["ws_range"]
-                    pow_range = window["pow_range"]
-                    axis = window["axis"]
-                    idx = window["idx"]
+        return ax
 
-                    if axis == 0:
-                        # Filtered region left of curve
-                        ut.plot_redzone(
-                            ax[0],
-                            xlim[0],
-                            pow_range[0],
-                            ws_range[0] - xlim[0],
-                            pow_range[1] - pow_range[0],
-                            "%d" % idx,
-                            ii=idx,
-                        )
-                        # Filtered region right of curve
-                        ut.plot_redzone(
-                            ax[0],
-                            ws_range[1],
-                            pow_range[0],
-                            xlim[1] - ws_range[1],
-                            pow_range[1] - pow_range[0],
-                            "%d" % idx,
-                            ii=idx,
-                        )
-                    else:
-                        # Filtered region above curve
-                        ut.plot_redzone(
-                            ax[0],
-                            ws_range[0],
-                            pow_range[1],
-                            ws_range[1] - ws_range[0],
-                            ylim[1] - pow_range[1],
-                            "%d" % idx,
-                            ii=idx,
-                        )
-                        # Filtered region below curve
-                        ut.plot_redzone(
-                            ax[0],
-                            ws_range[0],
-                            ylim[0],
-                            ws_range[1] - ws_range[0],
-                            pow_range[0] - ylim[0],
-                            "%d" % idx,
-                            ii=idx,
-                        )
-                    # ax[0].add_patch(rect)
-
-                ax[0].set_xlim(xlim)
-                ax[0].set_ylim(ylim)
-
-            ax[0].set_title("Turbine %03d" % ti)
-            ax[0].set_ylabel("Power (kW)")
-            ax[0].set_xlabel("Wind speed (m/s)")
-            lgd = ax[0].legend()
-            for l in lgd.legendHandles:
-                # Force alpha in legend to 1.0
-                l.set_alpha(1)
-
-            if confirm_plot:
-                ut._make_confirmation_plot(df, self.df_filters, ti=ti, ax=ax[1])
-                ax[1].set_ylabel("")
-
-            fig.tight_layout()
-            if save_path is not None:
-                plt.savefig(
-                    save_path + "/wspowcurve_%03d." % ti + fig_format, dpi=dpi
-                )
-
-        return fig_list
-
-    def plot_outliers_vs_time(
-        self, save_path=None, fig_format="png", dpi=300
-    ):
+    def plot_filters_in_time(self, ti, ax=None):
         """Generate bar plot where each week of data is gathered and its
         filtering results will be shown relative to the data size of each
         week. This plot can particularly be useful to investigate whether
@@ -1031,24 +915,22 @@ class ws_pw_curve_filtering:
             "png".
             dpi (int, optional): Image resolution if saved. Defaults to 300.
         """
-        df = self.df
+        if ax is None:
+            _, ax = plt.subplots(figsize=(13, 7))
 
-        fig_list = []
-        for ti in self.turbine_list:
-            print("Producing time-outliers bar plot for turbine %03d." % ti)
-            df_f = self.df_filters[ti]
-            cols = [c for c in df_f.columns if "status" not in c]
-            conds = list(np.array(df_f[cols], dtype=bool).T)
-            fig, ax = dff.plot_highlight_data_by_conds(df, conds, ti)
-            ax.legend(["All data"] + cols)
-            fig_list.append(fig)
+        # Get a list of all flags and then get colors correspondingly
+        all_flags = self._get_all_unique_flags()
 
-            if save_path is not None:
-                os.makedirs(save_path, exist_ok=True)
-                fp = os.path.join(
-                    save_path,
-                    ("fault_timestamps_histogram_%03d." % ti) + fig_format,
-                )
-                plt.savefig(fp, dpi=dpi)
+        # Manipulate dataframe to easily plot results
+        df_f = self.df_filters["WTG_{:03d}".format(ti)]
+        df_conditional = pd.concat([pd.DataFrame({flag: np.array(df_f==flag, dtype=int)}) for flag in all_flags], axis=1)
+        df_merged = pd.concat([df_conditional, self.df["time"]], axis=1)
+        df_histogram = df_merged.groupby([df_merged["time"].dt.year, df_merged["time"].dt.isocalendar().week]).sum(numeric_only=True)
 
-        return fig_list
+        # Plot the histogram information
+        ax = df_histogram.plot.bar(stacked=True, ax=ax)
+        ax.set_ylabel("Count (-)")
+        ax.set_title("WTG {:03d}".format(ti))
+        ax.grid(True)
+
+        return ax

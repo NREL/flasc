@@ -156,7 +156,7 @@ allows the user to compare, for example, FLORIS model predictions to SCADA
 data. Different instantiations of the FLORIS model can be analyzed by creating
 multiple dataframes and all inserting them into the suite object using the
 function ``add_df()``. An example of this usage is shown in
-``a_08_plot_energy_ratios.py`` in the ``examples/raw_data_processing/``
+``a_08_plot_energy_ratios.py`` in the ``examples_artificial_data/raw_data_processing/``
 folder.
 
 
@@ -171,7 +171,7 @@ showcasing the energy ratios under various inflow conditions and in different
 bins. Continuing on the example of the previous section, a user can generate
 such an Excel file using the ``fsc.export_detailed_energy_info_to_xlsx()``
 function. Usage of this function is exemplified in
-``energy_table_for_two_df.py``, in the folder ``examples/table_analysis/``.
+``energy_table_for_two_df.py``, in the folder ``examples_artificial_data/table_analysis/``.
 The function produces an Excel sheet which looks as follows:
 
 .. image:: images/example_table_analysis.png

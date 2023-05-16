@@ -104,8 +104,9 @@ if __name__ == "__main__":
         df_approx = ftls.calc_floris_approx_table(
             fi=fi,
             wd_array=np.arange(0.0, 360.0, 3.0),
-            ws_array=np.arange(0.0, 27.0, 1.0),
+            ws_array=np.arange(0.001, 27.0, 1.0),
             ti_array=np.arange(0.03, 0.30, 0.03),
+            save_turbine_inflow_conditions_to_df=True
         )
         df_approx.to_feather(fn_approx)
 

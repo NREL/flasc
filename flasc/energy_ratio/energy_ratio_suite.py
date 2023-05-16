@@ -17,6 +17,7 @@ from pandas.errors import DataError
 from scipy.interpolate import NearestNDInterpolator
 
 from ..energy_ratio import energy_ratio as er
+from ..energy_ratio import energy_ratio_gain as erg
 from ..energy_ratio import energy_ratio_visualization as vis
 from .. import time_operations as fsato, utilities as fsut
 
@@ -58,7 +59,7 @@ class energy_ratio_suite:
 
     # Public methods
 
-    def add_df(self, df, name):
+    def add_df(self, df, name, color=None):
         """Add a dataframe to the class. This function verifies if the
         dataframe inserted matches in formatting with the already existing
         dataframes in the class. It also verifies if the right columns
@@ -96,7 +97,7 @@ class energy_ratio_suite:
                 + "addition."
             )
 
-        new_entry = dict({"df": df, "name": name})
+        new_entry = dict({"df": df, "name": name, "color":color})
         self.df_list.append(new_entry)
 
         default_ids = np.array([True for _ in range(df.shape[0])])
@@ -290,6 +291,7 @@ class energy_ratio_suite:
             ii ([int]): Dataset number/identifier
         """
         self.df_list[ii].pop("er_results")
+        self.df_list[ii].pop("df_freq")
         self.df_list[ii].pop("er_test_turbines")
         self.df_list[ii].pop("er_ref_turbines")
         self.df_list[ii].pop("er_dep_turbines")
@@ -315,6 +317,7 @@ class energy_ratio_suite:
         percentiles=[5.0, 95.0],
         balance_bins_between_dfs=True,
         return_detailed_output=False,
+        num_blocks=-1,
         verbose=True,
     ):
         """This is the main function used to calculate the energy ratios
@@ -398,6 +401,10 @@ class energy_ratio_suite:
                 direction and wind speed bin, among others. This is
                 particularly helpful in figuring out if the bins are well
                 balanced. Defaults to False.
+            num_blocks (int, optional): Number of blocks to use in block
+                boostrapping.  If = -1 then don't use block bootstrapping
+                and follow normal approach of sampling num_samples randomly
+                with replacement.  Defaults to -1.
             verbose (bool, optional): Print to console. Defaults to True.
 
         Returns:
@@ -497,6 +504,7 @@ class energy_ratio_suite:
                 N=N,
                 percentiles=percentiles,
                 return_detailed_output=return_detailed_output,
+                num_blocks = num_blocks
             )
 
             # Save each output to self
@@ -505,6 +513,7 @@ class energy_ratio_suite:
                 self.df_list[ii]["er_results_info_dict"] = out[1]
             else:
                 self.df_list[ii]["er_results"] = out
+            self.df_list[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
@@ -512,6 +521,246 @@ class energy_ratio_suite:
             self.df_list[ii]["er_bootstrap_N"] = N
 
         return self.df_list
+
+    def get_energy_ratios_gain(
+        self,
+        test_turbines,
+        wd_step=3.0,
+        ws_step=5.0,
+        wd_bin_width=None,
+        ws_bins=None,
+        wd_bins=None,
+        N=1,
+        percentiles=[5.0, 95.0],
+        # balance_bins_between_dfs=True,
+        return_detailed_output=False,
+        num_blocks=-1,
+        verbose=True,
+    ):
+        """This is the main function used to calculate the energy ratios
+        for dataframe provided to the class during initialization. One
+        can calculate the energy ratio for different (sets of) turbines
+        and under various discretization options.
+
+        Args:
+            test_turbines ([iteratible]): List with the test turbine(s)
+                used to calculate the power production in the nominator of
+                the energy ratio equation. Typically, this is a single
+                turbine, e.g., test_turbines=[0], but can also be multiple
+                turbines. If multiple turbines are specified, it averages
+                the power production between the turbines to come up with
+                the test power values.
+            wd_step (float, optional): Wind direction discretization step
+                size. This defines for what wind directions the energy ratio
+                is to be calculated. Note that this does not necessarily
+                also mean each bin has a width of this value. Namely, the
+                bin width can be specified separately. Note that this variable
+                is ignored if the 'wd_bins' is also specified. Defaults to
+                3.0.
+            ws_step (float, optional): Wind speed discretization step size.
+                This defines the resolution and widths of the wind speed
+                bins. Note that this variable is ignored if the 'ws_bins' is
+                also specified. Defaults to 5.0.
+            wd_bin_width ([type], optional): The wind direction bin width.
+                This value should be equal or larger than wd_step. When no
+                value is specified, will default to wd_bin_width = wd_step.
+                In the literature, it is not uncommon to specify a bin width
+                larger than the step size to cover for variability in the
+                wind direction measurements. By setting a large value for
+                wd_bin_width, one gets a better idea of the larger-scale
+                wake losses in the wind farm. Defaults to None.
+            ws_bins (array, optional): Array containing the bins over which
+                the energy ratios must be calculated (wind speeds). Each entry
+                of the provided array must contain exactly two float values,
+                being the lower and upper bound for that wind speed bin.
+                Overlap between bins is not supported for wind speed bins,
+                currently. This variable overwrites the settings for 'ws_step'
+                and instead allows the user to directly specify the binning
+                properties, rather than deriving them from the data and an
+                assigned step size. Defaults to None.
+            wd_bins (array, optional): Array containing the bins over which
+                the energy ratios must be calculated (wind dir.). Each entry
+                of the provided array must contain exactly two float values,
+                being the lower and upper bound for that wind dir. bin.
+                Overlap between bins is supported for wind direction bins.
+                This variable overwrites the settings for 'wd_step' and
+                'wd_bin_width', and instead allows the user to directly
+                specify the binning properties, rather than deriving them
+                from the data and an assigned step size and bin width.
+                Defaults to None.
+            N (int, optional): Number of bootstrap evaluations for
+                uncertainty quantification (UQ). If N=1, will not perform
+                any uncertainty quantification. Defaults to 1.
+            percentiles (list, optional): Confidence bounds for the
+                uncertainty quantification in percents. This value is only
+                relevant if N > 1 is specified. Defaults to [5., 95.].
+            balance_bins_between_dfs (bool, optional): Balance the bins by
+                the frequency of occurrence for each wind direction and wind
+                speed bin in the collective of dataframes. Frequency of a
+                certain bin is equal to the minimum number of occurrences
+                among all the dataframes. This ensures we are comparing
+                apples to apples. Recommended to set to 'True'. It will
+                avoid bin rebalancing if the underlying wd and ws occurrences
+                are identical between all dataframes, e.g., when we are
+                comparing SCADA data to FLORIS predictions of the same data.
+                Defaults to True.
+            return_detailed_output (bool, optional): Also calculate and
+                return detailed energy ratio information useful for debugging
+                and figuring out flaws in the data. This slows down the
+                calculations but can be very useful. The additional info is
+                written to self.df_lists[i]["er_results_info_dict"]. The
+                dictionary variable therein contains two fields, being
+                "df_per_wd_bin" and "df_per_ws_bin". The first gives an
+                overview of the energy ratio for every wind direction bin,
+                covering the collective effect of all wind speeds in the
+                data. The latter one, "df_per_ws_bin", yields even more
+                information and displays the energy ratio for every wind
+                direction and wind speed bin, among others. This is
+                particularly helpful in figuring out if the bins are well
+                balanced. Defaults to False.
+            num_blocks (int, optional): Number of blocks to use in block
+                boostrapping.  If = -1 then don't use block bootstrapping
+                and follow normal approach of sampling num_samples randomly
+                with replacement.  Defaults to -1.
+            verbose (bool, optional): Print to console. Defaults to True.
+
+        Returns:
+            self.df_list (iterable): List of Pandas DataFrames containing
+                the energy ratios for each dataset, respectively. Each
+                entry in this list is a Dataframe containing the found
+                energy ratios under the prespecified settings, contains the
+                columns:
+                    * wd_bin: The mean wind direction for this bin
+                    * N_bin: Number of data entries in this bin
+                    * baseline: Nominal energy ratio value (without UQ)
+                    * baseline_l: Lower bound for energy ratio. This
+                        value is equal to baseline without UQ and lower
+                        with UQ.
+                    * baseline_u: Upper bound for energy ratio. This
+                        value is equal to baseline without UQ and higher
+                        with UQ.
+        """
+
+        #TODO should probably check that num df = 2,4,6 etc.,
+
+        # Define number of dataframes specified by user
+        N_df = len(self.df_list)
+        N_gains = int(N_df / 2) # Assume every 2 form a desired gain
+
+        # Set up a list of gains
+        self.df_list_gains = []
+
+        # Load energy ratio class for dfs without bin frequency interpolant
+        era_list = [None for _ in range(N_gains)]
+        for ii in range(0, N_df, 2):# (N_df, step=2):
+            df_subset_d = self.df_list[ii]["df_subset"]
+            df_subset_n = self.df_list[ii+1]["df_subset"]
+
+            name_d = self.df_list[ii]["name"]
+            name_n = self.df_list[ii+1]["name"]
+
+            color = self.df_list[ii]["color"]
+
+            era_list[int(ii/2)] = erg.energy_ratio_gain(df_in_d=df_subset_d, df_in_n=df_subset_n, verbose=verbose)
+
+            new_entry = dict({"name": '%s/%s' % (name_n, name_d), "color":color})
+            self.df_list_gains.append(new_entry)
+
+        if True: # balance_bins_between_dfs: TODO: I think this is a must in this case
+            # First check if necessary
+            balance_bins_between_dfs = False
+            wd_ref = np.array(self.df_list[0]["df_subset"]["wd"])
+            ws_ref = np.array(self.df_list[0]["df_subset"]["ws"])
+            for d in self.df_list:
+                if (
+                    (not np.array_equal(wd_ref, d["df_subset"]["wd"])) or
+                    (not np.array_equal(ws_ref, d["df_subset"]["ws"]))
+                ):
+                    balance_bins_between_dfs = True
+
+            if True: #balance_bins_between_dfs: #TODO Again just forcing this here I think
+                print("Dataframes differ in wd and ws. Rebalancing.")
+                df_binned_list = [None for _ in range(N_df)]
+                for ii, era in enumerate(era_list):
+                    # Calculate how data would be binned in era
+                    era._set_test_turbines(test_turbines)
+                    era._set_binning_properties(
+                        ws_step=ws_step,
+                        wd_step=wd_step,
+                        wd_bin_width=wd_bin_width,
+                        ws_bins=ws_bins,
+                        wd_bins=wd_bins,
+                    )
+                    era._calculate_bins()
+
+                    # Extract dataframe and calculate bin counts
+                    # Do this for both _d and _n
+                    df_binned = era.df_d[["wd_bin", "ws_bin"]].copy()
+                    df_binned["bin_count_df{:d}".format(ii*2)] = 1
+                    df_binned = df_binned.groupby(["wd_bin", "ws_bin"]).sum()
+                    df_binned_list[ii*2] = df_binned
+
+                    df_binned = era.df_n[["wd_bin", "ws_bin"]].copy()
+                    df_binned["bin_count_df{:d}".format(ii*2 + 1)] = 1
+                    df_binned = df_binned.groupby(["wd_bin", "ws_bin"]).sum()
+                    df_binned_list[ii*2 + 1] = df_binned
+
+                # Now merge bin counts from each separate dataframe
+                df_binned_merged = pd.concat(df_binned_list, axis=1)
+                df_binned_merged = df_binned_merged.fillna(0).astype(int)
+
+                # Determine minimum bin count for every ws/wd
+                df_binned_merged["bin_count_balanced"] = (
+                    df_binned_merged.min(axis=1)
+                )
+
+                # Define a bin frequency interpolant. Can be nearest-neighbor
+                # since every data point from all dataframes is covered.
+                df_binned_merged = df_binned_merged.reset_index(drop=False)
+                freq_interpolant = NearestNDInterpolator(
+                    x=df_binned_merged[["wd_bin", "ws_bin"]],
+                    y=df_binned_merged["bin_count_balanced"],
+                )
+
+                # Assign frequency interpolant to each energy ratio object
+                for era in era_list:
+                    era._set_inflow_freq_interpolant(freq_interpolant)
+
+            else:
+                print(
+                    "Dataframes share underlying wd and ws." +
+                    " Skipping rebalancing -- not necessary."
+                )
+
+        # Now calculate energy ratios using each object
+        for ii, era in enumerate(era_list):
+            out = era.get_energy_ratio_gain(
+                test_turbines=test_turbines,
+                wd_step=wd_step,
+                ws_step=ws_step,
+                wd_bin_width=wd_bin_width,
+                ws_bins=ws_bins,
+                wd_bins=wd_bins,
+                N=N,
+                percentiles=percentiles,
+                return_detailed_output=return_detailed_output,
+                num_blocks = num_blocks
+            )
+
+            # Save each output to self
+            if return_detailed_output:
+                self.df_list_gains[ii]["er_results"] = out[0]
+                self.df_list_gains[ii]["er_results_info_dict"] = out[1]
+            else:
+                self.df_list_gains[ii]["er_results"] = out
+            self.df_list_gains[ii]["df_freq"] = era.df_freq.reset_index(drop=False)
+            self.df_list_gains[ii]["er_test_turbines"] = test_turbines
+            self.df_list_gains[ii]["er_wd_step"] = wd_step
+            self.df_list_gains[ii]["er_ws_step"] = ws_step
+            self.df_list_gains[ii]["er_wd_bin_width"] = era.wd_bin_width
+            self.df_list_gains[ii]["er_bootstrap_N"] = N
+
+        return self.df_list_gains
 
     def get_energy_ratios_fast(
         self,
@@ -617,6 +866,7 @@ class energy_ratio_suite:
 
             # Save each output to self
             self.df_list[ii]["er_results"] = out
+            self.df_list[ii]["df_freq"] = None
             self.df_list[ii]["er_test_turbines"] = test_turbines
             self.df_list[ii]["er_wd_step"] = wd_step
             self.df_list[ii]["er_ws_step"] = ws_step
@@ -625,7 +875,77 @@ class energy_ratio_suite:
 
         return self.df_list
 
-    def plot_energy_ratios(self, superimpose=True, hide_uq_labels=True):
+    def plot_energy_ratios(self, 
+                           superimpose=True, 
+                           hide_uq_labels=True, 
+                           polar_plot=False, 
+                           axarr=None,
+                           show_barplot_legend=True):
+        """This function plots the energy ratios of each dataset against
+        the wind direction, potentially with uncertainty bounds if N > 1
+        was specified by the user. One must first run get_energy_ratios()
+        before attempting to plot the energy ratios.
+
+        Args:
+        superimpose (bool, optional): if True, plots the energy ratio
+            of all datasets into the same figure. If False, will plot the
+            energy ratio of each dataset into a separate figure. Defaults
+            to True.
+        hide_uq_labels (bool, optional): If true, do not specifically label
+            the confidence intervals in the plot
+        polar_plot (bool, optional): Plots the energy ratios in a polar
+            coordinate system, aligned with the wind direction coordinate
+            system of FLORIS. Defaults to False.
+        axarr([iteratible]): List of axes in the figure with length 2.
+        show_barplot_legend (bool, optional): Show the legend in the bar
+            plot figure?  Defaults to True
+
+        Returns:
+            axarr([iteratible]): List of axes in the figure with length 2.
+        """
+        if superimpose:
+            results_array = [df["er_results"] for df in self.df_list]
+            df_freq_array = [df["df_freq"] for df in self.df_list]
+            labels_array = [df["name"] for df in self.df_list]
+            colors_array = [df["color"] for df in self.df_list]
+            axarr = vis.plot(
+                energy_ratios=results_array,
+                df_freqs=df_freq_array,
+                labels=labels_array,
+                colors=colors_array,
+                hide_uq_labels=hide_uq_labels,
+                polar_plot=polar_plot,
+                axarr=axarr,
+                show_barplot_legend=show_barplot_legend
+            )
+
+        else:
+            # If superimpose is False, axarr must be None
+            if axarr is not None:
+                raise ValueError("If superimpose is False, axarr must be None")
+
+            axarr = []
+            for df in self.df_list:
+                axi = vis.plot(
+                    energy_ratios=df["er_results"],
+                    df_freqs=df["df_freq"],
+                    labels=df["name"],
+                    colors=[df["color"]],
+                    hide_uq_labels=hide_uq_labels,
+                    polar_plot=polar_plot,
+                    show_barplot_legend=show_barplot_legend
+                )
+                axarr.append(axi)
+
+        return axarr
+
+    def plot_energy_ratio_gains(
+            self, 
+            superimpose=True, 
+            hide_uq_labels=True,
+            axarr=None,
+            show_barplot_legend=True,
+    ):
         """This function plots the energy ratios of each dataset against
         the wind direction, potentially with uncertainty bounds if N > 1
         was specified by the user. One must first run get_energy_ratios()
@@ -638,22 +958,46 @@ class energy_ratio_suite:
             to True.
             hide_uq_labels (bool, optional): If true, do not specifically label
             the confidence intervals in the plot
+            axarr([iteratible]): List of axes in the figure with length 2.
+            show_barplot_legend (bool, optional): Show the legend in the bar
+            plot figure?  Defaults to True
 
         Returns:
-            ax [plt.Axes]: Axis handle for the figure.
+            axarr([iteratible]): List of axes in the figure with length 2.
         """
         if superimpose:
-            results_array = [df["er_results"] for df in self.df_list]
-            labels_array = [df["name"] for df in self.df_list]
-            fig, ax = vis.plot(results_array, labels_array, hide_uq_labels=hide_uq_labels)
+            results_array = [df["er_results"] for df in self.df_list_gains]
+            labels_array = [df["name"] for df in self.df_list_gains]
+            colors_array = [df["color"] for df in self.df_list_gains]
+            axarr = vis.plot(
+                energy_ratios=results_array, 
+                labels=labels_array, 
+                colors=colors_array,
+                hide_uq_labels=hide_uq_labels,
+                axarr=axarr,
+                show_barplot_legend=show_barplot_legend
+            )
+            axarr[0].set_ylabel("Change in energy ratio (-)")
 
         else:
-            ax = []
-            for df in self.df_list:
-                fig, axi = vis.plot(df["er_results"], df["name"], hide_uq_labels=hide_uq_labels)
-                ax.append(axi)
+            # If superimpose is False, axarr must be None
+            if axarr is not None:
+                raise ValueError("If superimpose is False, axarr must be None")
+            axarr = []
+            for df in self.df_list_gains:
+                axi = vis.plot(
+                    energy_ratios=df["er_results"],
+                    labels=df["name"], 
+                    colors=[df["color"]],
+                    hide_uq_labels=hide_uq_labels,
+                    axarr=axarr,
+                    show_barplot_legend=show_barplot_legend
+                )
+                axi.set_ylabel("Change in energy ratio (-)")
+                axarr.append(axi)
 
-        return ax
+        return axarr
+
 
     def export_detailed_energy_info_to_xlsx(
         self,
