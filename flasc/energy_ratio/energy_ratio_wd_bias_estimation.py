@@ -458,6 +458,7 @@ class bias_estimation():
         for ii, fsc in enumerate(self.fsc_list):
             ti = self.fsc_test_turbine_list[ii]
             ax = fsc.plot_energy_ratios()
+            ax[0].set_title('Turbine {:03d}'.format(ti))
             if save_path is not None:
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 plt.savefig(save_path + '_{:03d}.{:s}'.format(ti, format), dpi=dpi)

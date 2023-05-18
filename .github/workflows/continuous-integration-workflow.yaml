@@ -11,7 +11,7 @@ on:
       - 'NOTICE.txt'
       - 'README.rst'
       - 'docs/**'
-      - 'examples/**'
+      - 'examples*/**'
   pull_request:
     types: [opened, synchronize, edited, reopened]
 

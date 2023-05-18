@@ -26,6 +26,7 @@ def plot(
     hide_uq_labels=True,
     polar_plot=False,
     axarr=None,
+    show_barplot_legend=True,
 ):
     """This function plots energy ratios against the reference wind
     direction. The plot may or may not include uncertainty bounds,
@@ -68,6 +69,8 @@ def plot(
         polar_plot (bool, optional): Plots the energy ratios in a polar
            coordinate system, aligned with the wind direction coordinate
            system of FLORIS. Defaults to False.
+        show_barplot_legend (bool, optional): Show the legend in the bar
+            plot figure?  Defaults to True
 
     Returns:
         axarr([iteratible]): List of axes in the figure with length 2.
@@ -227,8 +230,9 @@ def plot(
     # Format the bin count plot
     axarr[1].grid(visible=True, which="major", axis="both", color="gray")
     axarr[1].grid(visible=True, which="minor", axis="both", color="lightgray")
-    if df_freqs is not None:
-        axarr[1].legend(ncols=len(df_freqs), fontsize="small")
+    if show_barplot_legend:
+        if df_freqs is not None:
+            axarr[1].legend(ncols=len(df_freqs), fontsize="small")
 
     # Arrange xtick labels to align with FLORIS internal coordinate system
     if polar_plot:
