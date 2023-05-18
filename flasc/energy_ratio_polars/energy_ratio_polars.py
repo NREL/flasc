@@ -339,6 +339,7 @@ def compute_energy_ratio(df_,
         .pivot(values=['energy_ratio','count'], columns='df_name', index='wd_bin',aggregate_function='first')
         .rename({f'energy_ratio_df_name_{n}' : n for n in df_names})
         .rename({f'count_df_name_{n}' : f'count_{n}'  for n in df_names})
+        .sort('wd_bin')
     )
 
     # This probably doesn't belong in here but for now
@@ -347,8 +348,13 @@ def compute_energy_ratio(df_,
             uplift = 100 * (pl.col(df_names[1]) - pl.col(df_names[0])) / pl.col(df_names[0])
         )
 
-    # Enforce a column order
-    df_ = df_.select(['wd_bin'] + df_names + ['uplift'] + [f'count_{n}' for n in df_names])
+        # Enforce a column order
+        df_ = df_.select(['wd_bin'] + df_names + ['uplift'] + [f'count_{n}' for n in df_names])
+
+    else:
+        # Enforce a column order
+        df_ = df_.select(['wd_bin'] + df_names +  [f'count_{n}' for n in df_names])
+
     
 
     return(df_)
@@ -386,6 +392,8 @@ def compute_energy_ratio_bootstrap(df_,
     
     if 'uplift' in df_concat.columns:
         df_names_with_uplift = df_names + ['uplift']
+    else:
+        df_names_with_uplift = df_names
 
 
     return(df_concat
