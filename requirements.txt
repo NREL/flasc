@@ -2,7 +2,6 @@ floris>=3.4
 feather-format
 matplotlib>=3.6.3
 numpy
-numba
 pandas>=1.5
 pyproj
 pytest

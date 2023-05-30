@@ -176,7 +176,13 @@ def plot(
             )
 
     # Plot the bin count
-    if df_freqs is not None:
+    is_none = False
+    if df_freqs is None:
+        is_none = True
+    elif isinstance(df_freqs, list):
+        is_none = np.any([c is None for c in df_freqs])
+
+    if not is_none:
         for ii, df_freq in enumerate(df_freqs):
             wd_bins = df_freq["wd_bin"].unique()
             n_ws_bins = len(df_freq["ws_bin_edges"].unique())

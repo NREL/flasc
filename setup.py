@@ -16,8 +16,6 @@ REQUIRED = [
     'feather-format',
     'matplotlib>=3.6.3',
     'numpy',
-    'numba',
-    'openoa',
     'pandas>=1.5',
     'pyproj',
     'pytest',
