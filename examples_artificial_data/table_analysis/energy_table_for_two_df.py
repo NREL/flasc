@@ -19,7 +19,7 @@ def load_data():
     )
     if not os.path.exists(ftr_path):
         raise FileNotFoundError(
-            "Please run ./examples/demo_dataset/"
+            "Please run ./examples_artificial_data/demo_dataset/"
             + "generate_demo_dataset.py before try"
             + "ing any of the other examples."
         )
