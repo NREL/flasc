@@ -55,10 +55,57 @@ class sql_database_manager:
 
     def _get_table_names(self):
         return self.inspector.get_table_names()
+    
+    def _does_table_exist(self, table_name):
+        return table_name in self._get_table_names()
 
     def _get_column_names(self, table_name):
         columns =  self.inspector.get_columns(table_name)
         return [c['name'] for c in columns]
+    
+    def _create_table_from_df(self, table_name, df):
+
+        print(f'Creating Table: {table_name} with {df.shape[1]} columns')
+
+        # Convert to pandas for upload
+        df_pandas = df.to_pandas()
+        df_pandas = df_pandas.iloc[:10]
+
+        df_pandas.to_sql(
+                    table_name,
+                    self.engine,
+                    index=False,
+                    method="multi"
+                )
+        
+        # Make time unique and an index to speed queries
+        query = 'CREATE UNIQUE INDEX idx_time ON %s (time);' % table_name
+        print('Setting time to unique index')
+        with self.engine.connect() as con:
+            rs = con.execute(sqlalch.text(query))
+            print(f'...RESULT: {rs}')
+            con.commit()  # commit the transaction
+
+    def _remove_duplicated_time(self, table_name, df):
+
+        start_time = df.select(pl.min("time"))[0, 0]
+        end_time = df.select(pl.max("time"))[0, 0]
+        original_size = df.shape[0]
+
+        print(f'Checking for time entries already in {table_name} between {start_time} and {end_time}')
+        time_in_db = self.get_data(table_name,
+                                   ['time'],
+                                   start_time=start_time,
+                                   end_time=end_time,
+                                   end_inclusive=True
+        )
+
+        df = df.join(time_in_db, on='time',how="anti")
+        new_size = df.shape[0]
+        if new_size < original_size:
+            print(f'...Dataframe size reduced from {original_size} to {new_size} by time values already in {table_name}')
+        return df
+
 
     def _get_first_time_entry(self, table_name):
 
@@ -148,7 +195,12 @@ class sql_database_manager:
             df.write_ipc(fn_out_ii)
 
     def get_data(
-        self, table_name, columns=None, start_time=None, end_time=None
+        self, 
+        table_name, 
+        columns=None, 
+        start_time=None, 
+        end_time=None,
+        end_inclusive=False,
     ):
         # Get the data from tables
         if columns is None:
@@ -161,13 +213,19 @@ class sql_database_manager:
             query_string += " WHERE time >= '" + str(start_time) + "'"
 
         if (start_time is not None) and (end_time is not None):
-            query_string += " AND time < '" + str(end_time) + "'"
+            if end_inclusive:
+                query_string += " AND time <= '" + str(end_time) + "'"
+            else:
+                query_string += " AND time < '" + str(end_time) + "'"
         elif (start_time is None) and (end_time is not None):
-            query_string += " WHERE time < '" + str(end_time) + "'"
+            if end_inclusive:
+                query_string += " WHERE time <= '" + str(end_time) + "'"
+            else:
+                query_string += " WHERE time < '" + str(end_time) + "'"
 
         query_string += " ORDER BY time"
 
-        df = pl.read_sql(query_string,self.url)
+        df = pl.read_database(query_string,self.url)
 
         # Drop a column called index
         if "index" in df.columns:
@@ -179,8 +237,9 @@ class sql_database_manager:
                 df = df.with_columns(pl.col("time").cast(pl.Datetime))
 
         return df
+    
 
-    #TODO: UPDATE TO POLARS
+    #TODO: This is a fresh redo check it works
     def send_data(
         self,
         table_name,
@@ -190,79 +249,117 @@ class sql_database_manager:
         df_chunk_size=2000,
         sql_chunk_size=50
     ):
-        table_name = table_name.lower()
-        table_names = [t.lower() for t in self._get_table_names()]
+        
+        # Make a local copy
+        df_ = df.clone()
+        
+        # Check if table exists
+        if not self._does_table_exist(table_name):
 
-        if (if_exists == "append"):
-            print("Warning: risk of adding duplicate rows using 'append'.")
-            print("You are suggested to use 'append_new' instead.")
+            print(f'{table_name} does not yet exist')
 
-        if (if_exists == "append_new") and (table_name in table_names):
-            if len(unique_cols) > 1:
-                raise NotImplementedError("Not yet implemented.")
+            # Create the table
+            self._create_table_from_df(table_name, df_)
 
-            col = unique_cols[0]
-            idx_in_db = self.get_data(table_name=table_name, columns=[col])[
-                col
-            ]
+        # Check for times already in database
+        df_ = self._remove_duplicated_time(table_name, df_)
 
-            # Check if values in SQL database are unique
-            if not idx_in_db.is_unique:
-                raise IndexError(
-                    "Column '%s' is not unique in the SQL database." % col
-                )
+        # Write to database
+        print(f'Inserting {df_.shape[0]} rows into {table_name}')
+        time_start_total = timerpc()
+        df_.write_database(
+            table_name,
+            self.url,
+            if_exists='append'
+        )
+        total_time = timerpc() - time_start_total
+        print(f'...Finished in {total_time}')
 
-            idx_in_df = set(df[col])
-            idx_in_db = set(idx_in_db)
-            idx_to_add = np.sort(list(idx_in_df - idx_in_db))
-            print(
-                "{:d} entries already exist in SQL database.".format(
-                    len(idx_in_df) - len(idx_to_add)
-                )
-            )
 
-            print("Adding {:d} new entries...".format(len(idx_to_add)))
-            df_subset = df.set_index('time').loc[idx_to_add].reset_index(
-                drop=False)
+    # #TODO: UPDATE TO POLARS
+    # #TODO: Paul note (may 31 2023), POLARS API not up to PANDAS so using PANDAS here
+    # def send_data(
+    #     self,
+    #     table_name,
+    #     df,
+    #     if_exists="append_new",
+    #     unique_cols=["time"],
+    #     df_chunk_size=2000,
+    #     sql_chunk_size=50
+    # ):
+    #     table_name = table_name.lower()
+    #     table_names = [t.lower() for t in self._get_table_names()]
 
-        else:
-            df_subset = df
+    #     if (if_exists == "append"):
+    #         print("Warning: risk of adding duplicate rows using 'append'.")
+    #         print("You are suggested to use 'append_new' instead.")
 
-        if (if_exists == "append_new"):
-            if_exists = "append"
+    #     if (if_exists == "append_new") and (table_name in table_names):
+    #         if len(unique_cols) > 1:
+    #             raise NotImplementedError("Not yet implemented.")
 
-        # Upload data
-        N = df_subset.shape[0]
-        if N < 1:
-            print("Skipping data upload. Dataframe is empty.")
-        else:
-            print("Attempting to insert %d rows into table '%s'."
-                % (df_subset.shape[0], table_name))
-            df_chunks_id = np.arange(0, df_subset.shape[0], df_chunk_size)
-            df_chunks_id = np.append(df_chunks_id, df_subset.shape[0])
-            df_chunks_id = np.unique(df_chunks_id)
+    #         col = unique_cols[0]
+    #         idx_in_db = self.get_data(table_name=table_name, columns=[col])[
+    #             col
+    #         ]
 
-            time_start_total = timerpc()
-            for i in range(len(df_chunks_id)-1):
-                Nl = df_chunks_id[i]
-                Nu = df_chunks_id[i+1]
-                print("Inserting rows %d to %d." % (Nl, Nu))
-                time_start_i = timerpc()
-                df_sub = df_subset[Nl:Nu]
-                df_sub.to_sql(
-                    table_name,
-                    self.engine,
-                    if_exists=if_exists,
-                    index=False,
-                    method="multi",
-                    chunksize=sql_chunk_size,
-                )
-                time_i = timerpc() - time_start_i
-                total_time = timerpc() - time_start_total
-                est_time_left = (total_time / Nu) * (N - Nu)
-                eta = datetime.datetime.now() + td(seconds=est_time_left)
-                eta = eta.strftime("%a, %d %b %Y %H:%M:%S")
-                print("Data insertion took %.1f s. ETA: %s." % (time_i, eta))
+    #         # Check if values in SQL database are unique
+    #         if not idx_in_db.is_unique:
+    #             raise IndexError(
+    #                 "Column '%s' is not unique in the SQL database." % col
+    #             )
+
+    #         idx_in_df = set(df[col])
+    #         idx_in_db = set(idx_in_db)
+    #         idx_to_add = np.sort(list(idx_in_df - idx_in_db))
+    #         print(
+    #             "{:d} entries already exist in SQL database.".format(
+    #                 len(idx_in_df) - len(idx_to_add)
+    #             )
+    #         )
+
+    #         print("Adding {:d} new entries...".format(len(idx_to_add)))
+    #         df_subset = df.set_index('time').loc[idx_to_add].reset_index(
+    #             drop=False)
+
+    #     else:
+    #         df_subset = df
+
+    #     if (if_exists == "append_new"):
+    #         if_exists = "append"
+
+    #     # Upload data
+    #     N = df_subset.shape[0]
+    #     if N < 1:
+    #         print("Skipping data upload. Dataframe is empty.")
+    #     else:
+    #         print("Attempting to insert %d rows into table '%s'."
+    #             % (df_subset.shape[0], table_name))
+    #         df_chunks_id = np.arange(0, df_subset.shape[0], df_chunk_size)
+    #         df_chunks_id = np.append(df_chunks_id, df_subset.shape[0])
+    #         df_chunks_id = np.unique(df_chunks_id)
+
+    #         time_start_total = timerpc()
+    #         for i in range(len(df_chunks_id)-1):
+    #             Nl = df_chunks_id[i]
+    #             Nu = df_chunks_id[i+1]
+    #             print("Inserting rows %d to %d." % (Nl, Nu))
+    #             time_start_i = timerpc()
+    #             df_sub = df_subset[Nl:Nu]
+    #             df_sub.to_sql(
+    #                 table_name,
+    #                 self.engine,
+    #                 if_exists=if_exists,
+    #                 index=False,
+    #                 method="multi",
+    #                 chunksize=sql_chunk_size,
+    #             )
+    #             time_i = timerpc() - time_start_i
+    #             total_time = timerpc() - time_start_total
+    #             est_time_left = (total_time / Nu) * (N - Nu)
+    #             eta = datetime.datetime.now() + td(seconds=est_time_left)
+    #             eta = eta.strftime("%a, %d %b %Y %H:%M:%S")
+    #             print("Data insertion took %.1f s. ETA: %s." % (time_i, eta))
 
 #TODO: UPDATE TO POLARS
 class sql_db_explorer_gui:
