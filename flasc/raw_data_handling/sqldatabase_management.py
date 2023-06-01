@@ -381,7 +381,7 @@ class sql_db_explorer_gui:
         self.master = master
 
         # Get basic database properties
-        self.df = pd.DataFrame()
+        self.df = pl.DataFrame()
         table_names = dbc._get_table_names()
         min_table_dates = [
             dbc._get_first_time_entry(table_name=t) for t in table_names
@@ -570,7 +570,7 @@ class sql_db_explorer_gui:
                 start_time=start_time,
                 end_time=end_time,
             )
-            df = df.set_index("time", drop=True)
+            # df = df.set_index("time", drop=True)
 
             if df.shape[0] <= 0:
                 print(
@@ -580,29 +580,40 @@ class sql_db_explorer_gui:
             else:
                 print("...Imported data successfully.")
 
-                old_col_names = list(df.columns)
+                old_col_names = [c for c in list(df.columns) if not c=='time']
                 new_col_names = [
                     chr(97 + tables_selected[ii]).upper() + "_%s" % c
-                    for c in df.columns
+                    for c in old_col_names
                 ]
                 col_mapping = dict(zip(old_col_names, new_col_names))
-                df = df.rename(columns=col_mapping)
+                df = df.rename(col_mapping)
 
                 # If specific turbine names are supplied apply them here
                 if self.turbine_names is not None:
                     columns = df.columns
                     for t in range(len(self.turbine_names)):
                         columns = [c.replace('%03d' % t,self.turbine_names[t]) for c in columns]
-                    df.columns = columns
+                    # df.columns = columns
+                    df = df.rename(dict(zip(df.columns,columns)))
 
                 df_array.append(df)
 
         # Merge dataframes
-        self.df = pd.concat(df_array, axis=1).reset_index(drop=False)
+        # self.df = pl.concat(df_array, axis=1)# .reset_index(drop=False)
+        df_merge = df_array[0]
+
+        if len(df_array) > 1:
+            for df_ in df_array:
+                df_merge = df_merge.join(df_, on='time',how='outer')
+
+        #Save it now
+        self.df = df_merge
 
         # If sorting the columns do it now
         if self.sort_columns:
-            self.df = self.df[sorted(self.df.columns)]
+            # self.df = self.df[sorted(self.df.columns)]
+            self.df = self.df.select(sorted(self.df.columns))
+
 
         self.update_channel_cols()
         self.create_figures()
@@ -650,7 +661,7 @@ class sql_db_explorer_gui:
             ax = self.axes[channel_no]
             ax.clear()
             for c in self.channel_selection[channel_no]:
-                ax.plot(self.df.time, np.array(self.df[c].values), label=c)
+                ax.plot(self.df['time'], np.array(self.df[c]), label=c)
             ax.legend()
             ax.grid(True)
 
