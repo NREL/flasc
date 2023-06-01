@@ -265,13 +265,24 @@ class sql_database_manager:
         df_ = self._remove_duplicated_time(table_name, df_)
 
         # Write to database
-        print(f'Inserting {df_.shape[0]} rows into {table_name}')
+        print(f'Inserting {df_.shape[0]} rows into {table_name} in chunks of {df_chunk_size}')
         time_start_total = timerpc()
-        df_.write_database(
-            table_name,
-            self.url,
-            if_exists='append'
+
+        # Parition into chunks
+        df_list = (df_.with_row_count('id')
+            .with_columns(pl.col('id').apply(lambda i: int(i/df_chunk_size)))
+            .partition_by('id')
         )
+
+        num_par = len(df_list)
+        for df_par_idx, df_par in enumerate(df_list):
+            print(f'...inserting chunk {df_par_idx} of {num_par}')
+        
+            df_par.drop('id').write_database(
+                table_name,
+                self.url,
+                if_exists='append'
+            )
         total_time = timerpc() - time_start_total
         print(f'...Finished in {total_time}')
 
