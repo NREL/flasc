@@ -603,7 +603,7 @@ class sql_db_explorer_gui:
         df_merge = df_array[0]
 
         if len(df_array) > 1:
-            for df_ in df_array:
+            for df_ in df_array[1:]:
                 df_merge = df_merge.join(df_, on='time',how='outer')
 
         #Save it now
