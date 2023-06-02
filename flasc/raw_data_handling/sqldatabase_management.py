@@ -264,6 +264,11 @@ class sql_database_manager:
         # Check for times already in database
         df_ = self._remove_duplicated_time(table_name, df_)
 
+        # Check if df_ is now
+        if df_.shape[0] == 0:
+            print('Dataframe is empty')
+            return
+
         # Write to database
         print(f'Inserting {df_.shape[0]} rows into {table_name} in chunks of {df_chunk_size}')
         time_start_total = timerpc()
