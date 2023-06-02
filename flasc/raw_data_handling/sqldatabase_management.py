@@ -79,7 +79,7 @@ class sql_database_manager:
                 )
         
         # Make time unique and an index to speed queries
-        query = 'CREATE UNIQUE INDEX idx_time ON %s (time);' % table_name
+        query = 'CREATE UNIQUE INDEX idx_time_%s ON %s (time);' % (table_name, table_name)
         print('Setting time to unique index')
         with self.engine.connect() as con:
             rs = con.execute(sqlalch.text(query))
