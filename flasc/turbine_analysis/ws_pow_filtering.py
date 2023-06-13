@@ -117,10 +117,12 @@ class ws_pw_curve_filtering:
 
             bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
             bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
-            pow_bins = [
-                np.median(pw_clean[bin_array == i])
-                for i in range(pw_curve_df.shape[0])
-            ]
+            pow_bins = np.ones(pw_curve_df.shape[0], dtype=float) * np.nan
+            for i in range(pw_curve_df.shape[0]):
+                arr = pw_clean[bin_array == i]
+                if len(arr) > 0:
+                    pow_bins[i] =  np.median(pw_clean[bin_array == i])
+
 
             # Write outputs to the dataframe
             pw_curve_df["pow_%03d" % ti] = pow_bins
