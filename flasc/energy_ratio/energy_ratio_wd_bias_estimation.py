@@ -408,7 +408,7 @@ class bias_estimation():
                                                xtol=0.1, disp=True)
         )
 
-        dran = opt_search_range[1]-opt_search_range[0]
+        dran = opt_search_range[1] - opt_search_range[0]
         x_opt, J_opt, x, J = opt.brute(
             func=cost_fun,
             ranges=[opt_search_range],
