@@ -65,7 +65,7 @@ def bin_column(df_, col_name, bin_col_name, edges):
         ).alias(bin_col_name)
     )
     
-def add_ws_bin(df_, ws_cols, ws_step=1.0, ws_min=0.0, ws_max=50.0):
+def add_ws_bin(df_, ws_cols, ws_step=1.0, ws_min=-0.5, ws_max=50.0):
     """
     Add the ws_bin column to a dataframe, given which columns to average over
     and the step sizes to use
@@ -85,12 +85,14 @@ def add_ws_bin(df_, ws_cols, ws_step=1.0, ws_min=0.0, ws_max=50.0):
 
     df_with_mean_ws =  (
         # df_.select(pl.exclude('ws_bin')) # In case ws_bin already exists
-        df_.filter(
+        df_.with_columns(
+            df_.select(ws_cols).mean(axis=1).alias('ws_bin')
+            # ws_bin = pl.concat_list(ws_cols).arr.mean() # Initially ws_bin is just the mean
+        )
+        .filter(
             pl.all(pl.col(ws_cols).is_not_null()) # Select for all bin cols present
         ) 
-        .with_columns(
-            ws_bin = pl.concat_list(ws_cols).arr.mean() # Initially ws_bin is just the mean
-        )
+
         .filter(
             (pl.col('ws_bin') > ws_min) &  # Filter the mean wind speed
             (pl.col('ws_bin') < ws_max) &
@@ -138,10 +140,15 @@ def add_wd_bin(df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0):
             pl.col(wd_cols).mul(np.pi/180).sin().suffix('_sin'),
         ]
         )
+    )
+    df_with_mean_wd = (
+        df_with_mean_wd
         .with_columns(
         [
-            pl.concat_list(wd_cols_cos).arr.mean().alias('cos_mean'),
-            pl.concat_list(wd_cols_sin).arr.mean().alias('sin_mean'),
+            df_with_mean_wd.select(wd_cols_cos).mean(axis=1).alias('cos_mean'),
+            df_with_mean_wd.select(wd_cols_sin).mean(axis=1).alias('sin_mean'),
+            # pl.concat_list(wd_cols_cos).arr.mean().alias('cos_mean'),
+            # pl.concat_list(wd_cols_sin).arr.mean().alias('sin_mean'),
         ]
         )
         .with_columns(
