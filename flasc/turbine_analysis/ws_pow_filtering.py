@@ -255,18 +255,29 @@ class ws_pw_curve_filtering:
 
         if apply_filters_to_df:
             
-            # Update dataframe and filter labels
-            cols_to_filter = ["WTG_{:03d}".format(tii) for tii in ti]
-            for tii in ti:
-                col_to_filter = cols_to_filter[tii]
+            # # BEFORE JUNE 12 2022
+            # # Update dataframe and filter labels
+            # cols_to_filter = ["WTG_{:03d}".format(tii) for tii in ti]
+            # for tii in ti:
+            #     col_to_filter = cols_to_filter[tii]
             
 
                 
+            #     self.df_filters = self.df_filters.with_columns(
+            #         (pl.when(pl.Series(condition))
+            #         .then(pl.lit(label))
+            #         .otherwise(pl.col(col_to_filter))).alias(col_to_filter)   
+            #     )
+
+            # AFTER JUNE 12 2022
+            for tii in ti:
                 self.df_filters = self.df_filters.with_columns(
                     (pl.when(pl.Series(condition))
                     .then(pl.lit(label))
-                    .otherwise(pl.col(col_to_filter))).alias(col_to_filter)   
+                    .otherwise(pl.col("WTG_{:03d}".format(tii)))).alias("WTG_{:03d}".format(tii))   
                 )
+
+
             
 
             # for tii in ti:  
