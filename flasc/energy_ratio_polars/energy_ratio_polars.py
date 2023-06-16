@@ -321,15 +321,16 @@ def compute_energy_ratio(df_,
     bin_cols_without_df_name = [c for c in bin_cols_in if c != 'df_name']
     bin_cols_with_df_name = bin_cols_without_df_name + ['df_name']
     
-    df_ = (df_.with_columns(
-                power_ratio = pl.col('test_pow') / pl.col(f'ref_pow'))
+    df_ = (df_
+           #.with_columns(
+            #    power_ratio = pl.col('test_pow') / pl.col(f'ref_pow'))
         .filter(pl.all(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
         .groupby(bin_cols_with_df_name, maintain_order=True)
-        .agg([pl.mean("ref_pow"), pl.mean("power_ratio"),pl.count()]) 
+        .agg([pl.mean("ref_pow"), pl.mean("test_pow"),pl.count()]) 
         .with_columns(
             [
-                pl.col('count').min().over(bin_cols_without_df_name).alias('count_min'), # Find the min across df_name
-                pl.col('ref_pow').mul(pl.col('power_ratio')).alias('test_pow'), # Compute the test power
+                pl.col('count').min().over(bin_cols_without_df_name).alias('count_min')#, # Find the min across df_name
+                #pl.col('ref_pow').mul(pl.col('power_ratio')).alias('test_pow'), # Compute the test power
             ]
         )
         .with_columns(
