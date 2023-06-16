@@ -260,14 +260,16 @@ def resample_energy_table(df_e_, i):
 def add_test_power(df_, test_cols):
 
     return df_.with_columns(
-        test_pow = pl.concat_list(test_cols).arr.mean()
+        df_.select(test_cols).mean(axis=1).alias('test_pow')
     )
+
 
 def add_ref_power(df_, ref_cols):
 
     return df_.with_columns(
-        ref_pow = pl.concat_list(ref_cols).arr.mean()
+        df_.select(ref_cols).mean(axis=1).alias('ref_pow')
     )
+
 
 
 def compute_energy_ratio(df_,
