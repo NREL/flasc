@@ -697,10 +697,10 @@ class ws_pw_curve_filtering:
                 power curves were previously not yet calculated.
         """
         if calculate_missing and (self.pw_curve_df.isna().all(axis=0).any()):
-            turbines_subset = np.where(
+            turbine_subset = np.where(
                 self.pw_curve_df[[f"pow_{ti:03d}" for ti in range(self.n_turbines)]].isna().all(axis=0)
             )[0]
-            self._get_mean_power_curves(turbines_subset=turbines_subset)
+            self._get_mean_power_curves(turbine_subset=turbine_subset)
 
         return self.pw_curve_df
 
@@ -711,10 +711,10 @@ class ws_pw_curve_filtering:
 
         # Get mean power curves for the turbines that are not yet calculated
         if self.pw_curve_df.isna().all(axis=0).any():
-            turbines_subset = np.where(
+            turbine_subset = np.where(
                 self.pw_curve_df[[f"pow_{ti:03d}" for ti in range(self.n_turbines)]].isna().all(axis=0)
             )[0]
-            self._get_mean_power_curves(turbines_subset=turbines_subset)
+            self._get_mean_power_curves(turbine_subset=turbine_subset)
 
         # Create the figure
         fig, ax = plt.subplots()
