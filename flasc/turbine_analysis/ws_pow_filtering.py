@@ -71,7 +71,23 @@ class ws_pw_curve_filtering:
 
         return all_flags
 
-    def _get_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5), df=None):
+    def _reset_mean_power_curves(self, ws_bins=np.arange(0.0, 25.5, 0.5)):
+        # If uninitialized, create an empty dataframe with NaNs
+        pw_curve_dict = dict(
+            zip(
+                [f"pow_{ti:03d}" for ti in range(self.n_turbines)],
+                [np.ones(len(ws_bins) - 1) * np.nan] * self.n_turbines
+            )
+        )
+        pw_curve_dict["ws"] = (ws_bins[1::] + ws_bins[0:-1]) / 2
+        pw_curve_dict["ws_min"] = ws_bins[0:-1]
+        pw_curve_dict["ws_max"] = ws_bins[1::]
+        pw_curve_df = pd.DataFrame(pw_curve_dict)
+        
+        self._pw_curve_ws_bins = ws_bins
+        self.pw_curve_df = pw_curve_df
+
+    def _get_mean_power_curves(self, df=None, turbine_subset=None):
         """Calculates the mean power production in bins of the wind speed,
         for all turbines in the wind farm.
 
@@ -84,7 +100,9 @@ class ws_pw_curve_filtering:
                   * Time of each measurement: time
                   * Wind speed of each turbine: ws_000, ws_001, ... 
                   * Power production of each turbine: pow_000, pow_001, ...
-
+            turbine_subset (list, optional): List of turbine indices to
+                calculate the mean power curve for. If None is specified,
+                defaults to calculating it for all turbines.
         Returns:
             pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
                 speed bins and the mean power production value for every
@@ -95,59 +113,52 @@ class ws_pw_curve_filtering:
         if df is None:
             df = self.df
 
-        # # Create a dataframe to contain the averaged power curves
-        df_ws_info = pd.DataFrame(
-            {
-                "ws": (ws_bins[1::] + ws_bins[0:-1]) / 2,
-                "ws_min": ws_bins[0:-1],
-                "ws_max": ws_bins[1::],
-            }
-        )
+        # Get existing power curve
+        pw_curve_df = self.pw_curve_df
 
-        ws_bin_cuts = [pd.cut(df[f"ws_{ti:03d}"], bins=ws_bins) for ti in range(self.n_turbines)]
-        df_pow_and_ws_bins = pd.concat(
+        # By default, if unspecified, Calculate power curve for all turbines
+        if turbine_subset is None:
+            turbine_subset = list(range(self.n_turbines))
+
+        # Apply binning to the wind speeds of the turbine(s)
+        ws_bin_cuts_subset = [
+            pd.cut(df[f"ws_{ti:03d}"], bins=self._pw_curve_ws_bins)
+            for ti in turbine_subset
+        ]
+
+        # Now add the binned wind speeds to the power measurements dataframe
+        df_pow_and_ws_bins_subset = pd.concat(
             [
-                df[["pow_%03d" % ti for ti in range(self.n_turbines)]],
-                *ws_bin_cuts
+                df[["pow_%03d" % ti for ti in turbine_subset]],
+                *ws_bin_cuts_subset
             ],
             axis=1
         )
-        pw_curve = pd.concat(
+
+        # Now group power measurements by their wind speed bin and calculate the median
+        pw_curve_df_subset = pd.concat(
             [
-            df_pow_and_ws_bins.groupby(by=f"ws_{ti:03d}")[f"pow_{ti:03d}"].median()
-            for ti in range(self.n_turbines)
+            df_pow_and_ws_bins_subset.groupby(by=f"ws_{ti:03d}")[f"pow_{ti:03d}"].median()
+            for ti in turbine_subset
             ],
             axis=1
         ).sort_index().reset_index(drop=True)
 
-        pw_curve_df = pd.concat(
-            [df_ws_info, pw_curve],
-            axis=1,
-        )
+        # Update the median power curve for the turbines in turbine_subset
+        pw_curve_df[[f"pow_{ti:03d}" for ti in turbine_subset]] = pw_curve_df_subset
 
         # Save the finalized power curve to self and return it to the user
         self.pw_curve_df = pw_curve_df
         return pw_curve_df
 
-    def _reset_df(self):
-        """Reset the 'filtered' dataframe, self.df, to its original form,
-        before any measurements were marked as faulty. """
-
-        # Copy the original dataframe from self
-        df = self._df_initial  
-        self.df = df.reset_index(drop=("time" in df.columns))
-
-        # Derive the total number of turbines in the dataframe
-        self.n_turbines = flascutils.get_num_turbines(df)
-
-        # Get mean power curve from data to start with
-        self._get_mean_power_curves()
-
     # Public methods
     def reset_filters(self):
         """Reset all filter variables and assume all data is clean."""
-        # Reset the filtered dataframe to the original, unfiltered one
-        self._reset_df()
+    
+        # Copy the original, unfiltered dataframe from self
+        df = self._df_initial  
+        self.df = df.reset_index(drop=("time" in df.columns))
+        self.n_turbines = flascutils.get_num_turbines(df)
 
         # Reset the dataframe with filter flags to mark all data as clean, initially
         all_clean_array = [
@@ -159,6 +170,9 @@ class ws_pw_curve_filtering:
             index=self.df.index,
             columns=["WTG_{:03d}".format(ti) for ti in range(self.n_turbines)]
         )
+
+        # Reset the mean power curves of the turbines
+        self._reset_mean_power_curves()
 
     def filter_by_condition(
         self,
@@ -241,9 +255,9 @@ class ws_pw_curve_filtering:
             for tii in ti:  
                 self.df_filters.loc[condition, "WTG_{:03d}".format(tii)] = label
 
-            # Clear the mean power curves. Namely, with this new filtering application
-            # the mean power curves must be recalculated.
-            self.pw_curve_df = None
+                # Clear the mean power curves. Namely, with this new filtering application
+                # the mean power curves must be recalculated.
+                self.pw_curve_df[f"pow_{tii:03d}"] = None  # Set as Nones
 
         return df_out
 
@@ -378,10 +392,10 @@ class ws_pw_curve_filtering:
         # the estimated power curve) changes every iteration, and hence so
         # do the estimated mean power curves again. This explains the
         # iterative nature of the problem.
-        df_initial_filtered = self.df.copy()
+        df_initial_filtered = self.df[[f"ws_{ti:03d}", f"pow_{ti:03d}"]].copy()
 
         # Iteratively filter data and recalculate the mean power curves
-        self._get_mean_power_curves()
+        self._get_mean_power_curves(turbine_subset=[ti])
         for ii in range(no_iterations):
             # Only print final iteration
             is_final_iteration = (ii == no_iterations - 1)
@@ -481,7 +495,7 @@ class ws_pw_curve_filtering:
             )
 
             # Recalculate the mean power curve based on current iteration's filtered dataframe
-            self._get_mean_power_curves(df=df_iteration)
+            self._get_mean_power_curves(df=df_iteration, turbine_subset=[ti])
             self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
                 x=x,
                 xp=lb_ws,
@@ -534,8 +548,8 @@ class ws_pw_curve_filtering:
         # Create upper and lower bounds around floris curve
 
         # Get mean power curves first, if not yet calculated
-        if self.pw_curve_df is None:
-            self._get_mean_power_curves()
+        if self.pw_curve_df[f"pow_{ti:03d}"].isna().all():
+            self._get_mean_power_curves(turbine_subset=[ti])
 
         df_xy = self.pw_curve_df.copy()
         rho = fi.floris.flow_field.air_density
@@ -640,7 +654,7 @@ class ws_pw_curve_filtering:
             ti=ti,
             apply_filters_to_df=True,
         )
-        self._get_mean_power_curves()  # Recalculate mean curve
+        self._get_mean_power_curves(turbine_subset=[ti])  # Recalculate mean curve
 
         # Write left and right bound to own curve
         self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
@@ -671,17 +685,22 @@ class ws_pw_curve_filtering:
         """
         return self.df
 
-    def get_power_curve(self):
+    def get_power_curve(self, calculate_missing=True):
         """Return the turbine estimated mean power curves to the user.
 
         Returns:
             pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
                 speed bins and the mean power production value for every
                 turbine.
+            calculate_missing (bool, optional): Calculate the median power
+                curves for the turbines for the turbines of which their
+                power curves were previously not yet calculated.
         """
-        # Get mean power curves first, if not yet calculated
-        if self.pw_curve_df is None:
-            self._get_mean_power_curves()
+        if calculate_missing and (self.pw_curve_df.isna().all(axis=0).any()):
+            turbines_subset = np.where(
+                self.pw_curve_df[[f"pow_{ti:03d}" for ti in range(self.n_turbines)]].isna().all(axis=0)
+            )[0]
+            self._get_mean_power_curves(turbines_subset=turbines_subset)
 
         return self.pw_curve_df
 
@@ -689,10 +708,15 @@ class ws_pw_curve_filtering:
         """Plot all turbines' power curves in a single figure. Also estimate
         and plot a mean turbine power curve.
         """
-        # Get mean power curves first, if not yet calculated
-        if self.pw_curve_df is None:
-            self._get_mean_power_curves()
 
+        # Get mean power curves for the turbines that are not yet calculated
+        if self.pw_curve_df.isna().all(axis=0).any():
+            turbines_subset = np.where(
+                self.pw_curve_df[[f"pow_{ti:03d}" for ti in range(self.n_turbines)]].isna().all(axis=0)
+            )[0]
+            self._get_mean_power_curves(turbines_subset=turbines_subset)
+
+        # Create the figure
         fig, ax = plt.subplots()
         x = np.array(self.pw_curve_df["ws"], dtype=float)
         for ti in range(self.n_turbines):
