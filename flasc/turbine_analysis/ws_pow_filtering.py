@@ -726,11 +726,10 @@ class ws_pw_curve_filtering:
         pow_mean_array = self.pw_curve_df[pow_cols].mean(axis=1)
         pow_std_array = self.pw_curve_df[pow_cols].std(axis=1)
 
-        yl = np.array(pow_mean_array - 2 * pow_std_array)
-        yu = np.array(pow_mean_array + 2 * pow_std_array)
         ax.fill_between(
-            np.hstack([x, x[::-1]]),
-            np.hstack([yl, yu[::-1]]),
+            x,
+            np.array(pow_mean_array - 2 * pow_std_array),
+            np.array(pow_mean_array + 2 * pow_std_array),
             color="tab:red",
             label="Uncertainty bounds (2 std. dev.)",
             alpha=0.30,
