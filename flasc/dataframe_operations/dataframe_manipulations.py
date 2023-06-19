@@ -725,7 +725,7 @@ def df_reduce_precision(df_in, verbose=False):
             max_error = np.max(np.abs(var_downsampled-df_in[c]))
             if verbose:
                 print("Column %s ['%s'] was downsampled to %s."
-                      % (c, datatype, var_downsampled.dtypes[0]))
+                      % (c, datatype, var_downsampled.dtypes))
                 print( "Max error: ", max_error)
         elif ((datatype == 'int64') or
               (datatype == 'int32') or
@@ -739,7 +739,7 @@ def df_reduce_precision(df_in, verbose=False):
             max_error = np.max(np.abs(var_downsampled-df_in[c]))
             if verbose:
                 print("Column %s ['%s'] was downsampled to %s."
-                      % (c, datatype, var_downsampled.dtypes[0]))
+                      % (c, datatype, var_downsampled.dtypes))
                 print( "Max error: ", max_error)
         else:
             if verbose:
