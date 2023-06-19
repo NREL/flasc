@@ -95,10 +95,8 @@ class ws_pw_curve_filtering:
         if df is None:
             df = self.df
 
-        # Create a dataframe to contain the averaged power curves
-        ws_max = np.max(ws_bins)
-        ws_min = np.min(ws_bins)
-        pw_curve_df = pd.DataFrame(
+        # # Create a dataframe to contain the averaged power curves
+        df_ws_info = pd.DataFrame(
             {
                 "ws": (ws_bins[1::] + ws_bins[0:-1]) / 2,
                 "ws_min": ws_bins[0:-1],
@@ -106,26 +104,26 @@ class ws_pw_curve_filtering:
             }
         )
 
-        # Loop through every turbine
-        for ti in range(self.n_turbines):
-            # Extract the measurements and calculate the bin average
-            ws = df["ws_%03d" % ti]
-            pw = df["pow_%03d" % ti]
-            bin_ids = (ws > ws_min) & (ws < ws_max)
-            ws_clean = ws[bin_ids]
-            pw_clean = pw[bin_ids]
+        ws_bin_cuts = [pd.cut(df[f"ws_{ti:03d}"], bins=ws_bins) for ti in range(self.n_turbines)]
+        df_pow_and_ws_bins = pd.concat(
+            [
+                df[["pow_%03d" % ti for ti in range(self.n_turbines)]],
+                *ws_bin_cuts
+            ],
+            axis=1
+        )
+        pw_curve = pd.concat(
+            [
+            df_pow_and_ws_bins.groupby(by=f"ws_{ti:03d}")[f"pow_{ti:03d}"].median()
+            for ti in range(self.n_turbines)
+            ],
+            axis=1
+        ).sort_index().reset_index(drop=True)
 
-            bin_array = np.searchsorted(ws_bins, ws_clean, side="left")
-            bin_array = bin_array - 1  # 0 -> 1st bin, rather than before bin
-            pow_bins = np.ones(pw_curve_df.shape[0], dtype=float) * np.nan
-            for i in range(pw_curve_df.shape[0]):
-                arr = pw_clean[bin_array == i]
-                if len(arr) > 0:
-                    pow_bins[i] =  np.median(pw_clean[bin_array == i])
-
-
-            # Write outputs to the dataframe
-            pw_curve_df["pow_%03d" % ti] = pow_bins
+        pw_curve_df = pd.concat(
+            [df_ws_info, pw_curve],
+            axis=1,
+        )
 
         # Save the finalized power curve to self and return it to the user
         self.pw_curve_df = pw_curve_df
@@ -243,8 +241,9 @@ class ws_pw_curve_filtering:
             for tii in ti:  
                 self.df_filters.loc[condition, "WTG_{:03d}".format(tii)] = label
 
-            # Recalculate mean power curves
-            self._get_mean_power_curves()
+            # Clear the mean power curves. Namely, with this new filtering application
+            # the mean power curves must be recalculated.
+            self.pw_curve_df = None
 
         return df_out
 
@@ -382,6 +381,7 @@ class ws_pw_curve_filtering:
         df_initial_filtered = self.df.copy()
 
         # Iteratively filter data and recalculate the mean power curves
+        self._get_mean_power_curves()
         for ii in range(no_iterations):
             # Only print final iteration
             is_final_iteration = (ii == no_iterations - 1)
@@ -532,6 +532,11 @@ class ws_pw_curve_filtering:
         print("Filtering data by deviations from the floris power curve...")
 
         # Create upper and lower bounds around floris curve
+
+        # Get mean power curves first, if not yet calculated
+        if self.pw_curve_df is None:
+            self._get_mean_power_curves()
+
         df_xy = self.pw_curve_df.copy()
         rho = fi.floris.flow_field.air_density
         for ti in range(len(fi.layout_x)):
@@ -635,6 +640,7 @@ class ws_pw_curve_filtering:
             ti=ti,
             apply_filters_to_df=True,
         )
+        self._get_mean_power_curves()  # Recalculate mean curve
 
         # Write left and right bound to own curve
         self.pw_curve_df_bounds["pow_%03d_lb" % ti] = np.interp(
@@ -673,12 +679,20 @@ class ws_pw_curve_filtering:
                 speed bins and the mean power production value for every
                 turbine.
         """
+        # Get mean power curves first, if not yet calculated
+        if self.pw_curve_df is None:
+            self._get_mean_power_curves()
+
         return self.pw_curve_df
 
     def plot_farm_mean_power_curve(self):
         """Plot all turbines' power curves in a single figure. Also estimate
         and plot a mean turbine power curve.
         """
+        # Get mean power curves first, if not yet calculated
+        if self.pw_curve_df is None:
+            self._get_mean_power_curves()
+
         fig, ax = plt.subplots()
         x = np.array(self.pw_curve_df["ws"], dtype=float)
         for ti in range(self.n_turbines):
@@ -703,7 +717,7 @@ class ws_pw_curve_filtering:
 
         return fig, ax
 
-    def plot_filters_custom_scatter(self, ti, x_col, y_col, ax=None):
+    def plot_filters_custom_scatter(self, ti, x_col, y_col, xlabel="Wind speed (m/s)", ylabel="Power (kW)", ax=None):
         """Plot the filtered data in a scatter plot, categorized
         by the source of their filter/fault. This is a generic
         function that allows the user to plot various numeric
@@ -757,8 +771,8 @@ class ws_pw_curve_filtering:
             l.set_alpha(1)  # Force alpha in legend to 1.0
 
         ax.set_title("WTG {:03d}: Filters".format(ti))
-        ax.set_xlabel("Wind speed (m/s)")
-        ax.set_ylabel("Power (kW)")
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
         ax.grid(True)
     
         return ax
