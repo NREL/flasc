@@ -1,7 +1,6 @@
-floris>=3.1
+floris>=3.4
 feather-format
-matplotlib
-openoa
+matplotlib>=3.6.3
 numpy
 numba
 pandas>=1.5

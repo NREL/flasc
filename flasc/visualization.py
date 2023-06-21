@@ -13,6 +13,8 @@
 
 import numpy as np
 from matplotlib import pyplot as plt
+import pandas as pd
+import scipy.stats as st
 
 
 def plot_with_wrapping(
@@ -402,6 +404,7 @@ def plot_layout_with_waking_directions(
     limit_dist_D=None,
     limit_dist_m=None,
     limit_num=None,
+    wake_label_size=7,
     ax=None
     ):
     """
@@ -418,7 +421,7 @@ def plot_layout_with_waking_directions(
             "color" : ("black"), 
             "linestyle" : ("solid"),
             "linewidth" : (0.5)
-        D: rotor diamter. Defaults to the rotor diamter of the first 
+        D: rotor diameter. Defaults to the rotor diamter of the first 
             turbine in the Floris object.
         limit_dist_D: limit on the distance between turbines to plot, 
             specified in rotor diamters.
@@ -428,21 +431,25 @@ def plot_layout_with_waking_directions(
             If specified, only the limit_num closest turbines are 
             plotted. However, directions already plotted from other 
             turbines are not considered in the count.
+        wake_label_size: font size for labels of direction/distance.
         ax: axes to plot on (if None, creates figure and axes)
     
     Returns:
         ax: the current axes for the thrust curve plot
     """
- 
-    ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
     
     # Combine default plotting options
-    default_plotting_dict = {
+    def_wake_plotting_dict = {
         "color" : "black", 
         "linestyle" : "solid",
-        "linewidth" : 0.5
+        "linewidth" : 0.5,
     }
-    wake_plotting_dict = {**default_plotting_dict, **wake_plotting_dict}
+    wake_plotting_dict = {**def_wake_plotting_dict, **wake_plotting_dict}
+    
+    def_layout_plotting_dict = {"turbine_indices" : range(len(fi.layout_x))}
+    layout_plotting_dict = {**def_layout_plotting_dict, **layout_plotting_dict}
+
+    ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
 
     N_turbs = len(fi.floris.farm.turbine_definitions)
     
@@ -485,7 +492,9 @@ def plot_layout_with_waking_directions(
             #import ipdb; ipdb.set_trace()
             if ~np.isnan(dists_m[i, j]) and \
                 dists_m[i, j] != 0.0 and \
-                ~(dists_m[i, j] > np.sort(dists_m[i,:])[limit_num]):
+                ~(dists_m[i, j] > np.sort(dists_m[i,:])[limit_num]) and \
+                i in layout_plotting_dict["turbine_indices"] and \
+                j in layout_plotting_dict["turbine_indices"]:
 
                 (l,) = ax.plot(fi.layout_x[[i,j]], fi.layout_y[[i,j]],
                                **wake_plotting_dict)
@@ -501,12 +510,13 @@ def plot_layout_with_waking_directions(
 
                     label_line(
                         l, linetext, ax, near_i=1, near_x=None, near_y=None, 
-                        rotation_offset=0
+                        rotation_offset=0, size=wake_label_size
                     )
 
                     label_exists[i,j] = True
                     label_exists[j,i] = True
 
+    return ax
     
 def wake_angle(x_i, y_i, x_j, y_j):
     """
@@ -543,6 +553,7 @@ def label_line(
     near_y=None,
     rotation_offset=0.0,
     offset=(0, 0),
+    size=7,
 ):
     """
     [summary]
@@ -561,6 +572,7 @@ def label_line(
             Defaults to 0.
         offset (tuple, optional): label offset from turbine location.
             Defaults to (0, 0).
+        size (float): font size. Defaults to 7.
 
     Raises:
         ValueError: ("Need one of near_i, near_x, near_y") raised if
@@ -583,7 +595,7 @@ def label_line(
             pos[0],
             pos[1],
             label_text,
-            size=7,
+            size=size,
             rotation=rotation,
             color=line.get_color(),
             ha="center",
@@ -626,15 +638,205 @@ def label_line(
     else:
         raise ValueError("Need one of near_i, near_x, near_y")
 
+def shade_region(points, show_points=False, plotting_dict_region={}, 
+    plotting_dict_points={}, ax=None):
+    """
+    Shade a region defined by a series of vertices (points).
 
-
-
-
+    Args:
+        points: 2D array of vertices for the shaded region, shape N x 2, 
+            where each row contains a coordinate (x, y)
+        show_points: Boolean to dictate whether to plot the points as well 
+            as the shaded region
+        plotting_dict_region: dictionary of plotting parameters for the shaded
+            region, with the following (optional) fields and their (default) 
+            values:
+            "color" : ("black")
+            "edgecolor": (None)
+            "alpha" : (0.3)
+            "label" : (None) (for legend, if desired)
+        plotting_dict_region: dictionary of plotting parameters for the 
+            vertices (points), with the following (optional) fields and their 
+            (default) values:
+            "color" : "black", 
+            "marker" : (None)
+            "s" : (10)
+            "label" : (None) (for legend, if desired)
+        ax: axes to plot on (if None, creates figure and axes)
     
+    Returns:
+        ax: the current axes for the layout plot
+    """
+
+    # Generate axis, if needed
+    if ax is None:
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111)
+
+    # Generate plotting dictionary
+    default_plotting_dict_region = {
+        "color" : "black", 
+        "edgecolor" : None,
+        "alpha" : 0.3,
+        "label" : None
+    }
+    plotting_dict_region = {**default_plotting_dict_region,
+                            **plotting_dict_region}
+
+    ax.fill(points[:,0], points[:,1], **plotting_dict_region)
+
+    if show_points:
+        default_plotting_dict_points = {
+            "color" : "black", 
+            "marker" : ".",
+            "s" : 10,
+            "label" : None
+        }
+        plotting_dict_points = {**default_plotting_dict_points, 
+                                **plotting_dict_points}
+
+        ax.scatter(points[:,0], points[:,1], **plotting_dict_points)
+
+    # Plot labels and aesthetics
+    ax.axis("equal")
+    ax.grid(True)
+    ax.set_xlabel("x coordinate (m)")
+    ax.set_ylabel("y coordinate (m)")
+
+    return ax
+
+
+def plot_binned_mean_and_ci(
+    x,
+    y,
+    color="b",
+    label="_nolegend_",
+    x_edges=None,
+    ax=None,
+    show_scatter=True,
+    show_bin_points=True,
+    show_confidence=True,
+    alpha_scatter=0.1,
+    confidence_level = 0.95,
+):
+    """
+    Plot data to a single axis.  Method
+    has options to include scatter of underlying data, specifiying
+    bin edges, and plotting confidence interval.
+
+    Args:
+        x (np.array): abscissa data.
+        y (np.array): ordinate data.
+        color (str, optional): line color.
+            Defaults to 'b'.
+        label (str, optional): line label used in legend.
+            Defaults to '_nolegend_'.
+        x_edges (np.array, optional): bin edges in x data
+            Defaults to None.
+        ax (:py:class:`matplotlib.pyplot.axes`, optional):
+            axes handle for plotting. Defaults to None.
+        show_scatter (bool, optional): flag to control scatter plot.
+            Defaults to True.
+        show_bin_points (bool, optional): flag to control plot of bins.
+            Defaults to True.
+        show_confidence (bool, optional): flag to control plot of
+            confidence interval. Defaults to True.
+        alpha_scatter (float, optional): Alpha for scatter
+            plot. Defaults to 0.5.
+        confidenceLevel (float, optional): Confidence level for
+            confidence interval. Defaults to 0.95.
+
+    """
+
+    # Check the length of x equals length of y
+    if len(x) != len(y):
+        raise ValueError("x and y must be the same length")
+    
+    # Check that x is not empty
+    if len(x) == 0:
+        raise ValueError("x is empty")
     
 
-    
+    # Declare ax if not provided
+    if ax is None:
+        _, ax = plt.subplots()
 
+    # Put points ino dataframe
+    df = pd.DataFrame({"x": x, "y": y})
 
+    # If x_edges not provided, use 50 bins over range of x
+    if x_edges is None:
+        x_edges = np.linspace(df["x"].min()*.98, df["x"].max()*1.02, 50)
 
-    
+    # Define x_labels as bin centers
+    x_labels = (x_edges[1:] + x_edges[:-1]) / 2.0
+
+    # Bin data
+    df["x_bin"] = pd.cut(df["x"], x_edges, labels=x_labels)
+
+    # Get aggregate statistics
+    df_agg = df.groupby("x_bin").agg(
+        {"y": ["count", "std", "min", "max", "mean", st.sem]}
+    )
+    # Flatten column names
+    df_agg.columns = ["_".join(c) for c in df_agg.columns]
+
+    # Reset the index
+    df_agg = df_agg.reset_index()
+
+    # Delete rows with no data
+    df_agg = df_agg[df_agg["y_count"] > 0]
+
+    # Add the confidence interval of the mean to df_agg
+    df_agg["y_ci_lower"], df_agg["y_ci_upper"] = st.t.interval(
+        confidence_level, 
+        df_agg["y_count"]-1,
+        loc=df_agg["y_mean"],
+        scale=df_agg["y_sem"]
+    )
+
+    # Plot the mean values
+    ax.plot(df_agg.x_bin, df_agg.y_mean, color=color, label=label)
+
+    # Plot the confidence interval
+    if show_confidence:
+        ax.fill_between(
+            df_agg.x_bin,
+            df_agg.y_ci_lower,
+            df_agg.y_ci_upper,
+            color=color,
+            alpha=0.2,
+        )
+
+        # Plot a dasshed line at confidence interval
+        ax.plot(
+            df_agg.x_bin,
+            df_agg.y_ci_lower,
+            color=color,
+            alpha=0.2,
+            ls="--",
+        )
+        ax.plot(
+            df_agg.x_bin,
+            df_agg.y_ci_upper,
+            color=color,
+            alpha=0.2,
+            ls="--",
+        )
+
+    # Plot the scatter points
+    if show_scatter:
+        ax.scatter(df.x, df.y, color=color, s=10, alpha=alpha_scatter)
+
+    # Plot the bin points, scaled by the counts
+    if show_bin_points:
+        ax.scatter(
+            df_agg.x_bin,
+            df_agg.y_mean,
+            color=color,
+            s=df_agg.y_count / df_agg.y_count.max() * 20,
+            alpha=0.5,
+            marker='s'
+        )
+
+    return ax

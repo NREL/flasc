@@ -11,7 +11,7 @@ Install the repository following the instructions `here <installation.html>`_.
 Generating an artificial dataset
 ================================
 You can generate a demo dataset using the script at
-``examples/demo_dataset/``. The script ``generate_demo_dataset.py`` downloads
+``examples_artificial_data/demo_dataset/``. The script ``generate_demo_dataset.py`` downloads
 historical data from a meteorological measurement tower at the U.S. National
 Wind Technology Center (NWTC), part of the National Renewable Energy
 Laboratory (NREL). This data is made readily available to the public on its

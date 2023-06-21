@@ -28,7 +28,7 @@ def load_data():
     ftr_path = os.path.join(root_dir, '..', 'demo_dataset',
                             'demo_dataset_scada_60s.ftr')
     if not os.path.exists(ftr_path):
-        raise FileNotFoundError('Please run ./examples/demo_dataset/' +
+        raise FileNotFoundError('Please run ./examples_artificial_data/demo_dataset/' +
                                 'generate_demo_dataset.py before try' +
                                 'ing any of the other examples.')
     df = pd.read_feather(ftr_path)
@@ -89,9 +89,13 @@ if __name__ == '__main__':
         test_turbines=[1],
         wd_step=2.0,
         ws_step=1.0,
-        wd_bin_width=3.0,
+        wd_bin_width=2.0,
     )
     fig, ax = era.plot_energy_ratio()
+    ax[0].set_title("Energy ratios for turbine 001 without UQ")
+    plt.tight_layout()
+
+    fig, ax = era.plot_energy_ratio(polar_plot=True)  # Plot in polar format too
     ax[0].set_title("Energy ratios for turbine 001 without UQ")
     plt.tight_layout()
 
@@ -101,13 +105,29 @@ if __name__ == '__main__':
         test_turbines=[1],
         wd_step=2.0,
         ws_step=1.0,
-        wd_bin_width=3.0,
-        N=50,
+        wd_bin_width=2.0,
+        N=20,
         percentiles=[5.0, 95.0]
     )
     fig, ax = era.plot_energy_ratio()
     ax[0].set_title("Energy ratios for turbine 001 with UQ "
-                    + "(N=50, 90% confidence interval)")
+                    + "(N=20, 90% confidence interval)")
+    plt.tight_layout()
+
+    # Get energy ratio with uncertainty quantification
+    # using N=10 bootstrap samples and block bootstrapping
+    era.get_energy_ratio(
+        test_turbines=[1],
+        wd_step=2.0,
+        ws_step=1.0,
+        wd_bin_width=2.0,
+        N=20,
+        percentiles=[5.0, 95.0],
+        num_blocks=20 # Resample over 20 blocks
+    )
+    fig, ax = era.plot_energy_ratio()
+    ax[0].set_title("Energy ratios for turbine 001 with UQ "
+                    + "(N=20, Block Bootstrapping)")
     plt.tight_layout()
 
     plt.show()

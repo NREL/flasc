@@ -99,7 +99,7 @@ Data filtering
 
 With the SCADA data now in a wide-formatted Pandas DataFrame, the flasc
 data filtering tools can readily be applied. The files in 
-``examples/raw_data_processing`` demonstrate how the SCADA data files are
+``examples_artifical_data/raw_data_processing`` demonstrate how the SCADA data files are
 processed.
 
 ++++++++++++++++++++++++

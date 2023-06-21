@@ -12,9 +12,9 @@ AUTHOR = "NREL National Wind Technology Center"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'floris>=3.1',
+    'floris>=3.4',
     'feather-format',
-    'matplotlib',
+    'matplotlib>=3.6.3',
     'numpy',
     'numba',
     'openoa',
@@ -64,7 +64,7 @@ setup(
     zip_safe=False,
     keywords='flasc',
     classifiers=[
-        'Development Status :: Release',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',

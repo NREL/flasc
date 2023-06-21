@@ -10,7 +10,7 @@ from pathlib import Path
 
 from . import (
     find_sensor_faults,
+    northing_offset,
     ws_pow_filtering,
-    ws_pow_filtering_utilities,
     yaw_pow_fitting
 )

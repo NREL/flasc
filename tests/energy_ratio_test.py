@@ -14,7 +14,7 @@ def load_floris():
     # Initialize the FLORIS interface fi
     print('Initializing the FLORIS object for our demo wind farm')
     file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../examples/demo_dataset/demo_floris_input.yaml")
+    fi_path = os.path.join(file_path, "../examples_artificial_data/demo_dataset/demo_floris_input.yaml")
     fi = wfct.floris_interface.FlorisInterface(fi_path)
     return fi
 
