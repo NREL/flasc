@@ -141,13 +141,14 @@ def plot(
         dwd = np.min(x[1::] - x[0:-1])
         jumps = np.where(np.diff(x) > dwd * 1.50)[0]
         if len(jumps) > 0:
-            df = df.append(
-                pd.DataFrame(
-                    {
-                        "wd_bin": x[jumps] + dwd / 2.0,
-                        "N_bin": [0] * len(jumps),
-                    }
-                )
+            df = pd.concat([df,
+                    pd.DataFrame(
+                        {
+                            "wd_bin": x[jumps] + dwd / 2.0,
+                            "N_bin": [0] * len(jumps),
+                        }
+                    )
+                ]
             )
             df = df.iloc[np.argsort(df["wd_bin"])].reset_index(drop=True)
             x = np.array(df["wd_bin"], dtype=float)
