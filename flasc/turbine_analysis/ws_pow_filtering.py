@@ -14,12 +14,15 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import itertools
 
 from ..turbine_analysis.find_sensor_faults import find_sensor_stuck_faults
 from .. import utilities as flascutils
 from ..dataframe_operations import dataframe_filtering as dff
 
+from bokeh.plotting import ColumnDataSource, figure
+from bokeh.models import Legend
+from bokeh.palettes import Category20_20 as palette
 
 
 class ws_pw_curve_filtering:
@@ -757,6 +760,97 @@ class ws_pw_curve_filtering:
     
         return ax
 
+    def plot_filters_custom_scatter_bokeh(
+            self,
+            ti,
+            x_col,
+            y_col,
+            title="Wind-speed vs. power curve",
+            xlabel="Wind speed (m/s)",
+            ylabel="Power (kW)",
+            p=None,
+        ):
+        """Plot the filtered data in a scatter plot, categorized
+        by the source of their filter/fault. This is a generic
+        function that allows the user to plot various numeric
+        variables on the x and y axis.
+
+        Args:
+            ti (int): Turbine identifier. This is used to determine
+                which turbine's filter history should be looked at.
+            x_col (str): Column name to plot on the x-axis. A common
+                choice is "ws_000" for ti=0, for example.
+            y_col (str): Column name to plot on the y-axis. A common
+                choice is "pow_000" for ti=0, for example.
+            ax (plt.Axis, optional): Pyplot Figure axis in which the
+                figure should be produced. If None specified, then
+                 creates a new figure. Defaults to None.
+
+        Returns:
+            ax: The figure axis in which the scatter plot is drawn.
+        """
+        # Create figure, if not specified
+
+        bokeh_tooltips = [
+                ("(x,y)", "($x, $y)"),
+                ("time", "@time"),
+                ("index", "$index"),
+        ]
+
+        if p is None:
+            p = figure(
+                title=title,
+                width=800,
+                height=550,
+                sizing_mode='stretch_width',
+                x_axis_label=xlabel,
+                y_axis_label=ylabel,
+                tooltips=bokeh_tooltips,
+            )
+            p.add_layout(Legend(title="Data category"), 'right')
+
+        # Get filter dataframe
+        df_f = self.df_filters["WTG_{:03d}".format(ti)]
+        all_flags = self._get_all_unique_flags()
+        N = df_f.shape[0]
+
+        # For each flagging condition, plot the results
+        colors = itertools.cycle(palette)
+        for flag in all_flags:
+            ids = (df_f == flag)
+            df_subset = self._df_initial.loc[ids]
+            percentage = 100.0 * np.sum(ids) / N
+            label = "{:s} ({:.2f} %)".format(flag, percentage)
+            alpha = 0.65
+            size = 5
+            color = next(colors)
+            if (
+                any(ids) and
+                (not df_subset[x_col].isna().all()) and
+                (not df_subset[y_col].isna().all())
+            ):
+                source = ColumnDataSource(data=dict(
+                    x=df_subset[x_col],
+                    y=df_subset[y_col],
+                    time=list(df_subset["time"].astype(str)),
+                ))
+                p.circle(
+                    "x",
+                    "y",
+                    source=source,
+                    fill_alpha=alpha,
+                    color=color,
+                    line_color=None,
+                    size=size,
+                    legend_label=label
+                )
+    
+        p.legend.title = "Data category"
+        p.legend.click_policy = "hide"
+        p.toolbar.active_inspect = None
+
+        return p
+
     def plot_filters_in_ws_power_curve(self, ti, fi=None, ax=None):
         """Plot the wind speed power curve and connect each faulty datapoint
         to the label it was classified as faulty with.
@@ -934,3 +1028,63 @@ class ws_pw_curve_filtering:
         ax.grid(True)
 
         return ax
+
+    def plot_filters_in_time_bokeh(self, ti, p=None):
+        """Generate bar plot where each week of data is gathered and its
+        filtering results will be shown relative to the data size of each
+        week. This plot can particularly be useful to investigate whether
+        certain weeks/time periods show a particular high number of faulty
+        measurements. This can often be correlated with maintenance time
+        windows and the user may opt to completely remove any measurements
+        in the found time period from the dataset.
+
+        Args:
+            save_path ([str], optional): Path to save the figure to. If none
+            is specified, then will not save any figures. Defaults to None.
+            fig_format (str, optional): Figure format if saved. Defaults to
+            "png".
+            dpi (int, optional): Image resolution if saved. Defaults to 300.
+        """
+
+        if p is None:
+            p = figure(
+                title="Filters over time",
+                width=800,
+                height=550,
+                sizing_mode='stretch_width',
+                x_axis_label="Time (year - week)",
+                y_axis_label="Number of data points (-)",
+                # tooltips=bokeh_tooltips,
+            )
+            p.add_layout(Legend(title="Data category"), 'right')
+
+        # Get a list of all flags and then get colors correspondingly
+        all_flags = self._get_all_unique_flags()
+
+        # Manipulate dataframe to easily plot results
+        df_f = self.df_filters["WTG_{:03d}".format(ti)]
+        df_conditional = pd.concat([pd.DataFrame({flag: np.array(df_f==flag, dtype=int)}) for flag in all_flags], axis=1)
+        df_merged = pd.concat([df_conditional, self.df["time"]], axis=1)
+        df_histogram = df_merged.groupby([df_merged["time"].dt.year, df_merged["time"].dt.isocalendar().week]).sum(numeric_only=True)
+
+        filter_flags = list(df_histogram.columns)
+        xlabels = [f"{year}-{week}" for year, week in df_histogram.index]
+        x = np.arange(len(list(df_histogram.index)))
+
+        heights = np.zeros(len(x), dtype=int)
+        colors = itertools.cycle(palette)
+        for f in filter_flags:
+            y = np.array(df_histogram[f], dtype=int)
+            p.vbar(x=x, bottom=heights, top=heights+y, width=0.7, legend_label=f, color=next(colors))
+            heights = heights + y
+        
+        # Format x-axis
+        p.xaxis.major_label_orientation = np.pi / 2.0
+        p.xaxis.ticker = x
+        p.xaxis.major_label_overrides = dict(zip(x, xlabels))
+
+        # Format legend and allow hide/show functionality
+        p.legend.title = "Filter"
+        p.legend.click_policy = "hide"
+
+        return p
