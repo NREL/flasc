@@ -17,6 +17,7 @@ REQUIRED = [
     'matplotlib>=3.6.3',
     'numpy',
     'numba',
+    "bokeh==3.1.1",
     'openoa',
     'pandas>=1.5',
     'pyproj',
