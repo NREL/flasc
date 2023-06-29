@@ -50,7 +50,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    packages=find_packages(include=['flasc']),
+    packages=find_packages(include=['flasc*']),
     entry_points={
         'console_scripts': [
             'flasc=flasc.cli:main'
