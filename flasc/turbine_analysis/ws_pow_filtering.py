@@ -673,7 +673,7 @@ class ws_pw_curve_filtering:
         """
         return self.pw_curve_df
 
-    def plot_farm_mean_power_curve(self):
+    def plot_farm_mean_power_curve(self, fi=None):
         """Plot all turbines' power curves in a single figure. Also estimate
         and plot a mean turbine power curve.
         """
@@ -696,9 +696,20 @@ class ws_pw_curve_filtering:
             alpha=0.30,
         )
         ax.plot(x, pow_mean_array, color="tab:red", label="Mean curve")
+
+        if fi is not None:
+            fi_turb = fi.floris.farm.turbine_definitions[ti]
+            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
+            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
+            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
+            rho = fi.floris.flow_field.air_density
+            pow_array = (
+                0.5 * rho * ws_array ** 3.0 * Ad * cp_array * 1.0e-3
+            )
+            ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
+
         ax.legend()
         ax.set_title("Mean of all turbine power curves with UQ")
-
         return fig, ax
 
     def plot_filters_custom_scatter(self, ti, x_col, y_col, ax=None):
