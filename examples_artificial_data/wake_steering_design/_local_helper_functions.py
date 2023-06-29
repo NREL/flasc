@@ -22,16 +22,11 @@ from floris.tools.floris_interface import FlorisInterface
 from floris.tools.uncertainty_interface import UncertaintyInterface
 from floris.tools.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
 
+from flasc.examples.models import load_floris_artificial
 
 def load_floris(pP=2.0):
-    # Import example floris model
-    try:
-        root_path = os.path.dirname(os.path.abspath(__file__))
-        fn = os.path.join(root_path, "..", "demo_dataset", "demo_floris_input.yaml")
-        fi = FlorisInterface(fn)
-    except:
-        fn = os.path.join("..", "demo_dataset", "demo_floris_input.yaml")
-        fi = FlorisInterface(fn)
+    # Load FLORIS
+    fi, _ = load_floris_artificial()
 
     # Now assign a new pP value
     tdefs = [copy.deepcopy(t) for t in fi.floris.farm.turbine_definitions]
