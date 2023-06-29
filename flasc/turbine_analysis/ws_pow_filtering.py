@@ -676,7 +676,13 @@ class ws_pw_curve_filtering:
     def plot_farm_mean_power_curve(self, fi=None):
         """Plot all turbines' power curves in a single figure. Also estimate
         and plot a mean turbine power curve.
+
+        Args:
+            fi (FlorisInterface): The FlorisInterface object for the farm. If
+              specified by the user, then the farm-average turbine power curve
+              from FLORIS will be plotted on top of the SCADA-based power curves.
         """
+
         fig, ax = plt.subplots()
         x = np.array(self.pw_curve_df["ws"], dtype=float)
         for ti in range(self.n_turbines):
