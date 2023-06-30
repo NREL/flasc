@@ -20,6 +20,7 @@ import pandas as pd
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio_suite
 from flasc.visualization import plot_floris_layout
+from flasc.examples.models import load_floris_artificial as load_floris
 
 from floris.tools.visualization import visualize_cut_plane
 from floris.utilities import wrap_360
@@ -29,24 +30,15 @@ def load_data():
     # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(
-        root_dir, '..', 'demo_dataset', 'demo_dataset_scada_60s.ftr'
+        root_dir, '..', 'raw_data_processing', 'postprocessed', 'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
     )
     if not os.path.exists(ftr_path):
-        raise FileNotFoundError('Please run ./examples_artifical/demo_dataset/' +
-                                'generate_demo_dataset.py before try' +
-                                'ing any of the other examples.')
+        raise FileNotFoundError(
+            'Please run the scripts in /raw_data_processing/' +
+            'before trying any of the other examples.'
+        )
     df = pd.read_feather(ftr_path)
     return df
-
-
-def load_floris():
-    # Load the FLORIS model for the artificial wind farm
-    from floris import tools as wfct
-    print('Initializing the FLORIS object for our demo wind farm')
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.yaml")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
-    return fi
 
 
 def _get_angle(fi, turbine_array):
@@ -160,7 +152,7 @@ if __name__ == "__main__":
     N_bootstrapping = 50
 
     # Load FLORIS and load SCADA data
-    fi = load_floris()
+    fi, _ = load_floris()
     df = load_data()
 
     # Note that we normalize everything in our results to the first turbine in the array

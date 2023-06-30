@@ -21,9 +21,8 @@ from floris.utilities import wrap_360
 
 from flasc.energy_ratio import energy_ratio_suite
 # from flasc import floris_tools as fsatools
-
 from flasc.visualization import plot_layout_with_waking_directions, plot_binned_mean_and_ci
-
+from flasc.examples.models import load_floris_artificial as load_floris
 
 
 if __name__ == "__main__":
@@ -32,9 +31,7 @@ if __name__ == "__main__":
     # Reference turbine (0)
     # Controlled turbine (1)
     # Downstream turbine (2)
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.yaml")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
+    fi, _ = load_floris()
     fi.reinitialize(layout_x = [0, 0, 5*126], layout_y = [5*126, 0, 0])
 
     # Show the wind farm
