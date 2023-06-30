@@ -18,11 +18,13 @@ import seaborn as sns
 
 from floris.tools.uncertainty_interface import UncertaintyInterface
 from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-from _local_helper_functions import load_floris, optimize_yaw_angles, evaluate_optimal_yaw_angles
+from flasc.examples.models import load_floris_artificial as load_floris
+
+from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
 
 
 def load_floris_with_uncertainty(std_wd=0.0):
-    fi = load_floris()  # Load nominal floris object
+    fi, _ = load_floris()  # Load nominal floris object
     if std_wd > 0.001:
         unc_options = {
             "std_wd": std_wd,  # Standard deviation for inflow wind direction (deg)

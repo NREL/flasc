@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,7 +48,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
     return (fi, turbine_weights)
 
 
-def load_floris_artificial(wake_model="cc", wd_std=0.0):
+def load_floris_artificial(wake_model="cc", wd_std=0.0, pP=None):
     """Load a FlorisInterface object for the wind farm at hand.
 
     Args:
@@ -77,6 +78,14 @@ def load_floris_artificial(wake_model="cc", wd_std=0.0):
         layout_x=layout_x,
         layout_y=layout_y,
     )
+
+    # Update Pp if specified
+    if pP is not None:
+        tdefs = [copy.deepcopy(t) for t in fi.floris.farm.turbine_definitions]
+        for ii in range(len(tdefs)):
+            tdefs[ii]["pP"] = pP
+
+        fi.reinitialize(turbine_type=tdefs)
 
     # Add uncertainty
     if wd_std > 0.01:

@@ -22,20 +22,7 @@ from floris.tools.floris_interface import FlorisInterface
 from floris.tools.uncertainty_interface import UncertaintyInterface
 from floris.tools.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
 
-from flasc.examples.models import load_floris_artificial
-
-def load_floris(pP=2.0):
-    # Load FLORIS
-    fi, _ = load_floris_artificial()
-
-    # Now assign a new pP value
-    tdefs = [copy.deepcopy(t) for t in fi.floris.farm.turbine_definitions]
-    for ii in range(len(tdefs)):
-        tdefs[ii]["pP"] = pP
-
-    fi.reinitialize(turbine_type=tdefs)
-
-    return fi
+from flasc.examples.models import load_floris_artificial as load_floris
 
 
 def load_wind_climate_interpolant():
@@ -50,7 +37,7 @@ def load_wind_climate_interpolant():
 
 # Define default optimization settings
 def optimize_yaw_angles(
-    fi=load_floris(),
+    fi=None,
     opt_wind_directions=np.arange(0.0, 360.0, 3.0),
     opt_wind_speeds=[8.0],
     opt_turbulence_intensity=0.06,
@@ -61,6 +48,9 @@ def optimize_yaw_angles(
     opt_std_wd=0.0,
     opt_verify_convergence=False,
 ):
+    if fi is None:
+        fi, _ = load_floris()
+
     # Update FLORIS model with atmospheric conditions
     fi = fi.copy()
     fi.reinitialize(
@@ -90,7 +80,7 @@ def optimize_yaw_angles(
 def evaluate_optimal_yaw_angles(
     yaw_angle_interpolant,
     wind_climate_interpolant=load_wind_climate_interpolant(),
-    fi=load_floris(),
+    fi=None,
     eval_wd_array=np.arange(0.0, 360.0, 3.0),
     eval_ws_array=np.arange(4.0, 16.0, 1.0),
     eval_ti=0.06,
@@ -99,6 +89,9 @@ def evaluate_optimal_yaw_angles(
     # Sort inputs
     eval_wd_array = np.sort(eval_wd_array)
     eval_ws_array = np.sort(eval_ws_array)
+
+    if fi is None:
+        fi, _ = load_floris()
 
     # Update floris object
     fi = fi.copy()
