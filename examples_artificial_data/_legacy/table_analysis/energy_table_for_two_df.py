@@ -8,6 +8,8 @@ from flasc.energy_ratio import energy_ratio_suite
 from flasc.dataframe_operations import (
     dataframe_manipulations as dfm,
 )
+
+from flasc.examples.models import load_floris_artificial as load_floris
 from flasc import floris_tools as fsatools
 
 
@@ -15,27 +17,10 @@ def load_data():
     # Load dataframe with scada data
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(
-        root_dir, "..", "demo_dataset", "demo_dataset_scada_60s.ftr"
+        root_dir, "..", "raw_data_processing", "data", "demo_dataset_scada_600s.csv"
     )
-    if not os.path.exists(ftr_path):
-        raise FileNotFoundError(
-            "Please run ./examples_artificial_data/demo_dataset/"
-            + "generate_demo_dataset.py before try"
-            + "ing any of the other examples."
-        )
-    df = pd.read_feather(ftr_path)
+    df = pd.read_csv(ftr_path)
     return df
-
-
-def load_floris():
-    # Initialize the FLORIS interface fi
-    print("Initializing the FLORIS object for our demo wind farm")
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(
-        file_path, "../demo_dataset/demo_floris_input.json"
-    )
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
-    return fi
 
 
 if __name__ == "__main__":
@@ -44,7 +29,7 @@ if __name__ == "__main__":
 
     # Load data and FLORIS
     df = load_data()
-    fi = load_floris()
+    fi, _ = load_floris()
 
     # We first need to define a wd against which we plot the energy ratios
     # In this example, we set the wind direction to be equal to the mean
