@@ -86,8 +86,8 @@ def add_ws_bin(df_, ws_cols, ws_step=1.0, ws_min=-0.5, ws_max=50.0):
     df_with_mean_ws =  (
         # df_.select(pl.exclude('ws_bin')) # In case ws_bin already exists
         df_.with_columns(
-            df_.select(ws_cols).mean(axis=1).alias('ws_bin')
-            # ws_bin = pl.concat_list(ws_cols).arr.mean() # Initially ws_bin is just the mean
+            # df_.select(ws_cols).mean(axis=1).alias('ws_bin')
+            ws_bin = pl.concat_list(ws_cols).list.mean() # Initially ws_bin is just the mean
         )
         .filter(
             pl.all(pl.col(ws_cols).is_not_null()) # Select for all bin cols present
@@ -145,10 +145,10 @@ def add_wd_bin(df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0):
         df_with_mean_wd
         .with_columns(
         [
-            df_with_mean_wd.select(wd_cols_cos).mean(axis=1).alias('cos_mean'),
-            df_with_mean_wd.select(wd_cols_sin).mean(axis=1).alias('sin_mean'),
-            # pl.concat_list(wd_cols_cos).arr.mean().alias('cos_mean'),
-            # pl.concat_list(wd_cols_sin).arr.mean().alias('sin_mean'),
+            # df_with_mean_wd.select(wd_cols_cos).mean(axis=1).alias('cos_mean'),
+            # df_with_mean_wd.select(wd_cols_sin).mean(axis=1).alias('sin_mean'),
+            pl.concat_list(wd_cols_cos).list.mean().alias('cos_mean'),
+            pl.concat_list(wd_cols_sin).list.mean().alias('sin_mean'),
         ]
         )
         .with_columns(
@@ -260,14 +260,16 @@ def resample_energy_table(df_e_, i):
 def add_test_power(df_, test_cols):
 
     return df_.with_columns(
-        df_.select(test_cols).mean(axis=1).alias('test_pow')
+        test_pow = pl.concat_list(test_cols).list.mean()
+        #df_.select(test_cols).mean(axis=1).alias('test_pow')
     )
 
 
 def add_ref_power(df_, ref_cols):
 
     return df_.with_columns(
-        df_.select(ref_cols).mean(axis=1).alias('ref_pow')
+        ref_pow = pl.concat_list(ref_cols).list.mean()
+        # df_.select(ref_cols).mean(axis=1).alias('ref_pow')
     )
 
 
@@ -486,7 +488,7 @@ def compute_uplift_in_region(df_,
         )
         .with_columns(
             delta_power_ratio = pl.col(f'power_ratio_df_name_{df_names[1]}') - pl.col(f'power_ratio_df_name_{df_names[0]}'),
-            ref_pow_both_cases = pl.concat_list([f'ref_pow_df_name_{n}' for n in df_names]).arr.mean() 
+            ref_pow_both_cases = pl.concat_list([f'ref_pow_df_name_{n}' for n in df_names]).list.mean() 
         )
         .with_columns(
             delta_energy = pl.col('delta_power_ratio') * pl.col('f_norm') * pl.col('ref_pow_both_cases'), # pl.col(f'ref_pow_df_name_{df_names[0]}'),
