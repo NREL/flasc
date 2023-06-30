@@ -133,7 +133,6 @@ def df_mark_turbdata_as_faulty(df, cond, turbine_list, exclude_columns=[]):
         turbine_list = [turbine_list]
 
     for ti in turbine_list:
-        N_init = df_get_no_faulty_measurements(df, ti)
         cols = [s for s in df.columns if s[-4::] == ('_%03d' % ti)
                 and s not in exclude_columns]
         df.loc[cond, cols] = None  # Delete measurements

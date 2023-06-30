@@ -259,7 +259,11 @@ def match_y_curves_by_offset(yref, ytest, dy_eval=None, angle_wrapping=True):
             ytest_cor = ytest - dy
             y_error = np.abs(yref-ytest_cor)
 
-        J = np.nanmean(y_error**2.0)
+        if np.all(np.isnan(y_error)) | (len(y_error) < 1):
+            J = np.nan
+        else:
+            J = np.nanmean(y_error**2.0)
+
         if np.isnan(J_opt):
             if not np.isnan(J):
                 J_opt = J

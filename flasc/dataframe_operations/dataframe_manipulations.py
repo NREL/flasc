@@ -698,7 +698,7 @@ def df_reduce_precision(df_in, verbose=False):
     Returns:
         df_out ([pd.DataFrame]): Reduced dataframe
     """
-    df_out = pd.DataFrame()
+    list_out = []
     dtypes = df_in.dtypes
     for ii, c in enumerate(df_in.columns):
         datatype = str(dtypes[c])
@@ -711,42 +711,45 @@ def df_reduce_precision(df_in, verbose=False):
                                df_in[c], equal_nan=True))):
                 unique_values = np.unique(df_in[c])
                 if np.array_equal(unique_values, [0, 1]):
-                    df_out[c] = df_in[c].astype(bool)
+                    var_downsampled = df_in[c].astype(bool)
                 elif np.max(df_in[c]) < np.iinfo(np.int8).max:
-                    df_out[c] = df_in[c].astype(np.int8)
+                    var_downsampled = df_in[c].astype(np.int8)
                 elif np.max(df_in[c]) < np.iinfo(np.int16).max:
-                    df_out[c] = df_in[c].astype(np.int16)
+                    var_downsampled = df_in[c].astype(np.int16)
                 elif np.max(df_in[c]) < np.iinfo(np.int32).max:
-                    df_out[c] = df_in[c].astype(np.int32)
+                    var_downsampled = df_in[c].astype(np.int32)
                 else:
-                    df_out[c] = df_in[c].astype(np.int64)
+                    var_downsampled = df_in[c].astype(np.int64)
             else:  # If not, just simplify as float32
-                df_out[c] = df_in[c].astype(np.float32)
-            max_error = np.max(np.abs(df_out[c]-df_in[c]))
+                var_downsampled = df_in[c].astype(np.float32)
+            max_error = np.max(np.abs(var_downsampled-df_in[c]))
             if verbose:
                 print("Column %s ['%s'] was downsampled to %s."
-                      % (c, datatype, df_out.dtypes[ii]))
+                      % (c, datatype, var_downsampled.dtypes))
                 print( "Max error: ", max_error)
         elif ((datatype == 'int64') or
               (datatype == 'int32') or
               (datatype == 'int')):
-            if all(np.unique(df_in[c]) == [0, 1]):
-                df_out[c] = df_in[c].astype(bool)
+            if np.array_equal(np.unique(df_in[c]), [0, 1]):
+                var_downsampled = df_in[c].astype(bool)
             elif len(np.unique(df_in[c])) < 100:
-                df_out[c] = df_in[c].astype(np.int16)
+                var_downsampled = df_in[c].astype(np.int16)
             else:
-                df_out[c] = df_in[c].astype(np.int32)
-            max_error = np.max(np.abs(df_out[c]-df_in[c]))
+                var_downsampled = df_in[c].astype(np.int32)
+            max_error = np.max(np.abs(var_downsampled-df_in[c]))
             if verbose:
                 print("Column %s ['%s'] was downsampled to %s."
-                      % (c, datatype, df_out.dtypes[ii]))
+                      % (c, datatype, var_downsampled.dtypes))
                 print( "Max error: ", max_error)
         else:
             if verbose:
                 print("Datatype '%s' not recognized. Not downsampling."
                       % datatype)
-            df_out[c] = df_in[c]
+            var_downsampled = df_in[c]
 
+        list_out.append(var_downsampled)
+    
+    df_out = pd.concat(list_out, axis=1, ignore_index=False)
     return df_out
 
 
