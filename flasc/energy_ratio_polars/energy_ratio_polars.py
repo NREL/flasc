@@ -8,6 +8,7 @@
 
 import numpy as np
 import polars as pl
+import warnings
 
 # def get_mid_bins(bin_edges):
 #     """_summary_
@@ -165,6 +166,22 @@ def add_wd_bin(df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0):
 
     return bin_column(df_with_mean_wd, 'wd_bin', 'wd_bin', edges)
 
+
+def add_test_power(df_, test_cols):
+
+    return df_.with_columns(
+        test_pow = pl.concat_list(test_cols).list.mean()
+        #df_.select(test_cols).mean(axis=1).alias('test_pow')
+    )
+
+
+def add_ref_power(df_, ref_cols):
+
+    return df_.with_columns(
+        ref_pow = pl.concat_list(ref_cols).list.mean()
+        # df_.select(ref_cols).mean(axis=1).alias('ref_pow')
+    )
+
 def generate_block_list(N, num_blocks=10):
     """Generate an np.array of length N where each element is an integer between 0 and num_blocks-1
     with each value repeating N/num_blocks times.
@@ -257,84 +274,131 @@ def resample_energy_table(df_e_, i):
             ).join(df_e_, how='inner', on='block')
 
 
-def add_test_power(df_, test_cols):
-
-    return df_.with_columns(
-        test_pow = pl.concat_list(test_cols).list.mean()
-        #df_.select(test_cols).mean(axis=1).alias('test_pow')
-    )
-
-
-def add_ref_power(df_, ref_cols):
-
-    return df_.with_columns(
-        ref_pow = pl.concat_list(ref_cols).list.mean()
-        # df_.select(ref_cols).mean(axis=1).alias('ref_pow')
-    )
-
-
 
 def compute_energy_ratio(df_,
-                         ref_turbines,
-                         test_turbines,
                          df_names,
+                         ref_turbines=None,
+                         test_turbines= None,
                          ws_turbines=None,
                          wd_turbines=None,
-                         bin_cols_in = ['wd_bin','ws_bin'],
+                         use_predefined_ref = False,
+                         use_predefined_ws = False,
+                         use_predefined_wd = False,
                          ws_step = 1.0,
                          ws_min = 0.0,
                          ws_max = 50.0,
                          wd_step = 2.0,
                          wd_min = 0.0,
                          wd_max = 360.0,
+                         bin_cols_in = ['wd_bin','ws_bin'],
                          ):
 
+    """
+    Compute the energy ratio between two sets of turbines.
 
+    Args:
+        df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
+        df_names (list): A list of names to give to the dataframes. 
+        ref_turbines (list[int]): A list of turbine numbers to use as the reference.
+        test_turbines (list[int]): A list of turbine numbers to use as the test.
+        ws_turbines (list[int]): A list of turbine numbers to use for the wind speeds
+        wd_turbines (list[int]): A list of turbine numbers to use for the wind directions
+        use_predefined_ref (bool): If True, use the ref_pow column of df_ as the reference power.
+        use_predefined_ws (bool): If True, use the ws column of df_ as the wind speed.
+        use_predefined_wd (bool): If True, use the wd column of df_ as the wind direction.
+        ws_step (float): The width of the wind speed bins.
+        ws_min (float): The minimum wind speed to use.
+        ws_max (float): The maximum wind speed to use.
+        wd_step (float): The width of the wind direction bins.
+        wd_min (float): The minimum wind direction to use.
+        wd_max (float): The maximum wind direction to use.
+        bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+
+    Returns:
+        pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
+    """
+
+    # If use_predefined_ref is True, df_ must have a column named 'ref_pow'
+    if use_predefined_ref:
+        if 'ref_pow' not in df_.columns:
+            raise ValueError('df_ must have a column named ref_pow when use_predefined_ref is True')
+        # If ref_turbines supplied, warn user that it will be ignored
+        if ref_turbines is not None:
+            warnings.warn('ref_turbines will be ignored when use_predefined_ref is True')
+    else:
+        # ref_turbine must be supplied
+        if ref_turbines is None:
+            raise ValueError('ref_turbines must be supplied when use_predefined_ref is False')
+        
+    # If use_predefined_ws is True, df_ must have a column named 'ws'
+    if use_predefined_ws:
+        if 'ws' not in df_.columns:
+            raise ValueError('df_ must have a column named ws when use_predefined_ws is True')
+        # If ws_turbines supplied, warn user that it will be ignored
+        if ws_turbines is not None:
+            warnings.warn('ws_turbines will be ignored when use_predefined_ws is True')
+    else:
+        # ws_turbine must be supplied
+        if ws_turbines is None:
+            raise ValueError('ws_turbines must be supplied when use_predefined_ws is False')
+
+    # If use_predefined_wd is True, df_ must have a column named 'wd'
+    if use_predefined_wd:
+        if 'wd' not in df_.columns:
+            raise ValueError('df_ must have a column named wd when use_predefined_wd is True')
+        # If wd_turbines supplied, warn user that it will be ignored
+        if wd_turbines is not None:
+            warnings.warn('wd_turbines will be ignored when use_predefined_wd is True')
+    else:
+        # wd_turbine must be supplied
+        if wd_turbines is None:
+            raise ValueError('wd_turbines must be supplied when use_predefined_wd is False')
+        
+
+    # Identify the number of dataframes
     num_df = len(df_names)
 
-    # if ws_turbines is not supplied, assume equivalent to ref_turbines
-    if ws_turbines is None:
-        ws_turbines = ref_turbines
+    # Set up the column names for the reference and test power
+    if not use_predefined_ref:
+        ref_cols = [f'pow_{i:03d}' for i in ref_turbines]
+    else:
+        ref_cols = ['ref_pow']
 
-    # if wd_turbines is not supplied, assume equivalent to ref_turbines
-    if wd_turbines is None:
-        wd_turbines = ref_turbines
+    if not use_predefined_ws:
+        ws_cols = [f'ws_{i:03d}' for i in ws_turbines]
+    else:
+        ws_cols = ['ws']
+
+    if not use_predefined_wd:
+        wd_cols = [f'wd_{i:03d}' for i in wd_turbines]
+    else:
+        wd_cols = ['wd']
 
     # Convert the numbered arrays to appropriate column names
-    ref_turbines = [f'pow_{i:03d}' for i in ref_turbines]
-    test_turbines = [f'pow_{i:03d}' for i in test_turbines]
-    ws_turbines = [f'ws_{i:03d}' for i in ws_turbines]
-    wd_turbines = [f'wd_{i:03d}' for i in wd_turbines]
+    test_cols = [f'pow_{i:03d}' for i in test_turbines]
+
 
     # Filter df_ that all the columns are not null
-    df_ = df_.filter(pl.all(pl.col(ref_turbines + test_turbines + ws_turbines + wd_turbines).is_not_null()))
+    df_ = df_.filter(pl.all(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
 
     # Assign the wd/ws bins
-    df_ = add_ws_bin(df_, ws_turbines, ws_step, ws_min, ws_max)
-    df_ = add_wd_bin(df_, wd_turbines, wd_step, wd_min, wd_max)
+    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max)
+    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max)
 
     # Assign the reference and test power columns
-    df_ = add_ref_power(df_, ref_turbines)
-    df_ = add_test_power(df_, test_turbines)
-
-    # # Compute the power ratio
-    # df_ = df_.with_columns(
-    #     power_ratio = pl.col('test_pow') / pl.col('ref_pow')
-    # )
+    df_ = add_ref_power(df_, ref_cols)
+    df_ = add_test_power(df_, test_cols)
 
     bin_cols_without_df_name = [c for c in bin_cols_in if c != 'df_name']
     bin_cols_with_df_name = bin_cols_without_df_name + ['df_name']
     
     df_ = (df_
-           #.with_columns(
-            #    power_ratio = pl.col('test_pow') / pl.col(f'ref_pow'))
         .filter(pl.all(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
         .groupby(bin_cols_with_df_name, maintain_order=True)
         .agg([pl.mean("ref_pow"), pl.mean("test_pow"),pl.count()]) 
         .with_columns(
             [
                 pl.col('count').min().over(bin_cols_without_df_name).alias('count_min')#, # Find the min across df_name
-                #pl.col('ref_pow').mul(pl.col('power_ratio')).alias('test_pow'), # Compute the test power
             ]
         )
         .with_columns(
@@ -367,39 +431,71 @@ def compute_energy_ratio(df_,
         # Enforce a column order
         df_ = df_.select(['wd_bin'] + df_names +  [f'count_{n}' for n in df_names])
 
-    
 
     return(df_)
         
 def compute_energy_ratio_bootstrap(df_,
-                         ref_turbines,
-                         test_turbines,
                          df_names,
+                         ref_turbines=None,
+                         test_turbines= None,
                          ws_turbines=None,
                          wd_turbines=None,
-                         bin_cols_in = ['wd_bin','ws_bin'],
+                         use_predefined_ref = False,
+                         use_predefined_ws = False,
+                         use_predefined_wd = False,
                          ws_step = 1.0,
                          ws_min = 0.0,
                          ws_max = 50.0,
                          wd_step = 2.0,
                          wd_min = 0.0,
                          wd_max = 360.0,
+                         bin_cols_in = ['wd_bin','ws_bin'],
                          N = 20,
                          ):
     
+    """
+    Compute the energy ratio between two sets of turbines with bootstrapping
+
+    Args:
+        df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
+        df_names (list): A list of names to give to the dataframes. 
+        ref_turbines (list[int]): A list of turbine numbers to use as the reference.
+        test_turbines (list[int]): A list of turbine numbers to use as the test.
+        ws_turbines (list[int]): A list of turbine numbers to use for the wind speeds
+        wd_turbines (list[int]): A list of turbine numbers to use for the wind directions
+        use_predefined_ref (bool): If True, use the ref_pow column of df_ as the reference power.
+        use_predefined_ws (bool): If True, use the ws column of df_ as the wind speed.
+        use_predefined_wd (bool): If True, use the wd column of df_ as the wind direction.
+        ws_step (float): The width of the wind speed bins.
+        ws_min (float): The minimum wind speed to use.
+        ws_max (float): The maximum wind speed to use.
+        wd_step (float): The width of the wind direction bins.
+        wd_min (float): The minimum wind direction to use.
+        wd_max (float): The maximum wind direction to use.
+        bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        N (int): The number of bootstrap samples to use.
+
+    Returns:
+        pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
+
+    """
+    
     df_concat = pl.concat([compute_energy_ratio(resample_energy_table(df_, i),
+                         df_names,
                          ref_turbines,
                          test_turbines,
-                         df_names,
                          ws_turbines,
                          wd_turbines,
-                         bin_cols_in,
+                         use_predefined_ref,
+                         use_predefined_ws,
+                         use_predefined_wd,
                          ws_step,
                          ws_min,
                          ws_max,
                          wd_step,
                          wd_min,
                          wd_max,
+                         bin_cols_in,
                          ) for i in range(N)])
     
     if 'uplift' in df_concat.columns:
@@ -420,20 +516,84 @@ def compute_energy_ratio_bootstrap(df_,
 
 # Use method of Eric Simley's slide 2
 def compute_uplift_in_region(df_,
-                         ref_turbines,
-                         test_turbines,
                          df_names,
+                         ref_turbines=None,
+                         test_turbines= None,
                          ws_turbines=None,
                          wd_turbines=None,
-                         bin_cols_in = ['wd_bin','ws_bin'],
+                         use_predefined_ref = False,
+                         use_predefined_ws = False,
+                         use_predefined_wd = False,
                          ws_step = 1.0,
                          ws_min = 0.0,
                          ws_max = 50.0,
                          wd_step = 2.0,
                          wd_min = 0.0,
                          wd_max = 360.0,
+                         bin_cols_in = ['wd_bin','ws_bin'],
+                         N = 20,
                          ):
+    
+    """
+    Compute the energy  uplift between two dataframes using method of Eric Simley's slide 2
+    Args:
+        df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
+        df_names (list): A list of names to give to the dataframes. 
+        ref_turbines (list[int]): A list of turbine numbers to use as the reference.
+        test_turbines (list[int]): A list of turbine numbers to use as the test.
+        ws_turbines (list[int]): A list of turbine numbers to use for the wind speeds
+        wd_turbines (list[int]): A list of turbine numbers to use for the wind directions
+        use_predefined_ref (bool): If True, use the ref_pow column of df_ as the reference power.
+        use_predefined_ws (bool): If True, use the ws column of df_ as the wind speed.
+        use_predefined_wd (bool): If True, use the wd column of df_ as the wind direction.
+        ws_step (float): The width of the wind speed bins.
+        ws_min (float): The minimum wind speed to use.
+        ws_max (float): The maximum wind speed to use.
+        wd_step (float): The width of the wind direction bins.
+        wd_min (float): The minimum wind direction to use.
+        wd_max (float): The maximum wind direction to use.
+        bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
 
+    Returns:
+        pl.DataFrame: A dataframe containing the energy uplift
+    """
+
+    # If use_predefined_ref is True, df_ must have a column named 'ref_pow'
+    if use_predefined_ref:
+        if 'ref_pow' not in df_.columns:
+            raise ValueError('df_ must have a column named ref_pow when use_predefined_ref is True')
+        # If ref_turbines supplied, warn user that it will be ignored
+        if ref_turbines is not None:
+            warnings.warn('ref_turbines will be ignored when use_predefined_ref is True')
+    else:
+        # ref_turbine must be supplied
+        if ref_turbines is None:
+            raise ValueError('ref_turbines must be supplied when use_predefined_ref is False')
+        
+    # If use_predefined_ws is True, df_ must have a column named 'ws'
+    if use_predefined_ws:
+        if 'ws' not in df_.columns:
+            raise ValueError('df_ must have a column named ws when use_predefined_ws is True')
+        # If ws_turbines supplied, warn user that it will be ignored
+        if ws_turbines is not None:
+            warnings.warn('ws_turbines will be ignored when use_predefined_ws is True')
+    else:
+        # ws_turbine must be supplied
+        if ws_turbines is None:
+            raise ValueError('ws_turbines must be supplied when use_predefined_ws is False')
+
+    # If use_predefined_wd is True, df_ must have a column named 'wd'
+    if use_predefined_wd:
+        if 'wd' not in df_.columns:
+            raise ValueError('df_ must have a column named wd when use_predefined_wd is True')
+        # If wd_turbines supplied, warn user that it will be ignored
+        if wd_turbines is not None:
+            warnings.warn('wd_turbines will be ignored when use_predefined_wd is True')
+    else:
+        # wd_turbine must be supplied
+        if wd_turbines is None:
+            raise ValueError('wd_turbines must be supplied when use_predefined_wd is False')
+        
 
     num_df = len(df_names)
 
@@ -441,30 +601,36 @@ def compute_uplift_in_region(df_,
     if num_df != 2:
         raise ValueError('Number of dataframes must be 2')
 
-    # if ws_turbines is not supplied, assume equivalent to ref_turbines
-    if ws_turbines is None:
-        ws_turbines = ref_turbines
+    # Set up the column names for the reference and test power
+    if not use_predefined_ref:
+        ref_cols = [f'pow_{i:03d}' for i in ref_turbines]
+    else:
+        ref_cols = ['ref_pow']
 
-    # if wd_turbines is not supplied, assume equivalent to ref_turbines
-    if wd_turbines is None:
-        wd_turbines = ref_turbines
+    if not use_predefined_ws:
+        ws_cols = [f'ws_{i:03d}' for i in ws_turbines]
+    else:
+        ws_cols = ['ws']
+
+    if not use_predefined_wd:
+        wd_cols = [f'wd_{i:03d}' for i in wd_turbines]
+    else:
+        wd_cols = ['wd']
 
     # Convert the numbered arrays to appropriate column names
-    ref_turbines = [f'pow_{i:03d}' for i in ref_turbines]
-    test_turbines = [f'pow_{i:03d}' for i in test_turbines]
-    ws_turbines = [f'ws_{i:03d}' for i in ws_turbines]
-    wd_turbines = [f'wd_{i:03d}' for i in wd_turbines]
+    test_cols = [f'pow_{i:03d}' for i in test_turbines]
+
 
     # Filter df_ that all the columns are not null
-    df_ = df_.filter(pl.all(pl.col(ref_turbines + test_turbines + ws_turbines + wd_turbines).is_not_null()))
+    df_ = df_.filter(pl.all(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
 
     # Assign the wd/ws bins
-    df_ = add_ws_bin(df_, ws_turbines, ws_step, ws_min, ws_max)
-    df_ = add_wd_bin(df_, wd_turbines, wd_step, wd_min, wd_max)
+    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max)
+    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max)
 
     # Assign the reference and test power columns
-    df_ = add_ref_power(df_, ref_turbines)
-    df_ = add_test_power(df_, test_turbines)
+    df_ = add_ref_power(df_, ref_cols)
+    df_ = add_test_power(df_, test_cols)
 
     bin_cols_without_df_name = [c for c in bin_cols_in if c != 'df_name']
     bin_cols_with_df_name = bin_cols_without_df_name + ['df_name']
@@ -503,34 +669,66 @@ def compute_uplift_in_region(df_,
                             
 
 def compute_uplift_in_region_bootstrap(df_,
-                         ref_turbines,
-                         test_turbines,
                          df_names,
+                         ref_turbines=None,
+                         test_turbines= None,
                          ws_turbines=None,
                          wd_turbines=None,
-                         bin_cols_in = ['wd_bin','ws_bin'],
+                         use_predefined_ref = False,
+                         use_predefined_ws = False,
+                         use_predefined_wd = False,
                          ws_step = 1.0,
                          ws_min = 0.0,
                          ws_max = 50.0,
                          wd_step = 2.0,
                          wd_min = 0.0,
                          wd_max = 360.0,
+                         bin_cols_in = ['wd_bin','ws_bin'],
                          N = 20,
                          ):
     
+    """
+    Compute the uplift in a region using bootstrap resampling
+
+    Args:
+        df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
+        df_names (list): A list of names to give to the dataframes. 
+        ref_turbines (list[int]): A list of turbine numbers to use as the reference.
+        test_turbines (list[int]): A list of turbine numbers to use as the test.
+        ws_turbines (list[int]): A list of turbine numbers to use for the wind speeds
+        wd_turbines (list[int]): A list of turbine numbers to use for the wind directions
+        use_predefined_ref (bool): If True, use the ref_pow column of df_ as the reference power.
+        use_predefined_ws (bool): If True, use the ws column of df_ as the wind speed.
+        use_predefined_wd (bool): If True, use the wd column of df_ as the wind direction.
+        ws_step (float): The width of the wind speed bins.
+        ws_min (float): The minimum wind speed to use.
+        ws_max (float): The maximum wind speed to use.
+        wd_step (float): The width of the wind direction bins.
+        wd_min (float): The minimum wind direction to use.
+        wd_max (float): The maximum wind direction to use.
+        bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        N (int): The number of bootstrap samples to use.
+
+    Returns:
+        pl.DataFrame: A dataframe containing the energy uplift
+    """
+    
     df_concat = pl.concat([compute_uplift_in_region(resample_energy_table(df_, i),
+                          df_names,
                          ref_turbines,
                          test_turbines,
-                         df_names,
                          ws_turbines,
                          wd_turbines,
-                         bin_cols_in,
+                         use_predefined_ref,
+                         use_predefined_ws,
+                         use_predefined_wd,
                          ws_step,
                          ws_min,
                          ws_max,
                          wd_step,
                          wd_min,
                          wd_max,
+                         bin_cols_in,
                          ) for i in range(N)])
     
     return pl.DataFrame({
