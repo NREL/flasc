@@ -13,14 +13,13 @@
 
 from matplotlib import pyplot as plt
 import numpy as np
-import polars as pl
 import pandas as pd
 from scipy.interpolate import interp1d
 
 from .. import utilities as fsut
 from ..dataframe_operations import dataframe_manipulations as dfm
 
-#TODO: Convert to polars
+
 def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbose=True):
     """Assigns a turbine's measurement to NaN for each timestamp for which any of the turbines
       that are shedding a wake on this turbine is reporting NaN measurements.
@@ -118,28 +117,24 @@ def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbos
 
     return df_out
 
-#TODO: Check this works in polars
+
 def df_get_no_faulty_measurements(df, turbine):
     if isinstance(turbine, str):
         turbine = int(turbine)
+    entryisnan = np.isnan(df['pow_%03d' % turbine].astype(float))
+    # cols = [s for s in df.columns if s[-4::] == ('_%03d' % turbine)]
+    # entryisnan = (np.sum(np.isnan(df[cols]),axis=1) > 0)
+    N_isnan = np.sum(entryisnan)
+    return N_isnan
 
-    return df.select(pl.col('pow_%03d' % turbine).null_count()).item()
 
-
-#TODO: Confirm this works
 def df_mark_turbdata_as_faulty(df, cond, turbine_list, exclude_columns=[]):
     if isinstance(turbine_list, (np.integer, int)):
         turbine_list = [turbine_list]
 
     for ti in turbine_list:
-        # N_init = df_get_no_faulty_measurements(df, ti)
         cols = [s for s in df.columns if s[-4::] == ('_%03d' % ti)
                 and s not in exclude_columns]
-        
-        # Delete measurements
-        df = df.with_columns(
-            pl.when(~pl.Series(cond)) # Negated so True values get nulled
-            .then(pl.col(cols)) # Apply to selected columns
-        )
+        df.loc[cond, cols] = None  # Delete measurements
 
     return df
