@@ -14,6 +14,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+import polars as pl
 from scipy.interpolate import interp1d
 
 from .. import utilities as fsut
@@ -136,5 +137,32 @@ def df_mark_turbdata_as_faulty(df, cond, turbine_list, exclude_columns=[]):
         cols = [s for s in df.columns if s[-4::] == ('_%03d' % ti)
                 and s not in exclude_columns]
         df.loc[cond, cols] = None  # Delete measurements
+
+    return df
+
+
+#TODO: Check this works in polars
+def df_get_no_faulty_measurements_pl(df, turbine):
+    if isinstance(turbine, str):
+        turbine = int(turbine)
+
+    return df.select(pl.col('pow_%03d' % turbine).null_count()).item()
+
+
+#TODO: Confirm this works
+def df_mark_turbdata_as_faulty_pl(df, cond, turbine_list, exclude_columns=[]):
+    if isinstance(turbine_list, (np.integer, int)):
+        turbine_list = [turbine_list]
+
+    for ti in turbine_list:
+        # N_init = df_get_no_faulty_measurements(df, ti)
+        cols = [s for s in df.columns if s[-4::] == ('_%03d' % ti)
+                and s not in exclude_columns]
+        
+        # Delete measurements
+        df = df.with_columns(
+            pl.when(~pl.Series(cond)) # Negated so True values get nulled
+            .then(pl.col(cols)) # Apply to selected columns
+        )
 
     return df
