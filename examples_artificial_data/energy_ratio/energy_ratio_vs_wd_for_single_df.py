@@ -20,34 +20,28 @@ from flasc.energy_ratio import energy_ratio
 from flasc.dataframe_operations import \
     dataframe_manipulations as dfm
 from flasc import floris_tools as fsatools
+from flasc.examples.models import load_floris_artificial as load_floris
 
 
 def load_data():
-    # Load dataframe with scada data
+    # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    ftr_path = os.path.join(root_dir, '..', 'demo_dataset',
-                            'demo_dataset_scada_60s.ftr')
+    ftr_path = os.path.join(
+        root_dir, '..', 'raw_data_processing', 'postprocessed', 'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
+    )
     if not os.path.exists(ftr_path):
-        raise FileNotFoundError('Please run ./examples_artificial_data/demo_dataset/' +
-                                'generate_demo_dataset.py before try' +
-                                'ing any of the other examples.')
+        raise FileNotFoundError(
+            'Please run the scripts in /raw_data_processing/' +
+            'before trying any of the other examples.'
+        )
     df = pd.read_feather(ftr_path)
     return df
-
-
-def load_floris():
-    # Initialize the FLORIS interface fi
-    print('Initializing the FLORIS object for our demo wind farm')
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.yaml")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
-    return fi
 
 
 if __name__ == '__main__':
     # Load data and floris object
     df = load_data()
-    fi = load_floris()
+    fi, _ = load_floris()
 
     # Visualize layout
     fig, ax = plt.subplots()
@@ -91,11 +85,11 @@ if __name__ == '__main__':
         ws_step=1.0,
         wd_bin_width=2.0,
     )
-    fig, ax = era.plot_energy_ratio()
+    ax = era.plot_energy_ratio()
     ax[0].set_title("Energy ratios for turbine 001 without UQ")
     plt.tight_layout()
 
-    fig, ax = era.plot_energy_ratio(polar_plot=True)  # Plot in polar format too
+    ax = era.plot_energy_ratio(polar_plot=True)  # Plot in polar format too
     ax[0].set_title("Energy ratios for turbine 001 without UQ")
     plt.tight_layout()
 
@@ -109,7 +103,7 @@ if __name__ == '__main__':
         N=20,
         percentiles=[5.0, 95.0]
     )
-    fig, ax = era.plot_energy_ratio()
+    ax = era.plot_energy_ratio()
     ax[0].set_title("Energy ratios for turbine 001 with UQ "
                     + "(N=20, 90% confidence interval)")
     plt.tight_layout()
@@ -125,7 +119,7 @@ if __name__ == '__main__':
         percentiles=[5.0, 95.0],
         num_blocks=20 # Resample over 20 blocks
     )
-    fig, ax = era.plot_energy_ratio()
+    ax = era.plot_energy_ratio()
     ax[0].set_title("Energy ratios for turbine 001 with UQ "
                     + "(N=20, Block Bootstrapping)")
     plt.tight_layout()

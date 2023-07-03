@@ -16,9 +16,7 @@ REQUIRED = [
     'feather-format',
     'matplotlib>=3.6.3',
     'numpy',
-    'numba',
     "bokeh==3.1.1",
-    'openoa',
     'pandas>=1.5',
     'pyproj',
     'pytest',
@@ -53,7 +51,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    packages=find_packages(include=['flasc']),
+    packages=find_packages(include=['flasc*']),
     entry_points={
         'console_scripts': [
             'flasc=flasc.cli:main'
@@ -65,7 +63,7 @@ setup(
     zip_safe=False,
     keywords='flasc',
     classifiers=[
-        'Development Status :: Release',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',

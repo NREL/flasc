@@ -9,22 +9,13 @@ from flasc.floris_tools import (
     interpolate_floris_from_df_approx,
     get_dependent_turbines_by_wd
 )
-
-from floris import tools as wfct
-
-
-def load_floris():
-    # Initialize the FLORIS interface fi
-    print('Initializing the FLORIS object for our demo wind farm')
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../examples_artificial_data/demo_dataset/demo_floris_input.yaml")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
-    return fi
+from flasc.examples.models import load_floris_artificial as load_floris
+# from floris import tools as wfct
 
 
 class TestFlorisTools(unittest.TestCase):
     def test_floris_merge(self):
-        fi_1 = load_floris()
+        fi_1, _ = load_floris()
         fi_2 = fi_1.copy()
         fi_2.reinitialize(layout_x=[-500.0, -500.0], layout_y=[0.0, 500.0])
 
@@ -46,7 +37,7 @@ class TestFlorisTools(unittest.TestCase):
 
     def test_floris_approx_table(self):
         # Load FLORIS object
-        fi = load_floris()
+        fi, _ = load_floris()
 
         # Single core calculation
         df_fi_approx = calc_floris_approx_table(
@@ -117,7 +108,7 @@ class TestFlorisTools(unittest.TestCase):
 
     def test_get_dependent_turbines_by_wd(self):
         # Load FLORIS object
-        fi = load_floris()
+        fi, _ = load_floris()
 
         # compute the dependency on turbine 2 at 226 degrees
         dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]))

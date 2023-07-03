@@ -1,6 +1,6 @@
-==========
+=============================================
 FLORIS-based Analysis for SCADA data (FLASC)
-==========
+=============================================
 
 **Further documentation is available at http://flasc.readthedocs.io/.**
 
