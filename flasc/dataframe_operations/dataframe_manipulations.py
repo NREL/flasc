@@ -16,6 +16,7 @@ import datetime
 import numpy as np
 import os as os
 import pandas as pd
+import polars as pl
 import warnings
 
 from floris.utilities import wrap_360
@@ -752,6 +753,68 @@ def df_reduce_precision(df_in, verbose=False):
     df_out = pd.concat(list_out, axis=1, ignore_index=False)
     return df_out
 
+
+def df_reduce_precision_pl(df_in, verbose=False):
+    """Reduce the precision in dataframes from float64 to float32, or possibly
+    even further to int32, int16, int8 or even bool. This operation typically
+    reduces the size of the dataframe by a factor 2 without any real loss in
+    precision. This can make particular operations and data storage much more
+    efficient. This can also bring about speed-ups doing calculations with
+    these variables.
+
+    Args:
+        df_in ([pl.DataFrame]): Dataframe that needs to be reduced.
+        verbose (bool, optional): Print progress. Defaults to False.
+
+    Returns:
+        df_out ([pl.DataFrame]): Reduced dataframe
+    """
+    df_out = df_in.clone()
+    dtypes = df_in.dtypes
+
+
+    for ii, c in enumerate(df_in.columns):
+        datatype = dtypes[ii]
+        if datatype == pl.Float64:
+
+            # For now simply cast to float32
+            df_out = df_out.with_columns(pl.col(c).cast(pl.Float32))
+
+            max_error = df_out.with_columns([
+                (pl.col(c).sub(df_in[c]))
+                .abs()
+                .alias("error"),
+            ]).select("error").max().to_numpy()[0][0]
+
+            if verbose:
+                print("Column %s ['%s'] was downsampled to %s."
+                      % (c, datatype, df_out.dtypes[ii]))
+                print( f"Max error: {max_error:.2e}")
+
+
+        elif datatype == pl.Int64:
+
+            # For now simply cast to Int32
+            df_out = df_out.with_columns(pl.col(c).cast(pl.Int32))
+
+            max_error = df_out.with_columns([
+                (pl.col(c).sub(df_in[c]))
+                .abs()
+                .alias("error"),
+            ]).select("error").max().to_numpy()[0][0]
+
+            if verbose:
+                print("Column %s ['%s'] was downsampled to %s."
+                      % (c, datatype, df_out.dtypes[ii]))
+                print( f"Max error: {max_error:.2e}")
+
+        else:
+            if verbose:
+                print("Datatype '%s' not recognized. Not downsampling."
+                      % datatype)
+
+
+    return df_out
 
 # Functions used for dataframe processing specifically
 def df_drop_nan_rows(df, verbose=False):
