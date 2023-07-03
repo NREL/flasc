@@ -134,6 +134,10 @@ def plot(
     for ii, df in enumerate(energy_ratios):
         df = df.copy()
 
+        if df.shape[0] < 2:
+            # Do not plot single values
+            continue
+
         # Get x-axis values
         x = np.array(df["wd_bin"], dtype=float)
     
@@ -141,13 +145,18 @@ def plot(
         dwd = np.min(x[1::] - x[0:-1])
         jumps = np.where(np.diff(x) > dwd * 1.50)[0]
         if len(jumps) > 0:
-            df = df.append(
-                pd.DataFrame(
-                    {
-                        "wd_bin": x[jumps] + dwd / 2.0,
-                        "N_bin": [0] * len(jumps),
-                    }
-                )
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        {
+                            "wd_bin": x[jumps] + dwd / 2.0,
+                            "N_bin": [0] * len(jumps),
+                        }
+                    )
+                ],
+                axis=0,
+                ignore_index=False,
             )
             df = df.iloc[np.argsort(df["wd_bin"])].reset_index(drop=True)
             x = np.array(df["wd_bin"], dtype=float)
@@ -176,7 +185,13 @@ def plot(
             )
 
     # Plot the bin count
-    if df_freqs is not None:
+    is_none = False
+    if df_freqs is None:
+        is_none = True
+    elif isinstance(df_freqs, list):
+        is_none = np.any([c is None for c in df_freqs])
+
+    if not is_none:
         for ii, df_freq in enumerate(df_freqs):
             wd_bins = df_freq["wd_bin"].unique()
             n_ws_bins = len(df_freq["ws_bin_edges"].unique())
