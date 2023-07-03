@@ -526,7 +526,7 @@ class ws_pw_curve_filtering:
         m_pow_rb=0.99,
         ws_deadband=0.50,
         pow_deadband=20.0,
-        cutoff_ws=25.0,
+        cutoff_ws=20.0,
     ):
         """Filter the data by offset from the floris power curve in x-
         directions.
@@ -545,6 +545,19 @@ class ws_pw_curve_filtering:
             m_pow_rb (float, optional): Multiplier on the power defining
             the right bound for the power curve. Any data to the right of this
             curve is considered faulty. Defaults to 0.99.
+            ws_deadband (float, optional): Deadband in [m/s] around the median
+            power curve around which data is by default classified as valid.
+            Defaults to 0.50.
+            pow_deadband (float, optional): Deadband in [kW] around the median
+            power curve around which data is by default classified as valid.
+            Defaults to 20.0.
+            cutoff_ws (float, optional): Wind speed up to which the median
+            power curve is calculated and the data is filtered for. You should
+            make sure this variable is set to a value above the rated wind
+            speed and below the cut-out wind speed. If you are experiencing
+            problems with data filtering and your data points have a downward
+            trend near the high wind speeds, try decreasing this variable's
+            value to 15.0.
         """
         print("Filtering data by deviations from the floris power curve...")
 
@@ -691,13 +704,14 @@ class ws_pw_curve_filtering:
     def get_power_curve(self, calculate_missing=True):
         """Return the turbine estimated mean power curves to the user.
 
+        Args:
+            calculate_missing (bool, optional): Calculate the median power
+                curves for the turbines for the turbines of which their
+                power curves were previously not yet calculated.
         Returns:
             pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
                 speed bins and the mean power production value for every
                 turbine.
-            calculate_missing (bool, optional): Calculate the median power
-                curves for the turbines for the turbines of which their
-                power curves were previously not yet calculated.
         """
         if calculate_missing and (self.pw_curve_df.isna().all(axis=0).any()):
             turbine_subset = np.where(
@@ -759,7 +773,15 @@ class ws_pw_curve_filtering:
         ax.set_title("Mean of all turbine power curves with UQ")
         return fig, ax
 
-    def plot_filters_custom_scatter(self, ti, x_col, y_col, xlabel="Wind speed (m/s)", ylabel="Power (kW)", ax=None):
+    def plot_filters_custom_scatter(
+            self,
+            ti,
+            x_col,
+            y_col,
+            xlabel="Wind speed (m/s)",
+            ylabel="Power (kW)",
+            ax=None
+        ):
         """Plot the filtered data in a scatter plot, categorized
         by the source of their filter/fault. This is a generic
         function that allows the user to plot various numeric
@@ -772,6 +794,10 @@ class ws_pw_curve_filtering:
                 choice is "ws_000" for ti=0, for example.
             y_col (str): Column name to plot on the y-axis. A common
                 choice is "pow_000" for ti=0, for example.
+            xlabel (str, optional): Figure x-axis label. Defaults to
+                'Wind speed (m/s)'.
+            ylabel (str, optional): Figure y-axis label. Defaults to
+                'Power (kW)'.
             ax (plt.Axis, optional): Pyplot Figure axis in which the
                 figure should be produced. If None specified, then
                  creates a new figure. Defaults to None.
@@ -841,9 +867,14 @@ class ws_pw_curve_filtering:
                 choice is "ws_000" for ti=0, for example.
             y_col (str): Column name to plot on the y-axis. A common
                 choice is "pow_000" for ti=0, for example.
-            ax (plt.Axis, optional): Pyplot Figure axis in which the
-                figure should be produced. If None specified, then
-                 creates a new figure. Defaults to None.
+            title (str, optional): Figure title. Defaults to 'Wind-
+                speed vs. power curve'.
+            xlabel (str, optional): Figure x-axis label. Defaults to
+                'Wind speed (m/s)'.
+            ylabel (str, optional): Figure y-axis label. Defaults to
+                'Power (kW)'.
+            p (Bokeh Figure, optional): Figure to plot in. If None is
+                specified, creates a new figure. Defaults to None.
 
         Returns:
             ax: The figure axis in which the scatter plot is drawn.
@@ -986,6 +1017,8 @@ class ws_pw_curve_filtering:
             fi (FlorisInterface, optional): floris object. If not None, will
             use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
+            ax (Matplotlib.pyplot Axis, optional): Axis to plot in. If None is
+               specified, creates a new figure and axis. Defaults to None.
         """
 
         if ax is None:
@@ -1062,11 +1095,9 @@ class ws_pw_curve_filtering:
         in the found time period from the dataset.
 
         Args:
-            save_path ([str], optional): Path to save the figure to. If none
-            is specified, then will not save any figures. Defaults to None.
-            fig_format (str, optional): Figure format if saved. Defaults to
-            "png".
-            dpi (int, optional): Image resolution if saved. Defaults to 300.
+            ti (int): Index of the turbine of interest.
+            ax (Matplotlib.pyplot Axis, optional): Axis to plot in. If None is
+               specified, creates a new figure and axis. Defaults to None.
         """
         if ax is None:
             _, ax = plt.subplots(figsize=(13, 7))
@@ -1098,11 +1129,9 @@ class ws_pw_curve_filtering:
         in the found time period from the dataset.
 
         Args:
-            save_path ([str], optional): Path to save the figure to. If none
-            is specified, then will not save any figures. Defaults to None.
-            fig_format (str, optional): Figure format if saved. Defaults to
-            "png".
-            dpi (int, optional): Image resolution if saved. Defaults to 300.
+            ti (int): Index of the turbine of interest.
+            p (Bokeh Figure, optional): Figure to plot in. If None is
+               specified, creates a new figure. Defaults to None.
         """
 
         if p is None:
