@@ -24,7 +24,8 @@ REQUIRED = [
     'sqlalchemy',
     'streamlit',
     'tkcalendar',
-    'seaborn'
+    'seaborn',
+    'polars'
 ]
 
 ROOT = Path(__file__).parent
