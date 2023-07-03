@@ -16,6 +16,7 @@ import datetime
 import numpy as np
 import os as os
 import pandas as pd
+import polars as pl
 import warnings
 
 from floris.utilities import wrap_360
@@ -27,14 +28,14 @@ from .. import (
     utilities as fsut
 )
 
-
+#TODO: UPDATE TO POLARS
 # Functions related to wind farm analysis for df
 def filter_df_by_ws(df, ws_range):
     df = df[df['ws'] >= ws_range[0]]
     df = df[df['ws'] < ws_range[1]]
     return df
 
-
+#TODO: UPDATE TO POLARS
 def filter_df_by_wd(df, wd_range):
     lb = wd_range[0]
     ub = wd_range[1]
@@ -50,17 +51,17 @@ def filter_df_by_wd(df, wd_range):
         df = df[((wd_array >= lb) & (df['wd'] < ub))]
     return df
 
-
+#TODO: UPDATE TO POLARS
 def filter_df_by_ti(df, ti_range):
     df = df[df['ti'] >= ti_range[0]]
     df = df[df['ti'] < ti_range[1]]
     return df
 
-
+#TODO: UPDATE TO POLARS
 def get_num_turbines(df):
     return fsut.get_num_turbines(df)
 
-
+#TODO: UPDATE TO POLARS
 # Generic functions for column operations
 def get_column_mean(df, col_prefix='pow', turbine_list=None,
                     circular_mean=False):
@@ -87,7 +88,7 @@ def get_column_mean(df, col_prefix='pow', turbine_list=None,
 
     return mean_out
 
-
+#TODO: UPDATE TO POLARS
 def _set_col_by_turbines(col_out, col_prefix, df,
                          turbine_numbers, circular_mean):
     if isinstance(turbine_numbers, str):
@@ -102,7 +103,7 @@ def _set_col_by_turbines(col_out, col_prefix, df,
         )
     return df
 
-
+#TODO: UPDATE TO POLARS
 def _set_col_by_n_closest_upstream_turbines(col_out, col_prefix, df, N,
     df_upstream, circular_mean, turb_no, x_turbs, y_turbs, exclude_turbs=[]):
     # Can get df_upstream using floris_tools.get_upstream_turbs_floris()
@@ -135,7 +136,7 @@ def _set_col_by_n_closest_upstream_turbines(col_out, col_prefix, df, N,
 
     return df
 
-
+#TODO: UPDATE TO POLARS
 def _set_col_by_upstream_turbines(col_out, col_prefix, df,
                                   df_upstream, circular_mean,
                                   exclude_turbs=[]):
@@ -162,7 +163,7 @@ def _set_col_by_upstream_turbines(col_out, col_prefix, df,
 
     return df
 
-
+#TODO: UPDATE TO POLARS
 def _set_col_by_radius_from_turbine(col_out, col_prefix, df, turb_no,
                                     x_turbs, y_turbs, max_radius,
                                     circular_mean, include_itself=True):
@@ -179,7 +180,7 @@ def _set_col_by_radius_from_turbine(col_out, col_prefix, df, turb_no,
                                 turbine_numbers=turbs_within_radius,
                                 circular_mean=circular_mean)
 
-
+#TODO: UPDATE TO POLARS
 def _set_col_by_upstream_turbines_in_radius(
     col_out, col_prefix, df, df_upstream, turb_no,
     x_turbs, y_turbs, max_radius, circular_mean,
@@ -231,7 +232,7 @@ def _set_col_by_upstream_turbines_in_radius(
         circular_mean=circular_mean,
         exclude_turbs=turbs_outside_radius)
 
-
+#TODO: UPDATE TO POLARS
 # Helper functions
 def set_wd_by_turbines(df, turbine_numbers):
     """Add a column called 'wd' in your dataframe with value equal
@@ -251,7 +252,7 @@ def set_wd_by_turbines(df, turbine_numbers):
     """
     return _set_col_by_turbines('wd', 'wd', df, turbine_numbers, True)
 
-
+#TODO: UPDATE TO POLARS
 def set_wd_by_all_turbines(df):
     """Add a column called 'wd' in your dataframe with value equal
     to the circular-averaged wind direction measurements of all
@@ -268,7 +269,7 @@ def set_wd_by_all_turbines(df):
     """
     return _set_col_by_turbines('wd', 'wd', df, 'all', True)
 
-
+#TODO: UPDATE TO POLARS
 def set_wd_by_radius_from_turbine(df, turb_no, x_turbs, y_turbs,
                                   max_radius, include_itself=True):
     return _set_col_by_radius_from_turbine(
@@ -282,7 +283,7 @@ def set_wd_by_radius_from_turbine(df, turb_no, x_turbs, y_turbs,
         circular_mean=True,
         include_itself=include_itself)
 
-
+#TODO: UPDATE TO POLARS
 def set_ws_by_turbines(df, turbine_numbers):
     """Add a column called 'ws' in your dataframe with value equal
     to the circular-averaged wind direction measurements of all
@@ -301,7 +302,7 @@ def set_ws_by_turbines(df, turbine_numbers):
     """
     return _set_col_by_turbines('ws', 'ws', df, turbine_numbers, False)
 
-
+#TODO: UPDATE TO POLARS
 def set_ws_by_all_turbines(df):
     """Add a column called 'ws' in your dataframe with value equal
     to the circular-averaged wind direction measurements of all
@@ -320,7 +321,7 @@ def set_ws_by_all_turbines(df):
     """
     return _set_col_by_turbines('ws', 'ws', df, 'all', False)
 
-
+#TODO: UPDATE TO POLARS
 def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
     """Add a column called 'ws' in your dataframe with value equal
     to the averaged wind speed measurements of all the turbines
@@ -349,7 +350,7 @@ def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         circular_mean=False,
         exclude_turbs=exclude_turbs)
 
-
+#TODO: UPDATE TO POLARS
 def set_ws_by_upstream_turbines_in_radius(df, df_upstream, turb_no,
                                           x_turbs, y_turbs,
                                           max_radius,
@@ -394,7 +395,7 @@ def set_ws_by_upstream_turbines_in_radius(df, df_upstream, turb_no,
         circular_mean=False,
         include_itself=include_itself)
 
-
+#TODO: UPDATE TO POLARS
 def set_ws_by_n_closest_upstream_turbines(df, df_upstream, turb_no,
     x_turbs, y_turbs, exclude_turbs=[], N=5):
     """Add a column called 'pow_ref' to your dataframe, which is the
@@ -436,7 +437,7 @@ def set_ws_by_n_closest_upstream_turbines(df, df_upstream, turb_no,
         exclude_turbs=exclude_turbs,
         circular_mean=False)
 
-
+#TODO: UPDATE TO POLARS
 def set_ti_by_turbines(df, turbine_numbers):
     """Add a column called 'ti' in your dataframe with value equal
     to the averaged turbulence intensity measurements of all the
@@ -455,7 +456,7 @@ def set_ti_by_turbines(df, turbine_numbers):
     """
     return _set_col_by_turbines('ti', 'ti', df, turbine_numbers, False)
 
-
+#TODO: UPDATE TO POLARS
 def set_ti_by_all_turbines(df):
     """Add a column called 'ti' in your dataframe with value equal
     to the averaged turbulence intensity measurements of all
@@ -474,7 +475,7 @@ def set_ti_by_all_turbines(df):
     """
     return _set_col_by_turbines('ti', 'ti', df, 'all', False)
 
-
+#TODO: UPDATE TO POLARS
 def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
     """Add a column called 'ti' in your dataframe with value equal
     to the averaged turbulence intensity measurements of all the turbines
@@ -503,7 +504,7 @@ def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         circular_mean=False,
         exclude_turbs=exclude_turbs)
 
-
+#TODO: UPDATE TO POLARS
 def set_ti_by_upstream_turbines_in_radius(df, df_upstream, turb_no,
                                           x_turbs, y_turbs,
                                           max_radius,
@@ -548,7 +549,7 @@ def set_ti_by_upstream_turbines_in_radius(df, df_upstream, turb_no,
         circular_mean=False,
         include_itself=include_itself)
 
-
+#TODO: UPDATE TO POLARS
 def set_pow_ref_by_turbines(df, turbine_numbers):
     """Add a column called 'pow_ref' in your dataframe with value equal
     to the averaged turbulence intensity measurements of all the
@@ -567,7 +568,7 @@ def set_pow_ref_by_turbines(df, turbine_numbers):
     """
     return _set_col_by_turbines('pow_ref', 'pow', df, turbine_numbers, False)
 
-
+#TODO: UPDATE TO POLARS
 def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
     """Add a column called 'pow_ref' in your dataframe with value equal
     to the averaged power measurements of all the turbines upstream,
@@ -596,7 +597,7 @@ def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         circular_mean=False,
         exclude_turbs=exclude_turbs)
 
-
+#TODO: UPDATE TO POLARS
 def set_pow_ref_by_upstream_turbines_in_radius(
     df, df_upstream, turb_no, x_turbs,
     y_turbs, max_radius, include_itself=False):
@@ -640,7 +641,7 @@ def set_pow_ref_by_upstream_turbines_in_radius(
         circular_mean=False,
         include_itself=include_itself)
 
-
+#TODO: UPDATE TO POLARS
 def set_pow_ref_by_n_closest_upstream_turbines(df, df_upstream, turb_no,
     x_turbs, y_turbs, exclude_turbs=[], N=5):
     """Add a column called 'pow_ref' to your dataframe, which is the
@@ -682,7 +683,6 @@ def set_pow_ref_by_n_closest_upstream_turbines(df, df_upstream, turb_no,
         exclude_turbs=exclude_turbs,
         circular_mean=False)
 
-
 def df_reduce_precision(df_in, verbose=False):
     """Reduce the precision in dataframes from float64 to float32, or possibly
     even further to int32, int16, int8 or even bool. This operation typically
@@ -692,67 +692,60 @@ def df_reduce_precision(df_in, verbose=False):
     these variables.
 
     Args:
-        df_in ([pd.DataFrame]): Dataframe that needs to be reduced.
+        df_in ([pl.DataFrame]): Dataframe that needs to be reduced.
         verbose (bool, optional): Print progress. Defaults to False.
 
     Returns:
-        df_out ([pd.DataFrame]): Reduced dataframe
+        df_out ([pl.DataFrame]): Reduced dataframe
     """
-    list_out = []
+    df_out = df_in.clone()
     dtypes = df_in.dtypes
+
+
     for ii, c in enumerate(df_in.columns):
-        datatype = str(dtypes[c])
-        if ((datatype == 'float64') or
-            (datatype == 'float32') or
-            (datatype == 'float')):
-            # Check if can be simplified as integer
-            if (not any(np.isnan(df_in[c])) and
-                all(np.isclose(np.round(df_in[c]),
-                               df_in[c], equal_nan=True))):
-                unique_values = np.unique(df_in[c])
-                if np.array_equal(unique_values, [0, 1]):
-                    var_downsampled = df_in[c].astype(bool)
-                elif np.max(df_in[c]) < np.iinfo(np.int8).max:
-                    var_downsampled = df_in[c].astype(np.int8)
-                elif np.max(df_in[c]) < np.iinfo(np.int16).max:
-                    var_downsampled = df_in[c].astype(np.int16)
-                elif np.max(df_in[c]) < np.iinfo(np.int32).max:
-                    var_downsampled = df_in[c].astype(np.int32)
-                else:
-                    var_downsampled = df_in[c].astype(np.int64)
-            else:  # If not, just simplify as float32
-                var_downsampled = df_in[c].astype(np.float32)
-            max_error = np.max(np.abs(var_downsampled-df_in[c]))
+        datatype = dtypes[ii]
+        if datatype == pl.Float64:
+
+            # For now simply cast to float32
+            df_out = df_out.with_columns(pl.col(c).cast(pl.Float32))
+
+            max_error = df_out.with_columns([
+                (pl.col(c).sub(df_in[c]))
+                .abs()
+                .alias("error"),
+            ]).select("error").max().to_numpy()[0][0]
+
             if verbose:
                 print("Column %s ['%s'] was downsampled to %s."
-                      % (c, datatype, var_downsampled.dtypes))
-                print( "Max error: ", max_error)
-        elif ((datatype == 'int64') or
-              (datatype == 'int32') or
-              (datatype == 'int')):
-            if np.array_equal(np.unique(df_in[c]), [0, 1]):
-                var_downsampled = df_in[c].astype(bool)
-            elif len(np.unique(df_in[c])) < 100:
-                var_downsampled = df_in[c].astype(np.int16)
-            else:
-                var_downsampled = df_in[c].astype(np.int32)
-            max_error = np.max(np.abs(var_downsampled-df_in[c]))
+                      % (c, datatype, df_out.dtypes[ii]))
+                print( f"Max error: {max_error:.2e}")
+
+
+        elif datatype == pl.Int64:
+
+            # For now simply cast to Int32
+            df_out = df_out.with_columns(pl.col(c).cast(pl.Int32))
+
+            max_error = df_out.with_columns([
+                (pl.col(c).sub(df_in[c]))
+                .abs()
+                .alias("error"),
+            ]).select("error").max().to_numpy()[0][0]
+
             if verbose:
                 print("Column %s ['%s'] was downsampled to %s."
-                      % (c, datatype, var_downsampled.dtypes))
-                print( "Max error: ", max_error)
+                      % (c, datatype, df_out.dtypes[ii]))
+                print( f"Max error: {max_error:.2e}")
+
         else:
             if verbose:
                 print("Datatype '%s' not recognized. Not downsampling."
                       % datatype)
-            var_downsampled = df_in[c]
 
-        list_out.append(var_downsampled)
-    
-    df_out = pd.concat(list_out, axis=1, ignore_index=False)
+
     return df_out
 
-
+#TODO: UPDATE TO POLARS
 # Functions used for dataframe processing specifically
 def df_drop_nan_rows(df, verbose=False):
     """Remove entries in dataframe where all rows (besides 'time')
@@ -768,7 +761,7 @@ def df_drop_nan_rows(df, verbose=False):
 
     return df
 
-
+#TODO: UPDATE TO POLARS
 def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.):
     """This function takes a pd.DataFrame object and look for large jumps in
        the 'time' column. Rather than simply interpolating these values using
@@ -830,7 +823,7 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.):
 
     return df
 
-
+#TODO: UPDATE TO POLARS
 def df_sort_and_find_duplicates(df):
     """This function sorts the dataframe and finds rows with equal time index.
 
@@ -853,7 +846,7 @@ def df_sort_and_find_duplicates(df):
 
     return df, duplicate_entries_idx
 
-
+#TODO: UPDATE TO POLARS
 def make_df_wide(df):
     df["turbid"] = df['turbid'].astype(int)
     df = df.reset_index(drop=False)
@@ -865,7 +858,7 @@ def make_df_wide(df):
     df = df.reset_index(drop=False)
     return df
 
-
+#TODO: UPDATE TO POLARS
 def df_sort_and_fix_duplicates(df):
     """This function sorts the dataframe and addresses duplicate rows (i.e.,
     rows in which the time index is equal). It does this by merging the two
