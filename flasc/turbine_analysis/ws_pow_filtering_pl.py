@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from .find_sensor_faults import find_sensor_stuck_faults
+from .find_sensor_faults import find_sensor_stuck_faults_pl
 from .. import utilities as flascutils
 from ..dataframe_operations import dataframe_filtering as dff
 
@@ -240,13 +240,13 @@ class ws_pw_curve_filtering:
             df_in = df_in.clone()
 
         # Mark data as faulty on the dataframe
-        N_pre = [dff.df_get_no_faulty_measurements(df_in, tii) for tii in ti]
-        df_out = dff.df_mark_turbdata_as_faulty(df=df_in, cond=condition, turbine_list=ti)
+        N_pre = [dff.df_get_no_faulty_measurements_pl(df_in, tii) for tii in ti]
+        df_out = dff.df_mark_turbdata_as_faulty_pl(df=df_in, cond=condition, turbine_list=ti)
 
         # Print the reduction in useful data to the console, if verbose
         if verbose:
             for iii, tii in enumerate(ti):
-                N_post = dff.df_get_no_faulty_measurements(df_out, tii)
+                N_post = dff.df_get_no_faulty_measurements_pl(df_out, tii)
                 print(
                     "Faulty measurements for WTG {:03d} increased from {:.3f} % to {:.3f} %. Reason: '{:s}'.".format(
                         tii, 100.0 * N_pre[iii] / df_in.shape[0], 100.0 * N_post / df_in.shape[0], label
@@ -347,7 +347,7 @@ class ws_pw_curve_filtering:
         """
 
         # Filter sensor faults using the separate function call
-        stuck_indices = find_sensor_stuck_faults(
+        stuck_indices = find_sensor_stuck_faults_pl(
             df=self.df,
             columns=columns,
             ti=ti,
