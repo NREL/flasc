@@ -17,7 +17,9 @@ import pandas as pd
 import seaborn as sns
 
 from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-from _local_helper_functions import load_floris, optimize_yaw_angles, evaluate_optimal_yaw_angles
+from flasc.examples.models import load_floris_artificial as load_floris
+
+from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
 
 
 if __name__ == "__main__":

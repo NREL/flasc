@@ -18,7 +18,8 @@ import seaborn as sns
 
 from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
 
-from _local_helper_functions import load_floris, optimize_yaw_angles, evaluate_optimal_yaw_angles
+from flasc.examples.models import load_floris_artificial as load_floris
+from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
 
 
 if __name__ == "__main__":
@@ -29,8 +30,9 @@ if __name__ == "__main__":
     # Compare optimizing over different pPs and evaluating over different pPs
     for pP_opt in pP_list:
         # Optimize yaw angles
+        fi, _ = load_floris(pP=pP_opt)
         df_opt = optimize_yaw_angles(
-            fi=load_floris(pP=pP_opt),
+            fi=fi,
         )
 
         # Make an interpolant
@@ -38,8 +40,9 @@ if __name__ == "__main__":
 
         # Calculate AEP uplift
         for pP_eval in pP_list:
+            fi, _ = load_floris(pP=pP_eval)
             AEP_baseline, AEP_opt, _ = evaluate_optimal_yaw_angles(
-                fi=load_floris(pP=pP_eval),
+                fi=fi,
                 yaw_angle_interpolant=yaw_angle_interpolant,
             )
 
