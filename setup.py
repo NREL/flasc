@@ -12,11 +12,12 @@ AUTHOR = "NREL National Wind Technology Center"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    'bokeh>=3.1.1',
     'floris>=3.4',
     'feather-format',
+    'ipympl>=0.9.3',
     'matplotlib>=3.6.3',
     'numpy',
-    "bokeh==3.1.1",
     'pandas>=1.5',
     'pyproj',
     'pytest',
