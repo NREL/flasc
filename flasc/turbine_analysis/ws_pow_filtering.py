@@ -14,12 +14,15 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import itertools
 
 from ..turbine_analysis.find_sensor_faults import find_sensor_stuck_faults
 from .. import utilities as flascutils
 from ..dataframe_operations import dataframe_filtering as dff
 
+from bokeh.plotting import ColumnDataSource, figure
+from bokeh.models import Legend
+from bokeh.palettes import Category20_20 as palette
 
 
 class ws_pw_curve_filtering:
@@ -523,7 +526,7 @@ class ws_pw_curve_filtering:
         m_pow_rb=0.99,
         ws_deadband=0.50,
         pow_deadband=20.0,
-        cutoff_ws=25.0,
+        cutoff_ws=20.0,
     ):
         """Filter the data by offset from the floris power curve in x-
         directions.
@@ -542,6 +545,19 @@ class ws_pw_curve_filtering:
             m_pow_rb (float, optional): Multiplier on the power defining
             the right bound for the power curve. Any data to the right of this
             curve is considered faulty. Defaults to 0.99.
+            ws_deadband (float, optional): Deadband in [m/s] around the median
+            power curve around which data is by default classified as valid.
+            Defaults to 0.50.
+            pow_deadband (float, optional): Deadband in [kW] around the median
+            power curve around which data is by default classified as valid.
+            Defaults to 20.0.
+            cutoff_ws (float, optional): Wind speed up to which the median
+            power curve is calculated and the data is filtered for. You should
+            make sure this variable is set to a value above the rated wind
+            speed and below the cut-out wind speed. If you are experiencing
+            problems with data filtering and your data points have a downward
+            trend near the high wind speeds, try decreasing this variable's
+            value to 15.0.
         """
         print("Filtering data by deviations from the floris power curve...")
 
@@ -688,13 +704,14 @@ class ws_pw_curve_filtering:
     def get_power_curve(self, calculate_missing=True):
         """Return the turbine estimated mean power curves to the user.
 
+        Args:
+            calculate_missing (bool, optional): Calculate the median power
+                curves for the turbines for the turbines of which their
+                power curves were previously not yet calculated.
         Returns:
             pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
                 speed bins and the mean power production value for every
                 turbine.
-            calculate_missing (bool, optional): Calculate the median power
-                curves for the turbines for the turbines of which their
-                power curves were previously not yet calculated.
         """
         if calculate_missing and (self.pw_curve_df.isna().all(axis=0).any()):
             turbine_subset = np.where(
@@ -756,7 +773,15 @@ class ws_pw_curve_filtering:
         ax.set_title("Mean of all turbine power curves with UQ")
         return fig, ax
 
-    def plot_filters_custom_scatter(self, ti, x_col, y_col, xlabel="Wind speed (m/s)", ylabel="Power (kW)", ax=None):
+    def plot_filters_custom_scatter(
+            self,
+            ti,
+            x_col,
+            y_col,
+            xlabel="Wind speed (m/s)",
+            ylabel="Power (kW)",
+            ax=None
+        ):
         """Plot the filtered data in a scatter plot, categorized
         by the source of their filter/fault. This is a generic
         function that allows the user to plot various numeric
@@ -769,6 +794,10 @@ class ws_pw_curve_filtering:
                 choice is "ws_000" for ti=0, for example.
             y_col (str): Column name to plot on the y-axis. A common
                 choice is "pow_000" for ti=0, for example.
+            xlabel (str, optional): Figure x-axis label. Defaults to
+                'Wind speed (m/s)'.
+            ylabel (str, optional): Figure y-axis label. Defaults to
+                'Power (kW)'.
             ax (plt.Axis, optional): Pyplot Figure axis in which the
                 figure should be produced. If None specified, then
                  creates a new figure. Defaults to None.
@@ -815,6 +844,102 @@ class ws_pw_curve_filtering:
         ax.grid(True)
     
         return ax
+
+    def plot_filters_custom_scatter_bokeh(
+            self,
+            ti,
+            x_col,
+            y_col,
+            title="Wind-speed vs. power curve",
+            xlabel="Wind speed (m/s)",
+            ylabel="Power (kW)",
+            p=None,
+        ):
+        """Plot the filtered data in a scatter plot, categorized
+        by the source of their filter/fault. This is a generic
+        function that allows the user to plot various numeric
+        variables on the x and y axis.
+
+        Args:
+            ti (int): Turbine identifier. This is used to determine
+                which turbine's filter history should be looked at.
+            x_col (str): Column name to plot on the x-axis. A common
+                choice is "ws_000" for ti=0, for example.
+            y_col (str): Column name to plot on the y-axis. A common
+                choice is "pow_000" for ti=0, for example.
+            title (str, optional): Figure title. Defaults to 'Wind-
+                speed vs. power curve'.
+            xlabel (str, optional): Figure x-axis label. Defaults to
+                'Wind speed (m/s)'.
+            ylabel (str, optional): Figure y-axis label. Defaults to
+                'Power (kW)'.
+            p (Bokeh Figure, optional): Figure to plot in. If None is
+                specified, creates a new figure. Defaults to None.
+
+        Returns:
+            ax: The figure axis in which the scatter plot is drawn.
+        """
+        # Create figure, if not specified
+
+        bokeh_tooltips = [
+                ("(x,y)", "($x, $y)"),
+                ("time", "@time"),
+                ("index", "$index"),
+        ]
+
+        if p is None:
+            p = figure(
+                title=title,
+                width=800,
+                height=550,
+                sizing_mode='stretch_width',
+                x_axis_label=xlabel,
+                y_axis_label=ylabel,
+                tooltips=bokeh_tooltips,
+            )
+            p.add_layout(Legend(title="Data category"), 'right')
+
+        # Get filter dataframe
+        df_f = self.df_filters["WTG_{:03d}".format(ti)]
+        all_flags = self._get_all_unique_flags()
+        N = df_f.shape[0]
+
+        # For each flagging condition, plot the results
+        colors = itertools.cycle(palette)
+        for flag in all_flags:
+            ids = (df_f == flag)
+            df_subset = self._df_initial.loc[ids]
+            percentage = 100.0 * np.sum(ids) / N
+            label = "{:s} ({:.2f} %)".format(flag, percentage)
+            alpha = 0.65
+            size = 5
+            color = next(colors)
+            if (
+                any(ids) and
+                (not df_subset[x_col].isna().all()) and
+                (not df_subset[y_col].isna().all())
+            ):
+                source = ColumnDataSource(data=dict(
+                    x=df_subset[x_col],
+                    y=df_subset[y_col],
+                    time=list(df_subset["time"].astype(str)),
+                ))
+                p.circle(
+                    "x",
+                    "y",
+                    source=source,
+                    fill_alpha=alpha,
+                    color=color,
+                    line_color=None,
+                    size=size,
+                    legend_label=label
+                )
+    
+        p.legend.title = "Data category"
+        p.legend.click_policy = "hide"
+        p.toolbar.active_inspect = None
+
+        return p
 
     def plot_filters_in_ws_power_curve(self, ti, fi=None, ax=None):
         """Plot the wind speed power curve and connect each faulty datapoint
@@ -892,6 +1017,8 @@ class ws_pw_curve_filtering:
             fi (FlorisInterface, optional): floris object. If not None, will
             use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
+            ax (Matplotlib.pyplot Axis, optional): Axis to plot in. If None is
+               specified, creates a new figure and axis. Defaults to None.
         """
 
         if ax is None:
@@ -968,11 +1095,9 @@ class ws_pw_curve_filtering:
         in the found time period from the dataset.
 
         Args:
-            save_path ([str], optional): Path to save the figure to. If none
-            is specified, then will not save any figures. Defaults to None.
-            fig_format (str, optional): Figure format if saved. Defaults to
-            "png".
-            dpi (int, optional): Image resolution if saved. Defaults to 300.
+            ti (int): Index of the turbine of interest.
+            ax (Matplotlib.pyplot Axis, optional): Axis to plot in. If None is
+               specified, creates a new figure and axis. Defaults to None.
         """
         if ax is None:
             _, ax = plt.subplots(figsize=(13, 7))
@@ -993,3 +1118,61 @@ class ws_pw_curve_filtering:
         ax.grid(True)
 
         return ax
+
+    def plot_filters_in_time_bokeh(self, ti, p=None):
+        """Generate bar plot where each week of data is gathered and its
+        filtering results will be shown relative to the data size of each
+        week. This plot can particularly be useful to investigate whether
+        certain weeks/time periods show a particular high number of faulty
+        measurements. This can often be correlated with maintenance time
+        windows and the user may opt to completely remove any measurements
+        in the found time period from the dataset.
+
+        Args:
+            ti (int): Index of the turbine of interest.
+            p (Bokeh Figure, optional): Figure to plot in. If None is
+               specified, creates a new figure. Defaults to None.
+        """
+
+        if p is None:
+            p = figure(
+                title="Filters over time",
+                width=800,
+                height=550,
+                sizing_mode='stretch_width',
+                x_axis_label="Time (year - week)",
+                y_axis_label="Number of data points (-)",
+                # tooltips=bokeh_tooltips,
+            )
+            p.add_layout(Legend(title="Data category"), 'right')
+
+        # Get a list of all flags and then get colors correspondingly
+        all_flags = self._get_all_unique_flags()
+
+        # Manipulate dataframe to easily plot results
+        df_f = self.df_filters["WTG_{:03d}".format(ti)]
+        df_conditional = pd.concat([pd.DataFrame({flag: np.array(df_f==flag, dtype=int)}) for flag in all_flags], axis=1)
+        df_merged = pd.concat([df_conditional, self.df["time"]], axis=1)
+        df_histogram = df_merged.groupby([df_merged["time"].dt.year, df_merged["time"].dt.isocalendar().week]).sum(numeric_only=True)
+
+        filter_flags = list(df_histogram.columns)
+        xlabels = [f"{year}-{week}" for year, week in df_histogram.index]
+        x = np.arange(len(list(df_histogram.index)))
+
+        heights = np.zeros(len(x), dtype=int)
+        colors = itertools.cycle(palette)
+        for f in filter_flags:
+            y = np.array(df_histogram[f], dtype=int)
+            p.vbar(x=x, bottom=heights, top=heights+y, width=0.7, legend_label=f, color=next(colors))
+            heights = heights + y
+        
+        # Format x-axis
+        p.xaxis.major_label_orientation = np.pi / 2.0
+        p.xaxis.ticker = x
+        p.xaxis.major_label_overrides = dict(zip(x, xlabels))
+
+        # Format legend and allow hide/show functionality
+        p.legend.title = "Filter"
+        p.legend.click_policy = "hide"
+
+        return p
