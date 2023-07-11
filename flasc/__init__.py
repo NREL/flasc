@@ -21,6 +21,7 @@ from . import (
     optimization,
     time_operations,
     utilities,
-    visualization
+    visualization,
+    timing_tests
 )
 
