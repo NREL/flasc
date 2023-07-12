@@ -9,6 +9,7 @@ from flasc.energy_ratio import energy_ratio
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
 from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.energy_ratio import energy_ratio_polars as erp
 
 
 def load_data():
@@ -151,3 +152,42 @@ class TestEnergyRatio(unittest.TestCase):
         self.assertEqual(out.loc[3, "bin_count"], 34)
         self.assertEqual(out.loc[4, "bin_count"], 38)
         self.assertEqual(out.loc[5, "bin_count"], 6)
+
+    def test_energy_ratio_regression_polars(self):
+        # Load data and FLORIS model
+        fi, _ = load_floris()
+        df = load_data()
+        df = dfm.set_wd_by_all_turbines(df)
+        df_upstream = ftools.get_upstream_turbs_floris(fi)
+        df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
+        df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
+
+        wd_step=2.0
+        ws_step=1.0
+        # wd_bin_width=3.0,
+
+        df_energy = erp.get_energy_table([df],['baseline'])
+
+        df_erb = erp.compute_energy_ratio_bootstrap(
+            df_energy,
+            ['baseline'],
+            test_turbines=[1],
+            use_predefined_ref=True,
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            ws_max=30.0,
+            ws_min=ws_step/2.0,
+            ws_step=ws_step,
+            wd_max=360.0,
+            wd_min=wd_step/2.0,
+            wd_step=wd_step,
+        )
+
+
+        self.assertAlmostEqual(df_erb['baseline'].item(1), 0.8087321721301793, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].item(2), 0.903263, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].item(3), 0.930883, places=4)
+
+        self.assertEqual(df_erb['count_baseline'].item(1), 25)
+        self.assertEqual(df_erb['count_baseline'].item(2), 27)
+        self.assertEqual(df_erb['count_baseline'].item(3), 22)
