@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 
 from flasc.energy_ratio import energy_ratio_suite
+from flasc.energy_ratio import energy_ratio_polars as erp
 
 N_ITERATIONS = 5
 
@@ -33,7 +34,7 @@ def load_data_and_prep_data():
     # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(
-        root_dir, '..','examples_artificial_data', 'raw_data_processing', 'postprocessed', 'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
+        root_dir, '..','..','examples_artificial_data', 'raw_data_processing', 'postprocessed', 'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
     )
 
     if not os.path.exists(ftr_path):
@@ -62,39 +63,39 @@ def time_energy_ratio_with_bootstrapping():
     # Load the data
     df = load_data_and_prep_data()
 
-    # Load an energy ratio suite from FLASC
-    s = energy_ratio_suite.energy_ratio_suite(verbose=False)
+    # Build the polars energy table object
+    # Speciy num_blocks = num_rows to implement normal boostrapping
+    df_energy = erp.get_energy_table([df],['baseline'],num_blocks=df.shape[0])
 
-    # Add dataframe to energy suite
-    s.add_df(df, 'data')
+    print(df_energy)
 
-    # For forward consistency, define the bins by the edges
-    ws_edges = np.arange(5,25,1.)
-    wd_edges = np.arange(0,360,2.)
+    # # For forward consistency, define the bins by the edges
+    # ws_edges = np.arange(5,25,1.)
+    # wd_edges = np.arange(0,360,2.)
 
-    # Create bins
-    ws_bins = [(ws_edges[i], ws_edges[i+1]) for i in range(len(ws_edges)-1)]
-    wd_bins = [(wd_edges[i], wd_edges[i+1]) for i in range(len(wd_edges)-1)]
+    # # Create bins
+    # ws_bins = [(ws_edges[i], ws_edges[i+1]) for i in range(len(ws_edges)-1)]
+    # wd_bins = [(wd_edges[i], wd_edges[i+1]) for i in range(len(wd_edges)-1)]
 
-    # Run this calculation N_ITERATIONS times and take the average time
+    # # Run this calculation N_ITERATIONS times and take the average time
     
-    time_results = np.zeros(N_ITERATIONS)
-    for i in range(N_ITERATIONS):
-        start_time = time.time()
-        er = s.get_energy_ratios(
-            test_turbines=1,
-            ws_bins=ws_bins,
-            wd_bins=wd_bins,
-            N=N,
-            percentiles=[5.0, 95.0],
-            verbose=False
-        )
+    # time_results = np.zeros(N_ITERATIONS)
+    # for i in range(N_ITERATIONS):
+    #     start_time = time.time()
+    #     er = s.get_energy_ratios(
+    #         test_turbines=1,
+    #         ws_bins=ws_bins,
+    #         wd_bins=wd_bins,
+    #         N=N,
+    #         percentiles=[5.0, 95.0],
+    #         verbose=False
+    #     )
 
-        end_time = time.time()
-        time_results[i] = end_time - start_time
+    #     end_time = time.time()
+    #     time_results[i] = end_time - start_time
 
-    # Return the average time
-    return np.mean(time_results)
+    # # Return the average time
+    # return np.mean(time_results)
 
 
 
