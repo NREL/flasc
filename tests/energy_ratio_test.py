@@ -168,21 +168,23 @@ class TestEnergyRatio(unittest.TestCase):
 
         df_energy = erp.get_energy_table([df],['baseline'])
 
-        df_erb = erp.compute_energy_ratio_bootstrap(
+        ero = erp.compute_energy_ratio(
             df_energy,
             ['baseline'],
             test_turbines=[1],
             use_predefined_ref=True,
             use_predefined_wd=True,
             use_predefined_ws=True,
-            ws_max=30.0,
-            ws_min=ws_step/2.0,
-            ws_step=ws_step,
             wd_max=360.0,
             wd_min=wd_step/2.0,
             wd_step=wd_step,
+            ws_max=30.0,
+            ws_min=ws_step/2.0,
+            ws_step=ws_step,
         )
 
+        # Get the underlying polars data frame
+        df_erb = ero.df_result
 
         self.assertAlmostEqual(df_erb['baseline'].item(1), 0.8087321721301793, places=4)
         self.assertAlmostEqual(df_erb['baseline'].item(2), 0.903263, places=4)
