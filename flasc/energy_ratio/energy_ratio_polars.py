@@ -9,6 +9,7 @@
 import numpy as np
 import polars as pl
 import warnings
+from energy_ratio_result import EnergyRatioResult
 
 # def get_mid_bins(bin_edges):
 #     """_summary_
@@ -18,45 +19,6 @@ import warnings
 #     """
 
 #     print(bin_edges[:-1] + np.diff(bin_edges)/2.0)
-
-
-class EnergyRatioResult:
-    """  This class is used to store the results of the energy ratio calculations
-    and provide convenient methods for plotting and saving the results.
-    """
-    def __init__(self,
-                    df_result, 
-                    df_names,
-                    ref_cols,
-                    test_cols,
-                    wd_cols,
-                    ws_cols,
-                    wd_step,
-                    wd_min,
-                    wd_max,
-                    ws_step,
-                    ws_min,
-                    ws_max,
-                    bin_cols_in,
-                    N
-                  ):
-
-        self.df_result = df_result
-        self.df_names = df_names
-        self.num_df = len(df_names)
-        self.ref_cols = ref_cols
-        self.test_cols = test_cols
-        self.wd_cols = wd_cols
-        self.ws_cols = ws_cols
-        self.wd_step = wd_step
-        self.wd_min = wd_min
-        self.wd_max = wd_max
-        self.ws_step = ws_step
-        self.ws_min = ws_min
-        self.ws_max = ws_max
-        self.bin_cols_in = bin_cols_in
-        self.N = N
-
 
 # def convert_to_polars(df_):
 #     """_summary_
@@ -643,6 +605,7 @@ def compute_energy_ratio(df_,
     # Return the results as an EnergyRatioResult object
     return EnergyRatioResult(df_res, 
                                 df_names,
+                                energy_table,
                                 ref_cols, 
                                 test_cols, 
                                 wd_cols,
@@ -696,9 +659,6 @@ def _compute_uplift_in_region_single(df_,
     Returns:
         pl.DataFrame: A dataframe containing the energy uplift
     """
-
-    
-
 
     # Filter df_ that all the columns are not null
     df_ = df_.filter(pl.all(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
@@ -965,6 +925,7 @@ def compute_uplift_in_region(df_,
     # Return the results as an EnergyRatioResult object
     return EnergyRatioResult(df_res, 
                                 df_names,
+                                energy_table,
                                 ref_cols, 
                                 test_cols, 
                                 wd_cols,
