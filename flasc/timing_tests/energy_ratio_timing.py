@@ -29,7 +29,6 @@ from flasc.energy_ratio import energy_ratio_polars as erp
 
 N_ITERATIONS = 5
 
-
 def load_data_and_prep_data():
     # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
