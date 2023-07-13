@@ -84,7 +84,7 @@ def time_energy_ratio_with_bootstrapping():
     for i in range(N_ITERATIONS):
         start_time = time.time()
 
-        df_erb = erp.compute_energy_ratio_bootstrap(
+        df_erb = erp.compute_energy_ratio(
             df_energy,
             ['baseline'],
             test_turbines=[1],
