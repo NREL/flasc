@@ -1001,11 +1001,11 @@ class EnergyRatioResult:
         df_ = add_wd_bin(df_, self.wd_cols, self.wd_step, self.wd_min, self.wd_max)
 
         # Get the bin count by wd, ws and df_name
-        df_ = df_.groupby(['wd_bin','ws_bin','df_name']).count()
+        df_group = df_.groupby(['wd_bin','ws_bin','df_name']).count()
 
-        return df_
+        return df_.to_pandas(), df_group.to_pandas()
 
-    def _plot(self,
+    def plot(self,
         df_names_subset = None,
         labels = None,
         color_dict = None,
@@ -1061,17 +1061,10 @@ class EnergyRatioResult:
                 _, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
             else:
                 if show_wind_speed_distrubution:
-                    num_rows = 2 + N # Add rows to show wind speed distribution
+                    num_rows = 3 # Add rows to show wind speed distribution
                 else:
                     num_rows = 2
                 _, axarr = plt.subplots(nrows=num_rows, ncols=1, sharex=True, figsize=(10, 5))
-
-        # Come up with hatch patterns
-        hatch_patterns = [
-            '//', '++', 'xx', 'oo', '\\\\', '--', 'OO', '..', '**', '||',
-            '/o', '\\|', '|*', '-\\', '+o', 'x*', 'o-', 'O|', 'O.', '*-',
-            '/', '\\', '|', '-', '+', 'x', 'o', 'O', '.', '*',
-        ] * 10  # Repeat 10 times to ensure always sufficiently large size
 
         # Set the bar width using self.wd_step
         bar_width = (0.7 / N) * self.wd_step
@@ -1107,9 +1100,6 @@ class EnergyRatioResult:
         # Plot horizontal black line at 1.
         xlims = np.linspace(np.min(x) - 4.0, np.max(x) + 4.0, 1000)
 
-        # Save the x_bins
-        # x_bins = copy.deepcopy(x)
-
         if polar_plot:
             x = (90.0 - x) * np.pi / 180.0  # Convert to radians
             xlims = (90.0 - xlims) * np.pi / 180.0  # Convert to radians
@@ -1141,7 +1131,7 @@ class EnergyRatioResult:
         # axarr[0].set_grid(True)
 
         # Plot the bin counts
-        df_freq = self._compute_df_freq().to_pandas()
+        df_unbinned, df_freq = self._compute_df_freq()
         df_freq_sum_all_ws = df_freq.groupby(["wd_bin","df_name"]).sum().reset_index()
 
 
@@ -1164,20 +1154,23 @@ class EnergyRatioResult:
         if show_wind_speed_distrubution:
             # Plot the wind speed distribution in df_freq as a heat map with wd on the x-axis and ws on the y-axis
             
-            for i, (df_name, label) in enumerate(zip(df_names_subset, labels)):
-                ax = axarr[2 + i]
-
-                # Get the data for this df_name
+            ax = axarr[2]
+            for df_name, label in zip(df_names_subset, labels):
                 df_sub = df_freq[df_freq["df_name"] == df_name]
-
-                # Scatter plot the data with wd on the x-axis and ws on the y-axis and count as the color
-                im = ax.scatter(df_sub["wd_bin"], df_sub["ws_bin"], c=df_sub["count"], cmap="viridis", s=10, marker="s")
-                ax.set_ylabel(label)
-                # ax.colorbar(im, ax=ax)
-
-                # df_pivot = df_sub.pivot(index="ws_bin", columns="wd_bin", values="count")
-
-                # sns.heatmap(data=df_pivot, ax=ax, cmap="viridis", cbar=True, annot=True, fmt='g')
+                ax.scatter(df_unbinned["wd_bin"], df_unbinned["ws_bin"], c=color_dict[label],alpha=0.25, s=1)
 
 
-
+    def plot_uplift(self,
+        axarr = None,
+        polar_plot=False,
+        show_wind_speed_distrubution=True,
+    ):
+        self.plot(
+            df_names_subset = 'uplift',
+            labels = ['uplift'],
+            color_dict = {'uplift':'k'},
+            axarr = axarr,
+            polar_plot=polar_plot,
+            show_wind_speed_distrubution=show_wind_speed_distrubution,
+        )
+            
