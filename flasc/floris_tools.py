@@ -281,22 +281,30 @@ def interpolate_floris_from_df_approx(
     df_out = df[cols_to_copy].copy()
 
     # Use interpolant to determine values for all turbines and variables
-    for varname in varnames:
+    for ii, varname in enumerate(varnames):
         if verbose:
             print('     Interpolating ' + varname + ' for all turbines...')
         colnames = ['{:s}_{:03d}'.format(varname, ti) for ti in range(nturbs)]
-        f = interpolate.RegularGridInterpolator(
-            points=(wd_array_approx, ws_array_approx, ti_array_approx),
-            values=grid_dict[varname],
-            method=method,
-            bounds_error=False,
-        )
+
+        if ii == 0:
+            f = interpolate.RegularGridInterpolator(
+                points=(wd_array_approx, ws_array_approx, ti_array_approx),
+                values=grid_dict[varname],
+                method=method,
+                bounds_error=False,
+            )
+        else:
+            f.values = grid_dict[varname].to_numpy()
+
         df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
 
         if mirror_nans:
             # Copy NaNs in the raw data to the FLORIS predictions
             for c in colnames:
-                df_out.loc[df[c].isna(), c] = np.nan
+                if c in df.columns:
+                    df_out.loc[df[c].isna(), c] = np.nan
+                else:
+                    df_out.loc[:, c] = np.nan
 
     return df_out
 
@@ -398,7 +406,7 @@ def calc_floris_approx_table(
                 solutions_dict["wd_{:03d}".format(turbi)] = \
                     wd_mesh.flatten()  # Uniform wind direction
                 solutions_dict["ti_{:03d}".format(turbi)] = \
-                    fi.floris.flow_field.turbulence_intensity_field[:, :, turbi, 0, 0].flatten()
+                    fi.floris.flow_field.turbulence_intensity_field[:, :, turbi].flatten()
         df_list.append(pd.DataFrame(solutions_dict))
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
