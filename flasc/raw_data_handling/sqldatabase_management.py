@@ -11,9 +11,10 @@
 # the License.
 
 
-import os
 import numpy as np
 import pandas as pd
+import polars as pl
+from pathlib import Path
 from time import perf_counter as timerpc
 
 import datetime
@@ -25,6 +26,7 @@ from matplotlib.figure import Figure
 import matplotlib.backends.backend_tkagg as tkagg
 
 import sqlalchemy as sqlalch
+
 
 
 class sql_database_manager:
@@ -44,45 +46,88 @@ class sql_database_manager:
         name = self.db_name
         usn = self.username
         address = "%s:%d" % (self.host, self.port)
+        self.url = "%s://%s:%s@%s/%s" % (dr, usn, password, address, name)
         self.engine = sqlalch.create_engine(
-            url="%s://%s:%s@%s/%s" % (dr, usn, password, address, name)
+            url= self.url
         )
+        self.inspector = sqlalch.inspect(self.engine)
         self.print_properties()
 
     def _get_table_names(self):
-        return self.engine.table_names()
+        return self.inspector.get_table_names()
+    
+    def _does_table_exist(self, table_name):
+        return table_name in self._get_table_names()
 
     def _get_column_names(self, table_name):
-        df = pd.read_sql_query(
-            "SELECT * FROM " + table_name + " WHERE false;", self.engine
+        columns =  self.inspector.get_columns(table_name)
+        return [c['name'] for c in columns]
+    
+    def _create_table_from_df(self, table_name, df):
+
+        print(f'Creating Table: {table_name} with {df.shape[1]} columns')
+
+        # Convert to pandas for upload
+        df_pandas = df.to_pandas()
+        df_pandas = df_pandas.iloc[:10]
+
+        df_pandas.to_sql(
+                    table_name,
+                    self.engine,
+                    index=False,
+                    method="multi"
+                )
+        
+        # Make time unique and an index to speed queries
+        query = 'CREATE UNIQUE INDEX idx_time_%s ON %s (time);' % (table_name, table_name)
+        print('Setting time to unique index')
+        with self.engine.connect() as con:
+            rs = con.execute(sqlalch.text(query))
+            print(f'...RESULT: {rs}')
+            con.commit()  # commit the transaction
+
+    def _remove_duplicated_time(self, table_name, df):
+
+        start_time = df.select(pl.min("time"))[0, 0]
+        end_time = df.select(pl.max("time"))[0, 0]
+        original_size = df.shape[0]
+
+        print(f'Checking for time entries already in {table_name} between {start_time} and {end_time}')
+        time_in_db = self.get_data(table_name,
+                                   ['time'],
+                                   start_time=start_time,
+                                   end_time=end_time,
+                                   end_inclusive=True
         )
-        return list(df.columns)
+
+        df = df.join(time_in_db, on='time',how="anti")
+        new_size = df.shape[0]
+        if new_size < original_size:
+            print(f'...Dataframe size reduced from {original_size} to {new_size} by time values already in {table_name}')
+        return df
+
 
     def _get_first_time_entry(self, table_name):
-        tn = table_name
-        column_names = self._get_column_names(tn)
-        if 'time' in column_names:
-            df_time = pd.read_sql_query(
-                sql="SELECT time FROM %s ORDER BY time asc LIMIT 1" % tn,
-                con=self.engine
-            )
-            if df_time.shape[0] > 0:
-                return df_time["time"][0]
 
-        return None
+        # Get the table corresponding to the table name
+        table = sqlalch.Table(table_name, sqlalch.MetaData(), autoload_with=self.engine)
+
+        stmt = sqlalch.select(table.c.time).order_by(table.c.time.asc()).limit(1)
+        with self.engine.begin() as conn:
+            result = conn.execute(stmt)
+            for row in result:
+                return row[0]
 
     def _get_last_time_entry(self, table_name):
-        tn = table_name
-        column_names = self._get_column_names(tn)
-        if 'time' in column_names:
-            df_time = pd.read_sql_query(
-                sql="SELECT time FROM %s ORDER BY time desc LIMIT 1" % tn,
-                con=self.engine
-            )
-            if df_time.shape[0] > 0:
-                return df_time["time"][0]
+        # Get the table corresponding to the table name
+        table = sqlalch.Table(table_name, sqlalch.MetaData(), autoload_with=self.engine)
 
-        return None
+        stmt = sqlalch.select(table.c.time).order_by(table.c.time.desc()).limit(1)
+        print(stmt)
+        with self.engine.begin() as conn:
+            result = conn.execute(stmt)
+            for row in result:
+                return row[0]
 
     # General info functions from data
     def print_properties(self):
@@ -103,7 +148,11 @@ class sql_database_manager:
     def launch_gui(self, turbine_names=None, sort_columns=False):
         root = tk.Tk()
 
-        sql_db_explorer_gui(master=root, dbc=self, turbine_names=turbine_names, sort_columns=sort_columns)
+        sql_db_explorer_gui(master=root,
+                            dbc=self,
+                            turbine_names=turbine_names,
+                            sort_columns=sort_columns
+                            )
         root.mainloop()
 
     def get_column_names(self, table_name):
@@ -113,8 +162,8 @@ class sql_database_manager:
                        end_time=None, fn_out=None, no_rows_per_file=10000):
         if fn_out is None:
             fn_out = table_name + ".ftr"
-        if not (fn_out[-4::] == ".ftr"):
-            fn_out = fn_out + ".ftr"
+        if not (fn_out.suffix == ".ftr"):
+            fn_out = fn_out.with_suffix(".ftr")
 
         # Ensure 'time' in database
         column_names = self._get_column_names(table_name=table_name)
@@ -122,13 +171,16 @@ class sql_database_manager:
             raise KeyError("Cannot find 'time' column in database table.")
 
         # Get time column from database
+        print("Getting time column from database...")
         time_in_db = self.get_data(table_name=table_name, columns=['time'],
                                    start_time=start_time, end_time=end_time)
-        time_in_db = list(time_in_db['time'])
+        time_in_db = list(time_in_db.select("time").to_numpy().flatten())
+        print("...finished,  N.o. entries: %d." % len(time_in_db))
 
         splits = np.arange(0, len(time_in_db) - 1, no_rows_per_file, dtype=int)
         splits = np.append(splits, len(time_in_db) - 1)
         splits = np.unique(splits)
+        print(f"Splitting {len(time_in_db)} entries data into {len(splits)} subsets of {no_rows_per_file}.")
 
         for ii in range(len(splits) - 1):
             print("Downloading subset %d out of %d." % (ii, len(splits) - 1))
@@ -138,12 +190,17 @@ class sql_database_manager:
                 start_time=time_in_db[splits[ii]],
                 end_time=time_in_db[splits[ii+1]]
             )
-            fn_out_ii = fn_out + '.%d' % ii
-            print("Saving file to %s." % fn_out_ii)
-            df.to_feather(fn_out_ii)
+            fn_out_ii = fn_out.with_suffix(".ftr.%03d" % ii)
+            print("Saving file to %s" % fn_out_ii)
+            df.write_ipc(fn_out_ii)
 
     def get_data(
-        self, table_name, columns=None, start_time=None, end_time=None
+        self, 
+        table_name, 
+        columns=None, 
+        start_time=None, 
+        end_time=None,
+        end_inclusive=False,
     ):
         # Get the data from tables
         if columns is None:
@@ -156,22 +213,33 @@ class sql_database_manager:
             query_string += " WHERE time >= '" + str(start_time) + "'"
 
         if (start_time is not None) and (end_time is not None):
-            query_string += " AND time < '" + str(end_time) + "'"
+            if end_inclusive:
+                query_string += " AND time <= '" + str(end_time) + "'"
+            else:
+                query_string += " AND time < '" + str(end_time) + "'"
         elif (start_time is None) and (end_time is not None):
-            query_string += " WHERE time < '" + str(end_time) + "'"
+            if end_inclusive:
+                query_string += " WHERE time <= '" + str(end_time) + "'"
+            else:
+                query_string += " WHERE time < '" + str(end_time) + "'"
 
-        query_string += " ORDER BY time;"
-        df = pd.read_sql_query(query_string, self.engine)
+        query_string += " ORDER BY time"
+
+        df = pl.read_database(query_string,self.url)
 
         # Drop a column called index
         if "index" in df.columns:
-            df = df.drop(["index"], axis=1)
+            df = df.drop("index")
 
-        # Make sure time column is in datetime format
-        df["time"] = pd.to_datetime(df.time)
+        # Confirm that the time column is in datetime format
+        if "time" in df.columns:
+            if not (df.schema["time"] == pl.Datetime):
+                df = df.with_columns(pl.col("time").cast(pl.Datetime))
 
         return df
+    
 
+    #TODO: This is a fresh redo check it works
     def send_data(
         self,
         table_name,
@@ -181,81 +249,135 @@ class sql_database_manager:
         df_chunk_size=2000,
         sql_chunk_size=50
     ):
-        table_name = table_name.lower()
-        table_names = [t.lower() for t in self._get_table_names()]
+        
+        # Make a local copy
+        df_ = df.clone()
+        
+        # Check if table exists
+        if not self._does_table_exist(table_name):
 
-        if (if_exists == "append"):
-            print("Warning: risk of adding duplicate rows using 'append'.")
-            print("You are suggested to use 'append_new' instead.")
+            print(f'{table_name} does not yet exist')
 
-        if (if_exists == "append_new") and (table_name in table_names):
-            if len(unique_cols) > 1:
-                raise NotImplementedError("Not yet implemented.")
+            # Create the table
+            self._create_table_from_df(table_name, df_)
 
-            col = unique_cols[0]
-            idx_in_db = self.get_data(table_name=table_name, columns=[col])[
-                col
-            ]
+        # Check for times already in database
+        df_ = self._remove_duplicated_time(table_name, df_)
 
-            # Check if values in SQL database are unique
-            if not idx_in_db.is_unique:
-                raise IndexError(
-                    "Column '%s' is not unique in the SQL database." % col
-                )
+        # Check if df_ is now
+        if df_.shape[0] == 0:
+            print('Dataframe is empty')
+            return
 
-            idx_in_df = set(df[col])
-            idx_in_db = set(idx_in_db)
-            idx_to_add = np.sort(list(idx_in_df - idx_in_db))
-            print(
-                "{:d} entries already exist in SQL database.".format(
-                    len(idx_in_df) - len(idx_to_add)
-                )
+        # Write to database
+        print(f'Inserting {df_.shape[0]} rows into {table_name} in chunks of {df_chunk_size}')
+        time_start_total = timerpc()
+
+        # Parition into chunks
+        df_list = (df_.with_row_count('id')
+            .with_columns(pl.col('id').apply(lambda i: int(i/df_chunk_size)))
+            .partition_by('id')
+        )
+
+        num_par = len(df_list)
+        for df_par_idx, df_par in enumerate(df_list):
+            print(f'...inserting chunk {df_par_idx} of {num_par}')
+        
+            df_par.drop('id').write_database(
+                table_name,
+                self.url,
+                if_exists='append'
             )
-
-            print("Adding {:d} new entries...".format(len(idx_to_add)))
-            df_subset = df.set_index('time').loc[idx_to_add].reset_index(
-                drop=False)
-
-        else:
-            df_subset = df
-
-        if (if_exists == "append_new"):
-            if_exists = "append"
-
-        # Upload data
-        N = df_subset.shape[0]
-        if N < 1:
-            print("Skipping data upload. Dataframe is empty.")
-        else:
-            print("Attempting to insert %d rows into table '%s'."
-                % (df_subset.shape[0], table_name))
-            df_chunks_id = np.arange(0, df_subset.shape[0], df_chunk_size)
-            df_chunks_id = np.append(df_chunks_id, df_subset.shape[0])
-            df_chunks_id = np.unique(df_chunks_id)
-
-            time_start_total = timerpc()
-            for i in range(len(df_chunks_id)-1):
-                Nl = df_chunks_id[i]
-                Nu = df_chunks_id[i+1]
-                print("Inserting rows %d to %d." % (Nl, Nu))
-                time_start_i = timerpc()
-                df_sub = df_subset[Nl:Nu]
-                df_sub.to_sql(
-                    table_name,
-                    self.engine,
-                    if_exists=if_exists,
-                    index=False,
-                    method="multi",
-                    chunksize=sql_chunk_size,
-                )
-                time_i = timerpc() - time_start_i
-                total_time = timerpc() - time_start_total
-                est_time_left = (total_time / Nu) * (N - Nu)
-                eta = datetime.datetime.now() + td(seconds=est_time_left)
-                eta = eta.strftime("%a, %d %b %Y %H:%M:%S")
-                print("Data insertion took %.1f s. ETA: %s." % (time_i, eta))
+        total_time = timerpc() - time_start_total
+        print(f'...Finished in {total_time}')
 
 
+    # #TODO: UPDATE TO POLARS
+    # #TODO: Paul note (may 31 2023), POLARS API not up to PANDAS so using PANDAS here
+    # def send_data(
+    #     self,
+    #     table_name,
+    #     df,
+    #     if_exists="append_new",
+    #     unique_cols=["time"],
+    #     df_chunk_size=2000,
+    #     sql_chunk_size=50
+    # ):
+    #     table_name = table_name.lower()
+    #     table_names = [t.lower() for t in self._get_table_names()]
+
+    #     if (if_exists == "append"):
+    #         print("Warning: risk of adding duplicate rows using 'append'.")
+    #         print("You are suggested to use 'append_new' instead.")
+
+    #     if (if_exists == "append_new") and (table_name in table_names):
+    #         if len(unique_cols) > 1:
+    #             raise NotImplementedError("Not yet implemented.")
+
+    #         col = unique_cols[0]
+    #         idx_in_db = self.get_data(table_name=table_name, columns=[col])[
+    #             col
+    #         ]
+
+    #         # Check if values in SQL database are unique
+    #         if not idx_in_db.is_unique:
+    #             raise IndexError(
+    #                 "Column '%s' is not unique in the SQL database." % col
+    #             )
+
+    #         idx_in_df = set(df[col])
+    #         idx_in_db = set(idx_in_db)
+    #         idx_to_add = np.sort(list(idx_in_df - idx_in_db))
+    #         print(
+    #             "{:d} entries already exist in SQL database.".format(
+    #                 len(idx_in_df) - len(idx_to_add)
+    #             )
+    #         )
+
+    #         print("Adding {:d} new entries...".format(len(idx_to_add)))
+    #         df_subset = df.set_index('time').loc[idx_to_add].reset_index(
+    #             drop=False)
+
+    #     else:
+    #         df_subset = df
+
+    #     if (if_exists == "append_new"):
+    #         if_exists = "append"
+
+    #     # Upload data
+    #     N = df_subset.shape[0]
+    #     if N < 1:
+    #         print("Skipping data upload. Dataframe is empty.")
+    #     else:
+    #         print("Attempting to insert %d rows into table '%s'."
+    #             % (df_subset.shape[0], table_name))
+    #         df_chunks_id = np.arange(0, df_subset.shape[0], df_chunk_size)
+    #         df_chunks_id = np.append(df_chunks_id, df_subset.shape[0])
+    #         df_chunks_id = np.unique(df_chunks_id)
+
+    #         time_start_total = timerpc()
+    #         for i in range(len(df_chunks_id)-1):
+    #             Nl = df_chunks_id[i]
+    #             Nu = df_chunks_id[i+1]
+    #             print("Inserting rows %d to %d." % (Nl, Nu))
+    #             time_start_i = timerpc()
+    #             df_sub = df_subset[Nl:Nu]
+    #             df_sub.to_sql(
+    #                 table_name,
+    #                 self.engine,
+    #                 if_exists=if_exists,
+    #                 index=False,
+    #                 method="multi",
+    #                 chunksize=sql_chunk_size,
+    #             )
+    #             time_i = timerpc() - time_start_i
+    #             total_time = timerpc() - time_start_total
+    #             est_time_left = (total_time / Nu) * (N - Nu)
+    #             eta = datetime.datetime.now() + td(seconds=est_time_left)
+    #             eta = eta.strftime("%a, %d %b %Y %H:%M:%S")
+    #             print("Data insertion took %.1f s. ETA: %s." % (time_i, eta))
+
+#TODO: UPDATE TO POLARS
 class sql_db_explorer_gui:
     def __init__(self, master, dbc, turbine_names = None, sort_columns=False):
 
@@ -264,7 +386,7 @@ class sql_db_explorer_gui:
         self.master = master
 
         # Get basic database properties
-        self.df = pd.DataFrame()
+        self.df = pl.DataFrame()
         table_names = dbc._get_table_names()
         min_table_dates = [
             dbc._get_first_time_entry(table_name=t) for t in table_names
@@ -453,7 +575,7 @@ class sql_db_explorer_gui:
                 start_time=start_time,
                 end_time=end_time,
             )
-            df = df.set_index("time", drop=True)
+            # df = df.set_index("time", drop=True)
 
             if df.shape[0] <= 0:
                 print(
@@ -463,29 +585,40 @@ class sql_db_explorer_gui:
             else:
                 print("...Imported data successfully.")
 
-                old_col_names = list(df.columns)
+                old_col_names = [c for c in list(df.columns) if not c=='time']
                 new_col_names = [
                     chr(97 + tables_selected[ii]).upper() + "_%s" % c
-                    for c in df.columns
+                    for c in old_col_names
                 ]
                 col_mapping = dict(zip(old_col_names, new_col_names))
-                df = df.rename(columns=col_mapping)
+                df = df.rename(col_mapping)
 
                 # If specific turbine names are supplied apply them here
                 if self.turbine_names is not None:
                     columns = df.columns
                     for t in range(len(self.turbine_names)):
                         columns = [c.replace('%03d' % t,self.turbine_names[t]) for c in columns]
-                    df.columns = columns
+                    # df.columns = columns
+                    df = df.rename(dict(zip(df.columns,columns)))
 
                 df_array.append(df)
 
         # Merge dataframes
-        self.df = pd.concat(df_array, axis=1).reset_index(drop=False)
+        # self.df = pl.concat(df_array, axis=1)# .reset_index(drop=False)
+        df_merge = df_array[0]
+
+        if len(df_array) > 1:
+            for df_ in df_array[1:]:
+                df_merge = df_merge.join(df_, on='time',how='outer')
+
+        #Save it now
+        self.df = df_merge
 
         # If sorting the columns do it now
         if self.sort_columns:
-            self.df = self.df[sorted(self.df.columns)]
+            # self.df = self.df[sorted(self.df.columns)]
+            self.df = self.df.select(sorted(self.df.columns))
+
 
         self.update_channel_cols()
         self.create_figures()
@@ -533,7 +666,7 @@ class sql_db_explorer_gui:
             ax = self.axes[channel_no]
             ax.clear()
             for c in self.channel_selection[channel_no]:
-                ax.plot(self.df.time, np.array(self.df[c].values), label=c)
+                ax.plot(self.df['time'], np.array(self.df[c]), label=c)
             ax.legend()
             ax.grid(True)
 
@@ -572,186 +705,3 @@ class sql_db_explorer_gui:
         channels = [self.df.columns[idx] for idx in indices]
         self.channel_selection[channel_no] = channels
         self.update_plot(channel_no=channel_no)
-
-
-# def get_timestamp_of_last_downloaded_datafile(filelist):
-#     time_latest = None
-#     for fi in filelist:
-#         df = pd.read_feather(fi)
-#         time_array = df['time']
-#         if not all(np.isnan(time_array)):
-#             tmp_time_max = np.max(df['time'])
-#             if time_latest is None:
-#                 time_latest = tmp_time_max
-#             else:
-#                 if tmp_time_max > time_latest:
-#                     time_latest = tmp_time_max
-
-#     return time_latest
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # RAW DATA READING FUNCTIONS
-# # # # # # # # # # # # # # # # # # # # # # # # # #
-# def find_files_to_add_to_sqldb(sqldb_engine, files_paths, filenames_table):
-#     """This function is used to figure out which files are already
-#     uploaded to the SQL database, and which files still need to be
-#     uploaded.
-
-#     Args:
-#         sqldb_engine ([SQL engine]): SQL Engine from sqlalchemy.create_engine
-#         used to access the SQL database of interest. This is used to call
-#         which files have previously been uploaded.
-#         files_paths ([list, str]): List of strings or a single string containing
-#         the path to the raw data files. One example is:
-#             files_paths = ['/home/user/data/windfarm1/year1/*.csv',
-#                            '/home/user/data/windfarm1/year2/*.csv',
-#                            '/home/user/data/windfarm1/year3/*.csv',]
-#         filenames_table ([str]): SQL table name containing the filenames of
-#         the previously uploaded data files.
-
-#     Returns:
-#         files ([list]): List of files that are not yet in the SQL database
-#     """
-#     # Convert files_paths to a list
-#     if isinstance(files_paths, str):
-#         files_paths = [files_paths]
-
-#     # Figure out which files exists on local system
-#     files = []
-#     for fpath in files_paths:
-#         fl = glob.glob(fpath)
-#         if len(fl) <= 0:
-#             print('No files found in directory %s.' % fpath)
-#         else:
-#             files.extend(fl)
-
-#     # Figure out which files have already been uploaded to sql db
-#     query_string = "select * from " + filenames_table + ";"
-#     df = pd.read_sql_query(query_string, sqldb_engine)
-
-#     # # Check for the files not in the database
-#     files = [f for f in files
-#              if os.path.basename(f) not in df['filename'].values]
-
-#     # Sort the file list according to ascending name
-#     files = sorted(files, reverse=False)
-
-#     return files
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # DATA UPLOAD FUNCTIONS
-# # # # # # # # # # # # # # # # # # # # # # # # # #
-
-
-# def omit_last_rows_by_buffer(df, omit_buffer):
-#     if not 'time' in df.columns:
-#         df = df.reset_index(drop=False)
-
-#     num_rows = df.shape[0]
-#     df = df[df['time'] < max(df['time']) - omit_buffer]
-#     print('Omitting last %d rows (%s s) as a buffer for future files.'
-#           % (num_rows-df.shape[0], omit_buffer))
-#     return df
-
-
-# def remove_duplicates_with_sqldb(df, sql_engine, table_name):
-#     min_time = df.time.min()
-#     max_time = df.time.max()
-
-#     time_query = (
-#         "select time from "+ table_name +
-#         " where time BETWEEN '%s' and '%s';" % (min_time, max_time)
-#     )
-
-#     df_time = pd.read_sql_query(time_query, sql_engine)
-#     df_time["time"] = pd.to_datetime(df_time.time)
-#     print("......Before duplicate removal there are %d rows" % df.shape[0])
-#     df = df[~df.time.isin(df_time.time)]
-#     print("......After duplicate removal there are %d rows" % df.shape[0])
-
-#     # Check for self duplicates in to-be-uploaded dataset
-#     print("......Before SELF duplicate removal there are %d rows" % df.shape[0])
-#     if "turbid" in df.columns:
-#         df = df.drop_duplicates(subset=["time", "turbid"], keep="first")
-#     else:
-#         df = df.drop_duplicates(subset=["time"], keep="first")
-#     print("......After SELF duplicate removal there are %d rows" % df.shape[0])
-
-#     # Drop null times in to-be-uploaded dataset
-#     print(
-#         "......Before null time/turbid duplicate removal there are %d rows"
-#         % df.shape[0]
-#     )
-#     df = df.dropna(subset=["time"])
-#     print("......After null time duplicate removal there are %d rows" % df.shape[0])
-
-#     return df
-
-
-# def batch_download_data_from_sql(dbc, destination_path, table_name):
-#     print("Batch downloading data from table %s." % table_name)
-
-#     # Check if output directory exists, if not, create
-#     if not os.path.exists(destination_path):
-#         os.makedirs(destination_path)
-
-#     # Check current start and end time of database
-#     db_end_time = get_last_time_entry_sqldb(dbc.engine, table_name)
-#     db_end_time = db_end_time + datetime.timedelta(minutes=10)
-
-#     # Check for past files and continue download or start a fresh download
-#     files_result = fsio.browse_downloaded_datafiles(destination_path,
-#                                                     table_name=table_name)
-#     print('A total of %d existing files found.' % len(files_result))
-
-#     # Next timestamp is going to be next first of the month
-#     latest_timestamp = get_timestamp_of_last_downloaded_datafile(files_result)
-#     if latest_timestamp is None:
-#         db_start_time = get_first_time_entry_sqldb(dbc.engine, table_name)
-#         db_start_time = db_start_time - datetime.timedelta(minutes=10)
-#         current_timestamp = db_start_time
-#     elif latest_timestamp.month == 12:
-#         current_timestamp = pd.to_datetime('%s-01-01' %
-#             str(latest_timestamp.year+1))
-#     else:
-#         current_timestamp = pd.to_datetime("%s-%s-01" % (
-#             str(latest_timestamp.year), str(latest_timestamp.month+1)))
-
-#     print('Continuing import from timestep: ', current_timestamp)
-#     while current_timestamp <= db_end_time:
-#         print('Importing data for ' +
-#               str(current_timestamp.strftime("%B")) +
-#               ', ' + str(current_timestamp.year) + '.')
-#         if current_timestamp.month == 12:
-#             next_timestamp = current_timestamp.replace(
-#                 year=current_timestamp.year+1, month=1,
-#                 day=1, hour=0, minute=0, second=0)
-#         else:
-#             next_timestamp = current_timestamp.replace(
-#                 month=current_timestamp.month+1,
-#                 day=1, hour=0, minute=0, second=0)
-
-#         df = dbc.get_table_data_from_db_wide(
-#             table_name=table_name,
-#             start_time=current_timestamp,
-#             end_time=next_timestamp
-#             )
-
-#         # Drop NaN rows
-#         df = dfm.df_drop_nan_rows(df)
-
-#         # Save dataset as a .ftr file
-#         fout = os.path.join(destination_path, "%s_%s.ftr" %
-#             (current_timestamp.strftime("%Y-%m"), table_name))
-
-#         df = df.reset_index(drop=('time' in df.columns))
-#         df.to_feather(fout)
-
-#         print('Data for ' + table_name +
-#               ' saved to .ftr files for ' +
-#               str(current_timestamp.strftime("%B")) +
-#               ', ' + str(current_timestamp.year) + '.')
-
-#         current_timestamp = next_timestamp
