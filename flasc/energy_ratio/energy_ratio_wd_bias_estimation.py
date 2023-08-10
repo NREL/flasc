@@ -459,17 +459,25 @@ class bias_estimation():
 
         return x_opt, J_opt
 
-    def plot_energy_ratios(self, save_path=None, format='png', dpi=200):
+    def plot_energy_ratios(
+        self,
+        show_uncorrected_data=False,
+        save_path=None,
+        format='png',
+        dpi=200
+    ):
         """Plot the energy ratios for the currently evaluated wind
         direction offset term.
 
         Args:
+            show_uncorrcted_data (bool, optional): Compute and show the 
+                uncorrected energy ratio (with wd_bias=0) on the plot. Defaults
+                to False.
             save_path ([str], optional): Path to save the figure to. If not
                 specified, will not save the figure. Defaults to None.
             format (str, optional): Figure format. Defaults to 'png'.
             dpi (int, optional): Figure DPI. Defaults to 200.
         """
-        show_uncorrected_data = True
         fig_list = []
         ax_list = []
         if show_uncorrected_data:
@@ -489,13 +497,17 @@ class bias_estimation():
                 plot_iter_path=None,
                 fast=False
             )
-            # Drop the FLORIS case (only interested in the SCADA case)
-
-            # Update labels and colors for plotting
-            # CODE HERE
-            # Copy in the SCADA case for 0 bias only
+            
+            # Copy in the SCADA case only for 0 bias
+            # Update colors and labels while we're at it
             for fsc_c, fsc_0 in zip(fsc_list_copy, self.fsc_list):
                 fsc_c.df_list.insert(0, fsc_0.df_list[0])
+                fsc_c.df_list[0]["color"] = "silver"
+                fsc_c.df_list[1]["color"] = "C0"
+                fsc_c.df_list[2]["color"] = "C1"
+                fsc_c.df_list[0]["name"] = "Measurement data (uncorrected)"
+                fsc_c.df_list[1]["name"] = "Measurement data (bias corrected)"
+            # Reassign copy as fsc_list
             self.fsc_list = fsc_list_copy
 
         # Plot
