@@ -13,6 +13,5 @@ from . import (
     energy_ratio_gain,
     energy_ratio_suite,
     energy_ratio_visualization,
-    energy_ratio_wd_bias_estimation,
-    energy_ratio_polars
+    energy_ratio_wd_bias_estimation
 )
