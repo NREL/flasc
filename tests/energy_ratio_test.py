@@ -1,6 +1,8 @@
 from io import StringIO
 import os
 import pandas as pd
+import polars as pl
+import numpy as np
 
 import unittest
 
@@ -9,7 +11,8 @@ from flasc.energy_ratio import energy_ratio
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
 from flasc.examples.models import load_floris_artificial as load_floris
-from flasc.energy_ratio import energy_ratio_polars as erp
+from flasc.energy_ratio_polars import energy_ratio as erp
+from flasc.energy_ratio_polars.energy_ratio_utilities import add_reflected_rows
 
 
 def load_data():
@@ -164,7 +167,6 @@ class TestEnergyRatio(unittest.TestCase):
 
         wd_step=2.0
         ws_step=1.0
-        # wd_bin_width=3.0,
 
         df_energy = erp.get_energy_table([df],['baseline'])
 
@@ -176,20 +178,48 @@ class TestEnergyRatio(unittest.TestCase):
             use_predefined_wd=True,
             use_predefined_ws=True,
             wd_max=360.0,
-            wd_min=wd_step/2.0,
+            wd_min=0.,
             wd_step=wd_step,
             ws_max=30.0,
-            ws_min=ws_step/2.0,
+            ws_min=0.,
             ws_step=ws_step,
+            wd_bin_overlap_radius = 0.5,
         )
 
         # Get the underlying polars data frame
         df_erb = ero.df_result
 
-        self.assertAlmostEqual(df_erb['baseline'].item(1), 0.8087321721301793, places=4)
-        self.assertAlmostEqual(df_erb['baseline'].item(2), 0.903263, places=4)
-        self.assertAlmostEqual(df_erb['baseline'].item(3), 0.930883, places=4)
 
-        self.assertEqual(df_erb['count_baseline'].item(1), 25)
-        self.assertEqual(df_erb['count_baseline'].item(2), 27)
-        self.assertEqual(df_erb['count_baseline'].item(3), 22)
+        self.assertAlmostEqual(df_erb['baseline'].item(1), 0.807713, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].item(2), 0.884564, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].item(3), 0.921262, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].item(4), 0.942649, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].item(5), 0.959025, places=4)
+
+        self.assertEqual(df_erb['count_baseline'].item(0), 1)
+        self.assertEqual(df_erb['count_baseline'].item(1), 30)
+        self.assertEqual(df_erb['count_baseline'].item(2), 44)
+        self.assertEqual(df_erb['count_baseline'].item(3), 34)
+        self.assertEqual(df_erb['count_baseline'].item(4), 38)
+        self.assertEqual(df_erb['count_baseline'].item(5), 6)
+
+
+    def test_row_reflection(self):
+
+        from polars.testing import assert_frame_equal
+
+        # Test adding reflected rows works as expected
+
+        
+        df = pl.DataFrame({'wd': [.1,.5,.7], 'ws': [6,7,8]})
+        df_result_expected = pl.DataFrame({'wd': [.1,.5,.7, 359.9], 'ws': [6,7,8,6]})
+        edges = np.array([0, 2, 4])
+        df_reflected = add_reflected_rows(df, edges,0.25)
+        assert_frame_equal(df_result_expected, df_reflected)
+        
+
+        df = pl.DataFrame({'wd': [359.1,359.5,359.9], 'ws': [6,7,8]})
+        df_result_expected = pl.DataFrame({'wd': [359.1,359.5,359.9, 0.1], 'ws': [6,7,8, 8]})
+        edges = np.array([358, 360])
+        df_reflected = add_reflected_rows(df, edges,0.25)
+        assert_frame_equal(df_result_expected, df_reflected)
