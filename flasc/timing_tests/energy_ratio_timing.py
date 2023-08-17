@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 
 from flasc.energy_ratio import energy_ratio_suite
-from flasc.energy_ratio import energy_ratio_polars as erp
+from flasc.energy_ratio_polars import energy_ratio as erp
 
 N_ITERATIONS = 5
 
