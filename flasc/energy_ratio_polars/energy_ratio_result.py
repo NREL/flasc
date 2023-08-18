@@ -167,7 +167,7 @@ class EnergyRatioResult:
             raise ValueError('color_dict must be a dictionary')
 
         # Make sure the keys of color_dict are in df_names_subset
-        if not all([label in df_names_subset for label in color_dict.keys()]):
+        if not all([label in labels for label in color_dict.keys()]):
             raise ValueError('color_dict keys must be in df_names_subset')
 
         if axarr is None:
