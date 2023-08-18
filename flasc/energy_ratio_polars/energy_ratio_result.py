@@ -69,21 +69,25 @@ class EnergyRatioResult:
         # Get the bin count by wd, ws and df_name
         df_group = df_.groupby(['wd_bin','ws_bin','df_name']).count()
 
-        return df_.to_pandas(), df_group.to_pandas()
+        # Collect the minimum number of points per bin
+        df_min = df_group.groupby(['wd_bin','ws_bin']).min()
 
-    def plot(self,
+        return df_.to_pandas(), df_group.to_pandas(), df_min.to_pandas()
+
+    def plot_energy_ratios(self,
         df_names_subset = None,
         labels = None,
         color_dict = None,
         axarr = None,
         polar_plot=False,
+        show_wind_direction_distribution=True,
         show_wind_speed_distrubution=True,
     ):
 
         # Only allow showing the wind speed distribution if polar_plot is False
         if polar_plot and show_wind_speed_distrubution:
             raise ValueError('show_wind_speed_distrubution cannot be True if polar_plot is True')
-
+        
         # If df_names_subset is None, plot all the dataframes
         if df_names_subset is None:
             df_names_subset = self.df_names
@@ -126,22 +130,46 @@ class EnergyRatioResult:
             if polar_plot:
                 _, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
             else:
-                if show_wind_speed_distrubution:
-                    num_rows = 3 # Add rows to show wind speed distribution
+                if show_wind_direction_distribution:
+                    if show_wind_speed_distrubution:
+                        num_rows = 3 # Add rows to show wind speed and wind direction distribution
+                    else:
+                        num_rows = 2 # Add rows to show wind direction distribution
                 else:
-                    num_rows = 2
-                _, axarr = plt.subplots(nrows=num_rows, ncols=1, sharex=True, figsize=(10, 5))
+                    num_rows = 1
+                _, axarr = plt.subplots(nrows=num_rows, ncols=1, sharex=True, figsize=(11, num_rows * 3))
+        else: # Confirm correct number of axes passed in
+            if polar_plot:
+                if len(axarr) != 2:
+                    raise ValueError('If polar_plot is True, axarr must have length of 2')
+            else:
+                if show_wind_direction_distribution:
+                    if show_wind_speed_distrubution:
+                        if len(axarr) != 3:
+                            raise ValueError('If show_wind_speed_distrubution and show_wind_direction_distribution are True, axarr must have length of 3')
+                    else:
+                        if len(axarr) != 2:
+                            raise ValueError('If show_wind_direction_distribution is True, and show_wind_direction is False axarr must have length of 2')
+                else:
+                    # Confirm axarr is of type Axes
+                    if not isinstance(axarr, plt.Axes):
+                        raise ValueError('If show_wind_direction_distribution and show_wind_speed_distrubution are False, axarr be of type matplotlib.pyplot.Axes and not a list of axes')
 
-        # Set the bar width using self.wd_step
-        bar_width = (0.7 / N) * self.wd_step
-        if polar_plot:
-            bar_width = bar_width * np.pi / 180.0
+
 
         # For plotting, get a pandas dataframe
         df = self.df_result.to_pandas()
 
         # Get x-axis values
         x = np.array(df["wd_bin"], dtype=float)
+
+        # Get xlims to add a horizontal line at 1
+        xlims = np.linspace(np.min(x) - 4.0, np.max(x) + 4.0, 1000)
+
+
+        if polar_plot:
+            x = (90.0 - x) * np.pi / 180.0  # Convert to radians
+            xlims = (90.0 - xlims) * np.pi / 180.0  # Convert to radians
 
         # Add NaNs to avoid connecting plots over gaps
         dwd = np.min(x[1::] - x[0:-1])
@@ -163,25 +191,24 @@ class EnergyRatioResult:
             df = df.iloc[np.argsort(df["wd_bin"])].reset_index(drop=True)
             x = np.array(df["wd_bin"], dtype=float)
 
-        # Plot horizontal black line at 1.
-        xlims = np.linspace(np.min(x) - 4.0, np.max(x) + 4.0, 1000)
-
-        if polar_plot:
-            x = (90.0 - x) * np.pi / 180.0  # Convert to radians
-            xlims = (90.0 - xlims) * np.pi / 180.0  # Convert to radians
+        # Energy ratio plot ========================================
+        if show_wind_direction_distribution:
+            ax = axarr[0]
+        else:
+            ax = axarr
 
         # Plot the horizontal line at 1
-        axarr[0].plot(xlims, np.ones_like(xlims), color="black")
+        ax.plot(xlims, np.ones_like(xlims), color="black")
 
         # Plot the energy ratios
         for df_name, label in zip(df_names_subset, labels):
 
-            axarr[0].plot(x, df[df_name], "-o", markersize=3.0, label=label, color=color_dict[label])
+            ax.plot(x, df[df_name], "-o", markersize=3.0, label=label, color=color_dict[label])
 
             # If data includes upper and lower bounds plot them
             if df_name + "_ub" in df.columns:
 
-                axarr[0].fill_between(
+                ax.fill_between(
                     x,
                     df[df_name + "_lb"],
                     df[df_name + "_ub"],
@@ -190,53 +217,106 @@ class EnergyRatioResult:
                 )
 
         # Format the energy ratio plot
-        axarr[0].legend()
-        axarr[0].grid(visible=True, which="major", axis="both", color="gray")
-        axarr[0].grid(visible=True, which="minor", axis="both", color="lightgray")
-        axarr[0].minorticks_on()
-        # axarr[0].set_grid(True)
+        ax.legend()
+        ax.grid(visible=True, which="major", axis="both", color="gray")
+        ax.grid(visible=True, which="minor", axis="both", color="lightgray")
+        ax.minorticks_on()
+        ax.set_title("Energy Ratio")
+        ax.set_ylabel("Energy Ratio")
+
+
+        # Wind Direction Bin Plot ========================================
+        if not show_wind_direction_distribution:
+            ax.set_xlabel("Wind Direction (deg)")
+            return
+        
+        ax = axarr[1]
+
+        # Set the bar width using self.wd_step
+        bar_width = (0.7 / N) * self.wd_step
+        if polar_plot:
+            bar_width = bar_width * np.pi / 180.0
 
         # Plot the bin counts
-        df_unbinned, df_freq = self._compute_df_freq()
+        _, df_freq, df_min = self._compute_df_freq()
         df_freq_sum_all_ws = df_freq.groupby(["wd_bin","df_name"]).sum().reset_index()
 
-
         for i, (df_name, label) in enumerate(zip(df_names_subset, labels)):
-            df_sub = df_freq_sum_all_ws[df_freq_sum_all_ws["df_name"] == df_name]
+            print(df_name, label)
+            if df_name == 'uplift': # Special case, use the minimum
+                df_sub = df_min
+            else:
+                df_sub = df_freq_sum_all_ws[df_freq_sum_all_ws["df_name"] == df_name]
             
             x = np.array(df_sub["wd_bin"], dtype=float)
             if polar_plot:
                 x = (90.0 - x) * np.pi / 180.0  # Convert to radians
             axarr[1].bar(x - (i - N / 2) * bar_width, df_sub["count"], width=bar_width, label = label, color=color_dict[label])
 
-        axarr[1].legend()
+        ax.legend()
+        ax.set_ylabel('Number of Points')
+        ax.set_title('Number of Points per Bin')
+        ax.grid(True)
 
-        # Get the bins
-        wd_bins = np.array(df_freq["wd_bin"].unique(), dtype=float)
-        ws_bins = np.array(df_freq["ws_bin"].unique(), dtype=float)
-        num_wd_bins = len(wd_bins)
-        num_ws_bins = len(ws_bins)
+        # Wind Speed Distribtution Plot ========================================
+        if not show_wind_speed_distrubution:
+            ax.set_xlabel("Wind Direction (deg)")
+            return
 
-        if show_wind_speed_distrubution:
-            # Plot the wind speed distribution in df_freq as a heat map with wd on the x-axis and ws on the y-axis
-            
-            ax = axarr[2]
-            for df_name, label in zip(df_names_subset, labels):
-                df_sub = df_freq[df_freq["df_name"] == df_name]
-                ax.scatter(df_unbinned["wd_bin"], df_unbinned["ws_bin"], c=color_dict[label],alpha=0.25, s=1)
+        ax = axarr[2]        
+
+        sns.scatterplot(data=df_min, x='wd_bin', y='ws_bin', size='count', ax=ax, legend=True, color='k')
+        ax.set_xlabel('Wind Direction (deg)')
+        ax.set_ylabel('Wind Speed (m/s)')
+        ax.set_title('Minimum Number of Points per Bin')
+        ax.grid(True)
+
 
 
     def plot_uplift(self,
         axarr = None,
         polar_plot=False,
+        show_wind_direction_distribution=True,
         show_wind_speed_distrubution=True,
     ):
-        self.plot(
-            df_names_subset = 'uplift',
+        if axarr is None:
+            if polar_plot:
+                _, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
+            else:
+                if show_wind_direction_distribution:
+                    if show_wind_speed_distrubution:
+                        num_rows = 3 # Add rows to show wind speed and wind direction distribution
+                    else:
+                        num_rows = 2 # Add rows to show wind direction distribution
+                else:
+                    num_rows = 1
+                _, axarr = plt.subplots(nrows=num_rows, ncols=1, sharex=True, figsize=(11, num_rows * 3))
+
+        self.plot_energy_ratios(
+            df_names_subset = ['uplift'],
             labels = ['uplift'],
             color_dict = {'uplift':'k'},
             axarr = axarr,
             polar_plot=polar_plot,
+            show_wind_direction_distribution=show_wind_direction_distribution,
             show_wind_speed_distrubution=show_wind_speed_distrubution,
         )
             
+
+        # Finish plots
+        if not show_wind_direction_distribution:
+            ax = axarr
+        else:
+            ax = axarr[0]
+
+        # Finish Energy Ratio plot
+        ax.set_ylabel('Percent Change')
+        ax.set_title('Uplift in Energy Ratio')
+
+        if not show_wind_direction_distribution:
+            return
+
+        # Finish Wind Direction Distribution plot
+        ax = axarr[1]
+        ax.set_title("Minimum Number of Points per Bin")
+
