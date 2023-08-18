@@ -1,9 +1,13 @@
 import polars as pl
 import numpy as np
 
+from typing import Union, List, Optional
 
 
-def cut(col_name, edges):
+
+def cut(col_name: str,
+        edges: Union[np.ndarray, list],
+    ) -> pl.Expr:
     """
     Bins the values in the specified column according to the given edges.
 
@@ -27,7 +31,11 @@ def cut(col_name, edges):
     return expr
 
 
-def bin_column(df_, col_name, bin_col_name, edges):
+def bin_column(df_: pl.DataFrame,
+               col_name: str,
+               bin_col_name: str, 
+               edges: Union[np.ndarray, list],
+    ) -> pl.DataFrame:
     """
     Bins the values in the specified column of a Polars DataFrame according to the given edges.
 
@@ -50,14 +58,16 @@ def bin_column(df_, col_name, bin_col_name, edges):
         ).alias(bin_col_name)
     )
 
-def add_ws(df_, ws_cols):
+def add_ws(df_: pl.DataFrame,
+           ws_cols: List[str],
+    ) -> pl.DataFrame:
     """
     Add the ws column to a dataframe, given which columns to average over
     
 
     Parameters:
     df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    ws_cols (str): The name of the columns to average across.
+    ws_cols (list(str)): The name of the columns to average across.
 
     Returns:
     pl.DataFrame: A new Polars DataFrame with an additional ws column
@@ -81,14 +91,20 @@ def add_ws(df_, ws_cols):
 
     return df_with_mean_ws
     
-def add_ws_bin(df_, ws_cols, ws_step=1.0, ws_min=-0.5, ws_max=50.0, edges=None):
+def add_ws_bin(df_: pl.DataFrame,
+               ws_cols: List[str],
+               ws_step: float=1.0, 
+               ws_min: float=-0.5,
+               ws_max: float=50.0, 
+               edges: Optional[Union[np.ndarray, list]]=None,
+    ) -> pl.DataFrame:
     """
     Add the ws_bin column to a dataframe, given which columns to average over
     and the step sizes to use
 
     Parameters:
     df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    ws_cols (str): The name of the columns to average across.
+    ws_cols (list(str)): The name of the columns to average across.
     ws_step (float): Step size for binning
     ws_min (float): Minimum wind speed
     ws_max (float): Maximum wind speed
@@ -119,14 +135,16 @@ def add_ws_bin(df_, ws_cols, ws_step=1.0, ws_min=-0.5, ws_max=50.0, edges=None):
 
     return bin_column(df_with_mean_ws, 'ws', 'ws_bin', edges)
 
-def add_wd(df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0, edges=None):
+def add_wd(df_:pl.DataFrame,
+          wd_cols: List[str],
+    ) -> pl.DataFrame:
     """
     Add the wd column to a dataframe, given which columns to average over
     
 
     Parameters:
     df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    wd_cols (str): The name of the columns to average across.
+    wd_cols (list(str)): The name of the columns to average across.
 
     Returns:
     pl.DataFrame: A new Polars DataFrame with an additional wd column
@@ -176,14 +194,21 @@ def add_wd(df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0, edges=None):
 
     return df_with_mean_wd
 
-def add_wd_bin(df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0, edges=None):
+# (df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0, edges=None):@# 
+def add_wd_bin(df_: pl.DataFrame,
+                wd_cols: List[str],
+                wd_step: float=2.0,
+                wd_min: float=0.0,
+                wd_max: float=360.0,
+                edges: Optional[Union[np.ndarray, list]]=None,
+    ):
     """
     Add the wd_bin column to a dataframe, given which columns to average over
     and the step sizes to use
 
     Parameters:
     df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    wd_cols (str): The name of the columns to average across.
+    wd_cols (list(str)): The name of the columns to average across.
     wd_step (float): Step size for binning
     wd_min (float): Minimum wind direction
     wd_max (float): Maximum wind direction
@@ -218,23 +243,26 @@ def add_wd_bin(df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0, edges=None):
     return bin_column(df_with_mean_wd, 'wd', 'wd_bin', edges)
 
 
-def add_power_test(df_, test_cols):
+def add_power_test(df_: pl.DataFrame,
+                     test_cols: List[str],
+    ) -> pl.DataFrame:
 
     return df_.with_columns(
         pow_test = pl.concat_list(test_cols).list.mean()
-        #df_.select(test_cols).mean(axis=1).alias('pow_test')
     )
 
 
-def add_power_ref(df_, ref_cols):
+def add_power_ref(df_: pl.DataFrame,
+                   ref_cols: List[str]):
 
     return df_.with_columns(
         pow_ref = pl.concat_list(ref_cols).list.mean()
-        # df_.select(ref_cols).mean(axis=1).alias('pow_ref')
     )
 
 
-def add_reflected_rows(df_, edges, overlap_distance):
+def add_reflected_rows(df_: pl.DataFrame,
+                       edges: Union[np.ndarray, list], 
+                       overlap_distance: float):
     """
     Adds rows to a datrame with where the wind direction is reflected around the neearest edge if within overlap_distance
 
