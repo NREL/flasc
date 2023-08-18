@@ -4,6 +4,9 @@ import polars as pl
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from typing import Optional, Dict, List, Any, Tuple, Union
+import matplotlib.axes._axes as axes
+
 from flasc.energy_ratio_polars.energy_ratio_utilities import add_ws_bin, add_wd_bin
 
 
@@ -12,28 +15,47 @@ class EnergyRatioResult:
     and provide convenient methods for plotting and saving the results.
     """
     def __init__(self,
-                    df_result, 
-                    df_names,
-                    energy_table,
-                    ref_cols,
-                    test_cols,
-                    wd_cols,
-                    ws_cols,
-                    wd_step,
-                    wd_min,
-                    wd_max,
-                    ws_step,
-                    ws_min,
-                    ws_max,
-                    bin_cols_in,
-                    wd_bin_overlap_radius,
-                    N
-                  ):
+                 df_result: pl.DataFrame,
+                 df_names: List[str],
+                 energy_table: pl.DataFrame,
+                 ref_cols: List[str],
+                 test_cols: List[str],
+                 wd_cols: List[str],
+                 ws_cols: List[str],
+                 wd_step: float,
+                 wd_min: float,
+                 wd_max: float,
+                 ws_step: float,
+                 ws_min: float,
+                 ws_max: float,
+                 bin_cols_in: List[str],
+                 wd_bin_overlap_radius: float,
+                 N: int
+                ) -> None:
+        """Initialize an EnergyRatioResult object.
 
+        Args:
+            df_result (pl.DataFrame): The energy ratio results.
+            df_names (List[str]): The names of the dataframes used in the energy ratio calculation.
+            energy_table (pl.DataFrame): The energy table used in the energy ratio calculation.
+            ref_cols (List[str]): The column names of the reference turbines.
+            test_cols (List[str]): The column names of the test wind turbines.
+            wd_cols (List[str]): The column names of the wind directions.
+            ws_cols (List[str]): The column names of the wind speeds.
+            wd_step (float): The wind direction bin size.
+            wd_min (float): The minimum wind direction value.
+            wd_max (float): The maximum wind direction value.
+            ws_step (float): The wind speed bin size.
+            ws_min (float): The minimum wind speed value.
+            ws_max (float): The maximum wind speed value.
+            bin_cols_in (List[str]): TBD
+            wd_bin_overlap_radius (float): The radius of overlap between wind direction bins.
+            N (int): The number of bootstrap iterations used in the energy ratio calculation.
+        """
         self.df_result = df_result
         self.df_names = df_names
-        self.energy_table = energy_table
         self.num_df = len(df_names)
+        self.energy_table = energy_table
         self.ref_cols = ref_cols
         self.test_cols = test_cols
         self.wd_cols = wd_cols
@@ -47,8 +69,6 @@ class EnergyRatioResult:
         self.bin_cols_in = bin_cols_in
         self.wd_bin_overlap_radius = wd_bin_overlap_radius
         self.N = N
-
-        # self.df_freq = self._compute_df_freq()
 
     def _compute_df_freq(self):
         """ Compute the of ws/wd as previously computed but not presently
@@ -75,14 +95,38 @@ class EnergyRatioResult:
         return df_.to_pandas(), df_group.to_pandas(), df_min.to_pandas()
 
     def plot_energy_ratios(self,
-        df_names_subset = None,
-        labels = None,
-        color_dict = None,
-        axarr = None,
-        polar_plot=False,
-        show_wind_direction_distribution=True,
-        show_wind_speed_distrubution=True,
-    ):
+        df_names_subset: Optional[List[str]] = None,
+        labels: Optional[List[str]] = None,
+        color_dict: Optional[Dict[str, Any]] = None,
+        axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
+        polar_plot: bool = False,
+        show_wind_direction_distribution: bool = True,
+        show_wind_speed_distrubution: bool = True,
+    ) -> Union[axes.Axes, List[axes.Axes]]:
+        """Plot the energy ratios.
+
+        Args:
+            df_names_subset (Optional[List[str]], optional): A subset of the dataframes used in the energy ratio calculation. Defaults to None.
+            labels (Optional[List[str]], optional): The labels for the energy ratios. Defaults to None.
+            color_dict (Optional[Dict[str, Any]], optional): A dictionary mapping labels to colors. Defaults to None.
+            axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
+            polar_plot (bool, optional): Whether to plot the energy ratios on a polar plot. Defaults to False.
+            show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
+            show_wind_speed_distrubution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
+
+        Returns:
+            Union[axes.Axes, List[axes.Axes]]: The axes used for plotting.
+
+        Raises:
+            ValueError: If show_wind_speed_distrubution is True and polar_plot is True.
+
+        Notes:
+            - If df_names_subset is None, all dataframes will be plotted.
+            - If df_names_subset is not a list, it will be converted to a list.
+            - If labels is None, the dataframe names will be used as labels.
+            - If color_dict is None, a default color scheme will be used.
+            - If axarr is None, a new figure will be created.
+        """
 
         # Only allow showing the wind speed distribution if polar_plot is False
         if polar_plot and show_wind_speed_distrubution:
@@ -228,7 +272,7 @@ class EnergyRatioResult:
         # Wind Direction Bin Plot ========================================
         if not show_wind_direction_distribution:
             ax.set_xlabel("Wind Direction (deg)")
-            return
+            return axarr
         
         ax = axarr[1]
 
@@ -261,7 +305,7 @@ class EnergyRatioResult:
         # Wind Speed Distribtution Plot ========================================
         if not show_wind_speed_distrubution:
             ax.set_xlabel("Wind Direction (deg)")
-            return
+            return axarr
 
         ax = axarr[2]        
 
@@ -271,14 +315,37 @@ class EnergyRatioResult:
         ax.set_title('Minimum Number of Points per Bin')
         ax.grid(True)
 
+        return axarr
 
 
     def plot_uplift(self,
-        axarr = None,
-        polar_plot=False,
-        show_wind_direction_distribution=True,
-        show_wind_speed_distrubution=True,
-    ):
+        axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
+        polar_plot: bool = False,
+        show_wind_direction_distribution: bool = True,
+        show_wind_speed_distrubution: bool = True,
+    )-> Union[axes.Axes, List[axes.Axes]]:
+        """Plot the uplift in energy ratio
+
+        Args:
+            axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
+            polar_plot (bool, optional): Whether to plot the uplift on a polar plot. Defaults to False.
+            show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
+            show_wind_speed_distrubution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
+
+        Raises:
+            ValueError: If show_wind_speed_distrubution is True and polar_plot is True.
+
+        Returns:
+            Union[axes.Axes, List[axes.Axes]]: The axes used for plotting.
+
+        Notes:
+            - If axarr is None, a new figure will be created.
+            - If axarr is a single axes object, it will be used to plot the uplift.
+            - If axarr is a list of axes objects, each component of the uplift will be plotted on a separate axes object.
+            - If polar_plot is True, the uplift will be plotted on a polar plot.
+            - If show_wind_direction_distribution is True, the wind direction distribution will be shown.
+            - If show_wind_speed_distrubution is True, the wind speed distribution will be shown.
+        """
         if axarr is None:
             if polar_plot:
                 _, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
@@ -314,9 +381,10 @@ class EnergyRatioResult:
         ax.set_title('Uplift in Energy Ratio')
 
         if not show_wind_direction_distribution:
-            return
+            return axarr
 
         # Finish Wind Direction Distribution plot
         ax = axarr[1]
         ax.set_title("Minimum Number of Points per Bin")
 
+        return axarr
