@@ -40,6 +40,7 @@ jobs:
         pip install pytest-cov
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov  
+      if: ${{ env.CODECOV_TOKEN }}  # Don't attempt to upload if the codecov token is not configured
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
