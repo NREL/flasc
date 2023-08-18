@@ -10,104 +10,9 @@ import warnings
 import numpy as np
 import polars as pl
 
-from flasc.energy_ratio_polars.energy_ratio_result import EnergyRatioResult
+from flasc.energy_ratio_polars.energy_ratio_output import EnergyRatioOutput
+from flasc.energy_ratio_polars.energy_ratio_input import EnergyRatioInput
 from flasc.energy_ratio_polars.energy_ratio_utilities import add_ws_bin, add_wd, add_wd_bin, add_power_ref, add_power_test, add_reflected_rows
-
-
-
-def generate_block_list(N, num_blocks=10):
-    """Generate an np.array of length N where each element is an integer between 0 and num_blocks-1
-    with each value repeating N/num_blocks times.
-
-    Args:
-        N (int): Length of the array to generate
-        num_blocks (int): Number of blocks to generate
-        
-    """
-
-    # Test than N and num_blocks are integers greater than 0
-    if not isinstance(N, int) or not isinstance(num_blocks, int):
-        raise ValueError('N and num_blocks must be integers')
-    if N <= 0 or num_blocks <= 0:
-        raise ValueError('N and num_blocks must be greater than 0')
-    
-    # Num blocks must be less than or equal to N
-    if num_blocks > N:
-        raise ValueError('num_blocks must be less than or equal to N')
-
-
-    block_list = np.zeros(N)
-    for i in range(num_blocks):
-        block_list[i*N//num_blocks:(i+1)*N//num_blocks] = i
-    return block_list.astype(int)
-
-def get_energy_table(
-        df_list_in, 
-        df_names=None,
-        num_blocks=10,):
-    """
-    Given a list of PANDAS dataframes, return a single 
-    POLARS dataframe with a column
-    indicating which dataframe the row came from as well as a block
-    list to use in bootstrapping.
-
-    Parameters:
-    df_list_in (list): A list of PANDAS dataframes to combine.
-    df_names (list): A list of names to give to the dataframes. If None,
-                        the dataframes will be named df_0, df_1, etc.
-    n_blocks (int): The number of blocks to add to the block column for later bootstrapping.
-
-    Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional column containing the df_names
-    """
-
-    # Convert to polars
-    df_list = [pl.from_pandas(df) for df in df_list_in]
-    
-    if df_names is None:
-        df_names = ['df_'+str(i) for i in range(len(df_list))]
-
-    # Add a name column to each dataframe
-    for i in range(len(df_list)):
-        df_list[i] = df_list[i].with_columns([
-            pl.lit(df_names[i]).alias('df_name')
-        ])
-
-    # Add a block column to each dataframe
-    for i in range(len(df_list)):
-        df_list[i] = df_list[i].with_columns([
-            pl.Series(generate_block_list(df_list[i].shape[0], num_blocks=num_blocks)).alias('block')
-        ])
-
-    return pl.concat(df_list)
-
-def resample_energy_table(df_e_, i):
-    """Use the block column of an energy table to resample the data.
-
-    Args:
-        df_e_ (pl.DataFrame): An energy table with a block column
-
-    Returns:
-        pl.DataFrame: A new energy table with (approximately)
-            the same number of rows as the original
-    """
-
-    if i == 0: #code to return as is
-        return df_e_
-    
-    else:
-
-        num_blocks = df_e_['block'].max() + 1
-        
-        # Generate a random np.array, num_blocks long, where each element is
-        #  an integer between 0 and num_blocks-1
-        block_list = np.random.randint(0, num_blocks, num_blocks)
-        
-        return pl.DataFrame(
-            {
-                'block':block_list
-            }
-            ).join(df_e_, how='inner', on='block')
 
 
 # Internal version, returns a polars dataframe
@@ -225,7 +130,7 @@ def _compute_energy_ratio_single(df_,
     return(df_)
 
 # Bootstrap function wraps the _compute_energy_ratio function
-def _compute_energy_ratio_bootstrap(df_,
+def _compute_energy_ratio_bootstrap(eri,
                          df_names,
                          ref_cols,
                          test_cols,
@@ -246,7 +151,7 @@ def _compute_energy_ratio_bootstrap(df_,
     Compute the energy ratio between two sets of turbines with bootstrapping
 
     Args:
-        df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
+        eri (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
         df_names (list): A list of names to give to the dataframes. 
         ref_cols (list[str]): A list of columns to use as the reference turbines
         test_cols (list[str]): A list of columns to use as the test turbines
@@ -269,7 +174,7 @@ def _compute_energy_ratio_bootstrap(df_,
     """
 
     # Otherwise run the function N times and concatenate the results to compute statistics
-    df_concat = pl.concat([_compute_energy_ratio_single(resample_energy_table(df_, i),
+    df_concat = pl.concat([_compute_energy_ratio_single(eri.resample_energy_table(i),
                          df_names,
                          ref_cols,
                          test_cols,
@@ -301,7 +206,7 @@ def _compute_energy_ratio_bootstrap(df_,
             )
     
 
-def compute_energy_ratio(df_,
+def compute_energy_ratio(eri: EnergyRatioInput,
                          df_names=None,
                          ref_turbines=None,
                          test_turbines= None,
@@ -319,13 +224,13 @@ def compute_energy_ratio(df_,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          N = 1,
-                         ):
+                         )-> EnergyRatioOutput:
     
     """
     Compute the energy ratio between two sets of turbines with bootstrapping
 
     Args:
-        df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
+        eri (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
         df_names (list): A list of names to give to the dataframes. 
         ref_turbines (list[int]): A list of turbine numbers to use as the reference.
         test_turbines (list[int]): A list of turbine numbers to use as the test.
@@ -346,9 +251,12 @@ def compute_energy_ratio(df_,
         N (int): The number of bootstrap samples to use.
 
     Returns:
-        pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
+        EnergyRatioOutput: An EnergyRatioOutput object containing the energy ratio between the two sets of turbines.
 
     """
+
+    # Get the polars dataframe from within the eri
+    df_ = eri.get_df()
 
     # Check that the inputs are valid
     # If use_predefined_ref is True, df_ must have a column named 'pow_ref'
@@ -440,7 +348,7 @@ def compute_energy_ratio(df_,
                         bin_cols_in,
                         wd_bin_overlap_radius)
     else:
-        df_res = _compute_energy_ratio_bootstrap(df_,
+        df_res = _compute_energy_ratio_bootstrap(eri,
                             df_names,
                             ref_cols,
                             test_cols,
@@ -456,10 +364,10 @@ def compute_energy_ratio(df_,
                             wd_bin_overlap_radius,
                             N)
 
-    # Return the results as an EnergyRatioResult object
-    return EnergyRatioResult(df_res, 
+    # Return the results as an EnergyRatioOutput object
+    return EnergyRatioOutput(df_res, 
                                 df_names,
-                                df_,
+                                eri,
                                 ref_cols, 
                                 test_cols, 
                                 wd_cols,
