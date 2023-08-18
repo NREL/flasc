@@ -113,7 +113,7 @@ if __name__=="__main__":
     # Test loading the data
     df = load_data_and_prep_data()
     print(df.head())
-    print(df.shape)s
+    print(df.shape)
 
     # Test timing the energy ratio
     print(time_energy_ratio_with_bootstrapping())
