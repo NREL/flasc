@@ -302,7 +302,7 @@ def _compute_energy_ratio_bootstrap(df_,
     
 
 def compute_energy_ratio(df_,
-                         df_names,
+                         df_names=None,
                          ref_turbines=None,
                          test_turbines= None,
                          wd_turbines=None,
@@ -415,6 +415,9 @@ def compute_energy_ratio(df_,
         wd_cols = [f'wd_{i:03d}' for i in wd_turbines]
     else:
         wd_cols = ['wd']
+
+    if df_names is None:
+        df_names = df_['df_name'].unique().to_list()
 
     # Convert the numbered arrays to appropriate column names
     test_cols = [f'pow_{i:03d}' for i in test_turbines]
