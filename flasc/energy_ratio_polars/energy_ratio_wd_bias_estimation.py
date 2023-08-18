@@ -22,7 +22,8 @@ from floris.utilities import wrap_360
 from ..dataframe_operations import dataframe_manipulations as dfm
 from .. import floris_tools as ftools
 from ..utilities import printnow as print
-from ..energy_ratio_polars import energy_ratio, energy_ratio_result
+from ..energy_ratio_polars import energy_ratio
+from ..energy_ratio_polars.energy_ratio_input import EnergyRatioInput
 
 
 class bias_estimation():
@@ -120,9 +121,8 @@ class bias_estimation():
         print('  Constructing energy table for wd_bias of %.2f deg.'
               % wd_bias)
 
-        et_test_turbine_list_scada = []
-        et_test_turbine_list_floris = []
-        #fsc_wd_bias_list = []
+        eri_test_turbine_list_scada = []
+        eri_test_turbine_list_floris = []
 
         # Derive dataframe that covers all test_turbines
         df_cor_all = self.df.copy()
@@ -157,16 +157,16 @@ class bias_estimation():
             df_fi = df_fi_all[valid_entries].copy().reset_index(drop=True)
 
             # Initialize SCADA analysis class and add dataframes
-            et_test_turbine_list_scada.append(
-                energy_ratio.get_energy_table([df_cor], ["Measured data"])
+            eri_test_turbine_list_scada.append(
+                EnergyRatioInput([df_cor], ["Measured data"])
             )
-            et_test_turbine_list_floris.append(
-                energy_ratio.get_energy_table([df_fi], ["FLORIS prediction"])
+            eri_test_turbine_list_floris.append(
+                EnergyRatioInput([df_fi], ["FLORIS prediction"])
             )
 
         # Save to self
-        self.et_test_turbine_list_scada = et_test_turbine_list_scada
-        self.et_test_turbine_list_floris = et_test_turbine_list_floris
+        self.eri_test_turbine_list_scada = eri_test_turbine_list_scada
+        self.eri_test_turbine_list_floris = eri_test_turbine_list_floris
 
     def _get_energy_ratios_allbins(
         self,
@@ -232,7 +232,7 @@ class bias_estimation():
 
             er_test_turbine_list_scada.append(
                 energy_ratio.compute_energy_ratio(
-                    self.et_test_turbine_list_scada[ii],
+                    self.eri_test_turbine_list_scada[ii],
                     ref_turbines=None,
                     test_turbines=[ti],
                     use_predefined_ref=True,
@@ -251,7 +251,7 @@ class bias_estimation():
 
             er_test_turbine_list_floris.append(
                 energy_ratio.compute_energy_ratio(
-                    self.et_test_turbine_list_floris[ii],
+                    self.eri_test_turbine_list_floris[ii],
                     ref_turbines=None,
                     test_turbines=[ti],
                     use_predefined_ref=True,
