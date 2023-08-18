@@ -13,6 +13,7 @@ from flasc import floris_tools as ftools
 from flasc.examples.models import load_floris_artificial as load_floris
 from flasc.energy_ratio_polars import energy_ratio as erp
 from flasc.energy_ratio_polars.energy_ratio_utilities import add_reflected_rows
+from flasc.energy_ratio_polars.energy_ratio_input import EnergyRatioInput
 
 
 def load_data():
@@ -168,10 +169,10 @@ class TestEnergyRatio(unittest.TestCase):
         wd_step=2.0
         ws_step=1.0
 
-        df_energy = erp.get_energy_table([df],['baseline'])
+        eri = EnergyRatioInput([df],['baseline'])
 
         ero = erp.compute_energy_ratio(
-            df_energy,
+            eri,
             ['baseline'],
             test_turbines=[1],
             use_predefined_ref=True,
