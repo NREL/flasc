@@ -7,17 +7,19 @@ import seaborn as sns
 from typing import Optional, Dict, List, Any, Tuple, Union
 import matplotlib.axes._axes as axes
 
+from flasc.energy_ratio_polars.energy_ratio_input import EnergyRatioInput
+
 from flasc.energy_ratio_polars.energy_ratio_utilities import add_ws_bin, add_wd_bin
 
 
-class EnergyRatioResult:
+class EnergyRatioOutput:
     """  This class is used to store the results of the energy ratio calculations
     and provide convenient methods for plotting and saving the results.
     """
     def __init__(self,
                  df_result: pl.DataFrame,
                  df_names: List[str],
-                 energy_table: pl.DataFrame,
+                 eri: EnergyRatioInput,
                  ref_cols: List[str],
                  test_cols: List[str],
                  wd_cols: List[str],
@@ -32,12 +34,12 @@ class EnergyRatioResult:
                  wd_bin_overlap_radius: float,
                  N: int
                 ) -> None:
-        """Initialize an EnergyRatioResult object.
+        """Initialize an EnergyRatioOutput object.
 
         Args:
             df_result (pl.DataFrame): The energy ratio results.
             df_names (List[str]): The names of the dataframes used in the energy ratio calculation.
-            energy_table (pl.DataFrame): The energy table used in the energy ratio calculation.
+            eri (EnergyRatioInput): The energy table used in the energy ratio calculation.
             ref_cols (List[str]): The column names of the reference turbines.
             test_cols (List[str]): The column names of the test wind turbines.
             wd_cols (List[str]): The column names of the wind directions.
@@ -55,7 +57,7 @@ class EnergyRatioResult:
         self.df_result = df_result
         self.df_names = df_names
         self.num_df = len(df_names)
-        self.energy_table = energy_table
+        self.eri = eri
         self.ref_cols = ref_cols
         self.test_cols = test_cols
         self.wd_cols = wd_cols
@@ -77,7 +79,7 @@ class EnergyRatioResult:
         #TODO: I don't think so, but should this function count overlapping bins?
 
         # Temporary copy of energy table
-        df_ = self.energy_table.clone()
+        df_ = self.eri.get_df()
 
         # Filter df_ that all the columns are not null
         df_ = df_.filter(pl.all(pl.col(self.ref_cols + self.test_cols + self.ws_cols + self.wd_cols).is_not_null()))
