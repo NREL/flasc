@@ -97,7 +97,7 @@ def time_energy_ratio_with_bootstrapping():
             wd_min=wd_min,
             wd_step=wd_step,
             N=N,
-            parallell_interface='multiprocessing',
+            parallell_interface='serial',
             )
 
         end_time = time.time()
