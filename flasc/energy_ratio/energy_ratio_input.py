@@ -5,6 +5,7 @@ import polars as pl
 from typing import Optional, Dict, List, Any, Tuple, Union
 
 from flasc.energy_ratio.energy_ratio_utilities import add_ws_bin, add_wd_bin
+from flasc.dataframe_operations.dataframe_manipulations import df_reduce_precision
 
 
 def generate_block_list(N: int, 
@@ -52,9 +53,15 @@ class EnergyRatioInput:
             num_blocks (int): The number of blocks to use for the energy ratio calculation
         """
         
-        # Convert to polars
-        df_list = [pl.from_pandas(df) for df in df_list_in]
-        
+        # Reduce precision if needed and convert to polars
+        df_list = [pl.from_pandas(df_reduce_precision(df)) for df in df_list_in]
+
+        # Get minimal set of columns for the dataframes; drop the rest
+        keep_columns = df_list[0].columns
+        for df in df_list:
+            keep_columns = [c for c in df.columns if c in keep_columns]
+        df_list = [df.select(keep_columns) for df in df_list]
+
         # If df_names not provided, give simple numbered names
         if df_names is None:
             df_names = ['df_'+str(i) for i in range(len(df_list))]
