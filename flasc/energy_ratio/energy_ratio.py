@@ -145,6 +145,7 @@ def _compute_energy_ratio_bootstrap(er_in,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          N = 1,
+                         percentiles=[5., 95.],
                          parallell_interface="serial",  # Options are  'serial 'multiprocessing', 'mpi4py'
                          max_workers=None,
                          ):
@@ -246,8 +247,8 @@ def _compute_energy_ratio_bootstrap(er_in,
     return (df_concat
             .groupby(['wd_bin'], maintain_order=True)
             .agg([pl.first(n) for n in df_names_with_uplift] + 
-                    [pl.quantile(n, 0.95).alias(n + "_ub") for n in df_names_with_uplift] +
-                    [pl.quantile(n, 0.05).alias(n + "_lb") for n in df_names_with_uplift] + 
+                    [pl.quantile(n, percentiles[0]/100).alias(n + "_ub") for n in df_names_with_uplift] +
+                    [pl.quantile(n, percentiles[1]/100).alias(n + "_lb") for n in df_names_with_uplift] + 
                     [pl.first(f'count_{n}') for n in df_names]
                 )
             .sort('wd_bin')
@@ -272,6 +273,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          N = 1,
+                         percentiles=None,
                          parallell_interface="serial",  # Options are  'serial 'multiprocessing', 'mpi4py'
                          max_workers=None,
                          )-> EnergyRatioOutput:
@@ -299,6 +301,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         N (int): The number of bootstrap samples to use.
+        percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
+            If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
         parallell_interface (str): The interface to use for parallelization. Options are 'serial', 'multiprocessing', 'mpi4py'
         max_workers (int): The maximum number of workers to use for parallelization. If None, use all available workers.
 
@@ -384,6 +388,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
 
     # If N=1, don't use bootstrapping
     if N == 1:
+        if percentiles is not None:
+            print("percentiles can only be used with bootstrapping (N > 1).")
         # Compute the energy ratio
         df_res = _compute_energy_ratio_single(df_,
                         df_names,
@@ -400,6 +406,12 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                         bin_cols_in,
                         wd_bin_overlap_radius)
     else:
+        if percentiles is None:
+            percentiles = [5, 95]
+        elif not hasattr(percentiles, "__len__") or len(percentiles) != 2:
+            raise ValueError("percentiles should be a two element list of the "+\
+                "upper and lower desired percentiles.")
+
         df_res = _compute_energy_ratio_bootstrap(er_in,
                             df_names,
                             ref_cols,
@@ -415,8 +427,11 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                             bin_cols_in,
                             wd_bin_overlap_radius,
                             N,
+                            percentiles,
                             parallell_interface,
                             max_workers)
+    
+    # Sort df_res by df_names, ws, wd
 
     # Return the results as an EnergyRatioOutput object
     return EnergyRatioOutput(df_res, 
