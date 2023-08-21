@@ -130,7 +130,7 @@ def _compute_energy_ratio_single(df_,
     return(df_)
 
 # Bootstrap function wraps the _compute_energy_ratio function
-def _compute_energy_ratio_bootstrap(eri,
+def _compute_energy_ratio_bootstrap(er_in,
                          df_names,
                          ref_cols,
                          test_cols,
@@ -151,7 +151,7 @@ def _compute_energy_ratio_bootstrap(eri,
     Compute the energy ratio between two sets of turbines with bootstrapping
 
     Args:
-        eri (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
+        er_in (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
         df_names (list): A list of names to give to the dataframes. 
         ref_cols (list[str]): A list of columns to use as the reference turbines
         test_cols (list[str]): A list of columns to use as the test turbines
@@ -174,7 +174,7 @@ def _compute_energy_ratio_bootstrap(eri,
     """
 
     # Otherwise run the function N times and concatenate the results to compute statistics
-    df_concat = pl.concat([_compute_energy_ratio_single(eri.resample_energy_table(i),
+    df_concat = pl.concat([_compute_energy_ratio_single(er_in.resample_energy_table(i),
                          df_names,
                          ref_cols,
                          test_cols,
@@ -206,7 +206,7 @@ def _compute_energy_ratio_bootstrap(eri,
             )
     
 
-def compute_energy_ratio(eri: EnergyRatioInput,
+def compute_energy_ratio(er_in: EnergyRatioInput,
                          df_names=None,
                          ref_turbines=None,
                          test_turbines= None,
@@ -230,7 +230,7 @@ def compute_energy_ratio(eri: EnergyRatioInput,
     Compute the energy ratio between two sets of turbines with bootstrapping
 
     Args:
-        eri (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
+        er_in (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
         df_names (list): A list of names to give to the dataframes. 
         ref_turbines (list[int]): A list of turbine numbers to use as the reference.
         test_turbines (list[int]): A list of turbine numbers to use as the test.
@@ -255,8 +255,8 @@ def compute_energy_ratio(eri: EnergyRatioInput,
 
     """
 
-    # Get the polars dataframe from within the eri
-    df_ = eri.get_df()
+    # Get the polars dataframe from within the er_in
+    df_ = er_in.get_df()
 
     # Check that the inputs are valid
     # If use_predefined_ref is True, df_ must have a column named 'pow_ref'
@@ -348,7 +348,7 @@ def compute_energy_ratio(eri: EnergyRatioInput,
                         bin_cols_in,
                         wd_bin_overlap_radius)
     else:
-        df_res = _compute_energy_ratio_bootstrap(eri,
+        df_res = _compute_energy_ratio_bootstrap(er_in,
                             df_names,
                             ref_cols,
                             test_cols,
@@ -367,7 +367,7 @@ def compute_energy_ratio(eri: EnergyRatioInput,
     # Return the results as an EnergyRatioOutput object
     return EnergyRatioOutput(df_res, 
                                 df_names,
-                                eri,
+                                er_in,
                                 ref_cols, 
                                 test_cols, 
                                 wd_cols,
