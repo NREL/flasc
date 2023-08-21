@@ -18,8 +18,7 @@ class EnergyRatioOutput:
     """
     def __init__(self,
                  df_result: pl.DataFrame,
-                 df_names: List[str],
-                 eri: EnergyRatioInput,
+                 er_in: EnergyRatioInput,
                  ref_cols: List[str],
                  test_cols: List[str],
                  wd_cols: List[str],
@@ -38,7 +37,6 @@ class EnergyRatioOutput:
 
         Args:
             df_result (pl.DataFrame): The energy ratio results.
-            df_names (List[str]): The names of the dataframes used in the energy ratio calculation.
             eri (EnergyRatioInput): The energy table used in the energy ratio calculation.
             ref_cols (List[str]): The column names of the reference turbines.
             test_cols (List[str]): The column names of the test wind turbines.
@@ -55,9 +53,9 @@ class EnergyRatioOutput:
             N (int): The number of bootstrap iterations used in the energy ratio calculation.
         """
         self.df_result = df_result
-        self.df_names = df_names
-        self.num_df = len(df_names)
-        self.eri = eri
+        self.df_names = er_in.df_names
+        self.num_df = len(self.df_names)
+        self.er_in = er_in
         self.ref_cols = ref_cols
         self.test_cols = test_cols
         self.wd_cols = wd_cols
@@ -79,7 +77,7 @@ class EnergyRatioOutput:
         #TODO: I don't think so, but should this function count overlapping bins?
 
         # Temporary copy of energy table
-        df_ = self.eri.get_df()
+        df_ = self.er_in.get_df()
 
         # Filter df_ that all the columns are not null
         df_ = df_.filter(pl.all(pl.col(self.ref_cols + self.test_cols + self.ws_cols + self.wd_cols).is_not_null()))
@@ -310,7 +308,7 @@ class EnergyRatioOutput:
 
         ax = axarr[2]        
 
-        sns.scatterplot(data=df_min, x='wd_bin', y='ws_bin', size='count', ax=ax, legend=True, color='k')
+        sns.scatterplot(data=df_min, x='wd_bin', y='ws_bin', size='count',hue='count',cmap='jet', ax=ax, legend=True, color='k')
         ax.set_xlabel('Wind Direction (deg)')
         ax.set_ylabel('Wind Speed (m/s)')
         ax.set_title('Minimum Number of Points per Bin')

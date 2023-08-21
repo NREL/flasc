@@ -131,7 +131,6 @@ def _compute_energy_ratio_single(df_,
 
 # Bootstrap function wraps the _compute_energy_ratio function
 def _compute_energy_ratio_bootstrap(er_in,
-                         df_names,
                          ref_cols,
                          test_cols,
                          wd_cols,
@@ -155,7 +154,6 @@ def _compute_energy_ratio_bootstrap(er_in,
 
     Args:
         er_in (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
-        df_names (list): A list of names to give to the dataframes. 
         ref_cols (list[str]): A list of columns to use as the reference turbines
         test_cols (list[str]): A list of columns to use as the test turbines
         wd_cols (list[str]): A list of columns to derive the wind directions from
@@ -181,7 +179,7 @@ def _compute_energy_ratio_bootstrap(er_in,
     # Otherwise run the function N times and concatenate the results to compute statistics
     if parallell_interface == "serial":
         df_concat = pl.concat([_compute_energy_ratio_single(er_in.resample_energy_table(i),
-                            df_names,
+                            er_in.df_names,
                             ref_cols,
                             test_cols,
                             wd_cols,
@@ -216,7 +214,7 @@ def _compute_energy_ratio_bootstrap(er_in,
         
         # Assemble the agurments
         multiargs = [(er_in.resample_energy_table(i),
-                            df_names,
+                            er_in.df_names,
                             ref_cols,
                             test_cols,
                             wd_cols,
@@ -240,23 +238,22 @@ def _compute_energy_ratio_bootstrap(er_in,
                     df_concat = pl.concat(out)
 
     if 'uplift' in df_concat.columns:
-        df_names_with_uplift = df_names + ['uplift']
+        df_names_with_uplift = er_in.df_names + ['uplift']
     else:
-        df_names_with_uplift = df_names
+        df_names_with_uplift = er_in.df_names
 
     return (df_concat
             .groupby(['wd_bin'], maintain_order=True)
             .agg([pl.first(n) for n in df_names_with_uplift] + 
                     [pl.quantile(n, percentiles[0]/100).alias(n + "_ub") for n in df_names_with_uplift] +
                     [pl.quantile(n, percentiles[1]/100).alias(n + "_lb") for n in df_names_with_uplift] + 
-                    [pl.first(f'count_{n}') for n in df_names]
+                    [pl.first(f'count_{n}') for n in er_in.df_names]
                 )
             .sort('wd_bin')
             )
     
 
 def compute_energy_ratio(er_in: EnergyRatioInput,
-                         df_names=None,
                          ref_turbines=None,
                          test_turbines= None,
                          wd_turbines=None,
@@ -283,7 +280,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
 
     Args:
         er_in (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
-        df_names (list): A list of names to give to the dataframes. 
         ref_turbines (list[int]): A list of turbine numbers to use as the reference.
         test_turbines (list[int]): A list of turbine numbers to use as the test.
         ws_turbines (list[int]): A list of turbine numbers to use for the wind speeds
@@ -380,8 +376,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
     else:
         wd_cols = ['wd']
 
-    if df_names is None:
-        df_names = df_['df_name'].unique().to_list()
 
     # Convert the numbered arrays to appropriate column names
     test_cols = [f'pow_{i:03d}' for i in test_turbines]
@@ -392,7 +386,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             print("percentiles can only be used with bootstrapping (N > 1).")
         # Compute the energy ratio
         df_res = _compute_energy_ratio_single(df_,
-                        df_names,
+                        er_in.df_names,
                         ref_cols,
                         test_cols,
                         wd_cols,
@@ -413,7 +407,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                 "upper and lower desired percentiles.")
 
         df_res = _compute_energy_ratio_bootstrap(er_in,
-                            df_names,
                             ref_cols,
                             test_cols,
                             wd_cols,
@@ -435,7 +428,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
 
     # Return the results as an EnergyRatioOutput object
     return EnergyRatioOutput(df_res, 
-                                df_names,
                                 er_in,
                                 ref_cols, 
                                 test_cols, 
