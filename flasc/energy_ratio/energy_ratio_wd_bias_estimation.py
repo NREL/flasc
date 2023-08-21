@@ -13,9 +13,12 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import os as os
 from scipy import optimize as opt
 from scipy import stats as spst
+
+from typing import Optional, Dict, List, Any, Tuple, Union, Callable
 
 from floris.utilities import wrap_360
 
@@ -40,11 +43,11 @@ class bias_estimation():
     """
     def __init__(
         self,
-        df,
-        df_fi_approx,
-        test_turbines_subset,
-        df_ws_mapping_func,
-        df_pow_ref_mapping_func
+        df: pd.DataFrame,
+        df_fi_approx: pd.DataFrame,
+        test_turbines_subset: List[int],
+        df_ws_mapping_func: Callable,
+        df_pow_ref_mapping_func: Callable
     ):
         """Initialize the bias estimation class.
 
@@ -75,7 +78,7 @@ class bias_estimation():
             df_ws_mapping_func ([function]): This is a function that
                 returns the reference wind speed based on an array of wind
                 directions as input.
-            df_pow_ref_mapping_func ([type]): This is a function that
+            df_pow_ref_mapping_func ([function]): This is a function that
                 returns the reference power production based on an array of
                 wind directions as input.
         """
@@ -91,16 +94,15 @@ class bias_estimation():
 
     # Private methods
 
-    def _load_energy_table_for_wd_bias(
+    def _load_er_input_for_wd_bias(
         self,
         wd_bias,
     ):
-        """This function initializes an instance of the polars energy table 
+        """This function initializes an instance of the EnergyRatioInput 
         where the dataframe is shifted by wd_bias for each test turbine. 
         This facilitates the calculation of the energy ratios under this 
-        hypothesized wind
-        direction bias. Additionally, the FLORIS predictions for the shifted
-        dataset are calculated and the energy ratios for the FLORIS
+        hypothesized wind direction bias. Additionally, the FLORIS predictions 
+        for the shifted dataset are calculated and the energy ratios for the FLORIS
         predictions are also calculated.
 
         Args:
@@ -221,8 +223,8 @@ class bias_estimation():
         if wd_mask is None:
             wd_mask = [0., 360.]
 
-        print("    Initializing energy tables.")
-        self._load_energy_table_for_wd_bias(
+        print("    Initializing energy ratio inputs.")
+        self._load_er_input_for_wd_bias(
             wd_bias=wd_bias
         )
 
