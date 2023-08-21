@@ -297,6 +297,7 @@ class bias_estimation():
         er_wd_bin_width=None,
         er_N_btstrp=1,
     ):
+        # TODO: is this calculate_baseline method needed?
         self._get_energy_ratios_allbins(
             wd_bias=0.0,
             time_mask=time_mask,
@@ -392,6 +393,7 @@ class bias_estimation():
                 wd_step=er_wd_step,
                 ws_step=er_ws_step,
                 wd_bin_width=er_wd_bin_width,
+                N_btstrp=1,
                 plot_iter_path=plot_iter_path
             )
 
