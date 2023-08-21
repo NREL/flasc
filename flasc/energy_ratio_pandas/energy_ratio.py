@@ -19,7 +19,7 @@ from floris.utilities import wrap_360
 from pandas.errors import DataError
 
 from ..dataframe_operations import dataframe_manipulations as dfm
-from ..energy_ratio import energy_ratio_visualization as ervis
+from ..energy_ratio_pandas import energy_ratio_visualization as ervis
 
 
 class energy_ratio:

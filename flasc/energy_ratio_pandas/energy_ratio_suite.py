@@ -16,9 +16,9 @@ import pandas as pd
 from pandas.errors import DataError
 from scipy.interpolate import NearestNDInterpolator
 
-from ..energy_ratio import energy_ratio as er
-from ..energy_ratio import energy_ratio_gain as erg
-from ..energy_ratio import energy_ratio_visualization as vis
+from ..energy_ratio_pandas import energy_ratio as er
+from ..energy_ratio_pandas import energy_ratio_gain as erg
+from ..energy_ratio_pandas import energy_ratio_visualization as vis
 from .. import time_operations as fsato, utilities as fsut
 
 

@@ -22,7 +22,7 @@ from floris.utilities import wrap_360
 from ..dataframe_operations import dataframe_manipulations as dfm
 from .. import floris_tools as ftools
 from ..utilities import printnow as print
-from ..energy_ratio import energy_ratio_suite
+from ..energy_ratio_pandas import energy_ratio_suite
 
 
 class bias_estimation():
