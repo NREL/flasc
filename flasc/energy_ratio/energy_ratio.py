@@ -272,6 +272,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          N = 1,
+                                                  parallell_interface="serial",  # Options are  'serial 'multiprocessing', 'mpi4py'
+                         max_workers=None,
                          )-> EnergyRatioOutput:
     
     """
