@@ -96,7 +96,8 @@ def time_energy_ratio_with_bootstrapping():
             wd_max=wd_max,
             wd_min=wd_min,
             wd_step=wd_step,
-            N=N)
+            N=N,
+            )
 
         end_time = time.time()
         time_results[i] = end_time - start_time
