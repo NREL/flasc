@@ -272,7 +272,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          N = 1,
-                                                  parallell_interface="serial",  # Options are  'serial 'multiprocessing', 'mpi4py'
+                         parallell_interface="serial",  # Options are  'serial 'multiprocessing', 'mpi4py'
                          max_workers=None,
                          )-> EnergyRatioOutput:
     
@@ -299,6 +299,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         N (int): The number of bootstrap samples to use.
+        parallell_interface (str): The interface to use for parallelization. Options are 'serial', 'multiprocessing', 'mpi4py'
+        max_workers (int): The maximum number of workers to use for parallelization. If None, use all available workers.
 
     Returns:
         EnergyRatioOutput: An EnergyRatioOutput object containing the energy ratio between the two sets of turbines.
@@ -412,7 +414,9 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                             ws_max,
                             bin_cols_in,
                             wd_bin_overlap_radius,
-                            N)
+                            N,
+                            parallell_interface,
+                            max_workers)
 
     # Return the results as an EnergyRatioOutput object
     return EnergyRatioOutput(df_res, 
