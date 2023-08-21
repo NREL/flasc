@@ -7,13 +7,12 @@ import numpy as np
 import unittest
 
 from floris import tools as wfct
-from flasc.energy_ratio import energy_ratio
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
 from flasc.examples.models import load_floris_artificial as load_floris
-from flasc.energy_ratio_polars import energy_ratio as erp
-from flasc.energy_ratio_polars.energy_ratio_utilities import add_reflected_rows
-from flasc.energy_ratio_polars.energy_ratio_input import EnergyRatioInput
+from flasc.energy_ratio import energy_ratio as erp
+from flasc.energy_ratio.energy_ratio_utilities import add_reflected_rows
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 
 
 def load_data():
@@ -126,38 +125,8 @@ def load_data():
 
 
 class TestEnergyRatio(unittest.TestCase):
+
     def test_energy_ratio_regression(self):
-        # Load data and FLORIS model
-        fi, _ = load_floris()
-        df = load_data()
-        df = dfm.set_wd_by_all_turbines(df)
-        df_upstream = ftools.get_upstream_turbs_floris(fi)
-        df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
-        df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
-
-        # Get energy ratios
-        era = energy_ratio.energy_ratio(df_in=df, verbose=True)
-        out = era.get_energy_ratio(
-            test_turbines=[1],
-            wd_step=2.0,
-            ws_step=1.0,
-            wd_bin_width=3.0,
-        )
-
-        self.assertAlmostEqual(out.loc[1, "baseline"], 0.807713, places=4)
-        self.assertAlmostEqual(out.loc[2, "baseline"], 0.884564, places=4)
-        self.assertAlmostEqual(out.loc[3, "baseline"], 0.921262, places=4)
-        self.assertAlmostEqual(out.loc[4, "baseline"], 0.942649, places=4)
-        self.assertAlmostEqual(out.loc[5, "baseline"], 0.959025, places=4)
-
-        self.assertEqual(out.loc[0, "bin_count"], 1)
-        self.assertEqual(out.loc[1, "bin_count"], 30)
-        self.assertEqual(out.loc[2, "bin_count"], 44)
-        self.assertEqual(out.loc[3, "bin_count"], 34)
-        self.assertEqual(out.loc[4, "bin_count"], 38)
-        self.assertEqual(out.loc[5, "bin_count"], 6)
-
-    def test_energy_ratio_regression_polars(self):
         # Load data and FLORIS model
         fi, _ = load_floris()
         df = load_data()
@@ -169,10 +138,10 @@ class TestEnergyRatio(unittest.TestCase):
         wd_step=2.0
         ws_step=1.0
 
-        eri = EnergyRatioInput([df],['baseline'])
+        er_in = EnergyRatioInput([df],['baseline'])
 
-        ero = erp.compute_energy_ratio(
-            eri,
+        er_out = erp.compute_energy_ratio(
+            er_in,
             ['baseline'],
             test_turbines=[1],
             use_predefined_ref=True,
@@ -188,7 +157,7 @@ class TestEnergyRatio(unittest.TestCase):
         )
 
         # Get the underlying polars data frame
-        df_erb = ero.df_result
+        df_erb = er_out.df_result
 
 
         self.assertAlmostEqual(df_erb['baseline'].item(1), 0.807713, places=4)

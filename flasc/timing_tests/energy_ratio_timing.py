@@ -24,9 +24,8 @@ import time
 import numpy as np
 import pandas as pd
 
-from flasc.energy_ratio import energy_ratio_suite
-from flasc.energy_ratio_polars import energy_ratio as erp
-from flasc.energy_ratio_polars.energy_ratio_input import EnergyRatioInput
+from flasc.energy_ratio import energy_ratio as erp
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 
 N_ITERATIONS = 5
 
@@ -65,7 +64,7 @@ def time_energy_ratio_with_bootstrapping():
 
     # Build the polars energy table object
     # Speciy num_blocks = num_rows to implement normal boostrapping
-    eri = EnergyRatioInput([df],['baseline'],num_blocks=df.shape[0])
+    er_in = EnergyRatioInput([df],['baseline'],num_blocks=df.shape[0])
 
     # For forward consistency, define the bins by the edges
     ws_edges = np.arange(5,25,1.)
@@ -84,8 +83,8 @@ def time_energy_ratio_with_bootstrapping():
     for i in range(N_ITERATIONS):
         start_time = time.time()
 
-        df_erb = erp.compute_energy_ratio(
-            eri,
+        er_out = erp.compute_energy_ratio(
+            er_in,
             ['baseline'],
             test_turbines=[1],
             use_predefined_ref=True,
