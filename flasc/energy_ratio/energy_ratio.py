@@ -10,9 +10,9 @@ import warnings
 import numpy as np
 import polars as pl
 
-from flasc.energy_ratio_polars.energy_ratio_output import EnergyRatioOutput
-from flasc.energy_ratio_polars.energy_ratio_input import EnergyRatioInput
-from flasc.energy_ratio_polars.energy_ratio_utilities import add_ws_bin, add_wd, add_wd_bin, add_power_ref, add_power_test, add_reflected_rows
+from flasc.energy_ratio.energy_ratio_output import EnergyRatioOutput
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
+from flasc.energy_ratio.energy_ratio_utilities import add_ws_bin, add_wd, add_wd_bin, add_power_ref, add_power_test, add_reflected_rows
 
 
 # Internal version, returns a polars dataframe

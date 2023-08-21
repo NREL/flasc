@@ -22,8 +22,8 @@ from floris.utilities import wrap_360
 from ..dataframe_operations import dataframe_manipulations as dfm
 from .. import floris_tools as ftools
 from ..utilities import printnow as print
-from ..energy_ratio_polars import energy_ratio
-from ..energy_ratio_polars.energy_ratio_input import EnergyRatioInput
+from . import energy_ratio
+from ..energy_ratio.energy_ratio_input import EnergyRatioInput
 
 
 class bias_estimation():

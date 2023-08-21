@@ -7,9 +7,9 @@ import seaborn as sns
 from typing import Optional, Dict, List, Any, Tuple, Union
 import matplotlib.axes._axes as axes
 
-from flasc.energy_ratio_polars.energy_ratio_input import EnergyRatioInput
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 
-from flasc.energy_ratio_polars.energy_ratio_utilities import add_ws_bin, add_wd_bin
+from flasc.energy_ratio.energy_ratio_utilities import add_ws_bin, add_wd_bin
 
 
 class EnergyRatioOutput:
