@@ -145,6 +145,8 @@ def _compute_energy_ratio_bootstrap(er_in,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          N = 1,
+                         parallell_interface="serial",  # Options are  'serial 'multiprocessing', 'mpi4py'
+                         max_workers=None,
                          ):
     
     """
@@ -167,6 +169,8 @@ def _compute_energy_ratio_bootstrap(er_in,
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         N (int): The number of bootstrap samples to use.
+        parallell_interface (str): The interface to use for parallelization. Options are 'serial', 'multiprocessing', 'mpi4py'
+        max_workers (int): The maximum number of workers to use for parallelization. If None, use all available workers.
 
     Returns:
         pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
@@ -174,22 +178,66 @@ def _compute_energy_ratio_bootstrap(er_in,
     """
 
     # Otherwise run the function N times and concatenate the results to compute statistics
-    df_concat = pl.concat([_compute_energy_ratio_single(er_in.resample_energy_table(i),
-                         df_names,
-                         ref_cols,
-                         test_cols,
-                         wd_cols,
-                         ws_cols,
-                         wd_step,
-                         wd_min,
-                         wd_max,
-                         ws_step,
-                         ws_min,
-                         ws_max,
-                         bin_cols_in,
-                         wd_bin_overlap_radius,
-                         ) for i in range(N)])
-    
+    if parallell_interface == "serial":
+        df_concat = pl.concat([_compute_energy_ratio_single(er_in.resample_energy_table(i),
+                            df_names,
+                            ref_cols,
+                            test_cols,
+                            wd_cols,
+                            ws_cols,
+                            wd_step,
+                            wd_min,
+                            wd_max,
+                            ws_step,
+                            ws_min,
+                            ws_max,
+                            bin_cols_in,
+                            wd_bin_overlap_radius,
+                            ) for i in range(N)])
+    else:
+        # The parallel computing interface to use
+        if parallell_interface == "mpi4py":
+            import mpi4py.futures as mp
+            _PoolExecutor = mp.MPIPoolExecutor
+        elif parallell_interface == "multiprocessing":
+            import multiprocessing as mp
+            _PoolExecutor = mp.Pool
+            if max_workers is None:
+                max_workers = mp.cpu_count()
+        # elif interface == "concurrent":
+        #     from concurrent.futures import ProcessPoolExecutor
+        #     self._PoolExecutor = ProcessPoolExecutor
+        else:
+            raise UserWarning(
+                f"Interface '{parallell_interface}' not recognized. "
+                "Please use 'serial', 'multiprocessing' or 'mpi4py'."
+            )
+        
+        # Assemble the agurments
+        multiargs = [(er_in.resample_energy_table(i),
+                            df_names,
+                            ref_cols,
+                            test_cols,
+                            wd_cols,
+                            ws_cols,
+                            wd_step,
+                            wd_min,
+                            wd_max,
+                            ws_step,
+                            ws_min,
+                            ws_max,
+                            bin_cols_in,
+                            wd_bin_overlap_radius,
+                            ) for i in range(N)]
+        
+        with _PoolExecutor(max_workers) as p:
+            # This code is not currently necessary, but leaving in case implement
+            # concurrent later, based on parallel_computing_interface.py
+            if (parallell_interface == "mpi4py") or (parallell_interface == "multiprocessing"):
+                    out = p.starmap(_compute_energy_ratio_single, multiargs)
+
+                    df_concat = pl.concat(out)
+
     if 'uplift' in df_concat.columns:
         df_names_with_uplift = df_names + ['uplift']
     else:
@@ -224,6 +272,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          N = 1,
+                         parallell_interface="serial",  # Options are  'serial 'multiprocessing', 'mpi4py'
+                         max_workers=None,
                          )-> EnergyRatioOutput:
     
     """
@@ -249,6 +299,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         N (int): The number of bootstrap samples to use.
+        parallell_interface (str): The interface to use for parallelization. Options are 'serial', 'multiprocessing', 'mpi4py'
+        max_workers (int): The maximum number of workers to use for parallelization. If None, use all available workers.
 
     Returns:
         EnergyRatioOutput: An EnergyRatioOutput object containing the energy ratio between the two sets of turbines.
@@ -362,7 +414,9 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                             ws_max,
                             bin_cols_in,
                             wd_bin_overlap_radius,
-                            N)
+                            N,
+                            parallell_interface,
+                            max_workers)
 
     # Return the results as an EnergyRatioOutput object
     return EnergyRatioOutput(df_res, 
