@@ -295,7 +295,7 @@ def add_reflected_rows(df_: pl.DataFrame,
     abs_diff_matrix = np.abs(diff_matrix)
     idx = np.argmin(abs_diff_matrix, axis=1)
     signed_mins = diff_matrix[np.arange(len(diff_matrix)), idx]
-    df_add = (df_add.with_columns(pl.Series(name='distances',values=signed_mins))
+    df_add = (df_add.with_columns(pl.Series(name='distances',values=signed_mins,dtype=pl.Float32))
         .filter(pl.col('distances').abs() < overlap_distance)
         .with_columns(np.mod((pl.col('wd') - pl.col('distances') * 2),360.0))
         .drop('distances')
