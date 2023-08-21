@@ -19,11 +19,11 @@ from scipy import stats as spst
 
 from floris.utilities import wrap_360
 
-from ..dataframe_operations import dataframe_manipulations as dfm
-from .. import floris_tools as ftools
-from ..utilities import printnow as print
-from . import energy_ratio
-from ..energy_ratio.energy_ratio_input import EnergyRatioInput
+from flasc.dataframe_operations import dataframe_manipulations as dfm
+from flasc import floris_tools as ftools
+from flasc.utilities import printnow as print
+from flasc.energy_ratio import energy_ratio as er
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 
 
 class bias_estimation():
@@ -121,8 +121,8 @@ class bias_estimation():
         print('  Constructing energy table for wd_bias of %.2f deg.'
               % wd_bias)
 
-        eri_test_turbine_list_scada = []
-        eri_test_turbine_list_floris = []
+        er_in_test_turbine_list_scada = []
+        er_in_test_turbine_list_floris = []
 
         # Derive dataframe that covers all test_turbines
         df_cor_all = self.df.copy()
@@ -157,16 +157,16 @@ class bias_estimation():
             df_fi = df_fi_all[valid_entries].copy().reset_index(drop=True)
 
             # Initialize SCADA analysis class and add dataframes
-            eri_test_turbine_list_scada.append(
+            er_in_test_turbine_list_scada.append(
                 EnergyRatioInput([df_cor], ["Measured data"])
             )
-            eri_test_turbine_list_floris.append(
+            er_in_test_turbine_list_floris.append(
                 EnergyRatioInput([df_fi], ["FLORIS prediction"])
             )
 
         # Save to self
-        self.eri_test_turbine_list_scada = eri_test_turbine_list_scada
-        self.eri_test_turbine_list_floris = eri_test_turbine_list_floris
+        self.er_in_test_turbine_list_scada = er_in_test_turbine_list_scada
+        self.er_in_test_turbine_list_floris = er_in_test_turbine_list_floris
 
     def _get_energy_ratios_allbins(
         self,
@@ -209,8 +209,8 @@ class bias_estimation():
                 not plot or save any figures of iterations. Defaults to
                 None.
         """
-        er_test_turbine_list_scada = []
-        er_test_turbine_list_floris = []
+        er_out_test_turbine_list_scada = []
+        er_out_test_turbine_list_floris = []
 
         if time_mask is not None:
             raise NotImplementedError("time_mask not available. Please preprocess "+\
@@ -230,9 +230,9 @@ class bias_estimation():
             print('    Determining energy ratios for test turbine = %03d.'
                   % (ti) + ' WD bias: %.3f deg.' % wd_bias)
 
-            er_test_turbine_list_scada.append(
-                energy_ratio.compute_energy_ratio(
-                    self.eri_test_turbine_list_scada[ii],
+            er_out_test_turbine_list_scada.append(
+                er.compute_energy_ratio(
+                    self.er_in_test_turbine_list_scada[ii],
                     ref_turbines=None,
                     test_turbines=[ti],
                     use_predefined_ref=True,
@@ -249,9 +249,9 @@ class bias_estimation():
                 )
             )
 
-            er_test_turbine_list_floris.append(
-                energy_ratio.compute_energy_ratio(
-                    self.eri_test_turbine_list_floris[ii],
+            er_out_test_turbine_list_floris.append(
+                er.compute_energy_ratio(
+                    self.er_in_test_turbine_list_floris[ii],
                     ref_turbines=None,
                     test_turbines=[ti],
                     use_predefined_ref=True,
@@ -279,8 +279,8 @@ class bias_estimation():
             plt.close('all')
 
         # Save to self
-        self.er_test_turbine_list_scada = er_test_turbine_list_scada
-        self.er_test_turbine_list_floris = er_test_turbine_list_floris
+        self.er_out_test_turbine_list_scada = er_out_test_turbine_list_scada
+        self.er_out_test_turbine_list_floris = er_out_test_turbine_list_floris
 
         return None
 
@@ -398,10 +398,10 @@ class bias_estimation():
             )
 
             # Calculate cost
-            cost_array = np.full(len(self.er_test_turbine_list_scada), np.nan)
+            cost_array = np.full(len(self.er_out_test_turbine_list_scada), np.nan)
             for ii, _ in enumerate(self.test_turbines):
-                y_scada = np.array(self.er_test_turbine_list_scada[ii].df_result["Measured data"])
-                y_floris = np.array(self.er_test_turbine_list_floris[ii].df_result["FLORIS prediction"])
+                y_scada = np.array(self.er_out_test_turbine_list_scada[ii].df_result["Measured data"])
+                y_floris = np.array(self.er_out_test_turbine_list_floris[ii].df_result["FLORIS prediction"])
                 ids = ~np.isnan(y_scada) & ~np.isnan(y_floris)
                 if np.sum(ids) > 5:  # At least 6 valid data entries
                     r, _ = spst.pearsonr(y_scada[ids], y_floris[ids])
@@ -492,7 +492,7 @@ class bias_estimation():
         ax_list = []
         if show_uncorrected_data:
             # Store existing scada result
-            er_test_turbine_list_scada_copy = self.er_test_turbine_list_scada.copy()
+            er_out_test_turbine_list_scada_copy = self.er_out_test_turbine_list_scada.copy()
             # (Re)compute case with wd_bias=0
             self._get_energy_ratios_allbins(
                 wd_bias=0,
@@ -507,43 +507,31 @@ class bias_estimation():
                 plot_iter_path=None
             )
 
-            er_test_turbine_list_scada_0bias = self.er_test_turbine_list_scada.copy()
+            er_out_test_turbine_list_scada_0bias = self.er_out_test_turbine_list_scada.copy()
 
-            self.er_test_turbine_list_scada = er_test_turbine_list_scada_copy
-            
-            # # Copy in the SCADA case only for 0 bias
-            # # Update colors and labels while we're at it
-            # for fsc_c, fsc_0 in zip(fsc_list_copy, self.fsc_list):
-            #     fsc_c.df_list.insert(0, fsc_0.df_list[0])
-            #     fsc_c.df_list[0]["color"] = "silver"
-            #     fsc_c.df_list[1]["color"] = "C0"
-            #     fsc_c.df_list[2]["color"] = "C1"
-            #     fsc_c.df_list[0]["name"] = "Measurement data (uncorrected)"
-            #     fsc_c.df_list[1]["name"] = "Measurement data (bias corrected)"
-            # # Reassign copy as fsc_list
-            #self.fsc_list = fsc_list_copy
+            self.er_out_test_turbine_list_scada = er_out_test_turbine_list_scada_copy
 
         # Plot
         for ii, ti in enumerate(self.test_turbines):
             if show_uncorrected_data:
-                axarr = er_test_turbine_list_scada_0bias[ii].plot_energy_ratios(
+                axarr = er_out_test_turbine_list_scada_0bias[ii].plot_energy_ratios(
                     labels=["Measured data (uncorrected)"],
                     color_dict={"Measured data (uncorrected)":"silver"},
                     show_wind_speed_distrubution=False
                 )
-                axarr = self.er_test_turbine_list_scada[ii].plot_energy_ratios(
+                axarr = self.er_out_test_turbine_list_scada[ii].plot_energy_ratios(
                     labels=["Measured data (bias corrected)"],
                     color_dict={"Measured data (bias corrected)":"C0"},
                     axarr=axarr,
                     show_wind_speed_distrubution=False
                 )
             else:
-                axarr = self.er_test_turbine_list_scada[ii].plot_energy_ratios(
+                axarr = self.er_out_test_turbine_list_scada[ii].plot_energy_ratios(
                     color_dict={"Measured data":"C0"},
                     show_wind_speed_distrubution=False
                 )
             
-            axarr = self.er_test_turbine_list_floris[ii].plot_energy_ratios(
+            axarr = self.er_out_test_turbine_list_floris[ii].plot_energy_ratios(
                 color_dict={"FLORIS prediction":"C1"},
                 axarr=axarr, 
                 show_wind_speed_distrubution=False
