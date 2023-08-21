@@ -2,16 +2,15 @@
 
 """Energy ratio module for FLORIS SCADA Analysis repository."""
 
-__author__ = """Bart Doekemeijer"""
-__email__ = 'bart.doekemeijer@nrel.gov'
+__author__ = """Paul Fleming"""
+__email__ = 'paul.fleming@nrel.gov'
 __version__ = '0.1.0'
 
 from pathlib import Path
 
 from . import (
-    energy_ratio,
-    energy_ratio_gain,
-    energy_ratio_suite,
-    energy_ratio_visualization,
-    energy_ratio_wd_bias_estimation
+    energy_ratio_input,
+    energy_ratio_output,
+    energy_ratio_utilities,
+    energy_ratio
 )
