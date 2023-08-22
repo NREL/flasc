@@ -156,22 +156,21 @@ class TestEnergyRatio(unittest.TestCase):
             wd_bin_overlap_radius = 0.5,
         )
 
-        # Get the underlying polars data frame
+        # Get the underlying pandas data frame
         df_erb = er_out.df_result
 
+        self.assertAlmostEqual(df_erb['baseline'].iloc[1], 0.807713, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].iloc[2], 0.884564, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].iloc[3], 0.921262, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].iloc[4], 0.942649, places=4)
+        self.assertAlmostEqual(df_erb['baseline'].iloc[5], 0.959025, places=4)
 
-        self.assertAlmostEqual(df_erb['baseline'].item(1), 0.807713, places=4)
-        self.assertAlmostEqual(df_erb['baseline'].item(2), 0.884564, places=4)
-        self.assertAlmostEqual(df_erb['baseline'].item(3), 0.921262, places=4)
-        self.assertAlmostEqual(df_erb['baseline'].item(4), 0.942649, places=4)
-        self.assertAlmostEqual(df_erb['baseline'].item(5), 0.959025, places=4)
-
-        self.assertEqual(df_erb['count_baseline'].item(0), 1)
-        self.assertEqual(df_erb['count_baseline'].item(1), 30)
-        self.assertEqual(df_erb['count_baseline'].item(2), 44)
-        self.assertEqual(df_erb['count_baseline'].item(3), 34)
-        self.assertEqual(df_erb['count_baseline'].item(4), 38)
-        self.assertEqual(df_erb['count_baseline'].item(5), 6)
+        self.assertEqual(df_erb['count_baseline'].iloc[0], 1)
+        self.assertEqual(df_erb['count_baseline'].iloc[1], 30)
+        self.assertEqual(df_erb['count_baseline'].iloc[2], 44)
+        self.assertEqual(df_erb['count_baseline'].iloc[3], 34)
+        self.assertEqual(df_erb['count_baseline'].iloc[4], 38)
+        self.assertEqual(df_erb['count_baseline'].iloc[5], 6)
 
 
     def test_row_reflection(self):
