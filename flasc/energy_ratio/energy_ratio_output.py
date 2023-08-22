@@ -255,6 +255,8 @@ class EnergyRatioOutput:
         # Plot the energy ratios
         for df_name, label in zip(df_names_subset, labels):
 
+            if polar_plot: # Convert to radians
+                x = (90.0 - x) * np.pi / 180.0
             ax.plot(x, df[df_name], "-o", markersize=3.0, label=label, color=color_dict[label])
 
             # If data includes upper and lower bounds plot them
@@ -300,8 +302,8 @@ class EnergyRatioOutput:
                 df_sub = df_freq_sum_all_ws[df_freq_sum_all_ws["df_name"] == df_name]
             
             x = np.array(df_sub["wd_bin"], dtype=float)
-            if polar_plot:
-                x = (90.0 - x) * np.pi / 180.0  # Convert to radians
+            if polar_plot: # Convert to radians
+                x = (90.0 - x) * np.pi / 180.0
             axarr[1].bar(x - (i - N / 2) * bar_width, df_sub["count"], width=bar_width, label = label, color=color_dict[label])
 
         ax.legend()
@@ -316,7 +318,7 @@ class EnergyRatioOutput:
 
         ax = axarr[2]        
 
-        sns.scatterplot(data=df_min, x='wd_bin', y='ws_bin', size='count',hue='count',cmap='jet', ax=ax, legend=True, color='k')
+        sns.scatterplot(data=df_min, x='wd_bin', y='ws_bin', size='count',hue='count', ax=ax, legend=True, color='k')
         ax.set_xlabel('Wind Direction (deg)')
         ax.set_ylabel('Wind Speed (m/s)')
         ax.set_title('Minimum Number of Points per Bin')
