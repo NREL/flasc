@@ -23,7 +23,7 @@ from flasc.visualization import (
     shade_region
 )
 
-from floris import tools as wfct
+from flasc.examples.models import load_floris_artificial as load_floris
 
 # Example demonstrates some methods for visualizing the layout of the farm
 # represented within the FLORIS interface
@@ -33,9 +33,7 @@ if __name__ == "__main__":
 
     # Set up FLORIS interface
     print('Initializing the FLORIS object for our demo wind farm')
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, '../demo_dataset/demo_floris_input.yaml')
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
+    fi, _ = load_floris()
 
     # Defines alternative names for each turbine with 1-index
     turbine_names = ['Turbine-%d' % (t + 1) for t in range(len(fi.layout_x))]

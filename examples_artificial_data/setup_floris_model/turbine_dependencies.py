@@ -5,7 +5,7 @@ import numpy as np
 from flasc import floris_tools as fsatools
 from flasc import visualization as fsaviz
 
-from floris import tools as wfct
+from flasc.examples.models import load_floris_artificial as load_floris
 
 # Demonstrate the turbine dependency functions in floris_tools
 # Note a turbine is "dependent" on another if it is affected 
@@ -18,9 +18,7 @@ from floris import tools as wfct
     
 # Set up FLORIS interface
 print('Initializing the FLORIS object for our demo wind farm')
-file_path = os.path.dirname(os.path.abspath(__file__))
-fi_path = os.path.join(file_path, '../demo_dataset/demo_floris_input.yaml')
-fi = wfct.floris_interface.FlorisInterface(fi_path)
+fi, _ = load_floris()
 
 # Plot the layout of the farm for reference
 fsaviz.plot_layout_only(fi)
