@@ -294,7 +294,7 @@ class EnergyRatioOutput:
         df_freq_sum_all_ws = df_freq.groupby(["wd_bin","df_name"]).sum().reset_index()
 
         for i, (df_name, label) in enumerate(zip(df_names_subset, labels)):
-            if df_name == 'uplift': # Special case, use the minimum
+            if _is_uplift: # Special case, use the minimum
                 df_sub = df_min
             else:
                 df_sub = df_freq_sum_all_ws[df_freq_sum_all_ws["df_name"] == df_name]
