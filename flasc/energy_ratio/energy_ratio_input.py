@@ -54,7 +54,7 @@ class EnergyRatioInput:
         """
         
         # Reduce precision if needed and convert to polars
-        df_list = [pl.from_pandas(df_reduce_precision(df)) for df in df_list_in]
+        df_list = [pl.from_pandas(df_reduce_precision(df, allow_convert_to_integer=False)) for df in df_list_in]
 
         # Get minimal set of columns for the dataframes; drop the rest
         keep_columns = df_list[0].columns
