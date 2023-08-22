@@ -104,7 +104,7 @@ class EnergyRatioOutput:
         axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
-        show_wind_speed_distrubution: bool = True,
+        show_wind_speed_distribution: bool = True,
         _is_uplift: bool = False
     ) -> Union[axes.Axes, List[axes.Axes]]:
         """Plot the energy ratios.
@@ -116,14 +116,14 @@ class EnergyRatioOutput:
             axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
             polar_plot (bool, optional): Whether to plot the energy ratios on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
-            show_wind_speed_distrubution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
+            show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
             _is_uplift (bool, optional): Whether being called by plot_uplift(). Defaults to False.
 
         Returns:
             Union[axes.Axes, List[axes.Axes]]: The axes used for plotting.
 
         Raises:
-            ValueError: If show_wind_speed_distrubution is True and polar_plot is True.
+            ValueError: If show_wind_speed_distribution is True and polar_plot is True.
 
         Notes:
             - If df_names_subset is None, all dataframes will be plotted.
@@ -134,8 +134,8 @@ class EnergyRatioOutput:
         """
 
         # Only allow showing the wind speed distribution if polar_plot is False
-        if polar_plot and show_wind_speed_distrubution:
-            raise ValueError('show_wind_speed_distrubution cannot be True if polar_plot is True')
+        if polar_plot and show_wind_speed_distribution:
+            raise ValueError('show_wind_speed_distribution cannot be True if polar_plot is True')
         
         # If df_names_subset is None, plot all the dataframes
         if df_names_subset is None:
@@ -180,7 +180,7 @@ class EnergyRatioOutput:
                 _, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
             else:
                 if show_wind_direction_distribution:
-                    if show_wind_speed_distrubution:
+                    if show_wind_speed_distribution:
                         num_rows = 3 # Add rows to show wind speed and wind direction distribution
                     else:
                         num_rows = 2 # Add rows to show wind direction distribution
@@ -193,16 +193,16 @@ class EnergyRatioOutput:
                     raise ValueError('If polar_plot is True, axarr must have length of 2')
             else:
                 if show_wind_direction_distribution:
-                    if show_wind_speed_distrubution:
+                    if show_wind_speed_distribution:
                         if len(axarr) != 3:
-                            raise ValueError('If show_wind_speed_distrubution and show_wind_direction_distribution are True, axarr must have length of 3')
+                            raise ValueError('If show_wind_speed_distribution and show_wind_direction_distribution are True, axarr must have length of 3')
                     else:
                         if len(axarr) != 2:
                             raise ValueError('If show_wind_direction_distribution is True, and show_wind_direction is False axarr must have length of 2')
                 else:
                     # Confirm axarr is of type Axes
                     if not isinstance(axarr, plt.Axes):
-                        raise ValueError('If show_wind_direction_distribution and show_wind_speed_distrubution are False, axarr be of type matplotlib.pyplot.Axes and not a list of axes')
+                        raise ValueError('If show_wind_direction_distribution and show_wind_speed_distribution are False, axarr be of type matplotlib.pyplot.Axes and not a list of axes')
 
 
 
@@ -310,7 +310,7 @@ class EnergyRatioOutput:
         ax.grid(True)
 
         # Wind Speed Distribtution Plot ========================================
-        if not show_wind_speed_distrubution:
+        if not show_wind_speed_distribution:
             ax.set_xlabel("Wind Direction (deg)")
             return axarr
 
@@ -332,7 +332,7 @@ class EnergyRatioOutput:
         axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
-        show_wind_speed_distrubution: bool = True
+        show_wind_speed_distribution: bool = True
     )-> Union[axes.Axes, List[axes.Axes]]:
         """Plot the uplift in energy ratio
 
@@ -343,10 +343,10 @@ class EnergyRatioOutput:
             axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
             polar_plot (bool, optional): Whether to plot the uplift on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
-            show_wind_speed_distrubution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
+            show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
 
         Raises:
-            ValueError: If show_wind_speed_distrubution is True and polar_plot is True.
+            ValueError: If show_wind_speed_distribution is True and polar_plot is True.
 
         Returns:
             Union[axes.Axes, List[axes.Axes]]: The axes used for plotting.
@@ -357,12 +357,12 @@ class EnergyRatioOutput:
             - If axarr is a list of axes objects, each component of the uplift will be plotted on a separate axes object.
             - If polar_plot is True, the uplift will be plotted on a polar plot.
             - If show_wind_direction_distribution is True, the wind direction distribution will be shown.
-            - If show_wind_speed_distrubution is True, the wind speed distribution will be shown.
+            - If show_wind_speed_distribution is True, the wind speed distribution will be shown.
         """
         
         # Only allow showing the wind speed distribution if polar_plot is False
-        if polar_plot and show_wind_speed_distrubution:
-            raise ValueError('show_wind_speed_distrubution cannot be True if polar_plot is True')
+        if polar_plot and show_wind_speed_distribution:
+            raise ValueError('show_wind_speed_distribution cannot be True if polar_plot is True')
         
         # If df_names_subset is None, plot all the dataframes
         if uplift_names_subset is None:
@@ -411,7 +411,7 @@ class EnergyRatioOutput:
                 _, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
             else:
                 if show_wind_direction_distribution:
-                    if show_wind_speed_distrubution:
+                    if show_wind_speed_distribution:
                         num_rows = 3 # Add rows to show wind speed and wind direction distribution
                     else:
                         num_rows = 2 # Add rows to show wind direction distribution
@@ -426,7 +426,7 @@ class EnergyRatioOutput:
             axarr=axarr,
             polar_plot=polar_plot,
             show_wind_direction_distribution=show_wind_direction_distribution,
-            show_wind_speed_distrubution=show_wind_speed_distrubution,
+            show_wind_speed_distribution=show_wind_speed_distribution,
             _is_uplift=True
         )
             

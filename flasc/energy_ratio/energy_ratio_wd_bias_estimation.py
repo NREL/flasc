@@ -519,24 +519,24 @@ class bias_estimation():
                 axarr = er_out_test_turbine_list_scada_0bias[ii].plot_energy_ratios(
                     labels=["Measured data (uncorrected)"],
                     color_dict={"Measured data (uncorrected)":"silver"},
-                    show_wind_speed_distrubution=False
+                    show_wind_speed_distribution=False
                 )
                 axarr = self.er_out_test_turbine_list_scada[ii].plot_energy_ratios(
                     labels=["Measured data (bias corrected)"],
                     color_dict={"Measured data (bias corrected)":"C0"},
                     axarr=axarr,
-                    show_wind_speed_distrubution=False
+                    show_wind_speed_distribution=False
                 )
             else:
                 axarr = self.er_out_test_turbine_list_scada[ii].plot_energy_ratios(
                     color_dict={"Measured data":"C0"},
-                    show_wind_speed_distrubution=False
+                    show_wind_speed_distribution=False
                 )
             
             axarr = self.er_out_test_turbine_list_floris[ii].plot_energy_ratios(
                 color_dict={"FLORIS prediction":"C1"},
                 axarr=axarr, 
-                show_wind_speed_distrubution=False
+                show_wind_speed_distribution=False
             )
             
             axarr[0].set_title('Turbine {:03d}'.format(ti))
