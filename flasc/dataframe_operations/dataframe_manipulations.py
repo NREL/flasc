@@ -115,7 +115,7 @@ def _set_col_by_n_closest_upstream_turbines(col_out, col_prefix, df, N,
         # Calculate distances and get closest N upstream turbines
         upstr_turbs = [ti for ti in upstr_turbs if ti not in exclude_turbs]
         x0 = x_turbs[turb_no]
-        y0 = x_turbs[turb_no]
+        y0 = y_turbs[turb_no]
         x_upstr = np.array(x_turbs, dtype=float)[upstr_turbs]
         y_upstr = np.array(y_turbs, dtype=float)[upstr_turbs]
         ds = np.sqrt((x_upstr - x0) ** 2.0 + (y_upstr - y0) ** 2.0)

@@ -712,6 +712,9 @@ class ws_pw_curve_filtering:
             pw_curve_df ([pd.DataFrame]): Dataframe containing the wind
                 speed bins and the mean power production value for every
                 turbine.
+            calculate_missing (bool, optional): Calculate the median power
+                curves for the turbines for the turbines of which their
+                power curves were previously not yet calculated.
         """
         if calculate_missing and (self.pw_curve_df.isna().all(axis=0).any()):
             turbine_subset = np.where(
@@ -772,6 +775,7 @@ class ws_pw_curve_filtering:
         ax.legend()
         ax.set_title("Mean of all turbine power curves with UQ")
         return fig, ax
+
 
     def plot_filters_custom_scatter(
             self,
