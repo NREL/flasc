@@ -29,7 +29,9 @@ def _compute_energy_ratio_single(df_,
                          ws_min = 0.0,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
-                         wd_bin_overlap_radius = 0.
+                         wd_bin_overlap_radius = 0.,
+                         uplift_pairs = [],
+                         uplift_names = []
                          ):
 
     """
@@ -51,6 +53,12 @@ def _compute_energy_ratio_single(df_,
         bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
+        uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
+            of the list should be a tuple (or list) of length 2, where the first element will be the 
+            base case in the uplift calculation and the second element will be the test case in the 
+            uplift calculation. If None, no uplifts are computed.
+        uplift_names: (list[str]): Names for the uplift columns, following the order of the 
+            pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
 
     Returns:
         pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
@@ -114,18 +122,13 @@ def _compute_energy_ratio_single(df_,
     )
 
     # In the case of two turbines, compute an uplift column
-    if num_df == 2:
+    for upp, upn in zip(uplift_pairs, uplift_names):
         df_ = df_.with_columns(
-            uplift = 100 * (pl.col(df_names[1]) - pl.col(df_names[0])) / pl.col(df_names[0])
+            (100 * (pl.col(upp[1]) - pl.col(upp[0])) / pl.col(upp[0])).alias(upn)
         )
 
-        # Enforce a column order
-        df_ = df_.select(['wd_bin'] + df_names + ['uplift'] + [f'count_{n}' for n in df_names])
-
-    else:
-        # Enforce a column order
-        df_ = df_.select(['wd_bin'] + df_names +  [f'count_{n}' for n in df_names])
-
+    # Enforce a column order
+    df_ = df_.select(['wd_bin'] + df_names + uplift_names + [f'count_{n}' for n in df_names])
 
     return(df_)
 
@@ -143,6 +146,8 @@ def _compute_energy_ratio_bootstrap(er_in,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
+                         uplift_pairs = [],
+                         uplift_names = [],
                          N = 1,
                          percentiles=[5., 95.]
                          ):
@@ -165,6 +170,12 @@ def _compute_energy_ratio_bootstrap(er_in,
         bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
+        uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
+            of the list should be a tuple (or list) of length 2, where the first element will be the 
+            base case in the uplift calculation and the second element will be the test case in the 
+            uplift calculation. If None, no uplifts are computed.
+        uplift_names: (list[str]): Names for the uplift columns, following the order of the 
+            pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
         N (int): The number of bootstrap samples to use.
 
     Returns:
@@ -188,29 +199,27 @@ def _compute_energy_ratio_bootstrap(er_in,
                         ws_max,
                         bin_cols_in,
                         wd_bin_overlap_radius,
+                        uplift_pairs,
+                        uplift_names
                         ) for i in range(N)])
 
-    if 'uplift' in df_concat.columns:
-        df_names_with_uplift = er_in.df_names + ['uplift']
-    else:
-        df_names_with_uplift = er_in.df_names
+    bound_names = er_in.df_names + uplift_names
 
     return (df_concat
             .groupby(['wd_bin'], maintain_order=True)
-            .agg([pl.first(n) for n in df_names_with_uplift] + 
-                    [pl.quantile(n, percentiles[0]/100).alias(n + "_ub") for n in df_names_with_uplift] +
-                    [pl.quantile(n, percentiles[1]/100).alias(n + "_lb") for n in df_names_with_uplift] + 
+            .agg([pl.first(n) for n in bound_names] + 
+                    [pl.quantile(n, percentiles[0]/100).alias(n + "_ub") for n in bound_names] +
+                    [pl.quantile(n, percentiles[1]/100).alias(n + "_lb") for n in bound_names] + 
                     [pl.first(f'count_{n}') for n in er_in.df_names]
                 )
             .sort('wd_bin')
             )
-    
 
 def compute_energy_ratio(er_in: EnergyRatioInput,
-                         ref_turbines=None,
-                         test_turbines= None,
-                         wd_turbines=None,
-                         ws_turbines=None,
+                         ref_turbines = None,
+                         test_turbines = None,
+                         wd_turbines = None,
+                         ws_turbines = None,
                          use_predefined_ref = False,
                          use_predefined_wd = False,
                          use_predefined_ws = False,
@@ -222,8 +231,10 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
+                         uplift_pairs = None,
+                         uplift_names = None,
                          N = 1,
-                         percentiles=None
+                         percentiles = None
                          )-> EnergyRatioOutput:
     
     """
@@ -247,6 +258,12 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
+        uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
+            of the list should be a tuple (or list) of length 2, where the first element will be the 
+            base case in the uplift calculation and the second element will be the test case in the 
+            uplift calculation. If None, no uplifts are computed.
+        uplift_names: (list[str]): Names for the uplift columns, following the order of the 
+            pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
         N (int): The number of bootstrap samples to use.
         percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
@@ -325,6 +342,21 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
     else:
         wd_cols = ['wd']
 
+    # Confirm uplift pairs provided correctly
+    if uplift_pairs is None:
+        uplift_pairs = []
+    elif isinstance(uplift_pairs[0], str) and len(uplift_pairs) == 2:
+        # Single pair provided, not in list of lists
+        uplift_pairs = [uplift_pairs]
+    else:
+        for up in uplift_pairs:
+            if len(up) != 2:
+                raise ValueError("uplift_pairs should be a list of tuples of length 2.")
+    if uplift_names is not None:
+        if len(uplift_names) != len(uplift_pairs):
+            raise ValueError("Length of uplift_names should match length of uplift_pairs")
+    else:
+        uplift_names = ["uplift_"+up[0]+"_"+up[1] for up in uplift_pairs]
 
     # Convert the numbered arrays to appropriate column names
     test_cols = [f'pow_{i:03d}' for i in test_turbines]
@@ -347,7 +379,10 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                         ws_min,
                         ws_max,
                         bin_cols_in,
-                        wd_bin_overlap_radius)
+                        wd_bin_overlap_radius,
+                        uplift_pairs,
+                        uplift_names
+                    )
     else:
         if percentiles is None:
             percentiles = [5, 95]
@@ -368,8 +403,11 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                             ws_max,
                             bin_cols_in,
                             wd_bin_overlap_radius,
+                            uplift_pairs,
+                            uplift_names,
                             N,
-                            percentiles)
+                            percentiles
+                        )
     
     # Sort df_res by df_names, ws, wd
 
@@ -380,6 +418,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                                 test_cols, 
                                 wd_cols,
                                 ws_cols,
+                                uplift_names,
                                 wd_step,
                                 wd_min,
                                 wd_max,
