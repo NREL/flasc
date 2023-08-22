@@ -23,6 +23,7 @@ class EnergyRatioOutput:
                  test_cols: List[str],
                  wd_cols: List[str],
                  ws_cols: List[str],
+                 uplift_cols: List[str],
                  wd_step: float,
                  wd_min: float,
                  wd_max: float,
@@ -42,6 +43,7 @@ class EnergyRatioOutput:
             test_cols (List[str]): The column names of the test wind turbines.
             wd_cols (List[str]): The column names of the wind directions.
             ws_cols (List[str]): The column names of the wind speeds.
+            uplift_cols (List[str]): The column names of the uplifts.
             wd_step (float): The wind direction bin size.
             wd_min (float): The minimum wind direction value.
             wd_max (float): The maximum wind direction value.
@@ -60,6 +62,7 @@ class EnergyRatioOutput:
         self.test_cols = test_cols
         self.wd_cols = wd_cols
         self.ws_cols = ws_cols
+        self.uplift_cols = uplift_cols
         self.wd_step = wd_step
         self.wd_min = wd_min
         self.wd_max = wd_max
@@ -102,6 +105,7 @@ class EnergyRatioOutput:
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
         show_wind_speed_distrubution: bool = True,
+        _is_uplift: bool = False
     ) -> Union[axes.Axes, List[axes.Axes]]:
         """Plot the energy ratios.
 
@@ -113,6 +117,7 @@ class EnergyRatioOutput:
             polar_plot (bool, optional): Whether to plot the energy ratios on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
             show_wind_speed_distrubution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
+            _is_uplift (bool, optional): Whether being called by plot_uplift(). Defaults to False.
 
         Returns:
             Union[axes.Axes, List[axes.Axes]]: The axes used for plotting.
@@ -166,7 +171,7 @@ class EnergyRatioOutput:
         if not isinstance(color_dict, dict):
             raise ValueError('color_dict must be a dictionary')
 
-        # Make sure the keys of color_dict are in df_names_subset
+        # Make sure the keys of color_dict are in labels
         if not all([label in labels for label in color_dict.keys()]):
             raise ValueError('color_dict keys must be in df_names_subset')
 
@@ -241,8 +246,11 @@ class EnergyRatioOutput:
         else:
             ax = axarr
 
-        # Plot the horizontal line at 1
-        ax.plot(xlims, np.ones_like(xlims), color="black")
+        # Plot the horizontal line at 1 or 0
+        if _is_uplift:
+            ax.plot(xlims, np.zeros_like(xlims), color="black")
+        else:
+            ax.plot(xlims, np.ones_like(xlims), color="black")
 
         # Plot the energy ratios
         for df_name, label in zip(df_names_subset, labels):
@@ -318,14 +326,20 @@ class EnergyRatioOutput:
 
 
     def plot_uplift(self,
+        uplift_names_subset: Optional[List[str]] = None,
+        labels: Optional[List[str]] = None,
+        color_dict: Optional[Dict[str, Any]] = None,
         axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
-        show_wind_speed_distrubution: bool = True,
+        show_wind_speed_distrubution: bool = True
     )-> Union[axes.Axes, List[axes.Axes]]:
         """Plot the uplift in energy ratio
 
         Args:
+            uplift_names_subset (Optional[List[str]], optional): A subset of the uplifts computed to print. Defaults to None.
+            labels (Optional[List[str]], optional): The labels for the uplifts. Defaults to None.
+            color_dict (Optional[Dict[str, Any]], optional): A dictionary mapping labels to colors. Defaults to None.
             axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
             polar_plot (bool, optional): Whether to plot the uplift on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
@@ -345,6 +359,53 @@ class EnergyRatioOutput:
             - If show_wind_direction_distribution is True, the wind direction distribution will be shown.
             - If show_wind_speed_distrubution is True, the wind speed distribution will be shown.
         """
+        
+        # Only allow showing the wind speed distribution if polar_plot is False
+        if polar_plot and show_wind_speed_distrubution:
+            raise ValueError('show_wind_speed_distrubution cannot be True if polar_plot is True')
+        
+        # If df_names_subset is None, plot all the dataframes
+        if uplift_names_subset is None:
+            uplift_names_subset = self.uplift_cols
+
+        # If df_names_subset is not a list, convert it to a list
+        if not isinstance(uplift_names_subset, list):
+            uplift_names_subset = [uplift_names_subset]
+
+        # Total number of energy ratios to plot
+        N = len(uplift_names_subset)
+
+        if N == 0:
+            raise ValueError("No uplifts to plot. Please specify uplifts when calling compute_energy_ratio().")
+
+        # If labels is None, use the dataframe names
+        if labels is None:
+            labels = uplift_names_subset
+
+        # If labels is not a list, convert it to a list
+        if not isinstance(labels, list):
+            labels = [labels]
+
+        # Confirm that the length of labels is the same as the length of df_names_subset
+        if len(labels) != N:
+            raise ValueError('Length of labels must be the same as the length of uplift_names_subset')
+
+        # Generate the default colors using the seaborn color palette
+        default_colors = sns.color_palette('colorblind', N)
+
+        # If color_dict is None, use the default colors
+        if color_dict is None:
+            color_dict = {labels[i]: default_colors[i] for i in range(N)}
+
+        # If color_dict is not a dictionary, raise an error
+        if not isinstance(color_dict, dict):
+            raise ValueError('color_dict must be a dictionary')
+
+        # Make sure the keys of color_dict are in labels
+        if not all([label in labels for label in color_dict.keys()]):
+            raise ValueError('color_dict keys must be in df_names_subset')
+
+
         if axarr is None:
             if polar_plot:
                 _, axarr = plt.subplots(nrows=1, ncols=2, figsize=(10, 5), subplot_kw={'projection': 'polar'})
@@ -359,13 +420,14 @@ class EnergyRatioOutput:
                 _, axarr = plt.subplots(nrows=num_rows, ncols=1, sharex=True, figsize=(11, num_rows * 3))
 
         self.plot_energy_ratios(
-            df_names_subset = ['uplift'],
-            labels = ['uplift'],
-            color_dict = {'uplift':'k'},
-            axarr = axarr,
+            df_names_subset=uplift_names_subset,
+            labels=labels,
+            color_dict=color_dict,
+            axarr=axarr,
             polar_plot=polar_plot,
             show_wind_direction_distribution=show_wind_direction_distribution,
             show_wind_speed_distrubution=show_wind_speed_distrubution,
+            _is_uplift=True
         )
             
 
