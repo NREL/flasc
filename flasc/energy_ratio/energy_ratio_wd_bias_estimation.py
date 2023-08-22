@@ -441,13 +441,38 @@ class bias_estimation():
             fast=False
         )
 
+        # Save input arguments for future use
+        self._input_args = {
+            "time_mask": time_mask,
+            "ws_mask": ws_mask,
+            "wd_mask": wd_mask,
+            "ti_mask": ti_mask,
+            "opt_search_range": opt_search_range,
+            "opt_search_brute_dx": opt_search_brute_dx,
+            "opt_workers": opt_workers,
+            "er_wd_step": er_wd_step,
+            "er_ws_step": er_ws_step,
+            "er_wd_bin_width": er_wd_bin_width,
+            "er_N_btstrp": er_N_btstrp,
+            "plot_iter_path" : plot_iter_path,
+        }
+
         return x_opt, J_opt
 
-    def plot_energy_ratios(self, save_path=None, format='png', dpi=200):
+    def plot_energy_ratios(
+        self,
+        show_uncorrected_data=False,
+        save_path=None,
+        format='png',
+        dpi=200
+    ):
         """Plot the energy ratios for the currently evaluated wind
         direction offset term.
 
         Args:
+            show_uncorrcted_data (bool, optional): Compute and show the 
+                uncorrected energy ratio (with wd_bias=0) on the plot. Defaults
+                to False.
             save_path ([str], optional): Path to save the figure to. If not
                 specified, will not save the figure. Defaults to None.
             format (str, optional): Figure format. Defaults to 'png'.
@@ -455,6 +480,37 @@ class bias_estimation():
         """
         fig_list = []
         ax_list = []
+        if show_uncorrected_data:
+            # Store existing fsc_list 
+            fsc_list_copy = self.fsc_list.copy()
+            # (Re)compute case with wd_bias=0
+            self._get_energy_ratios_allbins(
+                wd_bias=0,
+                time_mask=self._input_args["time_mask"],
+                ws_mask=self._input_args["ws_mask"],
+                wd_mask=self._input_args["wd_mask"],
+                ti_mask=self._input_args["ti_mask"],
+                wd_step=self._input_args["er_wd_step"],
+                ws_step=self._input_args["er_ws_step"],
+                wd_bin_width=self._input_args["er_wd_bin_width"],
+                N_btstrp=self._input_args["er_N_btstrp"],
+                plot_iter_path=None,
+                fast=False
+            )
+            
+            # Copy in the SCADA case only for 0 bias
+            # Update colors and labels while we're at it
+            for fsc_c, fsc_0 in zip(fsc_list_copy, self.fsc_list):
+                fsc_c.df_list.insert(0, fsc_0.df_list[0])
+                fsc_c.df_list[0]["color"] = "silver"
+                fsc_c.df_list[1]["color"] = "C0"
+                fsc_c.df_list[2]["color"] = "C1"
+                fsc_c.df_list[0]["name"] = "Measurement data (uncorrected)"
+                fsc_c.df_list[1]["name"] = "Measurement data (bias corrected)"
+            # Reassign copy as fsc_list
+            self.fsc_list = fsc_list_copy
+
+        # Plot
         for ii, fsc in enumerate(self.fsc_list):
             ti = self.fsc_test_turbine_list[ii]
             ax = fsc.plot_energy_ratios()

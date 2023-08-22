@@ -9,6 +9,7 @@ __version__ = '1.0'
 from pathlib import Path
 
 from . import (
+    examples,
     dataframe_operations,
     energy_ratio,
     model_estimation,
@@ -20,6 +21,7 @@ from . import (
     optimization,
     time_operations,
     utilities,
-    visualization
+    visualization,
+    timing_tests
 )
 

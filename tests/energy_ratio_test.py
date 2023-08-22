@@ -8,15 +8,7 @@ from floris import tools as wfct
 from flasc.energy_ratio import energy_ratio
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
-
-
-def load_floris():
-    # Initialize the FLORIS interface fi
-    print('Initializing the FLORIS object for our demo wind farm')
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../examples_artificial_data/demo_dataset/demo_floris_input.yaml")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
-    return fi
+from flasc.examples.models import load_floris_artificial as load_floris
 
 
 def load_data():
@@ -131,7 +123,7 @@ def load_data():
 class TestEnergyRatio(unittest.TestCase):
     def test_energy_ratio_regression(self):
         # Load data and FLORIS model
-        fi = load_floris()
+        fi, _ = load_floris()
         df = load_data()
         df = dfm.set_wd_by_all_turbines(df)
         df_upstream = ftools.get_upstream_turbs_floris(fi)

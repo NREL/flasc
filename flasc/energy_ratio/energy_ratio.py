@@ -913,8 +913,8 @@ def _get_energy_ratio_single_wd_bin_nominal(
     )
 
     energy_ratio_total_balanced = float(
-        df_per_wd_bin["energy_test_balanced_norm"] /
-        df_per_wd_bin["energy_ref_balanced_norm"]
+            (df_per_wd_bin["energy_test_balanced_norm"] /
+             df_per_wd_bin["energy_ref_balanced_norm"]).iloc[0]
     )
 
     if return_detailed_output:
