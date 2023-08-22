@@ -104,7 +104,7 @@ class EnergyRatioOutput:
         axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
-        show_wind_speed_distribution: bool = True,
+        show_wind_speed_distribution: bool = None,
         _is_uplift: bool = False
     ) -> Union[axes.Axes, List[axes.Axes]]:
         """Plot the energy ratios.
@@ -116,7 +116,7 @@ class EnergyRatioOutput:
             axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
             polar_plot (bool, optional): Whether to plot the energy ratios on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
-            show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
+            show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
             _is_uplift (bool, optional): Whether being called by plot_uplift(). Defaults to False.
 
         Returns:
@@ -132,6 +132,12 @@ class EnergyRatioOutput:
             - If color_dict is None, a default color scheme will be used.
             - If axarr is None, a new figure will be created.
         """
+        # Handle defaults for show_wind_speed_distribution
+        if show_wind_direction_distribution is None:
+            if polar_plot:
+                show_wind_direction_distribution = False
+            else:
+                show_wind_direction_distribution = True
 
         # Only allow showing the wind speed distribution if polar_plot is False
         if polar_plot and show_wind_speed_distribution:
@@ -239,6 +245,8 @@ class EnergyRatioOutput:
             )
             df = df.iloc[np.argsort(df["wd_bin"])].reset_index(drop=True)
             x = np.array(df["wd_bin"], dtype=float)
+            if polar_plot: # Convert to radians
+                x = (90.0 - x) * np.pi / 180.0
 
         # Energy ratio plot ========================================
         if show_wind_direction_distribution:
@@ -255,8 +263,6 @@ class EnergyRatioOutput:
         # Plot the energy ratios
         for df_name, label in zip(df_names_subset, labels):
 
-            if polar_plot: # Convert to radians
-                x = (90.0 - x) * np.pi / 180.0
             ax.plot(x, df[df_name], "-o", markersize=3.0, label=label, color=color_dict[label])
 
             # If data includes upper and lower bounds plot them
@@ -345,7 +351,7 @@ class EnergyRatioOutput:
             axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
             polar_plot (bool, optional): Whether to plot the uplift on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
-            show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True.
+            show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
 
         Raises:
             ValueError: If show_wind_speed_distribution is True and polar_plot is True.
@@ -361,6 +367,12 @@ class EnergyRatioOutput:
             - If show_wind_direction_distribution is True, the wind direction distribution will be shown.
             - If show_wind_speed_distribution is True, the wind speed distribution will be shown.
         """
+        # Handle defaults for show_wind_speed_distribution
+        if show_wind_direction_distribution is None:
+            if polar_plot:
+                show_wind_direction_distribution = False
+            else:
+                show_wind_direction_distribution = True
         
         # Only allow showing the wind speed distribution if polar_plot is False
         if polar_plot and show_wind_speed_distribution:
