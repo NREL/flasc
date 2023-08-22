@@ -356,7 +356,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         if len(uplift_names) != len(uplift_pairs):
             raise ValueError("Length of uplift_names should match length of uplift_pairs")
     else:
-        uplift_names = ["uplift_"+up[0]+"_"+up[1] for up in uplift_pairs]
+        uplift_names = ["uplift_"+up[1]+"/"+up[0] for up in uplift_pairs]
 
     # Convert the numbered arrays to appropriate column names
     test_cols = [f'pow_{i:03d}' for i in test_turbines]
