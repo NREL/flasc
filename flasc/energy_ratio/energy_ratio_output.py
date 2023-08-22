@@ -17,7 +17,7 @@ class EnergyRatioOutput:
     and provide convenient methods for plotting and saving the results.
     """
     def __init__(self,
-                 df_result: pl.DataFrame,
+                 df_result: pd.DataFrame,
                  er_in: EnergyRatioInput,
                  ref_cols: List[str],
                  test_cols: List[str],
@@ -37,7 +37,7 @@ class EnergyRatioOutput:
         """Initialize an EnergyRatioOutput object.
 
         Args:
-            df_result (pl.DataFrame): The energy ratio results.
+            df_result (pd.DataFrame): The energy ratio results.
             eri (EnergyRatioInput): The energy table used in the energy ratio calculation.
             ref_cols (List[str]): The column names of the reference turbines.
             test_cols (List[str]): The column names of the test wind turbines.
@@ -206,8 +206,8 @@ class EnergyRatioOutput:
 
 
 
-        # For plotting, get a pandas dataframe
-        df = self.df_result.to_pandas()
+        # For plotting, create a copy in case
+        df = self.df_result.copy()
 
         # Get x-axis values
         x = np.array(df["wd_bin"], dtype=float)

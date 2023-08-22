@@ -412,7 +412,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
     # Sort df_res by df_names, ws, wd
 
     # Return the results as an EnergyRatioOutput object
-    return EnergyRatioOutput(df_res, 
+    return EnergyRatioOutput(df_res.to_pandas(), 
                                 er_in,
                                 ref_cols, 
                                 test_cols, 
