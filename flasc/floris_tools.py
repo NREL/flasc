@@ -180,7 +180,7 @@ def interpolate_floris_from_df_approx(
     """
 
     # Format dataframe and get number of turbines
-    df = df.reset_index(drop=('time' in df.columns))
+    # df = df.reset_index(drop=('time' in df.columns))
     nturbs = fsut.get_num_turbines(df_approx)
 
     # Check input
@@ -294,7 +294,7 @@ def interpolate_floris_from_df_approx(
                 bounds_error=False,
             )
         else:
-            f.values = grid_dict[varname].to_numpy()
+            f.values = np.array(grid_dict[varname], dtype=float)
 
         df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
 
@@ -302,9 +302,9 @@ def interpolate_floris_from_df_approx(
             # Copy NaNs in the raw data to the FLORIS predictions
             for c in colnames:
                 if c in df.columns:
-                    df_out.loc[df[c].isna(), c] = np.nan
+                    df_out.loc[df[c].isna(), c] = None
                 else:
-                    df_out.loc[:, c] = np.nan
+                    df_out.loc[:, c] = None
 
     return df_out
 

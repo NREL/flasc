@@ -115,7 +115,7 @@ def _set_col_by_n_closest_upstream_turbines(col_out, col_prefix, df, N,
         # Calculate distances and get closest N upstream turbines
         upstr_turbs = [ti for ti in upstr_turbs if ti not in exclude_turbs]
         x0 = x_turbs[turb_no]
-        y0 = x_turbs[turb_no]
+        y0 = y_turbs[turb_no]
         x_upstr = np.array(x_turbs, dtype=float)[upstr_turbs]
         y_upstr = np.array(y_turbs, dtype=float)[upstr_turbs]
         ds = np.sqrt((x_upstr - x0) ** 2.0 + (y_upstr - y0) ** 2.0)
@@ -125,12 +125,14 @@ def _set_col_by_n_closest_upstream_turbines(col_out, col_prefix, df, N,
         if wd_min > wd_max:  # Wrap around
             ids = (df['wd'] > wd_min) | (df['wd'] <= wd_max)
         else:
-            ids = (df['wd'] > wd_min) & (df['wd'] <= wd_max)
+            ids = (df['wd'] >= wd_min) & (df['wd'] < wd_max)
 
-        col_mean = get_column_mean(df.loc[ids, :],
-                                   col_prefix=col_prefix,
-                                   turbine_list=upstr_turbs_n_closest,
-                                   circular_mean=circular_mean)
+        col_mean = get_column_mean(
+            df.loc[ids, :],
+            col_prefix=col_prefix,
+            turbine_list=upstr_turbs_n_closest,
+            circular_mean=circular_mean
+        )
         df.loc[ids, col_out] = col_mean
 
     return df
@@ -152,7 +154,7 @@ def _set_col_by_upstream_turbines(col_out, col_prefix, df,
         if wd_min > wd_max:  # Wrap around
             ids = (df['wd'] > wd_min) | (df['wd'] <= wd_max)
         else:
-            ids = (df['wd'] > wd_min) & (df['wd'] <= wd_max)
+            ids = (df['wd'] >= wd_min) & (df['wd'] < wd_max)
 
         col_mean = get_column_mean(df.loc[ids, :],
                                    col_prefix=col_prefix,
