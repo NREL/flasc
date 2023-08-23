@@ -416,6 +416,83 @@ def calc_floris_approx_table(
     return df_approx
 
 
+def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_cutoff=0.995, verbose=False):
+    """This function applies a Gaussian blending across the wind direction for the predicted
+    turbine power productions from FLORIS. This is a post-processing step and achieves the
+    same result as evaluating FLORIS directly with the UncertaintyInterface module. However,
+    having this as a postprocess step allows for rapid generation of the FLORIS solutions for
+    different values of wd_std without having to re-run FLORIS.
+
+    Args:
+        df_fi_approx (pd.DataFrame): Pandas DataFrame with precalculated FLORIS solutions,
+          typically generated using flasc.floris_tools.calc_floris_approx_table().
+        wd_std (float, optional): Standard deviation of the Gaussian blur that is applied
+          across the wind direction in degrees. Defaults to 3.0.
+        pdf_cutoff (float, optional): Cut-off point of the probability density function of
+          the Gaussian curve. Defaults to 0.995 and thereby includes three standard
+          deviations to the left and to the right of the evaluation.
+        verbose (bool, optional): Print information to the console. Useful for debugging.
+          Defaults to False.
+
+    Returns:
+        df_fi_approx_gauss (pd.DataFrame): Pandas DataFrame with Gaussian-blurred precalculated
+          FLORIS solutions. The DataFrame typically has the columns "wd", "ws", "ti", and
+          "pow_000" until "pow_{nturbs-1}", with nturbs being the number of turbines.
+
+    """
+    # Assume the resolution to be equal to the resolution of the wind direction steps
+    wd_steps = np.unique(np.diff(np.unique(df_fi_approx["wd"])))
+    pmf_res = wd_steps[0]
+
+    # Set-up Gaussian kernel
+    wd_bnd = int(np.ceil(norm.ppf(pdf_cutoff, scale=wd_std) / pmf_res))
+    bound = wd_bnd * pmf_res
+    wd_unc = np.linspace(-1 * bound, bound, 2 * wd_bnd + 1)
+    wd_unc_pmf = norm.pdf(wd_unc, scale=wd_std)
+    wd_unc_pmf /= np.sum(wd_unc_pmf)  # normalize so sum = 1.0
+    
+    if verbose:
+        t0 = timerpc()
+        print(f"wd_unc: {wd_unc}, wd_unc_pmf: {wd_unc_pmf}")
+
+    # Map solutions to the right shape using a NN interpolant
+    F = interpolate.NearestNDInterpolator(
+        x=df_fi_approx[["wd", "ws", "ti"]],
+        y=df_fi_approx[[c for c in df_fi_approx.columns if "pow_" in c]]
+    )
+    
+    # Create new sets to interpolate over for Gaussian kernel
+    wd = df_fi_approx["wd"]
+    wd = wrap_360(np.tile(wd, (len(wd_unc), 1)).T + np.tile(wd_unc, (wd.shape[0], 1)))
+
+    ws = df_fi_approx["ws"]
+    ws = np.tile(ws, (len(wd_unc), 1)).T
+
+    ti = df_fi_approx["ti"]
+    ti = np.tile(ti, (len(wd_unc), 1)).T
+
+    # Interpolate power values
+    turbine_powers = F(wd, ws, ti)
+    weights = np.tile(wd_unc_pmf[None, :, None], (turbine_powers.shape[0], 1, turbine_powers.shape[2]))
+    turbine_powers_gaussian = np.sum(weights * turbine_powers, axis=1)  # Weighted sum
+
+    pow_cols = [c for c in df_fi_approx.columns if c.startswith("pow_")]
+    df_fi_approx_gauss = pd.concat(
+        [
+            df_fi_approx[["wd", "ws", "ti"]],
+            pd.DataFrame(dict(zip(pow_cols, turbine_powers_gaussian.T)))
+        ],
+        axis=1
+    )
+    
+    if verbose:
+        dt = timerpc() - t0
+        print(df_fi_approx_gauss)
+        print(f"Time spent to apply Gaussian smoothing: {dt:.3f} seconds.")
+
+    return df_fi_approx_gauss
+
+
 def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,
                         include_itself, sort_by_distance=False):
     """Determine which turbines are within a certain radius of other
