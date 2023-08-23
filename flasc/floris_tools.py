@@ -15,9 +15,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import interpolate
+from scipy.stats import norm
 import copy
 
 from floris.tools import FlorisInterface
+from floris.utilities import wrap_360
 from flasc import utilities as fsut
 
 
@@ -416,7 +418,7 @@ def calc_floris_approx_table(
     return df_approx
 
 
-def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_cutoff=0.995, verbose=False):
+def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_cutoff=0.995):
     """This function applies a Gaussian blending across the wind direction for the predicted
     turbine power productions from FLORIS. This is a post-processing step and achieves the
     same result as evaluating FLORIS directly with the UncertaintyInterface module. However,
@@ -431,8 +433,6 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
         pdf_cutoff (float, optional): Cut-off point of the probability density function of
           the Gaussian curve. Defaults to 0.995 and thereby includes three standard
           deviations to the left and to the right of the evaluation.
-        verbose (bool, optional): Print information to the console. Useful for debugging.
-          Defaults to False.
 
     Returns:
         df_fi_approx_gauss (pd.DataFrame): Pandas DataFrame with Gaussian-blurred precalculated
@@ -450,10 +450,6 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
     wd_unc = np.linspace(-1 * bound, bound, 2 * wd_bnd + 1)
     wd_unc_pmf = norm.pdf(wd_unc, scale=wd_std)
     wd_unc_pmf /= np.sum(wd_unc_pmf)  # normalize so sum = 1.0
-    
-    if verbose:
-        t0 = timerpc()
-        print(f"wd_unc: {wd_unc}, wd_unc_pmf: {wd_unc_pmf}")
 
     # Map solutions to the right shape using a NN interpolant
     F = interpolate.NearestNDInterpolator(
@@ -485,11 +481,6 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
         axis=1
     )
     
-    if verbose:
-        dt = timerpc() - t0
-        print(df_fi_approx_gauss)
-        print(f"Time spent to apply Gaussian smoothing: {dt:.3f} seconds.")
-
     return df_fi_approx_gauss
 
 
