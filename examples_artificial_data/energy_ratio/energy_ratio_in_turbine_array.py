@@ -18,7 +18,8 @@ import numpy as np
 import pandas as pd
 
 from flasc.dataframe_operations import dataframe_manipulations as dfm
-from flasc.energy_ratio import energy_ratio_suite
+from flasc.energy_ratio import energy_ratio as er
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.visualization import plot_floris_layout
 from flasc.examples.models import load_floris_artificial as load_floris
 
@@ -56,16 +57,13 @@ def _get_angle(fi, turbine_array):
     return wd
 
 
-def _calculate_energy_ratios(df, test_turbines, wd_bins, N=1):
+def _calculate_energy_ratios(df, test_turbines, aligned_wd, N=1):
     # This function calculates the energy ratio, one value, for each turbine
     # in the 'test_turbines' list. The energy ratio one value for each turbine,
     # corresponding to a single wind direction bin and wind speed bin. The
     # wind direction bin covers the wind direction region that causes maximum
     # wake overlap, thus close to the value returned by _get_angle(). Then,
     # N defines the bootstrapping sample size, defaulting to 1.
-
-    # Load an energy ratio suite from FLASC
-    s = energy_ratio_suite.energy_ratio_suite(verbose=False)
 
     # Designate a reference wind turbine, being the most upstream in the array
     # in our case. Thus, the energy ratio of the most upstream turbine will
@@ -80,8 +78,8 @@ def _calculate_energy_ratios(df, test_turbines, wd_bins, N=1):
     # We filter the data to a subset of wind speeds, from 6 to 10 m/s
     df = dfm.filter_df_by_ws(df, [6, 10])
 
-    # Finally, we add the dataframe to the energy ratio suite.
-    s.add_df(df, 'data')
+    # Finally, construct the energy ratio input with the dataframe
+    er_in = EnergyRatioInput([df], ['baseline'])
 
     # Now, we calculate the energy ratio for each turbine for the one wind
     # direction and wind speed bin. We save those values to
@@ -89,18 +87,25 @@ def _calculate_energy_ratios(df, test_turbines, wd_bins, N=1):
     results_energy_ratio = []
     for ti in test_turbines:
         # Get energy ratios
-        er = s.get_energy_ratios(
-            test_turbines=ti,
-            ws_bins=[[6.0, 10.0]],
-            wd_bins=wd_bins,
+        er_out = er.compute_energy_ratio(
+            er_in,
+            test_turbines=[ti],
+            use_predefined_ref=True,
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_step=15.0,
+            wd_bin_overlap_radius=0.0,
+            wd_min=aligned_wd-15.0/2,
+            wd_max=aligned_wd+15.0/2,
+            ws_min=6.0,
+            ws_max=10.0,
             N=N,
-            percentiles=[5.0, 95.0],
-            verbose=False
+            percentiles=[5.0, 95.0]
         )
-        results_energy_ratio.append(er[0]["er_results"].loc[0])
+        results_energy_ratio.append(er_out.df_result)
 
     # Finally, combine all results into a single dataframe
-    results_energy_ratio = pd.concat(results_energy_ratio, axis=1).T
+    results_energy_ratio = pd.concat(results_energy_ratio)
     return results_energy_ratio
 
 
@@ -166,7 +171,7 @@ if __name__ == "__main__":
     results_energy_ratio = _calculate_energy_ratios(
         df=df,
         test_turbines=turbine_array,
-        wd_bins=[[wd - wd_bin_width/2.0, wd + wd_bin_width/2.0]],
+        aligned_wd=wd,
         N=N_bootstrapping,
     )
 

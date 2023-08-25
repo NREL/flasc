@@ -18,7 +18,8 @@ import pandas as pd
 from floris import tools as wfct
 from floris.utilities import wrap_360
 
-from flasc.energy_ratio import energy_ratio_suite
+from flasc.energy_ratio import energy_ratio as er
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.dataframe_operations import \
     dataframe_manipulations as dfm
 from flasc import floris_tools as fsatools
@@ -76,45 +77,46 @@ if __name__ == "__main__":
     df2 = df.copy()
     df2['wd'] = wrap_360(df2['wd'] + 7.5)
 
-    # Initialize the energy ratio suite object and add each dataframe
-    # separately. We will import the original data and the manipulated
+    # Initialize the energy ratio input object and add dataframes
+    # separately. We will add the original data and the manipulated
     # dataset.
-    fsc = energy_ratio_suite.energy_ratio_suite()
-    fsc.add_df(df, 'Original data')
-    fsc.add_df(df2, 'Data with wd bias of 7.5 degrees')
-
-    # We now assign turbine names in the class. This can be useful when
-    # working with SCADA data in which the turbine names are not simple
-    # integer numbers from 0 to num_turbs - 1.
-    fsc.set_turbine_names(['WTG_%03d' % ti for ti in range(len(fi.layout_x))])
-
-    # Print the dataframes to see if everything is imported properly
-    fsc.print_dfs()
-
-    # Now we mask the datasets to a specific wind direction subset, e.g.,
-    # to 20 deg to 90 deg.
-    fsc.set_masks(wd_range=[20., 90.])
-
-    # Calculate the energy ratios for test_turbines = [1] for the masked
-    # datasets with uncertainty quantification using 50 bootstrap samples
-    fsc.get_energy_ratios(
-        test_turbines=[1],
-        wd_step=2.0,
-        ws_step=4.0,  # Usually recommended 1.0, for example purposes 4.0
-        N=50,
-        percentiles=[5., 95.],
-        verbose=False
+    er_in = EnergyRatioInput(
+        [df, df2], 
+        ["Original data", "Data with wd bias of 7.5 degrees"]
     )
-    fsc.plot_energy_ratios(superimpose=True)
+
+    # Calculate the energy ratios for test_turbines = [1] for a subset of 
+    # wind directions with uncertainty quantification using 50 bootstrap 
+    # samples
+    er_out = er.compute_energy_ratio(
+        er_in, 
+        test_turbines=[1],
+        use_predefined_ref=True,
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=2.0,
+        ws_step=4.0,
+        wd_min=20.,
+        wd_max=90.,
+        N=50,
+        percentiles=[5., 95.]
+    )
+    er_out.plot_energy_ratios()
 
     # Look at another test turbine with the same masked datasets
-    fsc.get_energy_ratios(
+    er_out = er.compute_energy_ratio(
+        er_in, 
         test_turbines=[3],
+        use_predefined_ref=True,
+        use_predefined_wd=True,
+        use_predefined_ws=True,
         wd_step=2.0,
-        ws_step=4.0,  # Usually recommended 1.0, for example purposes 4.0
+        ws_step=4.0,
+        wd_min=20.,
+        wd_max=90.,
         N=50,
-        percentiles=[5., 95.],
-        verbose=False)
-    fsc.plot_energy_ratios(superimpose=True)
-    fsc.plot_energy_ratios(superimpose=True, polar_plot=True)  # Also show in a polar plot
+        percentiles=[5., 95.]
+    )
+    er_out.plot_energy_ratios()
+    er_out.plot_energy_ratios(polar_plot=True)  # Also show in a polar plot
     plt.show()

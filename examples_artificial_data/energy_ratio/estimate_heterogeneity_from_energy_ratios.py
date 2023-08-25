@@ -7,7 +7,8 @@ from floris.utilities import wrap_360
 
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
-from flasc.energy_ratio import energy_ratio_suite
+from flasc.energy_ratio import energy_ratio as er
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.visualization import plot_floris_layout
 from flasc.examples.models import load_floris_artificial as load_floris
 
@@ -27,19 +28,26 @@ def load_data():
     return df
 
 
-def get_energy_ratio(df, ti, wd_bins):
+def get_energy_ratio(df, ti, aligned_wd):
     # Calculate and plot energy ratios
-    s = energy_ratio_suite.energy_ratio_suite(verbose=False)
-    s.add_df(df, 'Raw data (wind direction calibrated)')
-    return s.get_energy_ratios(
-        test_turbines=ti,
-        ws_bins=[[6.0, 10.0]],
-        wd_bins=wd_bins,
-        N=1,
-        percentiles=[5., 95.],
-        verbose=False,
-        balance_bins_between_dfs=False,
-    )
+    #s = energy_ratio_suite.energy_ratio_suite(verbose=False)
+    er_in = EnergyRatioInput([df], ['Raw data (wind direction calibrated)'])
+    #s.add_df(df, 'Raw data (wind direction calibrated)')
+    return er.compute_energy_ratio(
+            er_in,
+            test_turbines=[ti],
+            use_predefined_ref=True,
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_step=15.0,
+            wd_bin_overlap_radius=0.0,
+            wd_min=aligned_wd-15.0/2,
+            wd_max=aligned_wd+15.0/2,
+            ws_min=6.0,
+            ws_max=10.0,
+            N=10,
+            percentiles=[5.0, 95.0]
+        )
 
 
 def _process_single_wd(wd, wd_bin_width, turb_wd_measurement, df_upstream, df):
@@ -84,13 +92,13 @@ def _process_single_wd(wd, wd_bin_width, turb_wd_measurement, df_upstream, df):
     results_scada = []
     for ti in turbine_array:
         # Get energy ratios
-        er = get_energy_ratio(df, ti, wd_bins)
-        results_scada.append(er[0]["er_results"].loc[0])
+        er_out = get_energy_ratio(df, ti, wd)
+        results_scada.append(er_out.df_result)
 
-    results_scada = pd.concat(results_scada, axis=1).T
-    energy_ratios = np.array(results_scada["baseline"], dtype=float)
-    energy_ratios_lb = np.array(results_scada["baseline_lb"], dtype=float)
-    energy_ratios_ub = np.array(results_scada["baseline_ub"], dtype=float)
+    results_scada = pd.concat(results_scada)
+    energy_ratios = np.array(results_scada["Raw data (wind direction calibrated)"], dtype=float)
+    energy_ratios_lb = np.array(results_scada["Raw data (wind direction calibrated)_lb"], dtype=float)
+    energy_ratios_ub = np.array(results_scada["Raw data (wind direction calibrated)_ub"], dtype=float)
 
     return pd.DataFrame({
             "wd": [wd],

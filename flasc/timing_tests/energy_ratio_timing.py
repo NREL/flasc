@@ -24,10 +24,10 @@ import time
 import numpy as np
 import pandas as pd
 
-from flasc.energy_ratio import energy_ratio_suite
+from flasc.energy_ratio import energy_ratio as erp
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 
 N_ITERATIONS = 5
-
 
 def load_data_and_prep_data():
     # Load dataframe with artificial SCADA data
@@ -62,41 +62,48 @@ def time_energy_ratio_with_bootstrapping():
     # Load the data
     df = load_data_and_prep_data()
 
-    # Load an energy ratio suite from FLASC
-    s = energy_ratio_suite.energy_ratio_suite(verbose=False)
-
-    # Add dataframe to energy suite
-    s.add_df(df, 'data')
+    # Build the polars energy table object
+    # Speciy num_blocks = num_rows to implement normal boostrapping
+    er_in = EnergyRatioInput([df],['baseline'],num_blocks=df.shape[0])
 
     # For forward consistency, define the bins by the edges
     ws_edges = np.arange(5,25,1.)
     wd_edges = np.arange(0,360,2.)
 
-    # Create bins
-    ws_bins = [(ws_edges[i], ws_edges[i+1]) for i in range(len(ws_edges)-1)]
-    wd_bins = [(wd_edges[i], wd_edges[i+1]) for i in range(len(wd_edges)-1)]
+    # Get what new polars needs from this 
+    ws_max = np.max(ws_edges)
+    ws_min = np.min(ws_edges)
+    ws_step = ws_edges[1] - ws_edges[0]
+    wd_max = np.max(wd_edges)
+    wd_min = np.min(wd_edges)
+    wd_step = wd_edges[1] - wd_edges[0]
 
-    # Run this calculation N_ITERATIONS times and take the average time
-    
+    # # Run this calculation N_ITERATIONS times and take the average time
     time_results = np.zeros(N_ITERATIONS)
     for i in range(N_ITERATIONS):
         start_time = time.time()
-        er = s.get_energy_ratios(
-            test_turbines=1,
-            ws_bins=ws_bins,
-            wd_bins=wd_bins,
-            N=N,
-            percentiles=[5.0, 95.0],
-            verbose=False
-        )
+
+        er_out = erp.compute_energy_ratio(
+            er_in,
+            ['baseline'],
+            test_turbines=[1],
+            use_predefined_ref=True,
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            ws_max=ws_max,
+            ws_min=ws_min,
+            ws_step=ws_step,
+            wd_max=wd_max,
+            wd_min=wd_min,
+            wd_step=wd_step,
+            N=N
+            )
 
         end_time = time.time()
         time_results[i] = end_time - start_time
 
     # Return the average time
     return np.mean(time_results)
-
-
 
 
 
