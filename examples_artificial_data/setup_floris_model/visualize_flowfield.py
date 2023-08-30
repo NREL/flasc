@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from flasc.visualization import plot_floris_layout, plot_layout_only
 from floris.tools.visualization import visualize_cut_plane
 
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 if __name__ == "__main__":

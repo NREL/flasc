@@ -9,7 +9,7 @@ from floris.tools import FlorisInterface
 from flasc.dataframe_operations import dataframe_filtering as dff
 from flasc import floris_tools as ftools
 from flasc.turbine_analysis.ws_pow_filtering import ws_pw_curve_filtering
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_data():

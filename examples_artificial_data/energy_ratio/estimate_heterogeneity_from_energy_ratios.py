@@ -10,7 +10,7 @@ from flasc import floris_tools as ftools
 from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.visualization import plot_floris_layout
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_data():

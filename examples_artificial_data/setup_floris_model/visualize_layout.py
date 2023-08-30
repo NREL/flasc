@@ -22,7 +22,7 @@ from flasc.visualization import (
     shade_region
 )
 
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 # Example demonstrates some methods for visualizing the layout of the farm

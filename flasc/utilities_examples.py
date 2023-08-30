@@ -25,7 +25,10 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
     """
 
     # Use the local FLORIS GCH/CC model for the wake model settings
-    root_path = Path(__file__).resolve().parents[2] / "examples_smarteole" / "floris_input_smarteole"
+    root_path = (
+        Path(__file__).resolve().parents[1]
+        / "examples_smarteole" / "floris_input_smarteole"
+    )
     fn = root_path / "{:s}.yaml".format(wake_model)
 
     # Initialize FLORIS model and format appropriately
@@ -65,7 +68,10 @@ def load_floris_artificial(wake_model="cc", wd_std=0.0, pP=None):
     """
 
     # Use the local FLORIS GCH/CC model for the wake model settings
-    root_path = Path(__file__).resolve().parents[2] / "examples_artificial_data" / "floris_input_smarteole"
+    root_path = (
+        Path(__file__).resolve().parents[1]
+        / "examples_artificial_data" / "floris_input_artificial"
+    )
     fn = root_path / "{:s}.yaml".format(wake_model)
 
     # Now assign the turbine locations and information

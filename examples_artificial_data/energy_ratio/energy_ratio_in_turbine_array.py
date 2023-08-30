@@ -21,7 +21,7 @@ from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.visualization import plot_floris_layout
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 from floris.tools.visualization import visualize_cut_plane
 from floris.utilities import wrap_360

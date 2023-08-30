@@ -9,7 +9,7 @@ from flasc.dataframe_operations import (
     dataframe_manipulations as dfm,
 )
 
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 from flasc import floris_tools as fsatools
 
 

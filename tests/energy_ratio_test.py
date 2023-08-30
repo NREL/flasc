@@ -9,7 +9,7 @@ import unittest
 from floris import tools as wfct
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 from flasc.energy_ratio import energy_ratio as erp
 from flasc.energy_ratio.energy_ratio_utilities import add_reflected_rows
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
