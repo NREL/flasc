@@ -2,11 +2,11 @@
 Credits
 =======
 
-Development Lead
+Development Leads
 ----------------
 
-* Bart Doekemeijer <Bart.Doekemeijer@nrel.gov>
-
+* Bart Doekemeijer
+* Paul Fleming
 
 
 Contributors
@@ -14,4 +14,5 @@ Contributors
 
 * Paul Fleming <paul.fleming@nrel.gov>
 * Eric Simley <eric.simley@nrel.gov>
-* Christopher Bay <Christopher.Bay@nrel.gov>
+* Christopher Bay <christopher.bay@nrel.gov>
+* Misha Sinner <michael.sinner@nrel.gov>
