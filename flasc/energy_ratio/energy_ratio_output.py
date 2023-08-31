@@ -1,3 +1,4 @@
+from types import NoneType
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -104,7 +105,7 @@ class EnergyRatioOutput:
         axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
-        show_wind_speed_distribution: bool = True,
+        show_wind_speed_distribution: bool | None = None,
         _is_uplift: bool = False
     ) -> Union[axes.Axes, List[axes.Axes]]:
         """Plot the energy ratios.
