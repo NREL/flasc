@@ -12,7 +12,7 @@
 # See https://floris.readthedocs.io for documentation
 
 import os
-import copy
+# import copy
 import yaml
 
 import numpy as np
@@ -21,12 +21,14 @@ import numpy.typing as npt
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
+from sklearn.metrics import mean_squared_error
 
 from floris.tools import FlorisInterface
 
-from sklearn.metrics import mean_squared_error
+from flasc.model_tuning.error_result import ErrorResult
 
-from flasc.energy_ratio.energy_ratio_suite import energy_ratio_suite
+from flasc.energy_ratio import energy_ratio as er
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 
 class FlorisTuner():
     """
