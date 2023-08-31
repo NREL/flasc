@@ -10,14 +10,15 @@ from flasc import floris_tools as ftools
 from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.visualization import plot_floris_layout
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_data():
     # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(
-        root_dir, '..', 'raw_data_processing', 'postprocessed', 'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
+        root_dir, '..', '01_raw_data_processing', 'postprocessed',
+        'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
     )
     if not os.path.exists(ftr_path):
         raise FileNotFoundError(

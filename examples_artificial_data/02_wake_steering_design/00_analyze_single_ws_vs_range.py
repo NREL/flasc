@@ -19,7 +19,7 @@ from flasc.wake_steering.yaw_optimizer_visualization import \
     plot_uplifts_by_atmospheric_conditions, plot_offsets_wswd_heatmap, plot_offsets_wd
 from flasc.visualization import plot_floris_layout, plot_layout_with_waking_directions
 
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
 
 

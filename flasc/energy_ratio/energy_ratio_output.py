@@ -1,3 +1,4 @@
+from __future__ import annotations
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -83,7 +84,7 @@ class EnergyRatioOutput:
         df_ = self.er_in.get_df()
 
         # Filter df_ that all the columns are not null
-        df_ = df_.filter(pl.all(pl.col(self.ref_cols + self.test_cols + self.ws_cols + self.wd_cols).is_not_null()))
+        df_ = df_.filter(pl.all_horizontal(pl.col(self.ref_cols + self.test_cols + self.ws_cols + self.wd_cols).is_not_null()))
 
         # Assign the wd/ws bins
         df_ = add_ws_bin(df_, self.ws_cols, self.ws_step, self.ws_min, self.ws_max)
@@ -104,7 +105,7 @@ class EnergyRatioOutput:
         axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
-        show_wind_speed_distribution: bool = True,
+        show_wind_speed_distribution: bool | None = None,
         _is_uplift: bool = False
     ) -> Union[axes.Axes, List[axes.Axes]]:
         """Plot the energy ratios.

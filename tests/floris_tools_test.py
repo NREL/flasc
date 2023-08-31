@@ -10,7 +10,7 @@ from flasc.floris_tools import (
     add_gaussian_blending_to_floris_approx_table,
     get_dependent_turbines_by_wd
 )
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 class TestFlorisTools(unittest.TestCase):

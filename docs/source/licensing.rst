@@ -3,8 +3,8 @@ Licensing
 -----------------
 The FLASC repository has been licensed under the Apache License.
 For more information, contact the NREL FLASC team at
-`bart.doekemeijer@nrel.gov <mailto:bart.doekemeijer@nrel.gov>`_, or
-`paul.fleming@nrel.gov <mailto:paul.fleming@nrel.gov>`_.
+`paul.fleming@nrel.gov <mailto:paul.fleming@nrel.gov>`_ or
+`michael.sinner@nrel.gov <mailto:michael.sinner@nrel.gov>`_.
 
 .. code-block:: bash
 

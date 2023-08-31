@@ -68,7 +68,8 @@ def _compute_energy_ratio_single(df_,
     num_df = len(df_names)
 
     # Filter df_ that all the columns are not null
-    df_ = df_.filter(pl.all(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
+    print(ref_cols + test_cols + ws_cols + wd_cols)
+    df_ = df_.filter(pl.all_horizontal(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
 
     # If wd_bin_overlap_radius is not zero, add reflected rows
     if wd_bin_overlap_radius > 0.:
@@ -96,7 +97,7 @@ def _compute_energy_ratio_single(df_,
     
     
     df_ = (df_
-        .filter(pl.all(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
+        .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
         .groupby(bin_cols_with_df_name, maintain_order=True)
         .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()]) 
         .with_columns(
@@ -471,7 +472,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
 #     """
 
 #     # Filter df_ that all the columns are not null
-#     df_ = df_.filter(pl.all(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
+#     df_ = df_.filter(pl.all_horizontal(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
 
 #     # Assign the wd/ws bins
 #     df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max)
@@ -486,7 +487,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
     
 #     df_ = (df_.with_columns(
 #             power_ratio = pl.col('pow_test') / pl.col('pow_ref'))
-#         .filter(pl.all(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
+#         .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
 #         .groupby(bin_cols_with_df_name, maintain_order=True)
 #         .agg([pl.mean("pow_ref"), pl.mean("power_ratio"),pl.count()]) 
 #         .with_columns(
