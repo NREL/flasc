@@ -13,3 +13,4 @@ sqlalchemy
 streamlit
 tkcalendar
 seaborn
+polars

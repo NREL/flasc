@@ -702,6 +702,9 @@ def shade_region(points, show_points=False, plotting_dict_region={},
     ax.grid(True)
     ax.set_xlabel("x coordinate (m)")
     ax.set_ylabel("y coordinate (m)")
+    if plotting_dict_region["label"] is not None or \
+        plotting_dict_points["label"] is not None:
+        ax.legend()
 
     return ax
 

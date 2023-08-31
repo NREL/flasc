@@ -13,11 +13,13 @@
 
 import os
 import matplotlib.pyplot as plt
+import numpy as np
 
 from flasc.visualization import (
     plot_floris_layout,
     plot_layout_only,
-    plot_layout_with_waking_directions
+    plot_layout_with_waking_directions,
+    shade_region
 )
 
 from flasc.examples.models import load_floris_artificial as load_floris
@@ -64,6 +66,17 @@ if __name__ == "__main__":
         layout_plotting_dict = {'turbine_names':turbine_names, 
                                 'turbine_indices':range(2,len(fi.layout_x))},
         wake_plotting_dict={'color':'r'}
+    )
+
+    # Demonstrate shading of an arbitrary region
+    points_for_demo = np.array([[600, 0], [1400, 0], [1200, 1000]])
+    ax = plot_layout_only(fi)
+    shade_region(
+        points_for_demo, 
+        show_points=True,
+        plotting_dict_region={"color":"blue", "label":"Example region"},
+        plotting_dict_points={"color":"blue", "marker":"+", "s":50},
+        ax=ax
     )
 
     plt.show()

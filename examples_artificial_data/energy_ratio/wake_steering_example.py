@@ -19,7 +19,8 @@ import seaborn as sns
 from floris import tools as wfct
 from floris.utilities import wrap_360
 
-from flasc.energy_ratio import energy_ratio_suite
+from flasc.energy_ratio import energy_ratio as er
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 # from flasc import floris_tools as fsatools
 from flasc.visualization import plot_layout_with_waking_directions, plot_binned_mean_and_ci
 from flasc.examples.models import load_floris_artificial as load_floris
@@ -132,108 +133,54 @@ if __name__ == "__main__":
 
     # Initialize the energy ratio suite object and add each dataframe
     # separately. 
-    fsc = energy_ratio_suite.energy_ratio_suite()
-    fsc.add_df(df_baseline, 'Baseline', color_palette[0])
-    fsc.add_df(df_wakesteering, 'WakeSteering', color_palette[1])
-    fsc.add_df(df_baseline_noisy, 'Baseline (Noisy)', color_palette[2])
-    fsc.add_df(df_wakesteering_noisy, 'WakeSteering (Noisy)', color_palette[3])
 
-    # Print out the energy ratio
-    fsc.print_dfs()
+    er_in = EnergyRatioInput(
+        [df_baseline, df_wakesteering, df_baseline_noisy, df_wakesteering_noisy], 
+        ["Baseline", "WakeSteering", "Baseline (Noisy)", "WakeSteering (Noisy)"]
+    )
 
+    # fsc.add_df(df_baseline, 'Baseline', color_palette[0])
+    # fsc.add_df(df_wakesteering, 'WakeSteering', color_palette[1])
+    # fsc.add_df(df_baseline_noisy, 'Baseline (Noisy)', color_palette[2])
+    # fsc.add_df(df_wakesteering_noisy, 'WakeSteering (Noisy)', color_palette[3])
 
     # Calculate and plot the energy ratio for the downstream turbine [2]
     # With respect to reference turbine [0]
     # datasets with uncertainty quantification using 50 bootstrap samples
-    fsc.get_energy_ratios(
+    er_out = er.compute_energy_ratio(
+        er_in,
         test_turbines=[2],
+        use_predefined_ref=True,
+        use_predefined_wd=True,
+        use_predefined_ws=True,
         wd_step=2.0,
         ws_step=1.0,
         N=10,
         percentiles=[5., 95.],
-        verbose=False
+        uplift_pairs=[("Baseline", "WakeSteering"), 
+                      ("Baseline (Noisy)", "WakeSteering (Noisy)")],
+        uplift_names=["Clean", "Noisy"]
     )
-    fsc.plot_energy_ratios(superimpose=True)
-
-    fsc.get_energy_ratios_gain(
-        test_turbines=[2],
-        wd_step=2.0,
-        ws_step=1.0,
-        N=10,
-        percentiles=[5., 95.],
-        verbose=False
-    )
-
-    # Quick and dirty test of my idea for overall gain
-
-    # Calculate actual energy gain
-    total_energy_baseline = df_baseline['pow_002'].sum()
-    total_energy_wakesteering = df_wakesteering['pow_002'].sum()
-    total_energy_baseline_noisy = df_baseline_noisy['pow_002'].sum()
-    total_energy_wakesteering_noisy = df_wakesteering_noisy['pow_002'].sum()
-
-    # print(fsc.df_list_gains[0]['er_results'])
-
-    print('~~~~~ Assess ability to estimate total energy uplift')
-    print('In non-noisy case, energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering, 100 * (total_energy_wakesteering -total_energy_baseline )/total_energy_baseline))
-    print('In noisy case, energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline_noisy, total_energy_wakesteering_noisy, 100 * (total_energy_wakesteering_noisy -total_energy_baseline_noisy )/total_energy_baseline_noisy))
-    
-    # Add a bin wd to match up with energy ratio results
-    df_baseline['wd_bin'] = np.round( (df_baseline['wd'] - 1) / 2.0) * 2.0 + 1
-    df_baseline_noisy['wd_bin'] = np.round( (df_baseline_noisy['wd'] - 1) / 2.0) * 2.0 + 1
-   
-    # Now produce approximate uplift per bin
-    df_merge = (df_baseline
-        .groupby('wd_bin')  #Group original results by wind direction
-        .sum()  # Sum within bin
-        .reset_index()
-        .merge(fsc.df_list_gains[0]['er_results'], on='wd_bin') # Combine energy ratio gains
-        .assign(
-            pred = lambda df_: df_.pow_002 * df_.baseline,  # Assign channels combing baseline energy with gain
-            pred_lb = lambda df_: df_.pow_002 * df_.baseline_lb,
-            pred_ub = lambda df_: df_.pow_002 * df_.baseline_ub
-        )
-        .dropna()
+    # fsc.get_energy_ratios(
+    #     test_turbines=[2],
+    #     wd_step=2.0,
+    #     ws_step=1.0,
+    #     N=10,
+    #     percentiles=[5., 95.],
+    #     verbose=False
+    # )
+    er_out.plot_energy_ratios(
+        color_dict={"Baseline":"blue", 
+                    "WakeSteering":"green", 
+                    "Baseline (Noisy)":"C9",
+                    "WakeSteering (Noisy)":"C8"
+        }
     )
 
-    total_energy_baseline = df_merge['pow_002'].sum()
-    total_energy_wakesteering = df_merge['pred'].sum()
-    total_energy_wakesteering_lb = df_merge['pred_lb'].sum()
-    total_energy_wakesteering_ub = df_merge['pred_ub'].sum()
-
-    print('====== Predictions (NON-NOISY) =====')
-    print('Uplift from gain now for NON-NOISY Case, based on energy ratio gain')
-    print('In non-noisy case (lower bound), energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering_lb, 100 * (total_energy_wakesteering_lb -total_energy_baseline )/total_energy_baseline))
-    print('In non-noisy case (central), energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering, 100 * (total_energy_wakesteering -total_energy_baseline )/total_energy_baseline))
-    print('In non-noisy case (upper bound), energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering_ub, 100 * (total_energy_wakesteering_ub -total_energy_baseline )/total_energy_baseline))
-
-    # Repeat with noisy data
-
-    df_merge = (df_baseline_noisy
-        .groupby('wd_bin')  #Group original results by wind direction
-        .sum()  # Sum within bin
-        .reset_index()
-        .merge(fsc.df_list_gains[1]['er_results'], on='wd_bin') # Combine energy ratio gains
-        .assign(
-            pred = lambda df_: df_.pow_002 * df_.baseline,  # Assign channels combing baseline energy with gain
-            pred_lb = lambda df_: df_.pow_002 * df_.baseline_lb,
-            pred_ub = lambda df_: df_.pow_002 * df_.baseline_ub
-        )
-        .dropna()
+    er_out.plot_uplift(
+        color_dict={"Clean":"green", 
+                    "Noisy":"C8",
+        }
     )
-
-    total_energy_baseline = df_merge['pow_002'].sum()
-    total_energy_wakesteering = df_merge['pred'].sum()
-    total_energy_wakesteering_lb = df_merge['pred_lb'].sum()
-    total_energy_wakesteering_ub = df_merge['pred_ub'].sum()
-
-    print('====== Predictions (NOISY) =====')
-    print('Uplift from gain now for NOISY Case, based on energy ratio gain')
-    print('In NOISY case (lower bound), energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering_lb, 100 * (total_energy_wakesteering_lb -total_energy_baseline )/total_energy_baseline))
-    print('In NOISY case (central), energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering, 100 * (total_energy_wakesteering -total_energy_baseline )/total_energy_baseline))
-    print('In NOISY case (upper bound), energy production in total rises from %.1f to %.1f (%.1f%%)' % (total_energy_baseline, total_energy_wakesteering_ub, 100 * (total_energy_wakesteering_ub -total_energy_baseline )/total_energy_baseline))
-
 
     plt.show()
-
-

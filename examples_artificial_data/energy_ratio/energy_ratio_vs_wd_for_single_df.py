@@ -16,7 +16,8 @@ import os
 import pandas as pd
 
 from floris import tools as wfct
-from flasc.energy_ratio import energy_ratio
+from flasc.energy_ratio import energy_ratio as er
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.dataframe_operations import \
     dataframe_manipulations as dfm
 from flasc import floris_tools as fsatools
@@ -76,52 +77,62 @@ if __name__ == '__main__':
     df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
 
     # # Initialize energy ratio object for the dataframe
-    era = energy_ratio.energy_ratio(df_in=df, verbose=True)
+    er_in = EnergyRatioInput([df], ["baseline"])
 
     # Get energy ratio without uncertainty quantification
-    era.get_energy_ratio(
+    er_out = er.compute_energy_ratio(
+        er_in, 
         test_turbines=[1],
+        use_predefined_ref=True,
+        use_predefined_wd=True,
+        use_predefined_ws=True,
         wd_step=2.0,
-        ws_step=1.0,
-        wd_bin_width=2.0,
+        ws_step=1.0
     )
-    ax = era.plot_energy_ratio()
+    ax = er_out.plot_energy_ratios()
     ax[0].set_title("Energy ratios for turbine 001 without UQ")
     plt.tight_layout()
-
-    ax = era.plot_energy_ratio(polar_plot=True)  # Plot in polar format too
+    
+    # Also show polar plot
+    ax = er_out.plot_energy_ratios(polar_plot=True, show_wind_speed_distribution=False)
     ax[0].set_title("Energy ratios for turbine 001 without UQ")
     plt.tight_layout()
 
     # Get energy ratio with uncertainty quantification
-    # using N=50 bootstrap samples and 5-95 percent conf. bounds.
-    era.get_energy_ratio(
+    # using N=20 bootstrap samples and 5-95 percent conf. bounds.
+    er_out = er.compute_energy_ratio(
+        er_in, 
         test_turbines=[1],
+        use_predefined_ref=True,
+        use_predefined_wd=True,
+        use_predefined_ws=True,
         wd_step=2.0,
         ws_step=1.0,
-        wd_bin_width=2.0,
         N=20,
         percentiles=[5.0, 95.0]
     )
-    ax = era.plot_energy_ratio()
+    ax = er_out.plot_energy_ratios()
     ax[0].set_title("Energy ratios for turbine 001 with UQ "
                     + "(N=20, 90% confidence interval)")
     plt.tight_layout()
 
     # Get energy ratio with uncertainty quantification
-    # using N=10 bootstrap samples and block bootstrapping
-    era.get_energy_ratio(
+    # using N=20 bootstrap samples and without block bootstrapping.
+    er_in_noblocks = EnergyRatioInput([df], ["baseline"], num_blocks=len(df))
+    er_out = er.compute_energy_ratio(
+        er_in_noblocks, 
         test_turbines=[1],
+        use_predefined_ref=True,
+        use_predefined_wd=True,
+        use_predefined_ws=True,
         wd_step=2.0,
         ws_step=1.0,
-        wd_bin_width=2.0,
         N=20,
-        percentiles=[5.0, 95.0],
-        num_blocks=20 # Resample over 20 blocks
+        percentiles=[5.0, 95.0]
     )
-    ax = era.plot_energy_ratio()
+    ax = er_out.plot_energy_ratios()
     ax[0].set_title("Energy ratios for turbine 001 with UQ "
-                    + "(N=20, Block Bootstrapping)")
+                    + "(N=20, Normal (not Block) Bootstrapping)")
     plt.tight_layout()
 
     plt.show()
