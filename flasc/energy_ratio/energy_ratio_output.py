@@ -84,7 +84,7 @@ class EnergyRatioOutput:
         df_ = self.er_in.get_df()
 
         # Filter df_ that all the columns are not null
-        df_ = df_.filter(pl.all(pl.col(self.ref_cols + self.test_cols + self.ws_cols + self.wd_cols).is_not_null()))
+        df_ = df_.filter(pl.all_horizontal(pl.col(self.ref_cols + self.test_cols + self.ws_cols + self.wd_cols).is_not_null()))
 
         # Assign the wd/ws bins
         df_ = add_ws_bin(df_, self.ws_cols, self.ws_step, self.ws_min, self.ws_max)
