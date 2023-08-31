@@ -45,7 +45,6 @@ Questions
 For technical questions regarding FLASC usage, please post your questions to
 `GitHub Discussions <https://github.com/NREL/flasc/discussions>`_ on the
 FLASC repository. Alternatively, email the NREL FLASC team at
-`bart.doekemeijer@nrel.gov <mailto:bart.doekemeijer@nrel.gov>`_, or
 `paul.fleming@nrel.gov <mailto:paul.fleming@nrel.gov>`_.
 
 
