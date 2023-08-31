@@ -27,7 +27,7 @@ REQUIRED = [
     'streamlit',
     'tkcalendar',
     'seaborn',
-    'polars'
+    'polars=0.19.0'
 ]
 
 ROOT = Path(__file__).parent
