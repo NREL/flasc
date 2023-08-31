@@ -22,7 +22,7 @@ from floris.tools.floris_interface import FlorisInterface
 from floris.tools.uncertainty_interface import UncertaintyInterface
 from floris.tools.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
 
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_wind_climate_interpolant():

@@ -23,7 +23,7 @@ from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 # from flasc import floris_tools as fsatools
 from flasc.visualization import plot_layout_with_waking_directions, plot_binned_mean_and_ci
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 if __name__ == "__main__":

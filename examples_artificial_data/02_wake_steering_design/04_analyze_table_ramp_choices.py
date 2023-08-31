@@ -16,46 +16,32 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from floris.tools.uncertainty_interface import UncertaintyInterface
 from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
 
 
-def load_floris_with_uncertainty(std_wd=0.0):
-    fi, _ = load_floris()  # Load nominal floris object
-    if std_wd > 0.001:
-        unc_options = {
-            "std_wd": std_wd,  # Standard deviation for inflow wind direction (deg)
-            "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
-            "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
-        }
-        fi = UncertaintyInterface(fi, unc_options=unc_options)  # Load uncertainty object
-    return fi
-
-
 if __name__ == "__main__":
     # Define std_wd range
-    std_wd_list = [0.0, 3.0, 5.0]
+    ramp_up_list = [[3.0, 4.0], [4.0, 5.0], [4.0, 6.0], [4.0, 8.0]]
+    ramp_down_list = [[9.0, 11.0], [10.0, 11.0], [10.0, 12.0], [12.0, 14.0]]
     result_list = []
 
-    # Compare optimizing over different std_wd and evaluating over different std_wd values
-    for std_wd_opt in std_wd_list:
-        print("Optimizing yaw angles with std_wd={:.2f}".format(std_wd_opt))
-        # Optimize yaw angles
-        df_opt = optimize_yaw_angles(
-            fi=load_floris_with_uncertainty(std_wd=std_wd_opt),
-        )
+    # Optimize yaw angles nominally
+    df_opt = optimize_yaw_angles()
 
-        # Make an interpolant
-        yaw_angle_interpolant = get_yaw_angles_interpolant(df_opt)  # Create yaw angle interpolant
+    for ramp_up_ws in ramp_up_list:
+        for ramp_down_ws in ramp_down_list:
+            # Make an interpolant
+            yaw_angle_interpolant = get_yaw_angles_interpolant(
+                df_opt,
+                ramp_up_ws=ramp_up_ws,
+                ramp_down_ws=ramp_down_ws
+                )
 
-        # Calculate AEP uplift
-        for std_wd_eval in std_wd_list:
-            print("Evalating AEP uplift with std_wd={:.2f}".format(std_wd_eval))
+            # Calculate AEP uplift
             AEP_baseline, AEP_opt, _ = evaluate_optimal_yaw_angles(
-                fi=load_floris_with_uncertainty(std_wd=std_wd_eval),
                 yaw_angle_interpolant=yaw_angle_interpolant,
             )
 
@@ -64,8 +50,8 @@ if __name__ == "__main__":
             result_list.append(
                 pd.DataFrame(
                     {
-                        "std_wd_opt": [std_wd_opt],
-                        "std_wd_eval": [std_wd_eval],
+                        "ramp_up_ws": [str(ramp_up_ws)],
+                        "ramp_down_ws": [str(ramp_down_ws)],
                         "AEP uplift (%)": [uplift]
                     },
                 )
@@ -77,8 +63,8 @@ if __name__ == "__main__":
         print(df_result)
 
     # Plot as a table/colormap
-    df_result = df_result.set_index(["std_wd_opt", "std_wd_eval"]).unstack()
-    df_result.columns = ["std_wd_eval={:.2f}".format(p) for p in std_wd_list]
+    df_result = df_result.set_index(["ramp_up_ws", "ramp_down_ws"]).unstack()
+    df_result.columns = ["ramp_down_ws={}".format(p) for p in ramp_down_list]
     ax = sns.heatmap(df_result, linecolor="black", linewidths=1, annot=True, fmt=".2f")
     ax.set_title("AEP uplift (%)")
     plt.tight_layout()

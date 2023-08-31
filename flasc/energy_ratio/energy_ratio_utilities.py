@@ -81,7 +81,7 @@ def add_ws(df_: pl.DataFrame,
             ws = pl.concat_list(ws_cols).list.mean() # Initially ws_bin is just the mean
         )
         .filter(
-            pl.all(pl.col(ws_cols).is_not_null()) # Select for all bin cols present
+            pl.all_horizontal(pl.col(ws_cols).is_not_null()) # Select for all bin cols present
         ) 
 
         .filter(
@@ -162,7 +162,7 @@ def add_wd(df_:pl.DataFrame,
     df_with_mean_wd =  (
         # df_.select(pl.exclude('wd_bin')) # In case wd_bin already exists
         df_.filter(
-            pl.all(pl.col(wd_cols).is_not_null()) # Select for all bin cols present
+            pl.all_horizontal(pl.col(wd_cols).is_not_null()) # Select for all bin cols present
         ) 
         # Add the cosine columns
         .with_columns(

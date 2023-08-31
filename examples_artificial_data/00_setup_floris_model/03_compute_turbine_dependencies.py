@@ -5,7 +5,7 @@ import numpy as np
 from flasc import floris_tools as fsatools
 from flasc import visualization as fsaviz
 
-from flasc.examples.models import load_floris_artificial as load_floris
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 # Demonstrate the turbine dependency functions in floris_tools
 # Note a turbine is "dependent" on another if it is affected 
