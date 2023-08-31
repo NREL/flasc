@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     # Create alternative versions of each of the above dataframes where the wd/ws are perturbed by noise
     df_baseline_noisy = pd.DataFrame({
-        'wd':wd_array + np.random.randn(len(wd_array))*5,
+        'wd':wd_array + np.random.randn(len(wd_array))*2,
         'ws':ws_array + np.random.randn(len(ws_array)),
         'pow_ref':power_baseline_ref,
         'pow_000':power_baseline_ref, 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     })
 
     df_wakesteering_noisy = pd.DataFrame({
-        'wd':wd_array + np.random.randn(len(wd_array))*5,
+        'wd':wd_array + np.random.randn(len(wd_array))*2,
         'ws':ws_array + np.random.randn(len(ws_array)),
         'pow_ref':power_wakesteering_ref,
         'pow_000':power_wakesteering_ref, 
