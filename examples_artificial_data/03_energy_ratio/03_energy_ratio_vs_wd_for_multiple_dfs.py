@@ -30,7 +30,8 @@ def load_data():
     # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(
-        root_dir, '..', 'raw_data_processing', 'postprocessed', 'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
+        root_dir, '..', '01_raw_data_processing', 'postprocessed',
+        'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
     )
     if not os.path.exists(ftr_path):
         raise FileNotFoundError(
