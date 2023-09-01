@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -70,6 +71,10 @@ def set_fi_param(fi_in: FlorisInterface,
     fi_dict_mod = fi_in.floris.as_dict()
     nested_set(fi_dict_mod, param, value, idx)
     return FlorisInterface(fi_dict_mod)
+
+def resim_floris(fi_in: FlorisInterface,
+                 df_scada: pd.DataFrame,
+                 yaw_angles=None)
 
 
 from flasc.utilities_examples import load_floris_smarteole
