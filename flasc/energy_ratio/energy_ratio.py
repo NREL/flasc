@@ -68,8 +68,16 @@ def _compute_energy_ratio_single(df_,
     num_df = len(df_names)
 
     # Filter df_ that all the columns are not null
-    print(ref_cols + test_cols + ws_cols + wd_cols)
-    df_ = df_.filter(pl.all_horizontal(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
+
+    # Former behavior which requires all
+    # df_ = df_.filter(pl.all_horizontal(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
+
+    # New any behavior
+    df_ = (df_.filter(pl.any_horizontal(pl.col(ref_cols).is_not_null()))
+            .filter(pl.any_horizontal(pl.col(test_cols).is_not_null()))
+            .filter(pl.any_horizontal(pl.col(ws_cols).is_not_null()))
+            .filter(pl.any_horizontal(pl.col(wd_cols).is_not_null()))
+    )
 
     # If wd_bin_overlap_radius is not zero, add reflected rows
     if wd_bin_overlap_radius > 0.:
