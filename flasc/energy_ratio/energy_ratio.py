@@ -39,6 +39,7 @@ def _compute_energy_ratio_single(df_,
                          ws_min = 0.0,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
+                         weight_by = 'min', #min, sum
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
                          uplift_names = [],
@@ -62,6 +63,9 @@ def _compute_energy_ratio_single(df_,
         ws_min (float): The minimum wind speed to use.
         ws_max (float): The maximum wind speed to use.
         bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
+            the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
+            across the dataframes is used to weight the energy ratio.   Defaults to 'min'.
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
@@ -118,13 +122,15 @@ def _compute_energy_ratio_single(df_,
         .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()]) 
         .with_columns(
             [
-                pl.col('count').min().over(bin_cols_without_df_name).alias('count_min')#, # Find the min across df_name
+                # Get the weighting by counts
+                pl.col('count').min().over(bin_cols_without_df_name).alias('count_weight') if weight_by == 'min' else
+                pl.col('count').sum().over(bin_cols_without_df_name).alias('count_weight')
             ]
         )
         .with_columns(
             [
-                pl.col('pow_ref').mul(pl.col('count_min')).alias('ref_energy'), # Compute the reference energy
-                pl.col('pow_test').mul(pl.col('count_min')).alias('test_energy'), # Compute the test energy
+                pl.col('pow_ref').mul(pl.col('count_weight')).alias('ref_energy'), # Compute the reference energy
+                pl.col('pow_test').mul(pl.col('count_weight')).alias('test_energy'), # Compute the test energy
             ]
         )
         .groupby(['wd_bin','df_name'], maintain_order=True)
@@ -162,6 +168,7 @@ def _compute_energy_ratio_bootstrap(er_in,
                          ws_min = 0.0,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
+                         weight_by = 'min', #min, sum
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
                          uplift_names = [],
@@ -186,6 +193,10 @@ def _compute_energy_ratio_bootstrap(er_in,
         ws_min (float): The minimum wind speed to use.
         ws_max (float): The maximum wind speed to use.
         bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
+            the minimum count across the dataframes is used to weight the energy ratio.  'mean' means the mean
+            count across the dataframes is used to weight the energy ratio.  'sum' means the sum of the counts
+            across the dataframes is used to weight the energy ratio.
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
@@ -222,6 +233,7 @@ def _compute_energy_ratio_bootstrap(er_in,
                         ws_min,
                         ws_max,
                         bin_cols_in,
+                        weight_by,
                         wd_bin_overlap_radius,
                         uplift_pairs,
                         uplift_names,
@@ -255,6 +267,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          ws_min = 0.0,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
+                         weight_by = 'min', #min or sum
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = None,
                          uplift_names = None,
@@ -282,6 +295,9 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         ws_min (float): The minimum wind speed to use.
         ws_max (float): The maximum wind speed to use.
         bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        weight_by (str): How to weight the energy ratio, options are 'min', , or 'sum'.  'min' means
+            the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
+            across the dataframes is used to weight the energy ratio.
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
@@ -322,6 +338,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         ws_min,
         ws_max,
         bin_cols_in,
+        weight_by,
         wd_bin_overlap_radius,
         uplift_pairs,
         uplift_names,
@@ -383,6 +400,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                         ws_min,
                         ws_max,
                         bin_cols_in,
+                        weight_by,
                         wd_bin_overlap_radius,
                         uplift_pairs,
                         uplift_names,
@@ -407,6 +425,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                             ws_min,
                             ws_max,
                             bin_cols_in,
+                            weight_by,
                             wd_bin_overlap_radius,
                             uplift_pairs,
                             uplift_names,
@@ -431,6 +450,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                                 ws_min,
                                 ws_max,
                                 bin_cols_in,
+                                weight_by,
                                 wd_bin_overlap_radius,
                                 N)
 
