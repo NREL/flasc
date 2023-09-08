@@ -12,7 +12,16 @@ import polars as pl
 
 from flasc.energy_ratio.energy_ratio_output import EnergyRatioOutput
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.energy_ratio.energy_ratio_utilities import add_ws_bin, add_wd, add_wd_bin, add_power_ref, add_power_test, add_reflected_rows
+from flasc.energy_ratio.energy_ratio_utilities import (
+    add_ws_bin,
+    add_wd,
+    add_wd_bin,
+    add_power_ref,
+    add_power_test,
+    add_reflected_rows,
+    filter_all_nulls,
+    filter_any_nulls
+)
 
 
 # Internal version, returns a polars dataframe
@@ -31,7 +40,8 @@ def _compute_energy_ratio_single(df_,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
-                         uplift_names = []
+                         uplift_names = [],
+                         remove_all_nulls = False
                          ):
 
     """
@@ -58,7 +68,10 @@ def _compute_energy_ratio_single(df_,
             base case in the uplift calculation and the second element will be the test case in the 
             uplift calculation. If None, no uplifts are computed.
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
-            pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
+            pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2",
+        remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
+            available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+            must be available to compute the bin. Defaults to False.
 
     Returns:
         pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
@@ -67,31 +80,23 @@ def _compute_energy_ratio_single(df_,
     # Identify the number of dataframes
     num_df = len(df_names)
 
-    # Filter df_ that all the columns are not null
-
-    # Former behavior which requires all
-    # df_ = df_.filter(pl.all_horizontal(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
-
-    # New any behavior
-    df_ = (df_.filter(pl.any_horizontal(pl.col(ref_cols).is_not_null()))
-            .filter(pl.any_horizontal(pl.col(test_cols).is_not_null()))
-            .filter(pl.any_horizontal(pl.col(ws_cols).is_not_null()))
-            .filter(pl.any_horizontal(pl.col(wd_cols).is_not_null()))
-    )
+    # Filter df_ to remove null values
+    null_filter = filter_all_nulls if remove_all_nulls else filter_any_nulls
+    df_ = null_filter(df_, ref_cols, test_cols, ws_cols, wd_cols)
 
     # If wd_bin_overlap_radius is not zero, add reflected rows
     if wd_bin_overlap_radius > 0.:
 
         # Need to obtain the wd column now rather than during binning
-        df_ = add_wd(df_, wd_cols)
+        df_ = add_wd(df_, wd_cols, remove_all_nulls)
 
         # Add reflected rows
         edges = np.arange(wd_min, wd_max + wd_step, wd_step)
         df_ = add_reflected_rows(df_, edges, wd_bin_overlap_radius)
 
     # Assign the wd/ws bins
-    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max)
-    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max)
+    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max, remove_all_nulls=remove_all_nulls)
+    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max, remove_all_nulls=remove_all_nulls)
 
     
 
@@ -158,7 +163,8 @@ def _compute_energy_ratio_bootstrap(er_in,
                          uplift_pairs = [],
                          uplift_names = [],
                          N = 1,
-                         percentiles=[5., 95.]
+                         percentiles=[5., 95.],
+                         remove_all_nulls=False,
                          ):
     
     """
@@ -186,6 +192,12 @@ def _compute_energy_ratio_bootstrap(er_in,
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
         N (int): The number of bootstrap samples to use.
+        percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
+            If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
+        remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
+                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+                must be available to compute the bin. Defaults to False.
+
 
     Returns:
         pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
@@ -209,7 +221,8 @@ def _compute_energy_ratio_bootstrap(er_in,
                         bin_cols_in,
                         wd_bin_overlap_radius,
                         uplift_pairs,
-                        uplift_names
+                        uplift_names,
+                        remove_all_nulls
                         ) for i in range(N)])
 
     bound_names = er_in.df_names + uplift_names
@@ -243,7 +256,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          uplift_pairs = None,
                          uplift_names = None,
                          N = 1,
-                         percentiles = None
+                         percentiles = None,
+                         remove_all_nulls = False
                          )-> EnergyRatioOutput:
     
     """
@@ -276,6 +290,9 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         N (int): The number of bootstrap samples to use.
         percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
+        remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
+                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+                must be available to compute the bin. Defaults to False.
 
     Returns:
         EnergyRatioOutput: An EnergyRatioOutput object containing the energy ratio between the two sets of turbines.
@@ -390,7 +407,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                         bin_cols_in,
                         wd_bin_overlap_radius,
                         uplift_pairs,
-                        uplift_names
+                        uplift_names,
+                        remove_all_nulls
                     )
     else:
         if percentiles is None:

@@ -10,7 +10,12 @@ import matplotlib.axes._axes as axes
 
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 
-from flasc.energy_ratio.energy_ratio_utilities import add_ws_bin, add_wd_bin
+from flasc.energy_ratio.energy_ratio_utilities import (
+    add_ws_bin,
+    add_wd_bin,
+    filter_all_nulls,
+    filter_any_nulls
+)
 
 
 class EnergyRatioOutput:
@@ -33,7 +38,8 @@ class EnergyRatioOutput:
                  ws_max: float,
                  bin_cols_in: List[str],
                  wd_bin_overlap_radius: float,
-                 N: int
+                 N: int,
+                 remove_all_nulls: bool = False
                 ) -> None:
         """Initialize an EnergyRatioOutput object.
 
@@ -54,6 +60,9 @@ class EnergyRatioOutput:
             bin_cols_in (List[str]): TBD
             wd_bin_overlap_radius (float): The radius of overlap between wind direction bins.
             N (int): The number of bootstrap iterations used in the energy ratio calculation.
+            remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
+                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+                must be available to compute the bin. Defaults to False.
         """
         self.df_result = df_result
         self.df_names = er_in.df_names
@@ -73,6 +82,7 @@ class EnergyRatioOutput:
         self.bin_cols_in = bin_cols_in
         self.wd_bin_overlap_radius = wd_bin_overlap_radius
         self.N = N
+        self.remove_all_nulls = remove_all_nulls
 
     def _compute_df_freq(self):
         """ Compute the of ws/wd as previously computed but not presently
@@ -83,20 +93,15 @@ class EnergyRatioOutput:
         # Temporary copy of energy table
         df_ = self.er_in.get_df()
 
-        # Filter df_ that all the columns are not null
-        # Former behavior which requires all
-        #df_ = df_.filter(pl.all_horizontal(pl.col(self.ref_cols + self.test_cols + self.ws_cols + self.wd_cols).is_not_null()))
-
-        # New any behavior
-        df_ = (df_.filter(pl.any_horizontal(pl.col(self.ref_cols).is_not_null()))
-                .filter(pl.any_horizontal(pl.col(self.test_cols).is_not_null()))
-                .filter(pl.any_horizontal(pl.col(self.ws_cols).is_not_null()))
-                .filter(pl.any_horizontal(pl.col(self.wd_cols).is_not_null()))
-        )
+        # Filter df_ to remove null values
+        null_filter = filter_all_nulls if self.remove_all_nulls else filter_any_nulls
+        df_ = null_filter(df_, self.ref_cols, self.test_cols, self.ws_cols, self.wd_cols)
 
         # Assign the wd/ws bins
-        df_ = add_ws_bin(df_, self.ws_cols, self.ws_step, self.ws_min, self.ws_max)
-        df_ = add_wd_bin(df_, self.wd_cols, self.wd_step, self.wd_min, self.wd_max)
+        df_ = add_ws_bin(df_, self.ws_cols, self.ws_step, self.ws_min, self.ws_max,
+            remove_all_bins=self.remove_all_nulls)
+        df_ = add_wd_bin(df_, self.wd_cols, self.wd_step, self.wd_min, self.wd_max,
+            remove_all_bins=self.remove_all_nulls)
 
         # Get the bin count by wd, ws and df_name
         df_group = df_.groupby(['wd_bin','ws_bin','df_name']).count()

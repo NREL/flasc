@@ -4,7 +4,6 @@ import polars as pl
 
 from typing import Optional, Dict, List, Any, Tuple, Union
 
-from flasc.energy_ratio.energy_ratio_utilities import add_ws_bin, add_wd_bin
 from flasc.dataframe_operations.dataframe_manipulations import df_reduce_precision
 
 
