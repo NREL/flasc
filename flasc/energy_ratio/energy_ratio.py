@@ -84,6 +84,8 @@ def _compute_energy_ratio_single(df_,
     # Filter df_ to remove null values
     null_filter = filter_all_nulls if remove_all_nulls else filter_any_nulls
     df_ = null_filter(df_, ref_cols, test_cols, ws_cols, wd_cols)
+    if len(df_) == 0:
+        raise RuntimeError("After removing nulls, no data remains for computation.")
 
     # If wd_bin_overlap_radius is not zero, add reflected rows
     if wd_bin_overlap_radius > 0.:
