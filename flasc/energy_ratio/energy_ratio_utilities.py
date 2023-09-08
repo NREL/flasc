@@ -1,3 +1,4 @@
+import warnings
 import polars as pl
 import numpy as np
 
@@ -367,3 +368,83 @@ def filter_any_nulls(
             .filter(pl.any_horizontal(pl.col(ws_cols).is_not_null()))
             .filter(pl.any_horizontal(pl.col(wd_cols).is_not_null()))
     )
+
+def check_compute_energy_ratio_inputs(
+    df_,
+    ref_turbines,
+    test_turbines,
+    wd_turbines,
+    ws_turbines,
+    use_predefined_ref,
+    use_predefined_wd,
+    use_predefined_ws,
+    wd_step,
+    wd_min,
+    wd_max,
+    ws_step,
+    ws_min,
+    ws_max,
+    bin_cols_in,
+    wd_bin_overlap_radius,
+    uplift_pairs,
+    uplift_names,
+    N,
+    percentiles,
+    remove_all_nulls
+):
+    """
+    Check inputs to compute_energy_ratio. Inputs reflect inputs to compute_energy_ratio,
+    with exception of df_, which is passed directly instead of er_in.
+    """
+
+    # Check that the inputs are valid
+    # If use_predefined_ref is True, df_ must have a column named 'pow_ref'
+    if use_predefined_ref:
+        if 'pow_ref' not in df_.columns:
+            raise ValueError('df_ must have a column named pow_ref when use_predefined_ref is True')
+        # If ref_turbines supplied, warn user that it will be ignored
+        if ref_turbines is not None:
+            warnings.warn('ref_turbines will be ignored when use_predefined_ref is True')
+    else:
+        # ref_turbine must be supplied
+        if ref_turbines is None:
+            raise ValueError('ref_turbines must be supplied when use_predefined_ref is False')
+        
+    # If use_predefined_ws is True, df_ must have a column named 'ws'
+    if use_predefined_ws:
+        if 'ws' not in df_.columns:
+            raise ValueError('df_ must have a column named ws when use_predefined_ws is True')
+        # If ws_turbines supplied, warn user that it will be ignored
+        if ws_turbines is not None:
+            warnings.warn('ws_turbines will be ignored when use_predefined_ws is True')
+    else:
+        # ws_turbine must be supplied
+        if ws_turbines is None:
+            raise ValueError('ws_turbines must be supplied when use_predefined_ws is False')
+
+    # If use_predefined_wd is True, df_ must have a column named 'wd'
+    if use_predefined_wd:
+        if 'wd' not in df_.columns:
+            raise ValueError('df_ must have a column named wd when use_predefined_wd is True')
+        # If wd_turbines supplied, warn user that it will be ignored
+        if wd_turbines is not None:
+            warnings.warn('wd_turbines will be ignored when use_predefined_wd is True')
+    else:
+        # wd_turbine must be supplied
+        if wd_turbines is None:
+            raise ValueError('wd_turbines must be supplied when use_predefined_wd is False')
+        
+
+    # Confirm that test_turbines is a list of ints or a numpy array of ints
+    if not isinstance(test_turbines, list) and not isinstance(test_turbines, np.ndarray):
+        raise ValueError('test_turbines must be a list or numpy array of ints')
+
+    # Confirm that test_turbines is not empty  
+    if len(test_turbines) == 0:
+        raise ValueError('test_turbines cannot be empty')
+    
+    # Confirm that wd_bin_overlap_radius is less than or equal to wd_step/2
+    if wd_bin_overlap_radius > wd_step/2:
+        raise ValueError('wd_bin_overlap_radius must be less than or equal to wd_step/2')
+
+    return None
