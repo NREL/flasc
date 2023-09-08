@@ -12,7 +12,17 @@ import polars as pl
 
 from flasc.energy_ratio.energy_ratio_output import EnergyRatioOutput
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.energy_ratio.energy_ratio_utilities import add_ws_bin, add_wd, add_wd_bin, add_power_ref, add_power_test, add_reflected_rows
+from flasc.energy_ratio.energy_ratio_utilities import (
+    add_ws_bin,
+    add_wd,
+    add_wd_bin,
+    add_power_ref,
+    add_power_test,
+    add_reflected_rows,
+    check_compute_energy_ratio_inputs,
+    filter_all_nulls,
+    filter_any_nulls
+)
 
 
 # Internal version, returns a polars dataframe
@@ -31,7 +41,8 @@ def _compute_energy_ratio_single(df_,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
-                         uplift_names = []
+                         uplift_names = [],
+                         remove_all_nulls = False
                          ):
 
     """
@@ -58,7 +69,10 @@ def _compute_energy_ratio_single(df_,
             base case in the uplift calculation and the second element will be the test case in the 
             uplift calculation. If None, no uplifts are computed.
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
-            pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
+            pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2",
+        remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
+            available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+            must be available to compute the bin. Defaults to False.
 
     Returns:
         pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
@@ -67,23 +81,25 @@ def _compute_energy_ratio_single(df_,
     # Identify the number of dataframes
     num_df = len(df_names)
 
-    # Filter df_ that all the columns are not null
-    print(ref_cols + test_cols + ws_cols + wd_cols)
-    df_ = df_.filter(pl.all_horizontal(pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()))
+    # Filter df_ to remove null values
+    null_filter = filter_all_nulls if remove_all_nulls else filter_any_nulls
+    df_ = null_filter(df_, ref_cols, test_cols, ws_cols, wd_cols)
+    if len(df_) == 0:
+        raise RuntimeError("After removing nulls, no data remains for computation.")
 
     # If wd_bin_overlap_radius is not zero, add reflected rows
     if wd_bin_overlap_radius > 0.:
 
         # Need to obtain the wd column now rather than during binning
-        df_ = add_wd(df_, wd_cols)
+        df_ = add_wd(df_, wd_cols, remove_all_nulls)
 
         # Add reflected rows
         edges = np.arange(wd_min, wd_max + wd_step, wd_step)
         df_ = add_reflected_rows(df_, edges, wd_bin_overlap_radius)
 
     # Assign the wd/ws bins
-    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max)
-    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max)
+    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max, remove_all_nulls=remove_all_nulls)
+    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max, remove_all_nulls=remove_all_nulls)
 
     
 
@@ -150,7 +166,8 @@ def _compute_energy_ratio_bootstrap(er_in,
                          uplift_pairs = [],
                          uplift_names = [],
                          N = 1,
-                         percentiles=[5., 95.]
+                         percentiles=[5., 95.],
+                         remove_all_nulls=False,
                          ):
     
     """
@@ -178,6 +195,12 @@ def _compute_energy_ratio_bootstrap(er_in,
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
         N (int): The number of bootstrap samples to use.
+        percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
+            If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
+        remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
+                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+                must be available to compute the bin. Defaults to False.
+
 
     Returns:
         pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
@@ -201,7 +224,8 @@ def _compute_energy_ratio_bootstrap(er_in,
                         bin_cols_in,
                         wd_bin_overlap_radius,
                         uplift_pairs,
-                        uplift_names
+                        uplift_names,
+                        remove_all_nulls
                         ) for i in range(N)])
 
     bound_names = er_in.df_names + uplift_names
@@ -235,7 +259,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          uplift_pairs = None,
                          uplift_names = None,
                          N = 1,
-                         percentiles = None
+                         percentiles = None,
+                         remove_all_nulls = False
                          )-> EnergyRatioOutput:
     
     """
@@ -268,6 +293,9 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         N (int): The number of bootstrap samples to use.
         percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
+        remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
+                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+                must be available to compute the bin. Defaults to False.
 
     Returns:
         EnergyRatioOutput: An EnergyRatioOutput object containing the energy ratio between the two sets of turbines.
@@ -277,55 +305,30 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
     # Get the polars dataframe from within the er_in
     df_ = er_in.get_df()
 
-    # Check that the inputs are valid
-    # If use_predefined_ref is True, df_ must have a column named 'pow_ref'
-    if use_predefined_ref:
-        if 'pow_ref' not in df_.columns:
-            raise ValueError('df_ must have a column named pow_ref when use_predefined_ref is True')
-        # If ref_turbines supplied, warn user that it will be ignored
-        if ref_turbines is not None:
-            warnings.warn('ref_turbines will be ignored when use_predefined_ref is True')
-    else:
-        # ref_turbine must be supplied
-        if ref_turbines is None:
-            raise ValueError('ref_turbines must be supplied when use_predefined_ref is False')
-        
-    # If use_predefined_ws is True, df_ must have a column named 'ws'
-    if use_predefined_ws:
-        if 'ws' not in df_.columns:
-            raise ValueError('df_ must have a column named ws when use_predefined_ws is True')
-        # If ws_turbines supplied, warn user that it will be ignored
-        if ws_turbines is not None:
-            warnings.warn('ws_turbines will be ignored when use_predefined_ws is True')
-    else:
-        # ws_turbine must be supplied
-        if ws_turbines is None:
-            raise ValueError('ws_turbines must be supplied when use_predefined_ws is False')
-
-    # If use_predefined_wd is True, df_ must have a column named 'wd'
-    if use_predefined_wd:
-        if 'wd' not in df_.columns:
-            raise ValueError('df_ must have a column named wd when use_predefined_wd is True')
-        # If wd_turbines supplied, warn user that it will be ignored
-        if wd_turbines is not None:
-            warnings.warn('wd_turbines will be ignored when use_predefined_wd is True')
-    else:
-        # wd_turbine must be supplied
-        if wd_turbines is None:
-            raise ValueError('wd_turbines must be supplied when use_predefined_wd is False')
-        
-
-    # Confirm that test_turbines is a list of ints or a numpy array of ints
-    if not isinstance(test_turbines, list) and not isinstance(test_turbines, np.ndarray):
-        raise ValueError('test_turbines must be a list or numpy array of ints')
-
-    # Confirm that test_turbines is not empty  
-    if len(test_turbines) == 0:
-        raise ValueError('test_turbines cannot be empty')
-    
-    # Confirm that wd_bin_overlap_radius is less than or equal to wd_step/2
-    if wd_bin_overlap_radius > wd_step/2:
-        raise ValueError('wd_bin_overlap_radius must be less than or equal to wd_step/2')
+    # Check that inputs are valid
+    check_compute_energy_ratio_inputs(
+        df_,
+        ref_turbines,
+        test_turbines,
+        wd_turbines,
+        ws_turbines,
+        use_predefined_ref,
+        use_predefined_wd,
+        use_predefined_ws,
+        wd_step,
+        wd_min,
+        wd_max,
+        ws_step,
+        ws_min,
+        ws_max,
+        bin_cols_in,
+        wd_bin_overlap_radius,
+        uplift_pairs,
+        uplift_names,
+        N,
+        percentiles,
+        remove_all_nulls
+    )
     
      # Set up the column names for the reference and test power
     if not use_predefined_ref:
@@ -382,7 +385,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                         bin_cols_in,
                         wd_bin_overlap_radius,
                         uplift_pairs,
-                        uplift_names
+                        uplift_names,
+                        remove_all_nulls
                     )
     else:
         if percentiles is None:
