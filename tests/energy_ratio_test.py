@@ -194,6 +194,55 @@ class TestEnergyRatio(unittest.TestCase):
         df_reflected = add_reflected_rows(df, edges,0.25)
         assert_frame_equal(df_result_expected, df_reflected)
 
+    def test_alternative_weighting(self):
+        
+        # Test that in the default, an energy ratio is returned so long as any value is not null
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 8., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [1., 1., 1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+
+        er_out = erp.compute_energy_ratio(
+            er_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min = 269.,
+            wd_step=2.0,
+            weight_by='min'
+        )
+
+        # In the case we weight by min, there is 1 point in 7 m/s bin, 2 points in 8 m/s bin
+        # so the energy ratio for wake steering should be ((1 * 2) + (2 * 1)) / 3 = 1.33333333
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], ((2 * 1) + (1 * 2)) / 3 , places=4)   
+
+
+        er_out = erp.compute_energy_ratio(
+                    er_in,
+                    ref_turbines=[0],
+                    test_turbines=[1],
+                    use_predefined_wd=True,
+                    use_predefined_ws=True,
+                    wd_min = 269.,
+                    wd_step=2.0,
+                    weight_by='sum'
+                )
+        # In the case of weighting by sum there is 3 points in the 7 m /s bin and 5 points in the 8 m/s bin
+        # so the energy ratio for wake steering should be ((3 * 2) + (5 * 1)) / 8 = 1.375
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], ((3 * 2) + (5 * 1)) / 8  , places=4)   
+
+
+
     def test_null_behavior(self):
 
         # Test that in the default, an energy ratio is returned so long as any value is not null
