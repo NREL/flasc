@@ -82,9 +82,6 @@ def _compute_energy_ratio_single(df_,
         pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
     """
 
-    # Identify the number of dataframes
-    num_df = len(df_names)
-
     # Filter df_ to remove null values
     null_filter = filter_all_nulls if remove_all_nulls else filter_any_nulls
     df_ = null_filter(df_, ref_cols, test_cols, ws_cols, wd_cols)
@@ -105,8 +102,6 @@ def _compute_energy_ratio_single(df_,
     df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max, remove_all_nulls=remove_all_nulls)
     df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max, remove_all_nulls=remove_all_nulls)
 
-    
-
     # Assign the reference and test power columns
     df_ = add_power_ref(df_, ref_cols)
     df_ = add_power_test(df_, test_cols)
@@ -114,8 +109,6 @@ def _compute_energy_ratio_single(df_,
     bin_cols_without_df_name = [c for c in bin_cols_in if c != 'df_name']
     bin_cols_with_df_name = bin_cols_without_df_name + ['df_name']
 
-    
-    
     df_ = (df_
         .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
         .groupby(bin_cols_with_df_name, maintain_order=True)
