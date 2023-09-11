@@ -109,10 +109,15 @@ def _compute_energy_ratio_single(df_,
     bin_cols_without_df_name = [c for c in bin_cols_in if c != 'df_name']
     bin_cols_with_df_name = bin_cols_without_df_name + ['df_name']
 
+    # Group df_
     df_ = (df_
         .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
         .groupby(bin_cols_with_df_name, maintain_order=True)
-        .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()]) 
+        .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()])
+        )
+    
+    # Determine the weighting of the ws/wd bins
+    df_ = (df_
         .with_columns(
             [
                 # Get the weighting by counts
@@ -120,6 +125,10 @@ def _compute_energy_ratio_single(df_,
                 pl.col('count').sum().over(bin_cols_without_df_name).alias('count_weight')
             ]
         )
+    )
+
+    # Calculate energy ratios
+    df_ = (df_
         .with_columns(
             [
                 pl.col('pow_ref').mul(pl.col('count_weight')).alias('ref_energy'), # Compute the reference energy
