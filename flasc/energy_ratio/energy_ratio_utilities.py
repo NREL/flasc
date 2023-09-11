@@ -385,6 +385,7 @@ def check_compute_energy_ratio_inputs(
     ws_min,
     ws_max,
     bin_cols_in,
+    weight_by,
     wd_bin_overlap_radius,
     uplift_pairs,
     uplift_names,
@@ -446,5 +447,9 @@ def check_compute_energy_ratio_inputs(
     # Confirm that wd_bin_overlap_radius is less than or equal to wd_step/2
     if wd_bin_overlap_radius > wd_step/2:
         raise ValueError('wd_bin_overlap_radius must be less than or equal to wd_step/2')
+    
+    # Confirm the weight_by argument is valid
+    if weight_by not in ['min', 'sum']:
+        raise ValueError('weight_by must be one of "min", or "sum"')
 
     return None
