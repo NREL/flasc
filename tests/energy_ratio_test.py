@@ -196,7 +196,7 @@ class TestEnergyRatio(unittest.TestCase):
 
     def test_alternative_weighting(self):
         
-        # Test that in the default, an energy ratio is returned so long as any value is not null
+        # Test the returned energy ratio assuming alternative weightings of the wind speed bins
         df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
                            'ws': [7., 8., 8.,8.],
                            'pow_000': [1., 1., 1., 1.],
@@ -223,8 +223,10 @@ class TestEnergyRatio(unittest.TestCase):
         )
 
         # In the case we weight by min, there is 1 point in 7 m/s bin, 2 points in 8 m/s bin
-        # so the energy ratio for wake steering should be ((1 * 2) + (2 * 1)) / 3 = 1.33333333
-        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], ((2 * 1) + (1 * 2)) / 3 , places=4)   
+        # so the test energy (001) should be (1 * 2) + (2 * 1) = 4
+        # the ref energy (000) should be (1 * 1) + (2 * 1) = 3
+        # And energy ratio = 4/3
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], 4/3 , places=4)   
 
 
         er_out = erp.compute_energy_ratio(
@@ -238,8 +240,10 @@ class TestEnergyRatio(unittest.TestCase):
                     weight_by='sum'
                 )
         # In the case of weighting by sum there is 3 points in the 7 m /s bin and 5 points in the 8 m/s bin
-        # so the energy ratio for wake steering should be ((3 * 2) + (5 * 1)) / 8 = 1.375
-        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], ((3 * 2) + (5 * 1)) / 8  , places=4)   
+        # so the test energy (001) should be (3 * 2) + (5 * 1) = 11
+        # the ref energy (000) should be (3 * 1) + (5 * 1) = 8
+        # And energy ratio = 11/8
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], 11 / 8  , places=4)   
 
 
 
