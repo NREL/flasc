@@ -194,8 +194,7 @@ def _compute_energy_ratio_bootstrap(er_in,
         ws_max (float): The maximum wind speed to use.
         bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
         weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
-            the minimum count across the dataframes is used to weight the energy ratio.  'mean' means the mean
-            count across the dataframes is used to weight the energy ratio.  'sum' means the sum of the counts
+            the minimum count across the dataframes is used to weight the energy ratio. 'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
