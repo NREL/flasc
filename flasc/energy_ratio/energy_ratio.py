@@ -23,6 +23,7 @@ from flasc.energy_ratio.energy_ratio_utilities import (
     filter_all_nulls,
     filter_any_nulls
 )
+from flasc.dataframe_operations.dataframe_manipulations import df_reduce_precision
 
 
 # Internal version, returns a polars dataframe
@@ -40,6 +41,7 @@ def _compute_energy_ratio_single(df_,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          weight_by = 'min', #min, sum
+                         df_freq_pl = None,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
                          uplift_names = [],
@@ -66,6 +68,7 @@ def _compute_energy_ratio_single(df_,
         weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
             the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.   Defaults to 'min'.
+        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
@@ -117,15 +120,25 @@ def _compute_energy_ratio_single(df_,
         )
     
     # Determine the weighting of the ws/wd bins
-    df_ = (df_
-        .with_columns(
-            [
-                # Get the weighting by counts
-                pl.col('count').min().over(bin_cols_without_df_name).alias('count_weight') if weight_by == 'min' else
-                pl.col('count').sum().over(bin_cols_without_df_name).alias('count_weight')
-            ]
+
+    if df_freq_pl is None:
+        # Determine the weights per bin as either the min or sum count
+        df_ = (df_
+            .with_columns(
+                [
+                    # Get the weighting by counts
+                    pl.col('count').min().over(bin_cols_without_df_name).alias('count_weight') if weight_by == 'min' else
+                    pl.col('count').sum().over(bin_cols_without_df_name).alias('count_weight')
+                ]
+            )
         )
-    )
+    
+    else:
+        # Use the weights in df_freq_pl directly
+        df_ = (df_.join(df_freq_pl, on=['wd_bin','ws_bin'], how='left')
+              .with_columns(pl.col('count_weight').fill_null(strategy="zero"))
+        )
+
 
     # Calculate energy ratios
     df_ = (df_
@@ -171,6 +184,7 @@ def _compute_energy_ratio_bootstrap(er_in,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          weight_by = 'min', #min, sum
+                         df_freq_pl = None,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
                          uplift_names = [],
@@ -198,6 +212,7 @@ def _compute_energy_ratio_bootstrap(er_in,
         weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
             the minimum count across the dataframes is used to weight the energy ratio. 'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.
+        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
@@ -235,6 +250,7 @@ def _compute_energy_ratio_bootstrap(er_in,
                         ws_max,
                         bin_cols_in,
                         weight_by,
+                        df_freq_pl,
                         wd_bin_overlap_radius,
                         uplift_pairs,
                         uplift_names,
@@ -269,6 +285,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          ws_max = 50.0,
                          bin_cols_in = ['wd_bin','ws_bin'],
                          weight_by = 'min', #min or sum
+                         df_freq = None,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = None,
                          uplift_names = None,
@@ -299,6 +316,10 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         weight_by (str): How to weight the energy ratio, options are 'min', , or 'sum'.  'min' means
             the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.
+        df_freq (pd.Dataframe): A dataframe which specifies the frequency of the ws/wd bin combinations.  Provides
+            a method to used an explicit or long-term weigthing of various bins.  Dataframe should include
+            columns ws, wd and freq_val.  ws and wd should correspond to the bin centers resulting from
+            the choices of the ws/wd_min / _max / _step.  Defatuls to None
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
@@ -340,6 +361,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         ws_max,
         bin_cols_in,
         weight_by,
+        df_freq,
         wd_bin_overlap_radius,
         uplift_pairs,
         uplift_names,
@@ -383,6 +405,29 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
     # Convert the numbered arrays to appropriate column names
     test_cols = [f'pow_{i:03d}' for i in test_turbines]
 
+    # If df_freq is provided, confirm is consistent with ws/wd min max and
+    # prepare a polars table of weights
+    if df_freq is not None:
+
+        # Maybe not test, not sure yet
+        # ws_edges = np.arange(ws_min, ws_max+ws_step,ws_step)
+        # ws_labels = ws_edges[:-1] + np.diff(ws_edges)/2.0
+        # wd_edges = np.arange(wd_min, wd_max+wd_step,wd_step)
+        # wd_labels = wd_edges[:-1] + np.diff(wd_edges)/2.0
+        
+        # Conver to polars dataframe
+        df_freq_pl = pl.from_pandas(df_reduce_precision(df_freq, allow_convert_to_integer=False))
+
+        # Rename the columns
+        df_freq_pl = df_freq_pl.rename({
+            'ws':'ws_bin',
+            'wd':'wd_bin',
+            'freq_val':'count_weight'
+        })
+
+    else:
+        df_freq_pl = None
+
     # If N=1, don't use bootstrapping
     if N == 1:
         if percentiles is not None:
@@ -402,6 +447,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                         ws_max,
                         bin_cols_in,
                         weight_by,
+                        df_freq_pl,
                         wd_bin_overlap_radius,
                         uplift_pairs,
                         uplift_names,
@@ -427,6 +473,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                             ws_max,
                             bin_cols_in,
                             weight_by,
+                            df_freq_pl,
                             wd_bin_overlap_radius,
                             uplift_pairs,
                             uplift_names,
