@@ -59,7 +59,7 @@ class EnergyRatioOutput:
             ws_min (float): The minimum wind speed value.
             ws_max (float): The maximum wind speed value.
             bin_cols_in (List[str]): TBD
-            weight_by (str): How to weight the energy ratio, options are 'min', , or 'sum'.  'min' means
+            weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
                 the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
                 across the dataframes is used to weight the energy ratio.
             wd_bin_overlap_radius (float): The radius of overlap between wind direction bins.
