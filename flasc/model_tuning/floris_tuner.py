@@ -12,6 +12,14 @@
 # See https://floris.readthedocs.io for documentation
 
 import os
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,7 +41,6 @@ from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.model_tuning.error_result import ErrorResult
 from flasc.model_tuning.tuner_utils import set_fi_param
 
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 class FlorisTuner():
     """
