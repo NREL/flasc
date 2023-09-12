@@ -128,7 +128,16 @@ class FlorisTuner():
                     param: List[str], 
                     value: Any, 
                     idx: Optional[int] = None) -> FlorisInterface:
-        
+        """_summary_
+
+        Args:
+            param (List[str]): _description_
+            value (Any): _description_
+            idx (Optional[int], optional): _description_. Defaults to None.
+
+        Returns:
+            FlorisInterface: _description_
+        """        
         # Get an fi model with the parameter set
         fi = set_fi_param(self.fi_init, param, value, idx)
 
