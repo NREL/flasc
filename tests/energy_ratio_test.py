@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import polars as pl
 import numpy as np
+import pytest
 
 import unittest
 
@@ -192,3 +193,132 @@ class TestEnergyRatio(unittest.TestCase):
         edges = np.array([358, 360])
         df_reflected = add_reflected_rows(df, edges,0.25)
         assert_frame_equal(df_result_expected, df_reflected)
+
+    def test_alternative_weighting(self):
+        
+        # Test that in the default, an energy ratio is returned so long as any value is not null
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 8., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [1., 1., 1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+
+        er_out = erp.compute_energy_ratio(
+            er_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min = 269.,
+            wd_step=2.0,
+            weight_by='min'
+        )
+
+        # In the case we weight by min, there is 1 point in 7 m/s bin, 2 points in 8 m/s bin
+        # so the energy ratio for wake steering should be ((1 * 2) + (2 * 1)) / 3 = 1.33333333
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], ((2 * 1) + (1 * 2)) / 3 , places=4)   
+
+
+        er_out = erp.compute_energy_ratio(
+                    er_in,
+                    ref_turbines=[0],
+                    test_turbines=[1],
+                    use_predefined_wd=True,
+                    use_predefined_ws=True,
+                    wd_min = 269.,
+                    wd_step=2.0,
+                    weight_by='sum'
+                )
+        # In the case of weighting by sum there is 3 points in the 7 m /s bin and 5 points in the 8 m/s bin
+        # so the energy ratio for wake steering should be ((3 * 2) + (5 * 1)) / 8 = 1.375
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], ((3 * 2) + (5 * 1)) / 8  , places=4)   
+
+
+
+    def test_null_behavior(self):
+
+        # Test that in the default, an energy ratio is returned so long as any value is not null
+        df = pd.DataFrame({'wd_000': [268., 270., 272.,272.,],
+                           'wd_001': [np.nan, 270., 272. ,272.],
+                           'ws': [8., 8., 8.,8.],
+                           'pow_000': [100., 100., 100., 100.],
+                           'pow_001': [100., np.nan, np.nan,np.nan],
+                           'pow_002': [100., 100., 200.,np.nan],
+        })
+
+        er_in_1 = EnergyRatioInput([df],['baseline'],num_blocks=1)
+
+        er_out_any = erp.compute_energy_ratio(
+            er_in_1,
+            ref_turbines=[0,1],
+            test_turbines=[2],
+            wd_turbines = [0,1],
+            use_predefined_ws=True,
+            wd_min = 267.,
+            wd_step=2.0,
+            ws_step=1.0,
+            N=1,
+        )
+
+        df = pd.DataFrame({'wd_000': [268., 270., np.nan,272.,],
+                           'wd_001': [270., 270., 272. ,272.],
+                           'ws': [8., 8., 8.,8.],
+                           'pow_000': [100., 100., 100., 100.],
+                           'pow_001': [100., np.nan, np.nan,np.nan],
+                           'pow_002': [90., 100., 200.,np.nan],
+        })
+
+        er_in_2 = EnergyRatioInput([df],['baseline'],num_blocks=1)
+
+        er_out_all = erp.compute_energy_ratio(
+            er_in_2,
+            ref_turbines=[0,1],
+            test_turbines=[2],
+            wd_turbines = [0,1],
+            use_predefined_ws=True,
+            wd_min = 267.,
+            wd_step=2.0,
+            ws_step=1.0,
+            N=1,
+            remove_all_nulls=True
+        )
+        
+        with pytest.raises(RuntimeError):
+            # Expected to fail because no bins remain after null filtering
+            erp.compute_energy_ratio(
+                er_in_1,
+                ref_turbines=[0,1],
+                test_turbines=[2],
+                wd_turbines = [0,1],
+                use_predefined_ws=True,
+                wd_min = 267.,
+                wd_step=2.0,
+                ws_step=1.0,
+                N=1,
+                remove_all_nulls=True
+            )
+
+
+        # Check outputs match expectations
+        print(er_out_any.df_result)
+        print(er_out_all.df_result)
+
+        self.assertAlmostEqual(er_out_any.df_result['baseline'].iloc[0], 1., places=4)
+        self.assertAlmostEqual(er_out_any.df_result['baseline'].iloc[1], 1., places=4)
+        self.assertAlmostEqual(er_out_any.df_result['baseline'].iloc[2], 2., places=4)
+
+        self.assertEqual(er_out_any.df_result['count_baseline'].iloc[0], 1)
+        self.assertEqual(er_out_any.df_result['count_baseline'].iloc[1], 1)
+        self.assertEqual(er_out_any.df_result['count_baseline'].iloc[2], 1)
+
+        self.assertAlmostEqual(er_out_all.df_result['baseline'].iloc[0], 0.9, places=4)
+
+        self.assertEqual(er_out_all.df_result['count_baseline'].iloc[0], 1)

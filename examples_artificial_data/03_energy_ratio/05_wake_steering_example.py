@@ -10,20 +10,16 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-import numpy as np
+
 import matplotlib.pyplot as plt
-import os
+import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from floris import tools as wfct
-from floris.utilities import wrap_360
-
 from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-# from flasc import floris_tools as fsatools
-from flasc.visualization import plot_layout_with_waking_directions, plot_binned_mean_and_ci
 from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.visualization import plot_binned_mean_and_ci, plot_layout_with_waking_directions
 
 
 if __name__ == "__main__":
@@ -129,20 +125,12 @@ if __name__ == "__main__":
 
     # Make a color palette that visually links the nominal and noisy data sets together
     color_palette = sns.color_palette("Paired",4)[::-1]
-    # color_palette = ['r','g','b','k']
 
-    # Initialize the energy ratio suite object and add each dataframe
-    # separately. 
-
+    # Initialize the energy ratio input object
     er_in = EnergyRatioInput(
         [df_baseline, df_wakesteering, df_baseline_noisy, df_wakesteering_noisy], 
         ["Baseline", "WakeSteering", "Baseline (Noisy)", "WakeSteering (Noisy)"]
     )
-
-    # fsc.add_df(df_baseline, 'Baseline', color_palette[0])
-    # fsc.add_df(df_wakesteering, 'WakeSteering', color_palette[1])
-    # fsc.add_df(df_baseline_noisy, 'Baseline (Noisy)', color_palette[2])
-    # fsc.add_df(df_wakesteering_noisy, 'WakeSteering (Noisy)', color_palette[3])
 
     # Calculate and plot the energy ratio for the downstream turbine [2]
     # With respect to reference turbine [0]
@@ -159,16 +147,10 @@ if __name__ == "__main__":
         percentiles=[5., 95.],
         uplift_pairs=[("Baseline", "WakeSteering"), 
                       ("Baseline (Noisy)", "WakeSteering (Noisy)")],
-        uplift_names=["Clean", "Noisy"]
+        uplift_names=["Clean", "Noisy"],
+        weight_by='min'
     )
-    # fsc.get_energy_ratios(
-    #     test_turbines=[2],
-    #     wd_step=2.0,
-    #     ws_step=1.0,
-    #     N=10,
-    #     percentiles=[5., 95.],
-    #     verbose=False
-    # )
+
     er_out.plot_energy_ratios(
         color_dict={"Baseline":"blue", 
                     "WakeSteering":"green", 

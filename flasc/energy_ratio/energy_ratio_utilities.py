@@ -1,3 +1,4 @@
+import warnings
 import polars as pl
 import numpy as np
 
@@ -60,6 +61,7 @@ def bin_column(df_: pl.DataFrame,
 
 def add_ws(df_: pl.DataFrame,
            ws_cols: List[str],
+           remove_all_nulls: bool=False
     ) -> pl.DataFrame:
     """
     Add the ws column to a dataframe, given which columns to average over
@@ -68,6 +70,7 @@ def add_ws(df_: pl.DataFrame,
     Parameters:
     df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
     ws_cols (list(str)): The name of the columns to average across.
+    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)
 
     Returns:
     pl.DataFrame: A new Polars DataFrame with an additional ws column
@@ -81,7 +84,8 @@ def add_ws(df_: pl.DataFrame,
             ws = pl.concat_list(ws_cols).list.mean() # Initially ws_bin is just the mean
         )
         .filter(
-            pl.all_horizontal(pl.col(ws_cols).is_not_null()) # Select for all bin cols present
+            pl.all_horizontal(pl.col(ws_cols).is_not_null()) if remove_all_nulls else
+            pl.any_horizontal(pl.col(ws_cols).is_not_null())
         ) 
 
         .filter(
@@ -97,6 +101,7 @@ def add_ws_bin(df_: pl.DataFrame,
                ws_min: float=-0.5,
                ws_max: float=50.0, 
                edges: Optional[Union[np.ndarray, list]]=None,
+               remove_all_nulls: bool=False
     ) -> pl.DataFrame:
     """
     Add the ws_bin column to a dataframe, given which columns to average over
@@ -113,6 +118,7 @@ def add_ws_bin(df_: pl.DataFrame,
                         the value, and whose right edge is the smallest edge
                         greater than the value.  Defaults to None, in which case
                         the edges are generated using ws_step, ws_min, and ws_max.
+    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)
 
     Returns:
     pl.DataFrame: A new Polars DataFrame with an additional ws_bin column
@@ -125,7 +131,7 @@ def add_ws_bin(df_: pl.DataFrame,
     elif len(edges) < 2:
         raise ValueError("edges must have length of at least 2")
 
-    df_with_mean_ws = add_ws(df_, ws_cols)
+    df_with_mean_ws = add_ws(df_, ws_cols, remove_all_nulls)
 
     # Filter to min and max
     df_with_mean_ws = df_with_mean_ws.filter(
@@ -137,6 +143,7 @@ def add_ws_bin(df_: pl.DataFrame,
 
 def add_wd(df_:pl.DataFrame,
           wd_cols: List[str],
+          remove_all_nulls: bool=False
     ) -> pl.DataFrame:
     """
     Add the wd column to a dataframe, given which columns to average over
@@ -145,6 +152,7 @@ def add_wd(df_:pl.DataFrame,
     Parameters:
     df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
     wd_cols (list(str)): The name of the columns to average across.
+    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)
 
     Returns:
     pl.DataFrame: A new Polars DataFrame with an additional wd column
@@ -162,7 +170,8 @@ def add_wd(df_:pl.DataFrame,
     df_with_mean_wd =  (
         # df_.select(pl.exclude('wd_bin')) # In case wd_bin already exists
         df_.filter(
-            pl.all_horizontal(pl.col(wd_cols).is_not_null()) # Select for all bin cols present
+            pl.all_horizontal(pl.col(wd_cols).is_not_null()) if remove_all_nulls else
+            pl.any_horizontal(pl.col(wd_cols).is_not_null())
         ) 
         # Add the cosine columns
         .with_columns(
@@ -201,6 +210,7 @@ def add_wd_bin(df_: pl.DataFrame,
                 wd_min: float=0.0,
                 wd_max: float=360.0,
                 edges: Optional[Union[np.ndarray, list]]=None,
+                remove_all_nulls: bool=False
     ):
     """
     Add the wd_bin column to a dataframe, given which columns to average over
@@ -217,6 +227,7 @@ def add_wd_bin(df_: pl.DataFrame,
                     the value, and whose right edge is the smallest edge
                     greater than the value.  Defaults to None, in which case
                     the edges are generated using ws_step, ws_min, and ws_max.
+    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)
 
     Returns:
     pl.DataFrame: A new Polars DataFrame with an additional ws_bin column
@@ -232,7 +243,7 @@ def add_wd_bin(df_: pl.DataFrame,
     
 
     # Add in the mean wd column
-    df_with_mean_wd = add_wd(df_, wd_cols)
+    df_with_mean_wd = add_wd(df_, wd_cols, remove_all_nulls)
 
     # Filter to min and max
     df_with_mean_wd = df_with_mean_wd.filter(
@@ -303,3 +314,142 @@ def add_reflected_rows(df_: pl.DataFrame,
     
 
     return pl.concat([df_, df_add])
+
+def filter_all_nulls(
+    df_: pl.DataFrame, 
+    ref_cols: List[str],
+    test_cols: List[str],
+    ws_cols: List[str],
+    wd_cols: List[str]
+):
+    """
+    Filter data by requiring ALL values of ref, test, ws, and wd to be valid
+    numbers.
+
+    Args:
+        df_ (pl.DataFrame): Polars dataframe possibly containing Null values
+        ref_cols (list[str]): A list of columns to use as the reference turbines
+        test_cols (list[str]): A list of columns to use as the test turbines
+        wd_cols (list[str]): A list of columns to derive the wind directions from
+        ws_cols (list[str]): A list of columns to derive the wind speeds from
+
+    Returns:
+        pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
+
+    """
+    return df_.filter(pl.all_horizontal(
+        pl.col(ref_cols + test_cols + ws_cols + wd_cols).is_not_null()
+    ))
+
+def filter_any_nulls(
+    df_: pl.DataFrame, 
+    ref_cols: List[str],
+    test_cols: List[str],
+    ws_cols: List[str],
+    wd_cols: List[str]
+):
+    """
+    Filter data by requiring ANY of ref, ANY of test, ANY of ws, and ANY of wd
+    to be a valid number.
+
+    Args:
+        df_ (pl.DataFrame): Polars dataframe possibly containing Null values
+        ref_cols (list[str]): A list of columns to use as the reference turbines
+        test_cols (list[str]): A list of columns to use as the test turbines
+        wd_cols (list[str]): A list of columns to derive the wind directions from
+        ws_cols (list[str]): A list of columns to derive the wind speeds from
+
+    Returns:
+        pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
+
+    """
+    return (df_.filter(pl.any_horizontal(pl.col(ref_cols).is_not_null()))
+            .filter(pl.any_horizontal(pl.col(test_cols).is_not_null()))
+            .filter(pl.any_horizontal(pl.col(ws_cols).is_not_null()))
+            .filter(pl.any_horizontal(pl.col(wd_cols).is_not_null()))
+    )
+
+def check_compute_energy_ratio_inputs(
+    df_,
+    ref_turbines,
+    test_turbines,
+    wd_turbines,
+    ws_turbines,
+    use_predefined_ref,
+    use_predefined_wd,
+    use_predefined_ws,
+    wd_step,
+    wd_min,
+    wd_max,
+    ws_step,
+    ws_min,
+    ws_max,
+    bin_cols_in,
+    weight_by,
+    wd_bin_overlap_radius,
+    uplift_pairs,
+    uplift_names,
+    N,
+    percentiles,
+    remove_all_nulls
+):
+    """
+    Check inputs to compute_energy_ratio. Inputs reflect inputs to compute_energy_ratio,
+    with exception of df_, which is passed directly instead of er_in.
+    """
+
+    # Check that the inputs are valid
+    # If use_predefined_ref is True, df_ must have a column named 'pow_ref'
+    if use_predefined_ref:
+        if 'pow_ref' not in df_.columns:
+            raise ValueError('df_ must have a column named pow_ref when use_predefined_ref is True')
+        # If ref_turbines supplied, warn user that it will be ignored
+        if ref_turbines is not None:
+            warnings.warn('ref_turbines will be ignored when use_predefined_ref is True')
+    else:
+        # ref_turbine must be supplied
+        if ref_turbines is None:
+            raise ValueError('ref_turbines must be supplied when use_predefined_ref is False')
+        
+    # If use_predefined_ws is True, df_ must have a column named 'ws'
+    if use_predefined_ws:
+        if 'ws' not in df_.columns:
+            raise ValueError('df_ must have a column named ws when use_predefined_ws is True')
+        # If ws_turbines supplied, warn user that it will be ignored
+        if ws_turbines is not None:
+            warnings.warn('ws_turbines will be ignored when use_predefined_ws is True')
+    else:
+        # ws_turbine must be supplied
+        if ws_turbines is None:
+            raise ValueError('ws_turbines must be supplied when use_predefined_ws is False')
+
+    # If use_predefined_wd is True, df_ must have a column named 'wd'
+    if use_predefined_wd:
+        if 'wd' not in df_.columns:
+            raise ValueError('df_ must have a column named wd when use_predefined_wd is True')
+        # If wd_turbines supplied, warn user that it will be ignored
+        if wd_turbines is not None:
+            warnings.warn('wd_turbines will be ignored when use_predefined_wd is True')
+    else:
+        # wd_turbine must be supplied
+        if wd_turbines is None:
+            raise ValueError('wd_turbines must be supplied when use_predefined_wd is False')
+        
+
+    # Confirm that test_turbines is a list of ints or a numpy array of ints
+    if not isinstance(test_turbines, list) and not isinstance(test_turbines, np.ndarray):
+        raise ValueError('test_turbines must be a list or numpy array of ints')
+
+    # Confirm that test_turbines is not empty  
+    if len(test_turbines) == 0:
+        raise ValueError('test_turbines cannot be empty')
+    
+    # Confirm that wd_bin_overlap_radius is less than or equal to wd_step/2
+    if wd_bin_overlap_radius > wd_step/2:
+        raise ValueError('wd_bin_overlap_radius must be less than or equal to wd_step/2')
+    
+    # Confirm the weight_by argument is valid
+    if weight_by not in ['min', 'sum']:
+        raise ValueError('weight_by must be one of "min", or "sum"')
+
+    return None
