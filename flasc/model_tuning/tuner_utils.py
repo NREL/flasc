@@ -14,6 +14,20 @@ from floris.tools import FlorisInterface
 # from floris.tools import ParallelComputingInterface
 
 
+def replicate_nan_values(df_1, df_2):
+    # For columns which df_1 and df_2 have in common, make sure occurences of NaNs which appear in df_1
+    # appear in the same location in df_2
+    # This function is primarily for the case where df_2 is a FLORIS resimulation of df_1 and making sure
+    # missing data appears in both data frames
+
+    # Identify common columns between df_1 and df_2
+    common_columns = df_1.columns.intersection(df_2.columns)
+
+    # Use assign to create a new DataFrame with NaN values replaced
+    df_2_updated = df_2.assign(**{col: np.where(df_1[col].isna(), np.nan, df_2[col]) for col in common_columns})
+
+    return df_2_updated    
+
 def nested_get(dic: Dict[str, Any],
                  keys: List[str]) -> Any:
     """Get a value from a nested dictionary using a list of keys.
