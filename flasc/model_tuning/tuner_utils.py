@@ -15,6 +15,21 @@ from floris.tools import FlorisInterface
 
 
 def replicate_nan_values(df_1, df_2):
+    """
+    Replicate NaN Values in DataFrame df_2 to Match DataFrame df_1.
+
+    For columns that are common between df_1 and df_2, this function ensures that
+    NaN values in df_2 appear in the same locations as NaN values in df_1. This is
+    primarily useful when df_2 represents a FLORIS resimulation of
+    df_1, and you want to ensure that missing data is consistent between the two DataFrames.
+
+    Parameters:
+    - df_1 (pandas.DataFrame): The reference DataFrame containing NaN values.
+    - df_2 (pandas.DataFrame): The DataFrame to be updated to match NaN positions in df_1.
+
+    Returns:
+    - pandas.DataFrame: A new DataFrame with NaN values in df_2 replaced to match df_1.
+    """
     # For columns which df_1 and df_2 have in common, make sure occurences of NaNs which appear in df_1
     # appear in the same location in df_2
     # This function is primarily for the case where df_2 is a FLORIS resimulation of df_1 and making sure
