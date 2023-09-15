@@ -92,7 +92,7 @@ def nested_set(dic: Dict[str, Any],
 def set_fi_param(fi_in: FlorisInterface, 
         param: List[str], 
         value: Any, 
-        idx: Optional[int] = None) -> FlorisInterface:
+        param_idx: Optional[int] = None) -> FlorisInterface:
     """Set a parameter in a FlorisInterface object.
 
     Args:
@@ -105,7 +105,7 @@ def set_fi_param(fi_in: FlorisInterface,
         FlorisInterface: The modified FlorisInterface object.
     """
     fi_dict_mod = fi_in.floris.as_dict()
-    nested_set(fi_dict_mod, param, value, idx)
+    nested_set(fi_dict_mod, param, value, param_idx)
     return FlorisInterface(fi_dict_mod)
 
 # def resim_floris(fi_in: FlorisInterface,
