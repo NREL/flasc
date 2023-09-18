@@ -127,8 +127,8 @@ def _compute_energy_ratio_single(df_,
             .with_columns(
                 [
                     # Get the weighting by counts
-                    pl.col('count').min().over(bin_cols_without_df_name).alias('count_weight') if weight_by == 'min' else
-                    pl.col('count').sum().over(bin_cols_without_df_name).alias('count_weight')
+                    pl.col('count').min().over(bin_cols_without_df_name).alias('weight') if weight_by == 'min' else
+                    pl.col('count').sum().over(bin_cols_without_df_name).alias('weight')
                 ]
             )
         )
@@ -136,7 +136,7 @@ def _compute_energy_ratio_single(df_,
     else:
         # Use the weights in df_freq_pl directly
         df_ = (df_.join(df_freq_pl, on=['wd_bin','ws_bin'], how='left')
-              .with_columns(pl.col('count_weight').fill_null(strategy="zero"))
+              .with_columns(pl.col('weight').fill_null(strategy="zero"))
         )
 
 
@@ -144,8 +144,8 @@ def _compute_energy_ratio_single(df_,
     df_ = (df_
         .with_columns(
             [
-                pl.col('pow_ref').mul(pl.col('count_weight')).alias('ref_energy'), # Compute the reference energy
-                pl.col('pow_test').mul(pl.col('count_weight')).alias('test_energy'), # Compute the test energy
+                pl.col('pow_ref').mul(pl.col('weight')).alias('ref_energy'), # Compute the reference energy
+                pl.col('pow_test').mul(pl.col('weight')).alias('test_energy'), # Compute the test energy
             ]
         )
         .groupby(['wd_bin','df_name'], maintain_order=True)
@@ -422,7 +422,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         df_freq_pl = df_freq_pl.rename({
             'ws':'ws_bin',
             'wd':'wd_bin',
-            'freq_val':'count_weight'
+            'freq_val':'weight'
         })
 
     else:
