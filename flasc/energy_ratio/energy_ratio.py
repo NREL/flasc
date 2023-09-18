@@ -317,9 +317,12 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.
         df_freq (pd.Dataframe): A dataframe which specifies the frequency of the ws/wd bin combinations.  Provides
-            a method to used an explicit or long-term weigthing of various bins.  Dataframe should include
+            a method to use an explicit or long-term weigthing of bins.  Dataframe should include
             columns ws, wd and freq_val.  ws and wd should correspond to the bin centers resulting from
-            the choices of the ws/wd_min / _max / _step.  Defatuls to None
+            the choices of the ws/wd_min / _max / _step.  In the case that df_freq has extra bins that aren't included 
+            in those given by ws/wd min, max, step, they will be ignored in the energy ratio calculation. 
+            Any bins given by ws/wd min, max, step not present in df_freq will be assigned a frequency of zero. 
+            Defaults to None.
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
