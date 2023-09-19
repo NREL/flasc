@@ -225,7 +225,8 @@ class FlorisTuner():
                 wd_bin_overlap_radius=wd_bin_overlap_radius,
                 N=1,
                 uplift_pairs=[("SCADA0","SCADA1"),("FLORIS0","FLORIS1")],
-                uplift_names=["Uplift_SCADA","Uplift_FLORIS"]
+                uplift_names=["Uplift_SCADA","Uplift_FLORIS"],
+                uplift_absolute=True,
             )
             
         else:
@@ -341,7 +342,7 @@ class FlorisTuner():
 
     def _compute_uplift_error(self, 
                           er_out,
-                          min_abs_floris_value = 1.0):
+                          min_abs_floris_value = 0.01):
 
         # Remove rows where the FLORIS is near 0
         df_ = (er_out.df_result
