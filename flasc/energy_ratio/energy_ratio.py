@@ -142,8 +142,19 @@ def _compute_energy_ratio_single(df_,
     else:
         # Use the weights in df_freq_pl directly
         df_ = (df_.join(df_freq_pl, on=['wd_bin','ws_bin'], how='left')
-              .with_columns(pl.col('weight').fill_null(strategy="zero"))
+              .with_columns(pl.col('weight'))# .fill_null(strategy="zero"))
         )
+
+        # Check if all the values in the weight column are null
+        if df_['weight'].is_null().all():
+            raise RuntimeError("None of the ws/wd bins in data appear in df_freq")
+        
+        # Check if any of the values in the weight column are null
+        if df_['weight'].is_null().any():
+            warnings.warn('Some bins in data are not in df_freq and will get 0 weight')
+
+        # Fill the null values with zeros
+        df_= df_.with_columns(pl.col('weight').fill_null(strategy="zero"))
 
 
     # Calculate energy ratios
