@@ -443,6 +443,49 @@ class TestEnergyRatio(unittest.TestCase):
 
 
 
+    def test_weight_by_external_frequency_with_all_missing_df_freq_bin(self):
+
+        # Test the case where all bins in the data is not defined in df_freq
+        # In this case an error should be raised
+
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 8., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [1., 1., 1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+
+
+        # Finally test the case where the weight of one of the bins is missing and defaults to 0
+        # Here 6 and 7 m/s are specified but not 8, so the 8 m/s defaults to 0 weight
+        df_freq = pd.DataFrame({
+            'wd': [ 270.],
+            'ws': [10.],
+            'freq_val':[1.0]
+        })
+
+        with pytest.raises(RuntimeError):
+            er_out = erp.compute_energy_ratio(
+                er_in,
+                ref_turbines=[0],
+                test_turbines=[1],
+                use_predefined_wd=True,
+                use_predefined_ws=True,
+                wd_min = 269.,
+                wd_step=2.0,
+                ws_min = 0.5, # Make sure bin labels land on whole numbers
+                df_freq = df_freq
+            )
+
+
+
     def test_null_behavior(self):
 
         # Test that in the default, an energy ratio is returned so long as any value is not null
