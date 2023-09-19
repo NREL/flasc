@@ -85,6 +85,9 @@ def _compute_energy_ratio_single(df_,
         pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
     """
 
+    # Get the number of dataframes
+    num_df = len(df_names)
+
     # Filter df_ to remove null values
     null_filter = filter_all_nulls if remove_all_nulls else filter_any_nulls
     df_ = null_filter(df_, ref_cols, test_cols, ws_cols, wd_cols)
@@ -117,8 +120,11 @@ def _compute_energy_ratio_single(df_,
         .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
         .groupby(bin_cols_with_df_name, maintain_order=True)
         .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()])
-        )
-    
+
+        # Enforce that each ws/wd bin combination has to appear in all dataframes
+        .filter(pl.count().over(bin_cols_without_df_name) == num_df)
+
+    )
     # Determine the weighting of the ws/wd bins
 
     if df_freq_pl is None:
@@ -127,7 +133,7 @@ def _compute_energy_ratio_single(df_,
             .with_columns(
                 [
                     # Get the weighting by counts
-                    pl.col('count').min().over(bin_cols_without_df_name).alias('weight') if weight_by == 'min' else
+                    pl.col('count').min().over(bin_cols_without_df_name).alias('weight')  if weight_by == 'min' else
                     pl.col('count').sum().over(bin_cols_without_df_name).alias('weight')
                 ]
             )
