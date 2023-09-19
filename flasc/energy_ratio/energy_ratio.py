@@ -118,7 +118,7 @@ def _compute_energy_ratio_single(df_,
     # Group df_
     df_ = (df_
         .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
-        .groupby(bin_cols_with_df_name, maintain_order=True)
+        .group_by(bin_cols_with_df_name, maintain_order=True)
         .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()])
 
         # Enforce that each ws/wd bin combination has to appear in all dataframes
@@ -165,7 +165,7 @@ def _compute_energy_ratio_single(df_,
                 pl.col('pow_test').mul(pl.col('weight')).alias('test_energy'), # Compute the test energy
             ]
         )
-        .groupby(['wd_bin','df_name'], maintain_order=True)
+        .group_by(['wd_bin','df_name'], maintain_order=True)
         .agg([pl.sum("ref_energy"), pl.sum("test_energy"),pl.sum("count")])
         .with_columns(
             energy_ratio = pl.col('test_energy') / pl.col('ref_energy')
@@ -277,7 +277,7 @@ def _compute_energy_ratio_bootstrap(er_in,
     bound_names = er_in.df_names + uplift_names
 
     return (df_concat
-            .groupby(['wd_bin'], maintain_order=True)
+            .group_by(['wd_bin'], maintain_order=True)
             .agg([pl.first(n) for n in bound_names] + 
                     [pl.quantile(n, percentiles[0]/100).alias(n + "_ub") for n in bound_names] +
                     [pl.quantile(n, percentiles[1]/100).alias(n + "_lb") for n in bound_names] + 
@@ -580,7 +580,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
 #     df_ = (df_.with_columns(
 #             power_ratio = pl.col('pow_test') / pl.col('pow_ref'))
 #         .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
-#         .groupby(bin_cols_with_df_name, maintain_order=True)
+#         .group_by(bin_cols_with_df_name, maintain_order=True)
 #         .agg([pl.mean("pow_ref"), pl.mean("power_ratio"),pl.count()]) 
 #         .with_columns(
 #             [
