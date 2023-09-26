@@ -136,8 +136,6 @@ def _compute_energy_ratio_single(df_,
             .agg([pl.min('count') if weight_by == 'min' else pl.sum('count')])
             .rename({'count':'weight'})
         )
-    elif weight_by != 'min':
-        warnings.warn('Using weights from df_freq; weight_by ignored.')
     
     df_ = (df_.join(df_freq_pl, on=['wd_bin','ws_bin'], how='left')
             .with_columns(pl.col('weight'))# .fill_null(strategy="zero"))

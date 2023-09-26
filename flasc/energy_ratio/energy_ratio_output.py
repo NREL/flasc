@@ -92,34 +92,6 @@ class EnergyRatioOutput:
         self.N = N
         self.remove_all_nulls = remove_all_nulls
 
-    def _compute_df_freq(self):
-        """ Compute the of ws/wd as previously computed but not presently
-        computed with the energy calculation. """
-        
-        #TODO: I don't think so, but should this function count overlapping bins?
-
-        # Temporary copy of energy table
-        df_ = self.er_in.get_df()
-
-        # Filter df_ to remove null values
-        null_filter = filter_all_nulls if self.remove_all_nulls else filter_any_nulls
-        df_ = null_filter(df_, self.ref_cols, self.test_cols, self.ws_cols, self.wd_cols)
-
-        # Assign the wd/ws bins
-        df_ = add_ws_bin(df_, self.ws_cols, self.ws_step, self.ws_min, self.ws_max,
-            remove_all_nulls=self.remove_all_nulls)
-        df_ = add_wd_bin(df_, self.wd_cols, self.wd_step, self.wd_min, self.wd_max,
-            remove_all_nulls=self.remove_all_nulls)
-
-        # Get the bin count by wd, ws and df_name
-        df_group = df_.groupby(['wd_bin','ws_bin','df_name']).count()
-
-        # Collect the minimum number of points per bin
-        df_min = df_group.groupby(['wd_bin','ws_bin']).min()
-        df_sum = df_group.groupby(['wd_bin','ws_bin']).sum()
-
-        return df_.to_pandas(), df_group.to_pandas(), df_min.to_pandas(), df_sum.to_pandas()
-
     def plot_energy_ratios(self,
         df_names_subset: Optional[List[str]] = None,
         labels: Optional[List[str]] = None,
@@ -320,12 +292,9 @@ class EnergyRatioOutput:
         if polar_plot:
             bar_width = bar_width * np.pi / 180.0
 
-        # Plot the bin counts
-        _, df_freq, df_min, df_sum  = self._compute_df_freq()
-        df_freq_sum_all_ws = df_freq.groupby(["wd_bin","df_name"]).sum().reset_index()
-
         for i, (df_name, label) in enumerate(zip(df_names_subset, labels)):
             if _is_uplift: # Special case, use the minimum or the sum
+                # TODO: Work through this aspect next. 
                 if self.weight_by == 'min':
                     df_sub = df_min
                     ax.set_title('Minimum of Points per Bin')
@@ -333,13 +302,19 @@ class EnergyRatioOutput:
                     df_sub = df_sum
                     ax.set_title('Sum of Points per Bin')
             else:
-                df_sub = df_freq_sum_all_ws[df_freq_sum_all_ws["df_name"] == df_name]
+            #    df_sub = df_freq_sum_all_ws[df_freq_sum_all_ws["df_name"] == df_name]
                 ax.set_title('Number of Points per Bin')
             
-            x = np.array(df_sub["wd_bin"], dtype=float)
+            x = np.array(self.df_result["wd_bin"], dtype=float)
             if polar_plot: # Convert to radians
                 x = (90.0 - x) * np.pi / 180.0
-            axarr[1].bar(x - (i - N / 2) * bar_width, df_sub["count"], width=bar_width, label = label, color=color_dict[label])
+            axarr[1].bar(
+                x - (i - N / 2) * bar_width,
+                self.df_result["count_"+df_name],
+                width=bar_width,
+                label=label,
+                color=color_dict[label]
+            )
 
         ax.legend()
         ax.set_ylabel('Number of Points')
@@ -353,12 +328,10 @@ class EnergyRatioOutput:
 
         ax = axarr[2]        
 
-        if self.weight_by == 'min':
-            sns.scatterplot(data=df_min, x='wd_bin', y='ws_bin', size='count',hue='count', ax=ax, legend=True, color='k')
-            ax.set_title('Minimum Number of Points per Bin')
-        else:
-            sns.scatterplot(data=df_sum, x='wd_bin', y='ws_bin', size='count',hue='count', ax=ax, legend=True, color='k')
-            ax.set_title('Sum of Points per Bin')
+        df_bin_counts = self._compute_ws_counts()
+        sns.scatterplot(data=df_bin_counts, x='wd_bin', y='ws_bin', size='count',hue='count', ax=ax, legend=True, color='k')
+        ax.set_title('Minimum Number of Points per Bin' if self.weight_by == "min" else 
+            'Sum of Points per Bin')
         ax.set_xlabel('Wind Direction (deg)')
         ax.set_ylabel('Wind Speed (m/s)')
         
@@ -497,3 +470,29 @@ class EnergyRatioOutput:
         # ax.set_title("Minimum Number of Points per Bin")
 
         return axarr
+
+    def _compute_ws_counts(self):
+        """ Compute the of ws bin counts as previously computed but not presently
+        computed with the energy calculation. """
+
+        # Temporary copy of energy table
+        df_ = self.er_in.get_df()
+
+        # Filter df_ to remove null values
+        null_filter = filter_all_nulls if self.remove_all_nulls else filter_any_nulls
+        df_ = null_filter(df_, self.ref_cols, self.test_cols, self.ws_cols, self.wd_cols)
+
+        # Assign the wd/ws bins
+        df_ = add_ws_bin(df_, self.ws_cols, self.ws_step, self.ws_min, self.ws_max,
+            remove_all_nulls=self.remove_all_nulls)
+        df_ = add_wd_bin(df_, self.wd_cols, self.wd_step, self.wd_min, self.wd_max,
+            remove_all_nulls=self.remove_all_nulls)
+
+        # Get the bin count by wd, ws and df_name
+        df_group = df_.groupby(['wd_bin','ws_bin','df_name']).count()
+
+        # Collect the minimum number of points per bin
+        df_return = df_group.groupby(['wd_bin','ws_bin']).min() if self.weight_by == "min" \
+            else df_group.groupby(['wd_bin','ws_bin']).sum()
+
+        return df_return.drop('df_name').to_pandas()
