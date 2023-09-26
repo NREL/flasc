@@ -25,6 +25,7 @@ class EnergyRatioOutput:
     def __init__(self,
                  df_result: pd.DataFrame,
                  er_in: EnergyRatioInput,
+                 df_freq: pd.DataFrame,
                  ref_cols: List[str],
                  test_cols: List[str],
                  wd_cols: List[str],
@@ -46,7 +47,8 @@ class EnergyRatioOutput:
 
         Args:
             df_result (pd.DataFrame): The energy ratio results.
-            eri (EnergyRatioInput): The energy table used in the energy ratio calculation.
+            er_in (EnergyRatioInput): The energy table used in the energy ratio calculation.
+            df_freq (pd.DataFrame): Weights used for bins.
             ref_cols (List[str]): The column names of the reference turbines.
             test_cols (List[str]): The column names of the test wind turbines.
             wd_cols (List[str]): The column names of the wind directions.
@@ -69,6 +71,7 @@ class EnergyRatioOutput:
                 must be available to compute the bin. Defaults to False.
         """
         self.df_result = df_result
+        self.df_freq = df_freq
         self.df_names = er_in.df_names
         self.num_df = len(self.df_names)
         self.er_in = er_in

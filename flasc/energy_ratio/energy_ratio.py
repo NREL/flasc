@@ -273,9 +273,9 @@ def _compute_energy_ratio_bootstrap(er_in,
         ) for i in range(N)
     ]
     df_concat = pl.concat([er_single_out[0] for er_single_out in er_single_outs])
-    # First output contains the original table; use that df_freq.
-    df_freq = er_single_outs[0][1]
-    
+    # First output contains the original table; use that df_freq_pl
+    df_freq_pl = er_single_outs[0][1]
+
     bound_names = er_in.df_names + uplift_names
 
     return (df_concat
@@ -286,7 +286,7 @@ def _compute_energy_ratio_bootstrap(er_in,
                     [pl.first(f'count_{n}') for n in er_in.df_names]
                 )
             .sort('wd_bin')
-            )
+            ), df_freq_pl
 
 def compute_energy_ratio(er_in: EnergyRatioInput,
                          ref_turbines = None,
@@ -455,7 +455,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         if percentiles is not None:
             print("percentiles can only be used with bootstrapping (N > 1).")
         # Compute the energy ratio
-        df_res, df_freq = _compute_energy_ratio_single(
+        df_res, df_freq_pl = _compute_energy_ratio_single(
             df_,
             er_in.df_names,
             ref_cols,
@@ -483,7 +483,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             raise ValueError("percentiles should be a two element list of the "+\
                 "upper and lower desired percentiles.")
 
-        df_res = _compute_energy_ratio_bootstrap(
+        df_res, df_freq_pl = _compute_energy_ratio_bootstrap(
             er_in,
             ref_cols,
             test_cols,
@@ -512,6 +512,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
     # Return the results as an EnergyRatioOutput object
     return EnergyRatioOutput(df_res.to_pandas(), 
                                 er_in,
+                                df_freq_pl.to_pandas(),
                                 ref_cols, 
                                 test_cols, 
                                 wd_cols,
