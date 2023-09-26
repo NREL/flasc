@@ -173,12 +173,16 @@ def _compute_energy_ratio_single(df_,
 
     # In the case of two turbines, compute an uplift column
     for upp, upn in zip(uplift_pairs, uplift_names):
+        count_cols = ["count_"+upp[0], "count_"+upp[1]] 
         df_ = df_.with_columns(
-            (100 * (pl.col(upp[1]) - pl.col(upp[0])) / pl.col(upp[0])).alias(upn)
+            [(100 * (pl.col(upp[1]) - pl.col(upp[0])) / pl.col(upp[0])).alias(upn),
+             (pl.min_horizontal(count_cols) if weight_by == "min" else 
+              pl.sum_horizontal(count_cols)).alias("count_"+upn)
+            ]
         )
 
     # Enforce a column order
-    df_ = df_.select(['wd_bin'] + df_names + uplift_names + [f'count_{n}' for n in df_names])
+    df_ = df_.select(['wd_bin'] + df_names + uplift_names + [f'count_{n}' for n in df_names+uplift_names])
 
     return df_, df_freq_pl
 
@@ -281,7 +285,7 @@ def _compute_energy_ratio_bootstrap(er_in,
             .agg([pl.first(n) for n in bound_names] + 
                     [pl.quantile(n, percentiles[0]/100).alias(n + "_ub") for n in bound_names] +
                     [pl.quantile(n, percentiles[1]/100).alias(n + "_lb") for n in bound_names] + 
-                    [pl.first(f'count_{n}') for n in er_in.df_names]
+                    [pl.first(f'count_{n}') for n in bound_names]
                 )
             .sort('wd_bin')
             ), df_freq_pl

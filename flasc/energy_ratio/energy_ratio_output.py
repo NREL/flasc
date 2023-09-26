@@ -294,15 +294,9 @@ class EnergyRatioOutput:
 
         for i, (df_name, label) in enumerate(zip(df_names_subset, labels)):
             if _is_uplift: # Special case, use the minimum or the sum
-                # TODO: Work through this aspect next. 
-                if self.weight_by == 'min':
-                    df_sub = df_min
-                    ax.set_title('Minimum of Points per Bin')
-                else:
-                    df_sub = df_sum
-                    ax.set_title('Sum of Points per Bin')
+                ax.set_title('Minimum of Points per Bin' if self.weight_by == "min" else
+                    'Sum of Points per Bin')
             else:
-            #    df_sub = df_freq_sum_all_ws[df_freq_sum_all_ws["df_name"] == df_name]
                 ax.set_title('Number of Points per Bin')
             
             x = np.array(self.df_result["wd_bin"], dtype=float)
