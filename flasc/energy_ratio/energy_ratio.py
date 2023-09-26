@@ -83,6 +83,7 @@ def _compute_energy_ratio_single(df_,
 
     Returns:
         pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
+        pl.DataFrame: A dataframe containing the weights each wind direction and wind speed bin
     """
 
     # Get the number of dataframes
@@ -181,7 +182,7 @@ def _compute_energy_ratio_single(df_,
     # Enforce a column order
     df_ = df_.select(['wd_bin'] + df_names + uplift_names + [f'count_{n}' for n in df_names])
 
-    return(df_)
+    return df_, df_freq_pl
 
 # Bootstrap function wraps the _compute_energy_ratio function
 def _compute_energy_ratio_bootstrap(er_in,
@@ -248,28 +249,33 @@ def _compute_energy_ratio_bootstrap(er_in,
     """
 
     # Otherwise run the function N times and concatenate the results to compute statistics
-
-    df_concat = pl.concat([_compute_energy_ratio_single(er_in.resample_energy_table(i),
-                        er_in.df_names,
-                        ref_cols,
-                        test_cols,
-                        wd_cols,
-                        ws_cols,
-                        wd_step,
-                        wd_min,
-                        wd_max,
-                        ws_step,
-                        ws_min,
-                        ws_max,
-                        bin_cols_in,
-                        weight_by,
-                        df_freq_pl,
-                        wd_bin_overlap_radius,
-                        uplift_pairs,
-                        uplift_names,
-                        remove_all_nulls
-                        ) for i in range(N)])
-
+    er_single_outs = [
+        _compute_energy_ratio_single(
+            er_in.resample_energy_table(perform_resample=(i != 0)),
+            er_in.df_names,
+            ref_cols,
+            test_cols,
+            wd_cols,
+            ws_cols,
+            wd_step,
+            wd_min,
+            wd_max,
+            ws_step,
+            ws_min,
+            ws_max,
+            bin_cols_in,
+            weight_by,
+            df_freq_pl,
+            wd_bin_overlap_radius,
+            uplift_pairs,
+            uplift_names,
+            remove_all_nulls
+        ) for i in range(N)
+    ]
+    df_concat = pl.concat([er_single_out[0] for er_single_out in er_single_outs])
+    # First output contains the original table; use that df_freq.
+    df_freq = er_single_outs[0][1]
+    
     bound_names = er_in.df_names + uplift_names
 
     return (df_concat
@@ -449,26 +455,27 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         if percentiles is not None:
             print("percentiles can only be used with bootstrapping (N > 1).")
         # Compute the energy ratio
-        df_res = _compute_energy_ratio_single(df_,
-                        er_in.df_names,
-                        ref_cols,
-                        test_cols,
-                        wd_cols,
-                        ws_cols,
-                        wd_step,
-                        wd_min,
-                        wd_max,
-                        ws_step,
-                        ws_min,
-                        ws_max,
-                        bin_cols_in,
-                        weight_by,
-                        df_freq_pl,
-                        wd_bin_overlap_radius,
-                        uplift_pairs,
-                        uplift_names,
-                        remove_all_nulls
-                    )
+        df_res, df_freq = _compute_energy_ratio_single(
+            df_,
+            er_in.df_names,
+            ref_cols,
+            test_cols,
+            wd_cols,
+            ws_cols,
+            wd_step,
+            wd_min,
+            wd_max,
+            ws_step,
+            ws_min,
+            ws_max,
+            bin_cols_in,
+            weight_by,
+            df_freq_pl,
+            wd_bin_overlap_radius,
+            uplift_pairs,
+            uplift_names,
+            remove_all_nulls
+        )
     else:
         if percentiles is None:
             percentiles = [5, 95]
@@ -476,26 +483,27 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             raise ValueError("percentiles should be a two element list of the "+\
                 "upper and lower desired percentiles.")
 
-        df_res = _compute_energy_ratio_bootstrap(er_in,
-                            ref_cols,
-                            test_cols,
-                            wd_cols,
-                            ws_cols,
-                            wd_step,
-                            wd_min,
-                            wd_max,
-                            ws_step,
-                            ws_min,
-                            ws_max,
-                            bin_cols_in,
-                            weight_by,
-                            df_freq_pl,
-                            wd_bin_overlap_radius,
-                            uplift_pairs,
-                            uplift_names,
-                            N,
-                            percentiles
-                        )
+        df_res = _compute_energy_ratio_bootstrap(
+            er_in,
+            ref_cols,
+            test_cols,
+            wd_cols,
+            ws_cols,
+            wd_step,
+            wd_min,
+            wd_max,
+            ws_step,
+            ws_min,
+            ws_max,
+            bin_cols_in,
+            weight_by,
+            df_freq_pl,
+            wd_bin_overlap_radius,
+            uplift_pairs,
+            uplift_names,
+            N,
+            percentiles
+        )
     
     # Return the df_freqs, handle as needed.
     
