@@ -100,7 +100,7 @@ class EnergyRatioOutput:
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
         show_wind_speed_distribution: bool | None = None,
-        overlay_weighting: bool = False,
+        overlay_frequency: bool = False,
         _is_uplift: bool = False
     ) -> Union[axes.Axes, List[axes.Axes]]:
         """Plot the energy ratios.
@@ -113,7 +113,7 @@ class EnergyRatioOutput:
             polar_plot (bool, optional): Whether to plot the energy ratios on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
             show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
-            overlay_weighting (bool, optional): Whether to plot the frequency distribution used for calculation.
+            overlay_frequency (bool, optional): Whether to plot the frequency distribution used for calculation.
             _is_uplift (bool, optional): Whether being called by plot_uplift(). Defaults to False.
 
         Returns:
@@ -312,7 +312,7 @@ class EnergyRatioOutput:
                 label=label,
                 color=color_dict[label]
             )
-        if overlay_weighting:
+        if overlay_frequency:
             if "weight" in color_dict:
                 col = color_dict["weight"]
             else:
@@ -352,7 +352,7 @@ class EnergyRatioOutput:
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
         show_wind_speed_distribution: bool = True,
-        overlay_weighting: bool = False,
+        overlay_frequency: bool = False,
     )-> Union[axes.Axes, List[axes.Axes]]:
         """Plot the uplift in energy ratio
 
@@ -364,7 +364,7 @@ class EnergyRatioOutput:
             polar_plot (bool, optional): Whether to plot the uplift on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
             show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
-            overlay_weighting (bool, optional): Whether to plot the frequency distribution used for calculation.
+            overlay_frequency (bool, optional): Whether to plot the frequency distribution used for calculation.
 
         Raises:
             ValueError: If show_wind_speed_distribution is True and polar_plot is True.
@@ -455,7 +455,7 @@ class EnergyRatioOutput:
             polar_plot=polar_plot,
             show_wind_direction_distribution=show_wind_direction_distribution,
             show_wind_speed_distribution=show_wind_speed_distribution,
-            overlay_weighting=overlay_weighting,
+            overlay_frequency=overlay_frequency,
             _is_uplift=True
         )
             
