@@ -100,6 +100,7 @@ class EnergyRatioOutput:
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
         show_wind_speed_distribution: bool | None = None,
+        overlay_weighting: bool = False,
         _is_uplift: bool = False
     ) -> Union[axes.Axes, List[axes.Axes]]:
         """Plot the energy ratios.
@@ -112,6 +113,7 @@ class EnergyRatioOutput:
             polar_plot (bool, optional): Whether to plot the energy ratios on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
             show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
+            overlay_weighting (bool, optional): Whether to plot the frequency distribution used for calculation.
             _is_uplift (bool, optional): Whether being called by plot_uplift(). Defaults to False.
 
         Returns:
@@ -167,13 +169,14 @@ class EnergyRatioOutput:
         # If color_dict is None, use the default colors
         if color_dict is None:
             color_dict = {labels[i]: default_colors[i] for i in range(N)}
+            color_dict["weight"] = "black"
 
         # If color_dict is not a dictionary, raise an error
         if not isinstance(color_dict, dict):
             raise ValueError('color_dict must be a dictionary')
 
         # Make sure the keys of color_dict are in labels
-        if not all([label in labels for label in color_dict.keys()]):
+        if not all([label in labels+["weight"] for label in color_dict.keys()]):
             raise ValueError('color_dict keys must be in df_names_subset')
 
         if axarr is None:
@@ -302,13 +305,20 @@ class EnergyRatioOutput:
             x = np.array(self.df_result["wd_bin"], dtype=float)
             if polar_plot: # Convert to radians
                 x = (90.0 - x) * np.pi / 180.0
-            axarr[1].bar(
+            ax.bar(
                 x - (i - N / 2) * bar_width,
                 self.df_result["count_"+df_name],
                 width=bar_width,
                 label=label,
                 color=color_dict[label]
             )
+        if overlay_weighting:
+            if "weight" in color_dict:
+                col = color_dict["weight"]
+            else:
+                col = "black"
+            df_wd_weight = self.df_freq.drop(columns='ws_bin').groupby('wd_bin').sum().reset_index()
+            ax.plot(df_wd_weight['wd_bin'], df_wd_weight['weight'], color=col, label="Weight")
 
         ax.legend()
         ax.set_ylabel('Number of Points')
@@ -341,7 +351,8 @@ class EnergyRatioOutput:
         axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
-        show_wind_speed_distribution: bool = True
+        show_wind_speed_distribution: bool = True,
+        overlay_weighting: bool = False,
     )-> Union[axes.Axes, List[axes.Axes]]:
         """Plot the uplift in energy ratio
 
@@ -353,6 +364,7 @@ class EnergyRatioOutput:
             polar_plot (bool, optional): Whether to plot the uplift on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
             show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
+            overlay_weighting (bool, optional): Whether to plot the frequency distribution used for calculation.
 
         Raises:
             ValueError: If show_wind_speed_distribution is True and polar_plot is True.
@@ -411,13 +423,14 @@ class EnergyRatioOutput:
         # If color_dict is None, use the default colors
         if color_dict is None:
             color_dict = {labels[i]: default_colors[i] for i in range(N)}
+            color_dict["weight"] = "black"
 
         # If color_dict is not a dictionary, raise an error
         if not isinstance(color_dict, dict):
             raise ValueError('color_dict must be a dictionary')
 
         # Make sure the keys of color_dict are in labels
-        if not all([label in labels for label in color_dict.keys()]):
+        if not all([label in labels+["weight"] for label in color_dict.keys()]):
             raise ValueError('color_dict keys must be in df_names_subset')
 
 
@@ -442,6 +455,7 @@ class EnergyRatioOutput:
             polar_plot=polar_plot,
             show_wind_direction_distribution=show_wind_direction_distribution,
             show_wind_speed_distribution=show_wind_speed_distribution,
+            overlay_weighting=overlay_weighting,
             _is_uplift=True
         )
             
