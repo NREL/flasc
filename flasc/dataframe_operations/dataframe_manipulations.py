@@ -13,19 +13,19 @@
 
 # import datetime
 import datetime
-import numpy as np
 import os as os
-import pandas as pd
 import warnings
 
+import numpy as np
+import pandas as pd
 from floris.utilities import wrap_360
 
-from ..dataframe_operations import df_reader_writer as fsio
 from .. import (
-    time_operations as fsato,
     floris_tools as ftools,
-    utilities as fsut
+    time_operations as fsato,
+    utilities as fsut,
 )
+from ..dataframe_operations import df_reader_writer as fsio
 
 
 # Functions related to wind farm analysis for df
@@ -856,6 +856,36 @@ def df_sort_and_find_duplicates(df):
         df = df.drop(columns='index')
 
     return df, duplicate_entries_idx
+
+def is_day_or_night(df, 
+                    latitude, 
+                    longitude, 
+                    dawn_altitude_deg=6,
+                    datetime_column='time'):
+    
+    import ephem # Import here so don't use the memory if not calling this function
+
+    # Create an Observer with the given latitude and longitude
+    observer = ephem.Observer()
+
+    # Define a function to determine if it's day or night
+    def is_daytime(row):
+        observer.lat = str(latitude)
+        observer.long = str(longitude)
+        observer.date = row[datetime_column]
+        sun = ephem.Sun()
+        sun.compute(observer)
+        return {
+            'is_day': int(sun.alt > dawn_altitude_deg),  # If the sun's altitude is above dawn_altitude_deg, it's daytime.
+            'sun_altitude': float(sun.alt)
+        }
+
+    # Add a new column 'is_day' and 'sun_altitude' to the DataFrame
+    result = df.apply(is_daytime, axis=1, result_type='expand')
+    df['is_day'] = result['is_day']
+    df['sun_altitude'] = result['sun_altitude']
+
+    return df
 
 
 def make_df_wide(df):
