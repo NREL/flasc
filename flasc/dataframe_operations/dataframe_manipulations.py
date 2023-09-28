@@ -19,6 +19,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
+import matplotlib.pyplot as plt
 
 from .. import (
     floris_tools as ftools,
@@ -857,36 +858,104 @@ def df_sort_and_find_duplicates(df):
 
     return df, duplicate_entries_idx
 
-def is_day_or_night(df, 
-                    latitude, 
-                    longitude, 
-                    dawn_altitude_deg=6,
-                    datetime_column='time'):
+def is_day_or_night(df: pd.DataFrame, 
+                    latitude: float, 
+                    longitude: float, 
+                    lag_hours: float=0,
+                    datetime_column: str='time'):
+    """
+    Determine whether it's day or night for a given set of coordinates and UTC timestamp in a DataFrame.
+
+    Args:
+        df (pd.DataFrame): A Pandas DataFrame containing the time in UTC and other relevant data.
+        latitude (float): The latitude of the location for which to determine day or night.
+        longitude (float): The longitude of the location for which to determine day or night.
+        lag_hours (float, optional): The number of hours to lag behind the timestamp for the daylight determination. Default is 0.
+        datetime_column (str, optional): The name of the DataFrame column containing the timestamp in UTC. Default is 'time'.
+
+    Returns:
+        pd.DataFrame: The input DataFrame with two additional columns: 'sun_altitude' (the sun's altitude at the given timestamp)
+        and 'is_day' (a boolean indicating whether it's daytime at the given timestamp).
+
+    """
     
     import ephem # Import here so don't use the memory if not calling this function
 
     # Create an Observer with the given latitude and longitude
     observer = ephem.Observer()
 
-    # Define a function to determine if it's day or night
-    def is_daytime(row):
+    def san_alt(row):
         observer.lat = str(latitude)
         observer.long = str(longitude)
         observer.date = row[datetime_column]
         sun = ephem.Sun()
         sun.compute(observer)
-        return {
-            'is_day': int(sun.alt > dawn_altitude_deg),  # If the sun's altitude is above dawn_altitude_deg, it's daytime.
-            'sun_altitude': float(sun.alt)
-        }
+        return float(sun.alt)
+
+    # Define a function to determine if it's day or night
+    def is_daytime(row):
+        observer.lat = str(latitude)
+        observer.long = str(longitude)
+        observer.date = row[datetime_column] - datetime.timedelta(hours=lag_hours)
+        sun = ephem.Sun()
+        sun.compute(observer)
+
+        return bool(sun.alt > 0)  # If the sun's altitude is above dawn_altitude_deg, it's daytime.
+
 
     # Add a new column 'is_day' and 'sun_altitude' to the DataFrame
-    result = df.apply(is_daytime, axis=1, result_type='expand')
-    df['is_day'] = result['is_day']
-    df['sun_altitude'] = result['sun_altitude']
+    df['sun_altitude'] = df.apply(san_alt, axis=1)
+    df['is_day'] = df.apply(is_daytime, axis=1)
+    
 
     return df
 
+
+def plot_sun_altitude_with_day_night_color(df: pd.DataFrame,
+                                           ax: plt.axis =None):
+    """
+    Plot Sun Altitude with Day-Night Color Differentiation.
+
+    This function creates a plot of Sun Altitude over time, distinguishing between day and night periods
+    with different background colors. The input DataFrame 'df' should contain time and sun_altitude columns,
+    as well as a boolean 'is_day' column to indicate day and night periods.
+
+    Args:
+        df (pd.DataFrame): A DataFrame containing time, sun_altitude, and is_day columns.
+        ax (plt.axis, optional): An optional Matplotlib axis to use for the plot. If not provided, a new
+            axis will be created.
+
+    Returns:
+        None
+    """
+    # Separate the DataFrame into day and night parts
+    day_data = df[df['is_day']]
+    night_data = df[~df['is_day']]
+
+    # Create a figure and axis for the plot
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    # Plot day data with a blue background
+    ax.plot(day_data['time'], day_data['sun_altitude'],color='orange',label='Day',marker='.',ls='None')
+    # ax.fill_between(day_data['time'], day_data['sun_altitude'], color='orange', alpha=0.7)
+
+    # Plot night data with a black background
+    ax.plot(night_data['time'], night_data['sun_altitude'],color='darkblue',label='Night',marker='.',ls='None')
+    # ax.fill_between(night_data['time'], night_data['sun_altitude'], color='darkblue', alpha=0.7)
+
+    # Set axis labels and a legend
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Sun Altitude')
+    ax.set_title('Sun Altitude vs. Time')
+    ax.legend(loc='upper right')
+
+    # Show the plot
+    plt.xticks(rotation=45)  # Rotate x-axis labels for readability
+    
+    # Final touches
+    ax.grid(True)
+    ax.axhline(0, color='k', lw=3)
 
 def make_df_wide(df):
     df["turbid"] = df['turbid'].astype(int)
