@@ -11,6 +11,7 @@
 
 # See https://floris.readthedocs.io for documentation
 import numpy as np
+from flasc.model_tuning.tuner_utils import set_fi_param
 
 
 def sweep_velocity_model_parameter_annual_total_wake_losses(
@@ -74,7 +75,13 @@ def sweep_wd_std_for_er():
     pass
 
 
-def _sweep_parameter(parameter, value_candidates, fi_init, evaluator, evaluator_kwargs):
+def _sweep_parameter(
+        parameter,
+        value_candidates,
+        fi_init,
+        evaluator,
+        evaluator_kwargs
+    ):
     """
     Inputs:
         evaluator -- function handle to be evaluated
@@ -82,8 +89,8 @@ def _sweep_parameter(parameter, value_candidates, fi_init, evaluator, evaluator_
     """
 
     # Generate an fi for each parameter based on fi_init
-    # (probably want a special function for this, can get from floris_tuner.py)
-    fi_list = [] #< Will contain the fis
+    param_idx = None # TODO: handling for param_idx
+    fi_list = [set_fi_param(fi_init, parameter, v, param_idx) for v in value_candidates]
 
     values_floris = [evaluator(fi, **evaluator_kwargs) for fi in zip(fi_list)]
     
