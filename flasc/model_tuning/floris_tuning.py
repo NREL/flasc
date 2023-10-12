@@ -85,24 +85,21 @@ def _sweep_parameter(parameter, value_candidates, fi_init, evaluator, evaluator_
     # (probably want a special function for this, can get from floris_tuner.py)
     fi_list = [] #< Will contain the fis
 
-    # Make the equivalent df for each fi, put into list
-    # Now, we're going to need the ws, wd from df_scada, which is a little 
-    # awkward to get? But can be passed in, I guess.
-    df_fi_list = []
-
-    values_floris = [evaluator(df_fi, fi, **evaluator_kwargs) for df_fi, fi in zip(df_fi_list, fi_list)]
+    values_floris = [evaluator(fi, **evaluator_kwargs) for fi in zip(fi_list)]
     
     # Compute the errors (might be a bit more complex than this, but gives an idea)
 
     return values_floris
 
-def evaluate_aep(df, fi, freq, yaw_angles=None):
+def evaluate_aep(fi, freq, yaw_angles=None):
     # Possible function to evaluate in _sweep_parameter()
 
     return fi.get_farm_AEP(freq, yaw_angles=yaw_angles, nowake=False)
 
-def evaluate_energy_ratio(df, fi,):
+def evaluate_energy_ratio(fi,):
     # Possible function to evaluate in _sweep_parameter()
+
+    # Will need to create df_fi here. Should be doable.
 
     return energy_ratio # what exactly is returned here?
 
