@@ -14,7 +14,8 @@ from floris.tools import FlorisInterface
 # from floris.tools import ParallelComputingInterface
 
 
-def replicate_nan_values(df_1, df_2):
+def replicate_nan_values(df_1: pd.DataFrame, 
+                         df_2: pd.DataFrame):
     """
     Replicate NaN Values in DataFrame df_2 to Match DataFrame df_1.
 
