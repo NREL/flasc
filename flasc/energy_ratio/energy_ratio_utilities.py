@@ -5,7 +5,7 @@ import numpy as np
 from typing import Union, List, Optional
 
 
-
+#TODO: Someday I think can replace with polars-native code: https://github.com/pola-rs/polars/issues/8551
 def cut(col_name: str,
         edges: Union[np.ndarray, list],
     ) -> pl.Expr:
@@ -56,7 +56,7 @@ def bin_column(df_: pl.DataFrame,
         cut(
             col_name=col_name,
             edges = edges
-        ).alias(bin_col_name)
+        ).alias(bin_col_name).cast(df_[col_name].dtype)
     )
 
 def add_ws(df_: pl.DataFrame,
@@ -386,6 +386,7 @@ def check_compute_energy_ratio_inputs(
     ws_max,
     bin_cols_in,
     weight_by,
+    df_freq,
     wd_bin_overlap_radius,
     uplift_pairs,
     uplift_names,
@@ -451,5 +452,10 @@ def check_compute_energy_ratio_inputs(
     # Confirm the weight_by argument is valid
     if weight_by not in ['min', 'sum']:
         raise ValueError('weight_by must be one of "min", or "sum"')
+    
+    # Confirm df_freq contains ws, wd and freq_val
+    if df_freq is not None:
+        if ('ws' not in df_freq.columns) or ('wd' not in df_freq.columns) or  ('freq_val' not in df_freq.columns):
+            raise ValueError('df_freq must have columns ws, wd and freq_val')
 
     return None
