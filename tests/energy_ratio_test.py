@@ -368,7 +368,7 @@ class TestEnergyRatio(unittest.TestCase):
 
         er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
 
-        # In the final test, specify a bin frequency where 7 m/s is 90% and 8 m/s is 10%
+        # In the final test, specify uniform bin frequencies
         df_freq = pd.DataFrame({
             'wd': [270., 270., 270.,270.],
             'ws': [7., 8.,15.,20.],
