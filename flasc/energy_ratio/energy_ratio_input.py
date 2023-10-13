@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -91,27 +92,20 @@ class EnergyRatioInput:
         return self.df_pl.clone()
     
     def resample_energy_table(self, 
-                              i: int,
+                              perform_resample: bool=True
                               )-> pl.DataFrame:
         """Use the block column of an energy table to resample the data.
 
         Args:
             df_e_ (pl.DataFrame): An energy table with a block column
-            i (int): An index code where 0 returns the original energy table and
-                 and other values return a resampled energy table
+            perform_resample: Boolean, if False returns original energy table
 
         Returns:
             pl.DataFrame: A new energy table with (approximately)
                 the same number of rows as the original
         """
 
-        # If i is 0, return the original dataframe without resampling
-        if i == 0: 
-            return self.get_df()
-        
-        # If i is not 0, resample the dataframe
-        else:
-            
+        if perform_resample:
             # Generate a random np.array, num_blocks long, where each element is
             #  an integer between 0 and num_blocks-1
             block_list = np.random.randint(0, self.num_blocks, self.num_blocks)
@@ -121,3 +115,5 @@ class EnergyRatioInput:
                     'block':block_list
                 }
                 ).join(self.df_pl, how='inner', on='block')
+        else: 
+            return self.get_df()
