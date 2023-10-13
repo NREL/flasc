@@ -14,7 +14,7 @@ import numpy as np
 from flasc.model_tuning.tuner_utils import set_fi_param
 
 
-def sweep_velocity_model_parameter_annual_total_wake_losses(
+def sweep_velocity_model_parameter_for_annual_wake_losses(
         parameter,
         value_candidates,
         df_scada,
@@ -27,6 +27,7 @@ def sweep_velocity_model_parameter_annual_total_wake_losses(
 
     # Uses total wake losses
 
+    # How should we define df_freq here? as a FLORIS wind rose? 
     freq = df_freq # Somehow, use the same df_freq for SCADA aep as FLORIS aep
 
     # Do we use FLASC to compute AEP? how do we do this exactly?
@@ -89,8 +90,11 @@ def _sweep_parameter(
     """
 
     # Generate an fi for each parameter based on fi_init
-    param_idx = None # TODO: handling for param_idx
-    fi_list = [set_fi_param(fi_init, parameter, v, param_idx) for v in value_candidates]
+    if parameter == "wd_std":
+        fi_list = [] # TODO: setting wd_std
+    else:
+        param_idx = None # TODO: handling for param_idx
+        fi_list = [set_fi_param(fi_init, parameter, v, param_idx) for v in value_candidates]
 
     values_floris = [evaluator(fi, **evaluator_kwargs) for fi in zip(fi_list)]
     
