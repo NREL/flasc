@@ -138,7 +138,7 @@ def _compute_energy_ratio_single(df_,
         )
     
     df_ = (df_.join(df_freq_pl, on=['wd_bin','ws_bin'], how='left')
-            .with_columns(pl.col('weight'))# .fill_null(strategy="zero"))
+            .with_columns(pl.col('weight'))
     )
 
     # Check if all the values in the weight column are null
@@ -151,6 +151,9 @@ def _compute_energy_ratio_single(df_,
 
     # Fill the null values with zeros
     df_= df_.with_columns(pl.col('weight').fill_null(strategy="zero"))
+
+    # Normalize the weights
+    df_ = df_.with_columns(pl.col('weight').truediv(pl.col('weight').sum()))
 
     # Calculate energy ratios
     df_ = (df_
