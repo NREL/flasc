@@ -25,6 +25,7 @@ class EnergyRatioOutput:
     def __init__(self,
                  df_result: pd.DataFrame,
                  er_in: EnergyRatioInput,
+                 df_freq: pd.DataFrame,
                  ref_cols: List[str],
                  test_cols: List[str],
                  wd_cols: List[str],
@@ -46,7 +47,8 @@ class EnergyRatioOutput:
 
         Args:
             df_result (pd.DataFrame): The energy ratio results.
-            eri (EnergyRatioInput): The energy table used in the energy ratio calculation.
+            er_in (EnergyRatioInput): The energy table used in the energy ratio calculation.
+            df_freq (pd.DataFrame): Weights used for bins.
             ref_cols (List[str]): The column names of the reference turbines.
             test_cols (List[str]): The column names of the test wind turbines.
             wd_cols (List[str]): The column names of the wind directions.
@@ -69,6 +71,7 @@ class EnergyRatioOutput:
                 must be available to compute the bin. Defaults to False.
         """
         self.df_result = df_result
+        self.df_freq = df_freq
         self.df_names = er_in.df_names
         self.num_df = len(self.df_names)
         self.er_in = er_in
@@ -89,34 +92,6 @@ class EnergyRatioOutput:
         self.N = N
         self.remove_all_nulls = remove_all_nulls
 
-    def _compute_df_freq(self):
-        """ Compute the of ws/wd as previously computed but not presently
-        computed with the energy calculation. """
-        
-        #TODO: I don't think so, but should this function count overlapping bins?
-
-        # Temporary copy of energy table
-        df_ = self.er_in.get_df()
-
-        # Filter df_ to remove null values
-        null_filter = filter_all_nulls if self.remove_all_nulls else filter_any_nulls
-        df_ = null_filter(df_, self.ref_cols, self.test_cols, self.ws_cols, self.wd_cols)
-
-        # Assign the wd/ws bins
-        df_ = add_ws_bin(df_, self.ws_cols, self.ws_step, self.ws_min, self.ws_max,
-            remove_all_nulls=self.remove_all_nulls)
-        df_ = add_wd_bin(df_, self.wd_cols, self.wd_step, self.wd_min, self.wd_max,
-            remove_all_nulls=self.remove_all_nulls)
-
-        # Get the bin count by wd, ws and df_name
-        df_group = df_.groupby(['wd_bin','ws_bin','df_name']).count()
-
-        # Collect the minimum number of points per bin
-        df_min = df_group.groupby(['wd_bin','ws_bin']).min()
-        df_sum = df_group.groupby(['wd_bin','ws_bin']).sum()
-
-        return df_.to_pandas(), df_group.to_pandas(), df_min.to_pandas(), df_sum.to_pandas()
-
     def plot_energy_ratios(self,
         df_names_subset: Optional[List[str]] = None,
         labels: Optional[List[str]] = None,
@@ -125,6 +100,7 @@ class EnergyRatioOutput:
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
         show_wind_speed_distribution: bool | None = None,
+        overlay_frequency: bool = False,
         _is_uplift: bool = False
     ) -> Union[axes.Axes, List[axes.Axes]]:
         """Plot the energy ratios.
@@ -137,6 +113,7 @@ class EnergyRatioOutput:
             polar_plot (bool, optional): Whether to plot the energy ratios on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
             show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
+            overlay_frequency (bool, optional): Whether to plot the frequency distribution used for calculation.
             _is_uplift (bool, optional): Whether being called by plot_uplift(). Defaults to False.
 
         Returns:
@@ -192,13 +169,14 @@ class EnergyRatioOutput:
         # If color_dict is None, use the default colors
         if color_dict is None:
             color_dict = {labels[i]: default_colors[i] for i in range(N)}
+            color_dict["weight"] = "black"
 
         # If color_dict is not a dictionary, raise an error
         if not isinstance(color_dict, dict):
             raise ValueError('color_dict must be a dictionary')
 
         # Make sure the keys of color_dict are in labels
-        if not all([label in labels for label in color_dict.keys()]):
+        if not all([label in labels+["weight"] for label in color_dict.keys()]):
             raise ValueError('color_dict keys must be in df_names_subset')
 
         if axarr is None:
@@ -317,26 +295,30 @@ class EnergyRatioOutput:
         if polar_plot:
             bar_width = bar_width * np.pi / 180.0
 
-        # Plot the bin counts
-        _, df_freq, df_min, df_sum  = self._compute_df_freq()
-        df_freq_sum_all_ws = df_freq.groupby(["wd_bin","df_name"]).sum().reset_index()
-
         for i, (df_name, label) in enumerate(zip(df_names_subset, labels)):
             if _is_uplift: # Special case, use the minimum or the sum
-                if self.weight_by == 'min':
-                    df_sub = df_min
-                    ax.set_title('Minimum of Points per Bin')
-                else:
-                    df_sub = df_sum
-                    ax.set_title('Sum of Points per Bin')
+                ax.set_title('Minimum of Points per Bin' if self.weight_by == "min" else
+                    'Sum of Points per Bin')
             else:
-                df_sub = df_freq_sum_all_ws[df_freq_sum_all_ws["df_name"] == df_name]
                 ax.set_title('Number of Points per Bin')
             
-            x = np.array(df_sub["wd_bin"], dtype=float)
+            x = np.array(self.df_result["wd_bin"], dtype=float)
             if polar_plot: # Convert to radians
                 x = (90.0 - x) * np.pi / 180.0
-            axarr[1].bar(x - (i - N / 2) * bar_width, df_sub["count"], width=bar_width, label = label, color=color_dict[label])
+            ax.bar(
+                x - (i - N / 2) * bar_width,
+                self.df_result["count_"+df_name],
+                width=bar_width,
+                label=label,
+                color=color_dict[label]
+            )
+        if overlay_frequency:
+            if "weight" in color_dict:
+                col = color_dict["weight"]
+            else:
+                col = "black"
+            df_wd_weight = self.df_freq.drop(columns='ws_bin').groupby('wd_bin').sum().reset_index()
+            ax.plot(df_wd_weight['wd_bin'], df_wd_weight['weight'], color=col, label="Weight")
 
         ax.legend()
         ax.set_ylabel('Number of Points')
@@ -350,12 +332,10 @@ class EnergyRatioOutput:
 
         ax = axarr[2]        
 
-        if self.weight_by == 'min':
-            sns.scatterplot(data=df_min, x='wd_bin', y='ws_bin', size='count',hue='count', ax=ax, legend=True, color='k')
-            ax.set_title('Minimum Number of Points per Bin')
-        else:
-            sns.scatterplot(data=df_sum, x='wd_bin', y='ws_bin', size='count',hue='count', ax=ax, legend=True, color='k')
-            ax.set_title('Sum of Points per Bin')
+        df_bin_counts = self._compute_ws_counts()
+        sns.scatterplot(data=df_bin_counts, x='wd_bin', y='ws_bin', size='count',hue='count', ax=ax, legend=True, color='k')
+        ax.set_title('Minimum Number of Points per Bin' if self.weight_by == "min" else 
+            'Sum of Points per Bin')
         ax.set_xlabel('Wind Direction (deg)')
         ax.set_ylabel('Wind Speed (m/s)')
         
@@ -371,7 +351,8 @@ class EnergyRatioOutput:
         axarr: Optional[Union[axes.Axes, List[axes.Axes]]] = None,
         polar_plot: bool = False,
         show_wind_direction_distribution: bool = True,
-        show_wind_speed_distribution: bool = True
+        show_wind_speed_distribution: bool = True,
+        overlay_frequency: bool = False,
     )-> Union[axes.Axes, List[axes.Axes]]:
         """Plot the uplift in energy ratio
 
@@ -383,6 +364,7 @@ class EnergyRatioOutput:
             polar_plot (bool, optional): Whether to plot the uplift on a polar plot. Defaults to False.
             show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
             show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
+            overlay_frequency (bool, optional): Whether to plot the frequency distribution used for calculation.
 
         Raises:
             ValueError: If show_wind_speed_distribution is True and polar_plot is True.
@@ -441,13 +423,14 @@ class EnergyRatioOutput:
         # If color_dict is None, use the default colors
         if color_dict is None:
             color_dict = {labels[i]: default_colors[i] for i in range(N)}
+            color_dict["weight"] = "black"
 
         # If color_dict is not a dictionary, raise an error
         if not isinstance(color_dict, dict):
             raise ValueError('color_dict must be a dictionary')
 
         # Make sure the keys of color_dict are in labels
-        if not all([label in labels for label in color_dict.keys()]):
+        if not all([label in labels+["weight"] for label in color_dict.keys()]):
             raise ValueError('color_dict keys must be in df_names_subset')
 
 
@@ -472,6 +455,7 @@ class EnergyRatioOutput:
             polar_plot=polar_plot,
             show_wind_direction_distribution=show_wind_direction_distribution,
             show_wind_speed_distribution=show_wind_speed_distribution,
+            overlay_frequency=overlay_frequency,
             _is_uplift=True
         )
             
@@ -494,3 +478,29 @@ class EnergyRatioOutput:
         # ax.set_title("Minimum Number of Points per Bin")
 
         return axarr
+
+    def _compute_ws_counts(self):
+        """ Compute the of ws bin counts as previously computed but not presently
+        computed with the energy calculation. """
+
+        # Temporary copy of energy table
+        df_ = self.er_in.get_df()
+
+        # Filter df_ to remove null values
+        null_filter = filter_all_nulls if self.remove_all_nulls else filter_any_nulls
+        df_ = null_filter(df_, self.ref_cols, self.test_cols, self.ws_cols, self.wd_cols)
+
+        # Assign the wd/ws bins
+        df_ = add_ws_bin(df_, self.ws_cols, self.ws_step, self.ws_min, self.ws_max,
+            remove_all_nulls=self.remove_all_nulls)
+        df_ = add_wd_bin(df_, self.wd_cols, self.wd_step, self.wd_min, self.wd_max,
+            remove_all_nulls=self.remove_all_nulls)
+
+        # Get the bin count by wd, ws and df_name
+        df_group = df_.groupby(['wd_bin','ws_bin','df_name']).count()
+
+        # Collect the minimum number of points per bin
+        df_return = df_group.groupby(['wd_bin','ws_bin']).min() if self.weight_by == "min" \
+            else df_group.groupby(['wd_bin','ws_bin']).sum()
+
+        return df_return.drop('df_name').to_pandas()

@@ -194,9 +194,14 @@ class TestEnergyRatio(unittest.TestCase):
         df_reflected = add_reflected_rows(df, edges,0.25)
         assert_frame_equal(df_result_expected, df_reflected)
 
-    def test_alternative_weighting(self):
+    def test_weight_by_min(self):
+
+        # In the case we weight by min, there is 1 point in 7 m/s bin, 2 points in 8 m/s bin
+        # so the test energy (001) should be (1 * 2) + (2 * 1) = 4
+        # the ref energy (000) should be (1 * 1) + (2 * 1) = 3
+        # And energy ratio = 4/3
         
-        # Test that in the default, an energy ratio is returned so long as any value is not null
+        # Test the returned energy ratio assuming alternative weightings of the wind speed bins
         df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
                            'ws': [7., 8., 8.,8.],
                            'pow_000': [1., 1., 1., 1.],
@@ -219,13 +224,33 @@ class TestEnergyRatio(unittest.TestCase):
             use_predefined_ws=True,
             wd_min = 269.,
             wd_step=2.0,
+            ws_min = 0.5, # Make sure bin labels land on whole numbers
             weight_by='min'
         )
 
-        # In the case we weight by min, there is 1 point in 7 m/s bin, 2 points in 8 m/s bin
-        # so the energy ratio for wake steering should be ((1 * 2) + (2 * 1)) / 3 = 1.33333333
-        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], ((2 * 1) + (1 * 2)) / 3 , places=4)   
 
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], 4/3 , places=4)   
+
+    def test_weight_by_sum(self):
+
+        # In the case of weighting by sum there is 3 points in the 7 m /s bin and 5 points in the 8 m/s bin
+        # so the test energy (001) should be (3 * 2) + (5 * 1) = 11
+        # the ref energy (000) should be (3 * 1) + (5 * 1) = 8
+        # And energy ratio = 11/8 (in df_wake_steering)
+
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 8., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [1., 1., 1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
 
         er_out = erp.compute_energy_ratio(
                     er_in,
@@ -235,11 +260,229 @@ class TestEnergyRatio(unittest.TestCase):
                     use_predefined_ws=True,
                     wd_min = 269.,
                     wd_step=2.0,
+                    ws_min = 0.5, # Make sure bin labels land on whole numbers
                     weight_by='sum'
                 )
-        # In the case of weighting by sum there is 3 points in the 7 m /s bin and 5 points in the 8 m/s bin
-        # so the energy ratio for wake steering should be ((3 * 2) + (5 * 1)) / 8 = 1.375
-        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], ((3 * 2) + (5 * 1)) / 8  , places=4)   
+
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], 11 / 8  , places=4)   
+
+    def test_weight_by_sum_missing_bin_in_df(self):
+
+        # This case tests that the energy ratio sum is properly weighted when one df (df_base in this case)
+        # is missing a bin present in df_wake_steering
+
+        # Computation should only include 7 m/s in this case since 8 m/s not included in df_base
+
+        # In the case of weighting by sum there are 4 points in the 7 m /s bin and 2 points in the 8 m/s bin
+        # But 8m/s should be excluded from df_base because not in df_base
+        # so the test energy (001) should be (4 * 2) = 8
+        # the ref energy (000) should be (4 * 1) = 4
+        # And energy ratio = 2
+
+        df_base = pd.DataFrame({'wd': [270, 270.],
+                           'ws': [7., 7.],
+                           'pow_000': [1., 1.],
+                           'pow_001': [1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+
+        er_out = erp.compute_energy_ratio(
+                    er_in,
+                    ref_turbines=[0],
+                    test_turbines=[1],
+                    use_predefined_wd=True,
+                    use_predefined_ws=True,
+                    wd_min = 269.,
+                    wd_step=2.0,
+                    ws_min = 0.5, # Make sure bin labels land on whole numbers
+                    weight_by='sum'
+                )
+        print(er_out.df_result)
+
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], 2.  , places=4)   
+
+    def test_weight_by_external_frequency(self):
+
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 8., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [1., 1., 1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+
+        # In the final test, specify a bin frequency where 7 m/s is 90% and 8 m/s is 10%
+        df_freq = pd.DataFrame({
+            'wd': [270., 270.],
+            'ws': [7., 8.],
+            'freq_val':[0.9, 0.1]
+        })
+
+        er_out = erp.compute_energy_ratio(
+            er_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min = 269.,
+            wd_step=2.0,
+            ws_min = 0.5, # Make sure bin labels land on whole numbers
+            df_freq = df_freq
+        )
+                
+        # In the case the weights come provided so can be used directly
+        # so the test energy (001) should be (0.9 * 2) + (0.1 * 1) = 1.9
+        # the ref energy (000) should be (0.9 * 1) + (.1 * 1) = 1
+        # And energy ratio = 1.9 / 1
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], 1.9  , places=4)  
+
+    def test_weight_by_external_frequency_with_extra_df_freq_bin(self):
+
+        # Test that bins in df_freq which are not in data are ignored
+
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 8., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [1., 1., 1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+
+        # In the final test, specify uniform bin frequencies
+        df_freq = pd.DataFrame({
+            'wd': [270., 270., 270.,270.],
+            'ws': [7., 8.,15.,20.],
+            'freq_val':[0.25, 0.25, 0.25, 0.25]
+        })
+
+        er_out = erp.compute_energy_ratio(
+            er_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min = 269.,
+            wd_step=2.0,
+            ws_min = 0.5, # Make sure bin labels land on whole numbers
+            df_freq = df_freq
+        )
+                
+        # In the case the weights come provided so can be used directly
+        # so the test energy (001) should be (0.25 * 2) + (0.25 * 1) = .75
+        # the ref energy (000) should be (0.25 * 1) + (.25 * 1) = .5
+        # And energy ratio = .75 / .5 = 1.5
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], 1.5  , places=4)  
+
+    def test_weight_by_external_frequency_with_missing_df_freq_bin(self):
+
+        # Test the case where a bin in the data is not defined in df_freq
+        # In this case the expected behavior is that bin missing from df_freq
+        # get 0 weight and warning is printed
+
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 8., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [1., 1., 1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+
+
+        # Finally test the case where the weight of one of the bins is missing and defaults to 0
+        # Here 6 and 7 m/s are specified but not 8, so the 8 m/s defaults to 0 weight
+        df_freq = pd.DataFrame({
+            'wd': [ 270.],
+            'ws': [7.],
+            'freq_val':[1.0]
+        })
+
+
+        er_out = erp.compute_energy_ratio(
+            er_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min = 269.,
+            wd_step=2.0,
+            ws_min = 0.5, # Make sure bin labels land on whole numbers
+            df_freq = df_freq
+        )
+
+        # Weight of 1.0 applied to 7 and 0 applied to 8
+        # so the test energy (001) should be (1.0 * 2) + (0.0 * 1) = 2.
+        # the ref energy (000) should be (1.0 * 1) + (0.0 * 1) = 1
+        # And energy ratio = 2 / 1 -> 2
+        self.assertAlmostEqual(er_out.df_result['wake_steering'].iloc[0], 2.0  , places=4)  
+
+
+
+    def test_weight_by_external_frequency_with_all_missing_df_freq_bin(self):
+
+        # Test the case where all bins in the data is not defined in df_freq
+        # In this case an error should be raised
+
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 8., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [1., 1., 1., 1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,],
+                           'ws': [7., 7., 8.,8.],
+                           'pow_000': [1., 1., 1., 1.],
+                           'pow_001': [2., 2., 1., 1.],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+
+
+        # Finally test the case where the weight of one of the bins is missing and defaults to 0
+        # Here 6 and 7 m/s are specified but not 8, so the 8 m/s defaults to 0 weight
+        df_freq = pd.DataFrame({
+            'wd': [ 270.],
+            'ws': [10.],
+            'freq_val':[1.0]
+        })
+
+        with pytest.raises(RuntimeError):
+            er_out = erp.compute_energy_ratio(
+                er_in,
+                ref_turbines=[0],
+                test_turbines=[1],
+                use_predefined_wd=True,
+                use_predefined_ws=True,
+                wd_min = 269.,
+                wd_step=2.0,
+                ws_min = 0.5, # Make sure bin labels land on whole numbers
+                df_freq = df_freq
+            )
 
 
 
@@ -308,9 +551,6 @@ class TestEnergyRatio(unittest.TestCase):
 
 
         # Check outputs match expectations
-        print(er_out_any.df_result)
-        print(er_out_all.df_result)
-
         self.assertAlmostEqual(er_out_any.df_result['baseline'].iloc[0], 1., places=4)
         self.assertAlmostEqual(er_out_any.df_result['baseline'].iloc[1], 1., places=4)
         self.assertAlmostEqual(er_out_any.df_result['baseline'].iloc[2], 2., places=4)
