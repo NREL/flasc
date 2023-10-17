@@ -548,8 +548,11 @@ class TestEnergyRatio(unittest.TestCase):
         # Base_AEP = 8760 * ((1/4 * 1 * 1) + (1/2 * 1 * 1) + (1/4 * 1 * 15)) = 39,420
         # Percent Delta AEP = 100 * (18615 / 39420) = 47.22222222
 
-        self.assertAlmostEqual(er_out.delta_aep,  18615  , places=4) 
-        self.assertAlmostEqual(er_out.percent_delta_aep,  47.22222222  , places=4) 
+
+        # Unpack the result and check assertions
+        delta_aep, percent_delta_aep = er_out.total_uplift_result['uplift']
+        self.assertAlmostEqual(delta_aep,  18615  , places=4) 
+        self.assertAlmostEqual(percent_delta_aep,  47.22222222  , places=4) 
 
 
     def test_null_behavior(self):
