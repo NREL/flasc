@@ -31,6 +31,7 @@ class EnergyRatioOutput:
                  wd_cols: List[str],
                  ws_cols: List[str],
                  uplift_cols: List[str],
+                 total_uplift_result: dict,
                  wd_step: float,
                  wd_min: float,
                  wd_max: float,
@@ -54,6 +55,7 @@ class EnergyRatioOutput:
             wd_cols (List[str]): The column names of the wind directions.
             ws_cols (List[str]): The column names of the wind speeds.
             uplift_cols (List[str]): The column names of the uplifts.
+            total_uplift_result (dict): Results of total uplift for each name in uplift_cols
             wd_step (float): The wind direction bin size.
             wd_min (float): The minimum wind direction value.
             wd_max (float): The maximum wind direction value.
@@ -80,6 +82,7 @@ class EnergyRatioOutput:
         self.wd_cols = wd_cols
         self.ws_cols = ws_cols
         self.uplift_cols = uplift_cols
+        self.total_uplift_result = total_uplift_result
         self.wd_step = wd_step
         self.wd_min = wd_min
         self.wd_max = wd_max
