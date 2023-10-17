@@ -158,6 +158,40 @@ def _compute_energy_ratio_single(df_,
     # Normalize the weights
     df_ = df_.with_columns(pl.col('weight').truediv(pl.col('weight').sum()))
 
+    # If total uplift requested, compute at this point
+    total_uplift_result = {}
+    if compute_total_uplift:
+        
+        for uplift_pair, uplift_name in zip(uplift_pairs, uplift_names):
+            df_total = (df_
+                        .filter(pl.col('df_name').is_in(uplift_pair))
+                        .with_columns(power_ratio = pl.col('pow_test') / pl.col('pow_ref'),
+                                      weighted_pow_ref = pl.col('pow_ref') * pl.col('count'))
+                        .with_columns(total_count_per_bin = pl.col('count').sum().over(bin_cols_without_df_name))
+                        .with_columns(weighted_pow_ref = pl.col('weighted_pow_ref') / pl.col('total_count_per_bin'))
+                        .with_columns(weighted_pow_ref = pl.col('weighted_pow_ref').sum().over(bin_cols_without_df_name))
+                        
+                        .pivot(values=['power_ratio'], 
+                            columns='df_name', 
+                            index=bin_cols_without_df_name + ['weight','weighted_pow_ref'],
+                            aggregate_function='first')
+
+                        # Renorm the weight
+                        .with_columns(pl.col('weight') / pl.col('weight').sum())
+
+                        .with_columns(delta_power_ratio = pl.col(uplift_pair[1]) - pl.col(uplift_pair[0]))
+                        .with_columns(delta_aep = pl.col('weight') * pl.col('delta_power_ratio') * pl.col('weighted_pow_ref'),
+                                      base_aep = pl.col('weight') * pl.col(uplift_pair[0]) * pl.col('weighted_pow_ref'), )
+                        .sum()
+            )
+
+            # print(df_total.head(10))
+            delta_aep = 8760 * df_total.select('delta_aep').item()
+            percent_delta_aep = 100 * (df_total.select('delta_aep').item() / df_total.select('base_aep').item())
+            # print(delta_aep, percent_delta_aep)
+
+            total_uplift_result[uplift_name] = (delta_aep, percent_delta_aep) 
+
     # Calculate energy ratios
     df_ = (df_
         .with_columns(
@@ -190,7 +224,7 @@ def _compute_energy_ratio_single(df_,
     # Enforce a column order
     df_ = df_.select(['wd_bin'] + df_names + uplift_names + [f'count_{n}' for n in df_names+uplift_names])
 
-    return df_, df_freq_pl
+    return df_, df_freq_pl, total_uplift_result
 
 # Bootstrap function wraps the _compute_energy_ratio function
 def _compute_energy_ratio_bootstrap(er_in,
@@ -471,7 +505,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         if percentiles is not None:
             print("percentiles can only be used with bootstrapping (N > 1).")
         # Compute the energy ratio
-        df_res, df_freq_pl = _compute_energy_ratio_single(
+        df_res, df_freq_pl, total_uplift_result = _compute_energy_ratio_single(
             df_,
             er_in.df_names,
             ref_cols,
@@ -500,7 +534,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             raise ValueError("percentiles should be a two element list of the "+\
                 "upper and lower desired percentiles.")
 
-        df_res, df_freq_pl = _compute_energy_ratio_bootstrap(
+        df_res, df_freq_pl, total_uplift_result = _compute_energy_ratio_bootstrap(
             er_in,
             ref_cols,
             test_cols,
@@ -536,6 +570,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                                 wd_cols,
                                 ws_cols,
                                 uplift_names,
+                                total_uplift_result,
                                 wd_step,
                                 wd_min,
                                 wd_max,
