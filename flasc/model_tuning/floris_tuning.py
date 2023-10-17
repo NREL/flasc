@@ -14,7 +14,7 @@ import numpy as np
 from flasc.model_tuning.tuner_utils import set_fi_param
 
 
-def sweep_velocity_model_parameter_for_annual_wake_losses(
+def sweep_velocity_model_parameter_for_overall_wake_losses(
         parameter,
         value_candidates,
         df_scada,
@@ -36,9 +36,11 @@ def sweep_velocity_model_parameter_for_annual_wake_losses(
         parameter,
         value_candidates,
         fi_init,
-        evaluate_aep,
+        evaluate_overall_wake_loss,
         {"freq":freq}
     )
+
+    # Also call for SCADA
 
     aep_floris_nowake = fi_init.get_farm_AEP(freq, nowake=True)
 
@@ -76,7 +78,7 @@ def sweep_wd_std_for_er():
     pass
 
 
-def _sweep_parameter(
+def _sweep_floris_parameter(
         parameter,
         value_candidates,
         fi_init,
@@ -94,18 +96,28 @@ def _sweep_parameter(
         fi_list = [] # TODO: setting wd_std
     else:
         param_idx = None # TODO: handling for param_idx
+
+        # Run FLORIS for each row in df_scada
+
+        # Map over NaNs
+
+        # compute fi overall power
         fi_list = [set_fi_param(fi_init, parameter, v, param_idx) for v in value_candidates]
 
-    values_floris = [evaluator(fi, **evaluator_kwargs) for fi in zip(fi_list)]
+    values_floris = [evaluator(df_fi, **evaluator_kwargs) for fi in zip(fi_list)]
     
     # Compute the errors (might be a bit more complex than this, but gives an idea)
 
     return values_floris
 
-def evaluate_aep(fi, freq, yaw_angles=None):
+def evaluate_overall_wake_loss(df_, freq=None, yaw_angles=None):
     # Possible function to evaluate in _sweep_parameter()
 
-    return fi.get_farm_AEP(freq, yaw_angles=yaw_angles, nowake=False)
+
+
+    # Ultimately metric is [ref.sum() - test.sum()] / ref.sum()
+
+    return fi.get_farm_AEP(freq, yaw_angles=yaw_angles, nowake=False) # TODO: replace
 
 def evaluate_energy_ratio(fi,):
     # Possible function to evaluate in _sweep_parameter()
