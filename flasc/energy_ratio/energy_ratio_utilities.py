@@ -390,6 +390,7 @@ def check_compute_energy_ratio_inputs(
     wd_bin_overlap_radius,
     uplift_pairs,
     uplift_names,
+    compute_total_uplift,
     N,
     percentiles,
     remove_all_nulls

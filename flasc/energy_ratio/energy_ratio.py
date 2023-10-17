@@ -45,6 +45,7 @@ def _compute_energy_ratio_single(df_,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
                          uplift_names = [],
+                         compute_total_uplift = False,
                          remove_all_nulls = False
                          ):
 
@@ -77,6 +78,8 @@ def _compute_energy_ratio_single(df_,
             uplift calculation. If None, no uplifts are computed.
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2",
+        compute_total_uplift (bool): If true, calculate the total uplift in energy production in absolute and percent
+            difference terms.  Defaults to False.
         remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
             available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
             must be available to compute the bin. Defaults to False.
@@ -207,6 +210,7 @@ def _compute_energy_ratio_bootstrap(er_in,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
                          uplift_names = [],
+                         compute_total_uplift = False,
                          N = 1,
                          percentiles=[5., 95.],
                          remove_all_nulls=False,
@@ -240,6 +244,8 @@ def _compute_energy_ratio_bootstrap(er_in,
             uplift calculation. If None, no uplifts are computed.
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
+        compute_total_uplift (bool): If true, calculate the total uplift in energy production in absolute and percent
+            difference terms.  Defaults to False.
         N (int): The number of bootstrap samples to use.
         percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
@@ -274,6 +280,7 @@ def _compute_energy_ratio_bootstrap(er_in,
             wd_bin_overlap_radius,
             uplift_pairs,
             uplift_names,
+            compute_total_uplift,
             remove_all_nulls
         ) for i in range(N)
     ]
@@ -313,6 +320,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = None,
                          uplift_names = None,
+                         compute_total_uplift = False,
                          N = 1,
                          percentiles = None,
                          remove_all_nulls = False
@@ -355,6 +363,8 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             uplift calculation. If None, no uplifts are computed.
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
+        compute_total_uplift (bool): If true, calculate the total uplift in energy production in absolute and percent
+            difference terms.  Defaults to False.
         N (int): The number of bootstrap samples to use.
         percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
@@ -392,6 +402,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         wd_bin_overlap_radius,
         uplift_pairs,
         uplift_names,
+        compute_total_uplift,
         N,
         percentiles,
         remove_all_nulls
@@ -479,6 +490,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             wd_bin_overlap_radius,
             uplift_pairs,
             uplift_names,
+            compute_total_uplift,
             remove_all_nulls
         )
     else:
@@ -506,6 +518,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             wd_bin_overlap_radius,
             uplift_pairs,
             uplift_names,
+            compute_total_uplift,
             N,
             percentiles
         )
