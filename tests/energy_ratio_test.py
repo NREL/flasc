@@ -12,6 +12,7 @@ from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
 from flasc.utilities_examples import load_floris_artificial as load_floris
 from flasc.energy_ratio import energy_ratio as erp
+from flasc.energy_ratio import total_uplift as tup
 from flasc.energy_ratio.energy_ratio_utilities import add_reflected_rows
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 
@@ -503,7 +504,7 @@ class TestEnergyRatio(unittest.TestCase):
 
         er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
 
-        er_out = erp.compute_energy_ratio(
+        total_uplift_result = tup.compute_total_uplift(
             er_in,
             ref_turbines=[0],
             test_turbines=[1],
@@ -514,8 +515,7 @@ class TestEnergyRatio(unittest.TestCase):
             ws_min = 0.5, # Make sure bin labels land on whole numbers
             weight_by='min',
             uplift_pairs = ['baseline', 'wake_steering'],
-            uplift_names = ['uplift'],
-            compute_total_uplift = True,
+            uplift_names = ['uplift']
         )
 
         # Total energy production is computed via a weighted sum over differences in power ratio
@@ -550,7 +550,7 @@ class TestEnergyRatio(unittest.TestCase):
 
 
         # Unpack the result and check assertions
-        delta_aep, percent_delta_aep = er_out.total_uplift_result['uplift']
+        delta_aep, percent_delta_aep = total_uplift_result['uplift']
         self.assertAlmostEqual(delta_aep,  18615  , places=4) 
         self.assertAlmostEqual(percent_delta_aep,  47.22222222  , places=4) 
 
