@@ -10,19 +10,10 @@ import warnings
 import numpy as np
 import polars as pl
 
+import flasc.energy_ratio.energy_ratio_utilities as util
+
 from flasc.energy_ratio.energy_ratio_output import EnergyRatioOutput
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.energy_ratio.energy_ratio_utilities import (
-    add_ws_bin,
-    add_wd,
-    add_wd_bin,
-    add_power_ref,
-    add_power_test,
-    add_reflected_rows,
-    check_compute_energy_ratio_inputs,
-    filter_all_nulls,
-    filter_any_nulls
-)
 from flasc.dataframe_operations.dataframe_manipulations import df_reduce_precision
 
 
@@ -45,7 +36,6 @@ def _compute_energy_ratio_single(df_,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
                          uplift_names = [],
-                         compute_total_uplift = False,
                          remove_all_nulls = False
                          ):
 
@@ -78,8 +68,6 @@ def _compute_energy_ratio_single(df_,
             uplift calculation. If None, no uplifts are computed.
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2",
-        compute_total_uplift (bool): If true, calculate the total uplift in energy production in absolute and percent
-            difference terms.  Defaults to False.
         remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
             available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
             must be available to compute the bin. Defaults to False.
@@ -92,105 +80,22 @@ def _compute_energy_ratio_single(df_,
     # Get the number of dataframes
     num_df = len(df_names)
 
+    bin_cols_without_df_name = [c for c in bin_cols_in if c != 'df_name']
+
+
     # Filter df_ to remove null values
-    null_filter = filter_all_nulls if remove_all_nulls else filter_any_nulls
+    null_filter = util.filter_all_nulls if remove_all_nulls else util.filter_any_nulls
     df_ = null_filter(df_, ref_cols, test_cols, ws_cols, wd_cols)
     if len(df_) == 0:
         raise RuntimeError("After removing nulls, no data remains for computation.")
 
-    # If wd_bin_overlap_radius is not zero, add reflected rows
-    if wd_bin_overlap_radius > 0.:
-
-        # Need to obtain the wd column now rather than during binning
-        df_ = add_wd(df_, wd_cols, remove_all_nulls)
-
-        # Add reflected rows
-        edges = np.arange(wd_min, wd_max + wd_step, wd_step)
-        df_ = add_reflected_rows(df_, edges, wd_bin_overlap_radius)
-
-    # Assign the wd/ws bins
-    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max, remove_all_nulls=remove_all_nulls)
-    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max, remove_all_nulls=remove_all_nulls)
-
-    # Assign the reference and test power columns
-    df_ = add_power_ref(df_, ref_cols)
-    df_ = add_power_test(df_, test_cols)
-
-    bin_cols_without_df_name = [c for c in bin_cols_in if c != 'df_name']
-    bin_cols_with_df_name = bin_cols_without_df_name + ['df_name']
-
-    # Group df_
-    df_ = (df_
-        .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
-        .group_by(bin_cols_with_df_name, maintain_order=True)
-        .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()])
-
-        # Enforce that each ws/wd bin combination has to appear in all dataframes
-        .filter(pl.count().over(bin_cols_without_df_name) == num_df)
-
-    )
+    # Apply binning to dataframe
+    df_ = util.bin_dataframe(df_, ref_cols, test_cols, wd_cols, ws_cols, wd_step, wd_min, 
+        wd_max, ws_step, ws_min, ws_max, wd_bin_overlap_radius,
+        remove_all_nulls, bin_cols_without_df_name, num_df)
+    
     # Determine the weighting of the ws/wd bins
-
-    if df_freq_pl is None:
-        # Determine the weights per bin as either the min or sum count
-        df_freq_pl = (df_
-            .select(bin_cols_without_df_name+['count'])
-            .group_by(bin_cols_without_df_name)
-            .agg([pl.min('count') if weight_by == 'min' else pl.sum('count')])
-            .rename({'count':'weight'})
-        )
-    
-    df_ = (df_.join(df_freq_pl, on=['wd_bin','ws_bin'], how='left')
-            .with_columns(pl.col('weight'))
-    )
-
-    # Check if all the values in the weight column are null
-    if df_['weight'].is_null().all():
-        raise RuntimeError("None of the ws/wd bins in data appear in df_freq")
-    
-    # Check if any of the values in the weight column are null
-    if df_['weight'].is_null().any():
-        warnings.warn('Some bins in data are not in df_freq and will get 0 weight')
-
-    # Fill the null values with zeros
-    df_= df_.with_columns(pl.col('weight').fill_null(strategy="zero"))
-
-    # Normalize the weights
-    df_ = df_.with_columns(pl.col('weight').truediv(pl.col('weight').sum()))
-
-    # If total uplift requested, compute at this point
-    total_uplift_result = {}
-    if compute_total_uplift:
-        
-        for uplift_pair, uplift_name in zip(uplift_pairs, uplift_names):
-            df_total = (df_
-                        .filter(pl.col('df_name').is_in(uplift_pair))
-                        .with_columns(power_ratio = pl.col('pow_test') / pl.col('pow_ref'),
-                                      weighted_pow_ref = pl.col('pow_ref') * pl.col('count'))
-                        .with_columns(total_count_per_bin = pl.col('count').sum().over(bin_cols_without_df_name))
-                        .with_columns(weighted_pow_ref = pl.col('weighted_pow_ref') / pl.col('total_count_per_bin'))
-                        .with_columns(weighted_pow_ref = pl.col('weighted_pow_ref').sum().over(bin_cols_without_df_name))
-                        
-                        .pivot(values=['power_ratio'], 
-                            columns='df_name', 
-                            index=bin_cols_without_df_name + ['weight','weighted_pow_ref'],
-                            aggregate_function='first')
-
-                        # Renorm the weight
-                        .with_columns(pl.col('weight') / pl.col('weight').sum())
-
-                        .with_columns(delta_power_ratio = pl.col(uplift_pair[1]) - pl.col(uplift_pair[0]))
-                        .with_columns(delta_aep = pl.col('weight') * pl.col('delta_power_ratio') * pl.col('weighted_pow_ref'),
-                                      base_aep = pl.col('weight') * pl.col(uplift_pair[0]) * pl.col('weighted_pow_ref'), )
-                        .sum()
-            )
-
-            # print(df_total.head(10))
-            delta_aep = 8760 * df_total.select('delta_aep').item()
-            percent_delta_aep = 100 * (df_total.select('delta_aep').item() / df_total.select('base_aep').item())
-            # print(delta_aep, percent_delta_aep)
-
-            total_uplift_result[uplift_name] = (delta_aep, percent_delta_aep) 
+    df_, df_freq_pl = util.add_bin_weights(df_, df_freq_pl, bin_cols_without_df_name, weight_by)
 
     # Calculate energy ratios
     df_ = (df_
@@ -224,7 +129,7 @@ def _compute_energy_ratio_single(df_,
     # Enforce a column order
     df_ = df_.select(['wd_bin'] + df_names + uplift_names + [f'count_{n}' for n in df_names+uplift_names])
 
-    return df_, df_freq_pl, total_uplift_result
+    return df_, df_freq_pl
 
 # Bootstrap function wraps the _compute_energy_ratio function
 def _compute_energy_ratio_bootstrap(er_in,
@@ -244,7 +149,6 @@ def _compute_energy_ratio_bootstrap(er_in,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = [],
                          uplift_names = [],
-                         compute_total_uplift = False,
                          N = 1,
                          percentiles=[5., 95.],
                          remove_all_nulls=False,
@@ -278,8 +182,6 @@ def _compute_energy_ratio_bootstrap(er_in,
             uplift calculation. If None, no uplifts are computed.
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
-        compute_total_uplift (bool): If true, calculate the total uplift in energy production in absolute and percent
-            difference terms.  Defaults to False.
         N (int): The number of bootstrap samples to use.
         percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
@@ -314,7 +216,6 @@ def _compute_energy_ratio_bootstrap(er_in,
             wd_bin_overlap_radius,
             uplift_pairs,
             uplift_names,
-            compute_total_uplift,
             remove_all_nulls
         ) for i in range(N)
     ]
@@ -354,7 +255,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                          wd_bin_overlap_radius = 0.,
                          uplift_pairs = None,
                          uplift_names = None,
-                         compute_total_uplift = False,
                          N = 1,
                          percentiles = None,
                          remove_all_nulls = False
@@ -397,8 +297,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             uplift calculation. If None, no uplifts are computed.
         uplift_names: (list[str]): Names for the uplift columns, following the order of the 
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
-        compute_total_uplift (bool): If true, calculate the total uplift in energy production in absolute and percent
-            difference terms.  Defaults to False.
         N (int): The number of bootstrap samples to use.
         percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
@@ -415,7 +313,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
     df_ = er_in.get_df()
 
     # Check that inputs are valid
-    check_compute_energy_ratio_inputs(
+    util.check_compute_energy_ratio_inputs(
         df_,
         ref_turbines,
         test_turbines,
@@ -436,7 +334,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         wd_bin_overlap_radius,
         uplift_pairs,
         uplift_names,
-        compute_total_uplift,
         N,
         percentiles,
         remove_all_nulls
@@ -505,7 +402,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
         if percentiles is not None:
             print("percentiles can only be used with bootstrapping (N > 1).")
         # Compute the energy ratio
-        df_res, df_freq_pl, total_uplift_result = _compute_energy_ratio_single(
+        df_res, df_freq_pl = _compute_energy_ratio_single(
             df_,
             er_in.df_names,
             ref_cols,
@@ -524,7 +421,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             wd_bin_overlap_radius,
             uplift_pairs,
             uplift_names,
-            compute_total_uplift,
             remove_all_nulls
         )
     else:
@@ -534,7 +430,7 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             raise ValueError("percentiles should be a two element list of the "+\
                 "upper and lower desired percentiles.")
 
-        df_res, df_freq_pl, total_uplift_result = _compute_energy_ratio_bootstrap(
+        df_res, df_freq_pl = _compute_energy_ratio_bootstrap(
             er_in,
             ref_cols,
             test_cols,
@@ -552,7 +448,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
             wd_bin_overlap_radius,
             uplift_pairs,
             uplift_names,
-            compute_total_uplift,
             N,
             percentiles
         )
@@ -570,7 +465,6 @@ def compute_energy_ratio(er_in: EnergyRatioInput,
                                 wd_cols,
                                 ws_cols,
                                 uplift_names,
-                                total_uplift_result,
                                 wd_step,
                                 wd_min,
                                 wd_max,

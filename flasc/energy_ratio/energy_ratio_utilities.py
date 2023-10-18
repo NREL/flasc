@@ -390,7 +390,6 @@ def check_compute_energy_ratio_inputs(
     wd_bin_overlap_radius,
     uplift_pairs,
     uplift_names,
-    compute_total_uplift,
     N,
     percentiles,
     remove_all_nulls
@@ -460,3 +459,86 @@ def check_compute_energy_ratio_inputs(
             raise ValueError('df_freq must have columns ws, wd and freq_val')
 
     return None
+
+def bin_dataframe(df_,
+                 ref_cols,
+                 test_cols,
+                 wd_cols,
+                 ws_cols,
+                 wd_step = 2.0,
+                 wd_min = 0.0,
+                 wd_max = 360.0,
+                 ws_step = 1.0,
+                 ws_min = 0.0,
+                 ws_max = 50.0,
+                 wd_bin_overlap_radius = 0.,
+                 remove_all_nulls = False,
+                 bin_cols_without_df_name = None,
+                 num_df = 0,
+                 ):
+    
+        # If wd_bin_overlap_radius is not zero, add reflected rows
+    if wd_bin_overlap_radius > 0.:
+
+        # Need to obtain the wd column now rather than during binning
+        df_ = add_wd(df_, wd_cols, remove_all_nulls)
+
+        # Add reflected rows
+        edges = np.arange(wd_min, wd_max + wd_step, wd_step)
+        df_ = add_reflected_rows(df_, edges, wd_bin_overlap_radius)
+
+    # Assign the wd/ws bins
+    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max, remove_all_nulls=remove_all_nulls)
+    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max, remove_all_nulls=remove_all_nulls)
+
+    # Assign the reference and test power columns
+    df_ = add_power_ref(df_, ref_cols)
+    df_ = add_power_test(df_, test_cols)
+
+    bin_cols_with_df_name = bin_cols_without_df_name + ['df_name']
+
+    # Group df_
+    df_ = (df_
+        .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
+        .group_by(bin_cols_with_df_name, maintain_order=True)
+        .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()])
+        # Enforce that each ws/wd bin combination has to appear in all dataframes
+        .filter(pl.count().over(bin_cols_without_df_name) == num_df)
+    )
+
+    return df_
+
+def add_bin_weights(df_, 
+                    df_freq_pl=None,
+                    bin_cols_without_df_name=None,
+                    weight_by = "min"
+                    ):
+
+    if df_freq_pl is None:
+        # Determine the weights per bin as either the min or sum count
+        df_freq_pl = (df_
+            .select(bin_cols_without_df_name+['count'])
+            .group_by(bin_cols_without_df_name)
+            .agg([pl.min('count') if weight_by == 'min' else pl.sum('count')])
+            .rename({'count':'weight'})
+        )
+    
+    df_ = (df_.join(df_freq_pl, on=['wd_bin','ws_bin'], how='left')
+            .with_columns(pl.col('weight'))
+    )
+
+    # Check if all the values in the weight column are null
+    if df_['weight'].is_null().all():
+        raise RuntimeError("None of the ws/wd bins in data appear in df_freq")
+    
+    # Check if any of the values in the weight column are null
+    if df_['weight'].is_null().any():
+        warnings.warn('Some bins in data are not in df_freq and will get 0 weight')
+
+    # Fill the null values with zeros
+    df_= df_.with_columns(pl.col('weight').fill_null(strategy="zero"))
+
+    # Normalize the weights
+    df_ = df_.with_columns(pl.col('weight').truediv(pl.col('weight').sum()))
+
+    return df_, df_freq_pl
