@@ -25,7 +25,7 @@ class TestTotalUplift(unittest.TestCase):
                            'pow_001': [2., 2., 1., 1.,30.],
         })
 
-        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=1)
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'])
 
         total_uplift_result = tup.compute_total_uplift(
             er_in,
@@ -76,3 +76,40 @@ class TestTotalUplift(unittest.TestCase):
         delta_aep, percent_delta_aep = total_uplift_result['uplift']
         self.assertAlmostEqual(delta_aep,  18615  , places=4) 
         self.assertAlmostEqual(percent_delta_aep,  47.22222222  , places=4) 
+
+
+    def test_total_uplift_bootstrap(self):
+
+        # Test the ability to compute the total uplift in energy production with bootstrapping
+        
+        # This time use ratios that are all 1 in the baseline case and between 1.5 and 2.5
+        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,270.],
+                           'ws': [7., 8., 8.,8.,8.],
+                           'pow_000': [1., 1., 1., 1.,1.],
+                           'pow_001': [1., 1., 1., 1.,1.],
+        })
+
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,270.],
+                           'ws': [7., 7., 8.,8.,8.],
+                           'pow_000': [1., 1., 1., 1.,1.],
+                           'pow_001': [1.5, 1.7, 2., 2.25,2.5],
+        })
+
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=df_base.shape[0])
+
+        total_uplift_result = tup.compute_total_uplift(
+            er_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min = 269.,
+            wd_step=2.0,
+            ws_min = 0.5, # Make sure bin labels land on whole numbers
+            weight_by='min',
+            uplift_pairs = ['baseline', 'wake_steering'],
+            uplift_names = ['uplift'],
+            N=10
+        )
+
+        print(total_uplift_result)

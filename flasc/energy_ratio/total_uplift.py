@@ -41,7 +41,7 @@ def _compute_total_uplift_single(
     ):
  
     """
-    Compute the energy ratio between two sets of turbines.
+    Compute the total change in energy production between two sets of turbines.
 
     Args:
         df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
@@ -74,7 +74,7 @@ def _compute_total_uplift_single(
             must be available to compute the bin. Defaults to False.
 
     Returns:
-        pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
+        dict: A dictionary with results indexed for each element of uplift_names
         pl.DataFrame: A dataframe containing the weights each wind direction and wind speed bin
     """
 
@@ -128,6 +128,124 @@ def _compute_total_uplift_single(
         total_uplift_result[uplift_name] = (delta_aep, percent_delta_aep)
 
     return total_uplift_result, df_freq_pl
+
+
+# Bootstrap function wraps the _compute_energy_ratio function
+def _compute_total_uplift_bootstrap(er_in,
+                         ref_cols,
+                         test_cols,
+                         wd_cols,
+                         ws_cols,
+                         wd_step = 2.0,
+                         wd_min = 0.0,
+                         wd_max = 360.0,
+                         ws_step = 1.0,
+                         ws_min = 0.0,
+                         ws_max = 50.0,
+                         bin_cols_in = ['wd_bin','ws_bin'],
+                         weight_by = 'min', #min, sum
+                         df_freq_pl = None,
+                         wd_bin_overlap_radius = 0.,
+                         uplift_pairs = [],
+                         uplift_names = [],
+                         N = 1,
+                         percentiles=[5., 95.],
+                         remove_all_nulls=False,
+                         ):
+    
+    """
+    Compute the total change in energy production between two sets of turbines with bootstrapping
+
+    Args:
+        er_in (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
+        ref_cols (list[str]): A list of columns to use as the reference turbines
+        test_cols (list[str]): A list of columns to use as the test turbines
+        wd_cols (list[str]): A list of columns to derive the wind directions from
+        ws_cols (list[str]): A list of columns to derive the wind speeds from
+        wd_step (float): The width of the wind direction bins.
+        wd_min (float): The minimum wind direction to use.
+        wd_max (float): The maximum wind direction to use.
+        ws_step (float): The width of the wind speed bins.
+        ws_min (float): The minimum wind speed to use.
+        ws_max (float): The maximum wind speed to use.
+        bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
+            the minimum count across the dataframes is used to weight the energy ratio. 'sum' means the sum of the counts
+            across the dataframes is used to weight the energy ratio.
+        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
+        wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be 
+            less or equal to half the value of wd_step
+        uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element 
+            of the list should be a tuple (or list) of length 2, where the first element will be the 
+            base case in the uplift calculation and the second element will be the test case in the 
+            uplift calculation. If None, no uplifts are computed.
+        uplift_names: (list[str]): Names for the uplift columns, following the order of the 
+            pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2"
+        N (int): The number of bootstrap samples to use.
+        percentiles: (list or None): percentiles to use when returning energy ratio bounds. 
+            If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
+        remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be 
+                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+                must be available to compute the bin. Defaults to False.
+
+
+    Returns:
+        pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
+
+    """
+
+    # Otherwise run the function N times and concatenate the results to compute statistics
+    uplift_single_outs = [
+        _compute_total_uplift_single(
+            er_in.resample_energy_table(perform_resample=(i != 0)),
+            er_in.df_names,
+            ref_cols,
+            test_cols,
+            wd_cols,
+            ws_cols,
+            wd_step,
+            wd_min,
+            wd_max,
+            ws_step,
+            ws_min,
+            ws_max,
+            bin_cols_in,
+            weight_by,
+            df_freq_pl,
+            wd_bin_overlap_radius,
+            uplift_pairs,
+            uplift_names,
+            remove_all_nulls
+        ) for i in range(N)
+    ]
+    # df_concat = pl.concat([uplift_single_out[0] for uplift_single_out in uplift_single_outs])
+    # First output contains the original table; use that df_freq_pl
+    df_freq_pl = uplift_single_outs[0][1]
+
+
+    # Add in the statistics
+    total_uplift_result = {}
+
+    for uplift_name in uplift_names:
+        delta_aeps = np.zeros(N)
+        percent_delta_aeps = np.zeros(N)
+
+        for i in range(N):
+            delta_aeps[i] = uplift_single_outs[i][0][uplift_name][0]
+            percent_delta_aeps[i] = uplift_single_outs[i][0][uplift_name][1]
+
+        delta_aep_central = delta_aeps[0]
+        delta_aep_lb =  np.quantile(delta_aeps, percentiles[0]/100)
+        delta_aep_ub =  np.quantile(delta_aeps, percentiles[1]/100)
+
+        percent_delta_aep_central = percent_delta_aeps[0]
+        percent_delta_aep_lb =  np.quantile(percent_delta_aeps, percentiles[0]/100)
+        percent_delta_aep_ub =  np.quantile(percent_delta_aeps, percentiles[1]/100)
+
+        total_uplift_result[uplift_name] = (delta_aep_central, delta_aep_lb, delta_aep_ub, percent_delta_aep_central, percent_delta_aep_lb, percent_delta_aep_ub)
+
+    return total_uplift_result, df_freq_pl
+
 
 def compute_total_uplift(er_in: EnergyRatioInput,
                          ref_turbines = None,
@@ -318,64 +436,34 @@ def compute_total_uplift(er_in: EnergyRatioInput,
             remove_all_nulls
         )
     else:
-        raise NotImplementedError(
-            "Bootstrapping not yet implemented for total power uplift calculation."+\
-            "Please set N = 1."
+        if percentiles is None:
+            percentiles = [5, 95]
+        elif not hasattr(percentiles, "__len__") or len(percentiles) != 2:
+            raise ValueError("percentiles should be a two element list of the "+\
+                "upper and lower desired percentiles.")
+
+        total_uplift_result, df_freq_pl = _compute_total_uplift_bootstrap(
+            er_in,
+            ref_cols,
+            test_cols,
+            wd_cols,
+            ws_cols,
+            wd_step,
+            wd_min,
+            wd_max,
+            ws_step,
+            ws_min,
+            ws_max,
+            bin_cols_in,
+            weight_by,
+            df_freq_pl,
+            wd_bin_overlap_radius,
+            uplift_pairs,
+            uplift_names,
+            N,
+            percentiles
         )
-        # if percentiles is None:
-        #     percentiles = [5, 95]
-        # elif not hasattr(percentiles, "__len__") or len(percentiles) != 2:
-        #     raise ValueError("percentiles should be a two element list of the "+\
-        #         "upper and lower desired percentiles.")
 
-        # df_res, df_freq_pl, total_uplift_result = _compute_energy_ratio_bootstrap(
-        #     er_in,
-        #     ref_cols,
-        #     test_cols,
-        #     wd_cols,
-        #     ws_cols,
-        #     wd_step,
-        #     wd_min,
-        #     wd_max,
-        #     ws_step,
-        #     ws_min,
-        #     ws_max,
-        #     bin_cols_in,
-        #     weight_by,
-        #     df_freq_pl,
-        #     wd_bin_overlap_radius,
-        #     uplift_pairs,
-        #     uplift_names,
-        #     compute_total_uplift,
-        #     N,
-        #     percentiles
-        # )
-    
-    # Return the df_freqs, handle as needed.
-    
-    # Sort df_res by df_names, ws, wd
-
-    # # Return the results as an EnergyRatioOutput object
-    # return EnergyRatioOutput(df_res.to_pandas(), 
-    #                             er_in,
-    #                             df_freq_pl.to_pandas(),
-    #                             ref_cols, 
-    #                             test_cols, 
-    #                             wd_cols,
-    #                             ws_cols,
-    #                             uplift_names,
-    #                             total_uplift_result,
-    #                             wd_step,
-    #                             wd_min,
-    #                             wd_max,
-    #                             ws_step,
-    #                             ws_min,
-    #                             ws_max,
-    #                             bin_cols_in,
-    #                             weight_by,
-    #                             wd_bin_overlap_radius,
-    #                             N)
-    
     # Do we want some kind of more complex return object? Or are we OK 
     # returning just the total_uplift_result dictionary?
     return total_uplift_result
