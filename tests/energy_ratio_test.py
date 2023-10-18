@@ -1,20 +1,17 @@
+import unittest
 from io import StringIO
-import os
+
+import numpy as np
 import pandas as pd
 import polars as pl
-import numpy as np
 import pytest
 
-import unittest
-
-from floris import tools as wfct
-from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio as erp
-from flasc.energy_ratio import total_uplift as tup
-from flasc.energy_ratio.energy_ratio_utilities import add_reflected_rows
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
+from flasc.energy_ratio.energy_ratio_utilities import add_reflected_rows
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_data():
