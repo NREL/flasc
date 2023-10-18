@@ -90,7 +90,7 @@ def _compute_energy_ratio_single(df_,
         raise RuntimeError("After removing nulls, no data remains for computation.")
 
     # Apply binning to dataframe
-    df_ = util.bin_dataframe(df_, ref_cols, test_cols, wd_cols, ws_cols, wd_step, wd_min, 
+    df_ = util.bin_and_group_dataframe(df_, ref_cols, test_cols, wd_cols, ws_cols, wd_step, wd_min, 
         wd_max, ws_step, ws_min, ws_max, wd_bin_overlap_radius,
         remove_all_nulls, bin_cols_without_df_name, num_df)
     
