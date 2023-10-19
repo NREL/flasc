@@ -74,10 +74,11 @@ class TestTotalUplift(unittest.TestCase):
         # Percent Delta AEP = 100 * (18615 / 39420) = 47.22222222
 
 
-        # Unpack the result and check assertions
-        delta_aep, percent_delta_aep = total_uplift_result['uplift']
-        self.assertAlmostEqual(delta_aep,  18615  , places=4) 
-        self.assertAlmostEqual(percent_delta_aep,  47.22222222  , places=4) 
+        # Check assertions
+        self.assertAlmostEqual(total_uplift_result['uplift']['energy_uplift_ctr'],
+            18615, places=4) 
+        self.assertAlmostEqual(total_uplift_result['uplift']['energy_uplift_ctr_pc'],
+            47.22222222, places=4) 
 
 
     def test_total_uplift_bootstrap(self):
@@ -135,15 +136,15 @@ class TestTotalUplift(unittest.TestCase):
         )
         
         # Confirm determinism of the central
-        self.assertAlmostEqual(total_uplift_result_1['uplift'][3], 
-                                total_uplift_result_2['uplift'][3], 
+        self.assertAlmostEqual(total_uplift_result_1['uplift']['energy_uplift_ctr_pc'], 
+                                total_uplift_result_2['uplift']['energy_uplift_ctr_pc'], 
                                 places=4) 
 
         # Check accuraccy of centreal result
-        self.assertAlmostEqual(total_uplift_result_1['uplift'][3],  
-                               50.0 , 
+        self.assertAlmostEqual(total_uplift_result_1['uplift']['energy_uplift_ctr_pc'],  
+                               50.0, 
                                places=4) 
 
         # Check reasonableness of upper/lower bounds
-        self.assertGreaterEqual(total_uplift_result_1['uplift'][4],  25.0) 
-        self.assertLessEqual(total_uplift_result_1['uplift'][5],  75.0) 
+        self.assertGreaterEqual(total_uplift_result_1['uplift']['energy_uplift_lb_pc'],  25.0) 
+        self.assertLessEqual(total_uplift_result_1['uplift']['energy_uplift_ub_pc'],  75.0) 

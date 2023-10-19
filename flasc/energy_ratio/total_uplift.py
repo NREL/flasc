@@ -125,7 +125,14 @@ def _compute_total_uplift_single(
         delta_aep = 8760 * df_total.select('delta_aep').item()
         percent_delta_aep = 100 * (df_total.select('delta_aep').item() / df_total.select('base_aep').item())
 
-        total_uplift_result[uplift_name] = (delta_aep, percent_delta_aep)
+        total_uplift_result[uplift_name] = {
+            "energy_uplift_ctr": delta_aep,
+            "energy_uplift_lb": None,
+            "energy_uplift_ub": None,
+            "energy_uplift_ctr_pc": percent_delta_aep,
+            "energy_uplift_lb_pc": None,
+            "energy_uplift_ub_pc": None
+        }
 
     return total_uplift_result, df_freq_pl
 
@@ -231,8 +238,8 @@ def _compute_total_uplift_bootstrap(er_in,
         percent_delta_aeps = np.zeros(N)
 
         for i in range(N):
-            delta_aeps[i] = uplift_single_outs[i][0][uplift_name][0]
-            percent_delta_aeps[i] = uplift_single_outs[i][0][uplift_name][1]
+            delta_aeps[i] = uplift_single_outs[i][0][uplift_name]["energy_uplift_ctr"]
+            percent_delta_aeps[i] = uplift_single_outs[i][0][uplift_name]["energy_uplift_ctr_pc"]
 
         delta_aep_central = delta_aeps[0]
         delta_aep_lb =  np.quantile(delta_aeps, percentiles[0]/100)
@@ -242,7 +249,14 @@ def _compute_total_uplift_bootstrap(er_in,
         percent_delta_aep_lb =  np.quantile(percent_delta_aeps, percentiles[0]/100)
         percent_delta_aep_ub =  np.quantile(percent_delta_aeps, percentiles[1]/100)
 
-        total_uplift_result[uplift_name] = (delta_aep_central, delta_aep_lb, delta_aep_ub, percent_delta_aep_central, percent_delta_aep_lb, percent_delta_aep_ub)
+        total_uplift_result[uplift_name] = {
+            "energy_uplift_ctr": delta_aep_central,
+            "energy_uplift_lb": delta_aep_lb,
+            "energy_uplift_ub": delta_aep_ub,
+            "energy_uplift_ctr_pc": percent_delta_aep_central,
+            "energy_uplift_lb_pc": percent_delta_aep_lb,
+            "energy_uplift_ub_pc": percent_delta_aep_ub
+        }
 
     return total_uplift_result, df_freq_pl
 
