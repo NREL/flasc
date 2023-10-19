@@ -125,6 +125,15 @@ def _compute_total_uplift_single(
         delta_aep = 8760 * df_total.select('delta_aep').item()
         percent_delta_aep = 100 * (df_total.select('delta_aep').item() / df_total.select('base_aep').item())
 
+        if np.isnan(delta_aep):
+            if ws_min < 5.0:
+                warnings.warn("NaNs detected in power ratios. This can result from "\
+                    +"the reference power being 0, which can occur when wind speed is "\
+                    "very low. Try setting ws_min keyword argument to remove 0 power "\
+                    "wind speeds.")
+            else:
+                warnings.warn("NaNs detected in power ratios.")
+
         total_uplift_result[uplift_name] = {
             "energy_uplift_ctr": delta_aep,
             "energy_uplift_lb": None,
