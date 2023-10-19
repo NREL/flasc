@@ -25,7 +25,7 @@ class TestTotalUplift(unittest.TestCase):
                            'pow_001': [2., 2., 1., 1.,30.],
         })
 
-        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'])
+        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'],num_blocks=1)
 
         total_uplift_result = tup.compute_total_uplift(
             er_in,
