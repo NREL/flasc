@@ -1,4 +1,5 @@
 from flasc.model_tuning.tuner_utils import replicate_nan_values
+import flasc.model_tuning.floris_tuning as ft
 import unittest
 
 import pandas as pd
@@ -29,4 +30,18 @@ class TestModelTuning(unittest.TestCase):
         # Check if the result matches the expected output
         assert result_df.equals(expected_df_2)
         assert df_1.equals(expected_df_1)
+        
+
+    def test_evaluate_overall_wake_loss(self):
+        # Create a sample DataFrame for testing
+        data = {'pow_ref': [5, 2, 3],
+                'pow_test': [1, 2, 2]}
+        df = pd.DataFrame(data)
+
+        # Calculate the expected result manually
+        # Expected result = 100 * (10 - 5) / 10 = 50
+
+        # Check if the actual result matches the expected result
+        self.assertAlmostEqual(ft.evaluate_overall_wake_loss(df),
+            50, places=4) 
         

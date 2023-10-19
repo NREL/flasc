@@ -109,6 +109,45 @@ def set_fi_param(fi_in: FlorisInterface,
     nested_set(fi_dict_mod, param, value, param_idx)
     return FlorisInterface(fi_dict_mod)
 
+
+def resim_floris(fi_in: FlorisInterface,
+                  df_scada: pd.DataFrame,
+                  yaw_angles: np.array=None):
+
+        # Get wind speeds and directions
+        wind_speeds = df_scada['ws'].values
+        wind_directions = df_scada['wd'].values
+
+        # Get the number of turbiens
+        num_turbines = dfm.get_num_turbines(df_scada)
+
+        # Set up the FLORIS model
+        fi = fi_in.copy()
+        fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions, time_series=True)
+        fi.calculate_wake(yaw_angles=yaw_angles)
+        
+        # Get the turbines in kW
+        turbine_powers = fi.get_turbine_powers().squeeze()/1000
+
+        # Generate FLORIS dataframe
+        df_floris = pd.DataFrame(data=turbine_powers,
+                                    columns=[f'pow_{i:>03}' for i in range(num_turbines)])
+
+        # Assign the FLORIS results to a dataframe
+        df_floris = df_floris.assign(ws=wind_speeds,
+                                        wd=wind_directions)#,
+                                        # pow_ref=df_floris[[f"pow_{str(i).zfill(3)}" for i in pow_ref_columns]].mean(axis=1))
+
+        # Make sure the NaN values in the SCADA data appear in the same locations in the
+        # FLORIS data
+        df_floris = replicate_nan_values(df_scada, df_floris)
+
+        # If df_scada includes a df_mode column copy it over to floris
+        if 'df_mode' in df_scada.columns:
+            df_floris['df_mode'] = df_scada['df_mode'].values
+
+        return df_floris
+
 # def resim_floris(fi_in: FlorisInterface,
 #                  df_scada: pd.DataFrame,
 #                  yaw_angles: np.array=None):
