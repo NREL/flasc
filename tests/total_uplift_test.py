@@ -81,23 +81,26 @@ class TestTotalUplift(unittest.TestCase):
     def test_total_uplift_bootstrap(self):
 
         # Test the ability to compute the total uplift in energy production with bootstrapping
+        # Confirm the "central" answer is deterministic and that the upper and lower bounds
+        # make sense
         
         # This time use ratios that are all 1 in the baseline case and between 1.5 and 2.5
-        df_base = pd.DataFrame({'wd': [270, 270., 270.,270.,270.],
-                           'ws': [7., 8., 8.,8.,8.],
-                           'pow_000': [1., 1., 1., 1.,1.],
-                           'pow_001': [1., 1., 1., 1.,1.],
+        df_base = pd.DataFrame({'wd': [270, 270.,270., 270.,270.,270.],
+                           'ws': [7.,7.,7., 8.,8.,8.],
+                           'pow_000': [1., 1., 1., 1.,1.,1.],
+                           'pow_001': [1., 1., 1., 1.,1., 1.],
         })
 
-        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,270.],
-                           'ws': [7., 7., 8.,8.,8.],
-                           'pow_000': [1., 1., 1., 1.,1.],
-                           'pow_001': [1.5, 1.7, 2., 2.25,2.5],
+        # Define an uplift between 25 and 75%
+        df_wake_steering  = pd.DataFrame({'wd': [270, 270., 270.,270.,270.,270.],
+                           'ws': [7., 7.,7., 8.,8.,8.],
+                           'pow_000': [1., 1., 1., 1.,1.,1.],
+                           'pow_001': [1.25, 1.25,1.25, 1.75, 1.75 , 1.75],
         })
 
         er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=df_base.shape[0])
 
-        total_uplift_result = tup.compute_total_uplift(
+        total_uplift_result_1 = tup.compute_total_uplift(
             er_in,
             ref_turbines=[0],
             test_turbines=[1],
@@ -112,4 +115,27 @@ class TestTotalUplift(unittest.TestCase):
             N=10
         )
 
-        print(total_uplift_result)
+        total_uplift_result_2 = tup.compute_total_uplift(
+            er_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min = 269.,
+            wd_step=2.0,
+            ws_min = 0.5, # Make sure bin labels land on whole numbers
+            weight_by='min',
+            uplift_pairs = ['baseline', 'wake_steering'],
+            uplift_names = ['uplift'],
+            N=10
+        )
+        
+        # Confirm determinism of the central
+        self.assertAlmostEqual(total_uplift_result_1['uplift'][3],  total_uplift_result_2['uplift'][3]  , places=4) 
+
+        # Check accuraccy of centreal result
+        self.assertAlmostEqual(total_uplift_result_1['uplift'][3],  50.0 , places=4) 
+
+        # Check reasonableness of upper/lower bounds
+        self.assertGreaterEqual(total_uplift_result_1['uplift'][4],  25.0) 
+        self.assertLessEqual(total_uplift_result_1['uplift'][5],  75.0) 
