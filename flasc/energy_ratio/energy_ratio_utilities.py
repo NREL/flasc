@@ -460,3 +460,138 @@ def check_compute_energy_ratio_inputs(
             raise ValueError('df_freq must have columns ws, wd and freq_val')
 
     return None
+
+def bin_and_group_dataframe(df_: pl.DataFrame,
+    ref_cols: List,
+    test_cols: List,
+    wd_cols: List,
+    ws_cols: List,
+    wd_step: float = 2.0,
+    wd_min: float  = 0.0,
+    wd_max: float = 360.0,
+    ws_step: float = 1.0,
+    ws_min: float = 0.0,
+    ws_max: float = 50.0,
+    wd_bin_overlap_radius: float = 0.,
+    remove_all_nulls: bool = False,
+    bin_cols_without_df_name: List = None,
+    num_df: int = 0,
+):
+    
+    """
+    Bin and aggregate a DataFrame based on wind direction and wind speed parameters.
+
+    This function takes a Polars DataFrame (df_) and performs binning and aggregation operations based on
+    wind direction (wd) and wind speed (ws). It allows for optional handling of reflected rows and grouping by
+    specific columns. The resulting DataFrame contains aggregated statistics for reference and test power
+    columns within specified bins.
+
+    Args:
+        df_ (DataFrame): The input Polars DataFrame to be processed.
+        ref_cols (List[str]): List of columns containing reference power data.
+        test_cols (List[str]): List of columns containing test power data.
+        wd_cols (List[str]): List of columns containing wind direction data.
+        ws_cols (List[str]): List of columns containing wind speed data.
+        wd_step (float, optional): Step size for wind direction binning. Defaults to 2.0.
+        wd_min (float, optional): Minimum wind direction value. Defaults to 0.0.
+        wd_max (float, optional): Maximum wind direction value. Defaults to 360.0.
+        ws_step (float, optional): Step size for wind speed binning. Defaults to 1.0.
+        ws_min (float, optional): Minimum wind speed value. Defaults to 0.0.
+        ws_max (float, optional): Maximum wind speed value. Defaults to 50.0.
+        wd_bin_overlap_radius (float, optional): Radius for overlapping wind direction bins. Defaults to 0.0.
+        remove_all_nulls (bool, optional): If True, remove rows unless all valid instead of any Defaults to False.
+        bin_cols_without_df_name (List[str], optional): List of columns used for grouping without 'df_name'.
+        num_df (int, optional): Number of dataframes required for each bin combination.
+
+    Returns:
+        DataFrame: The resulting Polars DataFrame with aggregated statistics.
+    """
+
+        # If wd_bin_overlap_radius is not zero, add reflected rows
+    if wd_bin_overlap_radius > 0.:
+
+        # Need to obtain the wd column now rather than during binning
+        df_ = add_wd(df_, wd_cols, remove_all_nulls)
+
+        # Add reflected rows
+        edges = np.arange(wd_min, wd_max + wd_step, wd_step)
+        df_ = add_reflected_rows(df_, edges, wd_bin_overlap_radius)
+
+    # Assign the wd/ws bins
+    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max, remove_all_nulls=remove_all_nulls)
+    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max, remove_all_nulls=remove_all_nulls)
+
+    # Assign the reference and test power columns
+    df_ = add_power_ref(df_, ref_cols)
+    df_ = add_power_test(df_, test_cols)
+
+    bin_cols_with_df_name = bin_cols_without_df_name + ['df_name']
+
+    # Group df_
+    df_ = (df_
+        .filter(pl.all_horizontal(pl.col(bin_cols_with_df_name).is_not_null())) # Select for all bin cols present
+        .group_by(bin_cols_with_df_name, maintain_order=True)
+        .agg([pl.mean("pow_ref"), pl.mean("pow_test"),pl.count()])
+        # Enforce that each ws/wd bin combination has to appear in all dataframes
+        .filter(pl.count().over(bin_cols_without_df_name) == num_df)
+    )
+
+    return df_
+
+def add_bin_weights(df_: pl.DataFrame, 
+    df_freq_pl: pl.DataFrame = None,
+    bin_cols_without_df_name: List =None,
+    weight_by: str = "min"
+):
+    """
+    Add weights to DataFrame bins based on either frequency counts or the provided frequency table df_freq_pl.
+
+    This function  assigns weights to DataFrame bins.  If 'df_freq_pl' is provided, these weights are used
+    directly.  If 'df_freq_pl' is not provided, the function calculates the weights from the input DataFrame 'df_'.
+    Weights can be determined as either the minimum ('min') or the sum ('sum') of counts.
+
+    Args:
+        df_ (DataFrame): The input Polars DataFrame containing bins and frequency counts.
+        df_freq_pl (DataFrame, optional): A Polars DataFrame containing frequency counts for bins.
+            If not provided, the function will calculate these counts from 'df_'.
+        bin_cols_without_df_name (List, optional): List of columns used for grouping bins without 'df_name'.
+        weight_by (str, optional): Weight calculation method, either 'min' (minimum count) or 'sum' (sum of counts).
+            Defaults to 'min'.
+
+    Returns:
+        Tuple[pl.DataFrame, pl.DataFrame]: A tuple containing the modified DataFrame 'df_' with added weights and the DataFrame
+    'df_freq_pl' with the calculated frequency counts.
+
+    Raises:
+        RuntimeError: If none of the ws/wd bins in data appear in df_freq.
+        UserWarning: If some bins in data are not in df_freq and will receive a weight of 0.
+
+    """
+    if df_freq_pl is None:
+        # Determine the weights per bin as either the min or sum count
+        df_freq_pl = (df_
+            .select(bin_cols_without_df_name+['count'])
+            .group_by(bin_cols_without_df_name)
+            .agg([pl.min('count') if weight_by == 'min' else pl.sum('count')])
+            .rename({'count':'weight'})
+        )
+    
+    df_ = (df_.join(df_freq_pl, on=['wd_bin','ws_bin'], how='left')
+            .with_columns(pl.col('weight'))
+    )
+
+    # Check if all the values in the weight column are null
+    if df_['weight'].is_null().all():
+        raise RuntimeError("None of the ws/wd bins in data appear in df_freq")
+    
+    # Check if any of the values in the weight column are null
+    if df_['weight'].is_null().any():
+        warnings.warn('Some bins in data are not in df_freq and will get 0 weight')
+
+    # Fill the null values with zeros
+    df_= df_.with_columns(pl.col('weight').fill_null(strategy="zero"))
+
+    # Normalize the weights
+    df_ = df_.with_columns(pl.col('weight').truediv(pl.col('weight').sum()))
+
+    return df_, df_freq_pl
