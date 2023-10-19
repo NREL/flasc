@@ -25,7 +25,9 @@ class TestTotalUplift(unittest.TestCase):
                            'pow_001': [2., 2., 1., 1.,30.],
         })
 
-        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'],num_blocks=1)
+        er_in = EnergyRatioInput([df_base, df_wake_steering],
+                                 ['baseline', 'wake_steering'],
+                                 num_blocks=1)
 
         total_uplift_result = tup.compute_total_uplift(
             er_in,
@@ -98,7 +100,9 @@ class TestTotalUplift(unittest.TestCase):
                            'pow_001': [1.25, 1.25,1.25, 1.75, 1.75 , 1.75],
         })
 
-        er_in = EnergyRatioInput([df_base, df_wake_steering],['baseline', 'wake_steering'], num_blocks=df_base.shape[0])
+        er_in = EnergyRatioInput([df_base, df_wake_steering],
+                                 ['baseline', 'wake_steering'],
+                                   num_blocks=df_base.shape[0])
 
         total_uplift_result_1 = tup.compute_total_uplift(
             er_in,
@@ -131,10 +135,14 @@ class TestTotalUplift(unittest.TestCase):
         )
         
         # Confirm determinism of the central
-        self.assertAlmostEqual(total_uplift_result_1['uplift'][3],  total_uplift_result_2['uplift'][3]  , places=4) 
+        self.assertAlmostEqual(total_uplift_result_1['uplift'][3], 
+                                total_uplift_result_2['uplift'][3], 
+                                places=4) 
 
         # Check accuraccy of centreal result
-        self.assertAlmostEqual(total_uplift_result_1['uplift'][3],  50.0 , places=4) 
+        self.assertAlmostEqual(total_uplift_result_1['uplift'][3],  
+                               50.0 , 
+                               places=4) 
 
         # Check reasonableness of upper/lower bounds
         self.assertGreaterEqual(total_uplift_result_1['uplift'][4],  25.0) 
