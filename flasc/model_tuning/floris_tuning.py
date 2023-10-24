@@ -12,12 +12,15 @@
 # See https://floris.readthedocs.io for documentation
 import numpy as np
 import pandas as pd
+import polars as pl
 from flasc.model_tuning.tuner_utils import set_fi_param, resim_floris
 
 from flasc.dataframe_operations import (
     dataframe_filtering as dff,
     dataframe_manipulations as dfm,
 )
+
+from flasc.energy_ratio.energy_ratio_utilities import add_power_ref, add_power_test
 
 
 
@@ -36,73 +39,64 @@ def evaluate_overall_wake_loss(df_,
 def sweep_velocity_model_parameter_for_overall_wake_losses(
         parameter,
         value_candidates,
-        df_scada,
+        df_scada_in,
         fi_in,
+        ref_turbines,
+        test_turbines,
         param_idx = None,
         yaw_angles = None,
+        wd_min = 0.0,
+        wd_max = 360.0,
+        # ws_step: float = 1.0,
+        ws_min = 0.0,
+        ws_max = 50.0,
         df_freq = None # Not yet certain we will use this
     ):
 
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?
+
+    # Assign the ref and test cols
+    df_scada = pl.from_pandas(df_scada_in)
+
+    # Trim to ws/wd
+    df_scada = df_scada.filter(
+        (pl.col('ws') >= ws_min) &  # Filter the mean wind speed
+        (pl.col('ws') < ws_max) &
+        (pl.col('wd') >= wd_min) &  # Filter the mean wind direction
+        (pl.col('wd') < wd_max) 
+    )
+
+    ref_cols = [f'pow_{i:03d}' for i in ref_turbines]
+    test_cols = [f'pow_{i:03d}' for i in test_turbines]
+    df_scada = add_power_ref(df_scada, ref_cols)
+    df_scada = add_power_test(df_scada, test_cols)
     
     # First collect the scada wake loss
     scada_wake_loss = evaluate_overall_wake_loss(df_scada)
 
     # Now loop over FLORIS candidates and collect the wake loss
-    floris_wake_losses = np.array(len(value_candidates))
+    floris_wake_losses = np.zeros(len(value_candidates))
     for idx, vc in enumerate(value_candidates):
         
         # Set the parameter
         fi = set_fi_param(fi_in, parameter, vc, param_idx)
 
         # Collect the FLORIS results
-        df_floris = resim_floris(fi, df_scada, yaw_angles=yaw_angles)
+        df_floris = resim_floris(fi, df_scada.to_pandas(), yaw_angles=yaw_angles)
+        df_floris = pl.from_pandas(df_floris)
+
+        # Assign the ref and test cols
+        df_floris = add_power_ref(df_floris, ref_cols)
+        df_floris = add_power_test(df_floris, test_cols)
 
         # Get the wake loss
         floris_wake_losses[idx] = evaluate_overall_wake_loss(df_floris)
 
     # Return the error
-    return floris_wake_losses - scada_wake_loss
+    return floris_wake_losses, scada_wake_loss
 
 
-
-
-
-    # Uses total wake losses
-
-
-
-    # # Do we use FLASC to compute AEP? how do we do this exactly?
-    # aep_floris_list = _sweep_parameter(
-    #     parameter,
-    #     value_candidates,
-    #     fi_init,
-    #     evaluate_overall_wake_loss,
-    #     {"freq":freq}
-    # )
-
-    # # Also call for SCADA
-
-    # aep_floris_nowake = fi_init.get_farm_AEP(freq, nowake=True)
-
-    # aep_loss_scada = aep_floris_nowake - aep_scada
-    # aep_loss_floris = aep_floris_nowake - np.array(aep_floris_list)
-
-    # # COULD normalize to a percentage wake loss, if desired... not sure 
-    # # it's necessary. But would be an option
-
-    # # ASSUMING this function should return the error between SCADA and FLORIS:
-
-    # return aep_loss_scada - aep_loss_floris
-
-    # #OR
-
-    # # squared error...
-    # return (aep_loss_scada - aep_loss_floris)**2
-
-    # # I think I prefer an upper-level optimizer to handle whether to square 
-    # # the error or not.
 
 def sweep_deflection_model_parameter_for_er_uplift():
     
