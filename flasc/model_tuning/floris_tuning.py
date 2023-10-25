@@ -20,11 +20,14 @@ from flasc.dataframe_operations import (
     dataframe_manipulations as dfm,
 )
 
+import flasc.floris_tools as ftools
 from flasc.energy_ratio.energy_ratio_utilities import add_power_ref, add_power_test
+from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
+from flasc.energy_ratio import energy_ratio as er
+from sklearn.metrics import mean_squared_error
+from flasc.model_tuning.tuner_utils import replicate_nan_values
 
-
-
-from floris.tools import FlorisInterface
+from floris.tools import FlorisInterface, UncertaintyInterface
 
 
 def evaluate_overall_wake_loss(df_,
@@ -116,6 +119,119 @@ def select_best_velocity_parameter(floris_reults,
 
     return best_param
 
+def sweep_wd_std_for_er(
+        value_candidates,
+        df_scada_in,
+        df_approx_,
+        ref_turbines,
+        test_turbines,
+        yaw_angles = None,
+        wd_step = 2.0,
+        wd_min = 0.0,
+        wd_max = 360.0,
+        ws_step: float = 1.0,
+        ws_min = 0.0,
+        ws_max = 50.0,
+        bin_cols_in = ['wd_bin','ws_bin'],
+        weight_by = 'min', #min, sum
+        df_freq = None, # Not yet certain we will use this,
+        remove_all_nulls = False
+    ):
+
+    # Currently assuming pow_ref and pow_test already assigned
+    # Also assuming limit to ws/wd range accomplished but could revisit?
+
+    # Assign the ref and test cols
+    df_scada = pl.from_pandas(df_scada_in)
+    
+
+    # Trim to ws/wd
+    df_scada = df_scada.filter(
+        (pl.col('ws') >= ws_min) &  # Filter the mean wind speed
+        (pl.col('ws') < ws_max) &
+        (pl.col('wd') >= wd_min) &  # Filter the mean wind direction
+        (pl.col('wd') < wd_max) 
+    )
+
+    ref_cols = [f'pow_{i:03d}' for i in ref_turbines]
+    test_cols = [f'pow_{i:03d}' for i in test_turbines]
+    df_scada = add_power_ref(df_scada, ref_cols)
+    df_scada = add_power_test(df_scada, test_cols)
+    
+    df_scada = df_scada.to_pandas()
+    df_scada['ti'] = 0.1
+
+    
+    # scada_vals = er_out.df_result['SCADA'].values
+    
+    # # First collect the scada wake loss
+    # scada_wake_loss = evaluate_overall_wake_loss(df_scada)
+
+    # Now loop over FLORIS candidates and collect the wake loss
+    er_error = np.zeros(len(value_candidates))
+    for idx, wd_std in enumerate(value_candidates):
+        
+        if wd_std > 0:
+            df_approx_wd_std = ftools.add_gaussian_blending_to_floris_approx_table(df_approx_, wd_std)
+        else:
+            df_approx_wd_std = df_approx_.copy()
+
+        df_floris = ftools.interpolate_floris_from_df_approx(df_scada,
+                                                             df_approx_wd_std,
+                                                             mirror_nans=False,
+                                                             wrap_0deg_to_360deg=False)
+        df_floris = replicate_nan_values(df_scada,df_floris)
+
+        # Collect the FLORIS results
+        # df_floris = resim_floris(fi, df_scada.to_pandas(), yaw_angles=yaw_angles)
+        df_floris = pl.from_pandas(df_floris)
+
+        # Assign the ref and test cols
+        df_floris = add_power_ref(df_floris, ref_cols)
+        df_floris = add_power_test(df_floris, test_cols)
+
+        # Compare the energy ratio to SCADA
+        er_in = EnergyRatioInput(
+            [df_scada, df_floris.to_pandas()], 
+            ["SCADA", "FLORIS"]
+        )
+
+        er_out = er.compute_energy_ratio(
+            er_in,
+            ref_turbines=ref_turbines,
+            test_turbines=test_turbines,
+            # use_predefined_ref=use_predefined_ref,
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_step=wd_step,
+            wd_min=wd_min,
+            wd_max=wd_max,
+            ws_step=ws_step,
+            ws_min=ws_min,
+            ws_max=ws_max,
+            N=1,
+        )
+
+        df_ = (er_out.df_result
+               .copy()
+        )
+
+        # Grab the energy ratios and counts
+        scada_vals = df_['SCADA'].values
+        floris_vals = df_['FLORIS'].values
+        count_vals = df_['count_SCADA'].values
+
+        er_error[idx] = mean_squared_error(y_true=scada_vals, 
+                                 y_pred=floris_vals, 
+                                 sample_weight=count_vals)
+        
+    # Return the error
+    return er_error
+
+
+
+
+
 def sweep_deflection_model_parameter_for_er_uplift():
     
     # Evaluate the scada metric in first step
@@ -125,11 +241,6 @@ def sweep_deflection_model_parameter_for_er_uplift():
 
     pass
 
-def sweep_wd_std_for_er():
-
-    # uses energy ratio
-
-    pass
 
 
 # def _sweep_floris_parameter(
