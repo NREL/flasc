@@ -318,10 +318,10 @@ def sweep_deflection_parameter_for_total_uplift(
     
     # Add a simple index
     df_scada_baseline = df_scada_baseline.with_columns(
-        pl.col('simple_index', np.arange(0,df_scada_baseline.shape[0]))
+        pl.Series(name='simple_index', values=np.arange(0,df_scada_baseline.shape[0]))
     )
     df_scada_wakesteering = df_scada_wakesteering.with_columns(
-        pl.col('simple_index', np.arange(0,df_scada_wakesteering.shape[0]))
+        pl.Series(name='simple_index', values=np.arange(0,df_scada_wakesteering.shape[0]))
     )
 
     
