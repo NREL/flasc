@@ -122,7 +122,7 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     # Return the error
     return floris_wake_losses, scada_wake_loss
 
-def select_best_velocity_parameter(floris_reults, 
+def select_best_velocity_parameter(floris_results, 
                        scada_results,
                        value_candidates,
                        ax=None):
@@ -132,14 +132,14 @@ def select_best_velocity_parameter(floris_reults,
     """
 
 
-    error_values = (floris_reults - scada_results)**2
+    error_values = (floris_results - scada_results)**2
 
     best_param = value_candidates[np.argmin(error_values)]
-    best_floris_result = floris_reults[np.argmin(error_values)]
+    best_floris_result = floris_results[np.argmin(error_values)]
 
     if ax is not None:
 
-        ax.plot(value_candidates, floris_reults, 'b.-', label='FLORIS')
+        ax.plot(value_candidates, floris_results, 'b.-', label='FLORIS')
         ax.scatter(best_param,best_floris_result,color='r',marker='o', label='Best Fit')
         ax.axhline(scada_results,color='k', label='SCADA')
         ax.grid(True)
