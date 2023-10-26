@@ -318,6 +318,15 @@ def sweep_deflection_parameter_for_total_uplift(
     df_scada_baseline = pl.from_pandas(df_scada_baseline_in)
     df_scada_wakesteering = pl.from_pandas(df_scada_wakesteering_in)
     
+    # Add a simple index
+    df_scada_baseline = df_scada_baseline.with_columns(
+        pl.col('simple_index', np.arange(0,df_scada_baseline.shape[0]))
+    )
+    df_scada_wakesteering = df_scada_wakesteering.with_columns(
+        pl.col('simple_index', np.arange(0,df_scada_wakesteering.shape[0]))
+    )
+
+    
 
     # Trim to ws/wd
     df_scada_baseline = df_scada_baseline.filter(
@@ -332,6 +341,15 @@ def sweep_deflection_parameter_for_total_uplift(
         (pl.col('wd') >= wd_min) &  # Filter the mean wind direction
         (pl.col('wd') < wd_max) 
     )
+
+
+    # Trim the yaw angle matrices
+    if yaw_angles_baseline is not None:
+        simple_index = df_scada_baseline['simple_index'].to_numpy()
+        yaw_angles_baseline = yaw_angles_baseline[simple_index,:,:]
+    if yaw_angles_wakesteering is not None:
+        simple_index = df_scada_wakesteering['simple_index'].to_numpy()
+        yaw_angles_wakesteering = yaw_angles_wakesteering[simple_index,:,:]
 
     ref_cols = [f'pow_{i:03d}' for i in ref_turbines]
     test_cols = [f'pow_{i:03d}' for i in test_turbines]
