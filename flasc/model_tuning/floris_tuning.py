@@ -12,11 +12,11 @@
 # See https://floris.readthedocs.io for documentation
 
 # This is a preliminary implementation of tuning methods for FLORIS to SCADA. 
-# The code is focused on methods for the empirical guassian wake model and is 
+# The code is focused on methods for the Empirical Guassian wake model and is 
 # based on contributions from Elizabeth Eyeson, Paul Fleming (paul.fleming@nrel.gov)
-# Misha Sinner (Michael.Sinner@nrel.gov) and Eric Simley  at NREL, 
-# and Bart Doekemeijer of Shell.  If interested to contribute to this work please
-# reach out via github or email
+# Misha Sinner (michael.sinner@nrel.gov) and Eric Simley at NREL, and Bart
+# Doekemeijer at Shell, as well as discussions with Diederik van Binsbergen at 
+# NTNU. Please see readme.txt for more information.
 
 
 import numpy as np
