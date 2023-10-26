@@ -369,6 +369,7 @@ def compute_total_uplift(er_in: EnergyRatioInput,
         wd_bin_overlap_radius,
         uplift_pairs,
         uplift_names,
+        False,
         N,
         percentiles,
         remove_all_nulls
