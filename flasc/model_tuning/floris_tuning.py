@@ -10,6 +10,15 @@
 # the License.
 
 # See https://floris.readthedocs.io for documentation
+
+# This is a preliminary implementation of tuning methods for FLORIS to SCADA. 
+# The code is focused on methods for the empirical guassian wake model and is 
+# based on contributions from Elizabeth Eyeson, Paul Fleming (paul.fleming@nrel.gov)
+# Misha Sinner (Michael.Sinner@nrel.gov) and Eric Simley  at NREL, 
+# and Bart Doekemeijer of Shell.  If interested to contribute to this work please
+# reach out via github or email
+
+
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -33,8 +42,17 @@ from flasc.energy_ratio import total_uplift as tup
 
 def evaluate_overall_wake_loss(df_,
                                df_freq=None):
-    # Evaluate the overall deficit in energy from the column 'ref_pow'
-    # to the column test_pow
+    """
+    Evaluate the overall wake loss from pow_ref to pow_test as percent reductions
+
+    Args:
+        df_ (DataFrame): Polars dataframe possibly containing Null values
+        df_freq (Dataframe): Not yet used
+
+    Returns:
+        float: Overall wake losses
+
+    """
 
     # Not sure yet if we want to figure out how to use df_freq here
     return 100 * (df_['pow_ref'].sum()  - df_['pow_test'].sum()) / df_['pow_ref'].sum()
@@ -56,6 +74,10 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
         ws_max = 50.0,
         df_freq = None # Not yet certain we will use this
     ):
+    """
+    Sweep the parameter in FLORIS using the values in value_candidates, and compare to
+    SCADA data in df_scada_in using the overall_wake_loss
+    """
 
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?
@@ -104,7 +126,12 @@ def select_best_velocity_parameter(floris_reults,
                        scada_results,
                        value_candidates,
                        ax=None):
-    
+    """
+    Consider the provided velocity parameters and determine the best fit with
+    respect to squared error
+    """
+
+
     error_values = (floris_reults - scada_results)**2
 
     best_param = value_candidates[np.argmin(error_values)]
@@ -138,6 +165,11 @@ def sweep_wd_std_for_er(
         df_freq = None, # Not yet certain we will use this,
         remove_all_nulls = False
     ):
+    """
+    Determine the best-fit wd_std for FLORIS by comparison with energy ratio plots
+
+    TODO: Reimplement that comparison only takes place when FLORIS value is below some threshold
+    """
 
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?
@@ -162,11 +194,6 @@ def sweep_wd_std_for_er(
     df_scada = df_scada.to_pandas()
     df_scada['ti'] = 0.1
 
-    
-    # scada_vals = er_out.df_result['SCADA'].values
-    
-    # # First collect the scada wake loss
-    # scada_wake_loss = evaluate_overall_wake_loss(df_scada)
 
     # Now loop over FLORIS candidates and collect the wake loss
     er_error = np.zeros(len(value_candidates))
@@ -185,7 +212,6 @@ def sweep_wd_std_for_er(
         df_floris = replicate_nan_values(df_scada,df_floris)
 
         # Collect the FLORIS results
-        # df_floris = resim_floris(fi, df_scada.to_pandas(), yaw_angles=yaw_angles)
         df_floris = pl.from_pandas(df_floris)
 
         # Assign the ref and test cols
@@ -236,6 +262,10 @@ def sweep_wd_std_for_er(
 def select_best_wd_std(er_results, 
                        value_candidates,
                        ax=None):
+    """
+    Consider the provided wd_std and determine the best fit with
+    respect to squared error
+    """
     
     error_sq = er_results**2
 
@@ -275,6 +305,11 @@ def sweep_deflection_parameter_for_total_uplift(
         df_freq = None, # Not yet certain we will use this,
         remove_all_nulls = False
     ):
+    """
+    Sweep values of the deflection parameter in FLORIS and compare to SCADA
+    data with respect to overall uplift
+    """
+
 
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?
@@ -331,10 +366,7 @@ def sweep_deflection_parameter_for_total_uplift(
         N=1,
     )
 
-    print(scada_uplift_result)
     scada_uplift = scada_uplift_result["Uplift [SCADA]"]["energy_uplift_ctr_pc"]
-    print(scada_uplift)
-
     
     # Now loop over FLORIS candidates and collect the uplift
     floris_uplifts = np.zeros(len(value_candidates))
@@ -384,6 +416,3 @@ def sweep_deflection_parameter_for_total_uplift(
         floris_uplifts[idx] = scada_uplift_result["Uplift [FLORIS]"]["energy_uplift_ctr_pc"]
 
     return floris_uplifts, scada_uplift
-
-
-        
