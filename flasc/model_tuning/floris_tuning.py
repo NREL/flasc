@@ -84,6 +84,10 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     # Assign the ref and test cols
     df_scada = pl.from_pandas(df_scada_in)
 
+    df_scada = df_scada.with_columns(
+        pl.Series(name='simple_index', values=np.arange(0,df_scada.shape[0]))
+    )
+
     # Trim to ws/wd
     df_scada = df_scada.filter(
         (pl.col('ws') >= ws_min) &  # Filter the mean wind speed
@@ -91,6 +95,11 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
         (pl.col('wd') >= wd_min) &  # Filter the mean wind direction
         (pl.col('wd') < wd_max) 
     )
+
+    # Trim the yaw angle matrices
+    if yaw_angles is not None:
+        simple_index = df_scada['simple_index'].to_numpy()
+        yaw_angles = yaw_angles[simple_index,:,:]
 
     ref_cols = [f'pow_{i:03d}' for i in ref_turbines]
     test_cols = [f'pow_{i:03d}' for i in test_turbines]
