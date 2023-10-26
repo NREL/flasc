@@ -29,6 +29,7 @@ from flasc.model_tuning.tuner_utils import replicate_nan_values
 
 from floris.tools import FlorisInterface, UncertaintyInterface
 
+from flasc.energy_ratio import total_uplift as tup
 
 def evaluate_overall_wake_loss(df_,
                                df_freq=None):
@@ -169,6 +170,7 @@ def sweep_wd_std_for_er(
 
     # Now loop over FLORIS candidates and collect the wake loss
     er_error = np.zeros(len(value_candidates))
+    df_list = []
     for idx, wd_std in enumerate(value_candidates):
         
         if wd_std > 0:
@@ -216,6 +218,8 @@ def sweep_wd_std_for_er(
                .copy()
         )
 
+        df_list.append(df_)
+
         # Grab the energy ratios and counts
         scada_vals = df_['SCADA'].values
         floris_vals = df_['FLORIS'].values
@@ -226,69 +230,160 @@ def sweep_wd_std_for_er(
                                  sample_weight=count_vals)
         
     # Return the error
-    return er_error
+    return er_error, df_list
 
 
-
-
-
-def sweep_deflection_model_parameter_for_er_uplift():
+def select_best_wd_std(er_results, 
+                       value_candidates,
+                       ax=None):
     
-    # Evaluate the scada metric in first step
-    # then loop over FLORIS parameters
+    error_sq = er_results**2
 
-    # uses energy ratio uplift
-
-    pass
-
-
-
-# def _sweep_floris_parameter(
-#         parameter,
-#         value_candidates,
-#         fi_init,
-#         evaluator,
-#         evaluator_kwargs
-#     ):
-#     """
-#     Inputs:
-#         evaluator -- function handle to be evaluated
-
-#     """
-
-#     # Generate an fi for each parameter based on fi_init
-#     if parameter == "wd_std":
-#         fi_list = [] # TODO: setting wd_std
-#     else:
-#         param_idx = None # TODO: handling for param_idx
-
-#         # Run FLORIS for each row in df_scada
-
-#         # Map over NaNs
-
-#         # compute fi overall power
-#         fi_list = [set_fi_param(fi_init, parameter, v, param_idx) for v in value_candidates]
-
-#     values_floris = [evaluator(df_fi, **evaluator_kwargs) for fi in zip(fi_list)]
+    best_param = value_candidates[np.argmin(error_sq)]
     
-#     # Compute the errors (might be a bit more complex than this, but gives an idea)
 
-#     return values_floris
+    if ax is not None:
+
+        ax.plot(value_candidates, error_sq, 'b.-', label='Energy Ratio Error')
+        ax.axvline(best_param,color='r')
+        ax.set_xlabel('wd_std')
+        ax.set_ylabel('squared error')
+        ax.grid(True)
+        ax.legend()
+
+    return best_param
 
 
+def sweep_deflection_parameter_for_total_uplift(
+        parameter,
+        value_candidates,
+        df_scada_baseline_in,
+        df_scada_wakesteering_in,
+        fi_in,
+        ref_turbines,
+        test_turbines,
+        yaw_angles_baseline = None, 
+        yaw_angles_wakesteering = None, 
+        wd_step = 2.0,
+        wd_min = 0.0,
+        wd_max = 360.0,
+        ws_step: float = 1.0,
+        ws_min = 0.0,
+        ws_max = 50.0,
+        bin_cols_in = ['wd_bin','ws_bin'],
+        weight_by = 'min', #min, sum
+        df_freq = None, # Not yet certain we will use this,
+        remove_all_nulls = False
+    ):
 
-# def evaluate_energy_ratio(fi,):
-#     # Possible function to evaluate in _sweep_parameter()
+    # Currently assuming pow_ref and pow_test already assigned
+    # Also assuming limit to ws/wd range accomplished but could revisit?
 
-#     # Will need to create df_fi here. Should be doable.
+    # Assign the ref and test cols
+    df_scada_baseline = pl.from_pandas(df_scada_baseline_in)
+    df_scada_wakesteering = pl.from_pandas(df_scada_wakesteering_in)
+    
 
-#     return energy_ratio # what exactly is returned here?
+    # Trim to ws/wd
+    df_scada_baseline = df_scada_baseline.filter(
+        (pl.col('ws') >= ws_min) &  # Filter the mean wind speed
+        (pl.col('ws') < ws_max) &
+        (pl.col('wd') >= wd_min) &  # Filter the mean wind direction
+        (pl.col('wd') < wd_max) 
+    )
+    df_scada_wakesteering = df_scada_wakesteering.filter(
+        (pl.col('ws') >= ws_min) &  # Filter the mean wind speed
+        (pl.col('ws') < ws_max) &
+        (pl.col('wd') >= wd_min) &  # Filter the mean wind direction
+        (pl.col('wd') < wd_max) 
+    )
+
+    ref_cols = [f'pow_{i:03d}' for i in ref_turbines]
+    test_cols = [f'pow_{i:03d}' for i in test_turbines]
+    df_scada_baseline = add_power_ref(df_scada_baseline, ref_cols)
+    df_scada_baseline = add_power_test(df_scada_baseline, test_cols)
+    df_scada_wakesteering = add_power_ref(df_scada_wakesteering, ref_cols)
+    df_scada_wakesteering = add_power_test(df_scada_wakesteering, test_cols)
+    
+    df_scada_baseline = df_scada_baseline.to_pandas()
+    df_scada_wakesteering = df_scada_wakesteering.to_pandas()
+
+    # Compare the scada uplift
+    er_in = EnergyRatioInput(
+        [df_scada_baseline, df_scada_wakesteering], 
+        ["Baseline [SCADA]", "Controlled [SCADA]"]
+    )
+
+    scada_uplift_result = tup.compute_total_uplift(
+        er_in,
+        test_turbines=test_turbines,
+        use_predefined_ref=True,
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=wd_step,
+        wd_min=wd_min,
+        wd_max=wd_max,
+        ws_step=ws_step,
+        ws_min=ws_min,
+        ws_max=ws_max,
+        uplift_pairs=[("Baseline [SCADA]", "Controlled [SCADA]")],
+        uplift_names=["Uplift [SCADA]"],
+        N=1,
+    )
+
+    print(scada_uplift_result)
+    scada_uplift = scada_uplift_result["Uplift [SCADA]"]["energy_uplift_ctr_pc"]
+    print(scada_uplift)
+
+    
+    # Now loop over FLORIS candidates and collect the uplift
+    floris_uplifts = np.zeros(len(value_candidates))
+    # df_list = []
+    for idx, vc in enumerate(value_candidates):
+
+         # Set the parameter for baseline and wake steering
+        fi_baseline = set_fi_param(fi_in, parameter, vc)
+        fi_wakesteering = fi_baseline.copy()
+
+        # Collect the FLORIS results
+        df_floris_baseline = resim_floris(fi_baseline, df_scada_baseline, yaw_angles=yaw_angles_baseline)
+        df_floris_wakesteering = resim_floris(fi_wakesteering, df_scada_wakesteering, yaw_angles=yaw_angles_wakesteering)
+
+        df_floris_baseline = pl.from_pandas(df_floris_baseline)
+        df_floris_wakesteering = pl.from_pandas(df_floris_wakesteering)
+
+        # Assign the ref and test cols
+        df_floris_baseline = add_power_ref(df_floris_baseline, ref_cols)
+        df_floris_baseline = add_power_test(df_floris_baseline, test_cols)
+        df_floris_wakesteering = add_power_ref(df_floris_wakesteering, ref_cols)
+        df_floris_wakesteering = add_power_test(df_floris_wakesteering, test_cols)
+
+        # Calculate the FLORIS uplift
+        er_in = EnergyRatioInput(
+            [df_floris_baseline.to_pandas(), df_floris_wakesteering.to_pandas()], 
+            ["Baseline [FLORIS]", "Controlled [FLORIS]"]
+        )
+
+        scada_uplift_result = tup.compute_total_uplift(
+            er_in,
+            test_turbines=test_turbines,
+            use_predefined_ref=True,
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_step=wd_step,
+            wd_min=wd_min,
+            wd_max=wd_max,
+            ws_step=ws_step,
+            ws_min=ws_min,
+            ws_max=ws_max,
+            uplift_pairs=[("Baseline [FLORIS]", "Controlled [FLORIS]")],
+            uplift_names=["Uplift [FLORIS]"],
+            N=1,
+        )
+
+        floris_uplifts[idx] = scada_uplift_result["Uplift [FLORIS]"]["energy_uplift_ctr_pc"]
+
+    return floris_uplifts, scada_uplift
 
 
-def evaluate_energy_ratio_uplift(df, fi,):
-    # Possible function to evaluate in _sweep_parameter()
-
-    # Here, the df will have to have both control modes, presumably
-
-    pass
-
+        
