@@ -15,9 +15,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import interpolate
+from scipy.stats import norm
 import copy
 
 from floris.tools import FlorisInterface
+from floris.utilities import wrap_360
 from flasc import utilities as fsut
 
 
@@ -180,7 +182,7 @@ def interpolate_floris_from_df_approx(
     """
 
     # Format dataframe and get number of turbines
-    df = df.reset_index(drop=('time' in df.columns))
+    # df = df.reset_index(drop=('time' in df.columns))
     nturbs = fsut.get_num_turbines(df_approx)
 
     # Check input
@@ -281,22 +283,30 @@ def interpolate_floris_from_df_approx(
     df_out = df[cols_to_copy].copy()
 
     # Use interpolant to determine values for all turbines and variables
-    for varname in varnames:
+    for ii, varname in enumerate(varnames):
         if verbose:
             print('     Interpolating ' + varname + ' for all turbines...')
         colnames = ['{:s}_{:03d}'.format(varname, ti) for ti in range(nturbs)]
-        f = interpolate.RegularGridInterpolator(
-            points=(wd_array_approx, ws_array_approx, ti_array_approx),
-            values=grid_dict[varname],
-            method=method,
-            bounds_error=False,
-        )
+
+        if ii == 0:
+            f = interpolate.RegularGridInterpolator(
+                points=(wd_array_approx, ws_array_approx, ti_array_approx),
+                values=grid_dict[varname],
+                method=method,
+                bounds_error=False,
+            )
+        else:
+            f.values = np.array(grid_dict[varname], dtype=float)
+
         df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
 
         if mirror_nans:
             # Copy NaNs in the raw data to the FLORIS predictions
             for c in colnames:
-                df_out.loc[df[c].isna(), c] = np.nan
+                if c in df.columns:
+                    df_out.loc[df[c].isna(), c] = None
+                else:
+                    df_out.loc[:, c] = None
 
     return df_out
 
@@ -398,7 +408,7 @@ def calc_floris_approx_table(
                 solutions_dict["wd_{:03d}".format(turbi)] = \
                     wd_mesh.flatten()  # Uniform wind direction
                 solutions_dict["ti_{:03d}".format(turbi)] = \
-                    fi.floris.flow_field.turbulence_intensity_field[:, :, turbi, 0, 0].flatten()
+                    fi.floris.flow_field.turbulence_intensity_field[:, :, turbi].flatten()
         df_list.append(pd.DataFrame(solutions_dict))
 
     print('Finished calculating the FLORIS solutions for the dataframe.')
@@ -406,6 +416,72 @@ def calc_floris_approx_table(
     df_approx = df_approx.reset_index(drop=True)
 
     return df_approx
+
+
+def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_cutoff=0.995):
+    """This function applies a Gaussian blending across the wind direction for the predicted
+    turbine power productions from FLORIS. This is a post-processing step and achieves the
+    same result as evaluating FLORIS directly with the UncertaintyInterface module. However,
+    having this as a postprocess step allows for rapid generation of the FLORIS solutions for
+    different values of wd_std without having to re-run FLORIS.
+
+    Args:
+        df_fi_approx (pd.DataFrame): Pandas DataFrame with precalculated FLORIS solutions,
+          typically generated using flasc.floris_tools.calc_floris_approx_table().
+        wd_std (float, optional): Standard deviation of the Gaussian blur that is applied
+          across the wind direction in degrees. Defaults to 3.0.
+        pdf_cutoff (float, optional): Cut-off point of the probability density function of
+          the Gaussian curve. Defaults to 0.995 and thereby includes three standard
+          deviations to the left and to the right of the evaluation.
+
+    Returns:
+        df_fi_approx_gauss (pd.DataFrame): Pandas DataFrame with Gaussian-blurred precalculated
+          FLORIS solutions. The DataFrame typically has the columns "wd", "ws", "ti", and
+          "pow_000" until "pow_{nturbs-1}", with nturbs being the number of turbines.
+
+    """
+    # Assume the resolution to be equal to the resolution of the wind direction steps
+    wd_steps = np.unique(np.diff(np.unique(df_fi_approx["wd"])))
+    pmf_res = wd_steps[0]
+
+    # Set-up Gaussian kernel
+    wd_bnd = int(np.ceil(norm.ppf(pdf_cutoff, scale=wd_std) / pmf_res))
+    bound = wd_bnd * pmf_res
+    wd_unc = np.linspace(-1 * bound, bound, 2 * wd_bnd + 1)
+    wd_unc_pmf = norm.pdf(wd_unc, scale=wd_std)
+    wd_unc_pmf /= np.sum(wd_unc_pmf)  # normalize so sum = 1.0
+
+    # Map solutions to the right shape using a NN interpolant
+    F = interpolate.NearestNDInterpolator(
+        x=df_fi_approx[["wd", "ws", "ti"]],
+        y=df_fi_approx[[c for c in df_fi_approx.columns if "pow_" in c]]
+    )
+    
+    # Create new sets to interpolate over for Gaussian kernel
+    wd = df_fi_approx["wd"]
+    wd = wrap_360(np.tile(wd, (len(wd_unc), 1)).T + np.tile(wd_unc, (wd.shape[0], 1)))
+
+    ws = df_fi_approx["ws"]
+    ws = np.tile(ws, (len(wd_unc), 1)).T
+
+    ti = df_fi_approx["ti"]
+    ti = np.tile(ti, (len(wd_unc), 1)).T
+
+    # Interpolate power values
+    turbine_powers = F(wd, ws, ti)
+    weights = np.tile(wd_unc_pmf[None, :, None], (turbine_powers.shape[0], 1, turbine_powers.shape[2]))
+    turbine_powers_gaussian = np.sum(weights * turbine_powers, axis=1)  # Weighted sum
+
+    pow_cols = [c for c in df_fi_approx.columns if c.startswith("pow_")]
+    df_fi_approx_gauss = pd.concat(
+        [
+            df_fi_approx[["wd", "ws", "ti"]],
+            pd.DataFrame(dict(zip(pow_cols, turbine_powers_gaussian.T)))
+        ],
+        axis=1
+    )
+    
+    return df_fi_approx_gauss
 
 
 def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,

@@ -7,10 +7,10 @@ from flasc.floris_tools import (
     calc_floris_approx_table,
     merge_floris_objects,
     interpolate_floris_from_df_approx,
+    add_gaussian_blending_to_floris_approx_table,
     get_dependent_turbines_by_wd
 )
-from flasc.examples.models import load_floris_artificial as load_floris
-# from floris import tools as wfct
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 class TestFlorisTools(unittest.TestCase):
@@ -106,6 +106,36 @@ class TestFlorisTools(unittest.TestCase):
         self.assertTrue(("pow_003" in df.columns))
         self.assertAlmostEqual(df.shape[0], 3)
 
+    def test_gauss_blur(self):
+        # Load FLORIS object
+        fi, _ = load_floris()
+
+        # Get FLORIS approx. table
+        df_fi_approx = calc_floris_approx_table(
+            fi,
+            wd_array=np.arange(0.0, 360.0, 3.0),
+            ws_array=[8.0],
+            ti_array=[0.08],
+        )
+
+        # Apply Gaussian blending
+        df_fi_approx_gauss = add_gaussian_blending_to_floris_approx_table(df_fi_approx)
+        
+        # Make sure that table dimensions are identical
+        self.assertTrue(
+            np.all(df_fi_approx_gauss[["wd", "ws", "ti"]] == df_fi_approx[["wd", "ws", "ti"]])
+        )
+    
+        # Results should be smoothed, so highest point is lower and lowest point is higher
+        self.assertTrue(
+            df_fi_approx_gauss[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).max() < \
+            df_fi_approx[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).max()
+        )
+        self.assertTrue(
+            df_fi_approx_gauss[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).min() > \
+            df_fi_approx[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).min()
+        )
+    
     def test_get_dependent_turbines_by_wd(self):
         # Load FLORIS object
         fi, _ = load_floris()
