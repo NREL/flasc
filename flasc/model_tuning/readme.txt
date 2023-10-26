@@ -27,6 +27,7 @@ version releases. If you are interested in contributing to this effort, please
 reach out to Paul or Misha via email. Planned improvements include:
 - Streamlining of processes and code
 - Added flexibility for implementing other loss functions
-- Cosine power loss exponent fitting
+- Consolidation and alignment with cosine power loss exponent fitting
+  (see estimate_cos_pp_fit method in turbine_analysis/yaw_pow_fitting.py)
 - Possible accelerated model fitting by refinement of swept parameters
 - Methods for fitting multiple parameters simultaneously
