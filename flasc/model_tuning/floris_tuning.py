@@ -12,11 +12,11 @@
 # See https://floris.readthedocs.io for documentation
 
 # This is a preliminary implementation of tuning methods for FLORIS to SCADA. 
-# The code is focused on methods for the empirical guassian wake model and is 
+# The code is focused on methods for the Empirical Guassian wake model and is 
 # based on contributions from Elizabeth Eyeson, Paul Fleming (paul.fleming@nrel.gov)
-# Misha Sinner (Michael.Sinner@nrel.gov) and Eric Simley  at NREL, 
-# and Bart Doekemeijer of Shell.  If interested to contribute to this work please
-# reach out via github or email
+# Misha Sinner (michael.sinner@nrel.gov) and Eric Simley at NREL, and Bart
+# Doekemeijer at Shell, as well as discussions with Diederik van Binsbergen at 
+# NTNU. Please see readme.txt for more information.
 
 
 import numpy as np
@@ -33,7 +33,6 @@ import flasc.floris_tools as ftools
 from flasc.energy_ratio.energy_ratio_utilities import add_power_ref, add_power_test
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.energy_ratio import energy_ratio as er
-from sklearn.metrics import mean_squared_error
 from flasc.model_tuning.tuner_utils import replicate_nan_values
 
 from floris.tools import FlorisInterface, UncertaintyInterface
@@ -122,7 +121,7 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     # Return the error
     return floris_wake_losses, scada_wake_loss
 
-def select_best_velocity_parameter(floris_reults, 
+def select_best_velocity_parameter(floris_results, 
                        scada_results,
                        value_candidates,
                        ax=None):
@@ -132,14 +131,14 @@ def select_best_velocity_parameter(floris_reults,
     """
 
 
-    error_values = (floris_reults - scada_results)**2
+    error_values = (floris_results - scada_results)**2
 
     best_param = value_candidates[np.argmin(error_values)]
-    best_floris_result = floris_reults[np.argmin(error_values)]
+    best_floris_result = floris_results[np.argmin(error_values)]
 
     if ax is not None:
 
-        ax.plot(value_candidates, floris_reults, 'b.-', label='FLORIS')
+        ax.plot(value_candidates, floris_results, 'b.-', label='FLORIS')
         ax.scatter(best_param,best_floris_result,color='r',marker='o', label='Best Fit')
         ax.axhline(scada_results,color='k', label='SCADA')
         ax.grid(True)
@@ -251,9 +250,8 @@ def sweep_wd_std_for_er(
         floris_vals = df_['FLORIS'].values
         count_vals = df_['count_SCADA'].values
 
-        er_error[idx] = mean_squared_error(y_true=scada_vals, 
-                                 y_pred=floris_vals, 
-                                 sample_weight=count_vals)
+        er_error[idx] = (((scada_vals-floris_vals)**2 * count_vals).sum() / 
+                         count_vals.sum())
         
     # Return the error
     return er_error, df_list
