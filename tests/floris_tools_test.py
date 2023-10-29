@@ -7,24 +7,15 @@ from flasc.floris_tools import (
     calc_floris_approx_table,
     merge_floris_objects,
     interpolate_floris_from_df_approx,
+    add_gaussian_blending_to_floris_approx_table,
     get_dependent_turbines_by_wd
 )
-
-from floris import tools as wfct
-
-
-def load_floris():
-    # Initialize the FLORIS interface fi
-    print('Initializing the FLORIS object for our demo wind farm')
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../examples_artificial_data/demo_dataset/demo_floris_input.yaml")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
-    return fi
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 class TestFlorisTools(unittest.TestCase):
     def test_floris_merge(self):
-        fi_1 = load_floris()
+        fi_1, _ = load_floris()
         fi_2 = fi_1.copy()
         fi_2.reinitialize(layout_x=[-500.0, -500.0], layout_y=[0.0, 500.0])
 
@@ -46,7 +37,7 @@ class TestFlorisTools(unittest.TestCase):
 
     def test_floris_approx_table(self):
         # Load FLORIS object
-        fi = load_floris()
+        fi, _ = load_floris()
 
         # Single core calculation
         df_fi_approx = calc_floris_approx_table(
@@ -115,9 +106,39 @@ class TestFlorisTools(unittest.TestCase):
         self.assertTrue(("pow_003" in df.columns))
         self.assertAlmostEqual(df.shape[0], 3)
 
+    def test_gauss_blur(self):
+        # Load FLORIS object
+        fi, _ = load_floris()
+
+        # Get FLORIS approx. table
+        df_fi_approx = calc_floris_approx_table(
+            fi,
+            wd_array=np.arange(0.0, 360.0, 3.0),
+            ws_array=[8.0],
+            ti_array=[0.08],
+        )
+
+        # Apply Gaussian blending
+        df_fi_approx_gauss = add_gaussian_blending_to_floris_approx_table(df_fi_approx)
+        
+        # Make sure that table dimensions are identical
+        self.assertTrue(
+            np.all(df_fi_approx_gauss[["wd", "ws", "ti"]] == df_fi_approx[["wd", "ws", "ti"]])
+        )
+    
+        # Results should be smoothed, so highest point is lower and lowest point is higher
+        self.assertTrue(
+            df_fi_approx_gauss[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).max() < \
+            df_fi_approx[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).max()
+        )
+        self.assertTrue(
+            df_fi_approx_gauss[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).min() > \
+            df_fi_approx[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).min()
+        )
+    
     def test_get_dependent_turbines_by_wd(self):
         # Load FLORIS object
-        fi = load_floris()
+        fi, _ = load_floris()
 
         # compute the dependency on turbine 2 at 226 degrees
         dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]))

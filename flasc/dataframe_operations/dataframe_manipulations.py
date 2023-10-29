@@ -125,12 +125,14 @@ def _set_col_by_n_closest_upstream_turbines(col_out, col_prefix, df, N,
         if wd_min > wd_max:  # Wrap around
             ids = (df['wd'] > wd_min) | (df['wd'] <= wd_max)
         else:
-            ids = (df['wd'] > wd_min) & (df['wd'] <= wd_max)
+            ids = (df['wd'] >= wd_min) & (df['wd'] < wd_max)
 
-        col_mean = get_column_mean(df.loc[ids, :],
-                                   col_prefix=col_prefix,
-                                   turbine_list=upstr_turbs_n_closest,
-                                   circular_mean=circular_mean)
+        col_mean = get_column_mean(
+            df.loc[ids, :],
+            col_prefix=col_prefix,
+            turbine_list=upstr_turbs_n_closest,
+            circular_mean=circular_mean
+        )
         df.loc[ids, col_out] = col_mean
 
     return df
@@ -152,7 +154,7 @@ def _set_col_by_upstream_turbines(col_out, col_prefix, df,
         if wd_min > wd_max:  # Wrap around
             ids = (df['wd'] > wd_min) | (df['wd'] <= wd_max)
         else:
-            ids = (df['wd'] > wd_min) & (df['wd'] <= wd_max)
+            ids = (df['wd'] >= wd_min) & (df['wd'] < wd_max)
 
         col_mean = get_column_mean(df.loc[ids, :],
                                    col_prefix=col_prefix,
@@ -683,7 +685,7 @@ def set_pow_ref_by_n_closest_upstream_turbines(df, df_upstream, turb_no,
         circular_mean=False)
 
 
-def df_reduce_precision(df_in, verbose=False):
+def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
     """Reduce the precision in dataframes from float64 to float32, or possibly
     even further to int32, int16, int8 or even bool. This operation typically
     reduces the size of the dataframe by a factor 2 without any real loss in
@@ -694,6 +696,8 @@ def df_reduce_precision(df_in, verbose=False):
     Args:
         df_in ([pd.DataFrame]): Dataframe that needs to be reduced.
         verbose (bool, optional): Print progress. Defaults to False.
+        allow_convert_to_integer (bool, optional): Allow reduction to integer
+           type if possible. Defaults to True.
 
     Returns:
         df_out ([pd.DataFrame]): Reduced dataframe
@@ -706,7 +710,7 @@ def df_reduce_precision(df_in, verbose=False):
             (datatype == 'float32') or
             (datatype == 'float')):
             # Check if can be simplified as integer
-            if (not any(np.isnan(df_in[c])) and
+            if (not any(np.isnan(df_in[c])) and allow_convert_to_integer and
                 all(np.isclose(np.round(df_in[c]),
                                df_in[c], equal_nan=True))):
                 unique_values = np.unique(df_in[c])

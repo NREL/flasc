@@ -9,14 +9,7 @@ from floris.tools import FlorisInterface
 from flasc.dataframe_operations import dataframe_filtering as dff
 from flasc import floris_tools as ftools
 from flasc.turbine_analysis.ws_pow_filtering import ws_pw_curve_filtering
-
-
-def load_floris():
-    # Initialize the FLORIS interface fi
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    fi_path = os.path.join(file_path, "../examples_artificial_data/demo_dataset/demo_floris_input.yaml")
-    fi = FlorisInterface(fi_path)
-    return fi
+from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_data():
@@ -87,7 +80,7 @@ class TestDataFrameFiltering(unittest.TestCase):
 
     def test_impacting_filtering(self):
         # Read file and load FLORIS
-        fi = load_floris()
+        fi, _ = load_floris()
         num_turbs = len(fi.layout_x)
 
         # Determine which turbines impact which other turbines through their wakes

@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'flasc'
-copyright = '2022, Bart Doekemeijer, Paul Fleming, Eric Simley'
-author = 'Bart Doekemeijer, Paul Fleming, Eric Simley'
+copyright = '2022, Bart Doekemeijer, Paul Fleming, Eric Simley, Michael Sinner'
+author = 'Bart Doekemeijer, Paul Fleming, Eric Simley, Michael Sinner'
 
 # The full version, including alpha/beta/rc tags
 release = '1.1'

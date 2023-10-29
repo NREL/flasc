@@ -12,8 +12,10 @@ AUTHOR = "NREL National Wind Technology Center"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    'bokeh>=3.1.1',
     'floris>=3.4',
     'feather-format',
+    'ipympl>=0.9.3',
     'matplotlib>=3.6.3',
     'numpy',
     'pandas>=1.5',
@@ -24,7 +26,8 @@ REQUIRED = [
     'sqlalchemy',
     'streamlit',
     'tkcalendar',
-    'seaborn'
+    'seaborn',
+    'polars>=0.19.0'
 ]
 
 ROOT = Path(__file__).parent
