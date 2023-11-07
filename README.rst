@@ -17,8 +17,12 @@ and model parameter estimation.
 
 For technical questions or concerns, please email paul.fleming@nrel.gov.
 
-.. image:: https://readthedocs.org/projects/flasc/badge/?version=main
-   :target: http://flasc.readthedocs.io/
+.. .. image:: https://readthedocs.org/projects/flasc/badge/?version=main
+..    :target: http://flasc.readthedocs.io/
+..    :alt: Documentation status
+
+.. image:: https://github.com/NREL/flasc/actions/workflows/pages/pages-build-deployment/badge.svg
+   :target: https://github.com/NREL/flasc/actions/workflows/pages/pages-build-deployment
    :alt: Documentation status
 
 .. image:: https://github.com/NREL/flasc/actions/workflows/continuous-integration-workflow.yaml/badge.svg?branch=main
