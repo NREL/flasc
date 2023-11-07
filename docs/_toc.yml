@@ -11,6 +11,7 @@ parts:
     - file: getting_started
 
   - caption: User Referece
+    chapters:
     - file: data_processing
     - file: data_analysis
     - file: licensing
