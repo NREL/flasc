@@ -21,15 +21,15 @@ The FLASC repository is intended as a community driven toolbox, available on
 its `GitHub Repository <https://github.com/NREL/flasc>`_.
 
 
-**Documentation Directory**
+.. **Documentation Directory**
 
-.. toctree::
-   :numbered:
-   :maxdepth: 2
+.. .. toctree::
+..    :numbered:
+..    :maxdepth: 2
 
-   overview
-   installation
-   getting_started
-   data_processing
-   data_analysis
-   licensing
+..    overview
+..    installation
+..    getting_started
+..    data_processing
+..    data_analysis
+..    licensing

@@ -2,7 +2,7 @@
 FLORIS-Based Analysis for SCADA Data (FLASC)
 ==========
 
-**Note:** Further documentation is available at **http://flasc.readthedocs.io/.**
+**Note:** Further documentation is available at **https://nrel.github.io/flasc/**
 
 Description
 -----------
@@ -17,9 +17,6 @@ and model parameter estimation.
 
 For technical questions or concerns, please email paul.fleming@nrel.gov.
 
-.. .. image:: https://readthedocs.org/projects/flasc/badge/?version=main
-..    :target: http://flasc.readthedocs.io/
-..    :alt: Documentation status
 
 .. image:: https://github.com/NREL/flasc/actions/workflows/pages/pages-build-deployment/badge.svg
    :target: https://github.com/NREL/flasc/actions/workflows/pages/pages-build-deployment

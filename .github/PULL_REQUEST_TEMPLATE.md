@@ -21,6 +21,5 @@
 - Update the version in
     - [ ] docs/source/conf.py
     - [ ] flasc/VERSION
-- [ ] Verify readthedocs builds correctly
 - [ ] Create a tag in the NREL/FLASC repository
 -->

@@ -4,6 +4,11 @@
 format: jb-book
 root: index
 parts:
-  - caption: Getting Started
+  # - caption: Getting Started
     chapters:
+    - file: overview
     - file: installation
+    - file: getting_started
+    - file: data_processing
+    - file: data_analysis
+    - file: licensing
