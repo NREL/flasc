@@ -9,7 +9,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-# See https://floris.readthedocs.io for documentation
+# See https://nrel.github.io/flasc/ for documentation
 
 # This is a preliminary implementation of tuning methods for FLORIS to SCADA. 
 # The code is focused on methods for the Empirical Guassian wake model and is 
