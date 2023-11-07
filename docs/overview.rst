@@ -14,7 +14,7 @@ See :cite:`Doekemeijer2022a` and :cite:`Bay2022a` for a practical
 example of how the flasc repository is used or processing and analyses of
 historical SCADA data of three offshore wind farms.
 
-    .. bibliography:: zrefs.bib
+    .. bibliography:: references.bib
         :style: unsrt
         :filter: docname in docnames
 
