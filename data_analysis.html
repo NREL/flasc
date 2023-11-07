@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>5. Data analysis &#8212; FLASC</title>
+    <title>Data analysis &#8212; FLASC</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -52,8 +52,8 @@ const thebe_selector_output = ".output, .cell_output"
     <script async="async" src="_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="6. Licensing" href="licensing.html" />
-    <link rel="prev" title="4. Raw data processing" href="data_processing.html" />
+    <link rel="next" title="Licensing" href="licensing.html" />
+    <link rel="prev" title="Raw data processing" href="data_processing.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="python">
     
@@ -116,47 +116,47 @@ const thebe_selector_output = ".output, .cell_output"
                 </a>
             </li>
         </ul>
-        <ul class="current nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="overview.html">
-   1. Overview
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="installation.html">
-   2. Installation
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="getting_started.html">
-   3. Getting started
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="data_processing.html">
-   4. Raw data processing
-  </a>
- </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   5. Data analysis
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="licensing.html">
-   6. Licensing
-  </a>
- </li>
-</ul>
-<p aria-level="2" class="caption" role="heading">
+        <p aria-level="2" class="caption" role="heading">
  <span class="caption-text">
   Getting Started
  </span>
 </p>
 <ul class="nav bd-sidenav">
  <li class="toctree-l1">
+  <a class="reference internal" href="overview.html">
+   Overview
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="installation.html">
-   2. Installation
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="getting_started.html">
+   Getting started
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  User Referece
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="data_processing.html">
+   Raw data processing
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Data analysis
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="licensing.html">
+   Licensing
   </a>
  </li>
 </ul>
@@ -355,22 +355,22 @@ title="Print to PDF"
         <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#energy-ratio-analysis">
-   5.1. Energy ratio analysis
+   Energy ratio analysis
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#energy-ratio-curve-for-a-single-dataframe">
-     5.1.1. Energy ratio curve for a single dataframe
+     Energy ratio curve for a single dataframe
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#energy-ratio-curves-for-multiple-dataframes">
-     5.1.2. Energy ratio curves for multiple dataframes
+     Energy ratio curves for multiple dataframes
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#comprehensive-table-based-analysis">
-     5.1.3. Comprehensive table-based analysis
+     Comprehensive table-based analysis
     </a>
    </li>
   </ul>
@@ -396,22 +396,22 @@ title="Print to PDF"
                             <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#energy-ratio-analysis">
-   5.1. Energy ratio analysis
+   Energy ratio analysis
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#energy-ratio-curve-for-a-single-dataframe">
-     5.1.1. Energy ratio curve for a single dataframe
+     Energy ratio curve for a single dataframe
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#energy-ratio-curves-for-multiple-dataframes">
-     5.1.2. Energy ratio curves for multiple dataframes
+     Energy ratio curves for multiple dataframes
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#comprehensive-table-based-analysis">
-     5.1.3. Comprehensive table-based analysis
+     Comprehensive table-based analysis
     </a>
    </li>
   </ul>
@@ -427,13 +427,13 @@ title="Print to PDF"
               <div>
                 
   <section id="data-analysis">
-<h1><span class="section-number">5. </span>Data analysis<a class="headerlink" href="#data-analysis" title="Permalink to this headline">#</a></h1>
+<h1>Data analysis<a class="headerlink" href="#data-analysis" title="Permalink to this headline">#</a></h1>
 <p>Once the SCADA data has been filtered, outliers have been removed and the
 turbine signals have been calibrated to true north, they can be
 straightforwardly used in the analysis methods implemented in FLASC.
 Several of such methods are described next.</p>
 <section id="energy-ratio-analysis">
-<h2><span class="section-number">5.1. </span>Energy ratio analysis<a class="headerlink" href="#energy-ratio-analysis" title="Permalink to this headline">#</a></h2>
+<h2>Energy ratio analysis<a class="headerlink" href="#energy-ratio-analysis" title="Permalink to this headline">#</a></h2>
 <p>The energy ratio metric is defined as the energy yield of a test turbine
 relative to the energy yield of one or multiple reference turbines for
 a particular wind rose, e.g., for annual operation. See
@@ -446,7 +446,7 @@ the energy ratios of various turbines in a wind farm. The first example
 is <code class="docutils literal notranslate"><span class="pre">energy_ratio_for_single_df.py</span></code>. This is described
 in several steps.</p>
 <section id="energy-ratio-curve-for-a-single-dataframe">
-<h3><span class="section-number">5.1.1. </span>Energy ratio curve for a single dataframe<a class="headerlink" href="#energy-ratio-curve-for-a-single-dataframe" title="Permalink to this headline">#</a></h3>
+<h3>Energy ratio curve for a single dataframe<a class="headerlink" href="#energy-ratio-curve-for-a-single-dataframe" title="Permalink to this headline">#</a></h3>
 <p>Calculating the energy ratios for a dataset is mostly streamlined by the FLASC
 repository. Several lower-level decisions must be made that can have smaller
 to larger impacts on the energy ratio values. The example file
@@ -525,7 +525,7 @@ Note that increasing <code class="docutils literal notranslate"><span class="pre
 <a class="reference internal image-reference" href="images/example_single_df_energy_ratio.png"><img alt="alternate text" class="align-center" src="images/example_single_df_energy_ratio.png" /></a>
 </section>
 <section id="energy-ratio-curves-for-multiple-dataframes">
-<h3><span class="section-number">5.1.2. </span>Energy ratio curves for multiple dataframes<a class="headerlink" href="#energy-ratio-curves-for-multiple-dataframes" title="Permalink to this headline">#</a></h3>
+<h3>Energy ratio curves for multiple dataframes<a class="headerlink" href="#energy-ratio-curves-for-multiple-dataframes" title="Permalink to this headline">#</a></h3>
 <p>In continuation of the single-dataframe energy ratio analysis, we can analyze
 and cross-compare multiple energy ratios. This is exemplified in the example
 <code class="docutils literal notranslate"><span class="pre">compare_energy_ratios_between_dfs.py</span></code>. It works largely in a similar manner
@@ -567,7 +567,7 @@ function <code class="docutils literal notranslate"><span class="pre">add_df()</
 folder.</p>
 </section>
 <section id="comprehensive-table-based-analysis">
-<h3><span class="section-number">5.1.3. </span>Comprehensive table-based analysis<a class="headerlink" href="#comprehensive-table-based-analysis" title="Permalink to this headline">#</a></h3>
+<h3>Comprehensive table-based analysis<a class="headerlink" href="#comprehensive-table-based-analysis" title="Permalink to this headline">#</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">energy_ratio_suite</span></code> described above has an additional function which
 provides significant depth into the energy ratios under various scenarios.
 This is the table analysis method, which generates a detailed Excel sheet
@@ -629,13 +629,13 @@ significantly deviates from the experimental data.</p>
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title"><span class="section-number">4. </span>Raw data processing</p>
+            <p class="prev-next-title">Raw data processing</p>
         </div>
     </a>
     <a class='right-next' id="next-link" href="licensing.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">6. </span>Licensing</p>
+        <p class="prev-next-title">Licensing</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
