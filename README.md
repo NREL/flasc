@@ -28,6 +28,10 @@ We recommend installing this repository in a separate virtual environment.
 After creating a new virtual environment, clone this repository to your local
 system and install it locally using ``pip``. The command for this is ``pip install -e flasc``.
     
+## Documentation
+
+Documentation is provided via the included examples folders as well as [online documentation](https://nrel.github.io/flasc/).
+
 ## Engaging on GitHub
 
 FLORIS leverages the following GitHub features to coordinate support and development efforts:
