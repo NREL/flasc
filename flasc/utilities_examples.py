@@ -13,7 +13,8 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
 
     Args:
         wake_model (str, optional): The wake model that FLORIS should use. Common
-          options are 'cc', 'gch', 'jensen' and 'turbopark'. Defaults to "cc".
+          options are 'cc', 'gch', 'jensen', 'turbopark' and 'emgauss'
+           . Defaults to "gch".
         operation_modes (array, optional): Array or list of integers denoting each
           turbine's operation mode. When None is specified, will assume each turbine
           is in its first operation mode (0). Defaults to None.
@@ -51,12 +52,13 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
     return (fi, turbine_weights)
 
 
-def load_floris_artificial(wake_model="cc", wd_std=0.0, pP=None):
+def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
     """Load a FlorisInterface object for the wind farm at hand.
 
     Args:
         wake_model (str, optional): The wake model that FLORIS should use. Common
-          options are 'cc', 'gch', 'jensen' and 'turbopark'. Defaults to "cc".
+          options are 'cc', 'gch', 'jensen',  'turbopark' and 'emgauss'
+          . Defaults to "gch".
         operation_modes (array, optional): Array or list of integers denoting each
           turbine's operation mode. When None is specified, will assume each turbine
           is in its first operation mode (0). Defaults to None.
