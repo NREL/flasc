@@ -50,7 +50,7 @@ ROOT = Path(__file__).parent
 with open(ROOT / "flasc" / "version.py") as version_file:
     VERSION = version_file.read().strip()
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     README = readme_file.read()
 
 setup_requirements = [
