@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; FLASC</title>
+    <title>Energy ratio analysis &#8212; FLASC</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -52,8 +52,8 @@ const thebe_selector_output = ".output, .cell_output"
     <script async="async" src="_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting started" href="getting_started.html" />
-    <link rel="prev" title="Overview" href="overview.html" />
+    <link rel="next" title="Licensing" href="licensing.html" />
+    <link rel="prev" title="Raw data processing" href="data_processing.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="python">
     
@@ -126,14 +126,14 @@ const thebe_selector_output = ".output, .cell_output"
   Getting Started
  </span>
 </p>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="overview.html">
    Overview
   </a>
  </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
+ <li class="toctree-l1">
+  <a class="reference internal" href="installation.html">
    Installation
   </a>
  </li>
@@ -148,14 +148,14 @@ const thebe_selector_output = ".output, .cell_output"
   User Referece
  </span>
 </p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="data_processing.html">
    Raw data processing
   </a>
  </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="energy_ratio.html">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
    Energy ratio analysis
   </a>
  </li>
@@ -254,7 +254,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2Finstallation.html&body=Your%20issue%20content%20here."
+        <a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2Fenergy_ratio.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -271,7 +271,7 @@ title="Open an issue"
       </li>
       
       <li>
-        <a href="https://github.com/NREL/flasc/edit/main/docs/installation.rst"
+        <a href="https://github.com/NREL/flasc/edit/main/docs/energy_ratio.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -299,7 +299,7 @@ title="Edit this page"
   <div class="menu-dropdown__content">
     <ul>
       <li>
-        <a href="_sources/installation.rst"
+        <a href="_sources/energy_ratio.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -310,7 +310,7 @@ title="Download source file"
 <span class="headerbtn__icon-container">
   <i class="fas fa-file"></i>
   </span>
-<span class="headerbtn__text-container">.rst</span>
+<span class="headerbtn__text-container">.md</span>
 </a>
 
       </li>
@@ -336,23 +336,70 @@ title="Print to PDF"
     </ul>
   </div>
 </div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
 
     </div>
 </div>
 
 <!-- Table of contents -->
 <div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Energy ratio analysis
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#examples-demonstrating-energy-ratio-usage">
+   Examples demonstrating energy ratio usage
+  </a>
+ </li>
+</ul>
+
+    </nav>
 </div>
     </div>
     <div class="article row">
         <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Installation</h1>
+                <h1>Energy ratio analysis</h1>
                 <!-- Table of contents -->
                 <div id="print-main-content">
                     <div id="jb-print-toc">
                         
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Energy ratio analysis
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#examples-demonstrating-energy-ratio-usage">
+   Examples demonstrating energy ratio usage
+  </a>
+ </li>
+</ul>
+
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -360,27 +407,30 @@ title="Print to PDF"
                 
               <div>
                 
-  <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
-<p>FLASC is currently not available as a package on any repository manager.
-Instead, it must be installed by the user by cloning the GitHub repository.</p>
-<p>To download the source code, use <cite>git clone</cite>. Then, add it to
-your Python path with the &quot;local editable install&quot; through <cite>pip</cite>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download the source code.</span>
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/NREL/flasc.git
-
-<span class="c1"># Install into your Python environment</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>flasc
-</pre></div>
-</div>
-<p>If everything is configured correctly, any changes made to the source
-code will be available directly through your local Python. Remember
-to re-import the FLASC module when changes are made if you are working
-in an interactive environment like Jupyter.</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference external" href="index.html">Return to table of contents</a></p>
-</div>
+  <section class="tex2jax_ignore mathjax_ignore" id="energy-ratio-analysis">
+<h1>Energy ratio analysis<a class="headerlink" href="#energy-ratio-analysis" title="Permalink to this headline">#</a></h1>
+<p>The energy ratio metric is defined as the energy yield of a test turbine
+relative to the energy yield of one or multiple reference turbines for
+a particular wind rose, e.g., for annual operation. See
+[&#64;Doekemeijer2022a] and [&#64;Bay2022a] for a practical
+example of how the energy ratios can be used in the analyses of
+historical SCADA data of three offshore wind farms and their comparison
+to an engineering wind farm model.</p>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="examples-demonstrating-energy-ratio-usage">
+<h1>Examples demonstrating energy ratio usage<a class="headerlink" href="#examples-demonstrating-energy-ratio-usage" title="Permalink to this headline">#</a></h1>
+<p>Starting in FLASC v1.4, the energy ratio calculation was reconfigured around a <a class="reference external" href="https://www.pola.rs/">polars</a> back-end and new examples were put in place to demonstrate usage.</p>
+<p>Key syntax for computing energy ratios is provided in the examples:</p>
+<ul class="simple">
+<li><p><span class="xref myst">Energy Ratio Syntax</span></p></li>
+<li><p><span class="xref myst">Energy Ratio Options</span></p></li>
+</ul>
+<p>With the remaining examples in examples_artificial_data/03_energy_ratio providing more detail on specific use cases.</p>
+<p>Within the set of analysis of the smarteole dataset are also exmaples of using flasc's energy ratio calculations.  See for example:</p>
+<ul class="simple">
+<li><p><span class="xref myst">Baseline Energy Ratio Analysis</span></p></li>
+<li><p><span class="xref myst">Wake Steering Energy Ratio Analysis</span></p></li>
+</ul>
 </section>
 
     <script type="text/x-thebe-config">
@@ -410,17 +460,17 @@ in an interactive environment like Jupyter.</p>
                 
     <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="overview.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="data_processing.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Overview</p>
+            <p class="prev-next-title">Raw data processing</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="getting_started.html" title="next page">
+    <a class='right-next' id="next-link" href="licensing.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Getting started</p>
+        <p class="prev-next-title">Licensing</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
