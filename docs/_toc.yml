@@ -13,5 +13,5 @@ parts:
   - caption: User Referece
     chapters:
     - file: data_processing
-    - file: data_analysis
+    - file: energy_ratio
     - file: licensing
