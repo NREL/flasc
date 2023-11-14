@@ -27,7 +27,7 @@ REQUIRED = [
     'streamlit',
     'tkcalendar',
     'seaborn',
-    'polars==0.19.3'
+    'polars>=0.19.0'
 ]
 
 EXTRAS = {
