@@ -53,6 +53,7 @@ sphinx:
     language: 'python'
     autoyaml_level: 3
     autosummary_generate: true
+    bibtex_reference_style: author_year
 
     # Autodoc config reference
     # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
