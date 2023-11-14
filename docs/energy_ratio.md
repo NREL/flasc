@@ -1,17 +1,9 @@
----
-output:
-  md_document:
-    variant: markdown_github
-bibliography: references.bib
----
-
-
 # Energy ratio analysis
 
 The energy ratio metric is defined as the energy yield of a test turbine
 relative to the energy yield of one or multiple reference turbines for
 a particular wind rose, e.g., for annual operation. See
-[@Doekemeijer2022a] and [@Bay2022a] for a practical
+{cite:p}`Doekemeijer2022a` and {cite:p}`Bay2022a` for a practical
 example of how the energy ratios can be used in the analyses of
 historical SCADA data of three offshore wind farms and their comparison
 to an engineering wind farm model.
