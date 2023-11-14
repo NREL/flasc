@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; FLASC</title>
+    <title>Total uplift &#8212; FLASC</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -52,8 +52,8 @@ const thebe_selector_output = ".output, .cell_output"
     <script async="async" src="_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting started" href="getting_started.html" />
-    <link rel="prev" title="Overview" href="overview.html" />
+    <link rel="next" title="Licensing" href="licensing.html" />
+    <link rel="prev" title="Energy ratio analysis" href="energy_ratio.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="python">
     
@@ -126,14 +126,14 @@ const thebe_selector_output = ".output, .cell_output"
   Getting Started
  </span>
 </p>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="overview.html">
    Overview
   </a>
  </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
+ <li class="toctree-l1">
+  <a class="reference internal" href="installation.html">
    Installation
   </a>
  </li>
@@ -148,7 +148,7 @@ const thebe_selector_output = ".output, .cell_output"
   User Referece
  </span>
 </p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="data_processing.html">
    Raw data processing
@@ -159,8 +159,8 @@ const thebe_selector_output = ".output, .cell_output"
    Energy ratio analysis
   </a>
  </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="total_uplift.html">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
    Total uplift
   </a>
  </li>
@@ -259,7 +259,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2Finstallation.html&body=Your%20issue%20content%20here."
+        <a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2Ftotal_uplift.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -276,7 +276,7 @@ title="Open an issue"
       </li>
       
       <li>
-        <a href="https://github.com/NREL/flasc/edit/main/docs/installation.rst"
+        <a href="https://github.com/NREL/flasc/edit/main/docs/total_uplift.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -304,7 +304,7 @@ title="Edit this page"
   <div class="menu-dropdown__content">
     <ul>
       <li>
-        <a href="_sources/installation.rst"
+        <a href="_sources/total_uplift.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -315,7 +315,7 @@ title="Download source file"
 <span class="headerbtn__icon-container">
   <i class="fas fa-file"></i>
   </span>
-<span class="headerbtn__text-container">.rst</span>
+<span class="headerbtn__text-container">.md</span>
 </a>
 
       </li>
@@ -353,7 +353,7 @@ title="Print to PDF"
         <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Installation</h1>
+                <h1>Total uplift</h1>
                 <!-- Table of contents -->
                 <div id="print-main-content">
                     <div id="jb-print-toc">
@@ -365,27 +365,10 @@ title="Print to PDF"
                 
               <div>
                 
-  <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
-<p>FLASC is currently not available as a package on any repository manager.
-Instead, it must be installed by the user by cloning the GitHub repository.</p>
-<p>To download the source code, use <cite>git clone</cite>. Then, add it to
-your Python path with the &quot;local editable install&quot; through <cite>pip</cite>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download the source code.</span>
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/NREL/flasc.git
-
-<span class="c1"># Install into your Python environment</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>flasc
-</pre></div>
-</div>
-<p>If everything is configured correctly, any changes made to the source
-code will be available directly through your local Python. Remember
-to re-import the FLASC module when changes are made if you are working
-in an interactive environment like Jupyter.</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference external" href="index.html">Return to table of contents</a></p>
-</div>
+  <section class="tex2jax_ignore mathjax_ignore" id="total-uplift">
+<h1>Total uplift<a class="headerlink" href="#total-uplift" title="Permalink to this headline">#</a></h1>
+<p>Total uplift in energy production can be computed from one dataframe to another.  It uses a similar input as the <a class="reference internal" href="energy_ratio.html"><span class="doc std std-doc">energy ratio</span></a> but returns a single value representing the total uplift, rather then binned by wind direction.</p>
+<p>Currently the main example usage of the total uplift function is at the end of <a class="reference external" href="https://github.com/NREL/flasc/blob/main/examples_smarteole/06_wake_steering_energy_ratio_analysis.ipynb">smarteole example 06</a></p>
 </section>
 
     <script type="text/x-thebe-config">
@@ -415,17 +398,17 @@ in an interactive environment like Jupyter.</p>
                 
     <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="overview.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="energy_ratio.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Overview</p>
+            <p class="prev-next-title">Energy ratio analysis</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="getting_started.html" title="next page">
+    <a class='right-next' id="next-link" href="licensing.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Getting started</p>
+        <p class="prev-next-title">Licensing</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
