@@ -22,7 +22,7 @@ Starting in FLASC v1.4, the energy ratio calculation was reconfigured around a [
 
 Key syntax for computing energy ratios is provided in the examples:
 
- - [Energy Ratio Syntax](../examples_artificial_data/03_energy_ratio/00_demo_energy_ratio_syntax.ipynb)
+ - [Energy Ratio Syntax](../examples_artificial_data/03_energy_ratio/00_demo_energy_ratio_syntax)
  - [Energy Ratio Options](../examples_artificial_data/03_energy_ratio/01_demo_energy_ratio_options.ipynb)
 
  With the remaining examples in examples_artificial_data/03_energy_ratio providing more detail on specific use cases.
