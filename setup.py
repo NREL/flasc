@@ -12,7 +12,7 @@ AUTHOR = "NREL National Wind Technology Center"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'bokeh~=3.1.1',
+    'bokeh~=3.1',
     'floris~=3.4',
     'feather-format~=0.0',
     'ipympl~=0.9',
