@@ -890,7 +890,7 @@ def is_day_or_night(df: pd.DataFrame,
         observer.date = row[datetime_column]
         sun = ephem.Sun()
         sun.compute(observer)
-        return float(sun.alt)
+        return float(sun.alt) * 180/np.pi
 
     # Define a function to determine if it's day or night
     def is_daytime(row):
@@ -900,7 +900,7 @@ def is_day_or_night(df: pd.DataFrame,
         sun = ephem.Sun()
         sun.compute(observer)
 
-        return bool(sun.alt > 0)  # If the sun's altitude is above dawn_altitude_deg, it's daytime.
+        return bool(sun.alt > 0)  # If the sun's altitude is above 0 radians, it's daytime.
 
 
     # Add a new column 'is_day' and 'sun_altitude' to the DataFrame
@@ -946,8 +946,7 @@ def plot_sun_altitude_with_day_night_color(df: pd.DataFrame,
 
     # Set axis labels and a legend
     ax.set_xlabel('Time')
-    ax.set_ylabel('Sun Altitude')
-    ax.set_title('Sun Altitude vs. Time')
+    ax.set_ylabel('Sun altitude [deg]')
     ax.legend(loc='upper right')
 
     # Show the plot
@@ -956,6 +955,8 @@ def plot_sun_altitude_with_day_night_color(df: pd.DataFrame,
     # Final touches
     ax.grid(True)
     ax.axhline(0, color='k', lw=3)
+
+    return ax
 
 def make_df_wide(df):
     df["turbid"] = df['turbid'].astype(int)
