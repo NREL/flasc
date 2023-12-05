@@ -15,6 +15,7 @@
 import datetime
 import os as os
 import warnings
+from xmlrpc.client import Boolean
 
 import numpy as np
 import pandas as pd
@@ -860,7 +861,9 @@ def df_sort_and_find_duplicates(df):
 
 def is_day_or_night(df: pd.DataFrame, 
                     latitude: float, 
-                    longitude: float, 
+                    longitude: float,
+                    sunrise_altitude: float=0,
+                    sunset_altitude: float=0, 
                     lag_hours: float=0,
                     datetime_column: str='time'):
     """
@@ -870,6 +873,8 @@ def is_day_or_night(df: pd.DataFrame,
         df (pd.DataFrame): A Pandas DataFrame containing the time in UTC and other relevant data.
         latitude (float): The latitude of the location for which to determine day or night.
         longitude (float): The longitude of the location for which to determine day or night.
+        sunrise_altitude (float): The altitude of the sun to denote that sunrise has occurred [degress]
+        sunset_altitude (float): The altitude of the sun to denote that sunset has occurred [degress]
         lag_hours (float, optional): The number of hours to lag behind the timestamp for the daylight determination. Default is 0.
         datetime_column (str, optional): The name of the DataFrame column containing the timestamp in UTC. Default is 'time'.
 
@@ -884,35 +889,36 @@ def is_day_or_night(df: pd.DataFrame,
     # Create an Observer with the given latitude and longitude
     observer = ephem.Observer()
 
-    def san_alt(row):
-        observer.lat = str(latitude)
-        observer.long = str(longitude)
-        observer.date = row[datetime_column]
-        sun = ephem.Sun()
-        sun.compute(observer)
-        return float(sun.alt) * 180/np.pi
-
-    # Define a function to determine if it's day or night
-    def is_daytime(row):
+    def sun_alt(row):
         observer.lat = str(latitude)
         observer.long = str(longitude)
         observer.date = row[datetime_column] - datetime.timedelta(hours=lag_hours)
         sun = ephem.Sun()
         sun.compute(observer)
+        return float(sun.alt) * 180/np.pi
 
-        return bool(sun.alt > 0)  # If the sun's altitude is above 0 radians, it's daytime.
 
+    # Add a new column 'sun_altitude' to the DataFrame
+    df["sun_altitude"] = df.apply(sun_alt, axis=1)
+    alt_diff = np.diff(df["sun_altitude"], prepend=0)
+    alt_diff[0] = alt_diff[1] # Assume that the first time matches the second.
 
-    # Add a new column 'is_day' and 'sun_altitude' to the DataFrame
-    df['sun_altitude'] = df.apply(san_alt, axis=1)
-    df['is_day'] = df.apply(is_daytime, axis=1)
-    
+    # Apply daytime criteria
+    df["is_day"] = (
+        ((df["sun_altitude"] > sunrise_altitude) & (alt_diff > 0)) | 
+        ((df["sun_altitude"] > sunset_altitude) & (alt_diff < 0))
+    ).astype(Boolean)
+
+    # If a lag was provided, recompute sun_altitude at the correct time
+    if lag_hours != 0:
+        lag_hours = 0
+        df["sun_altitude"] = df.apply(sun_alt, axis=1)    
 
     return df
 
 
 def plot_sun_altitude_with_day_night_color(df: pd.DataFrame,
-                                           ax: plt.axis =None):
+                                           ax: plt.axis=None):
     """
     Plot Sun Altitude with Day-Night Color Differentiation.
 
@@ -926,7 +932,7 @@ def plot_sun_altitude_with_day_night_color(df: pd.DataFrame,
             axis will be created.
 
     Returns:
-        None
+        ax (plt.axis): The Matplotlib axis plotted on.
     """
     # Separate the DataFrame into day and night parts
     day_data = df[df['is_day']]
@@ -949,12 +955,13 @@ def plot_sun_altitude_with_day_night_color(df: pd.DataFrame,
     ax.set_ylabel('Sun altitude [deg]')
     ax.legend(loc='upper right')
 
-    # Show the plot
-    plt.xticks(rotation=45)  # Rotate x-axis labels for readability
+    # Rotate x-axis labels for readability
+    fig = plt.gcf()
+    fig.autofmt_xdate(rotation=45)
     
     # Final touches
     ax.grid(True)
-    ax.axhline(0, color='k', lw=3)
+    ax.axhline(0, color='k', lw=2)
 
     return ax
 
