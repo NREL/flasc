@@ -130,7 +130,7 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     # Return the error
     return floris_wake_losses, scada_wake_loss
 
-def select_best_velocity_parameter(floris_results, 
+def select_best_wake_model_parameter(floris_results, 
                        scada_results,
                        value_candidates,
                        ax=None):
