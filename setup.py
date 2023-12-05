@@ -12,22 +12,21 @@ AUTHOR = "NREL National Wind Technology Center"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'bokeh>=3.1.1',
-    'floris>=3.4',
-    'feather-format',
-    'ipympl>=0.9.3',
-    'matplotlib>=3.6.3',
-    'numpy',
-    'pandas>=1.5',
-    'pyproj',
-    'pytest',
-    'SALib',
-    'scipy',
-    'sqlalchemy',
-    'streamlit',
-    'tkcalendar',
-    'seaborn',
-    'polars>=0.19.0',
+    'bokeh~=3.1',
+    'floris~=3.4',
+    'feather-format~=0.0',
+    'ipympl~=0.9',
+    'matplotlib~=3.6',
+    "numpy~=1.20",
+    "pandas~=2.0",
+    'pyproj~=3.0',
+    'SALib~=1.0',
+    "scipy~=1.1",
+    'sqlalchemy~=2.0',
+    'streamlit~=1.0',
+    'tkcalendar~=1.0',
+    'seaborn~=0.0',
+    'polars==0.19.5',
     'ephem'
 ]
 

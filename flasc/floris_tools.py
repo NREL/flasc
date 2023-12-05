@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 from scipy.stats import norm
+from time import perf_counter as timerpc
 import copy
 
 from floris.tools import FlorisInterface
@@ -192,8 +193,26 @@ def interpolate_floris_from_df_approx(
     else:
         print("Warning: not mirroring NaNs from the raw data to the FLORIS predictions. This may skew your energy ratios.")
 
+    # Check dimensionality: do we have a 2D or a 3D grid
+    N_wd = len(np.unique(df_approx["wd"]))
+    N_ws = len(np.unique(df_approx["ws"]))
+    N_ti = len(np.unique(df_approx["ti"]))
+    if (N_wd * N_ws) == df_approx.shape[0]:
+        grid_type = "2d"
+    elif (N_wd * N_ws * N_ti) == df_approx.shape[0]:
+        grid_type = "3d"
+    else:
+        raise UserWarning("Incompatible df_approx table specified.")
+    if verbose:
+        print(f"Identified the following grid type: {grid_type}.")
+    
     # Check if all values in df fall within the precalculated solutions ranges
-    for col in ["wd", "ws", "ti"]:
+    if grid_type == "2d":
+        cols = ["wd", "ws", "ti"]
+    else:
+        cols = ["wd", "ws"]
+    
+    for col in cols:
         # Check if all columns are defined
         if col not in df.columns:
             raise ValueError("Your SCADA dataframe is missing a column called '{:s}'.".format(col))
@@ -232,10 +251,10 @@ def interpolate_floris_from_df_approx(
             raise UserWarning("wrap_0deg_to_360deg is set to True but no solutions at wd=0 deg in the precalculated solution table.")
         df_subset = df_approx[df_approx["wd"] == 0.0].copy()
         df_subset["wd"] = 360.0
-        df_approx = pd.concat([df_approx, df_subset], axis=0).reset_index(drop=True)
+        df_approx = pd.concat([df_approx, df_subset], axis=0)
 
     # Copy TI to lower and upper bound
-    if extrapolate_ti:
+    if (grid_type == "3d") and extrapolate_ti:
         df_ti_lb = df_approx.loc[df_approx["ti"] == df_approx['ti'].min()].copy()
         df_ti_ub = df_approx.loc[df_approx["ti"] == df_approx['ti'].max()].copy()
         df_ti_lb["ti"] = 0.0
@@ -243,7 +262,7 @@ def interpolate_floris_from_df_approx(
         df_approx = pd.concat(
             [df_approx, df_ti_lb, df_ti_ub],
             axis=0
-        ).reset_index(drop=True)
+        )
 
     # Copy WS to lower and upper bound
     if extrapolate_ws:
@@ -254,59 +273,95 @@ def interpolate_floris_from_df_approx(
         df_approx = pd.concat(
             [df_approx, df_ws_lb, df_ws_ub],
             axis=0
-        ).reset_index(drop=True)
+        )
 
     # Convert df_approx dataframe into a regular grid
     wd_array_approx = np.sort(df_approx["wd"].unique())
     ws_array_approx = np.sort(df_approx["ws"].unique())
-    ti_array_approx = np.sort(df_approx["ti"].unique())
-    xg, yg, zg = np.meshgrid(
-        wd_array_approx,
-        ws_array_approx,
-        ti_array_approx,
-        indexing='ij',
-    )
+    
+    if grid_type == "2d":
+        xg, yg = np.meshgrid(
+            wd_array_approx,
+            ws_array_approx,
+            indexing='ij',
+        )
+    else:
+        ti_array_approx = np.sort(df_approx["ti"].unique())
+        xg, yg, zg = np.meshgrid(
+            wd_array_approx,
+            ws_array_approx,
+            ti_array_approx,
+            indexing='ij',
+        )
 
     grid_dict = dict()
     for varname in varnames:
         colnames = ['{:s}_{:03d}'.format(varname, ti) for ti in range(nturbs)]
-        f = interpolate.NearestNDInterpolator(
-            df_approx[["wd", "ws", "ti"]],
-            df_approx[colnames]
-        )
-        grid_dict["{:s}".format(varname)] = f(xg, yg, zg)
+        if grid_type == "2d":
+            f = interpolate.NearestNDInterpolator(
+                df_approx[["wd", "ws"]],
+                df_approx[colnames]
+            )
+            grid_dict["{:s}".format(varname)] = f(xg, yg)
+        else:
+            f = interpolate.NearestNDInterpolator(
+                df_approx[["wd", "ws", "ti"]],
+                df_approx[colnames]
+            )
+            grid_dict["{:s}".format(varname)] = f(xg, yg, zg)
 
     # Prepare an minimal output dataframe
     cols_to_copy = ["wd", "ws", "ti"]
     if "time" in df.columns:
         cols_to_copy.append("time")
-    df_out = df[cols_to_copy].copy()
+    df_out = df[cols_to_copy].reset_index(drop=True).copy()
 
     # Use interpolant to determine values for all turbines and variables
+    t0 = timerpc()
+    df_out_interp_list = [df_out]
     for ii, varname in enumerate(varnames):
         if verbose:
             print('     Interpolating ' + varname + ' for all turbines...')
         colnames = ['{:s}_{:03d}'.format(varname, ti) for ti in range(nturbs)]
 
         if ii == 0:
-            f = interpolate.RegularGridInterpolator(
-                points=(wd_array_approx, ws_array_approx, ti_array_approx),
-                values=grid_dict[varname],
-                method=method,
-                bounds_error=False,
-            )
+            if grid_type == "2d":
+                f = interpolate.RegularGridInterpolator(
+                    points=(wd_array_approx, ws_array_approx),
+                    values=grid_dict[varname],
+                    method=method,
+                    bounds_error=False,
+                )
+            else:
+                f = interpolate.RegularGridInterpolator(
+                    points=(wd_array_approx, ws_array_approx, ti_array_approx),
+                    values=grid_dict[varname],
+                    method=method,
+                    bounds_error=False,
+                )
         else:
             f.values = np.array(grid_dict[varname], dtype=float)
-
-        df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
+        
+        # Interpolate values across grid
+        if grid_type == "2d":
+            out = f(df[['wd', 'ws']])
+        else:
+            out = f(df[['wd', 'ws', 'ti']])
 
         if mirror_nans:
             # Copy NaNs in the raw data to the FLORIS predictions
-            for c in colnames:
+            for cii, c in enumerate(colnames):
                 if c in df.columns:
-                    df_out.loc[df[c].isna(), c] = None
-                else:
-                    df_out.loc[:, c] = None
+                    out[df[c].isna(), cii] = np.nan
+
+        df_out_interp_list.append(pd.DataFrame(out, columns=colnames))
+
+    # Add interpolated solutions to df_out
+    df_out = pd.concat(df_out_interp_list, axis=1)
+    
+    if verbose:
+        dt = timerpc() - t0
+        print(f"Finished interpolation in {dt:.3f} seconds.")
 
     return df_out
 
