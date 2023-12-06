@@ -108,3 +108,18 @@ class TestDataframeManipulations(unittest.TestCase):
         self.assertAlmostEqual(df_test.loc[0, 'ws'], np.mean([5., 17.]))
         self.assertAlmostEqual(df_test.loc[0, 'ti'], np.mean([0.09]))
         self.assertAlmostEqual(df_test.loc[0, 'pow_ref'], np.mean([1500., 1800.]))
+
+    def test_is_day_or_night(self):
+        # Test is day night using noon and midnight Oct 1 2023 in London, UK
+        latitude = 51.5072
+        longitude = 0.1276
+
+        df_test = pd.DataFrame({
+            'time':['2023-10-01 00:00:00', '2023-10-10 12:00:00']
+        })
+        df_test['time'] = pd.to_datetime(df_test['time'],utc=True)
+
+        df_test = dfm.is_day_or_night(df_test, latitude=latitude, longitude=longitude)
+
+        self.assertFalse(df_test.is_day[0])
+        self.assertTrue(df_test.is_day[1])

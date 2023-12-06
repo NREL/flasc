@@ -26,7 +26,8 @@ REQUIRED = [
     'streamlit~=1.0',
     'tkcalendar~=1.0',
     'seaborn~=0.0',
-    'polars==0.19.5'
+    'polars==0.19.5',
+    'ephem'
 ]
 
 EXTRAS = {
