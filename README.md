@@ -27,6 +27,8 @@ For technical questions or concerns, please email paul.fleming@nrel.gov.
 We recommend installing this repository in a separate virtual environment.
 After creating a new virtual environment, clone this repository to your local
 system and install it locally using ``pip``. The command for this is ``pip install -e flasc``.
+
+If installing for develop, follow the developer [install instructions](https://nrel.github.io/flasc/installation.html)
     
 ## Documentation
 
