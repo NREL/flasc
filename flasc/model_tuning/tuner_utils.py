@@ -1,21 +1,18 @@
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import pandas as pd
-
-from typing import Any, Dict, List, Optional, Tuple, Union
-
-from pathlib import Path
+from floris.tools import FlorisInterface
 
 from flasc.dataframe_operations import (
-    dataframe_filtering as dff,
     dataframe_manipulations as dfm,
 )
 
-from floris.tools import FlorisInterface
 # from floris.tools import ParallelComputingInterface
 
 
-def replicate_nan_values(df_1: pd.DataFrame, 
-                         df_2: pd.DataFrame):
+def replicate_nan_values(df_1: pd.DataFrame, df_2: pd.DataFrame):
     """
     Replicate NaN Values in DataFrame df_2 to Match DataFrame df_1.
 
@@ -40,12 +37,14 @@ def replicate_nan_values(df_1: pd.DataFrame,
     common_columns = df_1.columns.intersection(df_2.columns)
 
     # Use assign to create a new DataFrame with NaN values replaced
-    df_2_updated = df_2.assign(**{col: np.where(df_1[col].isna(), np.nan, df_2[col]) for col in common_columns})
+    df_2_updated = df_2.assign(
+        **{col: np.where(df_1[col].isna(), np.nan, df_2[col]) for col in common_columns}
+    )
 
-    return df_2_updated    
+    return df_2_updated
 
-def nested_get(dic: Dict[str, Any],
-                 keys: List[str]) -> Any:
+
+def nested_get(dic: Dict[str, Any], keys: List[str]) -> Any:
     """Get a value from a nested dictionary using a list of keys.
     Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-via-a-list-of-keys
 
@@ -60,10 +59,8 @@ def nested_get(dic: Dict[str, Any],
         dic = dic[key]
     return dic
 
-def nested_set(dic: Dict[str, Any], 
-                keys: List[str], 
-                value: Any, 
-                idx: Optional[int] = None) -> None:
+
+def nested_set(dic: Dict[str, Any], keys: List[str], value: Any, idx: Optional[int] = None) -> None:
     """Set a value in a nested dictionary using a list of keys.
     Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-via-a-list-of-keys
 
@@ -90,10 +87,9 @@ def nested_set(dic: Dict[str, Any],
         dic[keys[-1]] = par_list
 
 
-def set_fi_param(fi_in: FlorisInterface, 
-        param: List[str], 
-        value: Any, 
-        param_idx: Optional[int] = None) -> FlorisInterface:
+def set_fi_param(
+    fi_in: FlorisInterface, param: List[str], value: Any, param_idx: Optional[int] = None
+) -> FlorisInterface:
     """Set a parameter in a FlorisInterface object.
 
     Args:
@@ -110,43 +106,41 @@ def set_fi_param(fi_in: FlorisInterface,
     return FlorisInterface(fi_dict_mod)
 
 
-def resim_floris(fi_in: FlorisInterface,
-                  df_scada: pd.DataFrame,
-                  yaw_angles: np.array=None):
+def resim_floris(fi_in: FlorisInterface, df_scada: pd.DataFrame, yaw_angles: np.array = None):
+    # Get wind speeds and directions
+    wind_speeds = df_scada["ws"].values
+    wind_directions = df_scada["wd"].values
 
-        # Get wind speeds and directions
-        wind_speeds = df_scada['ws'].values
-        wind_directions = df_scada['wd'].values
+    # Get the number of turbiens
+    num_turbines = dfm.get_num_turbines(df_scada)
 
-        # Get the number of turbiens
-        num_turbines = dfm.get_num_turbines(df_scada)
+    # Set up the FLORIS model
+    fi = fi_in.copy()
+    fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions, time_series=True)
+    fi.calculate_wake(yaw_angles=yaw_angles)
 
-        # Set up the FLORIS model
-        fi = fi_in.copy()
-        fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions, time_series=True)
-        fi.calculate_wake(yaw_angles=yaw_angles)
-        
-        # Get the turbines in kW
-        turbine_powers = fi.get_turbine_powers().squeeze()/1000
+    # Get the turbines in kW
+    turbine_powers = fi.get_turbine_powers().squeeze() / 1000
 
-        # Generate FLORIS dataframe
-        df_floris = pd.DataFrame(data=turbine_powers,
-                                    columns=[f'pow_{i:>03}' for i in range(num_turbines)])
+    # Generate FLORIS dataframe
+    df_floris = pd.DataFrame(
+        data=turbine_powers, columns=[f"pow_{i:>03}" for i in range(num_turbines)]
+    )
 
-        # Assign the FLORIS results to a dataframe
-        df_floris = df_floris.assign(ws=wind_speeds,
-                                        wd=wind_directions)#,
-                                        # pow_ref=df_floris[[f"pow_{str(i).zfill(3)}" for i in pow_ref_columns]].mean(axis=1))
+    # Assign the FLORIS results to a dataframe
+    df_floris = df_floris.assign(ws=wind_speeds, wd=wind_directions)  # ,
+    # pow_ref=df_floris[[f"pow_{str(i).zfill(3)}" for i in pow_ref_columns]].mean(axis=1))
 
-        # Make sure the NaN values in the SCADA data appear in the same locations in the
-        # FLORIS data
-        df_floris = replicate_nan_values(df_scada, df_floris)
+    # Make sure the NaN values in the SCADA data appear in the same locations in the
+    # FLORIS data
+    df_floris = replicate_nan_values(df_scada, df_floris)
 
-        # If df_scada includes a df_mode column copy it over to floris
-        if 'df_mode' in df_scada.columns:
-            df_floris['df_mode'] = df_scada['df_mode'].values
+    # If df_scada includes a df_mode column copy it over to floris
+    if "df_mode" in df_scada.columns:
+        df_floris["df_mode"] = df_scada["df_mode"].values
 
-        return df_floris
+    return df_floris
+
 
 # def resim_floris(fi_in: FlorisInterface,
 #                  df_scada: pd.DataFrame,
@@ -156,10 +150,10 @@ def resim_floris(fi_in: FlorisInterface,
 #     # Confirm the df_scada has columns 'ws', 'wd'
 #     if not all([col in df_scada.columns for col in ['ws', 'wd']]):
 #         raise ValueError('df_scada must have columns "ws" and "wd"')
-    
+
 #     # Get the number of turbines
 #     num_turbines = dfm.get_num_turbines(df_scada)
-    
+
 #     # Get wind speeds and directions
 #     wind_speeds = df_scada['ws'].values
 #     wind_directions = df_scada['wd'].values
@@ -187,7 +181,6 @@ def resim_floris(fi_in: FlorisInterface,
 #                  yaw_angles: np.array=None):
 
 
-
 #     # Confirm the df_scada has columns 'ws', 'wd'
 #     if not all([col in df_scada.columns for col in ['ws', 'wd']]):
 #         raise ValueError('df_scada must have columns "ws" and "wd"')
@@ -206,7 +199,7 @@ def resim_floris(fi_in: FlorisInterface,
 #         print_timings=True,
 #     )
 
-    
+
 #     # Get wind speeds and directions
 #     wind_speeds = df_scada['ws'].values
 #     wind_directions = df_scada['wd'].values
@@ -230,8 +223,8 @@ def resim_floris(fi_in: FlorisInterface,
 
 
 from flasc.utilities_examples import load_floris_smarteole
+
 if __name__ == "__main__":
-    
     fi, _ = load_floris_smarteole(wake_model="emgauss")
 
     # Testing parameter setting
@@ -239,7 +232,6 @@ if __name__ == "__main__":
 
     # param = ['wake','wake_velocity_parameters','empirical_gauss',\
     #             'wake_expansion_rates']
-    
 
     # fi_2 = set_fi_param(fi, param, 7777777, idx=1)
 
@@ -248,14 +240,17 @@ if __name__ == "__main__":
     # print(fi_2.floris.as_dict())
 
     # Load the SCADA data
-    scada_path = Path("../../examples_smarteole/postprocessed/df_scada_data_60s_filtered_and_northing_calibrated.ftr")
+    scada_path = Path(
+        "../../examples_smarteole/postprocessed/df_scada_data_60s_filtered_and_northing_calibrated.ftr"
+    )
     df_scada = pd.read_feather(scada_path)
 
     # Assign ws/wd and pow_ref
-    df_scada = df_scada.assign(ws=df_scada['ws_smarteole'],
-                                wd=df_scada['wd_smarteole'],
-                                pow_ref=df_scada['pow_ref_smarteole'])
+    df_scada = df_scada.assign(
+        ws=df_scada["ws_smarteole"],
+        wd=df_scada["wd_smarteole"],
+        pow_ref=df_scada["pow_ref_smarteole"],
+    )
 
-    
     # Resim FLORIS
     # df_floris = resim_floris(fi, df_scada)
