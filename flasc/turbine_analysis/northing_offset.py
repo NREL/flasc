@@ -12,10 +12,10 @@
 
 
 from datetime import timedelta as td
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from floris.utilities import wrap_360
 
 from flasc import (
@@ -24,7 +24,9 @@ from flasc import (
 )
 
 
-def crosscheck_northing_offset_consistency(df, fi, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True):
+def crosscheck_northing_offset_consistency(
+    df, fi, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True
+):
     # Load data and extract info
     num_turbines = len(fi.layout_x)
     turbine_list = range(num_turbines)
@@ -62,9 +64,7 @@ def crosscheck_northing_offset_consistency(df, fi, bias_timestep=td(days=120), n
         print("Matching curves for turbine %03d..." % ti)
         ref_turb_subset = turbs_ref_list[ti]
         ref_turb_subset = [
-            r
-            for r in ref_turb_subset
-            if all(np.isnan(bias_output_list[ti]["T%03d" % r]))
+            r for r in ref_turb_subset if all(np.isnan(bias_output_list[ti]["T%03d" % r]))
         ]
 
         for ii, idx_chunk in enumerate(idx_chunks):
@@ -79,7 +79,7 @@ def crosscheck_northing_offset_consistency(df, fi, bias_timestep=td(days=120), n
 
                 if sum(np.isnan(wd_turb)) / len(wd_turb) < nan_thrshld:
                     dx_opt, J_opt = opt.match_y_curves_by_offset(
-                        yref=wd_ref, 
+                        yref=wd_ref,
                         ytest=wd_turb,
                         angle_wrapping=True,
                     )
@@ -107,9 +107,7 @@ def crosscheck_northing_offset_consistency(df, fi, bias_timestep=td(days=120), n
                 turb_is_clean[ti] = "clean"
                 turb_is_clean[ti_ref] = "clean"
             else:
-                if (turb_is_clean[ti] == "clean") & (
-                    turb_is_clean[ti_ref] == "clean"
-                ):
+                if (turb_is_clean[ti] == "clean") & (turb_is_clean[ti_ref] == "clean"):
                     turb_is_clean[ti] = "disputed"
                     turb_is_clean[ti_ref] = "disputed"
 
