@@ -1,14 +1,14 @@
-import os
+import unittest
+
 import numpy as np
 import pandas as pd
 
-import unittest
 from flasc.floris_tools import (
-    calc_floris_approx_table,
-    merge_floris_objects,
-    interpolate_floris_from_df_approx,
     add_gaussian_blending_to_floris_approx_table,
-    get_dependent_turbines_by_wd
+    calc_floris_approx_table,
+    get_dependent_turbines_by_wd,
+    interpolate_floris_from_df_approx,
+    merge_floris_objects,
 )
 from flasc.utilities_examples import load_floris_artificial as load_floris
 
@@ -23,7 +23,7 @@ class TestFlorisTools(unittest.TestCase):
         fi_merged = merge_floris_objects([fi_1, fi_2])
         self.assertTrue(np.all(fi_merged.layout_x == np.hstack([fi_1.layout_x, fi_2.layout_x])))
         self.assertTrue(np.all(fi_merged.layout_y == np.hstack([fi_1.layout_y, fi_2.layout_y])))
-# 
+        #
         # Check if layouts are merged appropriately
         fi_merged = merge_floris_objects([fi_1, fi_2], reference_wind_height=200.0)
         self.assertTrue(fi_merged.floris.flow_field.reference_wind_height == 200.0)
@@ -60,7 +60,7 @@ class TestFlorisTools(unittest.TestCase):
 
         # Ensure there are no NaN entries
         self.assertTrue(~df_fi_approx.isna().any().any())
-        
+
         # Ensure dataframe shape and columns
         # self.assertTrue(("wd_000" in df_fi_approx.columns))
         # self.assertTrue(("ws_001" in df_fi_approx.columns))
@@ -120,22 +120,22 @@ class TestFlorisTools(unittest.TestCase):
 
         # Apply Gaussian blending
         df_fi_approx_gauss = add_gaussian_blending_to_floris_approx_table(df_fi_approx)
-        
+
         # Make sure that table dimensions are identical
         self.assertTrue(
             np.all(df_fi_approx_gauss[["wd", "ws", "ti"]] == df_fi_approx[["wd", "ws", "ti"]])
         )
-    
+
         # Results should be smoothed, so highest point is lower and lowest point is higher
         self.assertTrue(
-            df_fi_approx_gauss[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).max() < \
-            df_fi_approx[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).max()
+            df_fi_approx_gauss[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).max()
+            < df_fi_approx[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).max()
         )
         self.assertTrue(
-            df_fi_approx_gauss[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).min() > \
-            df_fi_approx[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).min()
+            df_fi_approx_gauss[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).min()
+            > df_fi_approx[[f"pow_{ti:03d}" for ti in range(7)]].sum(axis=1).min()
         )
-    
+
     def test_get_dependent_turbines_by_wd(self):
         # Load FLORIS object
         fi, _ = load_floris()
@@ -145,11 +145,9 @@ class TestFlorisTools(unittest.TestCase):
         self.assertEqual(dep[0], [1, 6])
 
         # Test the change_threshold
-        dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]), 
-            change_threshold=0.01)
+        dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]), change_threshold=0.01)
         self.assertEqual(dep[0], [1])
 
         # Test the limit_number
-        dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]), 
-            limit_number=1)
+        dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]), limit_number=1)
         self.assertEqual(dep[0], [1])

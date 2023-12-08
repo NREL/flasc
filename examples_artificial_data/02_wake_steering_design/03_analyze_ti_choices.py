@@ -11,16 +11,12 @@
 # the License.
 
 
-import numpy as np
-from matplotlib import pyplot as plt
 import pandas as pd
 import seaborn as sns
+from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
+from matplotlib import pyplot as plt
 
 from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-from flasc.utilities_examples import load_floris_artificial as load_floris
-
-from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
-
 
 if __name__ == "__main__":
     # Define turbulence intensity range
@@ -47,17 +43,13 @@ if __name__ == "__main__":
             uplift = 100.0 * (AEP_opt - AEP_baseline) / AEP_baseline
             result_list.append(
                 pd.DataFrame(
-                    {
-                        "ti_opt": [ti_opt],
-                        "ti_eval": [ti_eval],
-                        "AEP uplift (%)": [uplift]
-                    },
+                    {"ti_opt": [ti_opt], "ti_eval": [ti_eval], "AEP uplift (%)": [uplift]},
                 )
             )
 
     # Print all results to console
     df_result = pd.concat(result_list, axis=0, ignore_index=True)
-    with pd.option_context('display.max_rows', None):
+    with pd.option_context("display.max_rows", None):
         print(df_result)
 
     # Plot as a table/colormap

@@ -1,16 +1,15 @@
 import os
-import pandas as pd
-import numpy as np
 
-from floris import tools as wfct
+import numpy as np
+import pandas as pd
 from floris.utilities import wrap_360
-from flasc.energy_ratio import energy_ratio_suite
+
+from flasc import floris_tools as fsatools
 from flasc.dataframe_operations import (
     dataframe_manipulations as dfm,
 )
-
+from flasc.energy_ratio import energy_ratio_suite
 from flasc.utilities_examples import load_floris_artificial as load_floris
-from flasc import floris_tools as fsatools
 
 
 def load_data():
@@ -80,7 +79,7 @@ if __name__ == "__main__":
         N=1,
         percentiles=[5.0, 95.0],
         return_detailed_output=True,
-        verbose=True
+        verbose=True,
     )
 
     # Generate table

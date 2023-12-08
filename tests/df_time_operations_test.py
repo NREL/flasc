@@ -1,13 +1,13 @@
+import unittest
 from datetime import timedelta as td
+
 import numpy as np
 import pandas as pd
 
-import unittest
-
 from flasc.time_operations import (
-    df_resample_by_interpolation,
-    df_movingaverage,
     df_downsample,
+    df_movingaverage,
+    df_resample_by_interpolation,
 )
 
 
@@ -28,15 +28,15 @@ def load_data():
             "time": [pd.to_datetime(t) for t in time],
             "wd_000": [355, 356, 1, 2, 359, 1, 0, 359.9],
             "ws_000": [7.0, 7.1, 7.2, 7.0, 6.9, 7.0, 7.0, 7.0],
-            "vane_000": [-3, -3, -4, -3, -5, 0, 2, 3]
+            "vane_000": [-3, -3, -4, -3, -5, 0, 2, 3],
         }
     )
     return df
 
 
 class TestDataFrameResampling(unittest.TestCase):
-# if __name__ == "__main__":
-#     if True:
+    # if __name__ == "__main__":
+    #     if True:
     def test_downsampling(self):
         df = load_data()
         df_ds, data_indices = df_downsample(
@@ -46,7 +46,7 @@ class TestDataFrameResampling(unittest.TestCase):
             min_periods=1,
             center=True,
             calc_median_min_max_std=True,
-            return_index_mapping=True
+            return_index_mapping=True,
         )
 
         # Check solutions: for first row
@@ -56,8 +56,7 @@ class TestDataFrameResampling(unittest.TestCase):
         self.assertTrue(np.all(np.unique(data_indices[0, :]) == [-1, 0, 1, 2]))
 
         # Check solutions: for big chunk of data in middle of dataframe (Nones)
-        self.assertTrue(df_ds.drop(columns=["time"]).\
-            iloc[4:11].isna().all().all())
+        self.assertTrue(df_ds.drop(columns=["time"]).iloc[4:11].isna().all().all())
         self.assertTrue(np.all(np.unique(data_indices[4:11, :]) == [-1]))
 
         # Check solutions: for one but last row
@@ -73,17 +72,21 @@ class TestDataFrameResampling(unittest.TestCase):
             window_width=td(seconds=5),
             min_periods=1,
             center=True,
-            calc_median_min_max_std=True
+            calc_median_min_max_std=True,
         )
 
         # Check solutions: for first row which just used one value for mov avg
         self.assertAlmostEqual(df_ma.iloc[0]["ws_000_mean"], 7.0)
         self.assertTrue(np.isnan(df_ma.iloc[0]["ws_000_std"]))
-        #self.assertTrue(np.all(np.unique(data_indices[0, :]) == [-1, 0]))
+        # self.assertTrue(np.all(np.unique(data_indices[0, :]) == [-1, 0]))
 
         # Check solutions: second row with multiple values
-        self.assertAlmostEqual(df_ma.iloc[1]["wd_000_mean"], 359.667246, places=4)  # confirm circular averaging
-        self.assertAlmostEqual(df_ma.iloc[1]["wd_000_std"], 2.625014, places=4)  # confirm circular std
+        self.assertAlmostEqual(
+            df_ma.iloc[1]["wd_000_mean"], 359.667246, places=4
+        )  # confirm circular averaging
+        self.assertAlmostEqual(
+            df_ma.iloc[1]["wd_000_std"], 2.625014, places=4
+        )  # confirm circular std
 
         # Check solutions: sixth row, for good measure
         self.assertAlmostEqual(df_ma.iloc[6]["wd_000_mean"], 0.0)  # confirm circular averaging
@@ -95,13 +98,9 @@ class TestDataFrameResampling(unittest.TestCase):
         df = load_data()
         df_res = df_resample_by_interpolation(
             df=df,
-            time_array=pd.date_range(
-                df.iloc[0]["time"],
-                df.iloc[-1]["time"],
-                freq=td(seconds=1)
-            ),
+            time_array=pd.date_range(df.iloc[0]["time"], df.iloc[-1]["time"], freq=td(seconds=1)),
             circular_cols=["wd_000"],
-            interp_method='linear',
+            interp_method="linear",
             max_gap=td(seconds=5),  # Maximum gap of 5 seconds
             verbose=False,
         )

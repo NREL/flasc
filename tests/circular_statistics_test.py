@@ -1,7 +1,7 @@
+import unittest
+
 import numpy as np
 from scipy.stats import circmean
-
-import unittest
 
 from flasc import circular_statistics as cs
 
@@ -9,8 +9,8 @@ from flasc import circular_statistics as cs
 class TestDataframeManipulations(unittest.TestCase):
     def test_empty_array(self):
         # Try empty array with all statistics
-        mean_wd, median_wd, std_wd, min_wd, max_wd = (
-            cs.calculate_wd_statistics([], calc_median_min_max_std=True)
+        mean_wd, median_wd, std_wd, min_wd, max_wd = cs.calculate_wd_statistics(
+            [], calc_median_min_max_std=True
         )
         self.assertTrue(np.isnan(mean_wd))
         self.assertTrue(np.isnan(median_wd))
@@ -32,8 +32,8 @@ class TestDataframeManipulations(unittest.TestCase):
         self.assertAlmostEqual(mean, 355.0)
 
         # Multiple values without wrapping
-        mean_wd, median_wd, std_wd, min_wd, max_wd = (
-            cs.calculate_wd_statistics([12], calc_median_min_max_std=True)
+        mean_wd, median_wd, std_wd, min_wd, max_wd = cs.calculate_wd_statistics(
+            [12], calc_median_min_max_std=True
         )
         self.assertAlmostEqual(mean_wd, 12.0)
         self.assertAlmostEqual(median_wd, 12.0)
@@ -42,8 +42,8 @@ class TestDataframeManipulations(unittest.TestCase):
         self.assertAlmostEqual(max_wd, 12.0)
 
         # Multiple values with wrapping
-        mean_wd, median_wd, std_wd, min_wd, max_wd = (
-            cs.calculate_wd_statistics([365], calc_median_min_max_std=True)
+        mean_wd, median_wd, std_wd, min_wd, max_wd = cs.calculate_wd_statistics(
+            [365], calc_median_min_max_std=True
         )
         self.assertAlmostEqual(mean_wd, 5.0)
         self.assertAlmostEqual(median_wd, 5.0)
@@ -52,19 +52,11 @@ class TestDataframeManipulations(unittest.TestCase):
         self.assertAlmostEqual(max_wd, 5.0)
 
     def test_mean_median_min_max_std(self):
-        angles_array = np.array(
-            [
-                [355.0, 341.2, 2.1],
-                [13.2, 344.9, 356.1],
-                [2.2, 334.0, 356.5]
-            ]
-        )
-        mean_array, median_array, std_array, min_array, max_array = (
-            cs.calculate_wd_statistics(
-                angles_array,
-                axis=0,
-                calc_median_min_max_std=True,
-            )
+        angles_array = np.array([[355.0, 341.2, 2.1], [13.2, 344.9, 356.1], [2.2, 334.0, 356.5]])
+        mean_array, median_array, std_array, min_array, max_array = cs.calculate_wd_statistics(
+            angles_array,
+            axis=0,
+            calc_median_min_max_std=True,
         )
 
         # Compare to SciPy solutions

@@ -11,16 +11,14 @@
 # the License.
 
 
-import numpy as np
-from matplotlib import pyplot as plt
 import pandas as pd
 import seaborn as sns
-
+from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
 from floris.tools.uncertainty_interface import UncertaintyInterface
-from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from matplotlib import pyplot as plt
 
-from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
+from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
 
 
 def load_floris_with_uncertainty(std_wd=0.0):
@@ -66,14 +64,14 @@ if __name__ == "__main__":
                     {
                         "std_wd_opt": [std_wd_opt],
                         "std_wd_eval": [std_wd_eval],
-                        "AEP uplift (%)": [uplift]
+                        "AEP uplift (%)": [uplift],
                     },
                 )
             )
 
     # Print all results to console
     df_result = pd.concat(result_list, axis=0, ignore_index=True)
-    with pd.option_context('display.max_rows', None):
+    with pd.option_context("display.max_rows", None):
         print(df_result)
 
     # Plot as a table/colormap

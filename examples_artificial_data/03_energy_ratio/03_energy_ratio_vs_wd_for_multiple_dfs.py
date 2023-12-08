@@ -11,18 +11,16 @@
 # the License.
 
 
-import matplotlib.pyplot as plt
 import os
-import pandas as pd
 
-from floris import tools as wfct
+import matplotlib.pyplot as plt
+import pandas as pd
 from floris.utilities import wrap_360
 
+from flasc import floris_tools as fsatools
+from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.dataframe_operations import \
-    dataframe_manipulations as dfm
-from flasc import floris_tools as fsatools
 from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
@@ -30,13 +28,16 @@ def load_data():
     # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(
-        root_dir, '..', '01_raw_data_processing', 'postprocessed',
-        'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
+        root_dir,
+        "..",
+        "01_raw_data_processing",
+        "postprocessed",
+        "df_scada_data_600s_filtered_and_northing_calibrated.ftr",
     )
     if not os.path.exists(ftr_path):
         raise FileNotFoundError(
-            'Please run the scripts in /raw_data_processing/' +
-            'before trying any of the other examples.'
+            "Please run the scripts in /raw_data_processing/"
+            + "before trying any of the other examples."
         )
     df = pd.read_feather(ftr_path)
     return df
@@ -49,7 +50,7 @@ if __name__ == "__main__":
 
     # Visualize layout
     fig, ax = plt.subplots()
-    ax.plot(fi.layout_x, fi.layout_y, 'ko')
+    ax.plot(fi.layout_x, fi.layout_y, "ko")
     for ti in range(len(fi.layout_x)):
         ax.text(fi.layout_x[ti], fi.layout_y[ti], "T{:02d}".format(ti))
     ax.axis("equal")
@@ -76,47 +77,44 @@ if __name__ == "__main__":
     # Now we generate a copy of the original dataframe and shift the
     # reference wind direction measurement upward by 7.5 degrees.
     df2 = df.copy()
-    df2['wd'] = wrap_360(df2['wd'] + 7.5)
+    df2["wd"] = wrap_360(df2["wd"] + 7.5)
 
     # Initialize the energy ratio input object and add dataframes
     # separately. We will add the original data and the manipulated
     # dataset.
-    er_in = EnergyRatioInput(
-        [df, df2], 
-        ["Original data", "Data with wd bias of 7.5 degrees"]
-    )
+    er_in = EnergyRatioInput([df, df2], ["Original data", "Data with wd bias of 7.5 degrees"])
 
-    # Calculate the energy ratios for test_turbines = [1] for a subset of 
-    # wind directions with uncertainty quantification using 50 bootstrap 
+    # Calculate the energy ratios for test_turbines = [1] for a subset of
+    # wind directions with uncertainty quantification using 50 bootstrap
     # samples
     er_out = er.compute_energy_ratio(
-        er_in, 
+        er_in,
         test_turbines=[1],
         use_predefined_ref=True,
         use_predefined_wd=True,
         use_predefined_ws=True,
         wd_step=2.0,
         ws_step=4.0,
-        wd_min=20.,
-        wd_max=90.,
+        wd_min=20.0,
+        wd_max=90.0,
         N=50,
-        percentiles=[5., 95.]
+        percentiles=[5.0, 95.0],
     )
     er_out.plot_energy_ratios()
 
     # Look at another test turbine with the same masked datasets
     er_out = er.compute_energy_ratio(
-        er_in, 
+        er_in,
         test_turbines=[3],
         use_predefined_ref=True,
         use_predefined_wd=True,
         use_predefined_ws=True,
         wd_step=2.0,
         ws_step=4.0,
-        wd_min=20.,
-        wd_max=90.,
+        wd_min=20.0,
+        wd_max=90.0,
         N=50,
-        percentiles=[5., 95.]
+        percentiles=[5.0, 95.0],
     )
     er_out.plot_energy_ratios()
     er_out.plot_energy_ratios(polar_plot=True)  # Also show in a polar plot

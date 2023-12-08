@@ -11,16 +11,13 @@
 # the License.
 
 
-import numpy as np
-from matplotlib import pyplot as plt
 import pandas as pd
 import seaborn as sns
-
-from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
+from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
+from matplotlib import pyplot as plt
 
 from flasc.utilities_examples import load_floris_artificial as load_floris
-from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
-
+from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
 
 if __name__ == "__main__":
     # Define pP range
@@ -56,7 +53,7 @@ if __name__ == "__main__":
 
     # Print all results to console
     df_result = pd.concat(result_list, axis=0, ignore_index=True)
-    with pd.option_context('display.max_rows', None):
+    with pd.option_context("display.max_rows", None):
         print(df_result)
 
     # Plot as a table/colormap
