@@ -12,19 +12,18 @@
 
 
 import numpy as np
-from scipy.stats import circmean
-
 from floris.utilities import wrap_360
+from scipy.stats import circmean
 
 
 def calc_wd_mean_radial(angles_array_deg, axis=0, nan_policy="omit"):
     """
-    Compute the mean wind direction over a given axis. Assumes that the 
-    input angles are specified in degrees, and returns the mean wind 
+    Compute the mean wind direction over a given axis. Assumes that the
+    input angles are specified in degrees, and returns the mean wind
     direction in degrees. Wrapper for scipy.stats.circmean
 
     Inputs:
-        angles_array_deg - numpy array or pandas dataframe of input 
+        angles_array_deg - numpy array or pandas dataframe of input
             wind directions.
         axis - axis of array/dataframe to take average over
         nan_policy - option to pass to scipy.stats.circmean; defaults to
@@ -35,8 +34,7 @@ def calc_wd_mean_radial(angles_array_deg, axis=0, nan_policy="omit"):
             axis
     """
 
-    return circmean(angles_array_deg, high=360., axis=axis, 
-        nan_policy=nan_policy)
+    return circmean(angles_array_deg, high=360.0, axis=axis, nan_policy=nan_policy)
 
 
 # def calc_wd_mean_radial_list(angles_array_list):
@@ -57,8 +55,7 @@ def calc_wd_mean_radial(angles_array_deg, axis=0, nan_policy="omit"):
 #     return mean_out
 
 
-def calculate_wd_statistics(angles_array_deg, axis=0,
-                            calc_median_min_max_std=True):
+def calculate_wd_statistics(angles_array_deg, axis=0, calc_median_min_max_std=True):
     """Determine statistical properties of an array of wind directions.
     This includes the mean of the array, the median, the standard deviation,
     the minimum value and the maximum value.
@@ -107,13 +104,12 @@ def calculate_wd_statistics(angles_array_deg, axis=0,
     new_shape = list(mean_wd.shape)
     new_shape.insert(axis, 1)  # Add dimension at axis
     new_shape = tuple(new_shape)
-    mean_wd_full = mean_wd.reshape(new_shape).repeat(
-        angles_array_deg.shape[axis], axis=axis)
+    mean_wd_full = mean_wd.reshape(new_shape).repeat(angles_array_deg.shape[axis], axis=axis)
 
     # Copy angles_array_deg and wrap values around its mean value
     angles_wrp = angles_array_deg
-    angles_wrp[angles_wrp > (mean_wd_full + 180.)] += -360.
-    angles_wrp[angles_wrp < (mean_wd_full - 180.)] += 360.
+    angles_wrp[angles_wrp > (mean_wd_full + 180.0)] += -360.0
+    angles_wrp[angles_wrp < (mean_wd_full - 180.0)] += 360.0
 
     median_wd = wrap_360(np.nanmedian(angles_wrp, axis=axis))
     std_wd = np.nanstd(angles_wrp, axis=axis)

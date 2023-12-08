@@ -1,10 +1,11 @@
 import copy
 from pathlib import Path
-import matplotlib.pyplot as plt
-import numpy as np
 from time import perf_counter as timerpc
 
+import matplotlib.pyplot as plt
+import numpy as np
 from floris.tools import FlorisInterface, UncertaintyInterface
+
 from flasc.visualization import plot_floris_layout
 
 
@@ -27,8 +28,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
 
     # Use the local FLORIS GCH/CC model for the wake model settings
     root_path = (
-        Path(__file__).resolve().parents[1]
-        / "examples_smarteole" / "floris_input_smarteole"
+        Path(__file__).resolve().parents[1] / "examples_smarteole" / "floris_input_smarteole"
     )
     fn = root_path / "{:s}.yaml".format(wake_model)
 
@@ -71,8 +71,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
 
     # Use the local FLORIS GCH/CC model for the wake model settings
     root_path = (
-        Path(__file__).resolve().parents[1]
-        / "examples_artificial_data" / "floris_input_artificial"
+        Path(__file__).resolve().parents[1] / "examples_artificial_data" / "floris_input_artificial"
     )
     fn = root_path / "{:s}.yaml".format(wake_model)
 
