@@ -11,7 +11,6 @@
 # the License.
 
 
-
 import numpy as np
 import pandas as pd
 from floris.tools.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
