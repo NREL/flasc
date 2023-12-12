@@ -483,7 +483,7 @@ def plot_layout_with_waking_directions(
                 and i in layout_plotting_dict["turbine_indices"]
                 and j in layout_plotting_dict["turbine_indices"]
             ):
-                (l,) = ax.plot(fi.layout_x[[i, j]], fi.layout_y[[i, j]], **wake_plotting_dict)
+                (h,) = ax.plot(fi.layout_x[[i, j]], fi.layout_y[[i, j]], **wake_plotting_dict)
 
                 # Only label in one direction
                 if ~label_exists[i, j]:
@@ -494,7 +494,7 @@ def plot_layout_with_waking_directions(
                     )
 
                     label_line(
-                        l,
+                        h,
                         linetext,
                         ax,
                         near_i=1,
