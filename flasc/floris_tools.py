@@ -24,6 +24,10 @@ from scipy.stats import norm
 
 from flasc import utilities as fsut
 
+# Disable line too long for this file for csv block
+# Some comment blocks would be confusing otherwise
+# ruff: noqa: E501
+
 
 def merge_floris_objects(fi_list, reference_wind_height=None):
     """Merge a list of FlorisInterface objects into a single FlorisInterface object. Note that it uses
