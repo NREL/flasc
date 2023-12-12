@@ -357,11 +357,9 @@ def df_resample_by_interpolation(
         dt_raw_median = df["time"].diff().median() / td(seconds=1)
         if verbose:
             print(
-                "  Resampling column '{:s}' with median timestep {:.3f} s onto a prespecified time ".format(
-                    c, dt_raw_median
-                )
-                + "array with kind={}, max_gap={}".format(interp_method, max_gap)
-                + "s, and wrap_around_360={}".format(wrap_around_360)
+                f"  Resampling column '{c}' with median timestep {dt_raw_median:.3f} s "
+                f"onto a prespecified time array with kind={interp_method}, max_gap={max_gap}"
+                f"s, and wrap_around_360={wrap_around_360}"
             )
 
         fp = np.array(df[c], dtype=float)

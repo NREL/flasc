@@ -90,7 +90,8 @@ class sql_database_manager:
         new_size = df.shape[0]
         if new_size < original_size:
             print(
-                f"...Dataframe size reduced from {original_size} to {new_size} by time values already in {table_name}"
+                f"...Dataframe size reduced from {original_size} to {new_size}"
+                f" by time values already in {table_name}"
             )
         return df
 
@@ -173,7 +174,8 @@ class sql_database_manager:
         splits = np.append(splits, len(time_in_db) - 1)
         splits = np.unique(splits)
         print(
-            f"Splitting {len(time_in_db)} entries data into {len(splits)} subsets of {no_rows_per_file}."
+            f"Splitting {len(time_in_db)} entries data into {len(splits)}"
+            f" subsets of {no_rows_per_file}."
         )
 
         for ii in range(len(splits) - 1):

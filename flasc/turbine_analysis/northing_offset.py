@@ -124,8 +124,8 @@ def crosscheck_northing_offset_consistency(
             )
         elif turb_is_clean[ti] == "bad":
             print(
-                "Turbine %03d seems to have one or multiple jumps in its WD measurement calibration. [BAD]"
-                % ti
+                "Turbine %03d seems to have one or multiple jumps in "
+                "its WD measurement calibration. [BAD]" % ti
             )
 
     if plot_figure:

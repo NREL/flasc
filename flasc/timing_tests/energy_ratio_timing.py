@@ -90,7 +90,7 @@ def time_energy_ratio_with_bootstrapping():
     for i in range(N_ITERATIONS):
         start_time = time.time()
 
-        er_out = erp.compute_energy_ratio(
+        _ = erp.compute_energy_ratio(
             er_in,
             ["baseline"],
             test_turbines=[1],

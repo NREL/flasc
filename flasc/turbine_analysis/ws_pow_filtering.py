@@ -247,7 +247,10 @@ class ws_pw_curve_filtering:
             for iii, tii in enumerate(ti):
                 N_post = dff.df_get_no_faulty_measurements(df_out, tii)
                 print(
-                    "Faulty measurements for WTG {:03d} increased from {:.3f} % to {:.3f} %. Reason: '{:s}'.".format(
+                    (
+                        "Faulty measurements for WTG {:03d} increased from {:.3f} % to {:.3f} "
+                        "%. Reason: '{:s}'."
+                    ).format(
                         tii,
                         100.0 * N_pre[iii] / df_in.shape[0],
                         100.0 * N_post / df_in.shape[0],
