@@ -122,7 +122,7 @@ class yaw_pow_fitting:
             bins_y[ii] = np.nanmean(yi)
 
         # if np.any(bins_N > 0):
-        #     bins_y = np.array(bins_y) / np.nanmax(bins_y[bins_N/np.max(bins_N) > 0.10])  # Normalize to 1
+        #     bins_y = np.array(bins_y) / np.nanmax(bins_y[bins_N/np.max(bins_N) > 0.10])
 
         self.bins_x = bins_x
         self.bins_y = bins_y
