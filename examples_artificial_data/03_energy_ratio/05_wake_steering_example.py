@@ -32,7 +32,8 @@ if __name__ == "__main__":
     # Show the wind farm
     plot_layout_with_waking_directions(fi)
 
-    # Create a time history of points where the wind speed and wind direction step different combinations
+    # Create a time history of points where the wind speed and wind
+    # direction step different combinations
     ws_points = np.arange(5.0, 10.0, 1.0)
     wd_points = np.arange(
         250.0,
@@ -100,7 +101,8 @@ if __name__ == "__main__":
         }
     )
 
-    # Create alternative versions of each of the above dataframes where the wd/ws are perturbed by noise
+    # Create alternative versions of each of the above dataframes
+    # where the wd/ws are perturbed by noise
     df_baseline_noisy = pd.DataFrame(
         {
             "wd": wd_array + np.random.randn(len(wd_array)) * 2,

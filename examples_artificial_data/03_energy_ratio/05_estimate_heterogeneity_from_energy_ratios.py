@@ -61,7 +61,7 @@ def _process_single_wd(wd, wd_bin_width, turb_wd_measurement, df_upstream, df):
     # gives a strong indication of the heterogeneity in the inflow wind
     # speeds for that mean inflow wind direction.
     print("Processing wind direction = {:.1f} deg.".format(wd))
-    wd_bins = [[wd - wd_bin_width / 2.0, wd + wd_bin_width / 2.0]]
+    # wd_bins = [[wd - wd_bin_width / 2.0, wd + wd_bin_width / 2.0]]
 
     # Determine which turbines are upstream
     if wd > df_upstream.iloc[0]["wd_max"]:
