@@ -25,7 +25,6 @@ filterwarnings = [
 src = ["flasc", "tests"]
 line-length = 100
 target-version = "py310"
-# extend-include = ["*.ipynb"]
 ignore-init-module-imports = true
 
 # See https://github.com/charliermarsh/ruff#supported-rules
