@@ -5,12 +5,12 @@
 
 ## Description
 
-FLASC provides a **rich suite of analysis tools** for SCADA data filtering, analysis, 
-wind farm model validation, field experiment design, and field experiment monitoring. 
+FLASC provides a **rich suite of analysis tools** for SCADA data filtering, analysis,
+wind farm model validation, field experiment design, and field experiment monitoring.
 
 The repository is centrally built around NRELs in-house ``FLORIS`` wind farm model, available at
-**https://github.com/nrel/floris**. FLASC also largely relies on the ``energy ratio``, among others, 
-to quantify wake losses in synthetic and historical data, to perform turbine northing calibrations, 
+**https://github.com/nrel/floris**. FLASC also largely relies on the ``energy ratio``, among others,
+to quantify wake losses in synthetic and historical data, to perform turbine northing calibrations,
 and model parameter estimation.
 
 For technical questions or concerns, please email paul.fleming@nrel.gov.
@@ -29,7 +29,7 @@ After creating a new virtual environment, clone this repository to your local
 system and install it locally using ``pip``. The command for this is ``pip install -e flasc``.
 
 If installing for develop, follow the developer [install instructions](https://nrel.github.io/flasc/installation.html)
-    
+
 ## Documentation
 
 Documentation is provided via the included examples folders as well as [online documentation](https://nrel.github.io/flasc/).

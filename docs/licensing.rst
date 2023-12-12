@@ -25,4 +25,4 @@ For more information, contact the NREL FLASC team at
     limitations under the License.
 
 
-.. seealso:: `Return to table of contents <index.html>`_ 
+.. seealso:: `Return to table of contents <index.html>`_

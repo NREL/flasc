@@ -2,7 +2,7 @@ name: Documentation
 description: Report incorrect documentation or describe new documentation
 title: "[Documentation]: <title>"
 labels: "Type: Documentation"
-body: 
+body:
   - type: textarea
     id: doc-issue
     attributes:
