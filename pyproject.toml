@@ -60,6 +60,7 @@ exclude = [
     "dist",
     "node_modules",
     "venv",
+    "ipynb"
 ]
 
 # Allow unused variables when underscore-prefixed.
