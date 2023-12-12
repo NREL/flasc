@@ -163,7 +163,7 @@ def plot_offsets_wswd_heatmap(df_offsets, turb_id, ax=None):
 
     """
 
-    if type(turb_id) is int:
+    if isinstance(turb_id, int):
         if "yaw_angles_opt" in df_offsets.columns:
             offsets = np.vstack(df_offsets.yaw_angles_opt.to_numpy())[:, turb_id]
             df_offsets = pd.DataFrame(
@@ -187,7 +187,7 @@ def plot_offsets_wswd_heatmap(df_offsets, turb_id, ax=None):
     for i, ws in enumerate(ws_array):
         offsets_array[-i, :] = df_offsets[df_offsets.wind_speed == ws][turb_id].values
 
-    if ax == None:
+    if ax is None:
         fig, ax = plt.subplots(1, 1)
     d_wd = (wd_array[1] - wd_array[0]) / 2
     d_ws = (ws_array[1] - ws_array[0]) / 2
@@ -218,7 +218,7 @@ def plot_offsets_wd(df_offsets, turb_id, ws_plot, color="black", alpha=1.0, labe
     label only allowed is single wind speed is given.
     """
 
-    if type(turb_id) is int:
+    if isinstance(turb_id, int):
         if "yaw_angles_opt" in df_offsets.columns:
             offsets = np.vstack(df_offsets.yaw_angles_opt.to_numpy())[:, turb_id]
             df_offsets = pd.DataFrame(
@@ -249,7 +249,7 @@ def plot_offsets_wd(df_offsets, turb_id, ws_plot, color="black", alpha=1.0, labe
     else:
         offsets_list = [df_offsets[df_offsets.wind_speed == ws_plot][turb_id].values]
 
-    if ax == None:
+    if ax is None:
         fig, ax = plt.subplots(1, 1)
 
     for offsets in offsets_list:
