@@ -13,6 +13,9 @@ from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.energy_ratio.energy_ratio_utilities import add_reflected_rows
 from flasc.utilities_examples import load_floris_artificial as load_floris
 
+# Disable line too long for this file for csv block
+# ruff: noqa: E501
+
 
 def load_data():
     # 4-line data file
@@ -562,7 +565,7 @@ class TestEnergyRatio(unittest.TestCase):
         df_freq = pd.DataFrame({"wd": [270.0], "ws": [10.0], "freq_val": [1.0]})
 
         with pytest.raises(RuntimeError):
-            er_out = erp.compute_energy_ratio(
+            _ = erp.compute_energy_ratio(
                 er_in,
                 ref_turbines=[0],
                 test_turbines=[1],
