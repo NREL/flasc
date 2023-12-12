@@ -642,8 +642,10 @@ class sql_db_explorer_gui:
         try:
             self.toolbar.destroy()
             self.frame_2.destroy()
-        except:
-            print("No preexisting figures found.")
+        except tk.TclError as e:
+            print(f"Error destroying widgets: {e}")
+        else:
+            print("Figures destroyed successfully.")
 
         self.frame_2 = tk.Frame(self.master, width=20, height=500)
         self.fig = Figure()

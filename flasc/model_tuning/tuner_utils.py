@@ -29,9 +29,11 @@ def replicate_nan_values(df_1: pd.DataFrame, df_2: pd.DataFrame):
     Returns:
     - pandas.DataFrame: A new DataFrame with NaN values in df_2 replaced to match df_1.
     """
-    # For columns which df_1 and df_2 have in common, make sure occurences of NaNs which appear in df_1
+    # For columns which df_1 and df_2 have in common, make sure
+    # occurences of NaNs which appear in df_1
     # appear in the same location in df_2
-    # This function is primarily for the case where df_2 is a FLORIS resimulation of df_1 and making sure
+    # This function is primarily for the case where df_2 is
+    # a FLORIS resimulation of df_1 and making sure
     # missing data appears in both data frames
 
     # Identify common columns between df_1 and df_2

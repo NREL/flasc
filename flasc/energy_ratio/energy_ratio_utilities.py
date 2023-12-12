@@ -259,12 +259,17 @@ def add_power_ref(df_: pl.DataFrame, ref_cols: List[str]):
 
 def add_reflected_rows(df_: pl.DataFrame, edges: Union[np.ndarray, list], overlap_distance: float):
     """
-    Adds rows to a datrame with where the wind direction is reflected around the neearest edge if within overlap_distance
+    Adds rows to a datrame with where the wind direction is
+    reflected around the neearest edge if within overlap_distance
 
-    Given a wind direction DataFrame `df_`, this function adds reflected rows to the DataFrame such that each wind direction
-    in the original DataFrame has a corresponding reflected wind direction. The reflected wind direction is calculated by
-    subtracting the wind direction from the nearest edge in `edges` and then subtracting that difference again from the
-    original wind direction. The resulting wind direction is then wrapped around to the range [0, 360) degrees. The function
+    Given a wind direction DataFrame `df_`, this function adds
+    reflected rows to the DataFrame such that each wind direction
+    in the original DataFrame has a corresponding reflected wind
+    direction. The reflected wind direction is calculated by
+    subtracting the wind direction from the nearest edge in `edges`
+    and then subtracting that difference again from the
+    original wind direction. The resulting wind direction
+    is then wrapped around to the range [0, 360) degrees. The function
     returns a new DataFrame with the original rows and the added reflected rows.
 
     This function enables overlapping bins in the energy ratio functions
@@ -274,9 +279,11 @@ def add_reflected_rows(df_: pl.DataFrame, edges: Union[np.ndarray, list], overla
     df_ : polars.DataFrame
         The DataFrame to add reflected rows to.
     edges : numpy.ndarray
-        An array of wind direction edges to use for reflection.  (Should be same as used in energy ratio)
+        An array of wind direction edges to use for reflection.
+        (Should be same as used in energy ratio)
     overlap_distance : float
-        The maximum distance between a wind direction and an edge for the wind direction to be considered overlapping.
+        The maximum distance between a wind direction and an edge
+        for the wind direction to be considered overlapping.
 
     Returns
     -------
@@ -473,9 +480,12 @@ def bin_and_group_dataframe(
     """
     Bin and aggregate a DataFrame based on wind direction and wind speed parameters.
 
-    This function takes a Polars DataFrame (df_) and performs binning and aggregation operations based on
-    wind direction (wd) and wind speed (ws). It allows for optional handling of reflected rows and grouping by
-    specific columns. The resulting DataFrame contains aggregated statistics for reference and test power
+    This function takes a Polars DataFrame (df_) and performs
+    binning and aggregation operations based on
+    wind direction (wd) and wind speed (ws). It allows for optional
+    handling of reflected rows and grouping by
+    specific columns. The resulting DataFrame contains aggregated
+    statistics for reference and test power
     columns within specified bins.
 
     Args:
@@ -490,9 +500,12 @@ def bin_and_group_dataframe(
         ws_step (float, optional): Step size for wind speed binning. Defaults to 1.0.
         ws_min (float, optional): Minimum wind speed value. Defaults to 0.0.
         ws_max (float, optional): Maximum wind speed value. Defaults to 50.0.
-        wd_bin_overlap_radius (float, optional): Radius for overlapping wind direction bins. Defaults to 0.0.
-        remove_all_nulls (bool, optional): If True, remove rows unless all valid instead of any Defaults to False.
-        bin_cols_without_df_name (List[str], optional): List of columns used for grouping without 'df_name'.
+        wd_bin_overlap_radius (float, optional): Radius for overlapping wind direction bins.
+             Defaults to 0.0.
+        remove_all_nulls (bool, optional): If True, remove rows unless all valid instead of any.
+            Defaults to False.
+        bin_cols_without_df_name (List[str], optional): List of columns used
+            for grouping without 'df_name'.
         num_df (int, optional): Number of dataframes required for each bin combination.
 
     Returns:
@@ -539,22 +552,27 @@ def add_bin_weights(
     weight_by: str = "min",
 ):
     """
-    Add weights to DataFrame bins based on either frequency counts or the provided frequency table df_freq_pl.
+    Add weights to DataFrame bins based on either frequency counts or
+    the provided frequency table df_freq_pl.
 
-    This function  assigns weights to DataFrame bins.  If 'df_freq_pl' is provided, these weights are used
-    directly.  If 'df_freq_pl' is not provided, the function calculates the weights from the input DataFrame 'df_'.
+    This function  assigns weights to DataFrame bins.  If 'df_freq_pl' is provided,
+    these weights are used directly.  If 'df_freq_pl' is not provided, the function
+    calculates the weights from the input DataFrame 'df_'.
     Weights can be determined as either the minimum ('min') or the sum ('sum') of counts.
 
     Args:
         df_ (DataFrame): The input Polars DataFrame containing bins and frequency counts.
         df_freq_pl (DataFrame, optional): A Polars DataFrame containing frequency counts for bins.
             If not provided, the function will calculate these counts from 'df_'.
-        bin_cols_without_df_name (List, optional): List of columns used for grouping bins without 'df_name'.
-        weight_by (str, optional): Weight calculation method, either 'min' (minimum count) or 'sum' (sum of counts).
+        bin_cols_without_df_name (List, optional): List of columns used for grouping
+            bins without 'df_name'.
+        weight_by (str, optional): Weight calculation method, either 'min'
+            (minimum count) or 'sum' (sum of counts).
             Defaults to 'min'.
 
     Returns:
-        Tuple[pl.DataFrame, pl.DataFrame]: A tuple containing the modified DataFrame 'df_' with added weights and the DataFrame
+        Tuple[pl.DataFrame, pl.DataFrame]: A tuple containing the modified DataFrame 'df_'
+            with added weights and the DataFrame
     'df_freq_pl' with the calculated frequency counts.
 
     Raises:

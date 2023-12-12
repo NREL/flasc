@@ -74,7 +74,9 @@ def find_timeshift_between_dfs(
         dt = np.min(
             [fsut.estimate_dt(df1.iloc[0:5000]["time"]), fsut.estimate_dt(df2.iloc[0:5000]["time"])]
         )
-    except:
+    except (ValueError, TypeError) as e:
+        # Handle specific exception
+        print(f"Error estimating dt: {e}")
         # Use full dataframe if fails somehow
         dt = np.min([fsut.estimate_dt(df1["time"]), fsut.estimate_dt(df2["time"])])
 

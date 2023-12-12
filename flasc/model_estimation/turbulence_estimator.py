@@ -106,7 +106,8 @@ class ti_estimator:
     def _check_measurements(self):
         if self.P_measured is None:
             raise ValueError(
-                "Please specify measurements using .set_measurements(P_measured) before attempting to estimate the turbulence intensity."
+                "Please specify measurements using .set_measurements(P_measured) "
+                "before attempting to estimate the turbulence intensity."
             )
 
     def estimate_farmaveraged_ti(

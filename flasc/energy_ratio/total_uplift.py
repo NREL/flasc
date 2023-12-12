@@ -54,12 +54,15 @@ def _compute_total_uplift_single(
         ws_step (float): The width of the wind speed bins.
         ws_min (float): The minimum wind speed to use.
         ws_max (float): The maximum wind speed to use.
-        bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        bin_cols_in (list[str]): A list of column names
+            to use for the wind speed and wind direction bins.
         weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
-            the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
+            the minimum count across the dataframes
+            is used to weight the energy ratio.   'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.   Defaults to 'min'.
         df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
-        wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be
+        wd_bin_overlap_radius (float): The distance
+            in degrees one wd bin overlaps into the next, must be
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element
             of the list should be a tuple (or list) of length 2, where the first element will be the
@@ -68,7 +71,8 @@ def _compute_total_uplift_single(
         uplift_names: (list[str]): Names for the uplift columns, following the order of the
             pairs specified in uplift_pairs. If None, will default to "uplift_df_name1_df_name2",
         remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be
-            available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+            available. If False, a minimum one data point from
+            ref_cols, test_cols, wd_cols, and ws_cols
             must be available to compute the bin. Defaults to False.
 
     Returns:
@@ -198,7 +202,8 @@ def _compute_total_uplift_bootstrap(
     Compute the total change in energy production between two sets of turbines with bootstrapping
 
     Args:
-        er_in (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
+        er_in (EnergyRatioInput): An EnergyRatioInput object
+            containing the data to use in the calculation.
         ref_cols (list[str]): A list of columns to use as the reference turbines
         test_cols (list[str]): A list of columns to use as the test turbines
         wd_cols (list[str]): A list of columns to derive the wind directions from
@@ -209,12 +214,15 @@ def _compute_total_uplift_bootstrap(
         ws_step (float): The width of the wind speed bins.
         ws_min (float): The minimum wind speed to use.
         ws_max (float): The maximum wind speed to use.
-        bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        bin_cols_in (list[str]): A list of column names to use for
+            the wind speed and wind direction bins.
         weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
-            the minimum count across the dataframes is used to weight the energy ratio. 'sum' means the sum of the counts
+            the minimum count across the dataframes
+            is used to weight the energy ratio. 'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.
         df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
-        wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be
+        wd_bin_overlap_radius (float): The distance
+            in degrees one wd bin overlaps into the next, must be
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element
             of the list should be a tuple (or list) of length 2, where the first element will be the
@@ -226,7 +234,8 @@ def _compute_total_uplift_bootstrap(
         percentiles: (list or None): percentiles to use when returning energy ratio bounds.
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
         remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be
-                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+                available. If False, a minimum one data point
+                from ref_cols, test_cols, wd_cols, and ws_cols
                 must be available to compute the bin. Defaults to False.
 
 
@@ -324,7 +333,8 @@ def compute_total_uplift(
     Compute the energy ratio between two sets of turbines with bootstrapping
 
     Args:
-        er_in (EnergyRatioInput): An EnergyRatioInput object containing the data to use in the calculation.
+        er_in (EnergyRatioInput): An EnergyRatioInput object
+            containing the data to use in the calculation.
         ref_turbines (list[int]): A list of turbine numbers to use as the reference.
         test_turbines (list[int]): A list of turbine numbers to use as the test.
         ws_turbines (list[int]): A list of turbine numbers to use for the wind speeds
@@ -338,18 +348,26 @@ def compute_total_uplift(
         ws_step (float): The width of the wind speed bins.
         ws_min (float): The minimum wind speed to use.
         ws_max (float): The maximum wind speed to use.
-        bin_cols_in (list[str]): A list of column names to use for the wind speed and wind direction bins.
+        bin_cols_in (list[str]): A list of column names to
+            use for the wind speed and wind direction bins.
         weight_by (str): How to weight the energy ratio, options are 'min', , or 'sum'.  'min' means
-            the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
+            the minimum count across the dataframes is used to weight the energy ratio.
+            'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.
-        df_freq (pd.Dataframe): A dataframe which specifies the frequency of the ws/wd bin combinations.  Provides
+        df_freq (pd.Dataframe): A dataframe which specifies the
+            frequency of the ws/wd bin combinations.  Provides
             a method to use an explicit or long-term weigthing of bins.  Dataframe should include
-            columns ws, wd and freq_val.  ws and wd should correspond to the bin centers resulting from
-            the choices of the ws/wd_min / _max / _step.  In the case that df_freq has extra bins that aren't included
-            in those given by ws/wd min, max, step, they will be ignored in the energy ratio calculation.
-            Any bins given by ws/wd min, max, step not present in df_freq will be assigned a frequency of zero.
+            columns ws, wd and freq_val.  ws and wd should
+            orrespond to the bin centers resulting from
+            the choices of the ws/wd_min / _max / _step.
+            In the case that df_freq has extra bins that aren't included
+            in those given by ws/wd min, max, step, they will
+            be ignored in the energy ratio calculation.
+            Any bins given by ws/wd min, max, step not present in
+            df_freq will be assigned a frequency of zero.
             Defaults to None.
-        wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps into the next, must be
+        wd_bin_overlap_radius (float): The distance in degrees
+            one wd bin overlaps into the next, must be
             less or equal to half the value of wd_step
         uplift_pairs: (list[tuple]): List of pairs of df_names to compute uplifts for. Each element
             of the list should be a tuple (or list) of length 2, where the first element will be the
@@ -361,11 +379,13 @@ def compute_total_uplift(
         percentiles: (list or None): percentiles to use when returning energy ratio bounds.
             If specified as None with N > 1 (bootstrapping), defaults to [5, 95].
         remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be
-                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols,
+                and ws_cols
                 must be available to compute the bin. Defaults to False.
 
     Returns:
-        EnergyRatioOutput: An EnergyRatioOutput object containing the energy ratio between the two sets of turbines.
+        EnergyRatioOutput: An EnergyRatioOutput object containing the energy ratio between the
+        two sets of turbines.
 
     """
 

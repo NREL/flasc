@@ -680,7 +680,8 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10, plot_lines=False
                     y[x < x0 + 0.01] = -np.Inf
                 return y
 
-            is_in_wake = lambda xt, yt: ((yt < yw_upper(xt)) & (yt > yw_lower(xt)))
+            def is_in_wake(xt, yt):
+                return (yt < yw_upper(xt)) & (yt > yw_lower(xt))
 
             is_freestream = (
                 is_freestream

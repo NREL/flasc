@@ -168,7 +168,7 @@ class floris_sobol_analysis:
         Nv = problem["num_vars"]
 
         # Plot first order sensitivity plus uncertainties
-        bar1 = ax[0].bar(
+        _ = ax[0].bar(
             np.arange(Nv) - width / 2,
             self.Si["S1"],
             width=0.3,
@@ -195,7 +195,7 @@ class floris_sobol_analysis:
             )
 
         # Plot total sensitivity including uncertainties
-        bar2 = ax[0].bar(
+        _ = ax[0].bar(
             np.arange(Nv) + width / 2,
             self.Si["ST"],
             width=0.3,

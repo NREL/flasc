@@ -412,9 +412,8 @@ class bias_estimation:
             cost = np.nanmean(cost_array)
             return cost
 
-        opt_finish = lambda func, x0, args=(): opt.fmin(
-            func, x0, args, maxfun=10, full_output=True, xtol=0.1, disp=True
-        )
+        def opt_finish(func, x0, args=()):
+            return opt.fmin(func, x0, args, maxfun=10, full_output=True, xtol=0.1, disp=True)
 
         dran = opt_search_range[1] - opt_search_range[0]
         x_opt, J_opt, x, J = opt.brute(

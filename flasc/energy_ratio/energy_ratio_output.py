@@ -62,13 +62,17 @@ class EnergyRatioOutput:
             ws_min (float): The minimum wind speed value.
             ws_max (float): The maximum wind speed value.
             bin_cols_in (List[str]): TBD
-            weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
-                the minimum count across the dataframes is used to weight the energy ratio.   'sum' means the sum of the counts
+            weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.
+                'min' means the minimum count across the dataframes
+                is used to weight the energy ratio.
+                'sum' means the sum of the counts
                 across the dataframes is used to weight the energy ratio.
             wd_bin_overlap_radius (float): The radius of overlap between wind direction bins.
             N (int): The number of bootstrap iterations used in the energy ratio calculation.
-            remove_all_nulls: (bool): Construct reference and test by strictly requiring all data to be
-                available. If False, a minimum one data point from ref_cols, test_cols, wd_cols, and ws_cols
+            remove_all_nulls: (bool): Construct reference and test by
+                strictly requiring all data to be
+                available. If False, a minimum one data point from
+                ref_cols, test_cols, wd_cols, and ws_cols
                 must be available to compute the bin. Defaults to False.
         """
         self.df_result = df_result
@@ -108,14 +112,22 @@ class EnergyRatioOutput:
         """Plot the energy ratios.
 
         Args:
-            df_names_subset (Optional[List[str]], optional): A subset of the dataframes used in the energy ratio calculation. Defaults to None.
-            labels (Optional[List[str]], optional): The labels for the energy ratios. Defaults to None.
-            color_dict (Optional[Dict[str, Any]], optional): A dictionary mapping labels to colors. Defaults to None.
-            axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
-            polar_plot (bool, optional): Whether to plot the energy ratios on a polar plot. Defaults to False.
-            show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
-            show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
-            overlay_frequency (bool, optional): Whether to plot the frequency distribution used for calculation.
+            df_names_subset (Optional[List[str]], optional): A subset of the dataframes
+                used in the energy ratio calculation. Defaults to None.
+            labels (Optional[List[str]], optional): The labels for the energy ratios.
+                 Defaults to None.
+            color_dict (Optional[Dict[str, Any]], optional): A dictionary
+                mapping labels to colors. Defaults to None.
+            axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes
+                to plot on. Defaults to None.
+            polar_plot (bool, optional): Whether to plot the energy ratios
+                on a polar plot. Defaults to False.
+            show_wind_direction_distribution (bool, optional): Whether to show
+                 the wind direction distribution. Defaults to True.
+            show_wind_speed_distribution (bool, optional): Whether to show
+                the wind speed distribution. Defaults to True, unless polar_plot is True.
+            overlay_frequency (bool, optional): Whether to plot the
+                frequency distribution used for calculation.
             _is_uplift (bool, optional): Whether being called by plot_uplift(). Defaults to False.
 
         Returns:
@@ -206,18 +218,24 @@ class EnergyRatioOutput:
                     if show_wind_speed_distribution:
                         if len(axarr) != 3:
                             raise ValueError(
-                                "If show_wind_speed_distribution and show_wind_direction_distribution are True, axarr must have length of 3"
+                                "If show_wind_speed_distribution and "
+                                "show_wind_direction_distribution are"
+                                " True, axarr must have length of 3"
                             )
                     else:
                         if len(axarr) != 2:
                             raise ValueError(
-                                "If show_wind_direction_distribution is True, and show_wind_direction is False axarr must have length of 2"
+                                "If show_wind_direction_distribution is True, and"
+                                " show_wind_direction"
+                                " is False axarr must have length of 2"
                             )
                 else:
                     # Confirm axarr is of type Axes
                     if not isinstance(axarr, plt.Axes):
                         raise ValueError(
-                            "If show_wind_direction_distribution and show_wind_speed_distribution are False, axarr be of type matplotlib.pyplot.Axes and not a list of axes"
+                            "If show_wind_direction_distribution and show_wind_speed_distribution"
+                            " are False, axarr be of type matplotlib.pyplot.Axes "
+                            "and not a list of axes"
                         )
 
         # For plotting, create a copy in case
@@ -378,14 +396,21 @@ class EnergyRatioOutput:
         """Plot the uplift in energy ratio
 
         Args:
-            uplift_names_subset (Optional[List[str]], optional): A subset of the uplifts computed to print. Defaults to None.
+            uplift_names_subset (Optional[List[str]], optional): A subset
+                of the uplifts computed to print. Defaults to None.
             labels (Optional[List[str]], optional): The labels for the uplifts. Defaults to None.
-            color_dict (Optional[Dict[str, Any]], optional): A dictionary mapping labels to colors. Defaults to None.
-            axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes to plot on. Defaults to None.
-            polar_plot (bool, optional): Whether to plot the uplift on a polar plot. Defaults to False.
-            show_wind_direction_distribution (bool, optional): Whether to show the wind direction distribution. Defaults to True.
-            show_wind_speed_distribution (bool, optional): Whether to show the wind speed distribution. Defaults to True, unless polar_plot is True.
-            overlay_frequency (bool, optional): Whether to plot the frequency distribution used for calculation.
+            color_dict (Optional[Dict[str, Any]], optional): A dictionary
+                mapping labels to colors. Defaults to None.
+            axarr (Optional[Union[axes.Axes, List[axes.Axes]]], optional): The axes
+                to plot on. Defaults to None.
+            polar_plot (bool, optional): Whether to plot the uplift on
+                a polar plot. Defaults to False.
+            show_wind_direction_distribution (bool, optional): Whether to
+                show the wind direction distribution. Defaults to True.
+            show_wind_speed_distribution (bool, optional): Whether to
+                show the wind speed distribution. Defaults to True, unless polar_plot is True.
+            overlay_frequency (bool, optional): Whether to
+                plot the frequency distribution used for calculation.
 
         Raises:
             ValueError: If show_wind_speed_distribution is True and polar_plot is True.
@@ -396,9 +421,11 @@ class EnergyRatioOutput:
         Notes:
             - If axarr is None, a new figure will be created.
             - If axarr is a single axes object, it will be used to plot the uplift.
-            - If axarr is a list of axes objects, each component of the uplift will be plotted on a separate axes object.
+            - If axarr is a list of axes objects, each
+                component of the uplift will be plotted on a separate axes object.
             - If polar_plot is True, the uplift will be plotted on a polar plot.
-            - If show_wind_direction_distribution is True, the wind direction distribution will be shown.
+            - If show_wind_direction_distribution is True,
+                the wind direction distribution will be shown.
             - If show_wind_speed_distribution is True, the wind speed distribution will be shown.
         """
         # Handle defaults for show_wind_speed_distribution
