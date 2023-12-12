@@ -8,6 +8,7 @@ from floris.tools import FlorisInterface
 from flasc.dataframe_operations import (
     dataframe_manipulations as dfm,
 )
+from flasc.utilities_examples import load_floris_smarteole
 
 # from floris.tools import ParallelComputingInterface
 
@@ -141,88 +142,6 @@ def resim_floris(fi_in: FlorisInterface, df_scada: pd.DataFrame, yaw_angles: np.
 
     return df_floris
 
-
-# def resim_floris(fi_in: FlorisInterface,
-#                  df_scada: pd.DataFrame,
-#                  yaw_angles: np.array=None):
-
-
-#     # Confirm the df_scada has columns 'ws', 'wd'
-#     if not all([col in df_scada.columns for col in ['ws', 'wd']]):
-#         raise ValueError('df_scada must have columns "ws" and "wd"')
-
-#     # Get the number of turbines
-#     num_turbines = dfm.get_num_turbines(df_scada)
-
-#     # Get wind speeds and directions
-#     wind_speeds = df_scada['ws'].values
-#     wind_directions = df_scada['wd'].values
-
-#     # Set up the FLORIS model
-#     fi = fi_in.copy()
-#     fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions, time_series=True)
-#     fi.calculate_wake(yaw_angles=yaw_angles)
-
-#     # Get the turbines in kW
-#     turbine_powers = fi.get_turbine_powers().squeeze()/1000
-
-#     # Generate FLORIS dataframe
-#     df_floris = pd.DataFrame(data=turbine_powers,
-#                                 columns=[f'pow_{i:>03}' for i in range(num_turbines)])
-
-#     df_floris = df_floris.assign(ws=wind_speeds,
-#                                     wd=wind_directions)#,
-#                                     # pow_ref=df_floris[[f"pow_{str(i).zfill(3)}" for i in pow_ref_columns]].mean(axis=1))
-
-#     return df_floris
-
-# def resim_floris_par(fi_in: FlorisInterface,
-#                  df_scada: pd.DataFrame,
-#                  yaw_angles: np.array=None):
-
-
-#     # Confirm the df_scada has columns 'ws', 'wd'
-#     if not all([col in df_scada.columns for col in ['ws', 'wd']]):
-#         raise ValueError('df_scada must have columns "ws" and "wd"')
-
-#     # Get the number of turbines
-#     num_turbines = dfm.get_num_turbines(df_scada)
-
-#     max_workers = 16
-
-#     # Set up a parallel computing interface
-#     fi = fi_in.copy()
-#     fi_pci = ParallelComputingInterface(
-#         fi=fi,
-#         max_workers=max_workers,
-#         n_wind_direction_splits=max_workers,
-#         print_timings=True,
-#     )
-
-
-#     # Get wind speeds and directions
-#     wind_speeds = df_scada['ws'].values
-#     wind_directions = df_scada['wd'].values
-
-#     # Set up the FLORIS model
-#     fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions, time_series=True)
-#     fi.calculate_wake(yaw_angles=yaw_angles)
-
-#     # Get the turbines in kW
-#     turbine_powers = fi.get_turbine_powers().squeeze()/1000
-
-#     # Generate FLORIS dataframe
-#     df_floris = pd.DataFrame(data=turbine_powers,
-#                                 columns=[f'pow_{i:>03}' for i in range(num_turbines)])
-
-#     df_floris = df_floris.assign(ws=wind_speeds,
-#                                     wd=wind_directions)#,
-#                                     # pow_ref=df_floris[[f"pow_{str(i).zfill(3)}" for i in pow_ref_columns]].mean(axis=1))
-
-#     return df_floris
-
-
-from flasc.utilities_examples import load_floris_smarteole
 
 if __name__ == "__main__":
     fi, _ = load_floris_smarteole(wake_model="emgauss")
