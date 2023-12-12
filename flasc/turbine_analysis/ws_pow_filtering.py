@@ -492,7 +492,7 @@ class ws_pw_curve_filtering:
                 label="Mean power curve outlier",
                 ti=ti,
                 verbose=is_final_iteration,  # If final iteration, be verbose
-                apply_filters_to_df=is_final_iteration,  # If final iteration, save dataframe to self
+                apply_filters_to_df=is_final_iteration,  # If final , save dataframe to self
             )
 
             # Recalculate the mean power curve based on current iteration's filtered dataframe
@@ -822,8 +822,8 @@ class ws_pw_curve_filtering:
                 )
 
         lgd = ax.legend()
-        for l in lgd.legendHandles:
-            l.set_alpha(1)  # Force alpha in legend to 1.0
+        for h in lgd.legendHandles:
+            h.set_alpha(1)  # Force alpha in legend to 1.0
 
         ax.set_title("WTG {:03d}: Filters".format(ti))
         ax.set_xlabel(xlabel)
@@ -985,8 +985,8 @@ class ws_pw_curve_filtering:
             )
 
         lgd = ax.legend()
-        for l in lgd.legendHandles:
-            l.set_alpha(1)  # Force alpha in legend to 1.0
+        for h in lgd.legendHandles:
+            h.set_alpha(1)  # Force alpha in legend to 1.0
 
         ax.set_title("WTG {:03d}: Filters".format(ti))
         ax.set_xlabel("Wind speed (m/s)")
@@ -1060,8 +1060,8 @@ class ws_pw_curve_filtering:
             )
 
         lgd = ax.legend()
-        for l in lgd.legendHandles:
-            l.set_alpha(1)  # Force alpha in legend to 1.0
+        for h in lgd.legendHandles:
+            h.set_alpha(1)  # Force alpha in legend to 1.0
 
         ax.set_title("WTG {:03d}: Postprocessed dataset".format(ti))
         ax.set_xlabel("Wind speed (m/s)")
