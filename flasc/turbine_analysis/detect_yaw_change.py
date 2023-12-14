@@ -46,6 +46,26 @@ def remove_yaw_shifts(
     turbines_to_reference=None,
     plot_change=False,
 ):
+    """Removes yaw shifts from the input dataframe based on specified criteria.
+
+    Args:
+        df_in (pd.DataFrame): Input dataframe containing yaw angle data.
+        shift_threshold_deg (float, optional): Threshold for considering a yaw shift in degrees.
+            Defaults to 3.0.
+        min_power (float, optional): Minimum power value for filtering turbines. Defaults to None.
+        turbines_to_check (list or None, optional): List of turbine indices to check for shifts.
+            Defaults to None (checks all turbines).
+        turbines_to_reference (list or None, optional): List of turbine indices to use as reference
+            for calculating shifts. Defaults to None (uses all turbines).
+        plot_change (bool, optional): Flag indicating whether to plot the changes.
+            Defaults to False.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]:
+            - First DataFrame (df_original): Original dataframe with yaw shifts removed.
+            - Second DataFrame (df): Updated dataframe with yaw shifts accounted for.
+    """
+
     # Get a local copy and an original version
     df = df_in.copy(deep=True)
     df_original = df_in.copy(deep=True)
