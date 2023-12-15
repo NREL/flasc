@@ -276,7 +276,7 @@ title="Open an issue"
       </li>
       
       <li>
-        <a href="https://github.com/NREL/flasc/edit/main/docs/installation.rst"
+        <a href="https://github.com/NREL/flasc/edit/main/docs/installation.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -304,7 +304,7 @@ title="Edit this page"
   <div class="menu-dropdown__content">
     <ul>
       <li>
-        <a href="_sources/installation.rst"
+        <a href="_sources/installation.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -315,7 +315,7 @@ title="Download source file"
 <span class="headerbtn__icon-container">
   <i class="fas fa-file"></i>
   </span>
-<span class="headerbtn__text-container">.rst</span>
+<span class="headerbtn__text-container">.md</span>
 </a>
 
       </li>
@@ -341,12 +341,48 @@ title="Print to PDF"
     </ul>
   </div>
 </div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
 
     </div>
 </div>
 
 <!-- Table of contents -->
 <div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Installation
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#id1">
+   Installation
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#installation-for-developers">
+     Installation for developers
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
 </div>
     </div>
     <div class="article row">
@@ -358,6 +394,31 @@ title="Print to PDF"
                 <div id="print-main-content">
                     <div id="jb-print-toc">
                         
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Installation
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#id1">
+   Installation
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#installation-for-developers">
+     Installation for developers
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -365,12 +426,45 @@ title="Print to PDF"
                 
               <div>
                 
-  <section id="installation">
+  <section class="tex2jax_ignore mathjax_ignore" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
+<hr class="docutils" />
 <p>FLASC is currently not available as a package on any repository manager.
 Instead, it must be installed by the user by cloning the GitHub repository.</p>
-<p>To download the source code, use <cite>git clone</cite>. Then, add it to
-your Python path with the &quot;local editable install&quot; through <cite>pip</cite>.</p>
+<p>To download the source code, use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code>. Then, add it to
+your Python path with the &quot;local editable install&quot; through <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download the source code.</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/NREL/flasc.git
+
+<span class="c1"># Install into your Python environment</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>flasc
+</pre></div>
+</div>
+<p>If installing FLASC with the intention to develop, some additional configuration is helpful:</p>
+<p>Install FLASC in editable mode with the appropriate developer tools</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;.[develop]&quot;</span></code> is for the linting and code checking tools</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;.[docs]&quot;</span></code> is for the documentation building tools. Ideally, developers should also be
+contributing to the documentation, and therefore checking that the documentation builds locally.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[develop, docs]&quot;</span>
+</pre></div>
+</div>
+<p>Turn on the linting and code checking tools</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+<p>If everything is configured correctly, any changes made to the source
+code will be available directly through your local Python. Remember
+to re-import the FLASC module when changes are made if you are working
+in an interactive environment like Jupyter.</p>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h1>
+<p>FLASC is currently not available as a package on any repository manager.
+Instead, it must be installed by the user by cloning the GitHub repository.</p>
+<p>To download the source code, use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code>. Then, add it to
+your Python path with the &quot;local editable install&quot; through <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download the source code.</span>
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/NREL/flasc.git
 
@@ -382,10 +476,30 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 code will be available directly through your local Python. Remember
 to re-import the FLASC module when changes are made if you are working
 in an interactive environment like Jupyter.</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference external" href="index.html">Return to table of contents</a></p>
+<section id="installation-for-developers">
+<h2>Installation for developers<a class="headerlink" href="#installation-for-developers" title="Permalink to this headline">#</a></h2>
+<p>A more complete installation is recommended if interested in developing FLASC.
+Recommended apprach is to:</p>
+<ol>
+<li><p>Declare a new directory to be the root folder, for example FLASC/</p></li>
+<li><p>Setup a new virtual environement with venv or conda and activate</p></li>
+<li><p>Clone and install FLORIS into this root directory and environment, following the <a class="reference external" href="https://nrel.github.io/floris/dev_guide.html">developer install</a></p></li>
+<li><p>Clone and install flasc with developer options:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download the source code.</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/NREL/flasc.git
+
+<span class="c1"># Install into your Python environment</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>flasc<span class="w"> </span><span class="s2">&quot;.[develop, docs]&quot;</span>
+</pre></div>
 </div>
+</li>
+<li><p>Turn on the linting and code checking tools</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
