@@ -12,9 +12,9 @@
 
 
 import numpy as np
-from matplotlib import pyplot as plt
 import pandas as pd
 import scipy.stats as st
+from matplotlib import pyplot as plt
 
 
 def plot_with_wrapping(
@@ -81,9 +81,9 @@ def plot_with_wrapping(
 
     if color is None:
         # Use matplotlib's internal color cycler
-        color = ax._get_lines.prop_cycler.__next__()['color']
+        color = ax._get_lines.prop_cycler.__next__()["color"]
 
-    if (low >= high):
+    if low >= high:
         raise UserWarning("'low' must be lower than 'high'.")
     # Format inputs to numpy arrays
     x = np.array(x, copy=True)
@@ -100,21 +100,21 @@ def plot_with_wrapping(
     id_min = 0
     for id_wrap in id_wrap_array:
         # Step size in x direction
-        dx = x[id_wrap+1] - x[id_wrap]
+        dx = x[id_wrap + 1] - x[id_wrap]
 
         # Wrap around 0 deg
-        if np.diff(y)[id_wrap] > high_norm / 2.0:  
+        if np.diff(y)[id_wrap] > high_norm / 2.0:
             dy = y[id_wrap] - y[id_wrap + 1] + high_norm
             xtp = x[id_wrap] + dx * (y[id_wrap]) / dy  # transition point
-            xw = np.hstack([xw, x[id_min:id_wrap + 1], xtp - 0.001 * dx, xtp, xtp + 0.001 * dx])
-            yw = np.hstack([yw, y[id_min:id_wrap + 1], 0.0, np.nan, high_norm])
+            xw = np.hstack([xw, x[id_min : id_wrap + 1], xtp - 0.001 * dx, xtp, xtp + 0.001 * dx])
+            yw = np.hstack([yw, y[id_min : id_wrap + 1], 0.0, np.nan, high_norm])
 
         # Wrap around 360 deg
-        elif np.diff(y)[id_wrap] < - high_norm / 2.0:
-            dy = y[id_wrap+1] - y[id_wrap] + high_norm
+        elif np.diff(y)[id_wrap] < -high_norm / 2.0:
+            dy = y[id_wrap + 1] - y[id_wrap] + high_norm
             xtp = x[id_wrap] + dx * (high_norm - y[id_wrap]) / dy  # transition point
-            xw = np.hstack([xw, x[id_min:id_wrap + 1], xtp - 0.001 * dx, xtp, xtp + 0.001 * dx])
-            yw = np.hstack([yw, y[id_min:id_wrap + 1], high_norm, np.nan, 0.0])
+            xw = np.hstack([xw, x[id_min : id_wrap + 1], xtp - 0.001 * dx, xtp, xtp + 0.001 * dx])
+            yw = np.hstack([yw, y[id_min : id_wrap + 1], high_norm, np.nan, 0.0])
 
         id_min = id_wrap + 1
 
@@ -127,7 +127,7 @@ def plot_with_wrapping(
     y = y + low
 
     # Now plot lines, without markers
-    if (marker is None):
+    if marker is None:
         # Plot without marker, but with label
         ax.plot(xw, yw, linestyle=linestyle, color=color, label=label, rasterized=rasterized)
     else:
@@ -145,7 +145,7 @@ def plot_with_wrapping(
                 marker=marker,
                 label=label,
                 color=color,
-                rasterized=rasterized
+                rasterized=rasterized,
             )
 
     return ax
@@ -178,7 +178,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     # Get names if not provided
     if turbine_names is None:
         turbine_names = generate_labels_with_hub_heights(fi)
-    
+
     ax = [None, None, None]
     ax[0] = fig.add_subplot(121)
 
@@ -186,17 +186,14 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
         plot_farm_terrain(fi, fig, ax[0])
 
     # Generate plotting dictionary based on turbine; plot locations
-    turbine_types = (
-        [t["turbine_type"] for t in fi.floris.farm.turbine_definitions]
-    )
+    turbine_types = [t["turbine_type"] for t in fi.floris.farm.turbine_definitions]
     turbine_types = np.array(turbine_types, dtype="str")
     for ti, tt in enumerate(np.unique(turbine_types)):
         plotting_dict = {
-            "turbine_indices" : np.array(range(len(fi.layout_x)))\
-                [turbine_types == tt],
-            "turbine_names" : turbine_names,
-            "color" : "C%s" % ti,
-            "label" : tt
+            "turbine_indices": np.array(range(len(fi.layout_x)))[turbine_types == tt],
+            "turbine_names": turbine_names,
+            "color": "C%s" % ti,
+            "label": tt,
         }
         plot_layout_only(fi, plotting_dict, ax=ax[0])
     ax[0].legend()
@@ -211,32 +208,34 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     for ti, (tt, tti) in enumerate(zip(unique_turbine_types, utt_ids)):
         pt = fi.floris.farm.turbine_definitions[tti]["power_thrust_table"]
 
-        plotting_dict = {
-            "color" : "C%s" % ti,
-            "label" : tt
-        }
+        plotting_dict = {"color": "C%s" % ti, "label": tt}
         plot_power_curve_only(pt, plotting_dict, ax=ax[1])
         plot_thrust_curve_only(pt, plotting_dict, ax=ax[2])
 
     return fig, ax
 
+
 def generate_default_labels(fi):
     labels = ["T{0:02d}".format(ti) for ti in range(len(fi.layout_x))]
     return labels
 
+
 def generate_labels_with_hub_heights(fi):
-    labels = ["T{0:02d} ({1:.1f} m)".format(ti, h) for ti, h in 
-        enumerate(fi.floris.farm.hub_heights.flatten())]
+    labels = [
+        "T{0:02d} ({1:.1f} m)".format(ti, h)
+        for ti, h in enumerate(fi.floris.farm.hub_heights.flatten())
+    ]
     return labels
+
 
 def plot_layout_only(fi, plotting_dict={}, ax=None):
     """
     Plot the farm layout.
 
     Args:
-        plotting_dict: dictionary of plotting parameters, with the 
+        plotting_dict: dictionary of plotting parameters, with the
             following (optional) fields and their (default) values:
-            "turbine_indices" : (range(len(fi.layout_x))) (turbines to 
+            "turbine_indices" : (range(len(fi.layout_x))) (turbines to
                                 plot, default to all turbines)
             "turbine_names" : (["TX" for X in range(len(fi.layout_x)])
             "color" : ("black")
@@ -244,7 +243,7 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
             "markersize" : (10)
             "label" : (None) (for legend, if desired)
         ax: axes to plot on (if None, creates figure and axes)
-    
+
     Returns:
         ax: the current axes for the layout plot
 
@@ -259,32 +258,31 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
 
     # Generate plotting dictionary
     default_plotting_dict = {
-        "turbine_indices" : range(len(fi.layout_x)),
-        "turbine_names" : generate_default_labels(fi),
-        "color" : "black", 
-        "marker" : ".",
-        "markersize" : 10,
-        "label" : None
+        "turbine_indices": range(len(fi.layout_x)),
+        "turbine_names": generate_default_labels(fi),
+        "color": "black",
+        "marker": ".",
+        "markersize": 10,
+        "label": None,
     }
     plotting_dict = {**default_plotting_dict, **plotting_dict}
-    if len(plotting_dict["turbine_names"]) == 0: # empty list provided
-        plotting_dict["turbine_names"] = [""]*len(fi.layout_x)
+    if len(plotting_dict["turbine_names"]) == 0:  # empty list provided
+        plotting_dict["turbine_names"] = [""] * len(fi.layout_x)
 
     # Plot
     ax.plot(
-        fi.layout_x[plotting_dict["turbine_indices"]], 
+        fi.layout_x[plotting_dict["turbine_indices"]],
         fi.layout_y[plotting_dict["turbine_indices"]],
         marker=plotting_dict["marker"],
         markersize=plotting_dict["markersize"],
         linestyle="None",
         color=plotting_dict["color"],
-        label=plotting_dict["label"]
+        label=plotting_dict["label"],
     )
 
     # Add labels to plot, if desired
     for ti in plotting_dict["turbine_indices"]:
-       ax.text(fi.layout_x[ti], fi.layout_y[ti], 
-           plotting_dict["turbine_names"][ti])
+        ax.text(fi.layout_x[ti], fi.layout_y[ti], plotting_dict["turbine_names"][ti])
 
     # Plot labels and aesthetics
     ax.axis("equal")
@@ -294,21 +292,22 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
 
     return ax
 
+
 def plot_power_curve_only(pt, plotting_dict={}, ax=None):
     """
-    Generate plot of turbine power curve. 
+    Generate plot of turbine power curve.
 
     Args:
-        pt: power-thrust table as a dictionary. Expected to contain 
+        pt: power-thrust table as a dictionary. Expected to contain
             keys "wind_speed" and "power"
-        plotting_dict: dictionary of plotting parameters, with the 
+        plotting_dict: dictionary of plotting parameters, with the
             following (optional) fields and their (default) values:
-            "color" : ("black"), 
+            "color" : ("black"),
             "linestyle" : ("solid"),
             "linewidth" : (2),
             "label" : (None)
         ax: axes to plot on (if None, creates figure and axes)
-    
+
     Returns:
         ax: the current axes for the power curve plot
     """
@@ -317,12 +316,7 @@ def plot_power_curve_only(pt, plotting_dict={}, ax=None):
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot(111)
 
-    default_plotting_dict = {
-        "color" : "black", 
-        "linestyle" : "solid",
-        "linewidth" : 2,
-        "label" : None
-    }
+    default_plotting_dict = {"color": "black", "linestyle": "solid", "linewidth": 2, "label": None}
     plotting_dict = {**default_plotting_dict, **plotting_dict}
 
     # Plot power and thrust curves for groups of turbines
@@ -334,36 +328,32 @@ def plot_power_curve_only(pt, plotting_dict={}, ax=None):
 
     return ax
 
+
 def plot_thrust_curve_only(pt, plotting_dict, ax=None):
     """
-    Generate plot of turbine thrust curve. 
+    Generate plot of turbine thrust curve.
 
     Args:
-        pt: power-thrust table as a dictionary. Expected to contain 
+        pt: power-thrust table as a dictionary. Expected to contain
             keys "wind_speed" and "thrust"
-        plotting_dict: dictionary of plotting parameters, with the 
+        plotting_dict: dictionary of plotting parameters, with the
             following (optional) fields and their (default) values:
-            "color" : ("black"), 
+            "color" : ("black"),
             "linestyle" : ("solid"),
             "linewidth" : (2),
             "label" : (None)
         ax: axes to plot on (if None, creates figure and axes)
-    
+
     Returns:
         ax: the current axes for the thrust curve plot
     """
-    
+
     # Generate axis, if needed
     if ax is None:
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot(111)
 
-    default_plotting_dict = {
-        "color" : "black", 
-        "linestyle" : "solid",
-        "linewidth" : 2,
-        "label" : None
-    }
+    default_plotting_dict = {"color": "black", "linestyle": "solid", "linewidth": 2, "label": None}
     plotting_dict = {**default_plotting_dict, **plotting_dict}
 
     # Plot power and thrust curves for groups of turbines
@@ -375,101 +365,97 @@ def plot_thrust_curve_only(pt, plotting_dict, ax=None):
 
     return ax
 
+
 def plot_farm_terrain(fi, fig, ax):
     hub_heights = fi.floris.farm.hub_heights.flatten()
-    cntr = ax.tricontourf(
-        fi.layout_x,
-        fi.layout_y,
-        hub_heights,
-        levels=14,
-        cmap="RdBu_r"
-    )
-    
+    cntr = ax.tricontourf(fi.layout_x, fi.layout_y, hub_heights, levels=14, cmap="RdBu_r")
+
     fig.colorbar(
         cntr,
         ax=ax,
-        label='Terrain-corrected hub height (m)',
+        label="Terrain-corrected hub height (m)",
         ticks=np.linspace(
             np.min(hub_heights) - 10.0,
             np.max(hub_heights) + 10.0,
             15,
-        )
+        ),
     )
 
+
 def plot_layout_with_waking_directions(
-    fi, 
-    layout_plotting_dict={}, 
+    fi,
+    layout_plotting_dict={},
     wake_plotting_dict={},
     D=None,
     limit_dist_D=None,
     limit_dist_m=None,
     limit_num=None,
     wake_label_size=7,
-    ax=None
-    ):
+    ax=None,
+):
     """
     Plot waking directions and distances between turbines.
 
     Args:
         fi: Instantiated FlorisInterface object
-        layout_plotting_dict: dictionary of plotting parameters for 
-            turbine locations. Defaults to the defaults of 
+        layout_plotting_dict: dictionary of plotting parameters for
+            turbine locations. Defaults to the defaults of
             plot_layout_only.
-        wake_plotting_dict: dictionary of plotting parameters for the 
-            waking directions, with the following (optional) fields and 
+        wake_plotting_dict: dictionary of plotting parameters for the
+            waking directions, with the following (optional) fields and
             their (default) values:
-            "color" : ("black"), 
+            "color" : ("black"),
             "linestyle" : ("solid"),
             "linewidth" : (0.5)
-        D: rotor diameter. Defaults to the rotor diamter of the first 
+        D: rotor diameter. Defaults to the rotor diamter of the first
             turbine in the Floris object.
-        limit_dist_D: limit on the distance between turbines to plot, 
+        limit_dist_D: limit on the distance between turbines to plot,
             specified in rotor diamters.
-        limit_dist_m: limit on the distance between turbines to plot, 
+        limit_dist_m: limit on the distance between turbines to plot,
             specified in meters. If specified, overrides limit_dist_D.
-        limit_num: limit on number of outgoing neighbors to include. 
-            If specified, only the limit_num closest turbines are 
-            plotted. However, directions already plotted from other 
+        limit_num: limit on number of outgoing neighbors to include.
+            If specified, only the limit_num closest turbines are
+            plotted. However, directions already plotted from other
             turbines are not considered in the count.
         wake_label_size: font size for labels of direction/distance.
         ax: axes to plot on (if None, creates figure and axes)
-    
+
     Returns:
         ax: the current axes for the thrust curve plot
     """
-    
+
     # Combine default plotting options
     def_wake_plotting_dict = {
-        "color" : "black", 
-        "linestyle" : "solid",
-        "linewidth" : 0.5,
+        "color": "black",
+        "linestyle": "solid",
+        "linewidth": 0.5,
     }
     wake_plotting_dict = {**def_wake_plotting_dict, **wake_plotting_dict}
-    
-    def_layout_plotting_dict = {"turbine_indices" : range(len(fi.layout_x))}
+
+    def_layout_plotting_dict = {"turbine_indices": range(len(fi.layout_x))}
     layout_plotting_dict = {**def_layout_plotting_dict, **layout_plotting_dict}
 
     ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
 
     N_turbs = len(fi.floris.farm.turbine_definitions)
-    
+
     if D is None:
-        D = fi.floris.farm.turbine_definitions[0]['rotor_diameter']
+        D = fi.floris.farm.turbine_definitions[0]["rotor_diameter"]
         # TODO: build out capability to use multiple diameters, if of interest.
-        # D = np.array([turb['rotor_diameter'] for turb in 
+        # D = np.array([turb['rotor_diameter'] for turb in
         #      fi.floris.farm.turbine_definitions])
-    #else:
-        #D = D*np.ones(N_turbs)
+    # else:
+    # D = D*np.ones(N_turbs)
 
     dists_m = np.zeros((N_turbs, N_turbs))
     angles_d = np.zeros((N_turbs, N_turbs))
 
     for i in range(N_turbs):
         for j in range(N_turbs):
-            dists_m[i,j] = np.linalg.norm(
-                [fi.layout_x[i]-fi.layout_x[j], fi.layout_y[i]-fi.layout_y[j]]
+            dists_m[i, j] = np.linalg.norm(
+                [fi.layout_x[i] - fi.layout_x[j], fi.layout_y[i] - fi.layout_y[j]]
             )
-            angles_d[i,j] = wake_angle(
+            angles_d[i, j] = wake_angle(
                 fi.layout_x[i], fi.layout_y[i], fi.layout_x[j], fi.layout_y[j]
             )
 
@@ -489,35 +475,41 @@ def plot_layout_with_waking_directions(
     label_exists = np.full((N_turbs, N_turbs), False)
     for i in range(N_turbs):
         for j in range(N_turbs):
-            #import ipdb; ipdb.set_trace()
-            if ~np.isnan(dists_m[i, j]) and \
-                dists_m[i, j] != 0.0 and \
-                ~(dists_m[i, j] > np.sort(dists_m[i,:])[limit_num]) and \
-                i in layout_plotting_dict["turbine_indices"] and \
-                j in layout_plotting_dict["turbine_indices"]:
-
-                (l,) = ax.plot(fi.layout_x[[i,j]], fi.layout_y[[i,j]],
-                               **wake_plotting_dict)
+            # import ipdb; ipdb.set_trace()
+            if (
+                ~np.isnan(dists_m[i, j])
+                and dists_m[i, j] != 0.0
+                and ~(dists_m[i, j] > np.sort(dists_m[i, :])[limit_num])
+                and i in layout_plotting_dict["turbine_indices"]
+                and j in layout_plotting_dict["turbine_indices"]
+            ):
+                (h,) = ax.plot(fi.layout_x[[i, j]], fi.layout_y[[i, j]], **wake_plotting_dict)
 
                 # Only label in one direction
-                if ~label_exists[i,j]:
-               
+                if ~label_exists[i, j]:
                     linetext = "{0:.1f} D --- {1:.0f}/{2:.0f}".format(
-                        dists_m[i,j] / D,
-                        angles_d[i,j], 
-                        angles_d[j,i],
+                        dists_m[i, j] / D,
+                        angles_d[i, j],
+                        angles_d[j, i],
                     )
 
                     label_line(
-                        l, linetext, ax, near_i=1, near_x=None, near_y=None, 
-                        rotation_offset=0, size=wake_label_size
+                        h,
+                        linetext,
+                        ax,
+                        near_i=1,
+                        near_x=None,
+                        near_y=None,
+                        rotation_offset=0,
+                        size=wake_label_size,
                     )
 
-                    label_exists[i,j] = True
-                    label_exists[j,i] = True
+                    label_exists[i, j] = True
+                    label_exists[j, i] = True
 
     return ax
-    
+
+
 def wake_angle(x_i, y_i, x_j, y_j):
     """
     Get angles between turbines in wake direction
@@ -527,7 +519,7 @@ def wake_angle(x_i, y_i, x_j, y_j):
         y_i: y location of turbine i
         x_j: x location of turbine j
         y_j: y location of turbine j
-        
+
     Returns:
         wakeAngle (float): angle between turbines relative to compass
     """
@@ -543,6 +535,7 @@ def wake_angle(x_i, y_i, x_j, y_j):
         wakeAngle = wakeAngle - 360.0
 
     return wakeAngle
+
 
 def label_line(
     line,
@@ -625,45 +618,43 @@ def label_line(
         put_label(i)
     elif near_x is not None:
         for i in range(len(x) - 2):
-            if (x[i] < near_x and x[i + 1] >= near_x) or (
-                x[i + 1] < near_x and x[i] >= near_x
-            ):
+            if (x[i] < near_x and x[i + 1] >= near_x) or (x[i + 1] < near_x and x[i] >= near_x):
                 put_label(i)
     elif near_y is not None:
         for i in range(len(y) - 2):
-            if (y[i] < near_y and y[i + 1] >= near_y) or (
-                y[i + 1] < near_y and y[i] >= near_y
-            ):
+            if (y[i] < near_y and y[i + 1] >= near_y) or (y[i + 1] < near_y and y[i] >= near_y):
                 put_label(i)
     else:
         raise ValueError("Need one of near_i, near_x, near_y")
 
-def shade_region(points, show_points=False, plotting_dict_region={}, 
-    plotting_dict_points={}, ax=None):
+
+def shade_region(
+    points, show_points=False, plotting_dict_region={}, plotting_dict_points={}, ax=None
+):
     """
     Shade a region defined by a series of vertices (points).
 
     Args:
-        points: 2D array of vertices for the shaded region, shape N x 2, 
+        points: 2D array of vertices for the shaded region, shape N x 2,
             where each row contains a coordinate (x, y)
-        show_points: Boolean to dictate whether to plot the points as well 
+        show_points: Boolean to dictate whether to plot the points as well
             as the shaded region
         plotting_dict_region: dictionary of plotting parameters for the shaded
-            region, with the following (optional) fields and their (default) 
+            region, with the following (optional) fields and their (default)
             values:
             "color" : ("black")
             "edgecolor": (None)
             "alpha" : (0.3)
             "label" : (None) (for legend, if desired)
-        plotting_dict_region: dictionary of plotting parameters for the 
-            vertices (points), with the following (optional) fields and their 
+        plotting_dict_region: dictionary of plotting parameters for the
+            vertices (points), with the following (optional) fields and their
             (default) values:
-            "color" : "black", 
+            "color" : "black",
             "marker" : (None)
             "s" : (10)
             "label" : (None) (for legend, if desired)
         ax: axes to plot on (if None, creates figure and axes)
-    
+
     Returns:
         ax: the current axes for the layout plot
     """
@@ -675,35 +666,27 @@ def shade_region(points, show_points=False, plotting_dict_region={},
 
     # Generate plotting dictionary
     default_plotting_dict_region = {
-        "color" : "black", 
-        "edgecolor" : None,
-        "alpha" : 0.3,
-        "label" : None
+        "color": "black",
+        "edgecolor": None,
+        "alpha": 0.3,
+        "label": None,
     }
-    plotting_dict_region = {**default_plotting_dict_region,
-                            **plotting_dict_region}
+    plotting_dict_region = {**default_plotting_dict_region, **plotting_dict_region}
 
-    ax.fill(points[:,0], points[:,1], **plotting_dict_region)
+    ax.fill(points[:, 0], points[:, 1], **plotting_dict_region)
 
     if show_points:
-        default_plotting_dict_points = {
-            "color" : "black", 
-            "marker" : ".",
-            "s" : 10,
-            "label" : None
-        }
-        plotting_dict_points = {**default_plotting_dict_points, 
-                                **plotting_dict_points}
+        default_plotting_dict_points = {"color": "black", "marker": ".", "s": 10, "label": None}
+        plotting_dict_points = {**default_plotting_dict_points, **plotting_dict_points}
 
-        ax.scatter(points[:,0], points[:,1], **plotting_dict_points)
+        ax.scatter(points[:, 0], points[:, 1], **plotting_dict_points)
 
     # Plot labels and aesthetics
     ax.axis("equal")
     ax.grid(True)
     ax.set_xlabel("x coordinate (m)")
     ax.set_ylabel("y coordinate (m)")
-    if plotting_dict_region["label"] is not None or \
-        plotting_dict_points["label"] is not None:
+    if plotting_dict_region["label"] is not None or plotting_dict_points["label"] is not None:
         ax.legend()
 
     return ax
@@ -720,7 +703,7 @@ def plot_binned_mean_and_ci(
     show_bin_points=True,
     show_confidence=True,
     alpha_scatter=0.1,
-    confidence_level = 0.95,
+    confidence_level=0.95,
 ):
     """
     Plot data to a single axis.  Method
@@ -754,11 +737,10 @@ def plot_binned_mean_and_ci(
     # Check the length of x equals length of y
     if len(x) != len(y):
         raise ValueError("x and y must be the same length")
-    
+
     # Check that x is not empty
     if len(x) == 0:
         raise ValueError("x is empty")
-    
 
     # Declare ax if not provided
     if ax is None:
@@ -769,7 +751,7 @@ def plot_binned_mean_and_ci(
 
     # If x_edges not provided, use 50 bins over range of x
     if x_edges is None:
-        x_edges = np.linspace(df["x"].min()*.98, df["x"].max()*1.02, 50)
+        x_edges = np.linspace(df["x"].min() * 0.98, df["x"].max() * 1.02, 50)
 
     # Define x_labels as bin centers
     x_labels = (x_edges[1:] + x_edges[:-1]) / 2.0
@@ -778,9 +760,7 @@ def plot_binned_mean_and_ci(
     df["x_bin"] = pd.cut(df["x"], x_edges, labels=x_labels)
 
     # Get aggregate statistics
-    df_agg = df.groupby("x_bin").agg(
-        {"y": ["count", "std", "min", "max", "mean", st.sem]}
-    )
+    df_agg = df.groupby("x_bin").agg({"y": ["count", "std", "min", "max", "mean", st.sem]})
     # Flatten column names
     df_agg.columns = ["_".join(c) for c in df_agg.columns]
 
@@ -792,10 +772,7 @@ def plot_binned_mean_and_ci(
 
     # Add the confidence interval of the mean to df_agg
     df_agg["y_ci_lower"], df_agg["y_ci_upper"] = st.t.interval(
-        confidence_level, 
-        df_agg["y_count"]-1,
-        loc=df_agg["y_mean"],
-        scale=df_agg["y_sem"]
+        confidence_level, df_agg["y_count"] - 1, loc=df_agg["y_mean"], scale=df_agg["y_sem"]
     )
 
     # Plot the mean values
@@ -839,7 +816,7 @@ def plot_binned_mean_and_ci(
             color=color,
             s=df_agg.y_count / df_agg.y_count.max() * 20,
             alpha=0.5,
-            marker='s'
+            marker="s",
         )
 
     return ax

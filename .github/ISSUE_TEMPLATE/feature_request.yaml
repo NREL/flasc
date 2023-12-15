@@ -2,7 +2,7 @@ name: Feature
 description: Submit a detailed feature request
 title: "[Feature]: <title>"
 labels: 'Type: Enhancement'
-body: 
+body:
   - type: textarea
     id: feature-description
     attributes:

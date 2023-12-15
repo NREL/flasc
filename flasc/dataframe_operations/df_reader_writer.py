@@ -11,8 +11,9 @@
 # the License.
 
 
-import numpy as np
 import os
+
+import numpy as np
 import pandas as pd
 
 
@@ -30,7 +31,7 @@ def batch_load_data(fn_path):
 
 def batch_save_data(df, fn_path, no_rows_per_file=10000):
     N = df.shape[0]
-    if 'time' in df.columns:
+    if "time" in df.columns:
         df = df.reset_index(drop=True).copy()
     else:
         df = df.reset_index(drop=False).copy()
@@ -40,7 +41,7 @@ def batch_save_data(df, fn_path, no_rows_per_file=10000):
     splits = np.unique(splits)
     for ii in range(len(splits) - 1):
         lb = splits[ii]
-        ub = splits[ii+1]
+        ub = splits[ii + 1]
         df_subset = df[lb:ub].reset_index(drop=True).copy()
         fn_path_ii = fn_path + ".%d" % ii
         print("Saving file to %s." % fn_path_ii)

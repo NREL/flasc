@@ -12,16 +12,17 @@
 
 
 import numpy as np
+from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
 from matplotlib import pyplot as plt
 
-from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-from flasc.wake_steering.yaw_optimizer_visualization import \
-    plot_uplifts_by_atmospheric_conditions, plot_offsets_wswd_heatmap, plot_offsets_wd
-from flasc.visualization import plot_floris_layout, plot_layout_with_waking_directions
-
 from flasc.utilities_examples import load_floris_artificial as load_floris
-from _local_helper_functions import optimize_yaw_angles, evaluate_optimal_yaw_angles
-
+from flasc.visualization import plot_floris_layout, plot_layout_with_waking_directions
+from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
+from flasc.wake_steering.yaw_optimizer_visualization import (
+    plot_offsets_wd,
+    plot_offsets_wswd_heatmap,
+    plot_uplifts_by_atmospheric_conditions,
+)
 
 if __name__ == "__main__":
     # Load FLORIS model and plot layout (and additional information)
@@ -55,27 +56,23 @@ if __name__ == "__main__":
     ax, cbar = plot_offsets_wswd_heatmap(df_offsets=df_opt, turb_id=2)
     ax.set_title("T02 offset schedule")
 
-    ax = plot_offsets_wd(df_offsets=df_opt, turb_id=2, ws_plot=[5, 12], 
-                         alpha=0.5)
-    ax = plot_offsets_wd(df_offsets=df_opt, turb_id=2, ws_plot=7.0, 
-                         color="C0", label="7.0 m/s", ax=ax)
+    ax = plot_offsets_wd(df_offsets=df_opt, turb_id=2, ws_plot=[5, 12], alpha=0.5)
+    ax = plot_offsets_wd(
+        df_offsets=df_opt, turb_id=2, ws_plot=7.0, color="C0", label="7.0 m/s", ax=ax
+    )
     ax.set_title("T02 offset schedule")
     ax.legend()
 
     # Calculate AEP uplifts
-    uplift_one_ws = (
-        100.0 * (AEP_opt_array[0] - AEP_baseline_array[0]) /
-        AEP_baseline_array[0]
-    )
-    uplift_multi_ws = (
-        100.0 * (AEP_opt_array[1] - AEP_baseline_array[1]) /
-        AEP_baseline_array[1]
-    )
+    uplift_one_ws = 100.0 * (AEP_opt_array[0] - AEP_baseline_array[0]) / AEP_baseline_array[0]
+    uplift_multi_ws = 100.0 * (AEP_opt_array[1] - AEP_baseline_array[1]) / AEP_baseline_array[1]
     print("\n\n =====================================================")
     print("AEP uplift with one wind speed optimization: {:.3f} %".format(uplift_one_ws))
     print("AEP uplift with all wind speeds optimization: {:.3f} %".format(uplift_multi_ws))
 
     # Plot uplifts for either solution across wind directions and speeds
-    plot_uplifts_by_atmospheric_conditions(df_out_array, labels=["Opt. over one WS", "Opt. over all WS"])
+    plot_uplifts_by_atmospheric_conditions(
+        df_out_array, labels=["Opt. over one WS", "Opt. over all WS"]
+    )
 
     plt.show()

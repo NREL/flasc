@@ -79,7 +79,7 @@ This function also deals with 360-degree wrapping for nacelle headings and
 wind direction measurements, as specified by the ``circular_cols`` option.
 
 After each turbine's measurements are sampled onto a common time vector, they
-can straightforwardly be appended into a single, wide-formatted table 
+can straightforwardly be appended into a single, wide-formatted table
 (which in Python is a ``pd.DataFrame``). A common way to format a long table
 into a wide table, assuming they all share the same ``date`` vector, is:
 
@@ -98,7 +98,7 @@ Data filtering
 ==============
 
 With the SCADA data now in a wide-formatted Pandas DataFrame, the flasc
-data filtering tools can readily be applied. The files in 
+data filtering tools can readily be applied. The files in
 ``examples_artifical_data/raw_data_processing`` demonstrate how the SCADA data files are
 processed.
 
@@ -109,7 +109,7 @@ a_00_initial_download.py
 The first script, ``a_00_initial_download.py``, simply demonstrates how the raw data is imported. This
 basically compromises of the previous two steps, being data downloading and
 formatting it into a wide table format. Data is typically saved within flasc
-using the 
+using the
 `feather format <https://arrow.apache.org/docs/python/feather.html>`_, which
 is known for its excellent IO speed and its efficient storage, being often a
 factor 10 smaller than a similar .csv file.
@@ -317,7 +317,7 @@ turbine 3 and a comparable signal of the met mast. Here, that signal is the
 wind direction, which should be comparable between the two turbines.
 Note that we have not yet calibrated the turbine's wind direction to
 true north, so we may have an offset anywhere between -180 and +180 deg
-compared to the met mast signal. The algorithm in 
+compared to the met mast signal. The algorithm in
 ``a_06a_determine_timeshift_datasources.py`` accommodates for that by
 calculating and subtracting the mean difference in wind directions over
 the entire time period. The assign the measurement(s) to compare in
@@ -338,7 +338,7 @@ a_06b_apply_timeshift_dfs.py (optional)
 +++++++++++++++++++++++++++++++++++++++
 The optimal time shift found in ``a_06a_determine_timeshift_datasources.py``
 is used in this script to shift the time vector of one of the two dataframes
-so that they are synchronized with the other dataframe. 
+so that they are synchronized with the other dataframe.
 
 +++++++++++++++++++++++++++++++++++++
 a_07a_estimate_wd_bias_per_turbine.py
@@ -379,7 +379,7 @@ the average difference between the wind direction signals of the calibrated
 turbine and any other (uncalibrated) turbine, and that becomes the bias
 correction that the turbine needs. We can determine the shift between
 two turbine's wind direction signals using the ``match_y_curves_by_offset``
-function, as demonstrated in the example script 
+function, as demonstrated in the example script
 ``a_07a_estimate_wd_bias_per_turbine.py``.
 
 For more information how the subtleties about calculating the energy ratio,
@@ -414,4 +414,4 @@ the example and documentation surrounding the energy ratio analysis suite.
    :align: center
 
 
-.. seealso:: `Return to table of contents <index.html>`_ 
+.. seealso:: `Return to table of contents <index.html>`_

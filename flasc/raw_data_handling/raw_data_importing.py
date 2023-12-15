@@ -11,13 +11,14 @@
 # the License.
 
 
-import pandas as pd
-import numpy as np
-from datetime import timedelta as td
 import re
+from datetime import timedelta as td
 
-from ..dataframe_operations import dataframe_manipulations as dfm
+import numpy as np
+import pandas as pd
+
 from .. import utilities as fsut
+from ..dataframe_operations import dataframe_manipulations as dfm
 
 
 def fix_csv_contents(csv_contents, line_format_str):
@@ -47,11 +48,7 @@ def fix_csv_contents(csv_contents, line_format_str):
     for i in range(1, len(csv_contents)):  # Skip first line
         csv_line = csv_contents[i]
         if line_format.match(csv_line) is None:
-            print(
-                "    Ignoring this row due to incorrect format: '"
-                + csv_line
-                + "'"
-            )
+            print("    Ignoring this row due to incorrect format: '" + csv_line + "'")
             pop_ids.append(i)
 
     for i in pop_ids[::-1]:  # Back to front to avoid data shifts
@@ -61,12 +58,15 @@ def fix_csv_contents(csv_contents, line_format_str):
     return csv_contents
 
 
-def read_raw_scada_files(files, single_file_reader_func,
-                         channel_definitions_filename,
-                         channel_definitions_sheetname,
-                         ffill_missing_data=False,
-                         missing_data_buffer=None):
-    """ Read multiple SCADA datafiles and process them in preparation for
+def read_raw_scada_files(
+    files,
+    single_file_reader_func,
+    channel_definitions_filename,
+    channel_definitions_sheetname,
+    ffill_missing_data=False,
+    missing_data_buffer=None,
+):
+    """Read multiple SCADA datafiles and process them in preparation for
         uploading to the SQL database. Processing steps include merging
         multiple dataframes, removing/merging duplicate time entries, up-
         sampling data to the 1 second frequency, and finding large time
@@ -80,8 +80,9 @@ def read_raw_scada_files(files, single_file_reader_func,
         df_db[pd.DataFrame]: Dataframe with the formatted database
     """
     # Read channel definitions file
-    df_defs = pd.read_excel(io=channel_definitions_filename,
-                            sheet_name=channel_definitions_sheetname)
+    df_defs = pd.read_excel(
+        io=channel_definitions_filename, sheet_name=channel_definitions_sheetname
+    )
 
     # Convert files to list if necessary
     if isinstance(files, str):
@@ -96,7 +97,7 @@ def read_raw_scada_files(files, single_file_reader_func,
     df = dfm.df_sort_and_fix_duplicates(df)
 
     if ffill_missing_data:
-        dt = fsut.estimate_dt(df['time'])
+        dt = fsut.estimate_dt(df["time"])
         if missing_data_buffer is None:
             missing_data_buffer = dt + td(seconds=1)
 
@@ -105,13 +106,13 @@ def read_raw_scada_files(files, single_file_reader_func,
 
         # Upsample dataset with forward fill (ZOH)
         print("Upsampling df with forward fill...")
-        df = df.set_index('time')
+        df = df.set_index("time")
         df = df.resample(dt).ffill().ffill()  # Forward fill()
         df = df.reset_index(drop=False)
 
         print("Replacing all 'missing' rows in the upsampled df with np.nan...")
         for c in df.columns:
-            df[c] = df[c].replace(['missing'], np.nan)
+            df[c] = df[c].replace(["missing"], np.nan)
 
     # Drop all rows that only have nan values
     df = dfm.df_drop_nan_rows(df)

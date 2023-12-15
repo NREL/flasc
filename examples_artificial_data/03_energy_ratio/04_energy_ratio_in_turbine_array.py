@@ -16,28 +16,30 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from floris.tools.visualization import visualize_cut_plane
+from floris.utilities import wrap_360
 
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.visualization import plot_floris_layout
 from flasc.utilities_examples import load_floris_artificial as load_floris
-
-from floris.tools.visualization import visualize_cut_plane
-from floris.utilities import wrap_360
+from flasc.visualization import plot_floris_layout
 
 
 def load_data():
     # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(
-        root_dir, '..', '01_raw_data_processing', 'postprocessed',
-        'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
+        root_dir,
+        "..",
+        "01_raw_data_processing",
+        "postprocessed",
+        "df_scada_data_600s_filtered_and_northing_calibrated.ftr",
     )
     if not os.path.exists(ftr_path):
         raise FileNotFoundError(
-            'Please run the scripts in /raw_data_processing/' +
-            'before trying any of the other examples.'
+            "Please run the scripts in /raw_data_processing/"
+            + "before trying any of the other examples."
         )
     df = pd.read_feather(ftr_path)
     return df
@@ -80,7 +82,7 @@ def _calculate_energy_ratios(df, test_turbines, aligned_wd, N=1):
     df = dfm.filter_df_by_ws(df, [6, 10])
 
     # Finally, construct the energy ratio input with the dataframe
-    er_in = EnergyRatioInput([df], ['baseline'])
+    er_in = EnergyRatioInput([df], ["baseline"])
 
     # Now, we calculate the energy ratio for each turbine for the one wind
     # direction and wind speed bin. We save those values to
@@ -96,12 +98,12 @@ def _calculate_energy_ratios(df, test_turbines, aligned_wd, N=1):
             use_predefined_ws=True,
             wd_step=15.0,
             wd_bin_overlap_radius=0.0,
-            wd_min=aligned_wd-15.0/2,
-            wd_max=aligned_wd+15.0/2,
+            wd_min=aligned_wd - 15.0 / 2,
+            wd_max=aligned_wd + 15.0 / 2,
             ws_min=6.0,
             ws_max=10.0,
             N=N,
-            percentiles=[5.0, 95.0]
+            percentiles=[5.0, 95.0],
         )
         results_energy_ratio.append(er_out.df_result)
 
@@ -111,28 +113,28 @@ def _calculate_energy_ratios(df, test_turbines, aligned_wd, N=1):
 
 
 def plot_energy_ratios(turbine_array, results_energy_ratio, ax=None, label=None):
-    # Here, we plot the energy ratios for a turbine array, where each turbine in 
+    # Here, we plot the energy ratios for a turbine array, where each turbine in
     # the turbine_array has a single energy ratio value, plus a lower and upper bound
     # if the number of bootstrapping samples was larger than 1, i.e., N > 1.
     if ax is None:
         _, ax = plt.subplots(figsize=(7.0, 3.0))
 
     x = range(len(results_energy_ratio))
-    color = next(ax._get_lines.prop_cycler)['color']
+    color = next(ax._get_lines.prop_cycler)["color"]
     ax.fill_between(
         x,
-        results_energy_ratio['baseline_lb'],
-        results_energy_ratio['baseline_ub'],
+        results_energy_ratio["baseline_lb"],
+        results_energy_ratio["baseline_ub"],
         color=color,
-        alpha=0.25
+        alpha=0.25,
     )
-    ax.plot(x, results_energy_ratio['baseline'], '-o', markersize=7, color=color, label=label)
+    ax.plot(x, results_energy_ratio["baseline"], "-o", markersize=7, color=color, label=label)
     ax.grid(True)
-    ax.set_ylabel('Energy ratio (-)')
+    ax.set_ylabel("Energy ratio (-)")
     ax.set_xlabel("Turbine ID (-)")
     ax.set_xticks(x)
     ax.set_xticklabels(["{:02d}".format(ti) for ti in turbine_array])
-    ax.legend(bbox_to_anchor=(0, 1.08, 1, 0), loc='center', ncol=3, edgecolor='w')
+    ax.legend(bbox_to_anchor=(0, 1.08, 1, 0), loc="center", ncol=3, edgecolor="w")
 
     plt.tight_layout()
     return ax

@@ -11,16 +11,15 @@
 # the License.
 
 
-import matplotlib.pyplot as plt
 import os
+
+import matplotlib.pyplot as plt
 import pandas as pd
 
-from floris import tools as wfct
+from flasc import floris_tools as fsatools
+from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.dataframe_operations import \
-    dataframe_manipulations as dfm
-from flasc import floris_tools as fsatools
 from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
@@ -28,26 +27,29 @@ def load_data():
     # Load dataframe with artificial SCADA data
     root_dir = os.path.dirname(os.path.abspath(__file__))
     ftr_path = os.path.join(
-        root_dir, '..', '01_raw_data_processing', 'postprocessed',
-        'df_scada_data_600s_filtered_and_northing_calibrated.ftr'
+        root_dir,
+        "..",
+        "01_raw_data_processing",
+        "postprocessed",
+        "df_scada_data_600s_filtered_and_northing_calibrated.ftr",
     )
     if not os.path.exists(ftr_path):
         raise FileNotFoundError(
-            'Please run the scripts in /raw_data_processing/' +
-            'before trying any of the other examples.'
+            "Please run the scripts in /raw_data_processing/"
+            + "before trying any of the other examples."
         )
     df = pd.read_feather(ftr_path)
     return df
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Load data and floris object
     df = load_data()
     fi, _ = load_floris()
 
     # Visualize layout
     fig, ax = plt.subplots()
-    ax.plot(fi.layout_x, fi.layout_y, 'ko')
+    ax.plot(fi.layout_x, fi.layout_y, "ko")
     for ti in range(len(fi.layout_x)):
         ax.text(fi.layout_x[ti], fi.layout_y[ti], "T{:02d}".format(ti))
     ax.axis("equal")
@@ -62,7 +64,7 @@ if __name__ == '__main__':
 
     # We reduce the dataframe to only data where the wind direction
     # is between 20 and 90 degrees.
-    df = dfm.filter_df_by_wd(df=df, wd_range=[20., 90.])
+    df = dfm.filter_df_by_wd(df=df, wd_range=[20.0, 90.0])
     df = df.reset_index(drop=True)
 
     # We also need to define a reference wind speed and a reference power
@@ -82,18 +84,18 @@ if __name__ == '__main__':
 
     # Get energy ratio without uncertainty quantification
     er_out = er.compute_energy_ratio(
-        er_in, 
+        er_in,
         test_turbines=[1],
         use_predefined_ref=True,
         use_predefined_wd=True,
         use_predefined_ws=True,
         wd_step=2.0,
-        ws_step=1.0
+        ws_step=1.0,
     )
     ax = er_out.plot_energy_ratios()
     ax[0].set_title("Energy ratios for turbine 001 without UQ")
     plt.tight_layout()
-    
+
     # Also show polar plot
     ax = er_out.plot_energy_ratios(polar_plot=True, show_wind_speed_distribution=False)
     ax[0].set_title("Energy ratios for turbine 001 without UQ")
@@ -102,7 +104,7 @@ if __name__ == '__main__':
     # Get energy ratio with uncertainty quantification
     # using N=20 bootstrap samples and 5-95 percent conf. bounds.
     er_out = er.compute_energy_ratio(
-        er_in, 
+        er_in,
         test_turbines=[1],
         use_predefined_ref=True,
         use_predefined_wd=True,
@@ -110,18 +112,17 @@ if __name__ == '__main__':
         wd_step=2.0,
         ws_step=1.0,
         N=20,
-        percentiles=[5.0, 95.0]
+        percentiles=[5.0, 95.0],
     )
     ax = er_out.plot_energy_ratios()
-    ax[0].set_title("Energy ratios for turbine 001 with UQ "
-                    + "(N=20, 90% confidence interval)")
+    ax[0].set_title("Energy ratios for turbine 001 with UQ " + "(N=20, 90% confidence interval)")
     plt.tight_layout()
 
     # Get energy ratio with uncertainty quantification
     # using N=20 bootstrap samples and without block bootstrapping.
     er_in_noblocks = EnergyRatioInput([df], ["baseline"], num_blocks=len(df))
     er_out = er.compute_energy_ratio(
-        er_in_noblocks, 
+        er_in_noblocks,
         test_turbines=[1],
         use_predefined_ref=True,
         use_predefined_wd=True,
@@ -129,11 +130,12 @@ if __name__ == '__main__':
         wd_step=2.0,
         ws_step=1.0,
         N=20,
-        percentiles=[5.0, 95.0]
+        percentiles=[5.0, 95.0],
     )
     ax = er_out.plot_energy_ratios()
-    ax[0].set_title("Energy ratios for turbine 001 with UQ "
-                    + "(N=20, Normal (not Block) Bootstrapping)")
+    ax[0].set_title(
+        "Energy ratios for turbine 001 with UQ " + "(N=20, Normal (not Block) Bootstrapping)"
+    )
     plt.tight_layout()
 
     plt.show()
