@@ -35,6 +35,9 @@ select = ["E", "F", "I"]
 # F401 unused-import: Ignore until all used isort flags are adopted in ruff
 # ignore = ["F401"]
 
+# Ignore == -> is as this breaks in pandas
+ignore = ["E712"]
+
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 # fixable = ["A", "B", "C", "D", "E", "F"]
 fixable = ["E", "F", "I"]
