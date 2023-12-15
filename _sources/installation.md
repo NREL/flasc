@@ -1,5 +1,5 @@
 # Installation
------------------
+
 FLASC is currently not available as a package on any repository manager.
 Instead, it must be installed by the user by cloning the GitHub repository.
 
@@ -22,7 +22,8 @@ Install FLASC in editable mode with the appropriate developer tools
 
    - ``".[develop]"`` is for the linting and code checking tools
    - ``".[docs]"`` is for the documentation building tools. Ideally, developers should also be
-     contributing to the documentation, and therefore checking that the documentation builds locally.
+     contributing to the documentation, and therefore checking that
+     the documentation builds locally.
 
 ```bash
 pip install -e ".[develop, docs]"
