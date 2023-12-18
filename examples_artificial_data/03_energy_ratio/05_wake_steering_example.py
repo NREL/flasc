@@ -42,7 +42,6 @@ if __name__ == "__main__":
     )
     num_points_per_combination = 5  # 5 # How many "seconds" per combination
 
-    # I know this is dumb but will come back, can't quite work out the numpy version
     ws_array = []
     wd_array = []
     for ws in ws_points:
