@@ -27,6 +27,8 @@ if __name__ == "__main__":
     # Reference turbine (0)
     # Controlled turbine (1)
     # Downstream turbine (2)
+    np.random.seed(0)
+
     fi, _ = load_floris()
     fi.reinitialize(layout_x=[0, 0, 5 * 126], layout_y=[5 * 126, 0, 0])
 
@@ -127,7 +129,8 @@ if __name__ == "__main__":
 
     # Use the function plot_binned_mean_and_ci to show the noise in wind speed
     fig, ax = plt.subplots(1, 1, sharex=True)
-    plot_binned_mean_and_ci(df_baseline.ws, df_baseline_noisy.ws, ax=ax)
+    ws_edges = np.append(ws_points-0.5, ws_points[-1]+0.5)
+    plot_binned_mean_and_ci(df_baseline.ws, df_baseline_noisy.ws, ax=ax, x_edges=ws_edges)
     ax.set_xlabel("Wind Speed (m/s) [Baseline]")
     ax.set_ylabel("Wind Speed (m/s) [Baseline (Noisy)]")
     ax.grid(True)
