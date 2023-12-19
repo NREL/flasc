@@ -14,18 +14,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 
-from flasc.energy_ratio import energy_ratio as er
+from flasc.energy_ratio import total_uplift as tup
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 from flasc.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_binned_mean_and_ci, plot_layout_with_waking_directions
 
 if __name__ == "__main__":
+    # Generate the data as in example 05_wake_steering_example.py
+
     # Construct a simple 3-turbine wind farm with a
     # Reference turbine (0)
     # Controlled turbine (1)
     # Downstream turbine (2)
+    np.random.seed(0)
+
     fi, _ = load_floris()
     fi.reinitialize(layout_x=[0, 0, 5 * 126], layout_y=[5 * 126, 0, 0])
 
@@ -42,7 +45,6 @@ if __name__ == "__main__":
     )
     num_points_per_combination = 5  # 5 # How many "seconds" per combination
 
-    # I know this is dumb but will come back, can't quite work out the numpy version
     ws_array = []
     wd_array = []
     for ws in ws_points:
@@ -106,7 +108,7 @@ if __name__ == "__main__":
     df_baseline_noisy = pd.DataFrame(
         {
             "wd": wd_array + np.random.randn(len(wd_array)) * 2,
-            "ws": ws_array + np.random.randn(len(ws_array)),
+            "ws": ws_array,  #  + np.random.randn(len(ws_array)),
             "pow_ref": power_baseline_ref,
             "pow_000": power_baseline_ref,
             "pow_001": power_baseline_control,
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     df_wakesteering_noisy = pd.DataFrame(
         {
             "wd": wd_array + np.random.randn(len(wd_array)) * 2,
-            "ws": ws_array + np.random.randn(len(ws_array)),
+            "ws": ws_array,  # + np.random.randn(len(ws_array)),
             "pow_ref": power_wakesteering_ref,
             "pow_000": power_wakesteering_ref,
             "pow_001": power_wakesteering_control,
@@ -127,52 +129,127 @@ if __name__ == "__main__":
 
     # Use the function plot_binned_mean_and_ci to show the noise in wind speed
     fig, ax = plt.subplots(1, 1, sharex=True)
-    plot_binned_mean_and_ci(df_baseline.ws, df_baseline_noisy.ws, ax=ax)
+    ws_edges = np.append(ws_points - 0.5, ws_points[-1] + 0.5)
+    plot_binned_mean_and_ci(df_baseline.ws, df_baseline_noisy.ws, ax=ax, x_edges=ws_edges)
     ax.set_xlabel("Wind Speed (m/s) [Baseline]")
     ax.set_ylabel("Wind Speed (m/s) [Baseline (Noisy)]")
     ax.grid(True)
 
-    # Make a color palette that visually links the nominal and noisy data sets together
-    color_palette = sns.color_palette("Paired", 4)[::-1]
-
-    # Initialize the energy ratio input object
-    er_in = EnergyRatioInput(
-        [df_baseline, df_wakesteering, df_baseline_noisy, df_wakesteering_noisy],
-        ["Baseline", "WakeSteering", "Baseline (Noisy)", "WakeSteering (Noisy)"],
+    # Calculate the energy uplift in the downstream turbine
+    # first directly from the data
+    p_change_data = (
+        100
+        * (df_wakesteering.pow_002.sum() - df_baseline.pow_002.sum())
+        / df_baseline.pow_002.sum()
     )
 
-    # Calculate and plot the energy ratio for the downstream turbine [2]
-    # With respect to reference turbine [0]
-    # datasets with uncertainty quantification using 50 bootstrap samples
-    er_out = er.compute_energy_ratio(
+    p_change_data_noisy = (
+        100
+        * (df_wakesteering_noisy.pow_002.sum() - df_baseline_noisy.pow_002.sum())
+        / df_baseline_noisy.pow_002.sum()
+    )
+
+    print(" ")
+    print("=======Direct Calculation======")
+    print(
+        f"The power increase in the turbine is {p_change_data:.3}% in the"
+        f" non-noisy data and {p_change_data_noisy:.3}% in the noisy data"
+    )
+
+    # Calculate the uplift on the non-noisy data
+    er_in = EnergyRatioInput(
+        [df_baseline, df_wakesteering], ["baseline", "wake_steering"], num_blocks=1
+    )
+
+    total_uplift_result = tup.compute_total_uplift(
         er_in,
+        ref_turbines=[0],
         test_turbines=[2],
-        use_predefined_ref=True,
         use_predefined_wd=True,
         use_predefined_ws=True,
-        wd_step=2.0,
-        ws_step=1.0,
-        N=10,
-        percentiles=[5.0, 95.0],
-        uplift_pairs=[("Baseline", "WakeSteering"), ("Baseline (Noisy)", "WakeSteering (Noisy)")],
-        uplift_names=["Clean", "Noisy"],
         weight_by="min",
+        uplift_pairs=["baseline", "wake_steering"],
+        uplift_names=["uplift"],
     )
 
-    er_out.plot_energy_ratios(
-        color_dict={
-            "Baseline": "blue",
-            "WakeSteering": "green",
-            "Baseline (Noisy)": "C9",
-            "WakeSteering (Noisy)": "C8",
-        }
+    uplift_non_noisy = total_uplift_result["uplift"]["energy_uplift_ctr_pc"]
+
+    # Calculate the uplift on the noisy data
+    er_in = EnergyRatioInput(
+        [df_baseline_noisy, df_wakesteering_noisy], ["baseline", "wake_steering"], num_blocks=1
     )
 
-    er_out.plot_uplift(
-        color_dict={
-            "Clean": "green",
-            "Noisy": "C8",
-        }
+    total_uplift_result_noisy = tup.compute_total_uplift(
+        er_in,
+        ref_turbines=[0],
+        test_turbines=[2],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        weight_by="min",
+        uplift_pairs=["baseline", "wake_steering"],
+        uplift_names=["uplift"],
     )
 
-    plt.show()
+    uplift_noisy = total_uplift_result_noisy["uplift"]["energy_uplift_ctr_pc"]
+    print("=======Total Uplift======")
+    print(
+        f"The uplift calculated using the compute_total_uplift module "
+        f" is {uplift_non_noisy:.3}% in the"
+        f" non-noisy data and {uplift_noisy:.3}% in the noisy data"
+    )
+
+    # Recompute using bootstrapping to understand uncertainty bounds
+    # Calculate the uplift on the non-noisy data
+    er_in = EnergyRatioInput(
+        [df_baseline, df_wakesteering],
+        ["baseline", "wake_steering"],
+        num_blocks=df_baseline.shape[0],  # Use N blocks to do non-block boostrapping
+    )
+
+    total_uplift_result = tup.compute_total_uplift(
+        er_in,
+        ref_turbines=[0],
+        test_turbines=[2],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        weight_by="min",
+        uplift_pairs=["baseline", "wake_steering"],
+        uplift_names=["uplift"],
+        N=100,
+    )
+
+    uplift_non_noisy_lb = total_uplift_result["uplift"]["energy_uplift_lb_pc"]
+    uplift_non_noisy_ub = total_uplift_result["uplift"]["energy_uplift_ub_pc"]
+
+    # Calculate the uplift on the noisy data
+    er_in = EnergyRatioInput(
+        [df_baseline_noisy, df_wakesteering_noisy],
+        ["baseline", "wake_steering"],
+        num_blocks=df_baseline.shape[0],  # Use N blocks to do non-block boostrapping
+    )
+
+    total_uplift_result_noisy = tup.compute_total_uplift(
+        er_in,
+        ref_turbines=[0],
+        test_turbines=[2],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        weight_by="min",
+        uplift_pairs=["baseline", "wake_steering"],
+        uplift_names=["uplift"],
+        N=100,
+    )
+
+    uplift_noisy_lb = total_uplift_result_noisy["uplift"]["energy_uplift_lb_pc"]
+    uplift_noisy_ub = total_uplift_result_noisy["uplift"]["energy_uplift_ub_pc"]
+
+    print("=======Bootstrap Confidence Invervals======")
+    print(
+        f"The 90% confidence interval for the non-noisy data is: "
+        f"({uplift_non_noisy_lb:.2f},{uplift_non_noisy_ub:.2f})"
+    )
+
+    print(
+        f"The 90% confidence interval for the noisy data is: "
+        f"({uplift_noisy_lb:.2f},{uplift_noisy_ub:.2f})"
+    )

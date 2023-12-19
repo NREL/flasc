@@ -771,9 +771,17 @@ def plot_binned_mean_and_ci(
     df_agg = df_agg[df_agg["y_count"] > 0]
 
     # Add the confidence interval of the mean to df_agg
-    df_agg["y_ci_lower"], df_agg["y_ci_upper"] = st.t.interval(
-        confidence_level, df_agg["y_count"] - 1, loc=df_agg["y_mean"], scale=df_agg["y_sem"]
+    valid_sem = df_agg["y_sem"] > 0
+    y_ci_lower, y_ci_upper = st.t.interval(
+        confidence_level,
+        df_agg[valid_sem]["y_count"] - 1,
+        loc=df_agg[valid_sem]["y_mean"],
+        scale=df_agg[valid_sem]["y_sem"],
     )
+    df_agg["y_ci_lower"] = np.nan
+    df_agg["y_ci_upper"] = np.nan
+    df_agg.loc[valid_sem, "y_ci_lower"] = y_ci_lower
+    df_agg.loc[valid_sem, "y_ci_upper"] = y_ci_upper
 
     # Plot the mean values
     ax.plot(df_agg.x_bin, df_agg.y_mean, color=color, label=label)
