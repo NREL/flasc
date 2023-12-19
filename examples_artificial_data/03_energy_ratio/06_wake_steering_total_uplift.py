@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     # Use the function plot_binned_mean_and_ci to show the noise in wind speed
     fig, ax = plt.subplots(1, 1, sharex=True)
-    ws_edges = np.append(ws_points-0.5, ws_points[-1]+0.5)
+    ws_edges = np.append(ws_points - 0.5, ws_points[-1] + 0.5)
     plot_binned_mean_and_ci(df_baseline.ws, df_baseline_noisy.ws, ax=ax, x_edges=ws_edges)
     ax.set_xlabel("Wind Speed (m/s) [Baseline]")
     ax.set_ylabel("Wind Speed (m/s) [Baseline (Noisy)]")

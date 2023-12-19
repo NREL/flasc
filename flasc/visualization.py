@@ -776,7 +776,7 @@ def plot_binned_mean_and_ci(
         confidence_level,
         df_agg[valid_sem]["y_count"] - 1,
         loc=df_agg[valid_sem]["y_mean"],
-        scale=df_agg[valid_sem]["y_sem"]
+        scale=df_agg[valid_sem]["y_sem"],
     )
     df_agg["y_ci_lower"] = np.nan
     df_agg["y_ci_upper"] = np.nan
