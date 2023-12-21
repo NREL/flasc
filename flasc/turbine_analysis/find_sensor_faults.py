@@ -12,19 +12,20 @@
 
 
 import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 def find_sensor_stuck_faults(
-        df,
-        columns,
-        ti,
-        stddev_threshold=0.001,
-        n_consecutive_measurements=3,
-        plot_figures=True,
-        verbose=False,
-    ):
+    df,
+    columns,
+    ti,
+    stddev_threshold=0.001,
+    n_consecutive_measurements=3,
+    plot_figures=True,
+    verbose=False,
+):
     # Settings which indicate a sensor-stuck type of fault: the standard
     # deviation between the [no_consecutive_measurements] number of
     # consecutive measurements is less than [stddev_threshold].
@@ -55,7 +56,6 @@ def _plot_top_sensor_faults(
     fig_format="png",
     dpi=300,
 ):
-
     # Extract largest fault set and plot
     diff_index_faults = np.diff(index_faults)
     diffjumps = np.where(diff_index_faults > 1)[0]
@@ -69,9 +69,7 @@ def _plot_top_sensor_faults(
         fault_sets.append(index_faults[imin + 1 : :])
     fault_sets_idx_sorted = np.argsort([len(i) for i in fault_sets])[::-1]
     N_eval = np.min([N_eval_max, len(fault_sets)])
-    fig, ax_array = plt.subplots(
-        nrows=N_eval, ncols=1, figsize=(5.0, 2.5 * N_eval)
-    )
+    fig, ax_array = plt.subplots(nrows=N_eval, ncols=1, figsize=(5.0, 2.5 * N_eval))
 
     if N_eval == 1:
         ax_array = [ax_array]
@@ -86,9 +84,7 @@ def _plot_top_sensor_faults(
         )
         indices_to_plot = [v for v in indices_to_plot if v in df.index]
 
-        ax.plot(
-            df.loc[indices_to_plot, "time"], df.loc[indices_to_plot, c], "o"
-        )
+        ax.plot(df.loc[indices_to_plot, "time"], df.loc[indices_to_plot, c], "o")
         ax.plot(
             df.loc[index_faults, "time"],
             df.loc[index_faults, c],
@@ -117,12 +113,8 @@ def _plot_top_sensor_faults(
 
 
 def _find_sensor_stuck_single_timearray(
-        measurement_array,
-        no_consecutive_measurements=6,
-        stddev_threshold=0.05,
-        index_array=None
+    measurement_array, no_consecutive_measurements=6, stddev_threshold=0.05, index_array=None
 ):
-
     # Create index array, if unspecified
     N = len(measurement_array)
     if index_array is None:
@@ -141,14 +133,12 @@ def _find_sensor_stuck_single_timearray(
         Nm = row_length - 1
         C = array_in[0:-Nm]
         for ii in range(1, Nm):
-            C = np.vstack([C, array_in[ii:-Nm+ii]])
+            C = np.vstack([C, array_in[ii : -Nm + ii]])
         C = np.vstack([C, array_in[Nm::]]).T
         return C
 
-    Cindex = format_array(index_array,
-                          row_length=no_consecutive_measurements)
-    Cmeas = format_array(measurement_array,
-                         row_length=no_consecutive_measurements)
+    Cindex = format_array(index_array, row_length=no_consecutive_measurements)
+    Cmeas = format_array(measurement_array, row_length=no_consecutive_measurements)
 
     # Get standard deviations and determine faults
     std_array = np.std(Cmeas, axis=1)

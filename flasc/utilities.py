@@ -15,14 +15,14 @@ import datetime
 
 # import numba
 import numpy as np
-# import scipy.interpolate as interp
 
+# import scipy.interpolate as interp
 from floris.utilities import wrap_360
 
 
 def printnow(text, flush=True):
-    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print('%s: %s' % (now_time, text), flush=flush)
+    now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print("%s: %s" % (now_time, text), flush=flush)
 
 
 def estimate_dt(time_array):
@@ -41,18 +41,18 @@ def estimate_dt(time_array):
 
     dt = np.median(np.diff(time_array))
     if not isinstance(dt, datetime.timedelta):
-        dt = datetime.timedelta(seconds=dt.astype(float)/1e9)
+        dt = datetime.timedelta(seconds=dt.astype(float) / 1e9)
 
     # Check if data is all ascending
     if dt <= datetime.timedelta(0):
-        raise UserWarning('Please only insert time ascending data.')
+        raise UserWarning("Please only insert time ascending data.")
 
     return dt
 
 
 def get_num_turbines(df):
     nt = 0
-    while ('pow_%03d' % nt) in df.columns:
+    while ("pow_%03d" % nt) in df.columns:
         nt += 1
     return nt
 
@@ -63,7 +63,7 @@ def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
 
     # Check format of max_gap: needs to be an integer/float
     if not isinstance(max_gap, (float, int)):
-        max_gap = np.timedelta64(max_gap) / np.timedelta64(1, 's')
+        max_gap = np.timedelta64(max_gap) / np.timedelta64(1, "s")
 
     if wrap_around_360:
         fp_cos = np.cos(fp * np.pi / 180.0)
@@ -81,7 +81,13 @@ def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
 # Adapted to include nearest-neighbor interpolation
 # @numba.njit()
 def _interpolate_with_max_gap(
-    x, xp, fp, max_gap, assume_sorted=False, kind="linear", extrapolate=True,
+    x,
+    xp,
+    fp,
+    max_gap,
+    assume_sorted=False,
+    kind="linear",
+    extrapolate=True,
 ):
     """
     Interpolate data linearly or using nearest-neighbor with maximum gap.
@@ -107,7 +113,7 @@ def _interpolate_with_max_gap(
         If True, the input data `xp` is assumed to be monotonically
         increasing. Some performance gain if you supply sorted input data.
     x_is_sorted: boolean, default: True
-        If True, the input data `x` is assumed to be 
+        If True, the input data `x` is assumed to be
         monotonically increasing. Some performance gain if you supply
         sorted input data.
 
@@ -129,20 +135,20 @@ def _interpolate_with_max_gap(
 
     if extrapolate:
         # Add points on boundaries for xp
-        xp_full = np.empty(len(xp) + 2) 
+        xp_full = np.empty(len(xp) + 2)
         xp_full[1:-1] = xp
         xp_full[0] = xp[0] - max_gap
         xp_full[-1] = xp[-1] + max_gap
 
         # Add points on boundaries for fp
-        fp_full = np.empty(len(fp) + 2) 
+        fp_full = np.empty(len(fp) + 2)
         fp_full[1:-1] = fp
         fp_full[0] = fp[0]
         fp_full[-1] = fp[-1]
     else:
         xp_full = xp
         fp_full = fp
-    
+
     # # Check if we can solve it using numpy's internal interp function
     # if ((kind=='linear') and (np.max(np.diff(xp)) <= max_gap)):
     #     target_y = np.interp(x, xp, fp, left=np.nan, right=np.nan)
@@ -163,9 +169,9 @@ def _interpolate_with_max_gap(
         # Move left interp point, if necessary
         while x[ii] > xp_full[idx_left_interp_point + 1]:
             idx_left_interp_point += 1
-            if ((idx_left_interp_point + 1) >= len(xp_full)):
+            if (idx_left_interp_point + 1) >= len(xp_full):
                 # Exit, we are now to the right of max. point xp
-                exit_loop=True
+                exit_loop = True
                 break
 
         if exit_loop:
@@ -200,5 +206,5 @@ def _interpolate_with_max_gap(
 
     if not assume_sorted:
         return target_y[inverse_sort_array]
-    
+
     return target_y

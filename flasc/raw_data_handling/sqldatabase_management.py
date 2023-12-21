@@ -11,26 +11,22 @@
 # the License.
 
 
+import datetime
+import tkinter as tk
+from datetime import timedelta as td
+from time import perf_counter as timerpc
+
+import matplotlib.backends.backend_tkagg as tkagg
 import numpy as np
 import pandas as pd
 import polars as pl
-from pathlib import Path
-from time import perf_counter as timerpc
-
-import datetime
-from datetime import timedelta as td
-import tkinter as tk
+import sqlalchemy as sqlalch
 import tkcalendar as tkcal
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-import matplotlib.backends.backend_tkagg as tkagg
-
-import sqlalchemy as sqlalch
-
 
 
 class sql_database_manager:
-
     # Private methods
 
     def __init__(self, db_name, host, port, username, password):
@@ -47,68 +43,59 @@ class sql_database_manager:
         usn = self.username
         address = "%s:%d" % (self.host, self.port)
         self.url = "%s://%s:%s@%s/%s" % (dr, usn, password, address, name)
-        self.engine = sqlalch.create_engine(
-            url= self.url
-        )
+        self.engine = sqlalch.create_engine(url=self.url)
         self.inspector = sqlalch.inspect(self.engine)
         self.print_properties()
 
     def _get_table_names(self):
         return self.inspector.get_table_names()
-    
+
     def _does_table_exist(self, table_name):
         return table_name in self._get_table_names()
 
     def _get_column_names(self, table_name):
-        columns =  self.inspector.get_columns(table_name)
-        return [c['name'] for c in columns]
-    
-    def _create_table_from_df(self, table_name, df):
+        columns = self.inspector.get_columns(table_name)
+        return [c["name"] for c in columns]
 
-        print(f'Creating Table: {table_name} with {df.shape[1]} columns')
+    def _create_table_from_df(self, table_name, df):
+        print(f"Creating Table: {table_name} with {df.shape[1]} columns")
 
         # Convert to pandas for upload
         df_pandas = df.to_pandas()
         df_pandas = df_pandas.iloc[:10]
 
-        df_pandas.to_sql(
-                    table_name,
-                    self.engine,
-                    index=False,
-                    method="multi"
-                )
-        
+        df_pandas.to_sql(table_name, self.engine, index=False, method="multi")
+
         # Make time unique and an index to speed queries
-        query = 'CREATE UNIQUE INDEX idx_time_%s ON %s (time);' % (table_name, table_name)
-        print('Setting time to unique index')
+        query = "CREATE UNIQUE INDEX idx_time_%s ON %s (time);" % (table_name, table_name)
+        print("Setting time to unique index")
         with self.engine.connect() as con:
             rs = con.execute(sqlalch.text(query))
-            print(f'...RESULT: {rs}')
+            print(f"...RESULT: {rs}")
             con.commit()  # commit the transaction
 
     def _remove_duplicated_time(self, table_name, df):
-
         start_time = df.select(pl.min("time"))[0, 0]
         end_time = df.select(pl.max("time"))[0, 0]
         original_size = df.shape[0]
 
-        print(f'Checking for time entries already in {table_name} between {start_time} and {end_time}')
-        time_in_db = self.get_data(table_name,
-                                   ['time'],
-                                   start_time=start_time,
-                                   end_time=end_time,
-                                   end_inclusive=True
+        print(
+            f"Checking for time entries already in {table_name} between {start_time} and {end_time}"
+        )
+        time_in_db = self.get_data(
+            table_name, ["time"], start_time=start_time, end_time=end_time, end_inclusive=True
         )
 
-        df = df.join(time_in_db, on='time',how="anti")
+        df = df.join(time_in_db, on="time", how="anti")
         new_size = df.shape[0]
         if new_size < original_size:
-            print(f'...Dataframe size reduced from {original_size} to {new_size} by time values already in {table_name}')
+            print(
+                f"...Dataframe size reduced from {original_size} to {new_size}"
+                f" by time values already in {table_name}"
+            )
         return df
 
-
     def _get_first_time_entry(self, table_name):
-
         # Get the table corresponding to the table name
         table = sqlalch.Table(table_name, sqlalch.MetaData(), autoload_with=self.engine)
 
@@ -148,18 +135,23 @@ class sql_database_manager:
     def launch_gui(self, turbine_names=None, sort_columns=False):
         root = tk.Tk()
 
-        sql_db_explorer_gui(master=root,
-                            dbc=self,
-                            turbine_names=turbine_names,
-                            sort_columns=sort_columns
-                            )
+        sql_db_explorer_gui(
+            master=root, dbc=self, turbine_names=turbine_names, sort_columns=sort_columns
+        )
         root.mainloop()
 
     def get_column_names(self, table_name):
         return self._get_column_names(table_name)
 
-    def batch_get_data(self, table_name, columns=None, start_time=None,
-                       end_time=None, fn_out=None, no_rows_per_file=10000):
+    def batch_get_data(
+        self,
+        table_name,
+        columns=None,
+        start_time=None,
+        end_time=None,
+        fn_out=None,
+        no_rows_per_file=10000,
+    ):
         if fn_out is None:
             fn_out = table_name + ".ftr"
         if not (fn_out.suffix == ".ftr"):
@@ -167,20 +159,24 @@ class sql_database_manager:
 
         # Ensure 'time' in database
         column_names = self._get_column_names(table_name=table_name)
-        if 'time' not in column_names:
+        if "time" not in column_names:
             raise KeyError("Cannot find 'time' column in database table.")
 
         # Get time column from database
         print("Getting time column from database...")
-        time_in_db = self.get_data(table_name=table_name, columns=['time'],
-                                   start_time=start_time, end_time=end_time)
+        time_in_db = self.get_data(
+            table_name=table_name, columns=["time"], start_time=start_time, end_time=end_time
+        )
         time_in_db = list(time_in_db.select("time").to_numpy().flatten())
         print("...finished,  N.o. entries: %d." % len(time_in_db))
 
         splits = np.arange(0, len(time_in_db) - 1, no_rows_per_file, dtype=int)
         splits = np.append(splits, len(time_in_db) - 1)
         splits = np.unique(splits)
-        print(f"Splitting {len(time_in_db)} entries data into {len(splits)} subsets of {no_rows_per_file}.")
+        print(
+            f"Splitting {len(time_in_db)} entries data into {len(splits)}"
+            f" subsets of {no_rows_per_file}."
+        )
 
         for ii in range(len(splits) - 1):
             print("Downloading subset %d out of %d." % (ii, len(splits) - 1))
@@ -188,17 +184,17 @@ class sql_database_manager:
                 table_name=table_name,
                 columns=columns,
                 start_time=time_in_db[splits[ii]],
-                end_time=time_in_db[splits[ii+1]]
+                end_time=time_in_db[splits[ii + 1]],
             )
             fn_out_ii = fn_out.with_suffix(".ftr.%03d" % ii)
             print("Saving file to %s" % fn_out_ii)
             df.write_ipc(fn_out_ii)
 
     def get_data(
-        self, 
-        table_name, 
-        columns=None, 
-        start_time=None, 
+        self,
+        table_name,
+        columns=None,
+        start_time=None,
         end_time=None,
         end_inclusive=False,
     ):
@@ -225,7 +221,7 @@ class sql_database_manager:
 
         query_string += " ORDER BY time"
 
-        df = pl.read_database(query_string,self.url)
+        df = pl.read_database(query_string, self.url)
 
         # Drop a column called index
         if "index" in df.columns:
@@ -237,9 +233,8 @@ class sql_database_manager:
                 df = df.with_columns(pl.col("time").cast(pl.Datetime))
 
         return df
-    
 
-    #TODO: This is a fresh redo check it works
+    # TODO: This is a fresh redo check it works
     def send_data(
         self,
         table_name,
@@ -247,16 +242,14 @@ class sql_database_manager:
         if_exists="append_new",
         unique_cols=["time"],
         df_chunk_size=2000,
-        sql_chunk_size=50
+        sql_chunk_size=50,
     ):
-        
         # Make a local copy
         df_ = df.clone()
-        
+
         # Check if table exists
         if not self._does_table_exist(table_name):
-
-            print(f'{table_name} does not yet exist')
+            print(f"{table_name} does not yet exist")
 
             # Create the table
             self._create_table_from_df(table_name, df_)
@@ -266,31 +259,27 @@ class sql_database_manager:
 
         # Check if df_ is now
         if df_.shape[0] == 0:
-            print('Dataframe is empty')
+            print("Dataframe is empty")
             return
 
         # Write to database
-        print(f'Inserting {df_.shape[0]} rows into {table_name} in chunks of {df_chunk_size}')
+        print(f"Inserting {df_.shape[0]} rows into {table_name} in chunks of {df_chunk_size}")
         time_start_total = timerpc()
 
         # Parition into chunks
-        df_list = (df_.with_row_count('id')
-            .with_columns(pl.col('id').apply(lambda i: int(i/df_chunk_size)))
-            .partition_by('id')
+        df_list = (
+            df_.with_row_count("id")
+            .with_columns(pl.col("id").apply(lambda i: int(i / df_chunk_size)))
+            .partition_by("id")
         )
 
         num_par = len(df_list)
         for df_par_idx, df_par in enumerate(df_list):
-            print(f'...inserting chunk {df_par_idx} of {num_par}')
-        
-            df_par.drop('id').write_database(
-                table_name,
-                self.url,
-                if_exists='append'
-            )
-        total_time = timerpc() - time_start_total
-        print(f'...Finished in {total_time}')
+            print(f"...inserting chunk {df_par_idx} of {num_par}")
 
+            df_par.drop("id").write_database(table_name, self.url, if_exists="append")
+        total_time = timerpc() - time_start_total
+        print(f"...Finished in {total_time}")
 
     # #TODO: UPDATE TO POLARS
     # #TODO: Paul note (may 31 2023), POLARS API not up to PANDAS so using PANDAS here
@@ -377,10 +366,10 @@ class sql_database_manager:
     #             eta = eta.strftime("%a, %d %b %Y %H:%M:%S")
     #             print("Data insertion took %.1f s. ETA: %s." % (time_i, eta))
 
-#TODO: UPDATE TO POLARS
-class sql_db_explorer_gui:
-    def __init__(self, master, dbc, turbine_names = None, sort_columns=False):
 
+# TODO: UPDATE TO POLARS
+class sql_db_explorer_gui:
+    def __init__(self, master, dbc, turbine_names=None, sort_columns=False):
         # Create the options container
         frame_1 = tk.Frame(master)
         self.master = master
@@ -388,12 +377,8 @@ class sql_db_explorer_gui:
         # Get basic database properties
         self.df = pl.DataFrame()
         table_names = dbc._get_table_names()
-        min_table_dates = [
-            dbc._get_first_time_entry(table_name=t) for t in table_names
-        ]
-        max_table_dates = [
-            dbc._get_last_time_entry(table_name=t) for t in table_names
-        ]
+        min_table_dates = [dbc._get_first_time_entry(table_name=t) for t in table_names]
+        max_table_dates = [dbc._get_last_time_entry(table_name=t) for t in table_names]
         max_nochars_tbname = 4 + int(np.max([len(c) for c in table_names]))
 
         # Add data table list box
@@ -416,16 +401,12 @@ class sql_db_explorer_gui:
         # Create a start_date widget
         start_date_label = tk.Label(frame_1, text="Data import: start date")
         start_date_label.pack()
-        self.cal_start_date = tkcal.DateEntry(
-            frame_1, date_pattern="MM/dd/yyyy", state="disabled"
-        )
+        self.cal_start_date = tkcal.DateEntry(frame_1, date_pattern="MM/dd/yyyy", state="disabled")
         self.cal_start_date.pack()
 
         end_date_label = tk.Label(frame_1, text="Data import: end date")
         end_date_label.pack()
-        self.cal_end_date = tkcal.DateEntry(
-            frame_1, date_pattern="MM/dd/yyyy", state="disabled"
-        )
+        self.cal_end_date = tkcal.DateEntry(frame_1, date_pattern="MM/dd/yyyy", state="disabled")
         self.cal_end_date.pack()
 
         # Change min and max time depending on table(s) selected
@@ -468,17 +449,11 @@ class sql_db_explorer_gui:
             if end_date <= start_date:
                 self.cal_start_date.set_date(date=end_date - td(days=1))
 
-        self.cal_start_date.bind(
-            "<<DateEntrySelected>>", callback_change_enddate
-        )
-        self.cal_end_date.bind(
-            "<<DateEntrySelected>>", callback_change_startdate
-        )
+        self.cal_start_date.bind("<<DateEntrySelected>>", callback_change_enddate)
+        self.cal_end_date.bind("<<DateEntrySelected>>", callback_change_startdate)
 
         # Add a load data button
-        self.button_load = tk.Button(
-            frame_1, text="Download data", command=self.load_data
-        )
+        self.button_load = tk.Button(frame_1, text="Download data", command=self.load_data)
         self.button_load.pack(pady=10)  # side="left")
 
         # Add button to remove/add plots
@@ -566,10 +541,7 @@ class sql_db_explorer_gui:
         for ii in range(len(tables_selected)):
             table_select = table_choices[tables_selected[ii]]
 
-            print(
-                "Importing %s from %s to %s"
-                % (table_select, start_time, end_time)
-            )
+            print("Importing %s from %s to %s" % (table_select, start_time, end_time))
             df = self.dbc.get_data(
                 table_name=table_select,
                 start_time=start_time,
@@ -578,17 +550,13 @@ class sql_db_explorer_gui:
             # df = df.set_index("time", drop=True)
 
             if df.shape[0] <= 0:
-                print(
-                    "No data found in this timerange for table %s"
-                    % table_select
-                )
+                print("No data found in this timerange for table %s" % table_select)
             else:
                 print("...Imported data successfully.")
 
-                old_col_names = [c for c in list(df.columns) if not c=='time']
+                old_col_names = [c for c in list(df.columns) if not c == "time"]
                 new_col_names = [
-                    chr(97 + tables_selected[ii]).upper() + "_%s" % c
-                    for c in old_col_names
+                    chr(97 + tables_selected[ii]).upper() + "_%s" % c for c in old_col_names
                 ]
                 col_mapping = dict(zip(old_col_names, new_col_names))
                 df = df.rename(col_mapping)
@@ -597,9 +565,9 @@ class sql_db_explorer_gui:
                 if self.turbine_names is not None:
                     columns = df.columns
                     for t in range(len(self.turbine_names)):
-                        columns = [c.replace('%03d' % t,self.turbine_names[t]) for c in columns]
+                        columns = [c.replace("%03d" % t, self.turbine_names[t]) for c in columns]
                     # df.columns = columns
-                    df = df.rename(dict(zip(df.columns,columns)))
+                    df = df.rename(dict(zip(df.columns, columns)))
 
                 df_array.append(df)
 
@@ -609,16 +577,15 @@ class sql_db_explorer_gui:
 
         if len(df_array) > 1:
             for df_ in df_array[1:]:
-                df_merge = df_merge.join(df_, on='time',how='outer')
+                df_merge = df_merge.join(df_, on="time", how="outer")
 
-        #Save it now
+        # Save it now
         self.df = df_merge
 
         # If sorting the columns do it now
         if self.sort_columns:
             # self.df = self.df[sorted(self.df.columns)]
             self.df = self.df.select(sorted(self.df.columns))
-
 
         self.update_channel_cols()
         self.create_figures()
@@ -656,9 +623,7 @@ class sql_db_explorer_gui:
 
     def update_plot(self, channel_no):
         # Only update if we have anything to plot...
-        if (self.df.shape[0] > 1) & any(
-            [len(i) > 0 for i in self.channel_selection]
-        ):
+        if (self.df.shape[0] > 1) & any([len(i) > 0 for i in self.channel_selection]):
             # Update the tool bar
             # self.canvas.toolbar.update()
 
@@ -666,7 +631,7 @@ class sql_db_explorer_gui:
             ax = self.axes[channel_no]
             ax.clear()
             for c in self.channel_selection[channel_no]:
-                ax.plot(self.df['time'], np.array(self.df[c]), label=c)
+                ax.plot(self.df["time"], np.array(self.df[c]), label=c)
             ax.legend()
             ax.grid(True)
 
@@ -677,8 +642,10 @@ class sql_db_explorer_gui:
         try:
             self.toolbar.destroy()
             self.frame_2.destroy()
-        except:
-            print("No preexisting figures found.")
+        except tk.TclError as e:
+            print(f"Error destroying widgets: {e}")
+        else:
+            print("Figures destroyed successfully.")
 
         self.frame_2 = tk.Frame(self.master, width=20, height=500)
         self.fig = Figure()
@@ -686,17 +653,13 @@ class sql_db_explorer_gui:
         self.axes[0] = self.fig.add_subplot(self.N_channels, 1, 1)
         self.update_plot(channel_no=0)
         for ii in range(1, self.N_channels):
-            self.axes[ii] = self.fig.add_subplot(
-                self.N_channels, 1, ii + 1, sharex=self.axes[0]
-            )
+            self.axes[ii] = self.fig.add_subplot(self.N_channels, 1, ii + 1, sharex=self.axes[0])
             self.update_plot(channel_no=ii)
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_2)
         self.toolbar = tkagg.NavigationToolbar2Tk(self.canvas, self.master)
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(
-            side="bottom", fill="both", expand=True
-        )
+        self.canvas.get_tk_widget().pack(side="bottom", fill="both", expand=True)
         self.frame_2.pack(fill="both", expand=True, side="right")
         # self.update_channel_cols()  # Reset column selection
 

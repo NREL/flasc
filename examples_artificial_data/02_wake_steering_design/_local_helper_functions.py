@@ -11,16 +11,10 @@
 # the License.
 
 
-import copy
-import os
-
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-
-from floris.tools.floris_interface import FlorisInterface
-from floris.tools.uncertainty_interface import UncertaintyInterface
 from floris.tools.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
+from floris.tools.uncertainty_interface import UncertaintyInterface
 
 from flasc.utilities_examples import load_floris_artificial as load_floris
 
@@ -71,7 +65,7 @@ def optimize_yaw_angles(
         Ny_passes=opt_Ny_passes,
         turbine_weights=opt_turbine_weights,
         exclude_downstream_turbines=True,
-        verify_convergence=opt_verify_convergence
+        verify_convergence=opt_verify_convergence,
     )
     return yaw_opt.optimize()
 
@@ -102,26 +96,20 @@ def evaluate_optimal_yaw_angles(
     )
 
     # Include uncertainty in the FLORIS model, if applicable
-    if (eval_std_wd > 0.001):
-        opt_unc_options = dict(
-            {'std_wd': eval_std_wd, 'pmf_res': 1.0, 'pdf_cutoff': 0.995}
-        )
+    if eval_std_wd > 0.001:
+        opt_unc_options = dict({"std_wd": eval_std_wd, "pmf_res": 1.0, "pdf_cutoff": 0.995})
         fi = UncertaintyInterface(fi.copy(), unc_options=opt_unc_options)
 
     # Get wind rose frequency
     wd_mesh, ws_mesh = np.meshgrid(
-        fi.floris.flow_field.wind_directions,
-        fi.floris.flow_field.wind_speeds, 
-        indexing='ij'
+        fi.floris.flow_field.wind_directions, fi.floris.flow_field.wind_speeds, indexing="ij"
     )
     freq = wind_climate_interpolant(wd_mesh, ws_mesh)
     freq = freq / np.sum(freq)
 
     # Interpolate yaw angles
     wd_mesh, ws_mesh = np.meshgrid(
-        fi.floris.flow_field.wind_directions,
-        fi.floris.flow_field.wind_speeds, 
-        indexing='ij'
+        fi.floris.flow_field.wind_directions, fi.floris.flow_field.wind_speeds, indexing="ij"
     )
     ti = fi.floris.flow_field.turbulence_intensity * np.ones_like(wd_mesh)
     yaw_angles_opt = yaw_angle_interpolant(wd_mesh, ws_mesh, ti)
@@ -137,14 +125,16 @@ def evaluate_optimal_yaw_angles(
     optimized_powers = np.nan_to_num(optimized_powers, nan=0.0)
 
     # Prepare results: collect in dataframe and calculate AEPs
-    df_out = pd.DataFrame({
-        "wind_direction": wd_mesh.flatten(),
-        "wind_speed": ws_mesh.flatten(),
-        "turbulence_intensity": eval_ti * np.ones_like(ws_mesh).flatten(),
-        "frequency": freq.flatten(),
-        "farm_power_baseline": baseline_powers.flatten(),
-        "farm_power_opt": optimized_powers.flatten(),
-    })
+    df_out = pd.DataFrame(
+        {
+            "wind_direction": wd_mesh.flatten(),
+            "wind_speed": ws_mesh.flatten(),
+            "turbulence_intensity": eval_ti * np.ones_like(ws_mesh).flatten(),
+            "frequency": freq.flatten(),
+            "farm_power_baseline": baseline_powers.flatten(),
+            "farm_power_opt": optimized_powers.flatten(),
+        }
+    )
 
     AEP_baseline = np.sum(np.multiply(baseline_powers, freq))
     AEP_opt = np.sum(np.multiply(optimized_powers, freq))

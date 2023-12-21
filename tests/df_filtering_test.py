@@ -1,43 +1,42 @@
-import numpy as np
-import pandas as pd
-import os
-
 import unittest
 
-from floris.tools import FlorisInterface
+import numpy as np
+import pandas as pd
 
-from flasc.dataframe_operations import dataframe_filtering as dff
 from flasc import floris_tools as ftools
+from flasc.dataframe_operations import dataframe_filtering as dff
 from flasc.turbine_analysis.ws_pow_filtering import ws_pw_curve_filtering
 from flasc.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_data():
     # Create tiny subset
-    return pd.DataFrame({
-        "wd": [255.0],
-        "ws": [8.0],
-        "ti": [0.07],
-        "ws_000": [8.0],
-        "ws_001": [8.0],
-        "ws_002": [8.0],
-        "ws_003": [8.0],
-        "ws_004": [8.0],
-        "ws_005": [8.0],
-        "ws_006": [8.0],
-        "pow_000": [2.3e6],
-        "pow_001": [2.3e6],
-        "pow_002": [2.3e6],
-        "pow_003": [2.3e6],
-        "pow_004": [2.3e6],
-        "pow_005": [2.3e6],
-        "pow_006": [2.3e6],
-    })
+    return pd.DataFrame(
+        {
+            "wd": [255.0],
+            "ws": [8.0],
+            "ti": [0.07],
+            "ws_000": [8.0],
+            "ws_001": [8.0],
+            "ws_002": [8.0],
+            "ws_003": [8.0],
+            "ws_004": [8.0],
+            "ws_005": [8.0],
+            "ws_006": [8.0],
+            "pow_000": [2.3e6],
+            "pow_001": [2.3e6],
+            "pow_002": [2.3e6],
+            "pow_003": [2.3e6],
+            "pow_004": [2.3e6],
+            "pow_005": [2.3e6],
+            "pow_006": [2.3e6],
+        }
+    )
 
 
 class TestDataFrameFiltering(unittest.TestCase):
     def test_ws_pow_filtering(self):
-# if __name__ == "__main__":
+        # if __name__ == "__main__":
         # Test basic filtering operations
         df = load_data()
         df["ws_001"] = np.nan
@@ -52,8 +51,10 @@ class TestDataFrameFiltering(unittest.TestCase):
 
         # Verify that ws_001 and pow_001 are only NaNs
         self.assertTrue(w.get_df()[["ws_001", "pow_001"]].isna().all().all())
-        self.assertTrue(not w.get_df()[[c for c in df.columns if not "001" in c]].isna().any().any())
-        self.assertTrue((w.df_filters["WTG_001"] =="Wind speed is NaN").all())
+        self.assertTrue(
+            not w.get_df()[[c for c in df.columns if "001" not in c]].isna().any().any()
+        )
+        self.assertTrue((w.df_filters["WTG_001"] == "Wind speed is NaN").all())
 
         # Test basic filtering operations: sensor-stuck filtering
         df = load_data()
@@ -95,20 +96,31 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["wd"] = 275.0
         df["pow_004"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False)
+            df = dff.filter_df_by_faulty_impacting_turbines(
+                df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
+            )
         self.assertTrue(df[["pow_003", "pow_004", "pow_006"]].isna().all().all())  # NaN
-        self.assertTrue(~df[["pow_000", "pow_001", "pow_002", "pow_005"]].isna().any().any())  # Non-NaN
-                    
+        self.assertTrue(
+            ~df[["pow_000", "pow_001", "pow_002", "pow_005"]].isna().any().any()
+        )  # Non-NaN
+
         # Another scenario
         # print("\n\n Creating scenario where T5 wakes T1 and T1 is faulty:")
         df = df_base.copy()
         df["wd"] = 357.0
         df["pow_001"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False)
+            df = dff.filter_df_by_faulty_impacting_turbines(
+                df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
+            )
         self.assertTrue(df[["pow_001"]].isna().all().all())
-        self.assertTrue(~df[["pow_000", "pow_002", "pow_003", "pow_004", "pow_005", "pow_006"]].isna().any().any())
-    
+        self.assertTrue(
+            ~df[["pow_000", "pow_002", "pow_003", "pow_004", "pow_005", "pow_006"]]
+            .isna()
+            .any()
+            .any()
+        )
+
         # Another scenario
         # print("\n\n Creating scenario where T5 wakes T1 and T1 and T5 are faulty:")
         df = df_base.copy()
@@ -116,9 +128,13 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["pow_001"] = np.nan
         df["pow_005"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False)
+            df = dff.filter_df_by_faulty_impacting_turbines(
+                df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
+            )
         self.assertTrue(df[["pow_001", "pow_005"]].isna().all().all())  # NaN
-        self.assertTrue(~df[["pow_000", "pow_002", "pow_003", "pow_004", "pow_006"]].isna().any().any())  # Non-NaN
+        self.assertTrue(
+            ~df[["pow_000", "pow_002", "pow_003", "pow_004", "pow_006"]].isna().any().any()
+        )  # Non-NaN
 
         # Another scenario
         # print("\n\n Creating scenario where T5 wakes T1 and T5 is faulty:")
@@ -126,9 +142,13 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["wd"] = 357.0
         df["pow_005"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False)
+            df = dff.filter_df_by_faulty_impacting_turbines(
+                df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
+            )
         self.assertTrue(df[["pow_001", "pow_005"]].isna().all().all())  # NaN
-        self.assertTrue(~df[["pow_000", "pow_002", "pow_003", "pow_004", "pow_006"]].isna().any().any())  # Non-NaN
+        self.assertTrue(
+            ~df[["pow_000", "pow_002", "pow_003", "pow_004", "pow_006"]].isna().any().any()
+        )  # Non-NaN
 
         # Another scenario
         # print("\n\n Creating scenario where T5 wakes T1, T06 wakes T0, and T5 and T6 are faulty:")
@@ -137,7 +157,9 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["pow_005"] = np.nan
         df["pow_006"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False)
+            df = dff.filter_df_by_faulty_impacting_turbines(
+                df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
+            )
         self.assertTrue(df[["pow_000", "pow_001", "pow_005", "pow_006"]].isna().all().all())  # NaN
         self.assertTrue(~df[["pow_002", "pow_003", "pow_004"]].isna().any().any())  # Non-NaN
 

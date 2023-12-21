@@ -11,16 +11,22 @@
 # the License.
 
 
+import copy
+from time import perf_counter as timerpc
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy import interpolate
-from scipy.stats import norm
-import copy
-
 from floris.tools import FlorisInterface
 from floris.utilities import wrap_360
+from scipy import interpolate
+from scipy.stats import norm
+
 from flasc import utilities as fsut
+
+# Disable line too long for this file for csv block
+# Some comment blocks would be confusing otherwise
+# ruff: noqa: E501
 
 
 def merge_floris_objects(fi_list, reference_wind_height=None):
@@ -43,7 +49,9 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
 
     # Make sure the entries in fi_list are FlorisInterface objects
     if not isinstance(fi_list[0], FlorisInterface):
-        raise UserWarning("Incompatible input specified. Please merge FlorisInterface objects before inserting them into ParallelComputingInterface and UncertaintyInterface.")
+        raise UserWarning(
+            "Incompatible input specified. Please merge FlorisInterface objects before inserting them into ParallelComputingInterface and UncertaintyInterface."
+        )
 
     # Get the turbine locations and specifications for each subset and save as a list
     x_list = []
@@ -67,7 +75,9 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
     if reference_wind_height is None:
         reference_wind_height = np.mean(reference_wind_heights)
         if np.any(np.abs(np.array(reference_wind_heights) - reference_wind_height) > 1.0e-3):
-            raise UserWarning("Cannot automatically derive a fitting reference_wind_height since they substantially differ between FlorisInterface objects. Please specify 'reference_wind_height' manually.")
+            raise UserWarning(
+                "Cannot automatically derive a fitting reference_wind_height since they substantially differ between FlorisInterface objects. Please specify 'reference_wind_height' manually."
+            )
 
     # Construct the merged FLORIS model based on the first entry in fi_list
     fi_merged = fi_list[0].copy()
@@ -75,7 +85,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
         layout_x=x_list,
         layout_y=y_list,
         turbine_type=turbine_type_list,
-        reference_wind_height=reference_wind_height
+        reference_wind_height=reference_wind_height,
     )
 
     return fi_merged
@@ -84,12 +94,12 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
 def interpolate_floris_from_df_approx(
     df,
     df_approx,
-    method='linear',
+    method="linear",
     wrap_0deg_to_360deg=True,
     extrapolate_ws=True,
     extrapolate_ti=True,
     mirror_nans=True,
-    verbose=True
+    verbose=True,
 ):
     """This function generates the FLORIS predictions for a set of historical
     data, 'df', quickly by linearly interpolating from a precalculated set of
@@ -105,7 +115,7 @@ def interpolate_floris_from_df_approx(
         intensity to be used in the FLORIS predictions. An example:
 
         df=
-                 time                    wd     ws      ti  
+                 time                    wd     ws      ti
         0       2018-01-01 00:10:00   213.1   7.81    0.08
         1       2018-01-01 00:20:00   215.6   7.65    0.08
         ...                     ...   ...      ...     ...
@@ -120,10 +130,10 @@ def interpolate_floris_from_df_approx(
         typically has the form:
 
         df_approx=
-                  wd    ws    ti    pow_000     pow_001  ...    pow_006 
+                  wd    ws    ti    pow_000     pow_001  ...    pow_006
         0        0.0   1.0    0.03      0.0         0.0  ...        0.0
         1        3.0   1.0    0.03      0.0         0.0  ...        0.0
-        ...      ...   ...   ...        ...         ...  ...        ... 
+        ...      ...   ...   ...        ...         ...  ...        ...
         32399  357.0  24.0    0.18    5.0e6       5.0e6  ...       5.0e6
         32400  360.0  24.0    0.18    5.0e6       5.0e6  ...       5.0e6
 
@@ -139,8 +149,8 @@ def interpolate_floris_from_df_approx(
         for the entire wind rose. Recommended to set to True. Defaults to True.
         extrapolate_ws (bool, optional): The precalculated set of FLORIS solutions,
         df_approx, only covers a finite range of wind speeds, typically from 1 m/s up
-        to 25 m/s. Any wind speed values below or above this range therefore cannot 
-        be interpolated using the 'linear' method and therefore becomes a NaN. To 
+        to 25 m/s. Any wind speed values below or above this range therefore cannot
+        be interpolated using the 'linear' method and therefore becomes a NaN. To
         prevent this, we can copy over the lowest and highest wind speed value interpolated
         to finite bounds to avoid this. For example, if our lowest wind speed calculated is
         1 m/s, we copy the solutions at 1 m/s over to a wind speed of 0 m/s, implicitly
@@ -173,7 +183,7 @@ def interpolate_floris_from_df_approx(
         of the turbines interpolated from the precalculated solutions table. For example,
 
         df=
-                 time                    wd     ws      ti    pow_000     pow_001  ...    pow_006 
+                 time                    wd     ws      ti    pow_000     pow_001  ...    pow_006
         0       2018-01-01 00:10:00   213.1   7.81    0.08  1251108.2    825108.2  ...   725108.9
         1       2018-01-01 00:20:00   215.6   7.65    0.08  1202808.0    858161.8  ...   692111.2
         ...                     ...   ...      ...     ...         ...        ...  ...        ...
@@ -187,126 +197,188 @@ def interpolate_floris_from_df_approx(
 
     # Check input
     if mirror_nans:
-        if not ("pow_000" in df.columns) or not ("ws_000" in df.columns):
-            raise UserWarning("The option mirror_nans=True requires the raw data's wind speed and power measurements to be included in the dataframe 'df'.")
+        if "pow_000" not in df.columns or "ws_000" not in df.columns:
+            raise UserWarning(
+                "The option mirror_nans=True requires the raw data's wind speed and power measurements to be included in the dataframe 'df'."
+            )
     else:
-        print("Warning: not mirroring NaNs from the raw data to the FLORIS predictions. This may skew your energy ratios.")
+        print(
+            "Warning: not mirroring NaNs from the raw data to the FLORIS predictions. This may skew your energy ratios."
+        )
+
+    # Check dimensionality: do we have a 2D or a 3D grid
+    N_wd = len(np.unique(df_approx["wd"]))
+    N_ws = len(np.unique(df_approx["ws"]))
+    N_ti = len(np.unique(df_approx["ti"]))
+    if (N_wd * N_ws) == df_approx.shape[0]:
+        grid_type = "2d"
+    elif (N_wd * N_ws * N_ti) == df_approx.shape[0]:
+        grid_type = "3d"
+    else:
+        raise UserWarning("Incompatible df_approx table specified.")
+    if verbose:
+        print(f"Identified the following grid type: {grid_type}.")
 
     # Check if all values in df fall within the precalculated solutions ranges
-    for col in ["wd", "ws", "ti"]:
+    if grid_type == "2d":
+        cols = ["wd", "ws", "ti"]
+    else:
+        cols = ["wd", "ws"]
+
+    for col in cols:
         # Check if all columns are defined
         if col not in df.columns:
             raise ValueError("Your SCADA dataframe is missing a column called '{:s}'.".format(col))
         if col not in df_approx.columns:
-            raise ValueError("Your precalculated solutions dataframe is missing a column called '{:s}'.".format(col))
+            raise ValueError(
+                "Your precalculated solutions dataframe is missing a column called '{:s}'.".format(
+                    col
+                )
+            )
 
         # Check if approximate solutions cover the entire problem space
-        if (
-            (df[col].min() < (df_approx[col].min() - 1.0e-6)) |
-            (df[col].max() > (df_approx[col].max() + 1.0e-6))
+        if (df[col].min() < (df_approx[col].min() - 1.0e-6)) | (
+            df[col].max() > (df_approx[col].max() + 1.0e-6)
         ):
-            print("Warning: the values in df[{:s}] exceed the range in the precalculated solutions df_fi_approx[{:s}].".format(col, col))
-            print("   minimum/maximum value in df:        ({:.3f}, {:.3f})".format(df[col].min(), df[col].max()))
-            print("   minimum/maximum value in df_approx: ({:.3f}, {:.3f})".format(df_approx[col].min(), df_approx[col].max()))
-
+            print(
+                "Warning: the values in df[{:s}] exceed the range in the precalculated solutions df_fi_approx[{:s}].".format(
+                    col, col
+                )
+            )
+            print(
+                "   minimum/maximum value in df:        ({:.3f}, {:.3f})".format(
+                    df[col].min(), df[col].max()
+                )
+            )
+            print(
+                "   minimum/maximum value in df_approx: ({:.3f}, {:.3f})".format(
+                    df_approx[col].min(), df_approx[col].max()
+                )
+            )
 
     # Define which variables we must map from df_approx to df
-    varnames = ['pow']
-    if 'ws_000' in df_approx.columns:
-        varnames.append('ws')
-    if 'wd_000' in df_approx.columns:
-        varnames.append('wd')
-    if 'ti_000' in df_approx.columns:
-        varnames.append('ti')
+    varnames = ["pow"]
+    if "ws_000" in df_approx.columns:
+        varnames.append("ws")
+    if "wd_000" in df_approx.columns:
+        varnames.append("wd")
+    if "ti_000" in df_approx.columns:
+        varnames.append("ti")
 
     # Map individual data entries to full DataFrame
     if verbose:
-        print("Mapping the precalculated solutions " +
-              "from FLORIS to the dataframe...")
-        print("  Creating a gridded interpolant with " +
-              "interpolation method '%s'." % method)
+        print("Mapping the precalculated solutions " + "from FLORIS to the dataframe...")
+        print("  Creating a gridded interpolant with " + "interpolation method '%s'." % method)
 
     # Make a copy from wd=0.0 deg to wd=360.0 deg for wrapping
     if wrap_0deg_to_360deg and (not (df_approx["wd"] > 359.999999).any()):
         if not np.any(df_approx["wd"] < 0.01):
-            raise UserWarning("wrap_0deg_to_360deg is set to True but no solutions at wd=0 deg in the precalculated solution table.")
+            raise UserWarning(
+                "wrap_0deg_to_360deg is set to True but no solutions at wd=0 deg in the precalculated solution table."
+            )
         df_subset = df_approx[df_approx["wd"] == 0.0].copy()
         df_subset["wd"] = 360.0
-        df_approx = pd.concat([df_approx, df_subset], axis=0).reset_index(drop=True)
+        df_approx = pd.concat([df_approx, df_subset], axis=0)
 
     # Copy TI to lower and upper bound
-    if extrapolate_ti:
-        df_ti_lb = df_approx.loc[df_approx["ti"] == df_approx['ti'].min()].copy()
-        df_ti_ub = df_approx.loc[df_approx["ti"] == df_approx['ti'].max()].copy()
+    if (grid_type == "3d") and extrapolate_ti:
+        df_ti_lb = df_approx.loc[df_approx["ti"] == df_approx["ti"].min()].copy()
+        df_ti_ub = df_approx.loc[df_approx["ti"] == df_approx["ti"].max()].copy()
         df_ti_lb["ti"] = 0.0
         df_ti_ub["ti"] = 1.0
-        df_approx = pd.concat(
-            [df_approx, df_ti_lb, df_ti_ub],
-            axis=0
-        ).reset_index(drop=True)
+        df_approx = pd.concat([df_approx, df_ti_lb, df_ti_ub], axis=0)
 
     # Copy WS to lower and upper bound
     if extrapolate_ws:
-        df_ws_lb = df_approx.loc[df_approx["ws"] == df_approx['ws'].min()].copy()
-        df_ws_ub = df_approx.loc[df_approx["ws"] == df_approx['ws'].max()].copy()
+        df_ws_lb = df_approx.loc[df_approx["ws"] == df_approx["ws"].min()].copy()
+        df_ws_ub = df_approx.loc[df_approx["ws"] == df_approx["ws"].max()].copy()
         df_ws_lb["ws"] = 0.0
         df_ws_ub["ws"] = 99.0
-        df_approx = pd.concat(
-            [df_approx, df_ws_lb, df_ws_ub],
-            axis=0
-        ).reset_index(drop=True)
+        df_approx = pd.concat([df_approx, df_ws_lb, df_ws_ub], axis=0)
 
     # Convert df_approx dataframe into a regular grid
     wd_array_approx = np.sort(df_approx["wd"].unique())
     ws_array_approx = np.sort(df_approx["ws"].unique())
-    ti_array_approx = np.sort(df_approx["ti"].unique())
-    xg, yg, zg = np.meshgrid(
-        wd_array_approx,
-        ws_array_approx,
-        ti_array_approx,
-        indexing='ij',
-    )
+
+    if grid_type == "2d":
+        xg, yg = np.meshgrid(
+            wd_array_approx,
+            ws_array_approx,
+            indexing="ij",
+        )
+    else:
+        ti_array_approx = np.sort(df_approx["ti"].unique())
+        xg, yg, zg = np.meshgrid(
+            wd_array_approx,
+            ws_array_approx,
+            ti_array_approx,
+            indexing="ij",
+        )
 
     grid_dict = dict()
     for varname in varnames:
-        colnames = ['{:s}_{:03d}'.format(varname, ti) for ti in range(nturbs)]
-        f = interpolate.NearestNDInterpolator(
-            df_approx[["wd", "ws", "ti"]],
-            df_approx[colnames]
-        )
-        grid_dict["{:s}".format(varname)] = f(xg, yg, zg)
+        colnames = ["{:s}_{:03d}".format(varname, ti) for ti in range(nturbs)]
+        if grid_type == "2d":
+            f = interpolate.NearestNDInterpolator(df_approx[["wd", "ws"]], df_approx[colnames])
+            grid_dict["{:s}".format(varname)] = f(xg, yg)
+        else:
+            f = interpolate.NearestNDInterpolator(
+                df_approx[["wd", "ws", "ti"]], df_approx[colnames]
+            )
+            grid_dict["{:s}".format(varname)] = f(xg, yg, zg)
 
     # Prepare an minimal output dataframe
     cols_to_copy = ["wd", "ws", "ti"]
     if "time" in df.columns:
         cols_to_copy.append("time")
-    df_out = df[cols_to_copy].copy()
+    df_out = df[cols_to_copy].reset_index(drop=True).copy()
 
     # Use interpolant to determine values for all turbines and variables
+    t0 = timerpc()
+    df_out_interp_list = [df_out]
     for ii, varname in enumerate(varnames):
         if verbose:
-            print('     Interpolating ' + varname + ' for all turbines...')
-        colnames = ['{:s}_{:03d}'.format(varname, ti) for ti in range(nturbs)]
+            print("     Interpolating " + varname + " for all turbines...")
+        colnames = ["{:s}_{:03d}".format(varname, ti) for ti in range(nturbs)]
 
         if ii == 0:
-            f = interpolate.RegularGridInterpolator(
-                points=(wd_array_approx, ws_array_approx, ti_array_approx),
-                values=grid_dict[varname],
-                method=method,
-                bounds_error=False,
-            )
+            if grid_type == "2d":
+                f = interpolate.RegularGridInterpolator(
+                    points=(wd_array_approx, ws_array_approx),
+                    values=grid_dict[varname],
+                    method=method,
+                    bounds_error=False,
+                )
+            else:
+                f = interpolate.RegularGridInterpolator(
+                    points=(wd_array_approx, ws_array_approx, ti_array_approx),
+                    values=grid_dict[varname],
+                    method=method,
+                    bounds_error=False,
+                )
         else:
             f.values = np.array(grid_dict[varname], dtype=float)
 
-        df_out.loc[df_out.index, colnames] = f(df[['wd', 'ws', 'ti']])
+        # Interpolate values across grid
+        if grid_type == "2d":
+            out = f(df[["wd", "ws"]])
+        else:
+            out = f(df[["wd", "ws", "ti"]])
 
         if mirror_nans:
             # Copy NaNs in the raw data to the FLORIS predictions
-            for c in colnames:
+            for cii, c in enumerate(colnames):
                 if c in df.columns:
-                    df_out.loc[df[c].isna(), c] = None
-                else:
-                    df_out.loc[:, c] = None
+                    out[df[c].isna(), cii] = np.nan
+
+        df_out_interp_list.append(pd.DataFrame(out, columns=colnames))
+
+    # Add interpolated solutions to df_out
+    df_out = pd.concat(df_out_interp_list, axis=1)
+
+    if verbose:
+        dt = timerpc() - t0
+        print(f"Finished interpolation in {dt:.3f} seconds.")
 
     return df_out
 
@@ -317,7 +389,7 @@ def calc_floris_approx_table(
     ws_array=np.arange(1.0, 25.01, 1.0),
     ti_array=np.arange(0.03, 0.1801, 0.03),
     save_turbine_inflow_conditions_to_df=False,
-    ):
+):
     """This function calculates a large number of floris solutions for a rectangular grid
     of wind directions ('wd_array'), wind speeds ('ws_array'), and optionally turbulence
     intensities ('ti_array'). The variables that are saved are each turbine's power
@@ -349,7 +421,7 @@ def calc_floris_approx_table(
             save_turbine_inflow_conditions_to_df=True
 
         Yields:
-        
+
         df_approx=
                   wd    ws    ti    pow_000     ws_000  wd_000  ti_000  pow_001  ...    pow_006     ws_006  wd_006  ti_006
         0        0.0   1.0    0.03      0.0      1.0       0.0     0.03     0.0  ...        0.0      1.0       0.0     0.03
@@ -378,11 +450,11 @@ def calc_floris_approx_table(
     wd_array = np.sort(wd_array)
     ws_array = np.sort(ws_array)
     ti_array = np.sort(ti_array)
-    wd_mesh, ws_mesh = np.meshgrid(wd_array, ws_array, indexing='ij')
+    wd_mesh, ws_mesh = np.meshgrid(wd_array, ws_array, indexing="ij")
     N_approx = len(wd_array) * len(ws_array) * len(ti_array)
     print(
-        'Generating a df_approx table of FLORIS solutions ' +
-        'covering a total of {:d} cases.'.format(N_approx)
+        "Generating a df_approx table of FLORIS solutions "
+        + "covering a total of {:d} cases.".format(N_approx)
     )
 
     # Create solutions, one set per turbulence intensity
@@ -403,15 +475,18 @@ def calc_floris_approx_table(
         for turbi in range(num_turbines):
             solutions_dict["pow_{:03d}".format(turbi)] = turbine_powers[:, :, turbi].flatten()
             if save_turbine_inflow_conditions_to_df:
-                solutions_dict["ws_{:03d}".format(turbi)] = \
+                solutions_dict["ws_{:03d}".format(turbi)] = (
                     fi.floris.flow_field.u.mean(axis=4).mean(axis=3)[:, :, turbi].flatten()
-                solutions_dict["wd_{:03d}".format(turbi)] = \
-                    wd_mesh.flatten()  # Uniform wind direction
-                solutions_dict["ti_{:03d}".format(turbi)] = \
-                    fi.floris.flow_field.turbulence_intensity_field[:, :, turbi].flatten()
+                )
+                solutions_dict[
+                    "wd_{:03d}".format(turbi)
+                ] = wd_mesh.flatten()  # Uniform wind direction
+                solutions_dict[
+                    "ti_{:03d}".format(turbi)
+                ] = fi.floris.flow_field.turbulence_intensity_field[:, :, turbi].flatten()
         df_list.append(pd.DataFrame(solutions_dict))
 
-    print('Finished calculating the FLORIS solutions for the dataframe.')
+    print("Finished calculating the FLORIS solutions for the dataframe.")
     df_approx = pd.concat(df_list, axis=0).sort_values(by=["ti", "ws", "wd"])
     df_approx = df_approx.reset_index(drop=True)
 
@@ -454,9 +529,9 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
     # Map solutions to the right shape using a NN interpolant
     F = interpolate.NearestNDInterpolator(
         x=df_fi_approx[["wd", "ws", "ti"]],
-        y=df_fi_approx[[c for c in df_fi_approx.columns if "pow_" in c]]
+        y=df_fi_approx[[c for c in df_fi_approx.columns if "pow_" in c]],
     )
-    
+
     # Create new sets to interpolate over for Gaussian kernel
     wd = df_fi_approx["wd"]
     wd = wrap_360(np.tile(wd, (len(wd_unc), 1)).T + np.tile(wd_unc, (wd.shape[0], 1)))
@@ -469,23 +544,26 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
 
     # Interpolate power values
     turbine_powers = F(wd, ws, ti)
-    weights = np.tile(wd_unc_pmf[None, :, None], (turbine_powers.shape[0], 1, turbine_powers.shape[2]))
+    weights = np.tile(
+        wd_unc_pmf[None, :, None], (turbine_powers.shape[0], 1, turbine_powers.shape[2])
+    )
     turbine_powers_gaussian = np.sum(weights * turbine_powers, axis=1)  # Weighted sum
 
     pow_cols = [c for c in df_fi_approx.columns if c.startswith("pow_")]
     df_fi_approx_gauss = pd.concat(
         [
             df_fi_approx[["wd", "ws", "ti"]],
-            pd.DataFrame(dict(zip(pow_cols, turbine_powers_gaussian.T)))
+            pd.DataFrame(dict(zip(pow_cols, turbine_powers_gaussian.T))),
         ],
-        axis=1
+        axis=1,
     )
-    
+
     return df_fi_approx_gauss
 
 
-def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,
-                        include_itself, sort_by_distance=False):
+def get_turbs_in_radius(
+    x_turbs, y_turbs, turb_no, max_radius, include_itself, sort_by_distance=False
+):
     """Determine which turbines are within a certain radius of other
     wind turbines.
 
@@ -506,8 +584,7 @@ def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,
         turbs_within_radius ([list]): List of turbines that are within the
         prespecified distance from turbine [turb_no].
     """
-    dr_turb = np.sqrt((x_turbs - x_turbs[turb_no])**2.0 +
-                      (y_turbs - y_turbs[turb_no])**2.0)
+    dr_turb = np.sqrt((x_turbs - x_turbs[turb_no]) ** 2.0 + (y_turbs - y_turbs[turb_no]) ** 2.0)
     turbine_list = np.array(range(len(x_turbs)))
 
     if sort_by_distance:
@@ -517,14 +594,12 @@ def get_turbs_in_radius(x_turbs, y_turbs, turb_no, max_radius,
 
     turbs_within_radius = turbine_list[dr_turb <= max_radius]
     if not include_itself:
-        turbs_within_radius = [ti for ti in turbs_within_radius
-                               if not ti == turb_no]
+        turbs_within_radius = [ti for ti in turbs_within_radius if not ti == turb_no]
 
     return turbs_within_radius
 
 
-def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
-                              plot_lines=False):
+def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10, plot_lines=False):
     """Determine which turbines are operating in freestream (unwaked)
     flow, for the entire wind rose. This function will return a data-
     frame where each row will present a wind direction range and a set
@@ -567,20 +642,18 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
     upstream_turbs_wds = []  # lower bound of bin
 
     # Rotate farm and determine freestream/waked turbines
-    for wd in np.arange(0., 360., wd_step):
+    for wd in np.arange(0.0, 360.0, wd_step):
         is_freestream = [True for _ in range(n_turbs)]
-        x_rot = (np.cos((wd-270.) * np.pi / 180.) * x -
-                 np.sin((wd-270.) * np.pi / 180.) * y)
-        y_rot = (np.sin((wd-270.) * np.pi / 180.) * x +
-                 np.cos((wd-270.) * np.pi / 180.) * y)
+        x_rot = np.cos((wd - 270.0) * np.pi / 180.0) * x - np.sin((wd - 270.0) * np.pi / 180.0) * y
+        y_rot = np.sin((wd - 270.0) * np.pi / 180.0) * x + np.cos((wd - 270.0) * np.pi / 180.0) * y
 
         if plot_lines:
             fig, ax = plt.subplots()
             for ii in range(n_turbs):
-                ax.plot(x_rot[ii] * np.ones(2), [y_rot[ii] - D[ii] / 2, y_rot[ii] + D[ii] / 2], 'k')
+                ax.plot(x_rot[ii] * np.ones(2), [y_rot[ii] - D[ii] / 2, y_rot[ii] + D[ii] / 2], "k")
             for ii in range(n_turbs):
-                ax.text(x_rot[ii], y_rot[ii], 'T%03d' % ii)
-            ax.axis('equal')
+                ax.text(x_rot[ii], y_rot[ii], "T%03d" % ii)
+            ax.axis("equal")
 
         srt = np.argsort(x_rot)
         x_rot_srt = x_rot[srt]
@@ -590,7 +663,7 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
             y0 = y_rot_srt[ii]
 
             def yw_upper(x):
-                y = (y0 + D[ii]) + (x-x0) * wake_slope
+                y = (y0 + D[ii]) + (x - x0) * wake_slope
                 if isinstance(y, (float, np.float64, np.float32)):
                     if x < (x0 + 0.01):
                         y = -np.Inf
@@ -599,7 +672,7 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
                 return y
 
             def yw_lower(x):
-                y = (y0 - D[ii]) - (x-x0) * wake_slope
+                y = (y0 - D[ii]) - (x - x0) * wake_slope
                 if isinstance(y, (float, np.float64, np.float32)):
                     if x < (x0 + 0.01):
                         y = -np.Inf
@@ -607,19 +680,24 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
                     y[x < x0 + 0.01] = -np.Inf
                 return y
 
-            is_in_wake = lambda xt, yt: ((yt < yw_upper(xt)) &
-                                         (yt > yw_lower(xt)))
+            def is_in_wake(xt, yt):
+                return (yt < yw_upper(xt)) & (yt > yw_lower(xt))
 
-            is_freestream = (is_freestream &
-                             ~is_in_wake(x_rot_srt, y_rot_srt + D/2.) &
-                             ~is_in_wake(x_rot_srt, y_rot_srt - D/2.))
+            is_freestream = (
+                is_freestream
+                & ~is_in_wake(x_rot_srt, y_rot_srt + D / 2.0)
+                & ~is_in_wake(x_rot_srt, y_rot_srt - D / 2.0)
+            )
 
             if plot_lines:
-                x1 = np.max(x_rot_srt) + 500.
-                ax.fill_between([x0, x1, x1, x0],
-                                [yw_upper(x0+0.02), yw_upper(x1),
-                                 yw_lower(x1), yw_lower(x0+0.02)],
-                                alpha=0.1, color='k', edgecolor=None)
+                x1 = np.max(x_rot_srt) + 500.0
+                ax.fill_between(
+                    [x0, x1, x1, x0],
+                    [yw_upper(x0 + 0.02), yw_upper(x1), yw_lower(x1), yw_lower(x0 + 0.02)],
+                    alpha=0.1,
+                    color="k",
+                    edgecolor=None,
+                )
 
         usrt = np.argsort(srt)
         is_freestream = is_freestream[usrt]
@@ -628,17 +706,15 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
         if len(upstream_turbs_wds) == 0:
             upstream_turbs_ids.append(turbs_freestream)
             upstream_turbs_wds.append(wd)
-        elif not(turbs_freestream == upstream_turbs_ids[-1]):
+        elif not (turbs_freestream == upstream_turbs_ids[-1]):
             upstream_turbs_ids.append(turbs_freestream)
             upstream_turbs_wds.append(wd)
 
         if plot_lines:
-            ax.set_title('wd = %03d' % wd)
-            ax.set_xlim([np.min(x_rot)-500., x1])
-            ax.set_ylim([np.min(y_rot)-500., np.max(y_rot)+500.])
-            ax.plot(x_rot[turbs_freestream],
-                    y_rot[turbs_freestream],
-                    'o', color='green')
+            ax.set_title("wd = %03d" % wd)
+            ax.set_xlim([np.min(x_rot) - 500.0, x1])
+            ax.set_ylim([np.min(y_rot) - 500.0, np.max(y_rot) + 500.0])
+            ax.plot(x_rot[turbs_freestream], y_rot[turbs_freestream], "o", color="green")
 
     # # Connect at 360 degrees
     # if upstream_turbs_ids[0] == upstream_turbs_ids[-1]:
@@ -646,101 +722,106 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10,
     #     upstream_turbs_ids.pop(0)
 
     # Go from list to bins for upstream_turbs_wds
-    upstream_turbs_wds = [[upstream_turbs_wds[i], upstream_turbs_wds[i+1]]
-                          for i in range(len(upstream_turbs_wds)-1)]
-    upstream_turbs_wds.append([upstream_turbs_wds[-1][-1], 360.])
+    upstream_turbs_wds = [
+        [upstream_turbs_wds[i], upstream_turbs_wds[i + 1]]
+        for i in range(len(upstream_turbs_wds) - 1)
+    ]
+    upstream_turbs_wds.append([upstream_turbs_wds[-1][-1], 360.0])
 
-    df_upstream = pd.DataFrame({'wd_min': [wd[0] for wd in upstream_turbs_wds],
-                                'wd_max': [wd[1] for wd in upstream_turbs_wds],
-                                'turbines': upstream_turbs_ids})
+    df_upstream = pd.DataFrame(
+        {
+            "wd_min": [wd[0] for wd in upstream_turbs_wds],
+            "wd_max": [wd[1] for wd in upstream_turbs_wds],
+            "turbines": upstream_turbs_ids,
+        }
+    )
 
     return df_upstream
 
-def get_dependent_turbines_by_wd(fi_in, test_turbine, 
-    wd_array=np.arange(0., 360., 2.), change_threshold=0.001, limit_number=None, 
-    ws_test=9., return_influence_magnitudes=False):
+
+def get_dependent_turbines_by_wd(
+    fi_in,
+    test_turbine,
+    wd_array=np.arange(0.0, 360.0, 2.0),
+    change_threshold=0.001,
+    limit_number=None,
+    ws_test=9.0,
+    return_influence_magnitudes=False,
+):
     """
-    Computes all turbines that depend on the operation of a specified 
-    turbine (test_turbine) for each wind direction in wd_array, using 
-    the FLORIS model specified by fi_in to detect dependencies. 
+    Computes all turbines that depend on the operation of a specified
+    turbine (test_turbine) for each wind direction in wd_array, using
+    the FLORIS model specified by fi_in to detect dependencies.
 
     Args:
         fi ([floris object]): FLORIS object of the farm of interest.
         test_turbine ([int]): Turbine for which dependencies are found.
-        wd_array ([np.array]): Wind directions at which to determine 
+        wd_array ([np.array]): Wind directions at which to determine
             dependencies. Defaults to [0, 2, ... , 358].
-        change_threshold (float): Fractional change in power needed 
-            to denote a dependency. Defaults to 0. (any change in power 
+        change_threshold (float): Fractional change in power needed
+            to denote a dependency. Defaults to 0. (any change in power
             is marked as a dependency)
-        limit_number (int | NoneType): Number of turbines that a 
-            turbine can have as dependencies. If None, returns all 
+        limit_number (int | NoneType): Number of turbines that a
+            turbine can have as dependencies. If None, returns all
             turbines that depend on each turbine. Defaults to None.
-        ws_test (float): Wind speed at which FLORIS model is run to 
+        ws_test (float): Wind speed at which FLORIS model is run to
             determine dependencies.  Defaults to 9. m/s.
-        return_influence_magnitudes (Bool): Flag for whether to return 
-            an array containing the magnitude of the influence of the 
+        return_influence_magnitudes (Bool): Flag for whether to return
+            an array containing the magnitude of the influence of the
             test_turbine on all turbines.
-        
+
     Returns:
-        dep_indices_by_wd (list): A 2-dimensional list. Each element of 
-            the outer level list, which represents wind direction, 
-            contains a list of the turbines that depend on test_turbine 
-            for that wind direction. The second-level list may be empty 
-            if no turbine depends on the test_turbine for that wind 
+        dep_indices_by_wd (list): A 2-dimensional list. Each element of
+            the outer level list, which represents wind direction,
+            contains a list of the turbines that depend on test_turbine
+            for that wind direction. The second-level list may be empty
+            if no turbine depends on the test_turbine for that wind
             direciton (e.g., the turbine is in the back row).
-        all_influence_magnitudes ([np.array]): 2-D numpy array of 
-            influences of test_turbine on all other turbines, with size 
+        all_influence_magnitudes ([np.array]): 2-D numpy array of
+            influences of test_turbine on all other turbines, with size
             (number of wind directions) x (number of turbines). Returned
             only if return_influence_magnitudes is True.
     """
     # Copy fi to a local to not mess with incoming
     fi = copy.deepcopy(fi_in)
-    
+
     # Compute the base power
-    fi.reinitialize(
-        wind_speeds=[ws_test], 
-        wind_directions=wd_array
-    )
+    fi.reinitialize(wind_speeds=[ws_test], wind_directions=wd_array)
     fi.calculate_wake()
-    base_power = fi.get_turbine_powers()[:,0,:] # remove unneeded dimension
-    
+    base_power = fi.get_turbine_powers()[:, 0, :]  # remove unneeded dimension
+
     # Compute the test power
     if len(fi.floris.farm.turbine_type) > 1:
         # Remove test turbine from list
-        fi.floris.farm.turbine_type.pop(test_turbine) 
-    else: # Only a single turbine type defined for the whole farm; do nothing
+        fi.floris.farm.turbine_type.pop(test_turbine)
+    else:  # Only a single turbine type defined for the whole farm; do nothing
         pass
     fi.reinitialize(
         layout_x=np.delete(fi.layout_x, [test_turbine]),
         layout_y=np.delete(fi.layout_y, [test_turbine]),
         wind_speeds=[ws_test],
-        wind_directions=wd_array
-    ) # This will reindex the turbines; undone in following steps.
+        wind_directions=wd_array,
+    )  # This will reindex the turbines; undone in following steps.
     fi.calculate_wake()
-    test_power = fi.get_turbine_powers()[:,0,:] # remove unneeded dimension
-    test_power = np.insert(test_power, test_turbine, 
-        base_power[:,test_turbine], axis=1)
+    test_power = fi.get_turbine_powers()[:, 0, :]  # remove unneeded dimension
+    test_power = np.insert(test_power, test_turbine, base_power[:, test_turbine], axis=1)
 
     if return_influence_magnitudes:
         all_influence_magnitudes = np.zeros_like(test_power)
-    
+
     # Find the indices that have changed
-    dep_indices_by_wd = [None]*len(wd_array)
+    dep_indices_by_wd = [None] * len(wd_array)
     for i in range(len(wd_array)):
-        all_influences = np.abs(test_power[i,:] - base_power[i,:])/\
-                         base_power[i,:]
+        all_influences = np.abs(test_power[i, :] - base_power[i, :]) / base_power[i, :]
         # Sort with highest influence first; trim to limit_number
         influence_order = np.flip(np.argsort(all_influences))[:limit_number]
         # Mask to only those that meet the threshold
-        influence_order = influence_order[
-            all_influences[influence_order] >= change_threshold
-        ]
-        
+        influence_order = influence_order[all_influences[influence_order] >= change_threshold]
+
         # Store in output
         dep_indices_by_wd[i] = list(influence_order)
         if return_influence_magnitudes:
-            all_influence_magnitudes[i,:] = all_influences
-    
+            all_influence_magnitudes[i, :] = all_influences
 
     # Remove the turbines own indice
     if return_influence_magnitudes:
@@ -748,33 +829,39 @@ def get_dependent_turbines_by_wd(fi_in, test_turbine,
     else:
         return dep_indices_by_wd
 
-def get_all_dependent_turbines(fi_in, wd_array=np.arange(0., 360., 2.), 
-    change_threshold=0.001, limit_number=None, ws_test=9.):
+
+def get_all_dependent_turbines(
+    fi_in,
+    wd_array=np.arange(0.0, 360.0, 2.0),
+    change_threshold=0.001,
+    limit_number=None,
+    ws_test=9.0,
+):
     """
-    Wrapper for get_dependent_turbines_by_wd() that loops over all 
-    turbines in the farm and packages their dependencies as a pandas 
+    Wrapper for get_dependent_turbines_by_wd() that loops over all
+    turbines in the farm and packages their dependencies as a pandas
     dataframe.
 
     Args:
         fi ([floris object]): FLORIS object of the farm of interest.
-        wd_array ([np.array]): Wind directions at which to determine 
+        wd_array ([np.array]): Wind directions at which to determine
             dependencies. Defaults to [0, 2, ... , 358].
-        change_threshold (float): Fractional change in power needed 
-            to denote a dependency. Defaults to 0. (any change in power 
+        change_threshold (float): Fractional change in power needed
+            to denote a dependency. Defaults to 0. (any change in power
             is marked as a dependency)
-        limit_number (int | NoneType): Number of turbines that a 
-            turbine can have as dependencies. If None, returns all 
+        limit_number (int | NoneType): Number of turbines that a
+            turbine can have as dependencies. If None, returns all
             turbines that depend on each turbine. Defaults to None.
-        ws_test (float): Wind speed at which FLORIS model is run to 
+        ws_test (float): Wind speed at which FLORIS model is run to
             determine dependencies. Defaults to 9. m/s.
-        
+
     Returns:
         df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
-            contains a wind direction, each column is a turbine, and 
-            each entry is the turbines that depend on the column turbine 
-            at the row wind direction. Dependencies can be extracted 
-            as: For wind direction wd, the turbines that depend on 
-            turbine T are df_out.loc[wd, T]. Dependencies are ordered, 
+            contains a wind direction, each column is a turbine, and
+            each entry is the turbines that depend on the column turbine
+            at the row wind direction. Dependencies can be extracted
+            as: For wind direction wd, the turbines that depend on
+            turbine T are df_out.loc[wd, T]. Dependencies are ordered,
             with strongest dependencies appearing first.
     """
 
@@ -785,61 +872,73 @@ def get_all_dependent_turbines(fi_in, wd_array=np.arange(0., 360., 2.),
                 fi_in, t_i, wd_array, change_threshold, limit_number, ws_test
             )
         )
-    
-    df_out = (pd.DataFrame(data=results, columns=wd_array)
-              .transpose()
-              .reset_index().rename(columns={"index":"wd"}).set_index("wd")
-             )
-    
+
+    df_out = (
+        pd.DataFrame(data=results, columns=wd_array)
+        .transpose()
+        .reset_index()
+        .rename(columns={"index": "wd"})
+        .set_index("wd")
+    )
+
     return df_out
 
-def get_all_impacting_turbines(fi_in, wd_array=np.arange(0., 360., 2.), 
-    change_threshold=0.001, limit_number=None, ws_test=9.):
+
+def get_all_impacting_turbines(
+    fi_in,
+    wd_array=np.arange(0.0, 360.0, 2.0),
+    change_threshold=0.001,
+    limit_number=None,
+    ws_test=9.0,
+):
     """
-    Calculate which turbines impact a specified turbine based on the 
-    FLORIS model. Essentially a wrapper for 
-    get_dependent_turbines_by_wd() that loops over all turbines and 
+    Calculate which turbines impact a specified turbine based on the
+    FLORIS model. Essentially a wrapper for
+    get_dependent_turbines_by_wd() that loops over all turbines and
     extracts their impact magnitudes, then sorts.
 
     Args:
         fi ([floris object]): FLORIS object of the farm of interest.
-        wd_array ([np.array]): Wind directions at which to determine 
+        wd_array ([np.array]): Wind directions at which to determine
             dependencies. Defaults to [0, 2, ... , 358].
-        change_threshold (float): Fractional change in power needed 
-            to denote a dependency. Defaults to 0. (any change in power 
+        change_threshold (float): Fractional change in power needed
+            to denote a dependency. Defaults to 0. (any change in power
             is marked as a dependency)
-        limit_number (int | NoneType): Number of turbines that a 
-            turbine can depend on. If None, returns all 
+        limit_number (int | NoneType): Number of turbines that a
+            turbine can depend on. If None, returns all
             turbines that each turbine depends on. Defaults to None.
-        ws_test (float): Wind speed at which FLORIS model is run to 
+        ws_test (float): Wind speed at which FLORIS model is run to
             determine dependencies. Defaults to 9. m/s.
 
     Returns:
         df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
-            contains a wind direction, each column is a turbine, and 
-            each entry is the turbines that the column turbine depends 
-            on at the row wind direction. Dependencies can be extracted 
-            as: For wind direction wd, the turbines that impact turbine 
-            T are df_out.loc[wd, T]. Impacting turbines are simply 
+            contains a wind direction, each column is a turbine, and
+            each entry is the turbines that the column turbine depends
+            on at the row wind direction. Dependencies can be extracted
+            as: For wind direction wd, the turbines that impact turbine
+            T are df_out.loc[wd, T]. Impacting turbines are simply
             ordered by magnitude of impact.
     """
 
-    dependency_magnitudes = np.zeros(
-        (len(wd_array),len(fi_in.layout_x),len(fi_in.layout_x))
-    )
-    
+    dependency_magnitudes = np.zeros((len(wd_array), len(fi_in.layout_x), len(fi_in.layout_x)))
+
     for t_i in range(len(fi_in.layout_x)):
         _, ti_dep_mags = get_dependent_turbines_by_wd(
-                fi_in, t_i, wd_array, change_threshold, limit_number, ws_test,
-                return_influence_magnitudes=True
-            )
-        dependency_magnitudes[:,:,t_i] = ti_dep_mags
-    
+            fi_in,
+            t_i,
+            wd_array,
+            change_threshold,
+            limit_number,
+            ws_test,
+            return_influence_magnitudes=True,
+        )
+        dependency_magnitudes[:, :, t_i] = ti_dep_mags
+
     # Sort
     impact_order = np.flip(np.argsort(dependency_magnitudes, axis=2), axis=2)
 
     # Truncate to limit_number
-    impact_order = impact_order[:,:,:limit_number]
+    impact_order = impact_order[:, :, :limit_number]
 
     # Build up multi-level results list
     results = []
@@ -856,11 +955,15 @@ def get_all_impacting_turbines(fi_in, wd_array=np.arange(0., 360., 2.),
         results.append(wd_results)
 
     # Convert to dataframe
-    df_out = (pd.DataFrame(data=results, index=wd_array)
-            .reset_index().rename(columns={"index":"wd"}).set_index("wd")
-            )
+    df_out = (
+        pd.DataFrame(data=results, index=wd_array)
+        .reset_index()
+        .rename(columns={"index": "wd"})
+        .set_index("wd")
+    )
 
     return df_out
+
 
 # Wrapper function to easily set new TI values
 def _fi_set_ws_wd_ti(fi, wd=None, ws=None, ti=None):
@@ -886,9 +989,6 @@ def _fi_set_ws_wd_ti(fi, wd=None, ws=None, ti=None):
     wind_layout = (np.array(fi.layout_x), np.array(fi.layout_y))
 
     fi.reinitialize_flow_field(
-        wind_layout=wind_layout,
-        wind_direction=wd,
-        wind_speed=ws,
-        turbulence_intensity=ti
+        wind_layout=wind_layout, wind_direction=wd, wind_speed=ws, turbulence_intensity=ti
     )
     return fi

@@ -41,7 +41,7 @@ clock or timezone.
 Raw data processing
 ===================
 Once the artificial dataset has been generated, it should be filtered and
-postprocessed using the steps described in 
+postprocessed using the steps described in
 `Raw data processing <data_processing.html>`_. This will filter the SCADA data
 for measurement outliers and deal with northing calibration.
 
@@ -53,4 +53,4 @@ analyses. See `Data analysis <data_analysis.html>`_ for examples on how to
 derive useful information from the data, such as for model tuning and model
 validation.
 
-.. seealso:: `Return to table of contents <index.html>`_ 
+.. seealso:: `Return to table of contents <index.html>`_

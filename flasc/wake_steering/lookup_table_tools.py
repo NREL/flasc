@@ -15,7 +15,9 @@ import numpy as np
 from scipy.interpolate import LinearNDInterpolator
 
 
-def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12], minimum_yaw_angle=None, maximum_yaw_angle=None):
+def get_yaw_angles_interpolant(
+    df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12], minimum_yaw_angle=None, maximum_yaw_angle=None
+):
     """Create an interpolant for the optimal yaw angles from a dataframe
     'df_opt', which contains the rows 'wind_direction', 'wind_speed',
     'turbulence_intensity', and 'yaw_angles_opt'. This dataframe is typically
@@ -80,11 +82,7 @@ def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12],
         values = np.vstack([values, values_copied])
 
     # Now create a linear interpolant for the yaw angles
-    interpolant = LinearNDInterpolator(
-        points=points,
-        values=values,
-        fill_value=np.nan
-    )
+    interpolant = LinearNDInterpolator(points=points, values=values, fill_value=np.nan)
 
     # Now create a wrapper function with ramp-up and ramp-down
     def interpolant_with_ramps(wd_array, ws_array, ti_array=None):
@@ -104,18 +102,18 @@ def get_yaw_angles_interpolant(df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12],
         rampdown_factor = np.interp(
             x=ws_array,
             xp=[0.0, *ramp_up_ws, *ramp_down_ws, 999.0],
-            fp=[0.0, 0.0, 1.0, 1.0, 0.0, 0.0]
+            fp=[0.0, 0.0, 1.0, 1.0, 0.0, 0.0],
         )
 
         # Saturate yaw offsets to threshold
         axis = len(np.shape(yaw_angles)) - 1
         nturbs = np.shape(yaw_angles)[-1]
-        yaw_lb = np.expand_dims(
-            minimum_yaw_angle * rampdown_factor, axis=axis
-        ).repeat(nturbs, axis=axis)
-        yaw_ub = np.expand_dims(
-            maximum_yaw_angle * rampdown_factor, axis=axis
-        ).repeat(nturbs, axis=axis)
+        yaw_lb = np.expand_dims(minimum_yaw_angle * rampdown_factor, axis=axis).repeat(
+            nturbs, axis=axis
+        )
+        yaw_ub = np.expand_dims(maximum_yaw_angle * rampdown_factor, axis=axis).repeat(
+            nturbs, axis=axis
+        )
 
         return np.clip(yaw_angles, yaw_lb, yaw_ub)
 
