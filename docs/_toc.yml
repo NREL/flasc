@@ -1,0 +1,18 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: index
+parts:
+  - caption: Getting Started
+    chapters:
+    - file: overview
+    - file: installation
+    - file: getting_started
+
+  - caption: User Referece
+    chapters:
+    - file: data_processing
+    - file: energy_ratio
+    - file: total_uplift
+    - file: licensing
