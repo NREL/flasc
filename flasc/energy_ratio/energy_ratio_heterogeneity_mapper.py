@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.interpolate import NearestNDInterpolator
+from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 
 from floris.utilities import wrap_360
 
@@ -186,7 +186,7 @@ class heterogeneity_mapper():
         
         # Determine FLORIS heterogeneous map
         fi = self.fi
-        ll = np.sqrt(
+        ll = 2.0 * np.sqrt(
             (np.max(fi.layout_x) - np.min(fi.layout_x))**2.0 +
             (np.max(fi.layout_y) - np.min(fi.layout_y))**2.0
         )
@@ -303,18 +303,17 @@ class heterogeneity_mapper():
             clb.set_label("Wind speed ratio (-)")
 
             # Add plot to ensure equal axis does not crop plot too much
-            ax.plot(np.max(fi.layout_x) + 500.0, np.min(fi.layout_y), '.', color='white')
+            ax.plot(np.max(fi.layout_x) + 500.0, np.min(fi.layout_y), '.', color='white', markersize=1)
             ax.axis("equal")
             plt.tight_layout()
 
             if plot_background_flow:
-                df_hetmap = self.df_fi_hetmap
+                df_hetmap = self.df_fi_hetmap.copy()
                 id_hetmap = np.where(df_hetmap["wd"] == df_row["wd"])[0][0]
                 df_hetmap_row = df_hetmap.loc[id_hetmap]
 
                 if len(np.unique(df_hetmap_row["speed_up"])) <= 1:
                     # Add some noise to prevent issues
-                    df_hetmap_row = df_hetmap_row.copy()
                     df_hetmap_row["speed_up"] += 0.0001 * np.random.randn(len(df_hetmap_row["speed_up"]))
 
                 xlim_plot = ax.get_xlim()
@@ -357,6 +356,14 @@ class heterogeneity_mapper():
                     levels=50,
                     zorder=-1
                 )
+                # ax.scatter(
+                #     self.df_fi_hetmap.loc[0]["x"],
+                #     self.df_fi_hetmap.loc[0]["y"],
+                #     c=self.df_fi_hetmap.loc[0].speed_up,
+                #     cmap="jet",
+                #     vmin=ylim[0],
+                #     vmax=ylim[1],
+                # )
 
             if pdf_save_path is not None:
                 pdf.savefig(fig)
