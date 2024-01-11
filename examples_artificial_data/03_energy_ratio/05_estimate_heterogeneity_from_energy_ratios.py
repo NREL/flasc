@@ -9,7 +9,7 @@ from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
 from flasc.energy_ratio import energy_ratio as er
 from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.visualization import plot_floris_layout
+# from flasc.visualization import plot_floris_layout
 from flasc.utilities_examples import load_floris_artificial as load_floris
 
 from flasc.energy_ratio.energy_ratio_heterogeneity_mapper import heterogeneity_mapper
@@ -37,9 +37,6 @@ def load_data():
 if __name__ == "__main__":
     # Load FLORIS and plot the layout
     fi, _ = load_floris()
-    plot_floris_layout(fi, plot_terrain=False)
-
-
     
     # Now specify which turbines we want to use in the analysis. Basically,
     # we want to use all the turbines besides the ones that we know have
@@ -77,10 +74,13 @@ if __name__ == "__main__":
         wd_array=np.arange(0.0, 360.0, 30.0),
         ws_range=[6.0, 11.0]
     )
+    print("df_heterogeneity:")
     print(df_heterogeneity)
     
     # Extract a FLORIS heterogeneity map
     df_fi_hetmap = hm.generate_floris_hetmap()
+    print("")
+    print("df_fi_map:")
     print(df_fi_hetmap)
 
     # Generate a heterogeneity contour plot over the turbine layout plot
@@ -90,5 +90,4 @@ if __name__ == "__main__":
 
     # Plot individual graphs to showcase heterogeneity in detail
     hm.plot_graphs()
-
     plt.show()
