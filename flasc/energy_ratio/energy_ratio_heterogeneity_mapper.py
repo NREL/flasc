@@ -1,4 +1,6 @@
+from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
+
 import numpy as np
 import pandas as pd
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
@@ -133,7 +135,7 @@ class heterogeneity_mapper():
             raise UserWarning("Please call 'estimate_heterogeneity(...)' first.")
 
         if pdf_save_path is not None:
-            pdf = matplotlib.backends.backend_pdf.PdfPages(pdf_save_path)
+            pdf = PdfPages(pdf_save_path)
 
         # Plot the results one by one
         for _, df_row in self.df_heterogeneity.iterrows():
@@ -233,7 +235,7 @@ class heterogeneity_mapper():
             raise UserWarning("Please call 'generate_floris_hetmap(...)' first.")
 
         if pdf_save_path is not None:
-            pdf = matplotlib.backends.backend_pdf.PdfPages(pdf_save_path)
+            pdf = PdfPages(pdf_save_path)
 
         # Plot the results one by one
         fi = self.fi

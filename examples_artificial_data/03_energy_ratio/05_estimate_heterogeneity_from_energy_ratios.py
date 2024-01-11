@@ -39,9 +39,8 @@ if __name__ == "__main__":
     fi, _ = load_floris()
     plot_floris_layout(fi, plot_terrain=False)
 
-    # Load the SCADA data
-    df_full = load_data()
 
+    
     # Now specify which turbines we want to use in the analysis. Basically,
     # we want to use all the turbines besides the ones that we know have
     # an unreliable wind direction measurement. Here, for explanation purposes,
@@ -50,6 +49,10 @@ if __name__ == "__main__":
     bad_turbs = [3]  # Just hypothetical situation: assume turbine 3 gave faulty wind directions so we ignore it
     turb_wd_measurement = [i for i in range(nturbs) if i not in bad_turbs]
 
+    # Load the SCADA data and assign the freestream wind direction
+    df_full = load_data()
+    df_full = dfm.set_wd_by_turbines(df_full, turb_wd_measurement)
+
     # We use a wind direction bin width of 15 deg. Thus, if we look at
     # heterogeneity with winds coming from the west (270 deg), then we
     # use all data reporting a wind direction measurement between 262.5
@@ -57,8 +60,9 @@ if __name__ == "__main__":
     wd_bin_width = 15.0
 
     # Now calculate which turbines are upstream and for what wind directions,
-    # using a very simplified model as part of FLASC.
-    df_upstream = ftools.get_upstream_turbs_floris(fi, wake_slope=0.3)
+    # using a very simplified model as part of FLASC. We use a wide wake
+    # slope since we use a large value for wd_bin_width too.
+    df_upstream = ftools.get_upstream_turbs_floris(fi, wake_slope=0.70)
 
     # Load the FLASC heterogeneity mapper
     hm = heterogeneity_mapper(df_raw=df_full, fi=fi)
@@ -69,18 +73,22 @@ if __name__ == "__main__":
     # a higher energy ratio, also likely consistently see a higher wind speed.
     df_heterogeneity = hm.estimate_heterogeneity(
         df_upstream=df_upstream,
-        wd_bin_width=15.0,
+        wd_bin_width=wd_bin_width,
         wd_array=np.arange(0.0, 360.0, 30.0),
-        ws_range=[6.0, 10.0]
+        ws_range=[6.0, 11.0]
     )
     print(df_heterogeneity)
     
-    # Extract a FLORIS heterogeneity map and plot it over the layout
-
+    # Extract a FLORIS heterogeneity map
     df_fi_hetmap = hm.generate_floris_hetmap()
-    hm.plot_layout(plot_background_flow=True, ylim=[0.95, 1.05])
+    print(df_fi_hetmap)
 
-    # Plot individual graphs to showcase heterogeneity
+    # Generate a heterogeneity contour plot over the turbine layout plot
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    pdf_save_path = os.path.join(root_path, "heterogeneity_layouts.pdf")
+    hm.plot_layout(plot_background_flow=True, ylim=[0.90, 1.10], pdf_save_path=pdf_save_path)
+
+    # Plot individual graphs to showcase heterogeneity in detail
     hm.plot_graphs()
 
     plt.show()
