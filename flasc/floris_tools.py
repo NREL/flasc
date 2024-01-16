@@ -91,6 +91,38 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
     return fi_merged
 
 
+def reduce_floris_object(fi, turbine_list):
+    """Reduce a large FLORIS object to a subset selection of wind turbines.
+
+    Args:
+        fi (FlorisInterface): FLORIS object.
+        turbine_list (list, array-like): List of turbine indices which should be maintained.
+
+    Returns:
+        fi_reduced (FlorisInterface): The reduced FlorisInterface object.
+    """
+
+    # Get the turbine locations from the floris object
+    x = np.array(fi.layout_x, dtype=float, copy=True)
+    y = np.array(fi.layout_y, dtype=float, copy=True)
+
+    # Get turbine definitions from floris object
+    fi_turbine_type = fi.floris.farm.turbine_type
+    if len(fi_turbine_type) == 1:
+        fi_turbine_type = fi_turbine_type * len(fi.layout_x)
+    elif not len(fi_turbine_type) == len(fi.layout_x):
+        raise UserWarning("Incompatible format of turbine_type in FlorisInterface.")
+
+    # Construct the merged FLORIS model based on the first entry in fi_list
+    fi_reduced.reinitialize(
+        layout_x=x[turbine_list],
+        layout_y=y[turbine_list],
+        turbine_type=list(np.array(fi_turbine_type)[turbine_list]),
+    )
+
+    return fi_reduced
+
+
 def interpolate_floris_from_df_approx(
     df,
     df_approx,
@@ -597,6 +629,109 @@ def get_turbs_in_radius(
         turbs_within_radius = [ti for ti in turbs_within_radius if not ti == turb_no]
 
     return turbs_within_radius
+
+
+def get_all_impacting_turbines_geometrical(fi, turbine_weights, wd_step=3.0, wake_slope=0.30):
+    """Determine which turbines affect the turbines of interest
+    (i.e., those with a turbine_weights > 0.00001). This function
+    uses very simplified geometric functions to very quickly
+    derive which turbines are supposedly waking at least one
+    turbine in the farm of interest.
+
+    Args:
+        fi ([floris object]): FLORIS object of the farm of interest.
+        turbine_weights [list]: List of with turbine weights with length
+        equal to the number of wind turbines, and typically filled with
+        0s (neighbouring farms) and 1s (farm of interest).
+        wd_step (float, optional): Wind direction discretization step.
+        Defaults to 3.0.
+        wake_slope (float, optional): linear slope of the wake (dy/dx)
+        plot_lines (bool, optional): Enable plotting wakes/turbines.
+        Defaults to False.
+
+    Returns:
+        df_impacting_simple ([pd.DataFrame]): A Pandas Dataframe in which each row
+        contains a wind direction and a list of turbine numbers. The turbine
+        numbers are those turbines that should be modelled to accurately
+        capture the wake losses for the wind farm of interest. Turbine numbers
+        that are not in the 'impacting_turbines' can safely be removed from
+        the simulation without affecting any of the turbines that have a nonzero
+        turbine weight.
+    """
+
+    # Get farm layout
+    x = fi.layout_x
+    y = fi.layout_y
+    n_turbs = len(x)
+    D = [t["rotor_diameter"] for t in fi.floris.farm.turbine_definitions]
+    D = np.array(D, dtype=float)
+
+    # Setup output list
+    impacting_turbs_ids = []  # turbine numbers that impact any of the turbines of interest
+    impacting_turbs_wds = []  # lower bound of bin
+
+    # Rotate farm and determine freestream/waked turbines
+    is_impacting_list = []
+    wd_array = np.arange(0.0, 360.0, wd_step)
+    for wd in wd_array:
+        is_impacting = [None for _ in range(n_turbs)]
+        
+        # Rotate according to freestream wind direction
+        x_rot = np.cos((wd - 270.0) * np.pi / 180.0) * x - np.sin((wd - 270.0) * np.pi / 180.0) * y
+        y_rot = np.sin((wd - 270.0) * np.pi / 180.0) * x + np.cos((wd - 270.0) * np.pi / 180.0) * y
+        
+        # Get turbine indices of the farm turbines of interest, and find its most downstream location
+        turb_ids_of_interest = np.where(turbine_weights > 0.0001)[0]
+        x_rot_most_downstream_of_interest = np.max(x_rot[turb_ids_of_interest])
+
+        # Check for each turbine
+        for ii in range(n_turbs):
+            # Check easy skips: turbine is in farm of interest
+            if ii in turb_ids_of_interest:
+                is_impacting[ii] = True
+                continue
+            
+            # Check easy skips: further downstream than last turbine
+            if x_rot[ii] >= x_rot_most_downstream_of_interest:
+                is_impacting[ii] = False
+                continue
+            
+            x0 = x_rot[ii]
+            y0 = y_rot[ii]
+            def yw_upper(x):
+                y = (y0 + D[ii]) + (x - x0) * wake_slope
+                if isinstance(y, (float, np.float64, np.float32)):
+                    if x < (x0 + 0.01):
+                        y = -np.Inf
+                else:
+                    y[x < x0 + 0.01] = -np.Inf
+                return y
+
+            def yw_lower(x):
+                y = (y0 - D[ii]) - (x - x0) * wake_slope
+                if isinstance(y, (float, np.float64, np.float32)):
+                    if x < (x0 + 0.01):
+                        y = -np.Inf
+                else:
+                    y[x < x0 + 0.01] = -np.Inf
+                return y
+
+            def is_in_wake(xt, yt):
+                return (yt < yw_upper(xt)) & (yt > yw_lower(xt))
+
+            is_impacting[ii] = any(
+                is_in_wake(x_rot[turb_ids_of_interest], y_rot[turb_ids_of_interest])
+            )
+    
+        is_impacting_list.append(np.where(is_impacting)[0])
+
+    n_turbines_reduced = [len(ids) for ids in is_impacting_list]
+    df_impacting_simple = pd.DataFrame({
+        "wd": wd_array,
+        "impacting_turbines": is_impacting_list,
+        "n_turbines_reduced": n_turbines_reduced
+    })
+    return df_impacting_simple
 
 
 def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10, plot_lines=False):
