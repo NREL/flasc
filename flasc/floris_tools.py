@@ -91,7 +91,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
     return fi_merged
 
 
-def reduce_floris_object(fi, turbine_list):
+def reduce_floris_object(fi, turbine_list, copy=False):
     """Reduce a large FLORIS object to a subset selection of wind turbines.
 
     Args:
@@ -101,6 +101,12 @@ def reduce_floris_object(fi, turbine_list):
     Returns:
         fi_reduced (FlorisInterface): The reduced FlorisInterface object.
     """
+
+    # Copy, if necessary
+    if copy:
+        fi_reduced = fi.copy()
+    else:
+        fi_reduced = fi
 
     # Get the turbine locations from the floris object
     x = np.array(fi.layout_x, dtype=float, copy=True)
@@ -631,7 +637,12 @@ def get_turbs_in_radius(
     return turbs_within_radius
 
 
-def get_all_impacting_turbines_geometrical(fi, turbine_weights, wd_step=3.0, wake_slope=0.30):
+def get_all_impacting_turbines_geometrical(
+    fi,
+    turbine_weights,
+    wd_array=np.arange(0.0, 360.0, 3.0),
+    wake_slope=0.30
+):
     """Determine which turbines affect the turbines of interest
     (i.e., those with a turbine_weights > 0.00001). This function
     uses very simplified geometric functions to very quickly
@@ -672,7 +683,6 @@ def get_all_impacting_turbines_geometrical(fi, turbine_weights, wd_step=3.0, wak
 
     # Rotate farm and determine freestream/waked turbines
     is_impacting_list = []
-    wd_array = np.arange(0.0, 360.0, wd_step)
     for wd in wd_array:
         is_impacting = [None for _ in range(n_turbs)]
         
