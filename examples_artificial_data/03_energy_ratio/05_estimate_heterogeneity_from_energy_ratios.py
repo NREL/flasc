@@ -1,18 +1,15 @@
 import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from floris.utilities import wrap_360
-
-from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc import floris_tools as ftools
-from flasc.energy_ratio import energy_ratio as er
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
+from flasc.dataframe_operations import dataframe_manipulations as dfm
+from flasc.energy_ratio.energy_ratio_heterogeneity_mapper import heterogeneity_mapper
+
 # from flasc.visualization import plot_floris_layout
 from flasc.utilities_examples import load_floris_artificial as load_floris
-
-from flasc.energy_ratio.energy_ratio_heterogeneity_mapper import heterogeneity_mapper
 
 
 def load_data():
@@ -37,13 +34,15 @@ def load_data():
 if __name__ == "__main__":
     # Load FLORIS and plot the layout
     fi, _ = load_floris()
-    
+
     # Now specify which turbines we want to use in the analysis. Basically,
     # we want to use all the turbines besides the ones that we know have
     # an unreliable wind direction measurement. Here, for explanation purposes,
     # we just exclude turbine 3 from our analysis.
     nturbs = len(fi.layout_x)
-    bad_turbs = [3]  # Just hypothetical situation: assume turbine 3 gave faulty wind directions so we ignore it
+    bad_turbs = [
+        3
+    ]  # Just hypothetical situation: assume turbine 3 gave faulty wind directions so we ignore it
     turb_wd_measurement = [i for i in range(nturbs) if i not in bad_turbs]
 
     # Load the SCADA data and assign the freestream wind direction
@@ -72,11 +71,11 @@ if __name__ == "__main__":
         df_upstream=df_upstream,
         wd_bin_width=wd_bin_width,
         wd_array=np.arange(0.0, 360.0, 30.0),
-        ws_range=[6.0, 11.0]
+        ws_range=[6.0, 11.0],
     )
     print("df_heterogeneity:")
     print(df_heterogeneity)
-    
+
     # Extract a FLORIS heterogeneity map
     df_fi_hetmap = hm.generate_floris_hetmap()
     print("")

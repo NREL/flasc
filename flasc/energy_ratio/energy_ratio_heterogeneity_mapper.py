@@ -1,11 +1,9 @@
-from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
-
 import numpy as np
 import pandas as pd
-from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
-
 from floris.utilities import wrap_360
+from matplotlib.backends.backend_pdf import PdfPages
+from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 
 from flasc.dataframe_operations import dataframe_manipulations as dfm
 from flasc.energy_ratio import energy_ratio as er
@@ -15,27 +13,28 @@ from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
 # Standalone function to easily extract energy ratios for narrow wind direction bin
 def _get_energy_ratio(df, ti, wd_bins, ws_range):
     # Calculate energy ratios
-    er_in = EnergyRatioInput([df], ['data'])
+    er_in = EnergyRatioInput([df], ["data"])
     return er.compute_energy_ratio(
-            er_in,
-            test_turbines=[ti],
-            use_predefined_ref=True,
-            use_predefined_wd=True,
-            use_predefined_ws=True,
-            wd_step=15.0,
-            wd_bin_overlap_radius=0.0,
-            wd_min=wd_bins[0][0],
-            wd_max=wd_bins[0][1],
-            ws_min=ws_range[0],
-            ws_max=ws_range[1],
-            N=10,
-            percentiles=[5.0, 95.0]
-        )
+        er_in,
+        test_turbines=[ti],
+        use_predefined_ref=True,
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=15.0,
+        wd_bin_overlap_radius=0.0,
+        wd_min=wd_bins[0][0],
+        wd_max=wd_bins[0][1],
+        ws_min=ws_range[0],
+        ws_max=ws_range[1],
+        N=10,
+        percentiles=[5.0, 95.0],
+    )
 
 
-# Heterogeneity mapper class with all internal functions to calculate, extract and plot heterogeneity
+# Heterogeneity mapper class with all internal functions to calculate,
+# extract and plot heterogeneity
 # derived from upstream turbine's power measurements
-class heterogeneity_mapper():
+class heterogeneity_mapper:
     """This class is useful to calculate the energy ratios of a set
     of upstream turbines to then derive the heterogeneity in the
     inflow wind speed. This can be helpful in characterizing the
@@ -44,7 +43,7 @@ class heterogeneity_mapper():
     come from multiple sources, not only neighboring farms but also
     blockage effects of the farm itself.
     """
-   
+
     # Private functions
     def __init__(self, df_raw, fi):
         # Save to self
@@ -65,16 +64,15 @@ class heterogeneity_mapper():
         # Determine which turbines are upstream
         if wd > df_upstream.iloc[0]["wd_max"]:
             turbine_array = df_upstream.loc[
-                (wd > df_upstream["wd_min"]) & (wd <= df_upstream["wd_max"]),
-                "turbines"
+                (wd > df_upstream["wd_min"]) & (wd <= df_upstream["wd_max"]), "turbines"
             ].values[0]
 
         # deal with wd = 0 deg (or close to 0.0)
         else:
             turbine_array = df_upstream.loc[
-                (wrap_360(wd + 180) > wrap_360(df_upstream["wd_min"] + 180.0)) &
-                (wrap_360(wd + 180) <= wrap_360(df_upstream["wd_max"] + 180)),
-                "turbines"
+                (wrap_360(wd + 180) > wrap_360(df_upstream["wd_min"] + 180.0))
+                & (wrap_360(wd + 180) <= wrap_360(df_upstream["wd_max"] + 180)),
+                "turbines",
             ].values[0]
 
         # Load data and limit region
@@ -103,29 +101,29 @@ class heterogeneity_mapper():
         energy_ratios_lb = np.array(results_scada["data_lb"], dtype=float)
         energy_ratios_ub = np.array(results_scada["data_ub"], dtype=float)
 
-        return pd.DataFrame({
+        return pd.DataFrame(
+            {
                 "wd": [wd],
                 "wd_bin_width": [wd_bin_width],
                 "upstream_turbines": [turbine_array],
                 "energy_ratios": [energy_ratios],
                 "energy_ratios_lb": [energy_ratios_lb],
                 "energy_ratios_ub": [energy_ratios_ub],
-                "ws_ratios": [energy_ratios**(1/3)],
-                "bin_count": [np.array(results_scada["count_data"], dtype=int)]
-        })
+                "ws_ratios": [energy_ratios ** (1 / 3)],
+                "bin_count": [np.array(results_scada["count_data"], dtype=int)],
+            }
+        )
 
-    
     # Public functions
     def estimate_heterogeneity(
-            self,
-            df_upstream,
-            wd_array=np.arange(0.0, 360.0, 3.0),
-            wd_bin_width=6.0,
-            ws_range=[6.0, 11.0],
-        ):
+        self,
+        df_upstream,
+        wd_array=np.arange(0.0, 360.0, 3.0),
+        wd_bin_width=6.0,
+        ws_range=[6.0, 11.0],
+    ):
         df_list = [
-            self._process_single_wd(wd, wd_bin_width, ws_range, df_upstream)
-            for wd in wd_array
+            self._process_single_wd(wd, wd_bin_width, ws_range, df_upstream) for wd in wd_array
         ]
         self.df_heterogeneity = pd.concat(df_list).reset_index(drop=True)
         return self.df_heterogeneity
@@ -147,13 +145,9 @@ class heterogeneity_mapper():
 
             x = range(len(turbine_array))
             ax.fill_between(
-                x,
-                df_row["energy_ratios_lb"],
-                df_row["energy_ratios_ub"],
-                color="k",
-                alpha=0.30
+                x, df_row["energy_ratios_lb"], df_row["energy_ratios_ub"], color="k", alpha=0.30
             )
-            ax.plot(x, df_row["energy_ratios"], "-o", color='k', label="SCADA")
+            ax.plot(x, df_row["energy_ratios"], "-o", color="k", label="SCADA")
             ax.grid(True, which="major")
             # ax.grid(True, which="minor", axis="y")
             ax.set_ylabel("Energy ratio of upstream \n turbines w.r.t. the average (-)")
@@ -166,11 +160,15 @@ class heterogeneity_mapper():
             ax.set_yticklabels(["{:.2f}".format(f) for f in ax.get_yticks()])
 
             ax2 = ax.twinx()
-            ax2.plot(x, df_row["energy_ratios"], "-o", color='orange', label="SCADA") 
+            ax2.plot(x, df_row["energy_ratios"], "-o", color="orange", label="SCADA")
             ax2.set_ylim(ax.get_ylim())
             ax2.set_yticks(ax.get_yticks())
-            ax2.set_yticklabels(["{:.2f}".format(np.cbrt(f)) for f in ax.get_yticks()], color="orange")
-            ax2.set_ylabel("WS ratio of upstream \n turbines w.r.t. the average (-)", color="orange")
+            ax2.set_yticklabels(
+                ["{:.2f}".format(np.cbrt(f)) for f in ax.get_yticks()], color="orange"
+            )
+            ax2.set_ylabel(
+                "WS ratio of upstream \n turbines w.r.t. the average (-)", color="orange"
+            )
 
             plt.tight_layout()
 
@@ -185,12 +183,12 @@ class heterogeneity_mapper():
     def generate_floris_hetmap(self):
         if self.df_heterogeneity is None:
             raise UserWarning("Please call 'estimate_heterogeneity(...)' first.")
-        
+
         # Determine FLORIS heterogeneous map
         fi = self.fi
         ll = 2.0 * np.sqrt(
-            (np.max(fi.layout_x) - np.min(fi.layout_x))**2.0 +
-            (np.max(fi.layout_y) - np.min(fi.layout_y))**2.0
+            (np.max(fi.layout_x) - np.min(fi.layout_x)) ** 2.0
+            + (np.max(fi.layout_y) - np.min(fi.layout_y)) ** 2.0
         )
         locations_x = []
         locations_y = []
@@ -202,8 +200,12 @@ class heterogeneity_mapper():
             x_turbs = np.array(fi.layout_x, dtype=float)[turbs]
             y_turbs = np.array(fi.layout_y, dtype=float)[turbs]
 
-            xlocs = np.hstack([xt + ll * np.cos(wd) * np.linspace(-1.0, 1.0, 100) for xt in x_turbs])
-            ylocs = np.hstack([yt + ll * np.sin(wd) * np.linspace(-1.0, 1.0, 100) for yt in y_turbs])
+            xlocs = np.hstack(
+                [xt + ll * np.cos(wd) * np.linspace(-1.0, 1.0, 100) for xt in x_turbs]
+            )
+            ylocs = np.hstack(
+                [yt + ll * np.sin(wd) * np.linspace(-1.0, 1.0, 100) for yt in y_turbs]
+            )
             speedup_onewd = np.repeat(df_row["ws_ratios"], 100)
             locations_x.append(xlocs)
             locations_y.append(ylocs)
@@ -216,12 +218,14 @@ class heterogeneity_mapper():
             # plt.colorbar(im)
             # plt.show()
 
-        df_fi_hetmap = pd.DataFrame({
-            "wd": self.df_heterogeneity["wd"],
-            "x": locations_x,
-            "y": locations_y,
-            "speed_up": speed_ups
-        })
+        df_fi_hetmap = pd.DataFrame(
+            {
+                "wd": self.df_heterogeneity["wd"],
+                "x": locations_x,
+                "y": locations_y,
+                "speed_up": speed_ups,
+            }
+        )
 
         self.df_fi_hetmap = df_fi_hetmap
         return df_fi_hetmap
@@ -245,11 +249,13 @@ class heterogeneity_mapper():
             "color": ("lightgray"),
             "marker": ("."),
             "markersize": (30),
-            "label": (None)
+            "label": (None),
         }
 
         for _, df_row in self.df_heterogeneity.iterrows():
-            non_upstream_turbines = [ti for ti in range(len(fi.layout_x)) if ti not in df_row["upstream_turbines"]]
+            non_upstream_turbines = [
+                ti for ti in range(len(fi.layout_x)) if ti not in df_row["upstream_turbines"]
+            ]
 
             fig, ax = plt.subplots(figsize=(8, 6))
             ax.scatter(
@@ -283,7 +289,7 @@ class heterogeneity_mapper():
             xm = np.min(fi.layout_x) - 100.0
             ym = np.max(fi.layout_y) + 500.0
             radius = 120.0
-            theta = np.linspace(0.0, 2*np.pi, 100)
+            theta = np.linspace(0.0, 2 * np.pi, 100)
             xcirc = np.cos(theta) * radius + xm
             ycirc = np.sin(theta) * radius + ym
             ax.plot(xcirc, ycirc, color="black", linewidth=2)
@@ -296,7 +302,7 @@ class heterogeneity_mapper():
                 head_width=0.6 * radius,
                 head_length=0.75 * radius,
                 length_includes_head=True,
-                color="black"
+                color="black",
             )
 
             # Add title, colorbar
@@ -305,7 +311,9 @@ class heterogeneity_mapper():
             clb.set_label("Wind speed ratio (-)")
 
             # Add plot to ensure equal axis does not crop plot too much
-            ax.plot(np.max(fi.layout_x) + 500.0, np.min(fi.layout_y), '.', color='white', markersize=1)
+            ax.plot(
+                np.max(fi.layout_x) + 500.0, np.min(fi.layout_y), ".", color="white", markersize=1
+            )
             ax.axis("equal")
             plt.tight_layout()
 
@@ -316,14 +324,16 @@ class heterogeneity_mapper():
 
                 if len(np.unique(df_hetmap_row["speed_up"])) <= 1:
                     # Add some noise to prevent issues
-                    df_hetmap_row["speed_up"] += 0.0001 * np.random.randn(len(df_hetmap_row["speed_up"]))
+                    df_hetmap_row["speed_up"] += 0.0001 * np.random.randn(
+                        len(df_hetmap_row["speed_up"])
+                    )
 
                 xlim_plot = ax.get_xlim()
                 ylim_plot = ax.get_ylim()
                 x, y = np.meshgrid(
                     np.linspace(xlim_plot[0], xlim_plot[1], 100),
                     np.linspace(ylim_plot[0], ylim_plot[1], 100),
-                    indexing="ij"
+                    indexing="ij",
                 )
                 x = x.flatten()
                 y = y.flatten()
@@ -331,7 +341,7 @@ class heterogeneity_mapper():
                     lin_interpolant = LinearNDInterpolator(
                         points=np.vstack([df_hetmap_row["x"], df_hetmap_row["y"]]).T,
                         values=df_hetmap_row["speed_up"],
-                        fill_value=np.nan
+                        fill_value=np.nan,
                     )
                     lin_values = lin_interpolant(x, y)
                 except:
@@ -341,7 +351,7 @@ class heterogeneity_mapper():
                     x=np.vstack([df_hetmap_row["x"], df_hetmap_row["y"]]).T,
                     y=df_hetmap_row["speed_up"],
                 )
-                nn_values = nearest_interpolant(x,y)
+                nn_values = nearest_interpolant(x, y)
                 ids_isnan = np.isnan(lin_values)
 
                 het_map_mesh = np.array(lin_values, copy=True)
@@ -349,14 +359,7 @@ class heterogeneity_mapper():
 
                 # Produce plot
                 im = ax.tricontourf(
-                    x,
-                    y,
-                    het_map_mesh,
-                    cmap="jet",
-                    vmin=ylim[0],
-                    vmax=ylim[1],
-                    levels=50,
-                    zorder=-1
+                    x, y, het_map_mesh, cmap="jet", vmin=ylim[0], vmax=ylim[1], levels=50, zorder=-1
                 )
                 # ax.scatter(
                 #     self.df_fi_hetmap.loc[0]["x"],
