@@ -638,10 +638,7 @@ def get_turbs_in_radius(
 
 
 def get_all_impacting_turbines_geometrical(
-    fi,
-    turbine_weights,
-    wd_array=np.arange(0.0, 360.0, 3.0),
-    wake_slope=0.30
+    fi, turbine_weights, wd_array=np.arange(0.0, 360.0, 3.0), wake_slope=0.30
 ):
     """Determine which turbines affect the turbines of interest
     (i.e., those with a turbine_weights > 0.00001). This function
@@ -677,19 +674,15 @@ def get_all_impacting_turbines_geometrical(
     D = [t["rotor_diameter"] for t in fi.floris.farm.turbine_definitions]
     D = np.array(D, dtype=float)
 
-    # Setup output list
-    impacting_turbs_ids = []  # turbine numbers that impact any of the turbines of interest
-    impacting_turbs_wds = []  # lower bound of bin
-
     # Rotate farm and determine freestream/waked turbines
     is_impacting_list = []
     for wd in wd_array:
         is_impacting = [None for _ in range(n_turbs)]
-        
+
         # Rotate according to freestream wind direction
         x_rot = np.cos((wd - 270.0) * np.pi / 180.0) * x - np.sin((wd - 270.0) * np.pi / 180.0) * y
         y_rot = np.sin((wd - 270.0) * np.pi / 180.0) * x + np.cos((wd - 270.0) * np.pi / 180.0) * y
-        
+
         # Get turbine indices of the farm turbines of interest, and find its most downstream location
         turb_ids_of_interest = np.where(turbine_weights > 0.0001)[0]
         x_rot_most_downstream_of_interest = np.max(x_rot[turb_ids_of_interest])
@@ -700,14 +693,15 @@ def get_all_impacting_turbines_geometrical(
             if ii in turb_ids_of_interest:
                 is_impacting[ii] = True
                 continue
-            
+
             # Check easy skips: further downstream than last turbine
             if x_rot[ii] >= x_rot_most_downstream_of_interest:
                 is_impacting[ii] = False
                 continue
-            
+
             x0 = x_rot[ii]
             y0 = y_rot[ii]
+
             def yw_upper(x):
                 y = (y0 + D[ii]) + (x - x0) * wake_slope
                 if isinstance(y, (float, np.float64, np.float32)):
@@ -732,15 +726,17 @@ def get_all_impacting_turbines_geometrical(
             is_impacting[ii] = any(
                 is_in_wake(x_rot[turb_ids_of_interest], y_rot[turb_ids_of_interest])
             )
-    
+
         is_impacting_list.append(np.where(is_impacting)[0])
 
     n_turbines_reduced = [len(ids) for ids in is_impacting_list]
-    df_impacting_simple = pd.DataFrame({
-        "wd": wd_array,
-        "impacting_turbines": is_impacting_list,
-        "n_turbines_reduced": n_turbines_reduced
-    })
+    df_impacting_simple = pd.DataFrame(
+        {
+            "wd": wd_array,
+            "impacting_turbines": is_impacting_list,
+            "n_turbines_reduced": n_turbines_reduced,
+        }
+    )
     return df_impacting_simple
 
 
