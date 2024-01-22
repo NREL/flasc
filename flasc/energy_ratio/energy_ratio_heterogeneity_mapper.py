@@ -149,7 +149,6 @@ class heterogeneity_mapper:
             )
             ax.plot(x, df_row["energy_ratios"], "-o", color="k", label="SCADA")
             ax.grid(True, which="major")
-            # ax.grid(True, which="minor", axis="y")
             ax.set_ylabel("Energy ratio of upstream \n turbines w.r.t. the average (-)")
             ax.set_title("Wind direction = {:.1f} deg. Bin count: {:d}.".format(wd, N))
             ax.set_ylim(ylim)
@@ -210,13 +209,6 @@ class heterogeneity_mapper:
             locations_x.append(xlocs)
             locations_y.append(ylocs)
             speed_ups.append(speedup_onewd)
-
-            # fig, ax = plt.subplots()
-            # ax.plot(xlocs, ylocs, '.')
-            # ax.plot(x_turbs, y_turbs, 'ro')
-            # im = ax.tricontourf(xlocs, ylocs, speedup_onewd, levels=50)
-            # plt.colorbar(im)
-            # plt.show()
 
         df_fi_hetmap = pd.DataFrame(
             {
@@ -361,14 +353,6 @@ class heterogeneity_mapper:
                 im = ax.tricontourf(
                     x, y, het_map_mesh, cmap="jet", vmin=ylim[0], vmax=ylim[1], levels=50, zorder=-1
                 )
-                # ax.scatter(
-                #     self.df_fi_hetmap.loc[0]["x"],
-                #     self.df_fi_hetmap.loc[0]["y"],
-                #     c=self.df_fi_hetmap.loc[0].speed_up,
-                #     cmap="jet",
-                #     vmin=ylim[0],
-                #     vmax=ylim[1],
-                # )
 
             if pdf_save_path is not None:
                 pdf.savefig(fig)
