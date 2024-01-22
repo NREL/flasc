@@ -235,15 +235,6 @@ class heterogeneity_mapper:
 
         # Plot the results one by one
         fi = self.fi
-        plotting_dict = {
-            "turbine_indices": range(len(fi.layout_x)),
-            "turbine_names": ["T{:02d}".format(X) for X in range(len(fi.layout_x))],
-            "color": ("lightgray"),
-            "marker": ("."),
-            "markersize": (30),
-            "label": (None),
-        }
-
         for _, df_row in self.df_heterogeneity.iterrows():
             non_upstream_turbines = [
                 ti for ti in range(len(fi.layout_x)) if ti not in df_row["upstream_turbines"]
