@@ -320,15 +320,12 @@ class heterogeneity_mapper:
                 )
                 x = x.flatten()
                 y = y.flatten()
-                try:
-                    lin_interpolant = LinearNDInterpolator(
-                        points=np.vstack([df_hetmap_row["x"], df_hetmap_row["y"]]).T,
-                        values=df_hetmap_row["speed_up"],
-                        fill_value=np.nan,
-                    )
-                    lin_values = lin_interpolant(x, y)
-                except:
-                    lin_values = np.nan * np.ones_like(x)
+                lin_interpolant = LinearNDInterpolator(
+                    points=np.vstack([df_hetmap_row["x"], df_hetmap_row["y"]]).T,
+                    values=df_hetmap_row["speed_up"],
+                    fill_value=np.nan,
+                )
+                lin_values = lin_interpolant(x, y)
 
                 nearest_interpolant = NearestNDInterpolator(
                     x=np.vstack([df_hetmap_row["x"], df_hetmap_row["y"]]).T,
