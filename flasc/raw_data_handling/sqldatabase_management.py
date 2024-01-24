@@ -234,7 +234,6 @@ class sql_database_manager:
 
         return df
 
-    # TODO: This is a fresh redo check it works
     def send_data(
         self,
         table_name,
@@ -281,93 +280,7 @@ class sql_database_manager:
         total_time = timerpc() - time_start_total
         print(f"...Finished in {total_time}")
 
-    # #TODO: UPDATE TO POLARS
-    # #TODO: Paul note (may 31 2023), POLARS API not up to PANDAS so using PANDAS here
-    # def send_data(
-    #     self,
-    #     table_name,
-    #     df,
-    #     if_exists="append_new",
-    #     unique_cols=["time"],
-    #     df_chunk_size=2000,
-    #     sql_chunk_size=50
-    # ):
-    #     table_name = table_name.lower()
-    #     table_names = [t.lower() for t in self._get_table_names()]
 
-    #     if (if_exists == "append"):
-    #         print("Warning: risk of adding duplicate rows using 'append'.")
-    #         print("You are suggested to use 'append_new' instead.")
-
-    #     if (if_exists == "append_new") and (table_name in table_names):
-    #         if len(unique_cols) > 1:
-    #             raise NotImplementedError("Not yet implemented.")
-
-    #         col = unique_cols[0]
-    #         idx_in_db = self.get_data(table_name=table_name, columns=[col])[
-    #             col
-    #         ]
-
-    #         # Check if values in SQL database are unique
-    #         if not idx_in_db.is_unique:
-    #             raise IndexError(
-    #                 "Column '%s' is not unique in the SQL database." % col
-    #             )
-
-    #         idx_in_df = set(df[col])
-    #         idx_in_db = set(idx_in_db)
-    #         idx_to_add = np.sort(list(idx_in_df - idx_in_db))
-    #         print(
-    #             "{:d} entries already exist in SQL database.".format(
-    #                 len(idx_in_df) - len(idx_to_add)
-    #             )
-    #         )
-
-    #         print("Adding {:d} new entries...".format(len(idx_to_add)))
-    #         df_subset = df.set_index('time').loc[idx_to_add].reset_index(
-    #             drop=False)
-
-    #     else:
-    #         df_subset = df
-
-    #     if (if_exists == "append_new"):
-    #         if_exists = "append"
-
-    #     # Upload data
-    #     N = df_subset.shape[0]
-    #     if N < 1:
-    #         print("Skipping data upload. Dataframe is empty.")
-    #     else:
-    #         print("Attempting to insert %d rows into table '%s'."
-    #             % (df_subset.shape[0], table_name))
-    #         df_chunks_id = np.arange(0, df_subset.shape[0], df_chunk_size)
-    #         df_chunks_id = np.append(df_chunks_id, df_subset.shape[0])
-    #         df_chunks_id = np.unique(df_chunks_id)
-
-    #         time_start_total = timerpc()
-    #         for i in range(len(df_chunks_id)-1):
-    #             Nl = df_chunks_id[i]
-    #             Nu = df_chunks_id[i+1]
-    #             print("Inserting rows %d to %d." % (Nl, Nu))
-    #             time_start_i = timerpc()
-    #             df_sub = df_subset[Nl:Nu]
-    #             df_sub.to_sql(
-    #                 table_name,
-    #                 self.engine,
-    #                 if_exists=if_exists,
-    #                 index=False,
-    #                 method="multi",
-    #                 chunksize=sql_chunk_size,
-    #             )
-    #             time_i = timerpc() - time_start_i
-    #             total_time = timerpc() - time_start_total
-    #             est_time_left = (total_time / Nu) * (N - Nu)
-    #             eta = datetime.datetime.now() + td(seconds=est_time_left)
-    #             eta = eta.strftime("%a, %d %b %Y %H:%M:%S")
-    #             print("Data insertion took %.1f s. ETA: %s." % (time_i, eta))
-
-
-# TODO: UPDATE TO POLARS
 class sql_db_explorer_gui:
     def __init__(self, master, dbc, turbine_names=None, sort_columns=False):
         # Create the options container
@@ -396,7 +309,6 @@ class sql_db_explorer_gui:
         for ii, tci in enumerate(self.table_choices):
             id_letter = "[" + chr(97 + ii).upper() + "]"
             self.table_listbox.insert(tk.END, id_letter + " " + tci)
-        # self.table_listbox.select_set(0)
 
         # Create a start_date widget
         start_date_label = tk.Label(frame_1, text="Data import: start date")
@@ -547,7 +459,6 @@ class sql_db_explorer_gui:
                 start_time=start_time,
                 end_time=end_time,
             )
-            # df = df.set_index("time", drop=True)
 
             if df.shape[0] <= 0:
                 print("No data found in this timerange for table %s" % table_select)
@@ -572,7 +483,6 @@ class sql_db_explorer_gui:
                 df_array.append(df)
 
         # Merge dataframes
-        # self.df = pl.concat(df_array, axis=1)# .reset_index(drop=False)
         df_merge = df_array[0]
 
         if len(df_array) > 1:
@@ -584,14 +494,10 @@ class sql_db_explorer_gui:
 
         # If sorting the columns do it now
         if self.sort_columns:
-            # self.df = self.df[sorted(self.df.columns)]
             self.df = self.df.select(sorted(self.df.columns))
 
         self.update_channel_cols()
         self.create_figures()
-        # # Clear all axes
-        # for ax in self.axes:
-        #     ax.clear()
 
         # Update frame width
         nochars_cols = [len(c) for c in self.df.columns]
@@ -644,6 +550,8 @@ class sql_db_explorer_gui:
             self.frame_2.destroy()
         except tk.TclError as e:
             print(f"Error destroying widgets: {e}")
+        except AttributeError as ae:
+            print(f"Attibute error, but assuming just because no figures yet and continuing: {ae}")
         else:
             print("Figures destroyed successfully.")
 
