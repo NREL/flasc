@@ -75,7 +75,6 @@ class sql_database_manager:
             con.commit()  # commit the transaction
 
     def _remove_duplicated_time(self, table_name, df):
-
         df_pl = pl.from_pandas(df)
 
         start_time = df_pl.select(pl.min("time"))[0, 0]
