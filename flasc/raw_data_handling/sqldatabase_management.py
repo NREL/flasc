@@ -61,7 +61,7 @@ class sql_database_manager:
         print(f"Creating Table: {table_name} with {df.shape[1]} columns")
 
         # Convert to pandas for upload
-        df_pandas = df.to_pandas()
+        df_pandas = df.copy()
         df_pandas = df_pandas.iloc[:10]
 
         df_pandas.to_sql(table_name, self.engine, index=False, method="multi")
@@ -75,9 +75,12 @@ class sql_database_manager:
             con.commit()  # commit the transaction
 
     def _remove_duplicated_time(self, table_name, df):
-        start_time = df.select(pl.min("time"))[0, 0]
-        end_time = df.select(pl.max("time"))[0, 0]
-        original_size = df.shape[0]
+
+        df_pl = pl.from_pandas(df)
+
+        start_time = df_pl.select(pl.min("time"))[0, 0]
+        end_time = df_pl.select(pl.max("time"))[0, 0]
+        original_size = df_pl.shape[0]
 
         print(
             f"Checking for time entries already in {table_name} between {start_time} and {end_time}"
@@ -86,14 +89,14 @@ class sql_database_manager:
             table_name, ["time"], start_time=start_time, end_time=end_time, end_inclusive=True
         )
 
-        df = df.join(time_in_db, on="time", how="anti")
-        new_size = df.shape[0]
+        df_pl = df_pl.join(pl.from_pandas(time_in_db), on="time", how="anti")
+        new_size = df_pl.shape[0]
         if new_size < original_size:
             print(
                 f"...Dataframe size reduced from {original_size} to {new_size}"
                 f" by time values already in {table_name}"
             )
-        return df
+        return df_pl.to_pandas()
 
     def _get_first_time_entry(self, table_name):
         # Get the table corresponding to the table name
@@ -232,7 +235,7 @@ class sql_database_manager:
             if not (df.schema["time"] == pl.Datetime):
                 df = df.with_columns(pl.col("time").cast(pl.Datetime))
 
-        return df
+        return df.to_pandas()
 
     def send_data(
         self,
@@ -244,7 +247,7 @@ class sql_database_manager:
         sql_chunk_size=50,
     ):
         # Make a local copy
-        df_ = df.clone()
+        df_ = pl.from_pandas(df)
 
         # Check if table exists
         if not self._does_table_exist(table_name):
