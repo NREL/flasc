@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from floris.tools import FlorisInterface
 
-from flasc.floris_tools import get_all_impacting_turbines_geometrical
+from flasc.utilities.floris_tools import get_all_impacting_turbines_geometrical
 
 # Demonstrate the get_all_impacting_turbines_geometrical
 # function in floris_tools

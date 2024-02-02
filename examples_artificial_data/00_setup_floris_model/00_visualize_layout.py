@@ -14,7 +14,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import (
     plot_floris_layout,
     plot_layout_only,
