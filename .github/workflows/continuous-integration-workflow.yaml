@@ -23,18 +23,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e ".[develop]"
     - uses: pre-commit/action@v3.0.0
-    - name: Run tests and collect coverage
+    - name: Run tests
       run: |
         # -rA displays the captured output for all tests after they're run
         # See the docs: https://doc.pytest.org/en/latest/reference/reference.html#command-line-flags
         pytest -rA tests/
-    - name: Run coverage tests
+    - name: Run coverage tests and coveralls
       if: (${{ env.COVERALLS_REPO_TOKEN }}) && (matrix.os == 'ubuntu-latest')
       run: |
         pip install pytest coverage coveralls
         coverage run -m pytest -rA tests/
         coveralls
-      env:
+      uses: coverallsapp/github-action@v2
+      with:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
 
