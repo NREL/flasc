@@ -11,9 +11,9 @@ the License.
 
 See https://nrel.github.io/flasc/ for documentation
 
-____ model_tuning ____
+____ model_fitting ____
 
-This is a preliminary implementation of tuning methods for FLORIS to SCADA.
+This contains a preliminary implementation of tuning methods for FLORIS to SCADA (floris_tuning.py).
 The code is focused on methods for the Empirical Guassian wake model and is
 based on contributions from Elizabeth Eyeson, Paul Fleming (paul.fleming@nrel.gov)
 Misha Sinner (michael.sinner@nrel.gov) and Eric Simley at NREL, and Bart
