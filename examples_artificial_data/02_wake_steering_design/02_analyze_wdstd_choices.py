@@ -17,8 +17,8 @@ from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_an
 from floris.tools.uncertainty_interface import UncertaintyInterface
 from matplotlib import pyplot as plt
 
-from flasc.utilities_examples import load_floris_artificial as load_floris
-from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
+from flasc.utilities.lookup_table_tools import get_yaw_angles_interpolant
 
 
 def load_floris_with_uncertainty(std_wd=0.0):
