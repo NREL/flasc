@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.energy_ratio.energy_ratio_utilities import (
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.energy_ratio_utilities import (
     add_wd_bin,
     add_ws_bin,
     filter_all_nulls,

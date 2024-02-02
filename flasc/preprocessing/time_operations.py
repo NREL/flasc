@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
-from . import utilities as fsut
+from flasc.utilities import utilities as fsut
 
 
 def df_movingaverage(

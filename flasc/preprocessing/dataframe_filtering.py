@@ -14,7 +14,7 @@
 import numpy as np
 from scipy.interpolate import interp1d
 
-from ..dataframe_operations import dataframe_manipulations as dfm
+from flasc.preprocessing import dataframe_manipulations as dfm
 
 
 def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbose=True):
@@ -46,7 +46,7 @@ def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbos
         is waked, and each row shows which turbines are waking that turbine
         for that particular wind direction ('wd'). Typically calculated using:
 
-            import flasc.floris_tools as ftools
+            import flasc.utilities.floris_tools as ftools
             df_impacting_turbines = ftools.get_all_impacting_turbines(fi)
 
         verbose (bool, optional): Print information to the console. Defaults

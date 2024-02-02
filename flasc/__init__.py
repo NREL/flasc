@@ -8,13 +8,11 @@ __version__ = "0.1.0"
 
 from pathlib import Path
 
-from . import (
-    analysis,
-    preprocessing,
-    model_fitting,
-    utilities,
-    optimization,
-    timing_tests,
-    visualization,
-    yaw_optimizer_visualization,
-)
+with open(Path(__file__).parent / "version.py") as _version_file:
+    __version__ = _version_file.read().strip()
+
+# from . import (
+#     optimization,
+#     visualization,
+#     yaw_optimizer_visualization,
+# )

@@ -20,12 +20,12 @@ import scipy.stats as spst
 from floris.utilities import wrap_180, wrap_360
 from pandas.errors import DataError
 
-from . import (
+from flasc.utilities import (
     circular_statistics as css,
     floris_tools as ftools,
-    time_operations as fsato,
     utilities as fsut,
 )
+from flasc.preprocessing import time_operations as fsato
 
 
 def find_timeshift_between_dfs(

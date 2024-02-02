@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 
-from flasc.dataframe_operations.dataframe_manipulations import df_reduce_precision
+from flasc.preprocessing.dataframe_manipulations import df_reduce_precision
 
 
 def generate_block_list(N: int, num_blocks: int = 10):

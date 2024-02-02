@@ -22,11 +22,11 @@
 import numpy as np
 import polars as pl
 
-import flasc.floris_tools as ftools
-from flasc.energy_ratio import energy_ratio as er, total_uplift as tup
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.energy_ratio.energy_ratio_utilities import add_power_ref, add_power_test
-from flasc.model_tuning.tuner_utils import replicate_nan_values, resim_floris, set_fi_param
+import flasc.utilities.floris_tools as ftools
+from flasc.analysis import energy_ratio as er, total_uplift as tup
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.energy_ratio_utilities import add_power_ref, add_power_test
+from flasc.model_fitting.tuner_utils import replicate_nan_values, resim_floris, set_fi_param
 
 
 def evaluate_overall_wake_loss(df_, df_freq=None):

@@ -21,9 +21,9 @@ from floris.utilities import wrap_360
 from scipy import optimize as opt, stats as spst
 
 from flasc import floris_tools as ftools
-from flasc.dataframe_operations import dataframe_manipulations as dfm
-from flasc.energy_ratio import energy_ratio as er
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
+from flasc.preprocessing import dataframe_manipulations as dfm
+from flasc.analysis import energy_ratio as er
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.utilities import printnow as print
 
 

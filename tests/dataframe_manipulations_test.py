@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import circmean
 
-from flasc.dataframe_operations import dataframe_manipulations as dfm
+from flasc.preprocessing import dataframe_manipulations as dfm
 
 
 def load_data():

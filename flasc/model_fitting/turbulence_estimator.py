@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .. import floris_tools as ftools, optimization as opt
+from flasc.utilities import floris_tools as ftools
+from flasc import optimization as opt
 
 
 class ti_estimator:

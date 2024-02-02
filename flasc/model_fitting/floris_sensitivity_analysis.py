@@ -18,7 +18,7 @@ from pandas.errors import DataError
 from SALib.analyze import sobol
 from SALib.sample import saltelli
 
-from .. import floris_tools as ftools
+from flasc.utilities import floris_tools as ftools
 
 
 class floris_sobol_analysis:
