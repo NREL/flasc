@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from flasc import floris_tools as ftools
-from flasc.dataframe_operations import dataframe_manipulations as dfm
-from flasc.energy_ratio.energy_ratio_heterogeneity_mapper import heterogeneity_mapper
+from flasc.utilities import floris_tools as ftools
+from flasc.preprocessing import dataframe_manipulations as dfm
+from flasc.analysis.energy_ratio_heterogeneity_mapper import heterogeneity_mapper
 
 # from flasc.visualization import plot_floris_layout
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_data():

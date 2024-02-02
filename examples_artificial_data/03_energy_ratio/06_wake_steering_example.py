@@ -16,9 +16,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from flasc.energy_ratio import energy_ratio as er
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.analysis import energy_ratio as er
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_binned_mean_and_ci, plot_layout_with_waking_directions
 
 if __name__ == "__main__":
