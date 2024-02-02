@@ -22,7 +22,7 @@ from floris.utilities import wrap_360
 from scipy import interpolate
 from scipy.stats import norm
 
-from flasc import utilities as fsut
+from flasc.utilities import utilities as fsut
 
 # Disable line too long for this file for csv block
 # Some comment blocks would be confusing otherwise
