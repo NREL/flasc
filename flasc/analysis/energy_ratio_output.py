@@ -144,11 +144,11 @@ class EnergyRatioOutput:
             - If axarr is None, a new figure will be created.
         """
         # Handle defaults for show_wind_speed_distribution
-        if show_wind_direction_distribution is None:
+        if show_wind_speed_distribution is None:
             if polar_plot:
-                show_wind_direction_distribution = False
+                show_wind_speed_distribution = False
             else:
-                show_wind_direction_distribution = True
+                show_wind_speed_distribution = True
 
         # Only allow showing the wind speed distribution if polar_plot is False
         if polar_plot and show_wind_speed_distribution:
