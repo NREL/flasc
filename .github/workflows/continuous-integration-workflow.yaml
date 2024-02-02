@@ -29,13 +29,15 @@ jobs:
         # See the docs: https://doc.pytest.org/en/latest/reference/reference.html#command-line-flags
         pytest -rA tests/
     - name: Run coverage tests and coveralls
-      if: (${{ env.COVERALLS_REPO_TOKEN }}) && (matrix.os == 'ubuntu-latest')
+      # if: (${{ env.COVERALLS_REPO_TOKEN }}) && (matrix.os == 'ubuntu-latest')
+      if: matrix.os == 'ubuntu-latest'
       run: |
         pip install pytest coverage coveralls
         coverage run -m pytest -rA tests/
-        coveralls
+      # coveralls
     - name: Upload coverage to coveralls
-      if: (${{ env.COVERALLS_REPO_TOKEN }}) && (matrix.os == 'ubuntu-latest')
+      if: matrix.os == 'ubuntu-latest'
+      # if: (${{ env.COVERALLS_REPO_TOKEN }}) && (matrix.os == 'ubuntu-latest')
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
