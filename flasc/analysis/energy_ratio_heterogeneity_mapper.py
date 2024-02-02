@@ -5,9 +5,9 @@ from floris.utilities import wrap_360
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 
-from flasc.preprocessing import dataframe_manipulations as dfm
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.preprocessing import dataframe_manipulations as dfm
 
 
 # Standalone function to easily extract energy ratios for narrow wind direction bin

@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from flasc.utilities import floris_tools as fsatools
 from flasc import visualization as fsaviz
+from flasc.utilities import floris_tools as fsatools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
 # Demonstrate the turbine dependency functions in floris_tools

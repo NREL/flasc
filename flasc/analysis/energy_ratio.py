@@ -9,9 +9,9 @@
 import polars as pl
 
 import flasc.analysis.energy_ratio_utilities as util
-from flasc.preprocessing.dataframe_manipulations import df_reduce_precision
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.analysis.energy_ratio_output import EnergyRatioOutput
+from flasc.preprocessing.dataframe_manipulations import df_reduce_precision
 
 
 # Internal version, returns a polars dataframe
