@@ -38,9 +38,10 @@ jobs:
         pytest --cov=./ --cov-report=xml tests/ --ignore tests/reg_tests --ignore tests/timing.py --ignore tests/profiling.py
     - name: Upload coverage to Codecov
       # if: ${{ env.CODECOV_TOKEN }}  # Don't attempt to upload if the codecov token is not configured
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage.xml
         fail_ci_if_error: true
 
