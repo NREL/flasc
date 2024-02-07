@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from pandas.errors import DataError
 
-from flasc.optimization import find_timeshift_between_dfs, match_y_curves_by_offset
+from flasc.utilities.optimization import find_timeshift_between_dfs, match_y_curves_by_offset
 
 
 def generate_dataframes():
