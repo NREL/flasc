@@ -2,7 +2,6 @@ import os
 from time import perf_counter as timerpc
 
 import numpy as np
-from floris.tools import ParallelComputingInterface
 
 from flasc.utilities import floris_tools as ftools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
