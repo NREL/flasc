@@ -15,10 +15,10 @@ import numpy as np
 from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
 from matplotlib import pyplot as plt
 
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.utilities.lookup_table_tools import get_yaw_angles_interpolant
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_floris_layout, plot_layout_with_waking_directions
-from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
-from flasc.wake_steering.yaw_optimizer_visualization import (
+from flasc.yaw_optimizer_visualization import (
     plot_offsets_wd,
     plot_offsets_wswd_heatmap,
     plot_uplifts_by_atmospheric_conditions,

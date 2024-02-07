@@ -16,7 +16,7 @@ import pandas as pd
 from floris.tools.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
 from floris.tools.uncertainty_interface import UncertaintyInterface
 
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
 
 def load_wind_climate_interpolant():

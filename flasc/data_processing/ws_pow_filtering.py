@@ -20,9 +20,9 @@ from bokeh.models import Legend
 from bokeh.palettes import Category20_20 as palette
 from bokeh.plotting import ColumnDataSource, figure
 
-from .. import utilities as flascutils
-from ..dataframe_operations import dataframe_filtering as dff
-from ..turbine_analysis.find_sensor_faults import find_sensor_stuck_faults
+from flasc.data_processing import dataframe_filtering as dff
+from flasc.data_processing.find_sensor_faults import find_sensor_stuck_faults
+from flasc.utilities import utilities as flascutils
 
 
 class ws_pw_curve_filtering:

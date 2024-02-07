@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from scipy.stats import circmean
 
-from flasc import circular_statistics as cs
+from flasc.utilities import circular_statistics as cs
 
 
 class TestDataframeManipulations(unittest.TestCase):

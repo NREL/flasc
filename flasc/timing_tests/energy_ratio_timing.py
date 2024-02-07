@@ -24,8 +24,8 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from flasc.energy_ratio import energy_ratio as erp
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
+from flasc.analysis import energy_ratio as erp
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
 
 N_ITERATIONS = 5
 

@@ -22,7 +22,7 @@ from floris.utilities import wrap_360
 from scipy import interpolate
 from scipy.stats import norm
 
-from flasc import utilities as fsut
+from flasc.utilities import utilities as fsut
 
 # Disable line too long for this file for csv block
 # Some comment blocks would be confusing otherwise
@@ -540,7 +540,7 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
 
     Args:
         df_fi_approx (pd.DataFrame): Pandas DataFrame with precalculated FLORIS solutions,
-          typically generated using flasc.floris_tools.calc_floris_approx_table().
+          typically generated using flasc.utilities.floris_tools.calc_floris_approx_table().
         wd_std (float, optional): Standard deviation of the Gaussian blur that is applied
           across the wind direction in degrees. Defaults to 3.0.
         pdf_cutoff (float, optional): Cut-off point of the probability density function of

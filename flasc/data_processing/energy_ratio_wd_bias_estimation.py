@@ -20,11 +20,11 @@ import pandas as pd
 from floris.utilities import wrap_360
 from scipy import optimize as opt, stats as spst
 
-from flasc import floris_tools as ftools
-from flasc.dataframe_operations import dataframe_manipulations as dfm
-from flasc.energy_ratio import energy_ratio as er
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.utilities import printnow as print
+from flasc.analysis import energy_ratio as er
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.data_processing import dataframe_manipulations as dfm
+from flasc.utilities import floris_tools as ftools
+from flasc.utilities.utilities import printnow as print
 
 
 class bias_estimation:

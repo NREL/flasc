@@ -3,14 +3,14 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from flasc.floris_tools import (
+from flasc.utilities.floris_tools import (
     add_gaussian_blending_to_floris_approx_table,
     calc_floris_approx_table,
     get_dependent_turbines_by_wd,
     interpolate_floris_from_df_approx,
     merge_floris_objects,
 )
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
 
 class TestFlorisTools(unittest.TestCase):

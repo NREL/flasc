@@ -28,7 +28,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
 
     # Use the local FLORIS GCH/CC model for the wake model settings
     root_path = (
-        Path(__file__).resolve().parents[1] / "examples_smarteole" / "floris_input_smarteole"
+        Path(__file__).resolve().parents[2] / "examples_smarteole" / "floris_input_smarteole"
     )
     fn = root_path / "{:s}.yaml".format(wake_model)
 
@@ -71,7 +71,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
 
     # Use the local FLORIS GCH/CC model for the wake model settings
     root_path = (
-        Path(__file__).resolve().parents[1] / "examples_artificial_data" / "floris_input_artificial"
+        Path(__file__).resolve().parents[2] / "examples_artificial_data" / "floris_input_artificial"
     )
     fn = root_path / "{:s}.yaml".format(wake_model)
 

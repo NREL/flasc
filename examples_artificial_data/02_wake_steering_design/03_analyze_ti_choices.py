@@ -16,7 +16,7 @@ import seaborn as sns
 from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
 from matplotlib import pyplot as plt
 
-from flasc.wake_steering.lookup_table_tools import get_yaw_angles_interpolant
+from flasc.utilities.lookup_table_tools import get_yaw_angles_interpolant
 
 if __name__ == "__main__":
     # Define turbulence intensity range

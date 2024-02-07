@@ -8,4 +8,10 @@ __version__ = "0.1.0"
 
 from pathlib import Path
 
-from . import dataframe_filtering, dataframe_manipulations, df_reader_writer
+from . import (
+    dataframe_filtering,
+    dataframe_manipulations,
+    find_sensor_faults,
+    northing_offset,
+    ws_pow_filtering,
+)

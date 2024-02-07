@@ -5,10 +5,10 @@ import numpy as np
 import pandas as pd
 from floris.tools import FlorisInterface
 
-from flasc.dataframe_operations import (
+from flasc.data_processing import (
     dataframe_manipulations as dfm,
 )
-from flasc.utilities_examples import load_floris_smarteole
+from flasc.utilities.utilities_examples import load_floris_smarteole
 
 # from floris.tools import ParallelComputingInterface
 

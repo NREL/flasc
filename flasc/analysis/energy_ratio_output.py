@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.energy_ratio.energy_ratio_utilities import (
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.utilities.energy_ratio_utilities import (
     add_wd_bin,
     add_ws_bin,
     filter_all_nulls,
@@ -144,11 +144,11 @@ class EnergyRatioOutput:
             - If axarr is None, a new figure will be created.
         """
         # Handle defaults for show_wind_speed_distribution
-        if show_wind_direction_distribution is None:
+        if show_wind_speed_distribution is None:
             if polar_plot:
-                show_wind_direction_distribution = False
+                show_wind_speed_distribution = False
             else:
-                show_wind_direction_distribution = True
+                show_wind_speed_distribution = True
 
         # Only allow showing the wind speed distribution if polar_plot is False
         if polar_plot and show_wind_speed_distribution:

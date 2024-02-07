@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
-from .. import (
+from flasc.utilities import (
     floris_tools as ftools,
     utilities as fsut,
 )
@@ -228,7 +228,7 @@ def _set_col_by_upstream_turbines_in_radius(
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         turb_no ([int]): Turbine number from which the radius should be
         calculated.
         x_turbs ([list, array]): Array containing x locations of turbines.
@@ -370,7 +370,7 @@ def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         exclude_turbs ([list, array]): array-like variable containing
         turbine indices that should be excluded in determining the column
         mean quantity.
@@ -403,7 +403,7 @@ def set_ws_by_upstream_turbines_in_radius(
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         turb_no ([int]): Turbine number from which the radius should be
         calculated.
         x_turbs ([list, array]): Array containing x locations of turbines.
@@ -447,7 +447,7 @@ def set_ws_by_n_closest_upstream_turbines(
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         turb_no ([int]): Turbine number from which the radius should be
         calculated.
         x_turbs ([list, array]): Array containing x locations of turbines.
@@ -527,7 +527,7 @@ def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         exclude_turbs ([list, array]): array-like variable containing
         turbine indices that should be excluded in determining the column
         mean quantity.
@@ -560,7 +560,7 @@ def set_ti_by_upstream_turbines_in_radius(
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         turb_no ([int]): Turbine number from which the radius should be
         calculated.
         x_turbs ([list, array]): Array containing x locations of turbines.
@@ -621,7 +621,7 @@ def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         exclude_turbs ([list, array]): array-like variable containing
         turbine indices that should be excluded in determining the column
         mean quantity.
@@ -654,7 +654,7 @@ def set_pow_ref_by_upstream_turbines_in_radius(
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         turb_no ([int]): Turbine number from which the radius should be
         calculated.
         x_turbs ([list, array]): Array containing x locations of turbines.
@@ -698,7 +698,7 @@ def set_pow_ref_by_n_closest_upstream_turbines(
         df_upstream ([pd.DataFrame]): Dataframe containing rows indicating
         wind direction ranges and the corresponding upstream turbines for
         that wind direction range. This variable can be generated with
-        flasc.floris_tools.get_upstream_turbs_floris(...).
+        flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
         turb_no ([int]): Turbine number from which the radius should be
         calculated.
         x_turbs ([list, array]): Array containing x locations of turbines.

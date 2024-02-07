@@ -15,9 +15,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from flasc.energy_ratio import total_uplift as tup
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.analysis import total_uplift as tup
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_binned_mean_and_ci, plot_layout_with_waking_directions
 
 if __name__ == "__main__":
