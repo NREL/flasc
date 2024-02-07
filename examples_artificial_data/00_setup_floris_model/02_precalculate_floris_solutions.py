@@ -28,7 +28,7 @@ if __name__ == "__main__":
         #     print_timings=True,
         # )
         df_fi_approx = ftools.calc_floris_approx_table(
-            fi=fi,#fi=fi_pci,
+            fi=fi,  # fi=fi_pci,
             wd_array=np.arange(0.0, 360.01, 3.0),
             ws_array=np.arange(1.0, 30.01, 1.0),
             ti_array=[0.03, 0.06, 0.09, 0.12, 0.15],
