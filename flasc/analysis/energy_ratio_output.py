@@ -9,7 +9,7 @@ import pandas as pd
 import seaborn as sns
 
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
-from flasc.analysis.energy_ratio_utilities import (
+from flasc.utilities.energy_ratio_utilities import (
     add_wd_bin,
     add_ws_bin,
     filter_all_nulls,

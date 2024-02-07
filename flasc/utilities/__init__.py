@@ -10,8 +10,11 @@ from pathlib import Path
 
 from . import (
     circular_statistics,
+    energy_ratio_utilities,
     floris_tools,
     lookup_table_tools,
+    optimization,
+    tuner_utilities,
     utilities,
     utilities_examples,
 )

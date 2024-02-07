@@ -11,7 +11,7 @@ import warnings
 import numpy as np
 import polars as pl
 
-import flasc.analysis.energy_ratio_utilities as util
+import flasc.utilities.energy_ratio_utilities as util
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 

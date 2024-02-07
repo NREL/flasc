@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 import flasc.model_fitting.floris_tuning as ft
-from flasc.model_fitting.tuner_utils import replicate_nan_values
+from flasc.utilities.tuner_utilities import replicate_nan_values
 
 
 class TestModelTuning(unittest.TestCase):
