@@ -18,7 +18,6 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
-
 from flasc.utilities import (
     floris_tools as ftools,
     optimization as opt,
