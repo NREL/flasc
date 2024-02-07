@@ -930,7 +930,7 @@ def get_dependent_turbines_by_wd(
     fi = copy.deepcopy(fi_in)
 
     # Compute the base power
-    fi.reinitialize(wind_speeds=[ws_test], wind_directions=wd_array)
+    fi.reinitialize(wind_speeds=ws_test * np.ones_like(wd_array), wind_directions=wd_array)
     fi.calculate_wake()
     base_power = fi.get_turbine_powers()
 
@@ -943,7 +943,7 @@ def get_dependent_turbines_by_wd(
     fi.reinitialize(
         layout_x=np.delete(fi.layout_x, [test_turbine]),
         layout_y=np.delete(fi.layout_y, [test_turbine]),
-        wind_speeds=[ws_test],
+        wind_speeds=ws_test * np.ones_like(wd_array),
         wind_directions=wd_array,
     )  # This will reindex the turbines; undone in following steps.
     fi.calculate_wake()
