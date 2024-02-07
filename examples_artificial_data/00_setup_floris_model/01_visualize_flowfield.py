@@ -24,7 +24,7 @@ if __name__ == "__main__":
     fi.reinitialize(
         wind_directions=[wind_direction],
         wind_speeds=[wind_speed],
-        turbulence_intensity=turbulence_intensity,
+        turbulence_intensities=[turbulence_intensity],
     )
     plot_floris_layout(fi, plot_terrain=False)
 
@@ -37,10 +37,9 @@ if __name__ == "__main__":
     )
 
     fig, ax = plt.subplots(figsize=(9, 6))
-    im = visualize_cut_plane(horizontal_plane, ax=ax, title=None)
+    im = visualize_cut_plane(horizontal_plane, ax=ax, title=None, color_bar=True)
     ax.set_xlabel("x coordinate (m)")
     ax.set_ylabel("y coordinate (m)")
-    plt.colorbar(im, ax=ax)
     fig.suptitle(
         "Inflow: {:.1f} m/s, {:.1f} deg, {:.1f} % turbulence.".format(
             wind_speed, wind_direction, turbulence_intensity * 100.0
