@@ -20,7 +20,7 @@ import scipy.stats as spst
 from floris.utilities import wrap_180, wrap_360
 from pandas.errors import DataError
 
-from flasc.preprocessing import time_operations as fsato
+from flasc.data_processing import time_operations as fsato
 from flasc.utilities import (
     circular_statistics as css,
     floris_tools as ftools,

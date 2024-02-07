@@ -20,8 +20,8 @@ from bokeh.models import Legend
 from bokeh.palettes import Category20_20 as palette
 from bokeh.plotting import ColumnDataSource, figure
 
-from flasc.preprocessing import dataframe_filtering as dff
-from flasc.preprocessing.find_sensor_faults import find_sensor_stuck_faults
+from flasc.data_processing import dataframe_filtering as dff
+from flasc.data_processing.find_sensor_faults import find_sensor_stuck_faults
 from flasc.utilities import utilities as flascutils
 
 

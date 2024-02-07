@@ -14,7 +14,7 @@
 import numpy as np
 from scipy.interpolate import interp1d
 
-from flasc.preprocessing import dataframe_manipulations as dfm
+from flasc.data_processing import dataframe_manipulations as dfm
 
 
 def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbose=True):

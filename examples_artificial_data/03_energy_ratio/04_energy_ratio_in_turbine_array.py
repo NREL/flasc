@@ -21,7 +21,7 @@ from floris.utilities import wrap_360
 
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
-from flasc.preprocessing import dataframe_manipulations as dfm
+from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_floris_layout
 

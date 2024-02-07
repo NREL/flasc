@@ -13,7 +13,7 @@ import polars as pl
 
 import flasc.analysis.energy_ratio_utilities as util
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
-from flasc.preprocessing.dataframe_manipulations import df_reduce_precision
+from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 
 
 # Internal version, returns a polars dataframe

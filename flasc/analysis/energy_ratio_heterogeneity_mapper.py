@@ -7,7 +7,7 @@ from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
-from flasc.preprocessing import dataframe_manipulations as dfm
+from flasc.data_processing import dataframe_manipulations as dfm
 
 
 # Standalone function to easily extract energy ratios for narrow wind direction bin

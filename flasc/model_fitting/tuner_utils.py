@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from floris.tools import FlorisInterface
 
-from flasc.preprocessing import (
+from flasc.data_processing import (
     dataframe_manipulations as dfm,
 )
 from flasc.utilities.utilities_examples import load_floris_smarteole

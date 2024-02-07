@@ -9,7 +9,7 @@ import pytest
 from flasc.analysis import energy_ratio as erp
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.analysis.energy_ratio_utilities import add_reflected_rows
-from flasc.preprocessing import dataframe_manipulations as dfm
+from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities import floris_tools as ftools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 

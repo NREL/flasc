@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from flasc.analysis.energy_ratio_heterogeneity_mapper import heterogeneity_mapper
-from flasc.preprocessing import dataframe_manipulations as dfm
+from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities import floris_tools as ftools
 
 # from flasc.visualization import plot_floris_layout

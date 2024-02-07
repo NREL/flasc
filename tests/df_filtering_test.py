@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from flasc.preprocessing import dataframe_filtering as dff
-from flasc.preprocessing.ws_pow_filtering import ws_pw_curve_filtering
+from flasc.data_processing import dataframe_filtering as dff
+from flasc.data_processing.ws_pow_filtering import ws_pw_curve_filtering
 from flasc.utilities import floris_tools as ftools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 

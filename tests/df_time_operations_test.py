@@ -4,7 +4,7 @@ from datetime import timedelta as td
 import numpy as np
 import pandas as pd
 
-from flasc.preprocessing.time_operations import (
+from flasc.data_processing.time_operations import (
     df_downsample,
     df_movingaverage,
     df_resample_by_interpolation,
