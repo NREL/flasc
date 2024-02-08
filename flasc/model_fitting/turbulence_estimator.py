@@ -16,10 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from flasc.utilities import (
-    floris_tools as ftools,
-    optimization as opt,
-)
+from flasc.utilities import floris_tools as ftools, optimization as opt
 
 
 class ti_estimator:
@@ -73,7 +70,7 @@ class ti_estimator:
         disabled_turb_cp_ct = {
             "wind_speed": [0.0, 50.0],
             "power": [0.0, 0.0],
-            "thrust": [0.0001, 0.0001],
+            "thrust_coefficient": [0.0001, 0.0001],
         }
         regular_turb_cp_ct = fi.floris.farm.turbines[0].power_thrust_table
         df_pairs = pd.DataFrame(

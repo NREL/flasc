@@ -22,12 +22,13 @@ floris_version: 3.0
 flow_field:
   air_density: 1.225
   reference_wind_height: 80
-  turbulence_intensity: 0.11
+  turbulence_intensities:
+  - 0.11
   wind_directions:
-  - - 90.0
+  - 90.0
   wind_shear: 0.12
   wind_speeds:
-  - - 9.0
+  - 9.0
   wind_veer: 0.0
 logging:
   console:

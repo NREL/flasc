@@ -322,10 +322,10 @@ def sweep_deflection_parameter_for_total_uplift(
     # Trim the yaw angle matrices
     if yaw_angles_baseline is not None:
         simple_index = df_scada_baseline["simple_index"].to_numpy()
-        yaw_angles_baseline = yaw_angles_baseline[simple_index, :, :]
+        yaw_angles_baseline = yaw_angles_baseline[simple_index, :]
     if yaw_angles_wakesteering is not None:
         simple_index = df_scada_wakesteering["simple_index"].to_numpy()
-        yaw_angles_wakesteering = yaw_angles_wakesteering[simple_index, :, :]
+        yaw_angles_wakesteering = yaw_angles_wakesteering[simple_index, :]
 
     ref_cols = [f"pow_{i:03d}" for i in ref_turbines]
     test_cols = [f"pow_{i:03d}" for i in test_turbines]

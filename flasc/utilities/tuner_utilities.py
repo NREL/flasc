@@ -5,9 +5,7 @@ import numpy as np
 import pandas as pd
 from floris.tools import FlorisInterface
 
-from flasc.data_processing import (
-    dataframe_manipulations as dfm,
-)
+from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities.utilities_examples import load_floris_smarteole
 
 # from floris.tools import ParallelComputingInterface
@@ -119,7 +117,7 @@ def resim_floris(fi_in: FlorisInterface, df_scada: pd.DataFrame, yaw_angles: np.
 
     # Set up the FLORIS model
     fi = fi_in.copy()
-    fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions, time_series=True)
+    fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions)
     fi.calculate_wake(yaw_angles=yaw_angles)
 
     # Get the turbines in kW

@@ -497,12 +497,14 @@ def calc_floris_approx_table(
 
     # Create solutions, one set per turbulence intensity
     df_list = []
+    # TODO: reinitialize() will now accept an array of turbulence intensities
+    # TODO: use WindRose floris object instead of "normal" series mode in reinitialize()
     for turb_intensity in ti_array:
         # Calculate solutions
         fi.reinitialize(
-            wind_directions=wd_array,
-            wind_speeds=ws_array,
-            turbulence_intensity=turb_intensity,
+            wind_directions=wd_mesh.flatten(),
+            wind_speeds=ws_mesh.flatten(),
+            turbulence_intensities=[turb_intensity],
         )
         fi.calculate_wake()
         turbine_powers = fi.get_turbine_powers()
@@ -511,8 +513,9 @@ def calc_floris_approx_table(
         solutions_dict = {"wd": wd_mesh.flatten(), "ws": ws_mesh.flatten()}
         solutions_dict["ti"] = turb_intensity * np.ones(len(wd_array) * len(ws_array))
         for turbi in range(num_turbines):
-            solutions_dict["pow_{:03d}".format(turbi)] = turbine_powers[:, :, turbi].flatten()
+            solutions_dict["pow_{:03d}".format(turbi)] = turbine_powers[:, turbi].flatten()
             if save_turbine_inflow_conditions_to_df:
+                # TODO: Untested, does not work with FLORIS v4
                 solutions_dict["ws_{:03d}".format(turbi)] = (
                     fi.floris.flow_field.u.mean(axis=4).mean(axis=3)[:, :, turbi].flatten()
                 )
@@ -927,9 +930,9 @@ def get_dependent_turbines_by_wd(
     fi = copy.deepcopy(fi_in)
 
     # Compute the base power
-    fi.reinitialize(wind_speeds=[ws_test], wind_directions=wd_array)
+    fi.reinitialize(wind_speeds=ws_test * np.ones_like(wd_array), wind_directions=wd_array)
     fi.calculate_wake()
-    base_power = fi.get_turbine_powers()[:, 0, :]  # remove unneeded dimension
+    base_power = fi.get_turbine_powers()
 
     # Compute the test power
     if len(fi.floris.farm.turbine_type) > 1:
@@ -940,11 +943,11 @@ def get_dependent_turbines_by_wd(
     fi.reinitialize(
         layout_x=np.delete(fi.layout_x, [test_turbine]),
         layout_y=np.delete(fi.layout_y, [test_turbine]),
-        wind_speeds=[ws_test],
+        wind_speeds=ws_test * np.ones_like(wd_array),
         wind_directions=wd_array,
     )  # This will reindex the turbines; undone in following steps.
     fi.calculate_wake()
-    test_power = fi.get_turbine_powers()[:, 0, :]  # remove unneeded dimension
+    test_power = fi.get_turbine_powers()
     test_power = np.insert(test_power, test_turbine, base_power[:, test_turbine], axis=1)
 
     if return_influence_magnitudes:

@@ -20,7 +20,7 @@ REQUIRED = [
     "floris @ git+https://github.com/NREL/floris.git@v4",
     "feather-format~=0.0",
     "ipympl~=0.9",
-    "matplotlib~=3.6",
+    "matplotlib~=3.8",
     "numpy~=1.20",
     "pandas~=2.0",
     "pyproj~=3.0",

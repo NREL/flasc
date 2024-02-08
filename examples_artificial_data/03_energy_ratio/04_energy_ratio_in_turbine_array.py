@@ -120,7 +120,7 @@ def plot_energy_ratios(turbine_array, results_energy_ratio, ax=None, label=None)
         _, ax = plt.subplots(figsize=(7.0, 3.0))
 
     x = range(len(results_energy_ratio))
-    color = next(ax._get_lines.prop_cycler)["color"]
+    color = ax._get_lines.get_next_color()
     ax.fill_between(
         x,
         results_energy_ratio["baseline_lb"],

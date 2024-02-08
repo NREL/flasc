@@ -758,11 +758,8 @@ class ws_pw_curve_filtering:
 
         if fi is not None:
             fi_turb = fi.floris.farm.turbine_definitions[ti]
-            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
             ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
-            rho = fi.floris.flow_field.air_density
-            pow_array = 0.5 * rho * ws_array**3.0 * Ad * cp_array * 1.0e-3
+            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
         ax.legend()
@@ -966,11 +963,9 @@ class ws_pw_curve_filtering:
 
         if fi is not None:
             fi_turb = fi.floris.farm.turbine_definitions[ti]
-            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
             ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
-            rho = fi.floris.flow_field.air_density
-            pow_array = 0.5 * rho * ws_array**3.0 * Ad * cp_array * 1.0e-3
+            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
+
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
         if self.pw_curve_df_bounds is not None:
@@ -1041,11 +1036,9 @@ class ws_pw_curve_filtering:
 
         if fi is not None:
             fi_turb = fi.floris.farm.turbine_definitions[ti]
-            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
             ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
-            rho = fi.floris.flow_field.air_density
-            pow_array = 0.5 * rho * ws_array**3.0 * Ad * cp_array * 1.0e-3
+            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
+
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
         if self.pw_curve_df_bounds is not None:

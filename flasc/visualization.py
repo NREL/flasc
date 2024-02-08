@@ -335,7 +335,7 @@ def plot_thrust_curve_only(pt, plotting_dict, ax=None):
 
     Args:
         pt: power-thrust table as a dictionary. Expected to contain
-            keys "wind_speed" and "thrust"
+            keys "wind_speed" and "thrust_coefficient"
         plotting_dict: dictionary of plotting parameters, with the
             following (optional) fields and their (default) values:
             "color" : ("black"),
@@ -357,7 +357,7 @@ def plot_thrust_curve_only(pt, plotting_dict, ax=None):
     plotting_dict = {**default_plotting_dict, **plotting_dict}
 
     # Plot power and thrust curves for groups of turbines
-    ax.plot(pt["wind_speed"], pt["thrust"], **plotting_dict)
+    ax.plot(pt["wind_speed"], pt["thrust_coefficient"], **plotting_dict)
     ax.set_xlabel("Wind speed (m/s)")
     ax.set_ylabel("Thrust coefficient (-)")
     ax.set_xlim([pt["wind_speed"][0], pt["wind_speed"][-1]])

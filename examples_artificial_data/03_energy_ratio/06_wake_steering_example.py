@@ -66,14 +66,14 @@ if __name__ == "__main__":
     # Compute the power of the second turbine for two cases
     # Baseline: The front turbine is aligned to the wind
     # WakeSteering: The front turbine is yawed 25 deg
-    fi.reinitialize(wind_speeds=ws_array, wind_directions=wd_array, time_series=True)
+    fi.reinitialize(wind_speeds=ws_array, wind_directions=wd_array)
     fi.calculate_wake()
     power_baseline_ref = fi.get_turbine_powers().squeeze()[:, 0].flatten()
     power_baseline_control = fi.get_turbine_powers().squeeze()[:, 1].flatten()
     power_baseline_downstream = fi.get_turbine_powers().squeeze()[:, 2].flatten()
 
-    yaw_angles = np.zeros([len(t), 1, 3]) * 25
-    yaw_angles[:, :, 1] = 25  # Set control turbine yaw angles to 25 deg
+    yaw_angles = np.zeros([len(t), 3]) * 25
+    yaw_angles[:, 1] = 25  # Set control turbine yaw angles to 25 deg
     fi.calculate_wake(yaw_angles=yaw_angles)
     power_wakesteering_ref = fi.get_turbine_powers().squeeze()[:, 0].flatten()
     power_wakesteering_control = fi.get_turbine_powers().squeeze()[:, 1].flatten()
