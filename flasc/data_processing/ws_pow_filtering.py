@@ -56,7 +56,7 @@ class ws_pw_curve_filtering:
         self.reset_filters()
 
         # Save the turbine names
-        self.turbine_names = turbine_names  
+        self.turbine_names = turbine_names
 
     # Private methods
     def _get_all_unique_flags(self):
@@ -832,7 +832,7 @@ class ws_pw_curve_filtering:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
         else:
             ax.set_title("WTG {:03d}: Filters".format(ti))
-        
+
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.grid(True)
