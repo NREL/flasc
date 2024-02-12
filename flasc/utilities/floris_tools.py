@@ -10,7 +10,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-
 import copy
 from time import perf_counter as timerpc
 
@@ -22,7 +21,12 @@ from floris.utilities import wrap_360
 from scipy import interpolate
 from scipy.stats import norm
 
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import utilities as fsut
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
+
 
 # Disable line too long for this file for csv block
 # Some comment blocks would be confusing otherwise
@@ -240,7 +244,7 @@ def interpolate_floris_from_df_approx(
                 "The option mirror_nans=True requires the raw data's wind speed and power measurements to be included in the dataframe 'df'."
             )
     else:
-        print(
+        logger.warn(
             "Warning: not mirroring NaNs from the raw data to the FLORIS predictions. This may skew your energy ratios."
         )
 
@@ -255,7 +259,7 @@ def interpolate_floris_from_df_approx(
     else:
         raise UserWarning("Incompatible df_approx table specified.")
     if verbose:
-        print(f"Identified the following grid type: {grid_type}.")
+        logger.info(f"Identified the following grid type: {grid_type}.")
 
     # Check if all values in df fall within the precalculated solutions ranges
     if grid_type == "2d":
@@ -278,17 +282,22 @@ def interpolate_floris_from_df_approx(
         if (df[col].min() < (df_approx[col].min() - 1.0e-6)) | (
             df[col].max() > (df_approx[col].max() + 1.0e-6)
         ):
-            print(
+            logger.warn(
                 "Warning: the values in df[{:s}] exceed the range in the precalculated solutions df_fi_approx[{:s}].".format(
                     col, col
                 )
             )
-            print(
+            logger.info(
                 "   minimum/maximum value in df:        ({:.3f}, {:.3f})".format(
                     df[col].min(), df[col].max()
                 )
             )
-            print(
+            logger.info(
+                "   minimum/maximum value in df:        ({:.3f}, {:.3f})".format(
+                    df[col].min(), df[col].max()
+                )
+            )
+            logger.info(
                 "   minimum/maximum value in df_approx: ({:.3f}, {:.3f})".format(
                     df_approx[col].min(), df_approx[col].max()
                 )
@@ -305,8 +314,10 @@ def interpolate_floris_from_df_approx(
 
     # Map individual data entries to full DataFrame
     if verbose:
-        print("Mapping the precalculated solutions " + "from FLORIS to the dataframe...")
-        print("  Creating a gridded interpolant with " + "interpolation method '%s'." % method)
+        logger.info("Mapping the precalculated solutions " + "from FLORIS to the dataframe...")
+        logger.info(
+            "  Creating a gridded interpolant with " + "interpolation method '%s'." % method
+        )
 
     # Make a copy from wd=0.0 deg to wd=360.0 deg for wrapping
     if wrap_0deg_to_360deg and (not (df_approx["wd"] > 359.999999).any()):
@@ -376,7 +387,7 @@ def interpolate_floris_from_df_approx(
     df_out_interp_list = [df_out]
     for ii, varname in enumerate(varnames):
         if verbose:
-            print("     Interpolating " + varname + " for all turbines...")
+            logger.info("     Interpolating " + varname + " for all turbines...")
         colnames = ["{:s}_{:03d}".format(varname, ti) for ti in range(nturbs)]
 
         if ii == 0:
@@ -416,7 +427,7 @@ def interpolate_floris_from_df_approx(
 
     if verbose:
         dt = timerpc() - t0
-        print(f"Finished interpolation in {dt:.3f} seconds.")
+        logger.info(f"Finished interpolation in {dt:.3f} seconds.")
 
     return df_out
 
@@ -490,7 +501,7 @@ def calc_floris_approx_table(
     ti_array = np.sort(ti_array)
     wd_mesh, ws_mesh = np.meshgrid(wd_array, ws_array, indexing="ij")
     N_approx = len(wd_array) * len(ws_array) * len(ti_array)
-    print(
+    logger.info(
         "Generating a df_approx table of FLORIS solutions "
         + "covering a total of {:d} cases.".format(N_approx)
     )
@@ -527,7 +538,7 @@ def calc_floris_approx_table(
                 ] = fi.floris.flow_field.turbulence_intensity_field[:, :, turbi].flatten()
         df_list.append(pd.DataFrame(solutions_dict))
 
-    print("Finished calculating the FLORIS solutions for the dataframe.")
+    logger.info("Finished calculating the FLORIS solutions for the dataframe.")
     df_approx = pd.concat(df_list, axis=0).sort_values(by=["ti", "ws", "wd"])
     df_approx = df_approx.reset_index(drop=True)
 

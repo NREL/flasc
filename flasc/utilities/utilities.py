@@ -20,11 +20,6 @@ import numpy as np
 from floris.utilities import wrap_360
 
 
-def printnow(text, flush=True):
-    now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print("%s: %s" % (now_time, text), flush=flush)
-
-
 def estimate_dt(time_array):
     """Automatically estimate timestep in a time_array
 
