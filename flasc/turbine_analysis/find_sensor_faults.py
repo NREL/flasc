@@ -25,13 +25,15 @@ def find_sensor_stuck_faults(
     n_consecutive_measurements=3,
     plot_figures=True,
     verbose=False,
+    return_by_column=False,
 ):
     # Settings which indicate a sensor-stuck type of fault: the standard
     # deviation between the [no_consecutive_measurements] number of
     # consecutive measurements is less than [stddev_threshold].
 
     # TODO: remove unused argument 'ti'
-    index_faults = np.array([])
+
+    index_faults = {c: np.array([]) for c in columns}
     for c in columns:
         if verbose:
             print("Processing column %s" % c)
@@ -47,9 +49,12 @@ def find_sensor_stuck_faults(
         if (plot_figures) & (len(column_index_faults) > 0):
             _plot_top_sensor_faults(df, c, column_index_faults)
 
-        index_faults = np.append(index_faults, column_index_faults)
+        index_faults[c] = column_index_faults
 
-    return np.sort(np.unique(index_faults)).astype(int)
+    if return_by_column:
+        return index_faults
+    else:
+        return np.unique(np.concatenate([v for v in index_faults.values()]))
 
 
 def _plot_top_sensor_faults(
