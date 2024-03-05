@@ -29,6 +29,8 @@ def find_sensor_stuck_faults(
     # Settings which indicate a sensor-stuck type of fault: the standard
     # deviation between the [no_consecutive_measurements] number of
     # consecutive measurements is less than [stddev_threshold].
+
+    # TODO: remove unused argument 'ti'
     index_faults = np.array([])
     for c in columns:
         if verbose:
