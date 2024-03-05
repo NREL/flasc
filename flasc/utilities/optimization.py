@@ -274,7 +274,7 @@ def estimate_ti(
         ti_array = np.repeat(ti_0, num_turbines)
         ti_array[turbine_upstream] = ti
         ftools._fi_set_ws_wd_ti(fi, ti=ti_array)
-        fi.calculate_wake()
+        fi.run()
         Pturbs = np.array(fi.get_turbine_power())
         Pturbs = Pturbs[turbines_downstream]
         se = (P_measured - Pturbs) ** 2.0

@@ -17,7 +17,7 @@ class TestFlorisTools(unittest.TestCase):
     def test_floris_merge(self):
         fi_1, _ = load_floris()
         fi_2 = fi_1.copy()
-        fi_2.reinitialize(layout_x=[-500.0, -500.0], layout_y=[0.0, 500.0])
+        fi_2.set(layout_x=[-500.0, -500.0], layout_y=[0.0, 500.0])
 
         # Check if layouts are merged appropriately
         fi_merged = merge_floris_objects([fi_1, fi_2])
@@ -31,8 +31,8 @@ class TestFlorisTools(unittest.TestCase):
         # Also test that we raise a UserWarning if we have two different reference wind heights and
         # don't specify a reference_wind_height for the merged object
         with self.assertRaises(UserWarning):
-            fi_1.reinitialize(reference_wind_height=90.0)
-            fi_2.reinitialize(reference_wind_height=91.0)
+            fi_1.set(reference_wind_height=90.0)
+            fi_2.set(reference_wind_height=91.0)
             fi_merged = merge_floris_objects([fi_1, fi_2])
 
     def test_floris_approx_table(self):

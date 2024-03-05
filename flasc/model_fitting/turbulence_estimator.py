@@ -65,7 +65,7 @@ class ti_estimator:
 
     def get_turbine_pairs(self, wake_loss_thrs=0.20):
         fi = self.fi
-        fi.calculate_wake()
+        fi.run()
         power_baseline = np.array(fi.get_turbine_power())
         disabled_turb_cp_ct = {
             "wind_speed": [0.0, 50.0],
@@ -78,7 +78,7 @@ class ti_estimator:
         )
         for ti in range(self.num_turbs):
             fi.change_turbine([ti], {"power_thrust_table": disabled_turb_cp_ct})
-            fi.calculate_wake()
+            fi.run()
             power_excl = np.array(fi.get_turbine_power())
             power_excl[ti] = power_baseline[ti]  # Placeholder
             wake_losses = 1 - power_baseline / power_excl
@@ -94,7 +94,7 @@ class ti_estimator:
         return df_pairs
 
     def plot_flowfield(self):
-        self.fi.calculate_wake()
+        self.fi.run()
         fig, ax = plt.subplots()
         hor_plane = self.fi.get_hor_plane()
         wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
@@ -186,7 +186,7 @@ class ti_estimator:
 
     def plot_power_bars(self):
         fi = self.fi
-        fi.calculate_wake()
+        fi.run()
         fig, ax = plt.subplots()
         ax.bar(x=np.array(range(self.num_turbs)) - 0.15, height=fi.get_turbine_power(), width=0.3)
         ax.bar(x=np.array(range(self.num_turbs)) + 0.15, height=self.P_measured, width=0.3)

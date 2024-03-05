@@ -81,7 +81,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
 
     # Construct the merged FLORIS model based on the first entry in fi_list
     fi_merged = fi_list[0].copy()
-    fi_merged.reinitialize(
+    fi_merged.set(
         layout_x=x_list,
         layout_y=y_list,
         turbine_type=turbine_type_list,
@@ -120,7 +120,7 @@ def reduce_floris_object(fi, turbine_list, copy=False):
         raise UserWarning("Incompatible format of turbine_type in FlorisInterface.")
 
     # Construct the merged FLORIS model based on the first entry in fi_list
-    fi_reduced.reinitialize(
+    fi_reduced.set(
         layout_x=x[turbine_list],
         layout_y=y[turbine_list],
         turbine_type=list(np.array(fi_turbine_type)[turbine_list]),
@@ -501,12 +501,12 @@ def calc_floris_approx_table(
     # TODO: use WindRose floris object instead of "normal" series mode in reinitialize()
     for turb_intensity in ti_array:
         # Calculate solutions
-        fi.reinitialize(
+        fi.set(
             wind_directions=wd_mesh.flatten(),
             wind_speeds=ws_mesh.flatten(),
             turbulence_intensities=[turb_intensity],
         )
-        fi.calculate_wake()
+        fi.run()
         turbine_powers = fi.get_turbine_powers()
 
         # Create a dictionary to save solutions in
@@ -930,8 +930,8 @@ def get_dependent_turbines_by_wd(
     fi = copy.deepcopy(fi_in)
 
     # Compute the base power
-    fi.reinitialize(wind_speeds=ws_test * np.ones_like(wd_array), wind_directions=wd_array)
-    fi.calculate_wake()
+    fi.set(wind_speeds=ws_test * np.ones_like(wd_array), wind_directions=wd_array)
+    fi.run()
     base_power = fi.get_turbine_powers()
 
     # Compute the test power
@@ -940,13 +940,13 @@ def get_dependent_turbines_by_wd(
         fi.floris.farm.turbine_type.pop(test_turbine)
     else:  # Only a single turbine type defined for the whole farm; do nothing
         pass
-    fi.reinitialize(
+    fi.set(
         layout_x=np.delete(fi.layout_x, [test_turbine]),
         layout_y=np.delete(fi.layout_y, [test_turbine]),
         wind_speeds=ws_test * np.ones_like(wd_array),
         wind_directions=wd_array,
     )  # This will reindex the turbines; undone in following steps.
-    fi.calculate_wake()
+    fi.run()
     test_power = fi.get_turbine_powers()
     test_power = np.insert(test_power, test_turbine, base_power[:, test_turbine], axis=1)
 
