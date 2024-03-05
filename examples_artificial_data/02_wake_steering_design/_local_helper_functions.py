@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 from floris.tools.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
 from floris.tools.uncertainty_interface import UncertaintyInterface
+from floris.tools.wind_data import WindRose
 
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
@@ -34,7 +35,7 @@ def optimize_yaw_angles(
     fi=None,
     opt_wind_directions=np.arange(0.0, 360.0, 3.0),
     opt_wind_speeds=[8.0],
-    opt_turbulence_intensity=0.06,
+    opt_turbulence_intensities=0.06,
     opt_minimum_yaw=0.0,
     opt_maximum_yaw=20.0,
     opt_turbine_weights=None,
@@ -45,12 +46,20 @@ def optimize_yaw_angles(
     if fi is None:
         fi, _ = load_floris()
 
+    # Handle turbulence intensity input
+    if not hasattr(opt_turbulence_intensities, "__len__"):
+        opt_turbulence_intensities = opt_turbulence_intensities * np.ones(
+            (len(opt_wind_directions), len(opt_wind_speeds))
+        )
+
     # Update FLORIS model with atmospheric conditions
     fi = fi.copy()
-    fi.reinitialize(
-        wind_directions=opt_wind_directions,
-        wind_speeds=opt_wind_speeds,
-        turbulence_intensity=opt_turbulence_intensity,
+    fi.set(
+        wind_data=WindRose(
+            wind_directions=np.array(opt_wind_directions),
+            wind_speeds=np.array(opt_wind_speeds),
+            ti_table=np.array(opt_turbulence_intensities)
+        )
     )
 
     # Add uncertainty, if applicable
@@ -87,12 +96,20 @@ def evaluate_optimal_yaw_angles(
     if fi is None:
         fi, _ = load_floris()
 
-    # Update floris object
+    # Handle turbulence intensity input
+    if not hasattr(eval_ti, "__len__"):
+        eval_ti = eval_ti * np.ones(
+            (len(eval_wd_array), len(eval_ws_array))
+        )
+
+    # Update FLORIS model with atmospheric conditions
     fi = fi.copy()
-    fi.reinitialize(
-        wind_directions=eval_wd_array,
-        wind_speeds=eval_ws_array,
-        turbulence_intensity=eval_ti,
+    fi.set(
+        wind_data=WindRose(
+            wind_directions=np.array(eval_wd_array),
+            wind_speeds=np.array(eval_ws_array),
+            ti_table=np.array(eval_ti)
+        )
     )
 
     # Include uncertainty in the FLORIS model, if applicable
@@ -101,26 +118,24 @@ def evaluate_optimal_yaw_angles(
         fi = UncertaintyInterface(fi.copy(), unc_options=opt_unc_options)
 
     # Get wind rose frequency
-    wd_mesh, ws_mesh = np.meshgrid(
-        fi.floris.flow_field.wind_directions, fi.floris.flow_field.wind_speeds, indexing="ij"
-    )
+    wd_mesh = fi.floris.flow_field.wind_directions
+    ws_mesh = fi.floris.flow_field.wind_speeds
     freq = wind_climate_interpolant(wd_mesh, ws_mesh)
     freq = freq / np.sum(freq)
 
     # Interpolate yaw angles
-    wd_mesh, ws_mesh = np.meshgrid(
-        fi.floris.flow_field.wind_directions, fi.floris.flow_field.wind_speeds, indexing="ij"
-    )
-    ti = fi.floris.flow_field.turbulence_intensity * np.ones_like(wd_mesh)
+    ti = fi.floris.flow_field.turbulence_intensities
     yaw_angles_opt = yaw_angle_interpolant(wd_mesh, ws_mesh, ti)
 
     # Evaluate solutions in FLORIS
-    fi.calculate_wake(np.zeros_like(yaw_angles_opt))
+    fi.set(yaw_angles=np.zeros_like(yaw_angles_opt))
+    fi.run()
     baseline_powers = fi.get_farm_power()
     baseline_powers = np.nan_to_num(baseline_powers, nan=0.0)
 
     fi = fi.copy()
-    fi.calculate_wake(yaw_angles_opt)
+    fi.set(yaw_angles=yaw_angles_opt)
+    fi.run()
     optimized_powers = fi.get_farm_power()
     optimized_powers = np.nan_to_num(optimized_powers, nan=0.0)
 
@@ -129,7 +144,7 @@ def evaluate_optimal_yaw_angles(
         {
             "wind_direction": wd_mesh.flatten(),
             "wind_speed": ws_mesh.flatten(),
-            "turbulence_intensity": eval_ti * np.ones_like(ws_mesh).flatten(),
+            "turbulence_intensity": eval_ti.flatten(),
             "frequency": freq.flatten(),
             "farm_power_baseline": baseline_powers.flatten(),
             "farm_power_opt": optimized_powers.flatten(),

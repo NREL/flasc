@@ -20,7 +20,7 @@ if __name__ == "__main__":
     fi_scada = ftools._fi_set_ws_wd_ti(
         fi_scada, ws=8.95, wd=235.5, ti=[0.08, 0.12, 0.12, 0.18, 0.18, 0.18, 0.12]
     )
-    fi_scada.calculate_wake()
+    fi_scada.run()
     P_measured = np.array(fi_scada.get_turbine_power())
     P_measured = P_measured * (1 + 0.05 * np.random.rand(len(P_measured)))
 

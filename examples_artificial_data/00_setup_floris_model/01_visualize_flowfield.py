@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     # Load FLORIS
     fi, _ = load_floris()
-    fi.reinitialize(
+    fi.set(
         wind_directions=[wind_direction],
         wind_speeds=[wind_speed],
         turbulence_intensities=[turbulence_intensity],
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     # Generate baseline flowfield
     print("Calculating flowfield...")
-    fi.calculate_wake()
+    fi.run()
     farm_power = fi.get_farm_power().flatten()
     horizontal_plane = fi.calculate_horizontal_plane(
         x_resolution=x_resolution, y_resolution=y_resolution, height=plot_height

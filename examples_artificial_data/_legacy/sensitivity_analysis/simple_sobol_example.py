@@ -24,7 +24,7 @@ def load_floris():
 
 
 def plot_hor_flowfield(fi):
-    fi.calculate_wake()
+    fi.run()
     hor_plane = fi.get_hor_plane()
     fig, ax = plt.subplots()
     wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)

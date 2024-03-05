@@ -185,7 +185,7 @@ if __name__ == "__main__":
     plot_floris_layout(fi, plot_terrain=False)
 
     fig, ax = plt.subplots()
-    fi.reinitialize(wind_directions=[wd], wind_speeds=[10.0])
+    fi.set(wind_directions=[wd], wind_speeds=[10.0])
     horizontal_plane = fi.calculate_horizontal_plane(height=90.0)
     visualize_cut_plane(horizontal_plane, ax=ax, title="Horizontal plane")
     plt.show()

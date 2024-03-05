@@ -11,7 +11,7 @@ from flasc.utilities.floris_tools import get_all_impacting_turbines_geometrical
 fi = FlorisInterface("../floris_input_artificial/gch.yaml")
 D = 126.0
 X, Y = np.meshgrid(7.0 * D * np.arange(20), 5.0 * D * np.arange(20))
-fi.reinitialize(layout_x=X.flatten(), layout_y=Y.flatten())
+fi.set(layout_x=X.flatten(), layout_y=Y.flatten())
 
 # Specify which turbines are of interest
 turbine_weights = np.zeros(len(X.flatten()), dtype=float)
