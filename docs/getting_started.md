@@ -1,7 +1,7 @@
 ## 
 
 FLASC is a tool for processing and running analysis on wind farm SCADA. 
-If you have SCADA data from a wind farm, FLASC could be the tool from you! FLASC is written in python and relies heavily on [`pandas`](https://pandas.pydata.org/). We assume a working knowledge of both.
+If you have SCADA data from a wind farm, FLASC could be the tool for you! FLASC is written in python and relies heavily on [`pandas`](https://pandas.pydata.org/). We assume a working knowledge of both.
 
 The general steps you'll probably want to follow are
 1. Get your SCADA data into a `pandas` `DataFrame`. FLASC assumes that the dataframe is in "wide" format (see notes below), and has at least the following columns:
@@ -10,15 +10,21 @@ The general steps you'll probably want to follow are
 - `wd_XXX` Turbine-measured wind direction, specified in deg (you may not have this channel, in which case, we suggest you use the yaw position as a proxy)
 - `yaw_XXX` Turbine yaw position, specified in deg 
 Additionally, you may have other useful channels, such as the operating status, low-speed or high-speed shaft speed, blade pitch position, etc. You may also have data from other measurement devices such as lidars or met masts.
-2. Use `FLASC`'s data_processing/ tools to filter your data, removing data such as: 
+2. Use `FLASC`'s `data_processing` package to filter your data, removing data such as: 
 - off power-curve measurements
 - stuck sensors
 - bad status flags
 - unusual blade pitch or rotor speed signals
-3. Apply corrections, most notably a northing bias
-4. Fit a FLORIS model
-5. Run energy ratio and total uplift analysis
-
+3. Apply corrections---turbine data often contains a "northing" bias, i.e., a miscalibrated yaw encoder, which `FLASC` has tools to correct this 
+issue.
+4. Fit a [`FLORIS`](https://github.com/NREL/floris) model to your data using `FLASC`'s `model_fitting` package. `FLASC` has tools to:
+- fit the cosine loss exponent for yawing (useful when analyzing data from 
+a wake steering campaign or designing a wake steering controller)
+- fit wake model parameters, particularly those of the 
+[Empirical Gaussian wake model](https://nrel.github.io/floris/empirical_gauss_model.html), so that you can better understand wake interactions in your farm and compare model predictions to realized wake losses.
+5. Run energy ratio and total uplift analysis with tools from `FLASC`'s `analysis` package. These allow you to quantify the difference between cases seen in your data (for example, `wake_steering_on` and `wake_steering_off`, or `daytime` and `nighttime`) in terms of:
+- The energy produced at each turbine as a function of wind direction, particularly when wake interactions are present
+- The total power difference between cases
 
 
 ## Getting started
