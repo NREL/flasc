@@ -1,4 +1,27 @@
-Getting started
+## 
+
+FLASC is a tool for processing and running analysis on wind farm SCADA. 
+If you have SCADA data from a wind farm, FLASC could be the tool from you! FLASC is written in python and relies heavily on [`pandas`](https://pandas.pydata.org/). We assume a working knowledge of both.
+
+The general steps you'll probably want to follow are
+1. Get your SCADA data into a `pandas` `DataFrame`. FLASC assumes that the dataframe is in "wide" format (see notes below), and has at least the following columns:
+- `pow_XXX` Turbine power, specified in kW (TODO: check unit)
+- `ws_XXX` Turbine-measured wind speed, specified in m/s
+- `wd_XXX` Turbine-measured wind direction, specified in deg (you may not have this channel, in which case, we suggest you use the yaw position as a proxy)
+- `yaw_XXX` Turbine yaw position, specified in deg 
+Additionally, you may have other useful channels, such as the operating status, low-speed or high-speed shaft speed, blade pitch position, etc. You may also have data from other measurement devices such as lidars or met masts.
+2. Use `FLASC`'s data_processing/ tools to filter your data, removing data such as: 
+- off power-curve measurements
+- stuck sensors
+- bad status flags
+- unusual blade pitch or rotor speed signals
+3. Apply corrections, most notably a northing bias
+4. Fit a FLORIS model
+5. Run energy ratio and total uplift analysis
+
+
+
+## Getting started
 ---------------
 
 The easiest way to get started is to install FLASC and
