@@ -26,7 +26,7 @@ class ws_pw_curve_filtering:
            per power bin.
     """
 
-    def __init__(self, df):
+    def __init__(self, df, turbine_names=None):
         """Initializes the class.
 
         Args:
@@ -41,6 +41,9 @@ class ws_pw_curve_filtering:
         # Write dataframe to self
         self._df_initial = df.copy()
         self.reset_filters()
+
+        # Save the turbine names
+        self.turbine_names = turbine_names
 
     # Private methods
     def _get_all_unique_flags(self):
@@ -812,7 +815,11 @@ class ws_pw_curve_filtering:
         for h in lgd.legendHandles:
             h.set_alpha(1)  # Force alpha in legend to 1.0
 
-        ax.set_title("WTG {:03d}: Filters".format(ti))
+        if self.turbine_names is not None:
+            ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
+        else:
+            ax.set_title("WTG {:03d}: Filters".format(ti))
+
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.grid(True)
@@ -973,7 +980,10 @@ class ws_pw_curve_filtering:
         for h in lgd.legendHandles:
             h.set_alpha(1)  # Force alpha in legend to 1.0
 
-        ax.set_title("WTG {:03d}: Filters".format(ti))
+        if self.turbine_names is not None:
+            ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
+        else:
+            ax.set_title("WTG {:03d}: Filters".format(ti))
         ax.set_xlabel("Wind speed (m/s)")
         ax.set_ylabel("Power (kW)")
         ax.grid(True)
@@ -1046,7 +1056,10 @@ class ws_pw_curve_filtering:
         for h in lgd.legendHandles:
             h.set_alpha(1)  # Force alpha in legend to 1.0
 
-        ax.set_title("WTG {:03d}: Postprocessed dataset".format(ti))
+        if self.turbine_names is not None:
+            ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Postprocessed dataset")
+        else:
+            ax.set_title("WTG {:03d}: Postprocessed dataset".format(ti))
         ax.set_xlabel("Wind speed (m/s)")
         ax.set_ylabel("Power (kW)")
         ax.grid(True)
@@ -1086,7 +1099,11 @@ class ws_pw_curve_filtering:
         # Plot the histogram information
         ax = df_histogram.plot.bar(stacked=True, ax=ax)
         ax.set_ylabel("Count (-)")
-        ax.set_title("WTG {:03d}".format(ti))
+        if self.turbine_names is not None:
+            ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]")
+        else:
+            ax.set_title("WTG {:03d}".format(ti))
+
         ax.grid(True)
 
         return ax
