@@ -37,37 +37,37 @@ html:
 
 
 # Sphinx for API doc generation
-sphinx:
-  extra_extensions:
-  - 'sphinx.ext.autodoc'
-  - 'sphinx.ext.autosummary'
-  - 'sphinx.ext.viewcode'
-  - 'sphinx_autodoc_typehints'
-  - 'sphinxcontrib.autoyaml'
-  - 'sphinx.ext.napoleon'       # Formats google and numpy docstring styles
-  - 'sphinxcontrib.mermaid'
-  config:
-    html_theme: sphinx_book_theme
-    templates_path:
-    - '_templates'
-    language: 'python'
-    autoyaml_level: 3
-    autosummary_generate: true
-    bibtex_reference_style: author_year
+# sphinx:
+#   extra_extensions:
+#   - 'sphinx.ext.autodoc'
+#   - 'sphinx.ext.autosummary'
+#   - 'sphinx.ext.viewcode'
+#   - 'sphinx_autodoc_typehints'
+#   - 'sphinxcontrib.autoyaml'
+#   - 'sphinx.ext.napoleon'       # Formats google and numpy docstring styles
+#   - 'sphinxcontrib.mermaid'
+#   config:
+#     html_theme: sphinx_book_theme
+#     templates_path:
+#     - '_templates'
+#     language: 'python'
+#     autoyaml_level: 3
+#     autosummary_generate: true
+#     bibtex_reference_style: author_year
 
-    # Autodoc config reference
-    # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
-    autodoc_default_options:
-      members: true
-      member-order: bysource
-      undoc-members: true
-      private-members: true
-      # special-members: true
-      # inherited-members
-      # show-inheritance
-      # ignore-module-all
-      # imported-members: true
-      # exclude-members
-      # class-doc-from
-      # no-value
-    autodoc_typehints: both
+#     # Autodoc config reference
+#     # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
+#     autodoc_default_options:
+#       members: true
+#       member-order: bysource
+#       undoc-members: true
+#       private-members: true
+#       # special-members: true
+#       # inherited-members
+#       # show-inheritance
+#       # ignore-module-all
+#       # imported-members: true
+#       # exclude-members
+#       # class-doc-from
+#       # no-value
+#     autodoc_typehints: both
