@@ -81,7 +81,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
 
     # Initialize FLORIS model and format appropriately
     fi = FlorisInterface(fn)
-    fi.reinitialize(
+    fi.set(
         layout_x=layout_x,
         layout_y=layout_y,
     )
@@ -92,7 +92,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
         for ii in range(len(tdefs)):
             tdefs[ii]["pP"] = pP
 
-        fi.reinitialize(turbine_type=tdefs)
+        fi.set(turbine_type=tdefs)
 
     # Add uncertainty
     if wd_std > 0.01:
