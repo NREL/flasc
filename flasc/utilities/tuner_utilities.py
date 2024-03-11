@@ -117,8 +117,8 @@ def resim_floris(fi_in: FlorisInterface, df_scada: pd.DataFrame, yaw_angles: np.
 
     # Set up the FLORIS model
     fi = fi_in.copy()
-    fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions)
-    fi.calculate_wake(yaw_angles=yaw_angles)
+    fi.set(wind_speeds=wind_speeds, wind_directions=wind_directions, yaw_angles=yaw_angles)
+    fi.run()
 
     # Get the turbines in kW
     turbine_powers = fi.get_turbine_powers().squeeze() / 1000
