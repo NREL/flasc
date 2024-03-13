@@ -10,9 +10,19 @@ parts:
     - file: installation
     - file: getting_started
 
-  - caption: User Referece
+  - caption: User Reference
     chapters:
     - file: data_processing
     - file: energy_ratio
     - file: total_uplift
     - file: licensing
+
+  # - caption: Developer Reference
+  #   chapters:
+  #   - file: contributing
+  #   - file: development
+  #   - file: testing
+
+  - caption: API Reference
+    chapters:
+    - file: api
