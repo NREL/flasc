@@ -8,6 +8,7 @@ __pycache__/
 dist
 build
 _build
+_autosummary
 
 # macOS files
 .DS_Store
