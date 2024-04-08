@@ -138,7 +138,7 @@ def plot_with_wrapping(
     return ax
 
 
-def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
+def plot_floris_layout(fm, turbine_names=None, plot_terrain=True):
     """Plot the wind farm layout and turbine performance curves for the
     floris object of interest. This visualization function includes some
     useful checks such as checking which turbine curves are identical,
@@ -146,7 +146,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     different hub heights through a background colormap.
 
     Args:
-        fi (FlorisModel): The FLORIS object
+        fm (FlorisModel): The FLORIS object
         turbine_names (iteratible, optional): List of turbine names, with
         each entry being a string. It is recommended that this is something
         like one or two letters, and then a number to indicate the turbine.
@@ -164,13 +164,13 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
 
     # Get names if not provided
     if turbine_names is None:
-        turbine_names = generate_labels_with_hub_heights(fi)
+        turbine_names = generate_labels_with_hub_heights(fm)
 
     ax = [None, None, None]
     ax[0] = fig.add_subplot(121)
 
     if plot_terrain:
-        plot_farm_terrain(fi, fig, ax[0])
+        plot_farm_terrain(fm, fig, ax[0])
 
     # Generate plotting dictionary based on turbine; plot locations
     turbine_types = [t["turbine_type"] for t in fm.core.farm.turbine_definitions]
@@ -182,7 +182,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
             "color": "C%s" % ti,
             "label": tt,
         }
-        plot_layout_only(fi, plotting_dict, ax=ax[0])
+        plot_layout_only(fm, plotting_dict, ax=ax[0])
     ax[0].legend()
     ax[0].set_title("Farm layout")
 
@@ -202,12 +202,12 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     return fig, ax
 
 
-def generate_default_labels(fi):
+def generate_default_labels(fm):
     labels = ["T{0:02d}".format(ti) for ti in range(len(fm.layout_x))]
     return labels
 
 
-def generate_labels_with_hub_heights(fi):
+def generate_labels_with_hub_heights(fm):
     labels = [
         "T{0:02d} ({1:.1f} m)".format(ti, h)
         for ti, h in enumerate(fm.core.farm.hub_heights.flatten())
@@ -215,7 +215,7 @@ def generate_labels_with_hub_heights(fi):
     return labels
 
 
-def plot_layout_only(fi, plotting_dict={}, ax=None):
+def plot_layout_only(fm, plotting_dict={}, ax=None):
     """
     Plot the farm layout.
 
@@ -246,7 +246,7 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
     # Generate plotting dictionary
     default_plotting_dict = {
         "turbine_indices": range(len(fm.layout_x)),
-        "turbine_names": generate_default_labels(fi),
+        "turbine_names": generate_default_labels(fm),
         "color": "black",
         "marker": ".",
         "markersize": 10,
@@ -370,7 +370,7 @@ def plot_farm_terrain(fi, fig, ax):
 
 
 def plot_layout_with_waking_directions(
-    fi,
+    fm,
     layout_plotting_dict={},
     wake_plotting_dict={},
     D=None,
@@ -384,7 +384,7 @@ def plot_layout_with_waking_directions(
     Plot waking directions and distances between turbines.
 
     Args:
-        fi: Instantiated FlorisModel object
+        fm: Instantiated FlorisModel object
         layout_plotting_dict: dictionary of plotting parameters for
             turbine locations. Defaults to the defaults of
             plot_layout_only.
@@ -422,7 +422,7 @@ def plot_layout_with_waking_directions(
     def_layout_plotting_dict = {"turbine_indices": range(len(fm.layout_x))}
     layout_plotting_dict = {**def_layout_plotting_dict, **layout_plotting_dict}
 
-    ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
+    ax = plot_layout_only(fm, plotting_dict=layout_plotting_dict, ax=ax)
 
     N_turbs = len(fm.core.farm.turbine_definitions)
 

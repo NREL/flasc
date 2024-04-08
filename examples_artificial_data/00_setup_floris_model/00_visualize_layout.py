@@ -16,30 +16,30 @@ from flasc.visualization import (
 if __name__ == "__main__":
     # Set up FLORIS interface
     print("Initializing the FLORIS object for our demo wind farm")
-    fi, _ = load_floris()
+    fm, _ = load_floris()
 
     # Defines alternative names for each turbine with 1-index
     turbine_names = ["Turbine-%d" % (t + 1) for t in range(len(fm.layout_x))]
 
     # Plot using default 0-indexed labels (includes power/thrust curve)
-    plot_floris_layout(fi, plot_terrain=False)
+    plot_floris_layout(fm, plot_terrain=False)
 
     # Plot using default given 1-indexed labels (includes power/thrust curve)
-    plot_floris_layout(fi, plot_terrain=False, turbine_names=turbine_names)
+    plot_floris_layout(fm, plot_terrain=False, turbine_names=turbine_names)
 
     # Plot only the layout with default options
-    plot_layout_only(fi)
+    plot_layout_only(fm)
 
     # Plot only the layout with custom options
-    plot_layout_only(fi, {"turbine_names": turbine_names, "color": "g"})
+    plot_layout_only(fm, {"turbine_names": turbine_names, "color": "g"})
 
     # Plot layout with wake directions and inter-turbine distances labeled
-    plot_layout_with_waking_directions(fi)
+    plot_layout_with_waking_directions(fm)
 
     # Plot layout with wake directions and inter-turbine distances labeled
     # (using custom options)
     plot_layout_with_waking_directions(
-        fi,
+        fm,
         limit_num=3,  # limit to 3 lines per turbine
         layout_plotting_dict={
             "turbine_names": turbine_names,
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # Demonstrate shading of an arbitrary region
     points_for_demo = np.array([[600, 0], [1400, 0], [1200, 1000]])
-    ax = plot_layout_only(fi)
+    ax = plot_layout_only(fm)
     shade_region(
         points_for_demo,
         show_points=True,

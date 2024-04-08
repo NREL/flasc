@@ -19,7 +19,7 @@ turbine_weights[np.hstack([a + range(10) for a in np.arange(50, 231, 20)])] = 1.
 
 # Get all impacting turbines for each wind direction using simple geometry rules
 df_impacting = get_all_impacting_turbines_geometrical(
-    fi=fi, turbine_weights=turbine_weights, wd_array=np.arange(0.0, 360.0, 30.0)
+    fm=fm, turbine_weights=turbine_weights, wd_array=np.arange(0.0, 360.0, 30.0)
 )
 
 # Produce plots showcasing which turbines are estimated to be impacting

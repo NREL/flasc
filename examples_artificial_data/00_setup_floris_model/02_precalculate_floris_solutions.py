@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
         start_time = timerpc()
         print("Precalculating FLORIS table for '{:s}' model...".format(wake_model))
-        fi, turbine_weights = load_floris(wake_model=wake_model)
+        fm, turbine_weights = load_floris(wake_model=wake_model)
         # fi_pci = ParallelComputingInterface(
         #     fi=fi,
         #     max_workers=max_workers,
@@ -28,7 +28,7 @@ if __name__ == "__main__":
         #     print_timings=True,
         # )
         df_fi_approx = ftools.calc_floris_approx_table(
-            fi=fi,  # fi=fi_pci,
+            fm=fm,  # fi=fi_pci,
             wd_array=np.arange(0.0, 360.01, 3.0),
             ws_array=np.arange(1.0, 30.01, 1.0),
             ti_array=[0.03, 0.06, 0.09, 0.12, 0.15],

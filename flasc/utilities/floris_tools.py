@@ -624,7 +624,7 @@ def get_turbs_in_radius(
 
 
 def get_all_impacting_turbines_geometrical(
-    fi, turbine_weights, wd_array=np.arange(0.0, 360.0, 3.0), wake_slope=0.30
+    fm, turbine_weights, wd_array=np.arange(0.0, 360.0, 3.0), wake_slope=0.30
 ):
     """Determine which turbines affect the turbines of interest
     (i.e., those with a turbine_weights > 0.00001). This function
@@ -633,7 +633,7 @@ def get_all_impacting_turbines_geometrical(
     turbine in the farm of interest.
 
     Args:
-        fi ([floris object]): FLORIS object of the farm of interest.
+        fm ([floris object]): FLORIS object of the farm of interest.
         turbine_weights [list]: List of with turbine weights with length
         equal to the number of wind turbines, and typically filled with
         0s (neighbouring farms) and 1s (farm of interest).

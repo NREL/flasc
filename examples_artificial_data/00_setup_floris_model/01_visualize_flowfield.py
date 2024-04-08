@@ -20,13 +20,13 @@ if __name__ == "__main__":
     )
 
     # Load FLORIS
-    fi, _ = load_floris()
+    fm, _ = load_floris()
     fm.set(
         wind_directions=[wind_direction],
         wind_speeds=[wind_speed],
         turbulence_intensities=[turbulence_intensity],
     )
-    plot_floris_layout(fi, plot_terrain=False)
+    plot_floris_layout(fm, plot_terrain=False)
 
     # Generate baseline flowfield
     print("Calculating flowfield...")
