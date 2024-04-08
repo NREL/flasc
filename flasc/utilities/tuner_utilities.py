@@ -89,12 +89,12 @@ def nested_set(dic: Dict[str, Any], keys: List[str], value: Any, idx: Optional[i
 
 
 def set_fi_param(
-    fi_in: FlorisModel, param: List[str], value: Any, param_idx: Optional[int] = None
+    fm_in: FlorisModel, param: List[str], value: Any, param_idx: Optional[int] = None
 ) -> FlorisModel:
     """Set a parameter in a FlorisModel object.
 
     Args:
-        fi_in (FlorisModel): The FlorisModel object to modify.
+        fm_in (FlorisModel): The FlorisModel object to modify.
         param (List[str]): A list of keys to traverse the FlorisModel dictionary.
         value (Any): The value to set.
         idx (Optional[int], optional): The index to set the value at. Defaults to None.
@@ -102,12 +102,12 @@ def set_fi_param(
     Returns:
         FlorisModel: The modified FlorisModel object.
     """
-    fi_dict_mod = fi_in.core.as_dict()
+    fi_dict_mod = fm_in.core.as_dict()
     nested_set(fi_dict_mod, param, value, param_idx)
     return FlorisModel(fi_dict_mod)
 
 
-def resim_floris(fi_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.array = None):
+def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.array = None):
     # Get wind speeds and directions
     wind_speeds = df_scada["ws"].values
     wind_directions = df_scada["wd"].values
@@ -116,7 +116,7 @@ def resim_floris(fi_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.arra
     num_turbines = dfm.get_num_turbines(df_scada)
 
     # Set up the FLORIS model
-    fm = fi_in.copy()
+    fm = fm_in.copy()
     fm.set(wind_speeds=wind_speeds, wind_directions=wind_directions, yaw_angles=yaw_angles)
     fm.run()
 

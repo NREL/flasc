@@ -16,7 +16,7 @@ from flasc.utilities import utilities as fsut
 # ruff: noqa: E501
 
 
-def merge_floris_objects(fi_list, reference_wind_height=None):
+def merge_floris_objects(fm_list, reference_wind_height=None):
     """Merge a list of FlorisModel objects into a single FlorisModel object. Note that it uses
     the very first object specified in fi_list to build upon, so it uses those wake model parameters,
     air density, and so on.
@@ -35,7 +35,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
     """
 
     # Make sure the entries in fi_list are FlorisModel objects
-    if not isinstance(fi_list[0], FlorisModel):
+    if not isinstance(fm_list[0], FlorisModel):
         raise UserWarning(
             "Incompatible input specified. Please merge FlorisModel objects before inserting them into ParallelComputingInterface and UncertainFlorisModel."
         )
@@ -45,7 +45,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
     y_list = []
     turbine_type_list = []
     reference_wind_heights = []
-    for fi in fi_list:
+    for fm in fm_list:
         x_list.extend(fm.layout_x)
         y_list.extend(fm.layout_y)
 
@@ -67,7 +67,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
             )
 
     # Construct the merged FLORIS model based on the first entry in fi_list
-    fi_merged = fi_list[0].copy()
+    fi_merged = fm_list[0].copy()
     fi_merged.set(
         layout_x=x_list,
         layout_y=y_list,

@@ -42,14 +42,14 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fm = UncertainFlorisModel(fi, unc_options=unc_options)
+        fm = UncertainFlorisModel(fm, unc_options=unc_options)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly
     # helpful when you have information about surrounding wind farms.
     turbine_weights = np.ones(len(fm.layout_x), dtype=float)
 
-    return (fi, turbine_weights)
+    return (fm, turbine_weights)
 
 
 def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
@@ -101,14 +101,14 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fm = UncertainFlorisModel(fi, unc_options=unc_options)
+        fm = UncertainFlorisModel(fm, unc_options=unc_options)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly
     # helpful when you have information about surrounding wind farms.
     turbine_weights = np.ones(len(layout_x), dtype=float)
 
-    return (fi, turbine_weights)
+    return (fm, turbine_weights)
 
 
 if __name__ == "__main__":

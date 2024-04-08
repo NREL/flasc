@@ -50,7 +50,7 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     parameter,
     value_candidates,
     df_scada_in,
-    fi_in,
+    fm_in,
     ref_turbines,
     test_turbines,
     param_idx=None,
@@ -102,7 +102,7 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     floris_wake_losses = np.zeros(len(value_candidates))
     for idx, vc in enumerate(value_candidates):
         # Set the parameter
-        fm = set_fi_param(fi_in, parameter, vc, param_idx)
+        fm = set_fi_param(fm_in, parameter, vc, param_idx)
 
         # Collect the FLORIS results
         df_floris = resim_floris(fi, df_scada.to_pandas(), yaw_angles=yaw_angles)
@@ -269,7 +269,7 @@ def sweep_deflection_parameter_for_total_uplift(
     value_candidates,
     df_scada_baseline_in,
     df_scada_wakesteering_in,
-    fi_in,
+    fm_in,
     ref_turbines,
     test_turbines,
     yaw_angles_baseline=None,
@@ -366,7 +366,7 @@ def sweep_deflection_parameter_for_total_uplift(
     # df_list = []
     for idx, vc in enumerate(value_candidates):
         # Set the parameter for baseline and wake steering
-        fi_baseline = set_fi_param(fi_in, parameter, vc)
+        fi_baseline = set_fi_param(fm_in, parameter, vc)
         fi_wakesteering = fi_baseline.copy()
 
         # Collect the FLORIS results
