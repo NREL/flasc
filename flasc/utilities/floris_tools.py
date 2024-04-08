@@ -4,7 +4,7 @@ from time import perf_counter as timerpc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from floris import FlorisModel
+from floris import FlorisModel, TimeSeries, WindTIRose
 from floris.utilities import wrap_360
 from scipy import interpolate
 from scipy.stats import norm
@@ -409,7 +409,7 @@ def interpolate_floris_from_df_approx(
 
 
 def calc_floris_approx_table(
-    fi,
+    fm,
     wd_array=np.arange(0.0, 360.0, 1.0),
     ws_array=np.arange(1.0, 25.01, 1.0),
     ti_array=np.arange(0.03, 0.1801, 0.03),
@@ -422,7 +422,7 @@ def calc_floris_approx_table(
     turbulence intensity if 'save_turbine_inflow_conditions_to_df==True'.
 
     Args:
-        fi (FlorisModel): FlorisModel object.
+        fm (FlorisModel): FlorisModel object.
         wd_array (array, optional): Array of wind directions to evaluate in [deg]. This expands with the
           number of wind speeds and turbulence intensities. Defaults to np.arange(0.0, 360.0, 1.0).
         ws_array (array, optional): Array of wind speeds to evaluate in [m/s]. This expands with the
@@ -483,39 +483,35 @@ def calc_floris_approx_table(
     )
 
     # Create solutions, one set per turbulence intensity
-    df_list = []
-    # TODO: reinitialize() will now accept an array of turbulence intensities
-    # TODO: use WindRose floris object instead of "normal" series mode in reinitialize()
-    for turb_intensity in ti_array:
-        # Calculate solutions
-        fm.set(
-            wind_directions=wd_mesh.flatten(),
-            wind_speeds=ws_mesh.flatten(),
-            turbulence_intensities=[turb_intensity],
+    fm.set(
+        wind_data=WindTIRose(
+            wind_directions=wd_array,
+            wind_speeds=ws_array,
+            turbulence_intensities=ti_array,
         )
-        fm.run()
-        turbine_powers = fm.get_turbine_powers()
-
-        # Create a dictionary to save solutions in
-        solutions_dict = {"wd": wd_mesh.flatten(), "ws": ws_mesh.flatten()}
-        solutions_dict["ti"] = turb_intensity * np.ones(len(wd_array) * len(ws_array))
-        for turbi in range(num_turbines):
-            solutions_dict["pow_{:03d}".format(turbi)] = turbine_powers[:, turbi].flatten()
-            if save_turbine_inflow_conditions_to_df:
-                # TODO: Untested, does not work with FLORIS v4
-                solutions_dict["ws_{:03d}".format(turbi)] = (
-                    fm.core.flow_field.u.mean(axis=4).mean(axis=3)[:, :, turbi].flatten()
-                )
-                solutions_dict[
-                    "wd_{:03d}".format(turbi)
-                ] = wd_mesh.flatten()  # Uniform wind direction
-                solutions_dict[
-                    "ti_{:03d}".format(turbi)
-                ] = fm.core.flow_field.turbulence_intensity_field[:, :, turbi].flatten()
-        df_list.append(pd.DataFrame(solutions_dict))
+    )
+    fm.run()
+    turbine_powers = fm.get_turbine_powers().reshape(-1, fm.n_turbines) # Want flattened version
+    
+    solutions_dict = {
+        "wd": fm.wind_directions,
+        "ws": fm.wind_speeds,
+        "ti": fm.turbulence_intensities
+    }
+    for tindex in range(num_turbines):
+        solutions_dict["pow_{:03d}".format(tindex)] = turbine_powers[:, tindex]
+        if save_turbine_inflow_conditions_to_df:
+            solutions_dict["ws_{:03d}".format(tindex)] = (
+                fm.core.flow_field.u.mean(axis=(2,3))[:, tindex]
+            )
+            solutions_dict["wd_{:03d}".format(tindex)] = fm.wind_directions
+            solutions_dict["ti_{:03d}".format(tindex)] = (
+                fm.core.flow_field.turbulence_intensity_field[:, tindex]
+            )
+    df_approx = pd.DataFrame(solutions_dict)
 
     print("Finished calculating the FLORIS solutions for the dataframe.")
-    df_approx = pd.concat(df_list, axis=0).sort_values(by=["ti", "ws", "wd"])
+    df_approx = df_approx.sort_values(by=["ti", "ws", "wd"])
     df_approx = df_approx.reset_index(drop=True)
 
     return df_approx
@@ -730,7 +726,7 @@ def get_all_impacting_turbines_geometrical(
     return df_impacting_simple
 
 
-def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10, plot_lines=False):
+def get_upstream_turbs_floris(fm, wd_step=0.1, wake_slope=0.10, plot_lines=False):
     """Determine which turbines are operating in freestream (unwaked)
     flow, for the entire wind rose. This function will return a data-
     frame where each row will present a wind direction range and a set
@@ -871,7 +867,7 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10, plot_lines=False
 
 
 def get_dependent_turbines_by_wd(
-    fi_in,
+    fm_in,
     test_turbine,
     wd_array=np.arange(0.0, 360.0, 2.0),
     change_threshold=0.001,
@@ -882,7 +878,7 @@ def get_dependent_turbines_by_wd(
     """
     Computes all turbines that depend on the operation of a specified
     turbine (test_turbine) for each wind direction in wd_array, using
-    the FLORIS model specified by fi_in to detect dependencies.
+    the FLORIS model specified by fm_in to detect dependencies.
 
     Args:
         fi ([floris object]): FLORIS object of the farm of interest.
@@ -914,10 +910,16 @@ def get_dependent_turbines_by_wd(
             only if return_influence_magnitudes is True.
     """
     # Copy fi to a local to not mess with incoming
-    fm = copy.deepcopy(fi_in)
+    fm = copy.deepcopy(fm_in)
 
     # Compute the base power
-    fm.set(wind_speeds=ws_test * np.ones_like(wd_array), wind_directions=wd_array)
+    fm.set(
+        wind_data=TimeSeries(
+            wind_directions=wd_array,
+            wind_speeds=ws_test,
+            turbulence_intensities=0.06
+        )
+    )
     fm.run()
     base_power = fm.get_turbine_powers()
 
@@ -962,7 +964,7 @@ def get_dependent_turbines_by_wd(
 
 
 def get_all_dependent_turbines(
-    fi_in,
+    fm_in,
     wd_array=np.arange(0.0, 360.0, 2.0),
     change_threshold=0.001,
     limit_number=None,
@@ -997,10 +999,10 @@ def get_all_dependent_turbines(
     """
 
     results = []
-    for t_i in range(len(fi_in.layout_x)):
+    for t_i in range(len(fm_in.layout_x)):
         results.append(
             get_dependent_turbines_by_wd(
-                fi_in, t_i, wd_array, change_threshold, limit_number, ws_test
+                fm_in, t_i, wd_array, change_threshold, limit_number, ws_test
             )
         )
 
@@ -1016,7 +1018,7 @@ def get_all_dependent_turbines(
 
 
 def get_all_impacting_turbines(
-    fi_in,
+    fm_in,
     wd_array=np.arange(0.0, 360.0, 2.0),
     change_threshold=0.001,
     limit_number=None,
@@ -1051,11 +1053,11 @@ def get_all_impacting_turbines(
             ordered by magnitude of impact.
     """
 
-    dependency_magnitudes = np.zeros((len(wd_array), len(fi_in.layout_x), len(fi_in.layout_x)))
+    dependency_magnitudes = np.zeros((len(wd_array), len(fm_in.layout_x), len(fm_in.layout_x)))
 
-    for t_i in range(len(fi_in.layout_x)):
+    for t_i in range(len(fm_in.layout_x)):
         _, ti_dep_mags = get_dependent_turbines_by_wd(
-            fi_in,
+            fm_in,
             t_i,
             wd_array,
             change_threshold,
@@ -1076,7 +1078,7 @@ def get_all_impacting_turbines(
 
     for wd in range(len(wd_array)):
         wd_results = []
-        for t_j in range(len(fi_in.layout_x)):
+        for t_j in range(len(fm_in.layout_x)):
             impacts_on_t_j = dependency_magnitudes[wd, t_j, :]
             impact_order_t_j = impact_order[wd, t_j, :]
             impact_order_t_j = impact_order_t_j[
