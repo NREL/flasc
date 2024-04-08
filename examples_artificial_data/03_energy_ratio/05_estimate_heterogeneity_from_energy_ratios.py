@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # we want to use all the turbines besides the ones that we know have
     # an unreliable wind direction measurement. Here, for explanation purposes,
     # we just exclude turbine 3 from our analysis.
-    nturbs = len(fi.layout_x)
+    nturbs = len(fm.layout_x)
     bad_turbs = [
         3
     ]  # Just hypothetical situation: assume turbine 3 gave faulty wind directions so we ignore it

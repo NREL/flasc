@@ -33,7 +33,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
     fn = root_path / "{:s}.yaml".format(wake_model)
 
     # Initialize FLORIS model and format appropriately
-    fi = FlorisModel(fn)
+    fm = FlorisModel(fn)
 
     # Add uncertainty
     if wd_std > 0.01:
@@ -42,12 +42,12 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fi = UncertainFlorisModel(fi, unc_options=unc_options)
+        fm = UncertainFlorisModel(fi, unc_options=unc_options)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly
     # helpful when you have information about surrounding wind farms.
-    turbine_weights = np.ones(len(fi.layout_x), dtype=float)
+    turbine_weights = np.ones(len(fm.layout_x), dtype=float)
 
     return (fi, turbine_weights)
 
@@ -80,19 +80,19 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
     layout_y = [0.0, 297.357, 123.431, 575.544, 647.779, 772.262, 504.711]
 
     # Initialize FLORIS model and format appropriately
-    fi = FlorisModel(fn)
-    fi.set(
+    fm = FlorisModel(fn)
+    fm.set(
         layout_x=layout_x,
         layout_y=layout_y,
     )
 
     # Update Pp if specified
     if pP is not None:
-        tdefs = [copy.deepcopy(t) for t in fi.floris.farm.turbine_definitions]
+        tdefs = [copy.deepcopy(t) for t in fm.floris.farm.turbine_definitions]
         for ii in range(len(tdefs)):
             tdefs[ii]["pP"] = pP
 
-        fi.set(turbine_type=tdefs)
+        fm.set(turbine_type=tdefs)
 
     # Add uncertainty
     if wd_std > 0.01:
@@ -101,7 +101,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fi = UncertainFlorisModel(fi, unc_options=unc_options)
+        fm = UncertainFlorisModel(fi, unc_options=unc_options)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly

@@ -48,7 +48,7 @@ class heterogeneity_mapper:
     def __init__(self, df_raw, fi):
         # Save to self
         self.df_raw = df_raw
-        self.fi = fi
+        self.fm = fi
         self.df_heterogeneity = None
         self.df_fi_hetmap = None
 
@@ -184,10 +184,10 @@ class heterogeneity_mapper:
             raise UserWarning("Please call 'estimate_heterogeneity(...)' first.")
 
         # Determine FLORIS heterogeneous map
-        fi = self.fi
+        fm = self.fi
         ll = 2.0 * np.sqrt(
-            (np.max(fi.layout_x) - np.min(fi.layout_x)) ** 2.0
-            + (np.max(fi.layout_y) - np.min(fi.layout_y)) ** 2.0
+            (np.max(fm.layout_x) - np.min(fm.layout_x)) ** 2.0
+            + (np.max(fm.layout_y) - np.min(fm.layout_y)) ** 2.0
         )
         locations_x = []
         locations_y = []
@@ -196,8 +196,8 @@ class heterogeneity_mapper:
             df_row = self.df_heterogeneity.loc[ii]
             turbs = df_row["upstream_turbines"]
             wd = (270.0 - df_row["wd"]) * np.pi / 180.0
-            x_turbs = np.array(fi.layout_x, dtype=float)[turbs]
-            y_turbs = np.array(fi.layout_y, dtype=float)[turbs]
+            x_turbs = np.array(fm.layout_x, dtype=float)[turbs]
+            y_turbs = np.array(fm.layout_y, dtype=float)[turbs]
 
             xlocs = np.hstack(
                 [xt + ll * np.cos(wd) * np.linspace(-1.0, 1.0, 100) for xt in x_turbs]
@@ -234,25 +234,25 @@ class heterogeneity_mapper:
             pdf = PdfPages(pdf_save_path)
 
         # Plot the results one by one
-        fi = self.fi
+        fm = self.fi
         for _, df_row in self.df_heterogeneity.iterrows():
             non_upstream_turbines = [
-                ti for ti in range(len(fi.layout_x)) if ti not in df_row["upstream_turbines"]
+                ti for ti in range(len(fm.layout_x)) if ti not in df_row["upstream_turbines"]
             ]
 
             fig, ax = plt.subplots(figsize=(8, 6))
             ax.scatter(
-                x=fi.layout_x[non_upstream_turbines],
-                y=fi.layout_y[non_upstream_turbines],
+                x=fm.layout_x[non_upstream_turbines],
+                y=fm.layout_y[non_upstream_turbines],
                 s=300,
                 c="lightgray",
             )
             for ti in non_upstream_turbines:
-                ax.text(fi.layout_x[ti], fi.layout_y[ti], "T{:02d}".format(ti))
+                ax.text(fm.layout_x[ti], fm.layout_y[ti], "T{:02d}".format(ti))
 
             im = ax.scatter(
-                x=fi.layout_x[df_row["upstream_turbines"]],
-                y=fi.layout_y[df_row["upstream_turbines"]],
+                x=fm.layout_x[df_row["upstream_turbines"]],
+                y=fm.layout_y[df_row["upstream_turbines"]],
                 c=df_row["ws_ratios"],
                 s=300,
                 cmap="jet",
@@ -262,15 +262,15 @@ class heterogeneity_mapper:
             )
             for ii, ti in enumerate(df_row["upstream_turbines"]):
                 ax.text(
-                    fi.layout_x[ti],
-                    fi.layout_y[ti],
+                    fm.layout_x[ti],
+                    fm.layout_y[ti],
                     "T{:02d} ({:+.1f}%)".format(ti, 100.0 * (df_row["ws_ratios"][ii] - 1.0)),
                     weight="bold",
                 )
 
             # Add arrow plot
-            xm = np.min(fi.layout_x) - 100.0
-            ym = np.max(fi.layout_y) + 500.0
+            xm = np.min(fm.layout_x) - 100.0
+            ym = np.max(fm.layout_y) + 500.0
             radius = 120.0
             theta = np.linspace(0.0, 2 * np.pi, 100)
             xcirc = np.cos(theta) * radius + xm
@@ -295,7 +295,7 @@ class heterogeneity_mapper:
 
             # Add plot to ensure equal axis does not crop plot too much
             ax.plot(
-                np.max(fi.layout_x) + 500.0, np.min(fi.layout_y), ".", color="white", markersize=1
+                np.max(fm.layout_x) + 500.0, np.min(fm.layout_y), ".", color="white", markersize=1
             )
             ax.axis("equal")
             plt.tight_layout()

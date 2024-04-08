@@ -41,8 +41,8 @@ def _get_angle(fi, turbine_array):
     # the power production of each turbine in the array.
     t0 = turbine_array[0]
     t1 = turbine_array[-1]
-    dy = fi.layout_y[t1] - fi.layout_y[t0]
-    dx = fi.layout_x[t1] - fi.layout_x[t0]
+    dy = fm.layout_y[t1] - fm.layout_y[t0]
+    dx = fm.layout_x[t1] - fm.layout_x[t0]
     wd = wrap_360(270.0 - np.arctan2(dy, dx) * 180.0 / np.pi)
     return wd
 
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     plot_floris_layout(fi, plot_terrain=False)
 
     fig, ax = plt.subplots()
-    fi.set(wind_directions=[wd], wind_speeds=[10.0])
-    horizontal_plane = fi.calculate_horizontal_plane(height=90.0)
+    fm.set(wind_directions=[wd], wind_speeds=[10.0])
+    horizontal_plane = fm.calculate_horizontal_plane(height=90.0)
     visualize_cut_plane(horizontal_plane, ax=ax, title="Horizontal plane")
     plt.show()

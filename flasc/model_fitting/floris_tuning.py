@@ -102,7 +102,7 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     floris_wake_losses = np.zeros(len(value_candidates))
     for idx, vc in enumerate(value_candidates):
         # Set the parameter
-        fi = set_fi_param(fi_in, parameter, vc, param_idx)
+        fm = set_fi_param(fi_in, parameter, vc, param_idx)
 
         # Collect the FLORIS results
         df_floris = resim_floris(fi, df_scada.to_pandas(), yaw_angles=yaw_angles)

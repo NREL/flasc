@@ -16,7 +16,7 @@ def load_floris_with_uncertainty(std_wd=0.0):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fi = UncertainFlorisModel(fi, unc_options=unc_options)  # Load uncertainty object
+        fm = UncertainFlorisModel(fi, unc_options=unc_options)  # Load uncertainty object
     return fi
 
 

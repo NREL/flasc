@@ -14,27 +14,27 @@ def load_floris():
     # initialize FLORIS model
     root_dir = os.path.dirname(os.path.abspath(__file__))
     input_json = os.path.join(root_dir, "../demo_dataset/demo_floris_input.json")
-    fi = wfct.floris_interface.FlorisModel(input_json)
+    fm = wfct.floris_interface.FlorisModel(input_json)
     configure_console_log(False)  # Disable INFO statements
 
     # Set default scenario
-    fi.reinitialize_flow_field(wind_direction=62.0)
+    fm.reinitialize_flow_field(wind_direction=62.0)
 
     return fi
 
 
 def plot_hor_flowfield(fi):
-    fi.run()
-    hor_plane = fi.get_hor_plane()
+    fm.run()
+    hor_plane = fm.get_hor_plane()
     fig, ax = plt.subplots()
     wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
-    fi.vis_layout(ax=ax)
+    fm.vis_layout(ax=ax)
     return fig, ax
 
 
 if __name__ == "__main__":
     # Load FLORIS
-    fi = load_floris()
+    fm = load_floris()
     plot_hor_flowfield(fi)
     plt.show()
 

@@ -248,17 +248,17 @@ def estimate_ti(
     verbose=False,
 ):
     # Make copy so that existing object is not changed
-    fi = copy.deepcopy(fi)
-    num_turbines = len(fi.layout_x)
-    ti_0 = np.mean(fi.floris.farm.turbulence_intensity)
+    fm = copy.deepcopy(fi)
+    num_turbines = len(fm.layout_x)
+    ti_0 = np.mean(fm.floris.farm.turbulence_intensity)
 
     # Define a cost function
     def cost_fun(ti):
         ti_array = np.repeat(ti_0, num_turbines)
         ti_array[turbine_upstream] = ti
         ftools._fi_set_ws_wd_ti(fi, ti=ti_array)
-        fi.run()
-        Pturbs = np.array(fi.get_turbine_power())
+        fm.run()
+        Pturbs = np.array(fm.get_turbine_power())
         Pturbs = Pturbs[turbines_downstream]
         se = (P_measured - Pturbs) ** 2.0
         mse = np.mean(se)

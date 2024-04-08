@@ -137,7 +137,7 @@ class bias_estimation:
                 ~df_fi_all["pow_{:03d}".format(ti)].isna()
             )
             df_cor = df_cor_all[valid_entries].copy().reset_index(drop=True)
-            df_fi = df_fi_all[valid_entries].copy().reset_index(drop=True)
+            df_fm = df_fi_all[valid_entries].copy().reset_index(drop=True)
 
             # Initialize SCADA analysis class and add dataframes
             er_in_test_turbine_list_scada.append(EnergyRatioInput([df_cor], ["Measured data"]))

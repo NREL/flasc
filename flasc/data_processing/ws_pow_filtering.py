@@ -556,9 +556,9 @@ class ws_pw_curve_filtering:
             self._get_mean_power_curves(turbine_subset=[ti])
 
         df_xy = self.pw_curve_df.copy()
-        rho = fi.floris.flow_field.air_density
-        for ti in range(len(fi.layout_x)):
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
+        rho = fm.floris.flow_field.air_density
+        for ti in range(len(fm.layout_x)):
+            fi_turb = fm.floris.farm.turbine_definitions[ti]
             Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
             ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
             cp_array = np.array(fi_turb["power_thrust_table"]["power"])
@@ -744,7 +744,7 @@ class ws_pw_curve_filtering:
         ax.plot(x, pow_mean_array, color="tab:red", label="Mean curve")
 
         if fi is not None:
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
+            fi_turb = fm.floris.farm.turbine_definitions[ti]
             ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
             pow_array = np.array(fi_turb["power_thrust_table"]["power"])
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
@@ -949,7 +949,7 @@ class ws_pw_curve_filtering:
         )
 
         if fi is not None:
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
+            fi_turb = fm.floris.farm.turbine_definitions[ti]
             ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
             pow_array = np.array(fi_turb["power_thrust_table"]["power"])
 
@@ -1022,7 +1022,7 @@ class ws_pw_curve_filtering:
         )
 
         if fi is not None:
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
+            fi_turb = fm.floris.farm.turbine_definitions[ti]
             ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
             pow_array = np.array(fi_turb["power_thrust_table"]["power"])
 

@@ -12,8 +12,8 @@ if __name__ == "__main__":
     print("Initializing the FLORIS object for our demo wind farm")
     file_path = os.path.dirname(os.path.abspath(__file__))
     fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.json")
-    fi = wfct.floris_interface.FlorisModel(fi_path)
-    fi.vis_layout()
+    fm = wfct.floris_interface.FlorisModel(fi_path)
+    fm.vis_layout()
 
     # Generate measurement
     fi_scada = copy.deepcopy(fi)
@@ -33,11 +33,11 @@ if __name__ == "__main__":
 
     # Plot flow field error (m/s)
     hor_plane = fi_scada.get_hor_plane()
-    hor_plane_est = tb.fi.get_hor_plane()
+    hor_plane_est = tb.fm.get_hor_plane()
     hor_plane.df[["u", "v", "w"]] -= hor_plane_est.df[["u", "v", "w"]]
     fig, ax = plt.subplots()
     im = wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
-    fi.vis_layout(ax=ax)
+    fm.vis_layout(ax=ax)
     plt.colorbar(im, label="Wind speed error (m/s)")
     ax.set_title("Wind speed error before estimation")
 
@@ -49,11 +49,11 @@ if __name__ == "__main__":
 
     # Plot flow field error (m/s)
     hor_plane = fi_scada.get_hor_plane()
-    hor_plane_est = tb.fi.get_hor_plane()
+    hor_plane_est = tb.fm.get_hor_plane()
     hor_plane.df[["u", "v", "w"]] -= hor_plane_est.df[["u", "v", "w"]]
     fig, ax = plt.subplots()
     im = wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
-    fi.vis_layout(ax=ax)
+    fm.vis_layout(ax=ax)
     plt.colorbar(im, label="Wind speed error (m/s)")
     ax.set_title("Wind speed error after farm-wide estimation")
 
@@ -69,11 +69,11 @@ if __name__ == "__main__":
 
     # Plot flow field error (m/s)
     hor_plane = fi_scada.get_hor_plane()
-    hor_plane_est = tb.fi.get_hor_plane()
+    hor_plane_est = tb.fm.get_hor_plane()
     hor_plane.df[["u", "v", "w"]] -= hor_plane_est.df[["u", "v", "w"]]
     fig, ax = plt.subplots()
     im = wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
-    fi.vis_layout(ax=ax)
+    fm.vis_layout(ax=ax)
     plt.colorbar(im, label="Wind speed error (m/s)")
     ax.set_title("Wind speed error after turbine-individual estimation")
 
@@ -83,5 +83,5 @@ if __name__ == "__main__":
     plt.colorbar(im, label="Estimated wind field (m/s)")
     ax.set_title("Estimated wind field from turbine-individual estimation")
     wfct.visualization.plot_turbines_with_fi(ax=ax, fi=tb.fi)
-    fi.vis_layout(ax=ax)
+    fm.vis_layout(ax=ax)
     plt.show()

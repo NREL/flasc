@@ -37,9 +37,9 @@ if __name__ == "__main__":
 
     # Visualize layout
     fig, ax = plt.subplots()
-    ax.plot(fi.layout_x, fi.layout_y, "ko")
-    for ti in range(len(fi.layout_x)):
-        ax.text(fi.layout_x[ti], fi.layout_y[ti], "T{:02d}".format(ti))
+    ax.plot(fm.layout_x, fm.layout_y, "ko")
+    for ti in range(len(fm.layout_x)):
+        ax.text(fm.layout_x[ti], fm.layout_y[ti], "T{:02d}".format(ti))
     ax.axis("equal")
     ax.grid(True)
     ax.set_xlabel("x-direction (m)")

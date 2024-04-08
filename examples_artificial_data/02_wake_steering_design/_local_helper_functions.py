@@ -40,8 +40,8 @@ def optimize_yaw_angles(
         )
 
     # Update FLORIS model with atmospheric conditions
-    fi = fi.copy()
-    fi.set(
+    fm = fm.copy()
+    fm.set(
         wind_data=WindRose(
             wind_directions=np.array(opt_wind_directions),
             wind_speeds=np.array(opt_wind_speeds),
@@ -51,7 +51,7 @@ def optimize_yaw_angles(
 
     # Add uncertainty, if applicable
     if opt_std_wd > 0.001:
-        fi = UncertainFlorisModel(fi.copy())
+        fm = UncertainFlorisModel(fm.copy())
 
     # Do optimization
     yaw_opt = YawOptimizationSR(
@@ -90,8 +90,8 @@ def evaluate_optimal_yaw_angles(
         )
 
     # Update FLORIS model with atmospheric conditions
-    fi = fi.copy()
-    fi.set(
+    fm = fm.copy()
+    fm.set(
         wind_data=WindRose(
             wind_directions=np.array(eval_wd_array),
             wind_speeds=np.array(eval_ws_array),
@@ -102,28 +102,28 @@ def evaluate_optimal_yaw_angles(
     # Include uncertainty in the FLORIS model, if applicable
     if eval_std_wd > 0.001:
         opt_unc_options = dict({"std_wd": eval_std_wd, "pmf_res": 1.0, "pdf_cutoff": 0.995})
-        fi = UncertainFlorisModel(fi.copy(), unc_options=opt_unc_options)
+        fm = UncertainFlorisModel(fm.copy(), unc_options=opt_unc_options)
 
     # Get wind rose frequency
-    wd_mesh = fi.floris.flow_field.wind_directions
-    ws_mesh = fi.floris.flow_field.wind_speeds
+    wd_mesh = fm.floris.flow_field.wind_directions
+    ws_mesh = fm.floris.flow_field.wind_speeds
     freq = wind_climate_interpolant(wd_mesh, ws_mesh)
     freq = freq / np.sum(freq)
 
     # Interpolate yaw angles
-    ti = fi.floris.flow_field.turbulence_intensities
+    ti = fm.floris.flow_field.turbulence_intensities
     yaw_angles_opt = yaw_angle_interpolant(wd_mesh, ws_mesh, ti)
 
     # Evaluate solutions in FLORIS
-    fi.set(yaw_angles=np.zeros_like(yaw_angles_opt))
-    fi.run()
-    baseline_powers = fi.get_farm_power()
+    fm.set(yaw_angles=np.zeros_like(yaw_angles_opt))
+    fm.run()
+    baseline_powers = fm.get_farm_power()
     baseline_powers = np.nan_to_num(baseline_powers, nan=0.0)
 
-    fi = fi.copy()
-    fi.set(yaw_angles=yaw_angles_opt)
-    fi.run()
-    optimized_powers = fi.get_farm_power()
+    fm = fm.copy()
+    fm.set(yaw_angles=yaw_angles_opt)
+    fm.run()
+    optimized_powers = fm.get_farm_power()
     optimized_powers = np.nan_to_num(optimized_powers, nan=0.0)
 
     # Prepare results: collect in dataframe and calculate AEPs

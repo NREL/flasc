@@ -19,7 +19,7 @@ if __name__ == "__main__":
     fi, _ = load_floris()
 
     # Defines alternative names for each turbine with 1-index
-    turbine_names = ["Turbine-%d" % (t + 1) for t in range(len(fi.layout_x))]
+    turbine_names = ["Turbine-%d" % (t + 1) for t in range(len(fm.layout_x))]
 
     # Plot using default 0-indexed labels (includes power/thrust curve)
     plot_floris_layout(fi, plot_terrain=False)
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         limit_num=3,  # limit to 3 lines per turbine
         layout_plotting_dict={
             "turbine_names": turbine_names,
-            "turbine_indices": range(2, len(fi.layout_x)),
+            "turbine_indices": range(2, len(fm.layout_x)),
         },
         wake_plotting_dict={"color": "r"},
     )

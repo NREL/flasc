@@ -116,12 +116,12 @@ def resim_floris(fi_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.arra
     num_turbines = dfm.get_num_turbines(df_scada)
 
     # Set up the FLORIS model
-    fi = fi_in.copy()
-    fi.set(wind_speeds=wind_speeds, wind_directions=wind_directions, yaw_angles=yaw_angles)
-    fi.run()
+    fm = fi_in.copy()
+    fm.set(wind_speeds=wind_speeds, wind_directions=wind_directions, yaw_angles=yaw_angles)
+    fm.run()
 
     # Get the turbines in kW
-    turbine_powers = fi.get_turbine_powers().squeeze() / 1000
+    turbine_powers = fm.get_turbine_powers().squeeze() / 1000
 
     # Generate FLORIS dataframe
     df_floris = pd.DataFrame(
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     fi, _ = load_floris_smarteole(wake_model="emgauss")
 
     # Testing parameter setting
-    # fi_dict_mod = fi.floris.as_dict()
+    # fi_dict_mod = fm.floris.as_dict()
 
     # param = ['wake','wake_velocity_parameters','empirical_gauss',\
     #             'wake_expansion_rates']

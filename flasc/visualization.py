@@ -173,11 +173,11 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
         plot_farm_terrain(fi, fig, ax[0])
 
     # Generate plotting dictionary based on turbine; plot locations
-    turbine_types = [t["turbine_type"] for t in fi.floris.farm.turbine_definitions]
+    turbine_types = [t["turbine_type"] for t in fm.floris.farm.turbine_definitions]
     turbine_types = np.array(turbine_types, dtype="str")
     for ti, tt in enumerate(np.unique(turbine_types)):
         plotting_dict = {
-            "turbine_indices": np.array(range(len(fi.layout_x)))[turbine_types == tt],
+            "turbine_indices": np.array(range(len(fm.layout_x)))[turbine_types == tt],
             "turbine_names": turbine_names,
             "color": "C%s" % ti,
             "label": tt,
@@ -193,7 +193,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     # Identify unique power-thrust curves and group turbines accordingly
     unique_turbine_types, utt_ids = np.unique(turbine_types, return_index=True)
     for ti, (tt, tti) in enumerate(zip(unique_turbine_types, utt_ids)):
-        pt = fi.floris.farm.turbine_definitions[tti]["power_thrust_table"]
+        pt = fm.floris.farm.turbine_definitions[tti]["power_thrust_table"]
 
         plotting_dict = {"color": "C%s" % ti, "label": tt}
         plot_power_curve_only(pt, plotting_dict, ax=ax[1])
@@ -203,14 +203,14 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
 
 
 def generate_default_labels(fi):
-    labels = ["T{0:02d}".format(ti) for ti in range(len(fi.layout_x))]
+    labels = ["T{0:02d}".format(ti) for ti in range(len(fm.layout_x))]
     return labels
 
 
 def generate_labels_with_hub_heights(fi):
     labels = [
         "T{0:02d} ({1:.1f} m)".format(ti, h)
-        for ti, h in enumerate(fi.floris.farm.hub_heights.flatten())
+        for ti, h in enumerate(fm.floris.farm.hub_heights.flatten())
     ]
     return labels
 
@@ -222,9 +222,9 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
     Args:
         plotting_dict: dictionary of plotting parameters, with the
             following (optional) fields and their (default) values:
-            "turbine_indices" : (range(len(fi.layout_x))) (turbines to
+            "turbine_indices" : (range(len(fm.layout_x))) (turbines to
                                 plot, default to all turbines)
-            "turbine_names" : (["TX" for X in range(len(fi.layout_x)])
+            "turbine_names" : (["TX" for X in range(len(fm.layout_x)])
             "color" : ("black")
             "marker" : (".")
             "markersize" : (10)
@@ -245,7 +245,7 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
 
     # Generate plotting dictionary
     default_plotting_dict = {
-        "turbine_indices": range(len(fi.layout_x)),
+        "turbine_indices": range(len(fm.layout_x)),
         "turbine_names": generate_default_labels(fi),
         "color": "black",
         "marker": ".",
@@ -254,12 +254,12 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
     }
     plotting_dict = {**default_plotting_dict, **plotting_dict}
     if len(plotting_dict["turbine_names"]) == 0:  # empty list provided
-        plotting_dict["turbine_names"] = [""] * len(fi.layout_x)
+        plotting_dict["turbine_names"] = [""] * len(fm.layout_x)
 
     # Plot
     ax.plot(
-        fi.layout_x[plotting_dict["turbine_indices"]],
-        fi.layout_y[plotting_dict["turbine_indices"]],
+        fm.layout_x[plotting_dict["turbine_indices"]],
+        fm.layout_y[plotting_dict["turbine_indices"]],
         marker=plotting_dict["marker"],
         markersize=plotting_dict["markersize"],
         linestyle="None",
@@ -269,7 +269,7 @@ def plot_layout_only(fi, plotting_dict={}, ax=None):
 
     # Add labels to plot, if desired
     for ti in plotting_dict["turbine_indices"]:
-        ax.text(fi.layout_x[ti], fi.layout_y[ti], plotting_dict["turbine_names"][ti])
+        ax.text(fm.layout_x[ti], fm.layout_y[ti], plotting_dict["turbine_names"][ti])
 
     # Plot labels and aesthetics
     ax.axis("equal")
@@ -354,8 +354,8 @@ def plot_thrust_curve_only(pt, plotting_dict, ax=None):
 
 
 def plot_farm_terrain(fi, fig, ax):
-    hub_heights = fi.floris.farm.hub_heights.flatten()
-    cntr = ax.tricontourf(fi.layout_x, fi.layout_y, hub_heights, levels=14, cmap="RdBu_r")
+    hub_heights = fm.floris.farm.hub_heights.flatten()
+    cntr = ax.tricontourf(fm.layout_x, fm.layout_y, hub_heights, levels=14, cmap="RdBu_r")
 
     fig.colorbar(
         cntr,
@@ -419,18 +419,18 @@ def plot_layout_with_waking_directions(
     }
     wake_plotting_dict = {**def_wake_plotting_dict, **wake_plotting_dict}
 
-    def_layout_plotting_dict = {"turbine_indices": range(len(fi.layout_x))}
+    def_layout_plotting_dict = {"turbine_indices": range(len(fm.layout_x))}
     layout_plotting_dict = {**def_layout_plotting_dict, **layout_plotting_dict}
 
     ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
 
-    N_turbs = len(fi.floris.farm.turbine_definitions)
+    N_turbs = len(fm.floris.farm.turbine_definitions)
 
     if D is None:
-        D = fi.floris.farm.turbine_definitions[0]["rotor_diameter"]
+        D = fm.floris.farm.turbine_definitions[0]["rotor_diameter"]
         # TODO: build out capability to use multiple diameters, if of interest.
         # D = np.array([turb['rotor_diameter'] for turb in
-        #      fi.floris.farm.turbine_definitions])
+        #      fm.floris.farm.turbine_definitions])
     # else:
     # D = D*np.ones(N_turbs)
 
@@ -440,10 +440,10 @@ def plot_layout_with_waking_directions(
     for i in range(N_turbs):
         for j in range(N_turbs):
             dists_m[i, j] = np.linalg.norm(
-                [fi.layout_x[i] - fi.layout_x[j], fi.layout_y[i] - fi.layout_y[j]]
+                [fm.layout_x[i] - fm.layout_x[j], fm.layout_y[i] - fm.layout_y[j]]
             )
             angles_d[i, j] = wake_angle(
-                fi.layout_x[i], fi.layout_y[i], fi.layout_x[j], fi.layout_y[j]
+                fm.layout_x[i], fm.layout_y[i], fm.layout_x[j], fm.layout_y[j]
             )
 
     # Mask based on the limit distance (assumed to be in measurement D)
@@ -470,7 +470,7 @@ def plot_layout_with_waking_directions(
                 and i in layout_plotting_dict["turbine_indices"]
                 and j in layout_plotting_dict["turbine_indices"]
             ):
-                (h,) = ax.plot(fi.layout_x[[i, j]], fi.layout_y[[i, j]], **wake_plotting_dict)
+                (h,) = ax.plot(fm.layout_x[[i, j]], fm.layout_y[[i, j]], **wake_plotting_dict)
 
                 # Only label in one direction
                 if ~label_exists[i, j]:
