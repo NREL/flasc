@@ -109,8 +109,8 @@ class floris_sobol_analysis:
         # Copy and write wd and ws to dataframe
         # Nt = self.df_eval.shape[0]
         df = self.df_eval
-        df["wd"] = self.fm.floris.farm.wind_direction[0]
-        df["ws"] = self.fm.floris.farm.wind_speed[0]
+        df["wd"] = self.fm.core.farm.wind_direction[0]
+        df["ws"] = self.fm.core.farm.wind_speed[0]
 
         # Calculate floris predictions
         df_out = ftools.calc_floris(df, self.fi, num_threads=10, num_workers=2)

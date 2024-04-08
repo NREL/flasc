@@ -173,7 +173,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
         plot_farm_terrain(fi, fig, ax[0])
 
     # Generate plotting dictionary based on turbine; plot locations
-    turbine_types = [t["turbine_type"] for t in fm.floris.farm.turbine_definitions]
+    turbine_types = [t["turbine_type"] for t in fm.core.farm.turbine_definitions]
     turbine_types = np.array(turbine_types, dtype="str")
     for ti, tt in enumerate(np.unique(turbine_types)):
         plotting_dict = {
@@ -193,7 +193,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     # Identify unique power-thrust curves and group turbines accordingly
     unique_turbine_types, utt_ids = np.unique(turbine_types, return_index=True)
     for ti, (tt, tti) in enumerate(zip(unique_turbine_types, utt_ids)):
-        pt = fm.floris.farm.turbine_definitions[tti]["power_thrust_table"]
+        pt = fm.core.farm.turbine_definitions[tti]["power_thrust_table"]
 
         plotting_dict = {"color": "C%s" % ti, "label": tt}
         plot_power_curve_only(pt, plotting_dict, ax=ax[1])
@@ -210,7 +210,7 @@ def generate_default_labels(fi):
 def generate_labels_with_hub_heights(fi):
     labels = [
         "T{0:02d} ({1:.1f} m)".format(ti, h)
-        for ti, h in enumerate(fm.floris.farm.hub_heights.flatten())
+        for ti, h in enumerate(fm.core.farm.hub_heights.flatten())
     ]
     return labels
 
@@ -354,7 +354,7 @@ def plot_thrust_curve_only(pt, plotting_dict, ax=None):
 
 
 def plot_farm_terrain(fi, fig, ax):
-    hub_heights = fm.floris.farm.hub_heights.flatten()
+    hub_heights = fm.core.farm.hub_heights.flatten()
     cntr = ax.tricontourf(fm.layout_x, fm.layout_y, hub_heights, levels=14, cmap="RdBu_r")
 
     fig.colorbar(
@@ -424,13 +424,13 @@ def plot_layout_with_waking_directions(
 
     ax = plot_layout_only(fi, plotting_dict=layout_plotting_dict, ax=ax)
 
-    N_turbs = len(fm.floris.farm.turbine_definitions)
+    N_turbs = len(fm.core.farm.turbine_definitions)
 
     if D is None:
-        D = fm.floris.farm.turbine_definitions[0]["rotor_diameter"]
+        D = fm.core.farm.turbine_definitions[0]["rotor_diameter"]
         # TODO: build out capability to use multiple diameters, if of interest.
         # D = np.array([turb['rotor_diameter'] for turb in
-        #      fm.floris.farm.turbine_definitions])
+        #      fm.core.farm.turbine_definitions])
     # else:
     # D = D*np.ones(N_turbs)
 

@@ -105,13 +105,13 @@ def evaluate_optimal_yaw_angles(
         fm = UncertainFlorisModel(fm.copy(), unc_options=opt_unc_options)
 
     # Get wind rose frequency
-    wd_mesh = fm.floris.flow_field.wind_directions
-    ws_mesh = fm.floris.flow_field.wind_speeds
+    wd_mesh = fm.core.flow_field.wind_directions
+    ws_mesh = fm.core.flow_field.wind_speeds
     freq = wind_climate_interpolant(wd_mesh, ws_mesh)
     freq = freq / np.sum(freq)
 
     # Interpolate yaw angles
-    ti = fm.floris.flow_field.turbulence_intensities
+    ti = fm.core.flow_field.turbulence_intensities
     yaw_angles_opt = yaw_angle_interpolant(wd_mesh, ws_mesh, ti)
 
     # Evaluate solutions in FLORIS

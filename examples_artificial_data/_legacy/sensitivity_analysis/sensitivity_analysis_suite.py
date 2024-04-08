@@ -32,7 +32,7 @@ def load_floris(nrows=1, ncols=1, row_spacing_D=5.0, col_spacing_D=3.0, wd=None,
     json_dict["logging"]["console"]["level"] = "WARNING"
     fm = wfct.floris_interface.FlorisModel(input_dict=json_dict)
 
-    D = fm.floris.farm.turbines[0].rotor_diameter
+    D = fm.core.farm.turbines[0].rotor_diameter
     x_row = np.arange(0, nrows) * row_spacing_D * D
     y_col = np.arange(0, ncols) * col_spacing_D * D
     x, y = np.meshgrid(x_row, y_col)

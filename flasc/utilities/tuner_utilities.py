@@ -102,7 +102,7 @@ def set_fi_param(
     Returns:
         FlorisModel: The modified FlorisModel object.
     """
-    fi_dict_mod = fi_in.floris.as_dict()
+    fi_dict_mod = fi_in.core.as_dict()
     nested_set(fi_dict_mod, param, value, param_idx)
     return FlorisModel(fi_dict_mod)
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     fi, _ = load_floris_smarteole(wake_model="emgauss")
 
     # Testing parameter setting
-    # fi_dict_mod = fm.floris.as_dict()
+    # fi_dict_mod = fm.core.as_dict()
 
     # param = ['wake','wake_velocity_parameters','empirical_gauss',\
     #             'wake_expansion_rates']
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
     # print(fi_dict_mod)
     # print('******')
-    # print(fi_2.floris.as_dict())
+    # print(fi_2.core.as_dict())
 
     # Load the SCADA data
     scada_path = Path(

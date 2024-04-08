@@ -250,7 +250,7 @@ def estimate_ti(
     # Make copy so that existing object is not changed
     fm = copy.deepcopy(fi)
     num_turbines = len(fm.layout_x)
-    ti_0 = np.mean(fm.floris.farm.turbulence_intensity)
+    ti_0 = np.mean(fm.core.farm.turbulence_intensity)
 
     # Define a cost function
     def cost_fun(ti):

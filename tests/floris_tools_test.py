@@ -26,7 +26,7 @@ class TestFlorisTools(unittest.TestCase):
         #
         # Check if layouts are merged appropriately
         fi_merged = merge_floris_objects([fi_1, fi_2], reference_wind_height=200.0)
-        self.assertTrue(fi_merged.floris.flow_field.reference_wind_height == 200.0)
+        self.assertTrue(fi_merged.core.flow_field.reference_wind_height == 200.0)
 
         # Also test that we raise a UserWarning if we have two different reference wind heights and
         # don't specify a reference_wind_height for the merged object

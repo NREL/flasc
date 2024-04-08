@@ -49,14 +49,14 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
         x_list.extend(fm.layout_x)
         y_list.extend(fm.layout_y)
 
-        fi_turbine_type = fm.floris.farm.turbine_type
+        fi_turbine_type = fm.core.farm.turbine_type
         if len(fi_turbine_type) == 1:
             fi_turbine_type = fi_turbine_type * len(fm.layout_x)
         elif not len(fi_turbine_type) == len(fm.layout_x):
             raise UserWarning("Incompatible format of turbine_type in FlorisModel.")
 
         turbine_type_list.extend(fi_turbine_type)
-        reference_wind_heights.append(fm.floris.flow_field.reference_wind_height)
+        reference_wind_heights.append(fm.core.flow_field.reference_wind_height)
 
     # Derive reference wind height, if unspecified by the user
     if reference_wind_height is None:
@@ -100,7 +100,7 @@ def reduce_floris_object(fi, turbine_list, copy=False):
     y = np.array(fm.layout_y, dtype=float, copy=True)
 
     # Get turbine definitions from floris object
-    fi_turbine_type = fm.floris.farm.turbine_type
+    fi_turbine_type = fm.core.farm.turbine_type
     if len(fi_turbine_type) == 1:
         fi_turbine_type = fi_turbine_type * len(fm.layout_x)
     elif not len(fi_turbine_type) == len(fm.layout_x):
@@ -465,7 +465,7 @@ def calc_floris_approx_table(
 
     # if ti_array is None, use the current value in the FLORIS object
     if ti_array is None:
-        ti = fm.floris.flow_field.turbulence_intensity
+        ti = fm.core.flow_field.turbulence_intensity
         ti_array = np.array([ti], dtype=float)
 
     fm = fm.copy()  # Create independent copy that we can manipulate
@@ -504,14 +504,14 @@ def calc_floris_approx_table(
             if save_turbine_inflow_conditions_to_df:
                 # TODO: Untested, does not work with FLORIS v4
                 solutions_dict["ws_{:03d}".format(turbi)] = (
-                    fm.floris.flow_field.u.mean(axis=4).mean(axis=3)[:, :, turbi].flatten()
+                    fm.core.flow_field.u.mean(axis=4).mean(axis=3)[:, :, turbi].flatten()
                 )
                 solutions_dict[
                     "wd_{:03d}".format(turbi)
                 ] = wd_mesh.flatten()  # Uniform wind direction
                 solutions_dict[
                     "ti_{:03d}".format(turbi)
-                ] = fm.floris.flow_field.turbulence_intensity_field[:, :, turbi].flatten()
+                ] = fm.core.flow_field.turbulence_intensity_field[:, :, turbi].flatten()
         df_list.append(pd.DataFrame(solutions_dict))
 
     print("Finished calculating the FLORIS solutions for the dataframe.")
@@ -661,7 +661,7 @@ def get_all_impacting_turbines_geometrical(
     x = fm.layout_x
     y = fm.layout_y
     n_turbs = len(x)
-    D = [t["rotor_diameter"] for t in fm.floris.farm.turbine_definitions]
+    D = [t["rotor_diameter"] for t in fm.core.farm.turbine_definitions]
     D = np.array(D, dtype=float)
 
     # Rotate farm and determine freestream/waked turbines
@@ -765,7 +765,7 @@ def get_upstream_turbs_floris(fi, wd_step=0.1, wake_slope=0.10, plot_lines=False
     x = fm.layout_x
     y = fm.layout_y
     n_turbs = len(x)
-    D = [t["rotor_diameter"] for t in fm.floris.farm.turbine_definitions]
+    D = [t["rotor_diameter"] for t in fm.core.farm.turbine_definitions]
     D = np.array(D, dtype=float)
 
     # Setup output list
@@ -922,9 +922,9 @@ def get_dependent_turbines_by_wd(
     base_power = fm.get_turbine_powers()
 
     # Compute the test power
-    if len(fm.floris.farm.turbine_type) > 1:
+    if len(fm.core.farm.turbine_type) > 1:
         # Remove test turbine from list
-        fm.floris.farm.turbine_type.pop(test_turbine)
+        fm.core.farm.turbine_type.pop(test_turbine)
     else:  # Only a single turbine type defined for the whole farm; do nothing
         pass
     fm.set(

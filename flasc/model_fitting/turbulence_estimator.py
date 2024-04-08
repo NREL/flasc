@@ -30,7 +30,7 @@ class ti_estimator:
         self.P_measured = P_measured
 
     def get_turbine_order(self):
-        wd = (180 - self.fm.floris.farm.wind_direction[0]) * np.pi / 180.0
+        wd = (180 - self.fm.core.farm.wind_direction[0]) * np.pi / 180.0
         rotz = np.matrix([[np.cos(wd), -np.sin(wd), 0], [np.sin(wd), np.cos(wd), 0], [0, 0, 1]])
         x0 = np.mean(self.fm.layout_x)
         y0 = np.mean(self.fm.layout_y)
@@ -59,7 +59,7 @@ class ti_estimator:
             "power": [0.0, 0.0],
             "thrust_coefficient": [0.0001, 0.0001],
         }
-        regular_turb_cp_ct = fm.floris.farm.turbines[0].power_thrust_table
+        regular_turb_cp_ct = fm.core.farm.turbines[0].power_thrust_table
         df_pairs = pd.DataFrame(
             {"turbine": pd.Series([], dtype="int"), "affected_turbines": pd.Series([], dtype="int")}
         )

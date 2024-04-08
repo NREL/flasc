@@ -88,7 +88,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
 
     # Update Pp if specified
     if pP is not None:
-        tdefs = [copy.deepcopy(t) for t in fm.floris.farm.turbine_definitions]
+        tdefs = [copy.deepcopy(t) for t in fm.core.farm.turbine_definitions]
         for ii in range(len(tdefs)):
             tdefs[ii]["pP"] = pP
 
