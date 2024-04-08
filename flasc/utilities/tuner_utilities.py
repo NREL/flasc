@@ -112,7 +112,7 @@ def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.arra
     wind_speeds = df_scada["ws"].values
     wind_directions = df_scada["wd"].values
     # TODO: better handling of TIs?
-    turbulence_intensities = fm_in.turbulence_intensities[0]*np.ones_like(wind_speeds)
+    turbulence_intensities = fm_in.turbulence_intensities[0] * np.ones_like(wind_speeds)
 
     # Get the number of turbiens
     num_turbines = dfm.get_num_turbines(df_scada)
@@ -123,7 +123,7 @@ def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.arra
         wind_speeds=wind_speeds,
         wind_directions=wind_directions,
         turbulence_intensities=turbulence_intensities,
-        yaw_angles=yaw_angles
+        yaw_angles=yaw_angles,
     )
     fm.run()
 

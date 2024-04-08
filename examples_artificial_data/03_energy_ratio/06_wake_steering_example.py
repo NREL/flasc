@@ -56,7 +56,7 @@ if __name__ == "__main__":
     fm.set(
         wind_speeds=ws_array,
         wind_directions=wd_array,
-        turbulence_intensities=0.06*np.ones_like(ws_array)
+        turbulence_intensities=0.06 * np.ones_like(ws_array),
     )
     fm.run()
     power_baseline_ref = fm.get_turbine_powers().squeeze()[:, 0].flatten()

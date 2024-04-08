@@ -11,7 +11,7 @@ if __name__ == "__main__":
     result_list = []
 
     # Compare optimizing and evaluating over different turbulence intensities
-    for ti_opt in ti_list: # TODO: with Floris v4, could optimize all at once
+    for ti_opt in ti_list:  # TODO: with Floris v4, could optimize all at once
         print("Optimizing yaw angles with turbulence_intensity={:.2f}".format(ti_opt))
         # Optimize yaw angles
         df_opt = optimize_yaw_angles(opt_turbulence_intensities=ti_opt)

@@ -45,7 +45,7 @@ def optimize_yaw_angles(
         wind_data=WindRose(
             wind_directions=np.array(opt_wind_directions),
             wind_speeds=np.array(opt_wind_speeds),
-            ti_table=np.array(opt_turbulence_intensities)
+            ti_table=np.array(opt_turbulence_intensities),
         )
     )
 
@@ -85,9 +85,7 @@ def evaluate_optimal_yaw_angles(
 
     # Handle turbulence intensity input
     if not hasattr(eval_ti, "__len__"):
-        eval_ti = eval_ti * np.ones(
-            (len(eval_wd_array), len(eval_ws_array))
-        )
+        eval_ti = eval_ti * np.ones((len(eval_wd_array), len(eval_ws_array)))
 
     # Update FLORIS model with atmospheric conditions
     fm = fm.copy()
@@ -95,7 +93,7 @@ def evaluate_optimal_yaw_angles(
         wind_data=WindRose(
             wind_directions=np.array(eval_wd_array),
             wind_speeds=np.array(eval_ws_array),
-            ti_table=np.array(eval_ti)
+            ti_table=np.array(eval_ti),
         )
     )
 

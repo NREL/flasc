@@ -85,10 +85,7 @@ class TestDataFrameFiltering(unittest.TestCase):
         num_turbs = len(fm.layout_x)
 
         # Determine which turbines impact which other turbines through their wakes
-        df_impacting_turbines = ftools.get_all_impacting_turbines(
-            fm_in=fm,
-            change_threshold=0.01
-        )
+        df_impacting_turbines = ftools.get_all_impacting_turbines(fm_in=fm, change_threshold=0.01)
 
         # Create tiny subset
         df_base = load_data()

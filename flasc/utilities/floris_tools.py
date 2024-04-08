@@ -491,23 +491,23 @@ def calc_floris_approx_table(
         )
     )
     fm.run()
-    turbine_powers = fm.get_turbine_powers().reshape(-1, fm.n_turbines) # Want flattened version
-    
+    turbine_powers = fm.get_turbine_powers().reshape(-1, fm.n_turbines)  # Want flattened version
+
     solutions_dict = {
         "wd": fm.wind_directions,
         "ws": fm.wind_speeds,
-        "ti": fm.turbulence_intensities
+        "ti": fm.turbulence_intensities,
     }
     for tindex in range(num_turbines):
         solutions_dict["pow_{:03d}".format(tindex)] = turbine_powers[:, tindex]
         if save_turbine_inflow_conditions_to_df:
-            solutions_dict["ws_{:03d}".format(tindex)] = (
-                fm.core.flow_field.u.mean(axis=(2,3))[:, tindex]
-            )
+            solutions_dict["ws_{:03d}".format(tindex)] = fm.core.flow_field.u.mean(axis=(2, 3))[
+                :, tindex
+            ]
             solutions_dict["wd_{:03d}".format(tindex)] = fm.wind_directions
-            solutions_dict["ti_{:03d}".format(tindex)] = (
-                fm.core.flow_field.turbulence_intensity_field[:, tindex]
-            )
+            solutions_dict[
+                "ti_{:03d}".format(tindex)
+            ] = fm.core.flow_field.turbulence_intensity_field[:, tindex]
     df_approx = pd.DataFrame(solutions_dict)
 
     print("Finished calculating the FLORIS solutions for the dataframe.")
@@ -915,9 +915,7 @@ def get_dependent_turbines_by_wd(
     # Compute the base power
     fm.set(
         wind_data=TimeSeries(
-            wind_directions=wd_array,
-            wind_speeds=ws_test,
-            turbulence_intensities=0.06
+            wind_directions=wd_array, wind_speeds=ws_test, turbulence_intensities=0.06
         )
     )
     fm.run()
