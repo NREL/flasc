@@ -88,7 +88,7 @@ def nested_set(dic: Dict[str, Any], keys: List[str], value: Any, idx: Optional[i
         dic[keys[-1]] = par_list
 
 
-def set_fi_param(
+def set_fm_param(
     fm_in: FlorisModel, param: List[str], value: Any, param_idx: Optional[int] = None
 ) -> FlorisModel:
     """Set a parameter in a FlorisModel object.
@@ -111,13 +111,20 @@ def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.arra
     # Get wind speeds and directions
     wind_speeds = df_scada["ws"].values
     wind_directions = df_scada["wd"].values
+    # TODO: better handling of TIs?
+    turbulence_intensities = fm_in.turbulence_intensities[0]*np.ones_like(wind_speeds)
 
     # Get the number of turbiens
     num_turbines = dfm.get_num_turbines(df_scada)
 
     # Set up the FLORIS model
     fm = fm_in.copy()
-    fm.set(wind_speeds=wind_speeds, wind_directions=wind_directions, yaw_angles=yaw_angles)
+    fm.set(
+        wind_speeds=wind_speeds,
+        wind_directions=wind_directions,
+        turbulence_intensities=turbulence_intensities,
+        yaw_angles=yaw_angles
+    )
     fm.run()
 
     # Get the turbines in kW
