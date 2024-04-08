@@ -1,4 +1,4 @@
-import floris.tools as wfct
+import floris as wfct
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

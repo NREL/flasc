@@ -146,7 +146,7 @@ def plot_floris_layout(fi, turbine_names=None, plot_terrain=True):
     different hub heights through a background colormap.
 
     Args:
-        fi (FlorisInterface): The FLORIS object
+        fi (FlorisModel): The FLORIS object
         turbine_names (iteratible, optional): List of turbine names, with
         each entry being a string. It is recommended that this is something
         like one or two letters, and then a number to indicate the turbine.
@@ -384,7 +384,7 @@ def plot_layout_with_waking_directions(
     Plot waking directions and distances between turbines.
 
     Args:
-        fi: Instantiated FlorisInterface object
+        fi: Instantiated FlorisModel object
         layout_plotting_dict: dictionary of plotting parameters for
             turbine locations. Defaults to the defaults of
             plot_layout_only.

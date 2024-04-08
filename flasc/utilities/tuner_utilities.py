@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from floris.tools import FlorisInterface
+from floris import FlorisModel
 
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities.utilities_examples import load_floris_smarteole
 
-# from floris.tools import ParallelComputingInterface
+# from floris import ParallelComputingInterface
 
 
 def replicate_nan_values(df_1: pd.DataFrame, df_2: pd.DataFrame):
@@ -89,25 +89,25 @@ def nested_set(dic: Dict[str, Any], keys: List[str], value: Any, idx: Optional[i
 
 
 def set_fi_param(
-    fi_in: FlorisInterface, param: List[str], value: Any, param_idx: Optional[int] = None
-) -> FlorisInterface:
-    """Set a parameter in a FlorisInterface object.
+    fi_in: FlorisModel, param: List[str], value: Any, param_idx: Optional[int] = None
+) -> FlorisModel:
+    """Set a parameter in a FlorisModel object.
 
     Args:
-        fi_in (FlorisInterface): The FlorisInterface object to modify.
-        param (List[str]): A list of keys to traverse the FlorisInterface dictionary.
+        fi_in (FlorisModel): The FlorisModel object to modify.
+        param (List[str]): A list of keys to traverse the FlorisModel dictionary.
         value (Any): The value to set.
         idx (Optional[int], optional): The index to set the value at. Defaults to None.
 
     Returns:
-        FlorisInterface: The modified FlorisInterface object.
+        FlorisModel: The modified FlorisModel object.
     """
     fi_dict_mod = fi_in.floris.as_dict()
     nested_set(fi_dict_mod, param, value, param_idx)
-    return FlorisInterface(fi_dict_mod)
+    return FlorisModel(fi_dict_mod)
 
 
-def resim_floris(fi_in: FlorisInterface, df_scada: pd.DataFrame, yaw_angles: np.array = None):
+def resim_floris(fi_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.array = None):
     # Get wind speeds and directions
     wind_speeds = df_scada["ws"].values
     wind_directions = df_scada["wd"].values

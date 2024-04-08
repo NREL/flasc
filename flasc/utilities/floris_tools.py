@@ -4,7 +4,7 @@ from time import perf_counter as timerpc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from floris.tools import FlorisInterface
+from floris import FlorisModel
 from floris.utilities import wrap_360
 from scipy import interpolate
 from scipy.stats import norm
@@ -17,27 +17,27 @@ from flasc.utilities import utilities as fsut
 
 
 def merge_floris_objects(fi_list, reference_wind_height=None):
-    """Merge a list of FlorisInterface objects into a single FlorisInterface object. Note that it uses
+    """Merge a list of FlorisModel objects into a single FlorisModel object. Note that it uses
     the very first object specified in fi_list to build upon, so it uses those wake model parameters,
     air density, and so on.
 
     Args:
-        fi_list (list): Array-like of FlorisInterface objects.
+        fi_list (list): Array-like of FlorisModel objects.
         reference_wind_height (float, optional): Height in meters at which the reference wind speed is
         assigned. If None, will assume this value is equal to the reference wind height specified in
-        the FlorisInterface objects. This only works if all objects have the same value for their
+        the FlorisModel objects. This only works if all objects have the same value for their
         reference_wind_height.
 
     Returns:
-        fi_merged (FlorisInterface): The merged FlorisInterface object, merged in the same order as fi_list.
+        fi_merged (FlorisModel): The merged FlorisModel object, merged in the same order as fi_list.
         The objects are merged on the turbine locations and turbine types, but not on the wake parameters
         or general solver settings.
     """
 
-    # Make sure the entries in fi_list are FlorisInterface objects
-    if not isinstance(fi_list[0], FlorisInterface):
+    # Make sure the entries in fi_list are FlorisModel objects
+    if not isinstance(fi_list[0], FlorisModel):
         raise UserWarning(
-            "Incompatible input specified. Please merge FlorisInterface objects before inserting them into ParallelComputingInterface and UncertaintyInterface."
+            "Incompatible input specified. Please merge FlorisModel objects before inserting them into ParallelComputingInterface and UncertainFlorisModel."
         )
 
     # Get the turbine locations and specifications for each subset and save as a list
@@ -53,7 +53,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
         if len(fi_turbine_type) == 1:
             fi_turbine_type = fi_turbine_type * len(fi.layout_x)
         elif not len(fi_turbine_type) == len(fi.layout_x):
-            raise UserWarning("Incompatible format of turbine_type in FlorisInterface.")
+            raise UserWarning("Incompatible format of turbine_type in FlorisModel.")
 
         turbine_type_list.extend(fi_turbine_type)
         reference_wind_heights.append(fi.floris.flow_field.reference_wind_height)
@@ -63,7 +63,7 @@ def merge_floris_objects(fi_list, reference_wind_height=None):
         reference_wind_height = np.mean(reference_wind_heights)
         if np.any(np.abs(np.array(reference_wind_heights) - reference_wind_height) > 1.0e-3):
             raise UserWarning(
-                "Cannot automatically derive a fitting reference_wind_height since they substantially differ between FlorisInterface objects. Please specify 'reference_wind_height' manually."
+                "Cannot automatically derive a fitting reference_wind_height since they substantially differ between FlorisModel objects. Please specify 'reference_wind_height' manually."
             )
 
     # Construct the merged FLORIS model based on the first entry in fi_list
@@ -82,11 +82,11 @@ def reduce_floris_object(fi, turbine_list, copy=False):
     """Reduce a large FLORIS object to a subset selection of wind turbines.
 
     Args:
-        fi (FlorisInterface): FLORIS object.
+        fi (FlorisModel): FLORIS object.
         turbine_list (list, array-like): List of turbine indices which should be maintained.
 
     Returns:
-        fi_reduced (FlorisInterface): The reduced FlorisInterface object.
+        fi_reduced (FlorisModel): The reduced FlorisModel object.
     """
 
     # Copy, if necessary
@@ -104,7 +104,7 @@ def reduce_floris_object(fi, turbine_list, copy=False):
     if len(fi_turbine_type) == 1:
         fi_turbine_type = fi_turbine_type * len(fi.layout_x)
     elif not len(fi_turbine_type) == len(fi.layout_x):
-        raise UserWarning("Incompatible format of turbine_type in FlorisInterface.")
+        raise UserWarning("Incompatible format of turbine_type in FlorisModel.")
 
     # Construct the merged FLORIS model based on the first entry in fi_list
     fi_reduced.set(
@@ -422,7 +422,7 @@ def calc_floris_approx_table(
     turbulence intensity if 'save_turbine_inflow_conditions_to_df==True'.
 
     Args:
-        fi (FlorisInterface): FlorisInterface object.
+        fi (FlorisModel): FlorisModel object.
         wd_array (array, optional): Array of wind directions to evaluate in [deg]. This expands with the
           number of wind speeds and turbulence intensities. Defaults to np.arange(0.0, 360.0, 1.0).
         ws_array (array, optional): Array of wind speeds to evaluate in [m/s]. This expands with the
@@ -524,7 +524,7 @@ def calc_floris_approx_table(
 def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_cutoff=0.995):
     """This function applies a Gaussian blending across the wind direction for the predicted
     turbine power productions from FLORIS. This is a post-processing step and achieves the
-    same result as evaluating FLORIS directly with the UncertaintyInterface module. However,
+    same result as evaluating FLORIS directly with the UncertainFlorisModel module. However,
     having this as a postprocess step allows for rapid generation of the FLORIS solutions for
     different values of wd_std without having to re-run FLORIS.
 

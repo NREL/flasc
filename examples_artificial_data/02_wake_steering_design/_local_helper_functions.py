@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from floris.tools.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
-from floris.tools.uncertainty_interface import UncertaintyInterface
-from floris.tools.wind_data import WindRose
+from floris.optimization.yaw_optimization.yaw_optimizer_sr import YawOptimizationSR
+from floris.uncertain_floris_model import UncertainFlorisModel
+from floris.wind_data import WindRose
 
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
@@ -51,7 +51,7 @@ def optimize_yaw_angles(
 
     # Add uncertainty, if applicable
     if opt_std_wd > 0.001:
-        fi = UncertaintyInterface(fi.copy())
+        fi = UncertainFlorisModel(fi.copy())
 
     # Do optimization
     yaw_opt = YawOptimizationSR(
@@ -102,7 +102,7 @@ def evaluate_optimal_yaw_angles(
     # Include uncertainty in the FLORIS model, if applicable
     if eval_std_wd > 0.001:
         opt_unc_options = dict({"std_wd": eval_std_wd, "pmf_res": 1.0, "pdf_cutoff": 0.995})
-        fi = UncertaintyInterface(fi.copy(), unc_options=opt_unc_options)
+        fi = UncertainFlorisModel(fi.copy(), unc_options=opt_unc_options)
 
     # Get wind rose frequency
     wd_mesh = fi.floris.flow_field.wind_directions

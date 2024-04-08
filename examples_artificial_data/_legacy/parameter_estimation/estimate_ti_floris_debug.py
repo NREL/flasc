@@ -1,7 +1,7 @@
 import copy
 import os
 
-import floris.tools as wfct
+import floris as wfct
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     print("Initializing the FLORIS object for our demo wind farm")
     file_path = os.path.dirname(os.path.abspath(__file__))
     fi_path = os.path.join(file_path, "../demo_dataset/demo_floris_input.json")
-    fi = wfct.floris_interface.FlorisInterface(fi_path)
+    fi = wfct.floris_interface.FlorisModel(fi_path)
     fi.vis_layout()
 
     # Generate measurement

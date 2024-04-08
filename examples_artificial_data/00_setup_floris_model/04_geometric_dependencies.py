@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from floris.tools import FlorisInterface
+from floris import FlorisModel
 
 from flasc.utilities.floris_tools import get_all_impacting_turbines_geometrical
 
@@ -8,7 +8,7 @@ from flasc.utilities.floris_tools import get_all_impacting_turbines_geometrical
 # function in floris_tools
 
 # Load a large FLORIS object
-fi = FlorisInterface("../floris_input_artificial/gch.yaml")
+fi = FlorisModel("../floris_input_artificial/gch.yaml")
 D = 126.0
 X, Y = np.meshgrid(7.0 * D * np.arange(20), 5.0 * D * np.arange(20))
 fi.set(layout_x=X.flatten(), layout_y=Y.flatten())

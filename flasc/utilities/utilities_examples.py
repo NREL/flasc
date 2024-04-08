@@ -4,13 +4,13 @@ from time import perf_counter as timerpc
 
 import matplotlib.pyplot as plt
 import numpy as np
-from floris.tools import FlorisInterface, UncertaintyInterface
+from floris import FlorisModel, UncertainFlorisModel
 
 from flasc.visualization import plot_floris_layout
 
 
 def load_floris_smarteole(wake_model="gch", wd_std=0.0):
-    """Load a FlorisInterface object for the wind farm at hand.
+    """Load a FlorisModel object for the wind farm at hand.
 
     Args:
         wake_model (str, optional): The wake model that FLORIS should use. Common
@@ -23,7 +23,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
           wind direction in degrees. Defaults to 0.0 deg meaning no uncertainty.
 
     Returns:
-        FlorisInterface: Floris object.
+        FlorisModel: Floris object.
     """
 
     # Use the local FLORIS GCH/CC model for the wake model settings
@@ -33,7 +33,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
     fn = root_path / "{:s}.yaml".format(wake_model)
 
     # Initialize FLORIS model and format appropriately
-    fi = FlorisInterface(fn)
+    fi = FlorisModel(fn)
 
     # Add uncertainty
     if wd_std > 0.01:
@@ -42,7 +42,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fi = UncertaintyInterface(fi, unc_options=unc_options)
+        fi = UncertainFlorisModel(fi, unc_options=unc_options)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly
@@ -53,7 +53,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
 
 
 def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
-    """Load a FlorisInterface object for the wind farm at hand.
+    """Load a FlorisModel object for the wind farm at hand.
 
     Args:
         wake_model (str, optional): The wake model that FLORIS should use. Common
@@ -66,7 +66,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
           wind direction in degrees. Defaults to 0.0 deg meaning no uncertainty.
 
     Returns:
-        FlorisInterface: Floris object.
+        FlorisModel: Floris object.
     """
 
     # Use the local FLORIS GCH/CC model for the wake model settings
@@ -80,7 +80,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
     layout_y = [0.0, 297.357, 123.431, 575.544, 647.779, 772.262, 504.711]
 
     # Initialize FLORIS model and format appropriately
-    fi = FlorisInterface(fn)
+    fi = FlorisModel(fn)
     fi.set(
         layout_x=layout_x,
         layout_y=layout_y,
@@ -101,7 +101,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fi = UncertaintyInterface(fi, unc_options=unc_options)
+        fi = UncertainFlorisModel(fi, unc_options=unc_options)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly

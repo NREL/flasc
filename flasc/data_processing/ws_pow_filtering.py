@@ -520,7 +520,7 @@ class ws_pw_curve_filtering:
         directions.
 
         Args:
-            fi (FlorisInterface): The FlorisInterface object for the farm
+            fi (FlorisModel): The FlorisModel object for the farm
             m_ws_lb (float, optional): Multiplier on the wind speed defining
             the left bound for the power curve. Any data to the left of this
             curve is considered faulty. Defaults to 0.95.
@@ -709,7 +709,7 @@ class ws_pw_curve_filtering:
         and plot a mean turbine power curve.
 
         Args:
-            fi (FlorisInterface): The FlorisInterface object for the farm. If
+            fi (FlorisModel): The FlorisModel object for the farm. If
               specified by the user, then the farm-average turbine power curve
               from FLORIS will be plotted on top of the SCADA-based power curves.
         """
@@ -923,7 +923,7 @@ class ws_pw_curve_filtering:
 
         Args:
             ti (int): Turbine number which should be plotted.
-            fi (FlorisInterface, optional): floris object. If not None, will
+            fi (FlorisModel, optional): floris object. If not None, will
             use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
             ax (plt.Axis): Pyplot Axis object.
@@ -986,7 +986,7 @@ class ws_pw_curve_filtering:
 
         Args:
             ti (int): Turbine number which should be plotted.
-            fi (FlorisInterface, optional): floris object. If not None, will
+            fi (FlorisModel, optional): floris object. If not None, will
             use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
             ax (Matplotlib.pyplot Axis, optional): Axis to plot in. If None is

@@ -1,6 +1,6 @@
 import os
 
-import floris.tools as wfct
+import floris as wfct
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -14,7 +14,7 @@ def load_floris():
     # initialize FLORIS model
     root_dir = os.path.dirname(os.path.abspath(__file__))
     input_json = os.path.join(root_dir, "../demo_dataset/demo_floris_input.json")
-    fi = wfct.floris_interface.FlorisInterface(input_json)
+    fi = wfct.floris_interface.FlorisModel(input_json)
     configure_console_log(False)  # Disable INFO statements
 
     # Set default scenario

@@ -1,6 +1,6 @@
 # Copyright 2022 NREL & Shell
 import matplotlib.pyplot as plt
-from floris.tools.visualization import visualize_cut_plane
+from floris.flow_visualization import visualize_cut_plane
 
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_floris_layout

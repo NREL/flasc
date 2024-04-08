@@ -1,7 +1,7 @@
 import pandas as pd
 import seaborn as sns
 from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
-from floris.tools.uncertainty_interface import UncertaintyInterface
+from floris.uncertain_floris_model import UncertainFlorisModel
 from matplotlib import pyplot as plt
 
 from flasc.utilities.lookup_table_tools import get_yaw_angles_interpolant
@@ -16,7 +16,7 @@ def load_floris_with_uncertainty(std_wd=0.0):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fi = UncertaintyInterface(fi, unc_options=unc_options)  # Load uncertainty object
+        fi = UncertainFlorisModel(fi, unc_options=unc_options)  # Load uncertainty object
     return fi
 
 

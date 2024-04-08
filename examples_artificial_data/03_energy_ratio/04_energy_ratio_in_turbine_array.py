@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from floris.tools.visualization import visualize_cut_plane
+from floris.visualization import visualize_cut_plane
 from floris.utilities import wrap_360
 
 from flasc.analysis import energy_ratio as er

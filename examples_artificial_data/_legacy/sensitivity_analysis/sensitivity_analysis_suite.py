@@ -2,7 +2,7 @@ import json
 import os
 import pickle
 
-import floris.tools as wfct
+import floris as wfct
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -30,7 +30,7 @@ def load_floris(nrows=1, ncols=1, row_spacing_D=5.0, col_spacing_D=3.0, wd=None,
     json_dict = json.load(open(input_json))
     json_dict["logging"]["console"]["enable"] = False
     json_dict["logging"]["console"]["level"] = "WARNING"
-    fi = wfct.floris_interface.FlorisInterface(input_dict=json_dict)
+    fi = wfct.floris_interface.FlorisModel(input_dict=json_dict)
 
     D = fi.floris.farm.turbines[0].rotor_diameter
     x_row = np.arange(0, nrows) * row_spacing_D * D
