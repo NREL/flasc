@@ -25,7 +25,7 @@ from flasc.utilities import (
 
 
 def crosscheck_northing_offset_consistency(
-    df, fi, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True
+    df, fm, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True
 ):
     # Load data and extract info
     num_turbines = len(fm.layout_x)

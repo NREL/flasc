@@ -506,7 +506,7 @@ class ws_pw_curve_filtering:
 
     def filter_by_floris_power_curve(
         self,
-        fi,
+        fm,
         ti,
         m_ws_lb=0.95,
         m_pow_lb=1.01,
@@ -520,7 +520,7 @@ class ws_pw_curve_filtering:
         directions.
 
         Args:
-            fi (FlorisModel): The FlorisModel object for the farm
+            fm (FlorisModel): The FlorisModel object for the farm
             m_ws_lb (float, optional): Multiplier on the wind speed defining
             the left bound for the power curve. Any data to the left of this
             curve is considered faulty. Defaults to 0.95.
@@ -558,10 +558,10 @@ class ws_pw_curve_filtering:
         df_xy = self.pw_curve_df.copy()
         rho = fm.core.flow_field.air_density
         for ti in range(len(fm.layout_x)):
-            fi_turb = fm.core.farm.turbine_definitions[ti]
-            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
+            fm_turb = fm.core.farm.turbine_definitions[ti]
+            Ad = 0.25 * np.pi * fm_turb["rotor_diameter"] ** 2.0
+            ws_array = np.array(fm_turb["power_thrust_table"]["wind_speed"])
+            cp_array = np.array(fm_turb["power_thrust_table"]["power"])
             pow_array = 0.5 * rho * ws_array**3.0 * Ad * cp_array * 1.0e-3
             df_xy.loc[df_xy.index, "pow_{:03d}".format(ti)] = np.interp(
                 xp=ws_array, fp=pow_array, x=df_xy["ws"]
@@ -704,12 +704,12 @@ class ws_pw_curve_filtering:
 
         return self.pw_curve_df
 
-    def plot_farm_mean_power_curve(self, fi=None):
+    def plot_farm_mean_power_curve(self, fm=None):
         """Plot all turbines' power curves in a single figure. Also estimate
         and plot a mean turbine power curve.
 
         Args:
-            fi (FlorisModel): The FlorisModel object for the farm. If
+            fm (FlorisModel): The FlorisModel object for the farm. If
               specified by the user, then the farm-average turbine power curve
               from FLORIS will be plotted on top of the SCADA-based power curves.
         """
@@ -743,10 +743,10 @@ class ws_pw_curve_filtering:
         )
         ax.plot(x, pow_mean_array, color="tab:red", label="Mean curve")
 
-        if fi is not None:
-            fi_turb = fm.core.farm.turbine_definitions[ti]
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
+        if fm is not None:
+            fm_turb = fm.core.farm.turbine_definitions[ti]
+            ws_array = np.array(fm_turb["power_thrust_table"]["wind_speed"])
+            pow_array = np.array(fm_turb["power_thrust_table"]["power"])
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
         ax.legend()
@@ -917,13 +917,13 @@ class ws_pw_curve_filtering:
 
         return p
 
-    def plot_filters_in_ws_power_curve(self, ti, fi=None, ax=None):
+    def plot_filters_in_ws_power_curve(self, ti, fm=None, ax=None):
         """Plot the wind speed power curve and connect each faulty datapoint
         to the label it was classified as faulty with.
 
         Args:
             ti (int): Turbine number which should be plotted.
-            fi (FlorisModel, optional): floris object. If not None, will
+            fm (FlorisModel, optional): floris object. If not None, will
             use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
             ax (plt.Axis): Pyplot Axis object.
@@ -948,10 +948,10 @@ class ws_pw_curve_filtering:
             label="Approximate power curve",
         )
 
-        if fi is not None:
-            fi_turb = fm.core.farm.turbine_definitions[ti]
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
+        if fm is not None:
+            fm_turb = fm.core.farm.turbine_definitions[ti]
+            ws_array = np.array(fm_turb["power_thrust_table"]["wind_speed"])
+            pow_array = np.array(fm_turb["power_thrust_table"]["power"])
 
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
@@ -980,13 +980,13 @@ class ws_pw_curve_filtering:
 
         return ax
 
-    def plot_postprocessed_in_ws_power_curve(self, ti, fi=None, ax=None):
+    def plot_postprocessed_in_ws_power_curve(self, ti, fm=None, ax=None):
         """Plot the wind speed power curve and mark faulty data according to
         their filters.
 
         Args:
             ti (int): Turbine number which should be plotted.
-            fi (FlorisModel, optional): floris object. If not None, will
+            fm (FlorisModel, optional): floris object. If not None, will
             use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
             ax (Matplotlib.pyplot Axis, optional): Axis to plot in. If None is
@@ -1021,10 +1021,10 @@ class ws_pw_curve_filtering:
             label="Approximate power curve",
         )
 
-        if fi is not None:
-            fi_turb = fm.core.farm.turbine_definitions[ti]
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
+        if fm is not None:
+            fm_turb = fm.core.farm.turbine_definitions[ti]
+            ws_array = np.array(fm_turb["power_thrust_table"]["wind_speed"])
+            pow_array = np.array(fm_turb["power_thrust_table"]["power"])
 
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 

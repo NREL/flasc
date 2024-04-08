@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     root_path = os.path.dirname(os.path.abspath(__file__))
     for wake_model in wake_models:
-        fn = os.path.join(root_path, "df_fi_approx_{:s}.ftr".format(wake_model))
+        fn = os.path.join(root_path, "df_fm_approx_{:s}.ftr".format(wake_model))
         if os.path.exists(fn):
             print("FLORIS table for '{:s}' model exists. Skipping...".format(wake_model))
             continue
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         #     n_wind_direction_splits=max_workers,
         #     print_timings=True,
         # )
-        df_fi_approx = ftools.calc_floris_approx_table(
+        df_fm_approx = ftools.calc_floris_approx_table(
             fm=fm,  # fi=fi_pci,
             wd_array=np.arange(0.0, 360.01, 3.0),
             ws_array=np.arange(1.0, 30.01, 1.0),
@@ -35,4 +35,4 @@ if __name__ == "__main__":
         )
         end_time = timerpc()
         print("Computation time: {:.2f} s".format(end_time - start_time))
-        df_fi_approx.to_feather(fn)
+        df_fm_approx.to_feather(fn)
