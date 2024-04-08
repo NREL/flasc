@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from floris.visualization import visualize_cut_plane
+from floris.flow_visualization import visualize_cut_plane
 from floris.utilities import wrap_360
 
 from flasc.analysis import energy_ratio as er
@@ -32,7 +32,7 @@ def load_data():
     return df
 
 
-def _get_angle(fi, turbine_array):
+def _get_angle(fm, turbine_array):
     # Determine the geometrical angle between the upmost and downmost turbine
     # in an array. This is equal to the wind direction that maximally overlaps
     # the wake from the most upstream turbine on the most downstream turbine.
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     N_bootstrapping = 50
 
     # Load FLORIS and load SCADA data
-    fi, _ = load_floris()
+    fm, _ = load_floris()
     df = load_data()
 
     # Note that we normalize everything in our results to the first turbine in the array
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     df = dfm.set_wd_by_turbines(df, t0)
 
     # Define wind direction that perfectly aligns turbine array
-    wd = _get_angle(fi, turbine_array)
+    wd = _get_angle(fm, turbine_array)
 
     # Calculate energy ratio for narrow bin near 'wd'
     results_energy_ratio = _calculate_energy_ratios(
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     ax = plot_energy_ratios(turbine_array, results_energy_ratio)
 
     # Also plot wake situation according to FLORIS
-    plot_floris_layout(fi, plot_terrain=False)
+    plot_floris_layout(fm, plot_terrain=False)
 
     fig, ax = plt.subplots()
     fm.set(wind_directions=[wd], wind_speeds=[10.0])

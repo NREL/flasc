@@ -33,7 +33,7 @@ def load_data():
 if __name__ == "__main__":
     # Load data and floris object
     df = load_data()
-    fi, _ = load_floris()
+    fm, _ = load_floris()
 
     # Visualize layout
     fig, ax = plt.subplots()
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # derived from the turbine layout and the wind direction signal in
     # the dataframe, df['wd']. The reference power production is set
     # as the average power production of all upstream turbines.
-    df_upstream = fsatools.get_upstream_turbs_floris(fi, wd_step=5.0)
+    df_upstream = fsatools.get_upstream_turbs_floris(fm, wd_step=5.0)
     df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
     df = dfm.set_pow_ref_by_upstream_turbines(df, df_upstream)
 

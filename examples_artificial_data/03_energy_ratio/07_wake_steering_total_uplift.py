@@ -16,11 +16,11 @@ if __name__ == "__main__":
     # Downstream turbine (2)
     np.random.seed(0)
 
-    fi, _ = load_floris()
+    fm, _ = load_floris()
     fm.set(layout_x=[0, 0, 5 * 126], layout_y=[5 * 126, 0, 0])
 
     # Show the wind farm
-    plot_layout_with_waking_directions(fi)
+    plot_layout_with_waking_directions(fm)
 
     # Create a time history of points where the wind speed and wind
     # direction step different combinations
@@ -54,7 +54,11 @@ if __name__ == "__main__":
     # Compute the power of the second turbine for two cases
     # Baseline: The front turbine is aligned to the wind
     # WakeSteering: The front turbine is yawed 25 deg
-    fm.set(wind_speeds=ws_array, wind_directions=wd_array)
+    fm.set(
+        wind_speeds=ws_array,
+        wind_directions=wd_array,
+        turbulence_intensities=0.06 * np.ones_like(ws_array),
+    )
     fm.run()
     power_baseline_ref = fm.get_turbine_powers().squeeze()[:, 0].flatten()
     power_baseline_control = fm.get_turbine_powers().squeeze()[:, 1].flatten()

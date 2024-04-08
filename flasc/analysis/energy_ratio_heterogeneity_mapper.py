@@ -45,10 +45,10 @@ class heterogeneity_mapper:
     """
 
     # Private functions
-    def __init__(self, df_raw, fi):
+    def __init__(self, df_raw, fm):
         # Save to self
         self.df_raw = df_raw
-        self.fm = fi
+        self.fm = fm
         self.df_heterogeneity = None
         self.df_fi_hetmap = None
 
@@ -184,7 +184,7 @@ class heterogeneity_mapper:
             raise UserWarning("Please call 'estimate_heterogeneity(...)' first.")
 
         # Determine FLORIS heterogeneous map
-        fm = self.fi
+        fm = self.fm
         ll = 2.0 * np.sqrt(
             (np.max(fm.layout_x) - np.min(fm.layout_x)) ** 2.0
             + (np.max(fm.layout_y) - np.min(fm.layout_y)) ** 2.0
@@ -234,7 +234,7 @@ class heterogeneity_mapper:
             pdf = PdfPages(pdf_save_path)
 
         # Plot the results one by one
-        fm = self.fi
+        fm = self.fm
         for _, df_row in self.df_heterogeneity.iterrows():
             non_upstream_turbines = [
                 ti for ti in range(len(fm.layout_x)) if ti not in df_row["upstream_turbines"]

@@ -33,7 +33,7 @@ def load_data():
 
 if __name__ == "__main__":
     # Load FLORIS and plot the layout
-    fi, _ = load_floris()
+    fm, _ = load_floris()
 
     # Now specify which turbines we want to use in the analysis. Basically,
     # we want to use all the turbines besides the ones that we know have
@@ -58,10 +58,10 @@ if __name__ == "__main__":
     # Now calculate which turbines are upstream and for what wind directions,
     # using a very simplified model as part of FLASC. We use a wide wake
     # slope since we use a large value for wd_bin_width too.
-    df_upstream = ftools.get_upstream_turbs_floris(fi, wake_slope=0.70)
+    df_upstream = ftools.get_upstream_turbs_floris(fm, wake_slope=0.70)
 
     # Load the FLASC heterogeneity mapper
-    hm = heterogeneity_mapper(df_raw=df_full, fi=fi)
+    hm = heterogeneity_mapper(df_raw=df_full, fm=fm)
 
     # For all wind directions from 0 to 360 deg, calculate the energy ratios of
     # all upstream turbines. That gives a good idea of the heterogeneity
