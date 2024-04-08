@@ -2,7 +2,7 @@ import json
 import os
 import pickle
 
-import floris as wfct
+import floris.tools as wfct
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -30,14 +30,14 @@ def load_floris(nrows=1, ncols=1, row_spacing_D=5.0, col_spacing_D=3.0, wd=None,
     json_dict = json.load(open(input_json))
     json_dict["logging"]["console"]["enable"] = False
     json_dict["logging"]["console"]["level"] = "WARNING"
-    fm = wfct.floris_interface.FlorisModel(input_dict=json_dict)
+    fi = wfct.floris_interface.FlorisInterface(input_dict=json_dict)
 
-    D = fm.core.farm.turbines[0].rotor_diameter
+    D = fi.floris.farm.turbines[0].rotor_diameter
     x_row = np.arange(0, nrows) * row_spacing_D * D
     y_col = np.arange(0, ncols) * col_spacing_D * D
     x, y = np.meshgrid(x_row, y_col)
 
-    fm.reinitialize_flow_field(
+    fi.reinitialize_flow_field(
         layout_array=(x[0], y[0]), wind_direction=wd, wind_speed=ws, turbulence_intensity=ti
     )
 
@@ -101,16 +101,16 @@ def calculate_sensitivity(fi, N, calc_second_order, num_threads=8):
 
 
 def plot_hor_flowfield(fi):
-    fm.run()
-    hor_plane = fm.get_hor_plane()
+    fi.calculate_wake()
+    hor_plane = fi.get_hor_plane()
     fig, ax = plt.subplots()
     wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
-    fm.vis_layout(ax=ax)
+    fi.vis_layout(ax=ax)
     return fig, ax
 
 
 def _case_wrapper(nrows, ncols, row_spacing, N, calc_second_order, wd=270.0):
-    fm = load_floris(nrows=nrows, ncols=ncols, row_spacing_D=row_spacing, wd=wd)
+    fi = load_floris(nrows=nrows, ncols=ncols, row_spacing_D=row_spacing, wd=wd)
 
     # Filename
     root_path = os.path.dirname(os.path.abspath(__file__))
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     # plot_results(si_dict, fi)
 
     print("Four turbine case")
-    si_dict, fm = _case_wrapper(
+    si_dict, fi = _case_wrapper(
         nrows=4, ncols=1, row_spacing=5.0, N=N, calc_second_order=calc_second_order
     )
     plot_results(si_dict, fi)
@@ -193,13 +193,13 @@ if __name__ == "__main__":
     # plot_results(si_dict, fi)
 
     print("Four turbine case (3D spacing)")
-    si_dict, fm = _case_wrapper(
+    si_dict, fi = _case_wrapper(
         nrows=4, ncols=1, row_spacing=3.0, N=N, calc_second_order=calc_second_order
     )
     plot_results(si_dict, fi)
 
     print("Four turbine case (9D spacing)")
-    si_dict, fm = _case_wrapper(
+    si_dict, fi = _case_wrapper(
         nrows=4, ncols=1, row_spacing=9.0, N=N, calc_second_order=calc_second_order
     )
     plot_results(si_dict, fi)
