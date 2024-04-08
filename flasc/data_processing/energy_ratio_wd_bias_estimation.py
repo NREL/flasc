@@ -30,7 +30,7 @@ class bias_estimation:
     def __init__(
         self,
         df: pd.DataFrame,
-        df_fi_approx: pd.DataFrame,
+        df_fm_approx: pd.DataFrame,
         test_turbines_subset: List[int],
         df_ws_mapping_func: Callable,
         df_pow_ref_mapping_func: Callable,
@@ -46,7 +46,7 @@ class bias_estimation:
                 * Power production of every turbine: pow_000, pow_001, ...
                 * Reference power production used to normalize the energy
                     ratio: 'pow_ref'
-            df_fi_approx ([pd.DataFrame]): Dataframe containing a large set
+            df_fm_approx ([pd.DataFrame]): Dataframe containing a large set
                 of precomputed solutions of the FLORIS model for a range of
                 wind directions, wind speeds (and optionally turbulence
                 intensities). This table can be generated using the following:
@@ -73,7 +73,7 @@ class bias_estimation:
         # Import inputs
         self.df = df.reset_index(drop=("time" in df.columns))
         self.n_turbines = dfm.get_num_turbines(self.df)
-        self.df_fi_approx = df_fi_approx
+        self.df_fm_approx = df_fm_approx
         self.df_ws_mapping_func = df_ws_mapping_func
         self.df_pow_ref_mapping_func = df_pow_ref_mapping_func
         self.test_turbines = test_turbines_subset
@@ -125,23 +125,23 @@ class bias_estimation:
         print("    Interpolating FLORIS predictions for dataframe.")
         ws_cols = ["ws_{:03d}".format(ti) for ti in range(self.n_turbines)]
         pow_cols = ["pow_{:03d}".format(ti) for ti in range(self.n_turbines)]
-        df_fi_all = df_cor_all[["time", "wd", "ws", "ti", *ws_cols, *pow_cols]].copy()
+        df_fm_all = df_cor_all[["time", "wd", "ws", "ti", *ws_cols, *pow_cols]].copy()
 
-        df_fi_all = ftools.interpolate_floris_from_df_approx(
-            df=df_fi_all, df_approx=self.df_fi_approx, verbose=False, mirror_nans=True
+        df_fm_all = ftools.interpolate_floris_from_df_approx(
+            df=df_fm_all, df_approx=self.df_fm_approx, verbose=False, mirror_nans=True
         )
-        df_fi_all = self.df_pow_ref_mapping_func(df_fi_all)
+        df_fm_all = self.df_pow_ref_mapping_func(df_fm_all)
 
         for ti in self.test_turbines:
             valid_entries = (~df_cor_all["pow_{:03d}".format(ti)].isna()) & (
-                ~df_fi_all["pow_{:03d}".format(ti)].isna()
+                ~df_fm_all["pow_{:03d}".format(ti)].isna()
             )
             df_cor = df_cor_all[valid_entries].copy().reset_index(drop=True)
-            df_fi = df_fi_all[valid_entries].copy().reset_index(drop=True)
+            df_fm = df_fm_all[valid_entries].copy().reset_index(drop=True)
 
             # Initialize SCADA analysis class and add dataframes
             er_in_test_turbine_list_scada.append(EnergyRatioInput([df_cor], ["Measured data"]))
-            er_in_test_turbine_list_floris.append(EnergyRatioInput([df_fi], ["FLORIS prediction"]))
+            er_in_test_turbine_list_floris.append(EnergyRatioInput([df_fm], ["FLORIS prediction"]))
 
         # Save to self
         self.er_in_test_turbine_list_scada = er_in_test_turbine_list_scada

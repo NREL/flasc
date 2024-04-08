@@ -1,7 +1,7 @@
 import pandas as pd
 import seaborn as sns
 from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
-from floris.tools.uncertainty_interface import UncertaintyInterface
+from floris.uncertain_floris_model import UncertainFlorisModel
 from matplotlib import pyplot as plt
 
 from flasc.utilities.lookup_table_tools import get_yaw_angles_interpolant
@@ -9,15 +9,10 @@ from flasc.utilities.utilities_examples import load_floris_artificial as load_fl
 
 
 def load_floris_with_uncertainty(std_wd=0.0):
-    fi, _ = load_floris()  # Load nominal floris object
+    fm, _ = load_floris()  # Load nominal floris object
     if std_wd > 0.001:
-        unc_options = {
-            "std_wd": std_wd,  # Standard deviation for inflow wind direction (deg)
-            "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
-            "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
-        }
-        fi = UncertaintyInterface(fi, unc_options=unc_options)  # Load uncertainty object
-    return fi
+        fm = UncertainFlorisModel(fm.core.as_dict(), wd_std=std_wd)  # Load uncertainty object
+    return fm
 
 
 if __name__ == "__main__":
@@ -30,7 +25,7 @@ if __name__ == "__main__":
         print("Optimizing yaw angles with std_wd={:.2f}".format(std_wd_opt))
         # Optimize yaw angles
         df_opt = optimize_yaw_angles(
-            fi=load_floris_with_uncertainty(std_wd=std_wd_opt),
+            fm=load_floris_with_uncertainty(std_wd=std_wd_opt),
         )
 
         # Make an interpolant
@@ -40,7 +35,7 @@ if __name__ == "__main__":
         for std_wd_eval in std_wd_list:
             print("Evalating AEP uplift with std_wd={:.2f}".format(std_wd_eval))
             AEP_baseline, AEP_opt, _ = evaluate_optimal_yaw_angles(
-                fi=load_floris_with_uncertainty(std_wd=std_wd_eval),
+                fm=load_floris_with_uncertainty(std_wd=std_wd_eval),
                 yaw_angle_interpolant=yaw_angle_interpolant,
             )
 

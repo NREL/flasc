@@ -15,58 +15,58 @@ from flasc.utilities.utilities_examples import load_floris_artificial as load_fl
 
 class TestFlorisTools(unittest.TestCase):
     def test_floris_merge(self):
-        fi_1, _ = load_floris()
-        fi_2 = fi_1.copy()
-        fi_2.reinitialize(layout_x=[-500.0, -500.0], layout_y=[0.0, 500.0])
+        fm_1, _ = load_floris()
+        fm_2 = fm_1.copy()
+        fm_2.set(layout_x=[-500.0, -500.0], layout_y=[0.0, 500.0])
 
         # Check if layouts are merged appropriately
-        fi_merged = merge_floris_objects([fi_1, fi_2])
-        self.assertTrue(np.all(fi_merged.layout_x == np.hstack([fi_1.layout_x, fi_2.layout_x])))
-        self.assertTrue(np.all(fi_merged.layout_y == np.hstack([fi_1.layout_y, fi_2.layout_y])))
+        fi_merged = merge_floris_objects([fm_1, fm_2])
+        self.assertTrue(np.all(fi_merged.layout_x == np.hstack([fm_1.layout_x, fm_2.layout_x])))
+        self.assertTrue(np.all(fi_merged.layout_y == np.hstack([fm_1.layout_y, fm_2.layout_y])))
         #
         # Check if layouts are merged appropriately
-        fi_merged = merge_floris_objects([fi_1, fi_2], reference_wind_height=200.0)
-        self.assertTrue(fi_merged.floris.flow_field.reference_wind_height == 200.0)
+        fm_merged = merge_floris_objects([fm_1, fm_2], reference_wind_height=200.0)
+        self.assertTrue(fm_merged.core.flow_field.reference_wind_height == 200.0)
 
         # Also test that we raise a UserWarning if we have two different reference wind heights and
         # don't specify a reference_wind_height for the merged object
         with self.assertRaises(UserWarning):
-            fi_1.reinitialize(reference_wind_height=90.0)
-            fi_2.reinitialize(reference_wind_height=91.0)
-            fi_merged = merge_floris_objects([fi_1, fi_2])
+            fm_1.set(reference_wind_height=90.0)
+            fm_2.set(reference_wind_height=91.0)
+            fm_merged = merge_floris_objects([fm_1, fm_2])
 
     def test_floris_approx_table(self):
         # Load FLORIS object
-        fi, _ = load_floris()
+        fm, _ = load_floris()
 
         # Single core calculation
-        df_fi_approx = calc_floris_approx_table(
-            fi,
+        df_fm_approx = calc_floris_approx_table(
+            fm,
             wd_array=np.arange(0.0, 10.0, 2.0),
             ws_array=[8.0, 9.0],
             ti_array=[0.08],
         )
 
         # Multi core calculation
-        df_fi_approx_multi = calc_floris_approx_table(
-            fi,
+        df_fm_approx_multi = calc_floris_approx_table(
+            fm,
             wd_array=np.arange(0.0, 10.0, 2.0),
             ws_array=[8.0, 9.0],
             ti_array=[0.08],
         )
 
         # Make sure singlecore and multicore solutions are equal
-        self.assertTrue((df_fi_approx == df_fi_approx_multi).all().all())
+        self.assertTrue((df_fm_approx == df_fm_approx_multi).all().all())
 
         # Ensure there are no NaN entries
-        self.assertTrue(~df_fi_approx.isna().any().any())
+        self.assertTrue(~df_fm_approx.isna().any().any())
 
         # Ensure dataframe shape and columns
         # self.assertTrue(("wd_000" in df_fi_approx.columns))
         # self.assertTrue(("ws_001" in df_fi_approx.columns))
         # self.assertTrue(("ti_002" in df_fi_approx.columns))
-        self.assertTrue(("pow_003" in df_fi_approx.columns))
-        self.assertAlmostEqual(df_fi_approx.shape[0], 10)
+        self.assertTrue(("pow_003" in df_fm_approx.columns))
+        self.assertAlmostEqual(df_fm_approx.shape[0], 10)
 
         # Now interpolate from table
         df = pd.DataFrame(
@@ -91,7 +91,7 @@ class TestFlorisTools(unittest.TestCase):
             }
         )
         df["time"] = 0.0  # Empty array
-        df = interpolate_floris_from_df_approx(df, df_fi_approx)
+        df = interpolate_floris_from_df_approx(df, df_fm_approx)
 
         # Ensure that NaNs are mimicked appropriately
         self.assertTrue(~df[["pow_003", "pow_004"]].isna().any().any())

@@ -13,9 +13,9 @@ from flasc.yaw_optimizer_visualization import (
 
 if __name__ == "__main__":
     # Load FLORIS model and plot layout (and additional information)
-    fi, _ = load_floris()
-    plot_floris_layout(fi)
-    plot_layout_with_waking_directions(fi, limit_dist_D=5, limit_num=3)
+    fm, _ = load_floris()
+    plot_floris_layout(fm)
+    plot_layout_with_waking_directions(fm, limit_dist_D=5, limit_num=3)
 
     # Compare optimizing over all wind speeds vs. optimizing over a single wind speed
     AEP_baseline_array = []
