@@ -7,8 +7,8 @@ from flasc.utilities import floris_tools as ftools, optimization as opt
 
 
 class ti_estimator:
-    def __init__(self, fi):
-        self.fm = fi
+    def __init__(self, fm):
+        self.fm = fm
         self.num_turbs = len(fm.layout_x)
 
         self._reset_outputs()

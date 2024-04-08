@@ -78,11 +78,11 @@ def merge_floris_objects(fm_list, reference_wind_height=None):
     return fi_merged
 
 
-def reduce_floris_object(fi, turbine_list, copy=False):
+def reduce_floris_object(fm, turbine_list, copy=False):
     """Reduce a large FLORIS object to a subset selection of wind turbines.
 
     Args:
-        fi (FlorisModel): FLORIS object.
+        fm (FlorisModel): FLORIS object.
         turbine_list (list, array-like): List of turbine indices which should be maintained.
 
     Returns:
@@ -91,9 +91,9 @@ def reduce_floris_object(fi, turbine_list, copy=False):
 
     # Copy, if necessary
     if copy:
-        fi_reduced = fm.copy()
+        fm_reduced = fm.copy()
     else:
-        fi_reduced = fi
+        fm_reduced = fm
 
     # Get the turbine locations from the floris object
     x = np.array(fm.layout_x, dtype=float, copy=True)
@@ -107,13 +107,13 @@ def reduce_floris_object(fi, turbine_list, copy=False):
         raise UserWarning("Incompatible format of turbine_type in FlorisModel.")
 
     # Construct the merged FLORIS model based on the first entry in fi_list
-    fi_reduced.set(
+    fm_reduced.set(
         layout_x=x[turbine_list],
         layout_y=y[turbine_list],
         turbine_type=list(np.array(fi_turbine_type)[turbine_list]),
     )
 
-    return fi_reduced
+    return fm_reduced
 
 
 def interpolate_floris_from_df_approx(
@@ -1099,7 +1099,7 @@ def get_all_impacting_turbines(
 
 
 # Wrapper function to easily set new TI values
-def _fi_set_ws_wd_ti(fi, wd=None, ws=None, ti=None):
+def _fi_set_ws_wd_ti(fm, wd=None, ws=None, ti=None):
     nturbs = len(fm.layout_x)
 
     # Convert scalar values to lists
@@ -1124,4 +1124,4 @@ def _fi_set_ws_wd_ti(fi, wd=None, ws=None, ti=None):
     fm.reinitialize_flow_field(
         wind_layout=wind_layout, wind_direction=wd, wind_speed=ws, turbulence_intensity=ti
     )
-    return fi
+    return fm
