@@ -353,7 +353,7 @@ def plot_thrust_curve_only(pt, plotting_dict, ax=None):
     return ax
 
 
-def plot_farm_terrain(fi, fig, ax):
+def plot_farm_terrain(fm, fig, ax):
     hub_heights = fm.core.farm.hub_heights.flatten()
     cntr = ax.tricontourf(fm.layout_x, fm.layout_y, hub_heights, levels=14, cmap="RdBu_r")
 

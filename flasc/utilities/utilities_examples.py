@@ -52,7 +52,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
     return (fm, turbine_weights)
 
 
-def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
+def load_floris_artificial(wake_model="gch", wd_std=0.0, cosine_exponent=None):
     """Load a FlorisModel object for the wind farm at hand.
 
     Args:
@@ -87,10 +87,10 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
     )
 
     # Update Pp if specified
-    if pP is not None:
+    if cosine_exponent is not None:
         tdefs = [copy.deepcopy(t) for t in fm.core.farm.turbine_definitions]
         for ii in range(len(tdefs)):
-            tdefs[ii]["pP"] = pP
+            tdefs[ii]["power_thrust_table"]["cosine_loss_exponent_yaw"] = cosine_exponent
 
         fm.set(turbine_type=tdefs)
 
