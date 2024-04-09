@@ -1,8 +1,8 @@
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import floris.layout_visualization as layoutviz
 
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput

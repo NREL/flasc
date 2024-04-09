@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
-from scipy import optimize as opt, stats as spst
+from scipy import optimize as opt
+from scipy import stats as spst
 
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput

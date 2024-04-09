@@ -1,9 +1,9 @@
 import os
 
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import floris.layout_visualization as layoutviz
 from floris.flow_visualization import visualize_cut_plane
 from floris.utilities import wrap_360
 

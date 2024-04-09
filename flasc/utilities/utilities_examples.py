@@ -2,9 +2,9 @@ import copy
 from pathlib import Path
 from time import perf_counter as timerpc
 
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
-import floris.layout_visualization as layoutviz
 from floris import FlorisModel, UncertainFlorisModel
 
 

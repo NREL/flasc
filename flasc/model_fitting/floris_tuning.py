@@ -23,7 +23,8 @@ import numpy as np
 import polars as pl
 
 import flasc.utilities.floris_tools as ftools
-from flasc.analysis import energy_ratio as er, total_uplift as tup
+from flasc.analysis import energy_ratio as er
+from flasc.analysis import total_uplift as tup
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.utilities.energy_ratio_utilities import add_power_ref, add_power_test
 from flasc.utilities.tuner_utilities import replicate_nan_values, resim_floris, set_fm_param

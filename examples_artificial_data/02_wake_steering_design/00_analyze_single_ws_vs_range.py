@@ -1,7 +1,7 @@
+import floris.layout_visualization as layoutviz
 import numpy as np
 from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
 from matplotlib import pyplot as plt
-import floris.layout_visualization as layoutviz
 
 from flasc.utilities.lookup_table_tools import get_yaw_angles_interpolant
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris

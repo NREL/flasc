@@ -1,7 +1,7 @@
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import floris.layout_visualization as layoutviz
 
 from flasc.analysis import total_uplift as tup
 from flasc.analysis.energy_ratio_input import EnergyRatioInput

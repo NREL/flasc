@@ -162,6 +162,3 @@ class TestDataFrameFiltering(unittest.TestCase):
             )
         self.assertTrue(df[["pow_000", "pow_001", "pow_005", "pow_006"]].isna().all().all())  # NaN
         self.assertTrue(~df[["pow_002", "pow_003", "pow_004"]].isna().any().any())  # Non-NaN
-
-        # plot_layout_only(fi)
-        # plt.show()

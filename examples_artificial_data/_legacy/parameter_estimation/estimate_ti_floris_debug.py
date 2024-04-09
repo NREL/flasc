@@ -5,7 +5,8 @@ import floris.tools as wfct
 import matplotlib.pyplot as plt
 import numpy as np
 
-from flasc.utilities import floris_tools as ftools, turbulence_estimator as fsatiestimator
+from flasc.utilities import floris_tools as ftools
+from flasc.utilities import turbulence_estimator as fsatiestimator
 
 if __name__ == "__main__":
     # Initialize the FLORIS interface fi

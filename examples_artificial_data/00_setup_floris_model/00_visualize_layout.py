@@ -1,6 +1,6 @@
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
-import floris.layout_visualization as layoutviz
 
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
@@ -22,13 +22,15 @@ if __name__ == "__main__":
     ax.grid()
     ax.set_xlabel("x coordinate [m]")
     ax.set_ylabel("y coordinate [m]")
-    
+
     # Plot using the default names and show the wake directions
     turbines_to_plot = range(2, len(fm.layout_x))
     ax = layoutviz.plot_turbine_points(fm, turbine_indices=turbines_to_plot)
-    layoutviz.plot_turbine_labels(fm, ax=ax, turbine_indices=turbines_to_plot, turbine_names=turbine_names)
+    layoutviz.plot_turbine_labels(
+        fm, ax=ax, turbine_indices=turbines_to_plot, turbine_names=turbine_names
+    )
     layoutviz.plot_waking_directions(
-        fm, 
+        fm,
         ax=ax,
         limit_num=3,
         wake_plotting_dict={"color": "r"},
@@ -54,7 +56,7 @@ if __name__ == "__main__":
     ax.set_ylabel("y coordinate [m]")
 
     # Turbine data
-    fig, ax = plt.subplots(2,1)
+    fig, ax = plt.subplots(2, 1)
     ax[0].plot(
         fm.core.farm.turbine_map[0].power_thrust_table["wind_speed"],
         fm.core.farm.turbine_map[0].power_thrust_table["power"],

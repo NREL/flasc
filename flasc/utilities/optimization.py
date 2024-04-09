@@ -8,7 +8,9 @@ from floris.utilities import wrap_180, wrap_360
 from pandas.errors import DataError
 
 from flasc.data_processing import time_operations as fsato
-from flasc.utilities import circular_statistics as css, floris_tools as ftools, utilities as fsut
+from flasc.utilities import circular_statistics as css
+from flasc.utilities import floris_tools as ftools
+from flasc.utilities import utilities as fsut
 
 
 def find_timeshift_between_dfs(
