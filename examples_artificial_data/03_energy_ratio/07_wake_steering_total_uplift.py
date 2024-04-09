@@ -1,3 +1,4 @@
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -5,7 +6,7 @@ import pandas as pd
 from flasc.analysis import total_uplift as tup
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
-from flasc.visualization import plot_binned_mean_and_ci, plot_layout_with_waking_directions
+from flasc.visualization import plot_binned_mean_and_ci
 
 if __name__ == "__main__":
     # Generate the data as in example 05_wake_steering_example.py
@@ -20,7 +21,12 @@ if __name__ == "__main__":
     fm.set(layout_x=[0, 0, 5 * 126], layout_y=[5 * 126, 0, 0])
 
     # Show the wind farm
-    plot_layout_with_waking_directions(fm)
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    layoutviz.plot_waking_directions(fm, ax=ax)
+    ax.grid()
+    ax.set_xlabel("x coordinate [m]")
+    ax.set_ylabel("y coordinate [m]")
 
     # Create a time history of points where the wind speed and wind
     # direction step different combinations

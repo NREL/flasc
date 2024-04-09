@@ -7,9 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from flasc.model_estimation.floris_sensitivity_analysis import (
-    floris_sobol_analysis,
-)
+from flasc.model_estimation.floris_sensitivity_analysis import floris_sobol_analysis
 
 
 def _save_pickle(dict_in, fn):

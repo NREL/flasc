@@ -1,13 +1,8 @@
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
-from flasc.visualization import (
-    plot_floris_layout,
-    plot_layout_only,
-    plot_layout_with_waking_directions,
-    shade_region,
-)
 
 # Example demonstrates some methods for visualizing the layout of the farm
 # represented within the FLORIS interface
@@ -21,42 +16,59 @@ if __name__ == "__main__":
     # Defines alternative names for each turbine with 1-index
     turbine_names = ["Turbine-%d" % (t + 1) for t in range(len(fm.layout_x))]
 
-    # Plot using default 0-indexed labels (includes power/thrust curve)
-    plot_floris_layout(fm, plot_terrain=False)
+    # Plot the basic farm layout
+    ax = layoutviz.plot_turbine_points(fm, plotting_dict={"color": "g"})
+    layoutviz.plot_turbine_labels(fm, ax=ax, turbine_names=turbine_names)
+    ax.grid()
+    ax.set_xlabel("x coordinate [m]")
+    ax.set_ylabel("y coordinate [m]")
 
-    # Plot using default given 1-indexed labels (includes power/thrust curve)
-    plot_floris_layout(fm, plot_terrain=False, turbine_names=turbine_names)
-
-    # Plot only the layout with default options
-    plot_layout_only(fm)
-
-    # Plot only the layout with custom options
-    plot_layout_only(fm, {"turbine_names": turbine_names, "color": "g"})
-
-    # Plot layout with wake directions and inter-turbine distances labeled
-    plot_layout_with_waking_directions(fm)
-
-    # Plot layout with wake directions and inter-turbine distances labeled
-    # (using custom options)
-    plot_layout_with_waking_directions(
-        fm,
-        limit_num=3,  # limit to 3 lines per turbine
-        layout_plotting_dict={
-            "turbine_names": turbine_names,
-            "turbine_indices": range(2, len(fm.layout_x)),
-        },
-        wake_plotting_dict={"color": "r"},
+    # Plot using the default names and show the wake directions
+    turbines_to_plot = range(2, len(fm.layout_x))
+    ax = layoutviz.plot_turbine_points(fm, turbine_indices=turbines_to_plot)
+    layoutviz.plot_turbine_labels(
+        fm, ax=ax, turbine_indices=turbines_to_plot, turbine_names=turbine_names
     )
+    layoutviz.plot_waking_directions(
+        fm,
+        ax=ax,
+        limit_num=3,
+        wake_plotting_dict={"color": "r"},
+        turbine_indices=turbines_to_plot,
+    )
+    ax.grid()
+    ax.set_xlabel("x coordinate [m]")
+    ax.set_ylabel("y coordinate [m]")
 
     # Demonstrate shading of an arbitrary region
     points_for_demo = np.array([[600, 0], [1400, 0], [1200, 1000]])
-    ax = plot_layout_only(fm)
-    shade_region(
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax, turbine_names=turbine_names)
+    layoutviz.shade_region(
         points_for_demo,
         show_points=True,
         plotting_dict_region={"color": "blue", "label": "Example region"},
         plotting_dict_points={"color": "blue", "marker": "+", "s": 50},
         ax=ax,
     )
+    ax.grid()
+    ax.set_xlabel("x coordinate [m]")
+    ax.set_ylabel("y coordinate [m]")
+
+    # Turbine data
+    fig, ax = plt.subplots(2, 1)
+    ax[0].plot(
+        fm.core.farm.turbine_map[0].power_thrust_table["wind_speed"],
+        fm.core.farm.turbine_map[0].power_thrust_table["power"],
+    )
+    ax[1].plot(
+        fm.core.farm.turbine_map[0].power_thrust_table["wind_speed"],
+        fm.core.farm.turbine_map[0].power_thrust_table["thrust_coefficient"],
+    )
+    ax[1].set_xlabel("Wind Speed [m/s]")
+    ax[1].set_ylabel("Thrust coefficient [-]")
+    ax[0].set_ylabel("Power [kW]")
+    ax[0].grid()
+    ax[1].grid()
 
     plt.show()
