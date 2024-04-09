@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from flasc.data_processing import dataframe_filtering as dff
-from flasc.data_processing.ws_pow_filtering import ws_pw_curve_filtering
+import flasc.data_processing.filtering as filt
+from flasc.data_processing.filtering import FlascFilter
 from flasc.utilities import floris_tools as ftools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
@@ -35,12 +35,12 @@ def load_data():
 
 
 class TestDataFrameFiltering(unittest.TestCase):
-    def test_ws_pow_filtering(self):
+    def test_flasc_filtering(self):
         # if __name__ == "__main__":
         # Test basic filtering operations
         df = load_data()
         df["ws_001"] = np.nan
-        w = ws_pw_curve_filtering(df)
+        w = FlascFilter(df)
         for ti in range(7):
             # Filter for NaN wind speeds
             w.filter_by_condition(
@@ -62,7 +62,7 @@ class TestDataFrameFiltering(unittest.TestCase):
         df = df * (1 + 0.05 * np.random.randn(*np.shape(df.to_numpy())))
         df.loc[[4, 5, 6, 7], "ws_004"] = 8.801  # Assign 4 measurements to be stuck
 
-        w = ws_pw_curve_filtering(df)
+        w = FlascFilter(df)
         w.filter_by_sensor_stuck_faults(columns=["wd", "ws_004"], ti=4)
         df_filtered = w.get_df()
         array_is_stuck = np.array(df_filtered["ws_004"].isna(), dtype=bool)
@@ -96,7 +96,7 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["wd"] = 275.0
         df["pow_004"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(
+            df = filt.filter_df_by_faulty_impacting_turbines(
                 df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
             )
         self.assertTrue(df[["pow_003", "pow_004", "pow_006"]].isna().all().all())  # NaN
@@ -110,7 +110,7 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["wd"] = 357.0
         df["pow_001"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(
+            df = filt.filter_df_by_faulty_impacting_turbines(
                 df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
             )
         self.assertTrue(df[["pow_001"]].isna().all().all())
@@ -128,7 +128,7 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["pow_001"] = np.nan
         df["pow_005"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(
+            df = filt.filter_df_by_faulty_impacting_turbines(
                 df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
             )
         self.assertTrue(df[["pow_001", "pow_005"]].isna().all().all())  # NaN
@@ -142,7 +142,7 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["wd"] = 357.0
         df["pow_005"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(
+            df = filt.filter_df_by_faulty_impacting_turbines(
                 df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
             )
         self.assertTrue(df[["pow_001", "pow_005"]].isna().all().all())  # NaN
@@ -157,8 +157,18 @@ class TestDataFrameFiltering(unittest.TestCase):
         df["pow_005"] = np.nan
         df["pow_006"] = np.nan
         for ti in range(num_turbs):
-            df = dff.filter_df_by_faulty_impacting_turbines(
+            df = filt.filter_df_by_faulty_impacting_turbines(
                 df=df, ti=ti, df_impacting_turbines=df_impacting_turbines, verbose=False
             )
         self.assertTrue(df[["pow_000", "pow_001", "pow_005", "pow_006"]].isna().all().all())  # NaN
         self.assertTrue(~df[["pow_002", "pow_003", "pow_004"]].isna().any().any())  # Non-NaN
+
+    def test_df_get_no_faulty_measurements(self):
+        # Create tiny subset
+        df = load_data()
+        df["pow_001"] = np.nan
+
+        num_faulty_0 = filt.df_get_no_faulty_measurements(df, 0)
+        assert num_faulty_0 == 0
+        num_faulty_1 = filt.df_get_no_faulty_measurements(df, 1)
+        assert num_faulty_1 == 1
