@@ -88,25 +88,6 @@ def nested_set(dic: Dict[str, Any], keys: List[str], value: Any, idx: Optional[i
         dic[keys[-1]] = par_list
 
 
-def set_fm_param(
-    fm_in: FlorisModel, param: List[str], value: Any, param_idx: Optional[int] = None
-) -> FlorisModel:
-    """Set a parameter in a FlorisModel object.
-
-    Args:
-        fm_in (FlorisModel): The FlorisModel object to modify.
-        param (List[str]): A list of keys to traverse the FlorisModel dictionary.
-        value (Any): The value to set.
-        idx (Optional[int], optional): The index to set the value at. Defaults to None.
-
-    Returns:
-        FlorisModel: The modified FlorisModel object.
-    """
-    fi_dict_mod = fm_in.core.as_dict()
-    nested_set(fi_dict_mod, param, value, param_idx)
-    return FlorisModel(fi_dict_mod)
-
-
 def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.array = None):
     # Get wind speeds and directions
     wind_speeds = df_scada["ws"].values
