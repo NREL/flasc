@@ -2,15 +2,14 @@ import copy
 from pathlib import Path
 from time import perf_counter as timerpc
 
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
-from floris.tools import FlorisInterface, UncertaintyInterface
-
-from flasc.visualization import plot_floris_layout
+from floris import FlorisModel, UncertainFlorisModel
 
 
 def load_floris_smarteole(wake_model="gch", wd_std=0.0):
-    """Load a FlorisInterface object for the wind farm at hand.
+    """Load a FlorisModel object for the wind farm at hand.
 
     Args:
         wake_model (str, optional): The wake model that FLORIS should use. Common
@@ -23,7 +22,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
           wind direction in degrees. Defaults to 0.0 deg meaning no uncertainty.
 
     Returns:
-        FlorisInterface: Floris object.
+        FlorisModel: Floris object.
     """
 
     # Use the local FLORIS GCH/CC model for the wake model settings
@@ -33,7 +32,7 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
     fn = root_path / "{:s}.yaml".format(wake_model)
 
     # Initialize FLORIS model and format appropriately
-    fi = FlorisInterface(fn)
+    fm = FlorisModel(fn)
 
     # Add uncertainty
     if wd_std > 0.01:
@@ -42,18 +41,18 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fi = UncertaintyInterface(fi, unc_options=unc_options)
+        fm = UncertainFlorisModel(fm, unc_options=unc_options)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly
     # helpful when you have information about surrounding wind farms.
-    turbine_weights = np.ones(len(fi.layout_x), dtype=float)
+    turbine_weights = np.ones(len(fm.layout_x), dtype=float)
 
-    return (fi, turbine_weights)
+    return (fm, turbine_weights)
 
 
-def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
-    """Load a FlorisInterface object for the wind farm at hand.
+def load_floris_artificial(wake_model="gch", wd_std=0.0, cosine_exponent=None):
+    """Load a FlorisModel object for the wind farm at hand.
 
     Args:
         wake_model (str, optional): The wake model that FLORIS should use. Common
@@ -66,7 +65,7 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
           wind direction in degrees. Defaults to 0.0 deg meaning no uncertainty.
 
     Returns:
-        FlorisInterface: Floris object.
+        FlorisModel: Floris object.
     """
 
     # Use the local FLORIS GCH/CC model for the wake model settings
@@ -80,19 +79,19 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
     layout_y = [0.0, 297.357, 123.431, 575.544, 647.779, 772.262, 504.711]
 
     # Initialize FLORIS model and format appropriately
-    fi = FlorisInterface(fn)
-    fi.reinitialize(
+    fm = FlorisModel(fn)
+    fm.set(
         layout_x=layout_x,
         layout_y=layout_y,
     )
 
     # Update Pp if specified
-    if pP is not None:
-        tdefs = [copy.deepcopy(t) for t in fi.floris.farm.turbine_definitions]
+    if cosine_exponent is not None:
+        tdefs = [copy.deepcopy(t) for t in fm.core.farm.turbine_definitions]
         for ii in range(len(tdefs)):
-            tdefs[ii]["pP"] = pP
+            tdefs[ii]["power_thrust_table"]["cosine_loss_exponent_yaw"] = cosine_exponent
 
-        fi.reinitialize(turbine_type=tdefs)
+        fm.set(turbine_type=tdefs)
 
     # Add uncertainty
     if wd_std > 0.01:
@@ -101,27 +100,31 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, pP=None):
             "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
             "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
         }
-        fi = UncertaintyInterface(fi, unc_options=unc_options)
+        fm = UncertainFlorisModel(fm, unc_options=unc_options)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly
     # helpful when you have information about surrounding wind farms.
     turbine_weights = np.ones(len(layout_x), dtype=float)
 
-    return (fi, turbine_weights)
+    return (fm, turbine_weights)
 
 
 if __name__ == "__main__":
     # Load and time the artificial FLORIS model
     t0 = timerpc()
-    fi, turbine_weights = load_floris_artificial()
+    fm, turbine_weights = load_floris_artificial()
     print("Time spent to load the FLORIS model (artificial): {:.2f} s.".format(timerpc() - t0))
-    plot_floris_layout(fi, plot_terrain=False)
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    ax.grid()
 
     # Load and time the Smarteole FLORIS model
     t0 = timerpc()
-    fi, turbine_weights = load_floris_smarteole()
+    fm, turbine_weights = load_floris_smarteole()
     print("Time spent to load the FLORIS model (smarteole): {:.2f} s.".format(timerpc() - t0))
-    plot_floris_layout(fi, plot_terrain=False)
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    ax.grid()
 
     plt.show()

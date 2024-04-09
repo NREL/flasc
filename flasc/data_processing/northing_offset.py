@@ -18,17 +18,14 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
-from flasc.utilities import (
-    floris_tools as ftools,
-    optimization as opt,
-)
+from flasc.utilities import floris_tools as ftools, optimization as opt
 
 
 def crosscheck_northing_offset_consistency(
-    df, fi, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True
+    df, fm, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True
 ):
     # Load data and extract info
-    num_turbines = len(fi.layout_x)
+    num_turbines = len(fm.layout_x)
     turbine_list = range(num_turbines)
 
     # Set up time_array and split into chunks
@@ -47,8 +44,8 @@ def crosscheck_northing_offset_consistency(
     bias_output_list = [[] for _ in turbine_list]
     for ti in turbine_list:
         turbs_in_radius = ftools.get_turbs_in_radius(
-            fi.layout_x,
-            fi.layout_y,
+            fm.layout_x,
+            fm.layout_y,
             ti,
             max_radius=1.0e9,
             include_itself=False,
@@ -140,16 +137,16 @@ def crosscheck_northing_offset_consistency(
                 clr = "orange"
 
             ax.plot(
-                fi.layout_x[ti],
-                fi.layout_y[ti],
+                fm.layout_x[ti],
+                fm.layout_y[ti],
                 "o",
                 markersize=15,
                 markerfacecolor=clr,
                 markeredgewidth=0.0,
             )
             ax.text(
-                fi.layout_x[ti] + 100,
-                fi.layout_y[ti],
+                fm.layout_x[ti] + 100,
+                fm.layout_y[ti],
                 "T%03d (%s)" % (ti, turb_is_clean[ti]),
                 color="black",
             )

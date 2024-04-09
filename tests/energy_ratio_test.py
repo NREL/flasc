@@ -129,10 +129,10 @@ def load_data():
 class TestEnergyRatio(unittest.TestCase):
     def test_energy_ratio_regression(self):
         # Load data and FLORIS model
-        fi, _ = load_floris()
+        fm, _ = load_floris()
         df = load_data()
         df = dfm.set_wd_by_all_turbines(df)
-        df_upstream = ftools.get_upstream_turbs_floris(fi)
+        df_upstream = ftools.get_upstream_turbs_floris(fm)
         df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
         df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
 

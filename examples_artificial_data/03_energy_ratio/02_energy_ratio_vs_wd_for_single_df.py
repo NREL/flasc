@@ -1,16 +1,3 @@
-# Copyright 2021 NREL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
-
 import os
 
 import matplotlib.pyplot as plt
@@ -45,13 +32,13 @@ def load_data():
 if __name__ == "__main__":
     # Load data and floris object
     df = load_data()
-    fi, _ = load_floris()
+    fm, _ = load_floris()
 
     # Visualize layout
     fig, ax = plt.subplots()
-    ax.plot(fi.layout_x, fi.layout_y, "ko")
-    for ti in range(len(fi.layout_x)):
-        ax.text(fi.layout_x[ti], fi.layout_y[ti], "T{:02d}".format(ti))
+    ax.plot(fm.layout_x, fm.layout_y, "ko")
+    for ti in range(len(fm.layout_x)):
+        ax.text(fm.layout_x[ti], fm.layout_y[ti], "T{:02d}".format(ti))
     ax.axis("equal")
     ax.grid(True)
     ax.set_xlabel("x-direction (m)")
@@ -75,7 +62,7 @@ if __name__ == "__main__":
     # the dataframe, df['wd']. The reference power production is set
     # as the average power production of turbines 0 and 6, which are
     # always upstream for wind directions between 20 and 90 deg.
-    df_upstream = fsatools.get_upstream_turbs_floris(fi)
+    df_upstream = fsatools.get_upstream_turbs_floris(fm)
     df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
     df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
 

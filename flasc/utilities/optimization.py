@@ -1,16 +1,3 @@
-# Copyright 2021 NREL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
-
 import copy
 from datetime import timedelta as td
 
@@ -21,11 +8,7 @@ from floris.utilities import wrap_180, wrap_360
 from pandas.errors import DataError
 
 from flasc.data_processing import time_operations as fsato
-from flasc.utilities import (
-    circular_statistics as css,
-    floris_tools as ftools,
-    utilities as fsut,
-)
+from flasc.utilities import circular_statistics as css, floris_tools as ftools, utilities as fsut
 
 
 def find_timeshift_between_dfs(
@@ -265,17 +248,17 @@ def estimate_ti(
     verbose=False,
 ):
     # Make copy so that existing object is not changed
-    fi = copy.deepcopy(fi)
-    num_turbines = len(fi.layout_x)
-    ti_0 = np.mean(fi.floris.farm.turbulence_intensity)
+    fm = copy.deepcopy(fi)
+    num_turbines = len(fm.layout_x)
+    ti_0 = np.mean(fm.core.farm.turbulence_intensity)
 
     # Define a cost function
     def cost_fun(ti):
         ti_array = np.repeat(ti_0, num_turbines)
         ti_array[turbine_upstream] = ti
         ftools._fi_set_ws_wd_ti(fi, ti=ti_array)
-        fi.calculate_wake()
-        Pturbs = np.array(fi.get_turbine_power())
+        fm.run()
+        Pturbs = np.array(fm.get_turbine_power())
         Pturbs = Pturbs[turbines_downstream]
         se = (P_measured - Pturbs) ** 2.0
         mse = np.mean(se)

@@ -1,16 +1,3 @@
-# Copyright 2021 NREL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
-
 import pandas as pd
 import seaborn as sns
 from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
@@ -24,10 +11,10 @@ if __name__ == "__main__":
     result_list = []
 
     # Compare optimizing and evaluating over different turbulence intensities
-    for ti_opt in ti_list:
+    for ti_opt in ti_list:  # TODO: with Floris v4, could optimize all at once
         print("Optimizing yaw angles with turbulence_intensity={:.2f}".format(ti_opt))
         # Optimize yaw angles
-        df_opt = optimize_yaw_angles(opt_turbulence_intensity=ti_opt)
+        df_opt = optimize_yaw_angles(opt_turbulence_intensities=ti_opt)
 
         # Make an interpolant
         yaw_angle_interpolant = get_yaw_angles_interpolant(df_opt)  # Create yaw angle interpolant

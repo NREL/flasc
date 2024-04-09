@@ -1,23 +1,10 @@
-# Copyright 2021 NREL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
-
+import floris.layout_visualization as layoutviz
 import numpy as np
 from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
 from matplotlib import pyplot as plt
 
 from flasc.utilities.lookup_table_tools import get_yaw_angles_interpolant
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
-from flasc.visualization import plot_floris_layout, plot_layout_with_waking_directions
 from flasc.yaw_optimizer_visualization import (
     plot_offsets_wd,
     plot_offsets_wswd_heatmap,
@@ -26,9 +13,10 @@ from flasc.yaw_optimizer_visualization import (
 
 if __name__ == "__main__":
     # Load FLORIS model and plot layout (and additional information)
-    fi, _ = load_floris()
-    plot_floris_layout(fi)
-    plot_layout_with_waking_directions(fi, limit_dist_D=5, limit_num=3)
+    fm, _ = load_floris()
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    layoutviz.plot_waking_directions(fm, ax=ax, limit_dist_D=5, limit_num=3)
 
     # Compare optimizing over all wind speeds vs. optimizing over a single wind speed
     AEP_baseline_array = []

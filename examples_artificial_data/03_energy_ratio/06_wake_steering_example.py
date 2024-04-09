@@ -1,16 +1,4 @@
-# Copyright 2021 NREL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
-
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -19,7 +7,7 @@ import seaborn as sns
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
-from flasc.visualization import plot_binned_mean_and_ci, plot_layout_with_waking_directions
+from flasc.visualization import plot_binned_mean_and_ci
 
 if __name__ == "__main__":
     # Construct a simple 3-turbine wind farm with a
@@ -28,11 +16,16 @@ if __name__ == "__main__":
     # Downstream turbine (2)
     np.random.seed(0)
 
-    fi, _ = load_floris()
-    fi.reinitialize(layout_x=[0, 0, 5 * 126], layout_y=[5 * 126, 0, 0])
+    fm, _ = load_floris()
+    fm.set(layout_x=[0, 0, 5 * 126], layout_y=[5 * 126, 0, 0])
 
     # Show the wind farm
-    plot_layout_with_waking_directions(fi)
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    layoutviz.plot_waking_directions(fm, ax=ax)
+    ax.grid()
+    ax.set_xlabel("x coordinate [m]")
+    ax.set_ylabel("y coordinate [m]")
 
     # Create a time history of points where the wind speed and wind
     # direction step different combinations
@@ -66,18 +59,23 @@ if __name__ == "__main__":
     # Compute the power of the second turbine for two cases
     # Baseline: The front turbine is aligned to the wind
     # WakeSteering: The front turbine is yawed 25 deg
-    fi.reinitialize(wind_speeds=ws_array, wind_directions=wd_array)
-    fi.calculate_wake()
-    power_baseline_ref = fi.get_turbine_powers().squeeze()[:, 0].flatten()
-    power_baseline_control = fi.get_turbine_powers().squeeze()[:, 1].flatten()
-    power_baseline_downstream = fi.get_turbine_powers().squeeze()[:, 2].flatten()
+    fm.set(
+        wind_speeds=ws_array,
+        wind_directions=wd_array,
+        turbulence_intensities=0.06 * np.ones_like(ws_array),
+    )
+    fm.run()
+    power_baseline_ref = fm.get_turbine_powers().squeeze()[:, 0].flatten()
+    power_baseline_control = fm.get_turbine_powers().squeeze()[:, 1].flatten()
+    power_baseline_downstream = fm.get_turbine_powers().squeeze()[:, 2].flatten()
 
     yaw_angles = np.zeros([len(t), 3]) * 25
     yaw_angles[:, 1] = 25  # Set control turbine yaw angles to 25 deg
-    fi.calculate_wake(yaw_angles=yaw_angles)
-    power_wakesteering_ref = fi.get_turbine_powers().squeeze()[:, 0].flatten()
-    power_wakesteering_control = fi.get_turbine_powers().squeeze()[:, 1].flatten()
-    power_wakesteering_downstream = fi.get_turbine_powers().squeeze()[:, 2].flatten()
+    fm.set(yaw_angles=yaw_angles)
+    fm.run()
+    power_wakesteering_ref = fm.get_turbine_powers().squeeze()[:, 0].flatten()
+    power_wakesteering_control = fm.get_turbine_powers().squeeze()[:, 1].flatten()
+    power_wakesteering_downstream = fm.get_turbine_powers().squeeze()[:, 2].flatten()
 
     # Build up the data frames needed for energy ratio suite
     df_baseline = pd.DataFrame(

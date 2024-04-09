@@ -1,16 +1,3 @@
-# Copyright 2021 NREL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
-
 import pandas as pd
 import seaborn as sns
 from _local_helper_functions import evaluate_optimal_yaw_angles, optimize_yaw_angles
@@ -27,9 +14,9 @@ if __name__ == "__main__":
     # Compare optimizing over different pPs and evaluating over different pPs
     for pP_opt in pP_list:
         # Optimize yaw angles
-        fi, _ = load_floris(pP=pP_opt)
+        fm, _ = load_floris(cosine_exponent=pP_opt)
         df_opt = optimize_yaw_angles(
-            fi=fi,
+            fm=fm,
         )
 
         # Make an interpolant
@@ -37,9 +24,9 @@ if __name__ == "__main__":
 
         # Calculate AEP uplift
         for pP_eval in pP_list:
-            fi, _ = load_floris(pP=pP_eval)
+            fm, _ = load_floris(cosine_exponent=pP_eval)
             AEP_baseline, AEP_opt, _ = evaluate_optimal_yaw_angles(
-                fi=fi,
+                fm=fm,
                 yaw_angle_interpolant=yaw_angle_interpolant,
             )
 
