@@ -162,3 +162,13 @@ class TestDataFrameFiltering(unittest.TestCase):
             )
         self.assertTrue(df[["pow_000", "pow_001", "pow_005", "pow_006"]].isna().all().all())  # NaN
         self.assertTrue(~df[["pow_002", "pow_003", "pow_004"]].isna().any().any())  # Non-NaN
+
+    def test_df_get_no_faulty_measurements(self):
+        # Create tiny subset
+        df = load_data()
+        df["pow_001"] = np.nan
+
+        num_faulty_0 = filt.df_get_no_faulty_measurements(df, 0)
+        assert num_faulty_0 == 0
+        num_faulty_1 = filt.df_get_no_faulty_measurements(df, 1)
+        assert num_faulty_1 == 1
