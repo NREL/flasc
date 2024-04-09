@@ -9,8 +9,7 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
-from flasc.utilities import floris_tools as ftools
-from flasc.utilities import utilities as fsut
+from flasc.utilities import floris_tools as ftools, utilities as fsut
 
 
 # Functions related to wind farm analysis for df
