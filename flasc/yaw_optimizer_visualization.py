@@ -2,6 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from flasc.logging_manager import LoggingManager
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
+
 
 def plot_uplifts_by_atmospheric_conditions(
     df_list,
@@ -33,7 +38,7 @@ def plot_uplifts_by_atmospheric_conditions(
                 df["frequency"] = df["freq"].astype(float)
             else:
                 df["frequency"] = 1.0
-                print(
+                logger.info(
                     "No column 'freq' or 'frequency' found in dataframe."
                     + "Assuming a uniform distribution."
                 )
@@ -223,7 +228,7 @@ def plot_offsets_wd(df_offsets, turb_id, ws_plot, color="black", alpha=1.0, labe
 
     if hasattr(ws_plot, "__len__") and label is not None:
         label = None
-        print("label option can only be used for signle wind speed plot.")
+        logger.warn("label option can only be used for single wind speed plot.")
 
     ws_array = np.unique(df_offsets.wind_speed)
     wd_array = np.unique(df_offsets.wind_direction)

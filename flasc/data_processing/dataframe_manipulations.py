@@ -9,7 +9,11 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools, utilities as fsut
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 # Functions related to wind farm analysis for df
@@ -176,7 +180,7 @@ def _set_col_by_radius_from_turbine(
     )
 
     if len(turbs_within_radius) < 1:
-        print("No turbines within proximity. Try to increase radius.")
+        logger.warn("No turbines within proximity. Try to increase radius.")
         return None
 
     return _set_col_by_turbines(
@@ -238,7 +242,7 @@ def _set_col_by_upstream_turbines_in_radius(
     )
 
     if len(turbs_in_radius) < 1:
-        print("No turbines within proximity. Try to increase radius.")
+        logger.info("No turbines within proximity. Try to increase radius.")
         return None
 
     turbs = range(len(x_turbs))
@@ -755,11 +759,11 @@ def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
                 var_downsampled = df_in[c].astype(np.float32)
             max_error = np.max(np.abs(var_downsampled - df_in[c]))
             if verbose:
-                print(
+                logger.info(
                     "Column %s ['%s'] was downsampled to %s."
                     % (c, datatype, var_downsampled.dtypes)
                 )
-                print("Max error: ", max_error)
+                logger.info("Max error: ", max_error)
         elif (datatype == "int64") or (datatype == "int32") or (datatype == "int"):
             if np.array_equal(np.unique(df_in[c]), [0, 1]):
                 var_downsampled = df_in[c].astype(bool)
@@ -769,14 +773,14 @@ def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
                 var_downsampled = df_in[c].astype(np.int32)
             max_error = np.max(np.abs(var_downsampled - df_in[c]))
             if verbose:
-                print(
+                logger.info(
                     "Column %s ['%s'] was downsampled to %s."
                     % (c, datatype, var_downsampled.dtypes)
                 )
-                print("Max error: ", max_error)
+                logger.info("Max error: ", max_error)
         else:
             if verbose:
-                print("Datatype '%s' not recognized. Not downsampling." % datatype)
+                logger.info("Datatype '%s' not recognized. Not downsampling." % datatype)
             var_downsampled = df_in[c]
 
         list_out.append(var_downsampled)
@@ -796,7 +800,7 @@ def df_drop_nan_rows(df, verbose=False):
     df = df.dropna(axis=0, subset=colnames, how="all")
 
     if verbose:
-        print("Reduced dataframe from %d to %d rows." % (N_init, df.shape[0]))
+        logger.info("Reduced dataframe from %d to %d rows." % (N_init, df.shape[0]))
 
     return df
 
@@ -826,7 +830,7 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.0):
     time_values = df["time"].values
     time_delta = np.diff(time_values)
 
-    print(
+    logger.info(
         "Largest time jump in data is %s s, from %s to %s."
         % (
             max(time_delta) / np.timedelta64(1, "s"),
@@ -835,13 +839,13 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.0):
         )
     )
     if max(time_delta) >= np.timedelta64(datetime.timedelta(minutes=30)):
-        print("Found a gap of > 30 minutes in data.\n" + " Are you missing a data file?")
+        logger.warn("Found a gap of > 30 minutes in data.\n" + " Are you missing a data file?")
 
     dt_buffer = np.timedelta64(missing_data_buffer)
     missing_data_idx = np.where(time_delta >= dt_buffer)[0]
     N_datagaps = len(missing_data_idx)
     td_avg = np.mean(time_delta[missing_data_idx]) / np.timedelta64(datetime.timedelta(seconds=1))
-    print(
+    logger.info(
         "  Found %d time jumps in data with an average of %.2f s. Filling datagaps with 'missing'."
         % (N_datagaps, td_avg)
     )
@@ -855,7 +859,7 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.0):
     df_entries_missing = df_entries_missing.replace(pd.NaT, "missing")
 
     for mi in np.where(time_delta > np.timedelta64(30, "s"))[0]:
-        print(
+        logger.warn(
             "  Significant time jump in data of %s s has happened from %s to %s."
             % (
                 time_delta[mi] / np.timedelta64(1, "s"),
@@ -1082,21 +1086,19 @@ def df_sort_and_fix_duplicates(df):
                 df_merged.loc[0, c] = np.nan
 
             if is_faulty:
-                import warnings
-
-                warnings.warn(
+                logger.warn(
                     "Found conflicting data entries for timestamp: " + str(df.loc[di, "time"]) + "."
                 )
-                print(df.loc[di : di + 1, c])
-                print("Setting value to np.nan as a safety measure...")
+                logger.info(df.loc[di : di + 1, c])
+                logger.info("Setting value to np.nan as a safety measure...")
 
-        print("Merged two rows with identical timestamp:", df.loc[di, "time"], ".")
-        print("Before merging:")
-        print(df[di : di + 2])
-        print(" ")
-        print("After merging:")
-        print(df_merged)
-        print(" ")
+        logger.info("Merged two rows with identical timestamp:", df.loc[di, "time"], ".")
+        logger.info("Before merging:")
+        logger.info(df[di : di + 2])
+        logger.info(" ")
+        logger.info("After merging:")
+        logger.info(df_merged)
+        logger.info(" ")
 
         # Now merge data
         df = df.reset_index().drop([di, di + 1])  # Remove dupl. rows

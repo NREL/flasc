@@ -345,7 +345,6 @@ class TestEnergyRatio(unittest.TestCase):
             ws_min=0.5,  # Make sure bin labels land on whole numbers
             weight_by="sum",
         )
-        print(er_out.df_result)
 
         self.assertAlmostEqual(er_out.df_result["wake_steering"].iloc[0], 2.0, places=4)
 

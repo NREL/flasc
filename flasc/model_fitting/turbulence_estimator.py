@@ -3,7 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools, optimization as opt
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 class ti_estimator:
@@ -115,7 +119,7 @@ class ti_estimator:
         self.opt_farm = out
         ti_opt = out["x_opt"]
         self.floris_set_ws_wd_ti(ti=ti_opt)
-        print("Optimal farm-averaged ti: %.3f" % ti_opt)
+        logger.info("Optimal farm-averaged ti: %.3f" % ti_opt)
 
         return ti_opt
 
@@ -148,7 +152,7 @@ class ti_estimator:
 
         self.opt_turbines = out_array
         for ti in range(self.num_turbs):
-            print("Optimal ti for turbine %03d: %.3f" % (ti, ti_array[ti]))
+            logger.info("Optimal ti for turbine %03d: %.3f" % (ti, ti_array[ti]))
 
         return out_array
 

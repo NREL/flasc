@@ -522,7 +522,7 @@ def calc_floris_approx_table(
             ] = fm.core.flow_field.turbulence_intensity_field[:, tindex]
     df_approx = pd.DataFrame(solutions_dict)
 
-    print("Finished calculating the FLORIS solutions for the dataframe.")
+    logger.info("Finished calculating the FLORIS solutions for the dataframe.")
     df_approx = df_approx.sort_values(by=["ti", "ws", "wd"])
     df_approx = df_approx.reset_index(drop=True)
 

@@ -5,10 +5,15 @@ import numpy as np
 from floris.utilities import wrap_180
 from scipy import optimize as opt
 
+from flasc.logging_manager import LoggingManager
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
+
 
 class yaw_pow_fitting:
     def __init__(self, df, df_upstream=None, ti=0):  # , turbine_list='all'):
-        print("Initializing yaw power curve filtering object.")
+        logger.info("Initializing yaw power curve filtering object.")
         # Assign dataframes to self
         # self.df_upstream = df_upstream
         self.set_df(df, df_upstream, ti)
@@ -68,18 +73,8 @@ class yaw_pow_fitting:
         # df_upstream = self.df_upstream
         # turbine_list = self.turbine_list
 
-        print("Determining yaw-power curve...")
-        # print('  Retrieving relevant dataframe subset...')
-        # rel_cols = ['wd', 'vane_%03d' % ti]
-        # rel_cols.extend(['pow_%03d' % ti for ti in self.full_turbine_list])
-        # rel_cols = [c for c in rel_cols if c in self.df.columns]
-        # df = self.df[rel_cols].copy()
+        logger.info("Determining yaw-power curve...")
 
-        # # Get reference power signals
-        # print('  Cutting down dataframe by minimum reference power')
-        # df = dfm.set_pow_ref_by_turbines(df, [])
-        # # df = dfm.set_pow_ref_by_upstream_turbines(
-        # #     df, df_upstream, exclude_turbs=[ti])
         df = df[df["pow_ref"] > Pmin]
 
         # Define vane and (normalized) power measurements
@@ -94,10 +89,10 @@ class yaw_pow_fitting:
         )
         vane = vane[ids_good]
         Pnorm = df.loc[ids_good, "pow"] / df.loc[ids_good, "pow_ref"]
-        print("  Number of useful datapoints: %d." % len(vane))
+        logger.info("  Number of useful datapoints: %d." % len(vane))
 
         # Bin data
-        print("  Binning data...")
+        logger.info("  Binning data...")
         bins_x = np.arange(vane_bounds[0], vane_bounds[1], dv)
         bins_y = np.zeros_like(bins_x)
         bins_N = np.zeros_like(bins_x)
@@ -150,7 +145,7 @@ class yaw_pow_fitting:
         if opt_yshift_range is None:
             opt_yshift_range = (np.nanmin(bins_y), np.nanmax(bins_y))
 
-        print("Fitting a cos(x-x0)^pp curve to the data...")
+        logger.info("Fitting a cos(x-x0)^pp curve to the data...")
         x_opt, J_opt, x, J = opt.brute(
             func=cost,
             ranges=(opt_yshift_range, opt_bias_range, opt_pp_range),
@@ -159,7 +154,7 @@ class yaw_pow_fitting:
             full_output=True,
             disp=True,
         )
-        print("x_opt: ", x_opt)
+        logger.info("x_opt: ", x_opt)
         y_opt = approx_func(x_opt)
 
         self.x_opt = x_opt
