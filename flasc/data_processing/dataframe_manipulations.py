@@ -763,7 +763,7 @@ def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
                     "Column %s ['%s'] was downsampled to %s."
                     % (c, datatype, var_downsampled.dtypes)
                 )
-                logger.info("Max error: ", max_error)
+                logger.info(f"Max error: {max_error}")
         elif (datatype == "int64") or (datatype == "int32") or (datatype == "int"):
             if np.array_equal(np.unique(df_in[c]), [0, 1]):
                 var_downsampled = df_in[c].astype(bool)
@@ -777,7 +777,7 @@ def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
                     "Column %s ['%s'] was downsampled to %s."
                     % (c, datatype, var_downsampled.dtypes)
                 )
-                logger.info("Max error: ", max_error)
+                logger.info(f"Max error: {max_error}")
         else:
             if verbose:
                 logger.info("Datatype '%s' not recognized. Not downsampling." % datatype)
@@ -1089,15 +1089,15 @@ def df_sort_and_fix_duplicates(df):
                 logger.warn(
                     "Found conflicting data entries for timestamp: " + str(df.loc[di, "time"]) + "."
                 )
-                logger.info(df.loc[di : di + 1, c])
+                print(df.loc[di : di + 1, c])
                 logger.info("Setting value to np.nan as a safety measure...")
 
-        logger.info("Merged two rows with identical timestamp:", df.loc[di, "time"], ".")
+        logger.info(f"Merged two rows with identical timestamp:{df.loc[di, "time"]}.")
         logger.info("Before merging:")
-        logger.info(df[di : di + 2])
+        print(df[di : di + 2])
         logger.info(" ")
         logger.info("After merging:")
-        logger.info(df_merged)
+        print(df_merged)
         logger.info(" ")
 
         # Now merge data

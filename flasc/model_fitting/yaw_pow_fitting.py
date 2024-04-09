@@ -154,7 +154,7 @@ class yaw_pow_fitting:
             full_output=True,
             disp=True,
         )
-        logger.info("x_opt: ", x_opt)
+        logger.info(f"x_opt: {x_opt}")
         y_opt = approx_func(x_opt)
 
         self.x_opt = x_opt
