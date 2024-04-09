@@ -17,7 +17,7 @@ AUTHOR = "NREL National Wind Technology Center"
 # What packages are required for this module to be executed?
 REQUIRED = [
     "bokeh>=2, <4",
-    "floris @ git+https://github.com/NREL/floris.git@v4",
+    "floris~=4.0",
     "feather-format~=0.0",
     "ipympl~=0.9",
     "matplotlib~=3.8",
