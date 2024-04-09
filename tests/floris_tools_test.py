@@ -2,13 +2,13 @@ import unittest
 
 import numpy as np
 import pandas as pd
+from floris import FlorisModel
 
 from flasc.utilities.floris_tools import (
     add_gaussian_blending_to_floris_approx_table,
     calc_floris_approx_table,
     get_dependent_turbines_by_wd,
     interpolate_floris_from_df_approx,
-    merge_floris_objects,
 )
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
@@ -20,20 +20,20 @@ class TestFlorisTools(unittest.TestCase):
         fm_2.set(layout_x=[-500.0, -500.0], layout_y=[0.0, 500.0])
 
         # Check if layouts are merged appropriately
-        fi_merged = merge_floris_objects([fm_1, fm_2])
-        self.assertTrue(np.all(fi_merged.layout_x == np.hstack([fm_1.layout_x, fm_2.layout_x])))
-        self.assertTrue(np.all(fi_merged.layout_y == np.hstack([fm_1.layout_y, fm_2.layout_y])))
+        fm_merged = FlorisModel.merge_floris_models([fm_1, fm_2])
+        self.assertTrue(np.all(fm_merged.layout_x == np.hstack([fm_1.layout_x, fm_2.layout_x])))
+        self.assertTrue(np.all(fm_merged.layout_y == np.hstack([fm_1.layout_y, fm_2.layout_y])))
         #
         # Check if layouts are merged appropriately
-        fm_merged = merge_floris_objects([fm_1, fm_2], reference_wind_height=200.0)
+        fm_merged = FlorisModel.merge_floris_models([fm_1, fm_2], reference_wind_height=200.0)
         self.assertTrue(fm_merged.core.flow_field.reference_wind_height == 200.0)
 
-        # Also test that we raise a UserWarning if we have two different reference wind heights and
-        # don't specify a reference_wind_height for the merged object
-        with self.assertRaises(UserWarning):
+        # Also test that we raise a ValueError if we have two different reference wind heights and
+        # don't specify a reference_wind_height for the merged model
+        with self.assertRaises(ValueError):
             fm_1.set(reference_wind_height=90.0)
             fm_2.set(reference_wind_height=91.0)
-            fm_merged = merge_floris_objects([fm_1, fm_2])
+            fm_merged = FlorisModel.merge_floris_models([fm_1, fm_2])
 
     def test_floris_approx_table(self):
         # Load FLORIS object
