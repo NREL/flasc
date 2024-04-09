@@ -1092,7 +1092,7 @@ def df_sort_and_fix_duplicates(df):
                 print(df.loc[di : di + 1, c])
                 logger.info("Setting value to np.nan as a safety measure...")
 
-        logger.info(f"Merged two rows with identical timestamp:{df.loc[di, "time"]}.")
+        logger.info(f"Merged two rows with identical timestamp:{df.loc[di, 'time']}.")
         logger.info("Before merging:")
         print(df[di : di + 2])
         logger.info(" ")
