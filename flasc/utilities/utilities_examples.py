@@ -2,11 +2,10 @@ import copy
 from pathlib import Path
 from time import perf_counter as timerpc
 
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 from floris import FlorisModel, UncertainFlorisModel
-
-from flasc.visualization import plot_floris_layout
 
 
 def load_floris_smarteole(wake_model="gch", wd_std=0.0):
@@ -114,14 +113,18 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, cosine_exponent=None):
 if __name__ == "__main__":
     # Load and time the artificial FLORIS model
     t0 = timerpc()
-    fi, turbine_weights = load_floris_artificial()
+    fm, turbine_weights = load_floris_artificial()
     print("Time spent to load the FLORIS model (artificial): {:.2f} s.".format(timerpc() - t0))
-    plot_floris_layout(fi, plot_terrain=False)
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    ax.grid()
 
     # Load and time the Smarteole FLORIS model
     t0 = timerpc()
-    fi, turbine_weights = load_floris_smarteole()
+    fm, turbine_weights = load_floris_smarteole()
     print("Time spent to load the FLORIS model (smarteole): {:.2f} s.".format(timerpc() - t0))
-    plot_floris_layout(fi, plot_terrain=False)
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    ax.grid()
 
     plt.show()

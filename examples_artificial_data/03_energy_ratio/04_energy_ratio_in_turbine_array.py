@@ -1,5 +1,6 @@
 import os
 
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -10,7 +11,6 @@ from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
-from flasc.visualization import plot_floris_layout
 
 
 def load_data():
@@ -169,7 +169,11 @@ if __name__ == "__main__":
     ax = plot_energy_ratios(turbine_array, results_energy_ratio)
 
     # Also plot wake situation according to FLORIS
-    plot_floris_layout(fm, plot_terrain=False)
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    ax.grid()
+    ax.set_xlabel("x coordinate [m]")
+    ax.set_ylabel("y coordinate [m]")
 
     fig, ax = plt.subplots()
     fm.set(wind_directions=[wd], wind_speeds=[10.0])

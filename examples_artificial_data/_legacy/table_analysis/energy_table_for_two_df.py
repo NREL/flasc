@@ -5,9 +5,7 @@ import pandas as pd
 from floris.utilities import wrap_360
 
 from flasc.analysis import energy_ratio_suite
-from flasc.data_processing import (
-    dataframe_manipulations as dfm,
-)
+from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities import floris_tools as fsatools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 

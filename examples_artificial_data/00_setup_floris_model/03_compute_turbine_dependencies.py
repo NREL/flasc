@@ -1,7 +1,7 @@
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 
-from flasc import visualization as fsaviz
 from flasc.utilities import floris_tools as fsatools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
@@ -19,7 +19,11 @@ print("Initializing the FLORIS object for our demo wind farm")
 fm, _ = load_floris()
 
 # Plot the layout of the farm for reference
-fsaviz.plot_layout_only(fm)
+ax = layoutviz.plot_turbine_points(fm)
+layoutviz.plot_turbine_labels(fm, ax=ax)
+ax.grid()
+ax.set_xlabel("x coordinate [m]")
+ax.set_ylabel("y coordinate [m]")
 
 # Get the dependencies of turbine 2
 check_directions = np.arange(0, 360.0, 2.0)
