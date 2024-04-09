@@ -1,9 +1,9 @@
 # Copyright 2022 NREL & Shell
 import matplotlib.pyplot as plt
+import floris.layout_visualization as layoutviz
 from floris.flow_visualization import visualize_cut_plane
 
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
-from flasc.visualization import plot_floris_layout
 
 if __name__ == "__main__":
     # User settings
@@ -26,7 +26,11 @@ if __name__ == "__main__":
         wind_speeds=[wind_speed],
         turbulence_intensities=[turbulence_intensity],
     )
-    plot_floris_layout(fm, plot_terrain=False)
+    ax = layoutviz.plot_turbine_points(fm)
+    ax.grid()
+    ax.set_xlabel("x coordinate [m]")
+    ax.set_ylabel("y coordinate [m]")
+    ax.set_title("Turbine layout")
 
     # Generate baseline flowfield
     print("Calculating flowfield...")

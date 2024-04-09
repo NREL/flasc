@@ -8,7 +8,6 @@ from flasc.analysis.energy_ratio_heterogeneity_mapper import heterogeneity_mappe
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities import floris_tools as ftools
 
-# from flasc.visualization import plot_floris_layout
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
 
