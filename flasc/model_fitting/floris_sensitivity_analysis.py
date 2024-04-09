@@ -5,7 +5,11 @@ from pandas.errors import DataError
 from SALib.analyze import sobol
 from SALib.sample import saltelli
 
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 class floris_sobol_analysis:
@@ -119,18 +123,6 @@ class floris_sobol_analysis:
 
         return self.samples_y
 
-    # def calculate_aep_for_samples(self, wd, ws, freq):
-    #     if self.samples_x is None:
-    #         raise DataError('Please run generate_samples first.')
-
-    #     print('Calculating AEP for %d samples.' % self.N)
-    #     for i in range(self.N):
-    #         self._set_fi_by_sample_id(i)
-    #         aep = self.fm.get_farm_AEP(wd=wd, ws=ws, freq=freq)
-    #         self.samples_y[i] = aep
-
-    #     return self.samples_y
-
     def get_sobol_sensitivity_indices(self, verbose=False):
         self.Si = sobol.analyze(
             self.problem,
@@ -240,7 +232,7 @@ class floris_sobol_analysis:
         return fig, ax
 
     def plot_convergence(self, save_path=None, fig_format="png", fig_dpi=200):
-        print("Analyzing convergence...")
+        logger.info("Analyzing convergence...")
 
         # Create copies of original results
         samples_x_full = self.samples_x

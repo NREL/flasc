@@ -2,6 +2,10 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from flasc.data_processing import dataframe_manipulations as dfm
+from flasc.logging_manager import LoggingManager
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbose=True):
@@ -96,7 +100,7 @@ def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbos
     N_post = df_get_no_faulty_measurements(df_out, ti)
 
     if verbose:
-        print(
+        logger.info(
             "Faulty measurements for WTG {:02d} increased from {:.3f} % to {:.3f} %. Reason: "
             "'Turbine is impacted by faulty upstream turbine'.".format(
                 ti, 100.0 * N_pre / df.shape[0], 100.0 * N_post / df.shape[0]

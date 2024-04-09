@@ -3,6 +3,11 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+from flasc.logging_manager import LoggingManager
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
+
 
 def find_sensor_stuck_faults(
     df,
@@ -18,7 +23,7 @@ def find_sensor_stuck_faults(
     # consecutive measurements is less than [stddev_threshold].
     for c in columns:
         if verbose:
-            print("Processing column %s" % c)
+            logger.info("Processing column %s" % c)
         measurement_array = np.array(df[c])
 
         index_faults = _find_sensor_stuck_single_timearray(

@@ -14,6 +14,10 @@ import polars as pl
 import flasc.utilities.energy_ratio_utilities as util
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
+from flasc.logging_manager import LoggingManager
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 # Internal version, returns a polars dataframe
@@ -476,7 +480,7 @@ def compute_total_uplift(
     # If N=1, don't use bootstrapping
     if N == 1:
         if percentiles is not None:
-            print("percentiles can only be used with bootstrapping (N > 1).")
+            logger.warn("percentiles can only be used with bootstrapping (N > 1).")
         # Compute the energy ratio
         total_uplift_result, df_freq_pl = _compute_total_uplift_single(
             df_,

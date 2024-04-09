@@ -9,7 +9,11 @@ from bokeh.plotting import ColumnDataSource, figure
 
 from flasc.data_processing import dataframe_filtering as dff
 from flasc.data_processing.find_sensor_faults import find_sensor_stuck_faults
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import utilities as flascutils
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 class ws_pw_curve_filtering:
@@ -236,7 +240,7 @@ class ws_pw_curve_filtering:
         if verbose:
             for iii, tii in enumerate(ti):
                 N_post = dff.df_get_no_faulty_measurements(df_out, tii)
-                print(
+                logger.info(
                     (
                         "Faulty measurements for WTG {:03d} increased from {:.3f} % to {:.3f} "
                         "%. Reason: '{:s}'."
@@ -550,7 +554,7 @@ class ws_pw_curve_filtering:
             trend near the high wind speeds, try decreasing this variable's
             value to 15.0.
         """
-        print("Filtering data by deviations from the floris power curve...")
+        logger.info("Filtering data by deviations from the floris power curve...")
 
         # Create upper and lower bounds around floris curve
 

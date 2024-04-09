@@ -8,6 +8,10 @@ from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing import dataframe_manipulations as dfm
+from flasc.logging_manager import LoggingManager
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 # Standalone function to easily extract energy ratios for narrow wind direction bin
@@ -58,7 +62,7 @@ class heterogeneity_mapper:
         # The difference in energy ratios between different upstream turbines
         # gives a strong indication of the heterogeneity in the inflow wind
         # speeds for that mean inflow wind direction.
-        print("Processing wind direction = {:.1f} deg.".format(wd))
+        logger.info("Processing wind direction = {:.1f} deg.".format(wd))
         wd_bins = [[wd - wd_bin_width / 2.0, wd + wd_bin_width / 2.0]]
 
         # Determine which turbines are upstream
@@ -176,7 +180,7 @@ class heterogeneity_mapper:
                 plt.close("all")
 
         if pdf_save_path is not None:
-            print("Plots saved to '{:s}'.".format(pdf_save_path))
+            logger.info("Plots saved to '{:s}'.".format(pdf_save_path))
             pdf.close()
 
     def generate_floris_hetmap(self):
@@ -347,7 +351,7 @@ class heterogeneity_mapper:
                 plt.close("all")
 
         if pdf_save_path is not None:
-            print("Plots saved to '{:s}'.".format(pdf_save_path))
+            logger.info("Plots saved to '{:s}'.".format(pdf_save_path))
             pdf.close()
 
         return fig, ax
