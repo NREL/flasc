@@ -4,7 +4,7 @@ from time import perf_counter as timerpc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from floris import FlorisModel, TimeSeries, WindTIRose
+from floris import TimeSeries, WindTIRose
 from floris.utilities import wrap_360
 from scipy import interpolate
 from scipy.stats import norm
