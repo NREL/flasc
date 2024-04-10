@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy.spatial._qhull
 from floris.utilities import wrap_360
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
@@ -324,12 +325,17 @@ class heterogeneity_mapper:
                 )
                 x = x.flatten()
                 y = y.flatten()
-                lin_interpolant = LinearNDInterpolator(
-                    points=np.vstack([df_hetmap_row["x"], df_hetmap_row["y"]]).T,
-                    values=df_hetmap_row["speed_up"],
-                    fill_value=np.nan,
-                )
-                lin_values = lin_interpolant(x, y)
+
+                try:
+                    lin_interpolant = LinearNDInterpolator(
+                        points=np.vstack([df_hetmap_row["x"], df_hetmap_row["y"]]).T,
+                        values=df_hetmap_row["speed_up"],
+                        fill_value=np.nan,
+                    )
+                    lin_values = lin_interpolant(x, y)
+                except scipy.spatial._qhull.QhullError:
+                    logger.warning("QhullError occurred. Falling back to nearest neighbor. ")
+                    lin_values = np.nan * np.ones_like(x)
 
                 nearest_interpolant = NearestNDInterpolator(
                     x=np.vstack([df_hetmap_row["x"], df_hetmap_row["y"]]).T,
