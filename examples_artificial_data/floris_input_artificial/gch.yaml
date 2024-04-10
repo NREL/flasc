@@ -112,7 +112,8 @@ flow_field:
 
   ###
   # The level of turbulence intensity level in the wind.
-  turbulence_intensity: 0.06
+  turbulence_intensities:
+  - 0.06
 
   ###
   # The wind directions to include in the simulation.
@@ -171,6 +172,10 @@ wake:
   ###
   # Can be "true" or "false".
   enable_transverse_velocities: true
+
+  ###
+  # Can be "true" or "false".
+  enable_active_wake_mixing: false
 
   ###
   # Configure the parameters for the wake deflection model
