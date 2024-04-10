@@ -26,7 +26,6 @@ REQUIRED = [
     "pyproj~=3.0",
     "SALib~=1.0",
     "scipy~=1.1",
-    "sqlalchemy~=2.0",
     "streamlit~=1.0",
     "tkcalendar~=1.0",
     "seaborn~=0.0",
