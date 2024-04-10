@@ -22,7 +22,7 @@ format for optimal balance of storage size and load/write speed.
 Functions include filtering data by wind direction, wind speed an/or TI,
 deriving the ambient conditions from the upstream turbines, all the while
 dealing with angle wrapping for angular variables. Outliers
-can be detected and removed at the turbine level. 
+can be detected and removed at the turbine level.
 Filtering methods include sensor-stuck type of
 fault detection and analysis of the turbine wind speed-power curve.
 
@@ -55,7 +55,7 @@ comparative field experiment.
 ## flasc.utilities
 
 This module contains utilities that support the other modules within FLASC.
-These utilities help to interface with FLORIS and calculate a large set of 
+These utilities help to interface with FLORIS and calculate a large set of
 floris simulations for different atmospheric conditions, yaw misalignments
 and/or model parameters. It also includes two functions to precalculate and
 respectively interpolate from a large set of model solutions to speed up
