@@ -132,7 +132,7 @@ def interpolate_floris_from_df_approx(
                 "The option mirror_nans=True requires the raw data's wind speed and power measurements to be included in the dataframe 'df'."
             )
     else:
-        logger.warn(
+        logger.warning(
             "Warning: not mirroring NaNs from the raw data to the FLORIS predictions. This may skew your energy ratios."
         )
 
@@ -170,7 +170,7 @@ def interpolate_floris_from_df_approx(
         if (df[col].min() < (df_approx[col].min() - 1.0e-6)) | (
             df[col].max() > (df_approx[col].max() + 1.0e-6)
         ):
-            logger.warn(
+            logger.warning(
                 "Warning: the values in df[{:s}] exceed the range in the precalculated solutions df_fi_approx[{:s}].".format(
                     col, col
                 )
