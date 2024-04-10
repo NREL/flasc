@@ -23,23 +23,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e ".[develop]"
     - uses: pre-commit/action@v3.0.0
-    - name: Run tests and collect coverage
+    - name: Run tests
       run: |
         # -rA displays the captured output for all tests after they're run
         # See the docs: https://doc.pytest.org/en/latest/reference/reference.html#command-line-flags
         pytest -rA tests/
-    - name: Generate coverage report
-      # Run these tests on unit tests only so that we avoid inflating our code
-      # coverage through the regression tests
+    - name: Run coverage
       if: matrix.os == 'ubuntu-latest'
       run: |
-        pip install pytest
-        pip install pytest-cov
-        pytest --cov=./ --cov-report=xml tests/
-    - name: Upload coverage to Codecov
-      if: ${{ env.CODECOV_TOKEN }}  # Don't attempt to upload if the codecov token is not configured
-      uses: codecov/codecov-action@v3
+        pip install pytest pytest-cov
+        coverage run -m pytest tests/
+    - name: Upload coverage to coveralls
+      if: matrix.os == 'ubuntu-latest'
+      uses: coverallsapp/github-action@v2
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage.xml
-        fail_ci_if_error: true
+        github-token: ${{ secrets.GITHUB_TOKEN }}

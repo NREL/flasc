@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from flasc.turbine_analysis.find_sensor_faults import find_sensor_stuck_faults
+from flasc.data_processing.find_sensor_faults import find_sensor_stuck_faults
 
 
 def test_find_sensor_stuck_faults():

@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 import pandas as pd
 
-import flasc.model_tuning.floris_tuning as ft
-from flasc.model_tuning.tuner_utils import replicate_nan_values
+import flasc.model_fitting.floris_tuning as ft
+from flasc.utilities.tuner_utilities import replicate_nan_values
 
 
 class TestModelTuning(unittest.TestCase):

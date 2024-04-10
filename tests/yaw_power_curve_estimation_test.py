@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from flasc.turbine_analysis import yaw_pow_fitting as ywpf
+from flasc.model_fitting import yaw_pow_fitting as ywpf
 
 
 def get_df_upstream():

@@ -24,14 +24,14 @@ historical SCADA data of three offshore wind farms.
 If FLASC played a role in your research, please cite it. This software can be
 cited as:
 
-   FLASC. Version 1.0 (2022). Available at https://github.com/NREL/flasc.
+   FLASC. Version 2.0 (2024). Available at https://github.com/NREL/flasc.
 
 For LaTeX users:
 
 
-    @misc{flasc2022,
+    @misc{flasc2024,
       author = {NREL},
-      title = {FLASC. Version 1.0},
+      title = {FLASC. Version 2.0},
       year = {2022},
       publisher = {GitHub},
       journal = {GitHub repository},
@@ -47,7 +47,7 @@ FLASC repository. Alternatively, email the NREL FLASC team at
 `paul.fleming@nrel.gov <mailto:paul.fleming@nrel.gov>`_ or
 `michael.sinner@nrel.gov <mailto:michael.sinner@nrel.gov>`_.
 
-
+<!--
 # Module overview
 
 FLASC consists of multiple modules, including:
@@ -129,4 +129,4 @@ leverages efficient functions inherent in pandas to maximize performance.
 
 this module allows the user to analyze SCADA data on a turbine level. Outliers
 can be detected and removed. Filtering methods include sensor-stuck type of
-fault detection and analysis of the turbine wind speed-power curve.
+fault detection and analysis of the turbine wind speed-power curve. -->

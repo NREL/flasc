@@ -12,7 +12,7 @@ parts:
 
   - caption: User Referece
     chapters:
-    - file: data_processing
+    # - file: data_processing
     - file: energy_ratio
     - file: total_uplift
     - file: licensing

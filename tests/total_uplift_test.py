@@ -2,8 +2,8 @@ import unittest
 
 import pandas as pd
 
-from flasc.energy_ratio import total_uplift as tup
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
+from flasc.analysis import total_uplift as tup
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
 
 
 class TestTotalUplift(unittest.TestCase):

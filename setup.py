@@ -17,10 +17,10 @@ AUTHOR = "NREL National Wind Technology Center"
 # What packages are required for this module to be executed?
 REQUIRED = [
     "bokeh>=2, <4",
-    "floris~=3.4",
+    "floris~=4.0",
     "feather-format~=0.0",
     "ipympl~=0.9",
-    "matplotlib~=3.6",
+    "matplotlib~=3.8",
     "numpy~=1.20",
     "pandas~=2.0",
     "pyproj~=3.0",
@@ -32,6 +32,7 @@ REQUIRED = [
     "seaborn~=0.0",
     "polars==0.19.5",
     "ephem",
+    "coloredlogs~=10.0",
 ]
 
 EXTRAS = {
@@ -78,13 +79,13 @@ setup(
     include_package_data=True,
     install_requires=REQUIRED,
     extras_require=EXTRAS,
-    license="Apache Software License 2.0",
+    license_files=("LICENSE.txt",),
     zip_safe=False,
     keywords="flasc",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache Software License",
+        "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
     ],

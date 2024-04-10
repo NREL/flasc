@@ -6,12 +6,12 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from flasc import floris_tools as ftools
-from flasc.dataframe_operations import dataframe_manipulations as dfm
-from flasc.energy_ratio import energy_ratio as erp
-from flasc.energy_ratio.energy_ratio_input import EnergyRatioInput
-from flasc.energy_ratio.energy_ratio_utilities import add_reflected_rows
-from flasc.utilities_examples import load_floris_artificial as load_floris
+from flasc.analysis import energy_ratio as erp
+from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.data_processing import dataframe_manipulations as dfm
+from flasc.utilities import floris_tools as ftools
+from flasc.utilities.energy_ratio_utilities import add_reflected_rows
+from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
 # Disable line too long for this file for csv block
 # ruff: noqa: E501
@@ -129,10 +129,10 @@ def load_data():
 class TestEnergyRatio(unittest.TestCase):
     def test_energy_ratio_regression(self):
         # Load data and FLORIS model
-        fi, _ = load_floris()
+        fm, _ = load_floris()
         df = load_data()
         df = dfm.set_wd_by_all_turbines(df)
-        df_upstream = ftools.get_upstream_turbs_floris(fi)
+        df_upstream = ftools.get_upstream_turbs_floris(fm)
         df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
         df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
 
@@ -345,7 +345,6 @@ class TestEnergyRatio(unittest.TestCase):
             ws_min=0.5,  # Make sure bin labels land on whole numbers
             weight_by="sum",
         )
-        print(er_out.df_result)
 
         self.assertAlmostEqual(er_out.df_result["wake_steering"].iloc[0], 2.0, places=4)
 
