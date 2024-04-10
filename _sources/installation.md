@@ -1,4 +1,4 @@
-# Installation
+<!-- # Installation
 
 FLASC is currently not available as a package on any repository manager.
 Instead, it must be installed by the user by cloning the GitHub repository.
@@ -37,7 +37,7 @@ pre-commit install
 If everything is configured correctly, any changes made to the source
 code will be available directly through your local Python. Remember
 to re-import the FLASC module when changes are made if you are working
-in an interactive environment like Jupyter.
+in an interactive environment like Jupyter. -->
 
 # Installation
 
@@ -63,7 +63,7 @@ in an interactive environment like Jupyter.
 ## Installation for developers
 
 A more complete installation is recommended if interested in developing FLASC.
-Recommended apprach is to:
+Recommended approach is to:
 
 1. Declare a new directory to be the root folder, for example FLASC/
 2. Setup a new virtual environement with venv or conda and activate
