@@ -52,7 +52,7 @@ setup(
     name=NAME,
     version=VERSION,
     description=DESCRIPTION,
-    long_description=README,
+    # long_description=README,
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
