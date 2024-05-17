@@ -40,6 +40,9 @@ with open(ROOT / "flasc" / "version.py") as version_file:
 with open("README.rst") as readme_file:
     README = readme_file.read()
 
+with open("READMELONG.rst") as readme_file:
+    READMELONG = readme_file.read()
+
 setup_requirements = [
     # Placeholder
 ]
@@ -52,7 +55,7 @@ setup(
     name=NAME,
     version=VERSION,
     description=DESCRIPTION,
-    # long_description=README,
+    long_description=READMELONG,
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
