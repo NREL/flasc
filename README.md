@@ -36,7 +36,7 @@ Documentation is provided via the included examples folders as well as [online d
 
 ## Engaging on GitHub
 
-FLORIS leverages the following GitHub features to coordinate support and development efforts:
+FLASC leverages the following GitHub features to coordinate support and development efforts:
 
 - [Discussions](https://github.com/NREL/flasc/discussions): Collaborate to develop ideas for new use cases, features, and software designs, and get support for usage questions
 - [Issues](https://github.com/NREL/flasc/issues): Report potential bugs and well-developed feature requests
