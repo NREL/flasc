@@ -42,6 +42,8 @@ FLORIS leverages the following GitHub features to coordinate support and develop
 - [Issues](https://github.com/NREL/flasc/issues): Report potential bugs and well-developed feature requests
 - [Projects](https://github.com/orgs/NREL/projects/39): Include current and future work on a timeline and assign a person to "own" it
 
+Your feedback is crucial in this environment, as it helps identify areas for enhancement, resolve issues, and ensure the project meets the needs of its users. By sharing your insights and suggestions, you contribute to the project's evolution and success.
+
 Generally, the first entry point for the community will be within one of the
 categories in Discussions.
 [Ideas](https://github.com/NREL/flasc/discussions/categories/ideas) is a great spot to develop the
