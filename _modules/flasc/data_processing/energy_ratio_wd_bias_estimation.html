@@ -1,0 +1,1154 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>flasc.data_processing.energy_ratio_wd_bias_estimation &#8212; FLASC</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/documentation_options.js?v=30a733bc"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-3PMGTE1H70"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/flasc/data_processing/energy_ratio_wd_bias_estimation';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
+    <script>document.write(`<img src="../../../_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    FLASC documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../energy_ratio.html">Energy ratio analysis</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../../total_uplift.html">Total uplift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licensing.html">Licensing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">API Documentation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_input.generate_block_list.html">flasc.analysis.energy_ratio_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_output.html">flasc.analysis.energy_ratio_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.html">flasc.model_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html">flasc.model_fitting.floris_sensitivity_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html">flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.html">flasc.model_fitting.floris_tuning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss.html">flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.select_best_wake_model_parameter.html">flasc.model_fitting.floris_tuning.select_best_wake_model_parameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.select_best_wd_std.html">flasc.model_fitting.floris_tuning.select_best_wd_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift.html">flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses.html">flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_wd_std_for_er.html">flasc.model_fitting.floris_tuning.sweep_wd_std_for_er</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.html">flasc.model_fitting.turbulence_estimator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html">flasc.model_fitting.turbulence_estimator.ti_estimator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.html">flasc.data_processing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.html">flasc.data_processing.dataframe_manipulations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_drop_nan_rows.html">flasc.data_processing.dataframe_manipulations.df_drop_nan_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing.html">flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_reduce_precision.html">flasc.data_processing.dataframe_manipulations.df_reduce_precision</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_ti.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_wd.html">flasc.data_processing.dataframe_manipulations.filter_df_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_ws.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.html">flasc.data_processing.filtering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.df_get_no_faulty_measurements.html">flasc.data_processing.filtering.df_get_no_faulty_measurements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html">flasc.data_processing.filtering.df_mark_turbdata_as_faulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html">flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html">flasc.data_processing.filtering.FlascFilter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.find_sensor_faults.html">flasc.data_processing.find_sensor_faults</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults.html">flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_downsample.html">flasc.data_processing.time_operations.df_downsample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_movingaverage.html">flasc.data_processing.time_operations.df_movingaverage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_resample_by_interpolation.html">flasc.data_processing.time_operations.df_resample_by_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.flatten_cols.html">flasc.data_processing.time_operations.flatten_cols</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.html">flasc.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.html">flasc.utilities.circular_statistics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.calc_wd_mean_radial.html">flasc.utilities.circular_statistics.calc_wd_mean_radial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.calculate_wd_statistics.html">flasc.utilities.circular_statistics.calculate_wd_statistics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.html">flasc.utilities.energy_ratio_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_bin_weights.html">flasc.utilities.energy_ratio_utilities.add_bin_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_ref.html">flasc.utilities.energy_ratio_utilities.add_power_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_test.html">flasc.utilities.energy_ratio_utilities.add_power_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_reflected_rows.html">flasc.utilities.energy_ratio_utilities.add_reflected_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd.html">flasc.utilities.energy_ratio_utilities.add_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd_bin.html">flasc.utilities.energy_ratio_utilities.add_wd_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws.html">flasc.utilities.energy_ratio_utilities.add_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.html">flasc.utilities.floris_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html">flasc.utilities.floris_tools.get_dependent_turbines_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_turbs_in_radius.html">flasc.utilities.floris_tools.get_turbs_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_upstream_turbs_floris.html">flasc.utilities.floris_tools.get_upstream_turbs_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html">flasc.utilities.floris_tools.interpolate_floris_from_df_approx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.lookup_table_tools.html">flasc.utilities.lookup_table_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant.html">flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.html">flasc.utilities.optimization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.estimate_ti.html">flasc.utilities.optimization.estimate_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.find_timeshift_between_dfs.html">flasc.utilities.optimization.find_timeshift_between_dfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.match_y_curves_by_offset.html">flasc.utilities.optimization.match_y_curves_by_offset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.html">flasc.utilities.tuner_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.nested_get.html">flasc.utilities.tuner_utilities.nested_get</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.nested_set.html">flasc.utilities.tuner_utilities.nested_set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.replicate_nan_values.html">flasc.utilities.tuner_utilities.replicate_nan_values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.resim_floris.html">flasc.utilities.tuner_utilities.resim_floris</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.html">flasc.utilities.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.estimate_dt.html">flasc.utilities.utilities.estimate_dt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.get_num_turbines.html">flasc.utilities.utilities.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.interp_with_max_gap.html">flasc.utilities.utilities.interp_with_max_gap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.html">flasc.utilities.utilities_examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.load_floris_artificial.html">flasc.utilities.utilities_examples.load_floris_artificial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.load_floris_smarteole.html">flasc.utilities.utilities_examples.load_floris_smarteole</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2F_modules/flasc/data_processing/energy_ratio_wd_bias_estimation.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for flasc.data_processing.energy_ratio_wd_bias_estimation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span> <span class="k">as</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">floris.utilities</span> <span class="kn">import</span> <span class="n">wrap_360</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">optimize</span> <span class="k">as</span> <span class="n">opt</span><span class="p">,</span> <span class="n">stats</span> <span class="k">as</span> <span class="n">spst</span>
+
+<span class="kn">from</span> <span class="nn">flasc.analysis</span> <span class="kn">import</span> <span class="n">energy_ratio</span> <span class="k">as</span> <span class="n">er</span>
+<span class="kn">from</span> <span class="nn">flasc.analysis.energy_ratio_input</span> <span class="kn">import</span> <span class="n">EnergyRatioInput</span>
+<span class="kn">from</span> <span class="nn">flasc.data_processing</span> <span class="kn">import</span> <span class="n">dataframe_manipulations</span> <span class="k">as</span> <span class="n">dfm</span>
+<span class="kn">from</span> <span class="nn">flasc.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingManager</span>
+<span class="kn">from</span> <span class="nn">flasc.utilities</span> <span class="kn">import</span> <span class="n">floris_tools</span> <span class="k">as</span> <span class="n">ftools</span>
+
+
+<div class="viewcode-block" id="bias_estimation">
+<a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation">[docs]</a>
+<span class="k">class</span> <span class="nc">bias_estimation</span><span class="p">(</span><span class="n">LoggingManager</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class can be used to estimate the bias (offset) in a wind</span>
+<span class="sd">    direction measurement by comparing the energy ratios in the SCADA</span>
+<span class="sd">    data with the predicted energy ratios from FLORIS under various</span>
+<span class="sd">    bias correction values. Essentially, this class solves the following</span>
+<span class="sd">    optimization problem: the argument in this optimization problem</span>
+<span class="sd">    is the offset on the wind direction measurement and the cost is the</span>
+<span class="sd">    Pearson correlation coefficient between two lines, namely</span>
+<span class="sd">    1) the energy ratios of the SCADA data, and 2) the predicted energy</span>
+<span class="sd">    ratios for the same data by FLORIS under the offset-corrected wind</span>
+<span class="sd">    direction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">df_fm_approx</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">test_turbines_subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">df_ws_mapping_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">df_pow_ref_mapping_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the bias estimation class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df ([pd.DataFrame]): Dataframe with the SCADA data measurements</span>
+<span class="sd">                formatted in the generic format. The dataframe should contain</span>
+<span class="sd">                at the minimum the following columns:</span>
+<span class="sd">                * Reference wind direction for the test turbine, &#39;wd&#39;</span>
+<span class="sd">                * Reference wind speed for the test turbine, &#39;ws&#39;</span>
+<span class="sd">                * Power production of every turbine: pow_000, pow_001, ...</span>
+<span class="sd">                * Reference power production used to normalize the energy</span>
+<span class="sd">                    ratio: &#39;pow_ref&#39;</span>
+<span class="sd">            df_fm_approx ([pd.DataFrame]): Dataframe containing a large set</span>
+<span class="sd">                of precomputed solutions of the FLORIS model for a range of</span>
+<span class="sd">                wind directions, wind speeds (and optionally turbulence</span>
+<span class="sd">                intensities). This table can be generated using the following:</span>
+<span class="sd">                    from flasc import floris_tools as ftls</span>
+<span class="sd">                    df_approx = ftls.calc_floris_approx_table(...)</span>
+<span class="sd">            test_turbines_subset ([iteratible]): List of test turbines for</span>
+<span class="sd">                which each the energy ratios are calculated and the Pearson</span>
+<span class="sd">                correlation coefficients are calculated. Note that this</span>
+<span class="sd">                variable is slightly different from &#39;test_turbines&#39; in the</span>
+<span class="sd">                energy ratio classes. Namely, in this class, the energy ratio</span>
+<span class="sd">                is calculated for each entry in test_turbines_subset</span>
+<span class="sd">                separately, while in the other classes one energy ratio is</span>
+<span class="sd">                calculated based on the mean power production of all turbines</span>
+<span class="sd">                in test_turbines.</span>
+<span class="sd">            df_ws_mapping_func ([function]): This is a function that</span>
+<span class="sd">                returns the reference wind speed based on an array of wind</span>
+<span class="sd">                directions as input.</span>
+<span class="sd">            df_pow_ref_mapping_func ([function]): This is a function that</span>
+<span class="sd">                returns the reference power production based on an array of</span>
+<span class="sd">                wind directions as input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Initializing a bias_estimation() object...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Import inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_turbines</span> <span class="o">=</span> <span class="n">dfm</span><span class="o">.</span><span class="n">get_num_turbines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_fm_approx</span> <span class="o">=</span> <span class="n">df_fm_approx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_ws_mapping_func</span> <span class="o">=</span> <span class="n">df_ws_mapping_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_pow_ref_mapping_func</span> <span class="o">=</span> <span class="n">df_pow_ref_mapping_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_turbines</span> <span class="o">=</span> <span class="n">test_turbines_subset</span>
+
+    <span class="c1"># Private methods</span>
+
+<div class="viewcode-block" id="bias_estimation._load_er_input_for_wd_bias">
+<a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_er_input_for_wd_bias">[docs]</a>
+    <span class="k">def</span> <span class="nf">_load_er_input_for_wd_bias</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">wd_bias</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function initializes an instance of the EnergyRatioInput</span>
+<span class="sd">        where the dataframe is shifted by wd_bias for each test turbine.</span>
+<span class="sd">        This facilitates the calculation of the energy ratios under this</span>
+<span class="sd">        hypothesized wind direction bias. Additionally, the FLORIS predictions</span>
+<span class="sd">        for the shifted dataset are calculated and the energy ratios for the FLORIS</span>
+<span class="sd">        predictions are also calculated.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            wd_bias ([float]): Hypothesized wind direction bias in degrees.</span>
+<span class="sd">            test_turbines ([iteratible]): List of test turbines for</span>
+<span class="sd">                which each the energy ratios are calculated and the Pearson</span>
+<span class="sd">                correlation coefficients are calculated. Note that this</span>
+<span class="sd">                variable is slightly different from &#39;test_turbines&#39; in the</span>
+<span class="sd">                energy ratio classes. Namely, in this class, the energy ratio</span>
+<span class="sd">                is calculated for each entry in test_turbines.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            et ([polars dataframe]): The energy ratio table</span>
+<span class="sd">                object in which the inserted dataframe has a shifted</span>
+<span class="sd">                wind direction measurement, offset by &#39;wd_bias&#39; compared</span>
+<span class="sd">                to the nominal dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  Constructing energy table for wd_bias of </span><span class="si">%.2f</span><span class="s2"> deg.&quot;</span> <span class="o">%</span> <span class="n">wd_bias</span><span class="p">)</span>
+
+        <span class="n">er_in_test_turbine_list_scada</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">er_in_test_turbine_list_floris</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Derive dataframe that covers all test_turbines</span>
+        <span class="n">df_cor_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_cor_all</span><span class="p">[</span><span class="s2">&quot;wd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrap_360</span><span class="p">(</span><span class="n">df_cor_all</span><span class="p">[</span><span class="s2">&quot;wd&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">wd_bias</span><span class="p">)</span>
+
+        <span class="c1"># Set columns &#39;ws&#39; and &#39;pow_ref&#39; for df_subset_cor</span>
+        <span class="n">df_cor_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_ws_mapping_func</span><span class="p">(</span><span class="n">df_cor_all</span><span class="p">)</span>
+        <span class="n">df_cor_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_pow_ref_mapping_func</span><span class="p">(</span><span class="n">df_cor_all</span><span class="p">)</span>
+        <span class="n">df_cor_all</span> <span class="o">=</span> <span class="n">df_cor_all</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;wd&quot;</span><span class="p">,</span> <span class="s2">&quot;ws&quot;</span><span class="p">,</span> <span class="s2">&quot;pow_ref&quot;</span><span class="p">])</span>
+        <span class="n">df_cor_all</span> <span class="o">=</span> <span class="n">df_cor_all</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Get FLORIS predictions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;    Interpolating FLORIS predictions for dataframe.&quot;</span><span class="p">)</span>
+        <span class="n">ws_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ws_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_turbines</span><span class="p">)]</span>
+        <span class="n">pow_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_turbines</span><span class="p">)]</span>
+        <span class="n">df_fm_all</span> <span class="o">=</span> <span class="n">df_cor_all</span><span class="p">[[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;wd&quot;</span><span class="p">,</span> <span class="s2">&quot;ws&quot;</span><span class="p">,</span> <span class="s2">&quot;ti&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">ws_cols</span><span class="p">,</span> <span class="o">*</span><span class="n">pow_cols</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">df_fm_all</span> <span class="o">=</span> <span class="n">ftools</span><span class="o">.</span><span class="n">interpolate_floris_from_df_approx</span><span class="p">(</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">df_fm_all</span><span class="p">,</span> <span class="n">df_approx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">df_fm_approx</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mirror_nans</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">df_fm_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_pow_ref_mapping_func</span><span class="p">(</span><span class="n">df_fm_all</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_turbines</span><span class="p">:</span>
+            <span class="n">valid_entries</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">df_cor_all</span><span class="p">[</span><span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span><span class="o">.</span><span class="n">isna</span><span class="p">())</span> <span class="o">&amp;</span> <span class="p">(</span>
+                <span class="o">~</span><span class="n">df_fm_all</span><span class="p">[</span><span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">df_cor</span> <span class="o">=</span> <span class="n">df_cor_all</span><span class="p">[</span><span class="n">valid_entries</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">df_fm</span> <span class="o">=</span> <span class="n">df_fm_all</span><span class="p">[</span><span class="n">valid_entries</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Initialize SCADA analysis class and add dataframes</span>
+            <span class="n">er_in_test_turbine_list_scada</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EnergyRatioInput</span><span class="p">([</span><span class="n">df_cor</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;Measured data&quot;</span><span class="p">]))</span>
+            <span class="n">er_in_test_turbine_list_floris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EnergyRatioInput</span><span class="p">([</span><span class="n">df_fm</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;FLORIS prediction&quot;</span><span class="p">]))</span>
+
+        <span class="c1"># Save to self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">er_in_test_turbine_list_scada</span> <span class="o">=</span> <span class="n">er_in_test_turbine_list_scada</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">er_in_test_turbine_list_floris</span> <span class="o">=</span> <span class="n">er_in_test_turbine_list_floris</span></div>
+
+
+<div class="viewcode-block" id="bias_estimation._get_energy_ratios_allbins">
+<a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._get_energy_ratios_allbins">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_energy_ratios_allbins</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">wd_bias</span><span class="p">,</span>
+        <span class="n">time_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ws_mask</span><span class="o">=</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">),</span>
+        <span class="n">wd_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ti_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">wd_step</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+        <span class="n">ws_step</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">wd_bin_width</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+        <span class="n">N_btstrp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">plot_iter_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the energy ratios for the energy_ratio_suite objects</span>
+<span class="sd">        contained in &#39;self.fsc_list&#39;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            wd_step (float, optional): Wind direction discretization step</span>
+<span class="sd">                size. This defines for what wind directions the energy ratio</span>
+<span class="sd">                is to be calculated. Note that this does not necessarily</span>
+<span class="sd">                also mean each bin has a width of this value. Namely, the</span>
+<span class="sd">                bin width can be specified separately. Defaults to 2.0.</span>
+<span class="sd">            ws_step (float, optional): Wind speed discretization step size.</span>
+<span class="sd">                This defines the resolution and widths of the wind speed</span>
+<span class="sd">                bins. Defaults to 1.0.</span>
+<span class="sd">            wd_bin_width ([type], optional): The wind direction bin width.</span>
+<span class="sd">                This value should be equal or larger than wd_step. When no</span>
+<span class="sd">                value is specified, will default to wd_bin_width = wd_step.</span>
+<span class="sd">                In the literature, it is not uncommon to specify a bin width</span>
+<span class="sd">                larger than the step size to cover for variability in the</span>
+<span class="sd">                wind direction measurements. By setting a large value for</span>
+<span class="sd">                wd_bin_width, one gets a better idea of the larger-scale</span>
+<span class="sd">                wake losses in the wind farm. Defaults to None.</span>
+<span class="sd">            N_btstrp (int, optional): Number of bootstrap evaluations for</span>
+<span class="sd">                uncertainty quantification (UQ). If N_btstrp=1, will not</span>
+<span class="sd">                perform any uncertainty quantification. Defaults to 1.</span>
+<span class="sd">            plot_iter_path ([type], optional): Path to save figures of the</span>
+<span class="sd">                energy ratios of each iteration to. If not specified, will</span>
+<span class="sd">                not plot or save any figures of iterations. Defaults to</span>
+<span class="sd">                None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">er_out_test_turbine_list_scada</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">er_out_test_turbine_list_floris</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">time_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;time_mask not available. Please preprocess &quot;</span> <span class="o">+</span> <span class="s2">&quot;your dataset to apply time masks.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">ti_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;ti_mask not available. Please preprocess &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;your dataset to apply turbulence intensity masks.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">wd_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">wd_mask</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">360.0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;    Initializing energy ratio inputs.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_er_input_for_wd_bias</span><span class="p">(</span><span class="n">wd_bias</span><span class="o">=</span><span class="n">wd_bias</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_turbines</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;    Determining energy ratios for test turbine = </span><span class="si">%03d</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ti</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot; WD bias: </span><span class="si">%.3f</span><span class="s2"> deg.&quot;</span> <span class="o">%</span> <span class="n">wd_bias</span>
+            <span class="p">)</span>
+
+            <span class="n">er_out_test_turbine_list_scada</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">er</span><span class="o">.</span><span class="n">compute_energy_ratio</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">er_in_test_turbine_list_scada</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                    <span class="n">ref_turbines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">test_turbines</span><span class="o">=</span><span class="p">[</span><span class="n">ti</span><span class="p">],</span>
+                    <span class="n">use_predefined_ref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">use_predefined_wd</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">use_predefined_ws</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+                    <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_mask</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_mask</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+                    <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_mask</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_mask</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">wd_bin_overlap_radius</span><span class="o">=</span><span class="p">(</span><span class="n">wd_bin_width</span> <span class="o">-</span> <span class="n">wd_step</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">N</span><span class="o">=</span><span class="n">N_btstrp</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">er_out_test_turbine_list_floris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">er</span><span class="o">.</span><span class="n">compute_energy_ratio</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">er_in_test_turbine_list_floris</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                    <span class="n">ref_turbines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">test_turbines</span><span class="o">=</span><span class="p">[</span><span class="n">ti</span><span class="p">],</span>
+                    <span class="n">use_predefined_ref</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">use_predefined_wd</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">use_predefined_ws</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+                    <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_mask</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_mask</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+                    <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_mask</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_mask</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">wd_bin_overlap_radius</span><span class="o">=</span><span class="p">(</span><span class="n">wd_bin_width</span> <span class="o">-</span> <span class="n">wd_step</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">N</span><span class="o">=</span><span class="n">N_btstrp</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Debugging: plot iteration to path</span>
+        <span class="k">if</span> <span class="n">plot_iter_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;    Plotting energy ratios and saving figures&quot;</span><span class="p">)</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">plot_iter_path</span><span class="p">,</span>
+                <span class="s2">&quot;bias</span><span class="si">%+.3f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fsc_wd_bias_list</span><span class="p">[</span><span class="n">ii</span><span class="p">]),</span>
+                <span class="s2">&quot;energy_ratios_test_turbine&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_energy_ratios</span><span class="p">(</span><span class="n">save_path</span><span class="o">=</span><span class="n">fp</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Save to self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_scada</span> <span class="o">=</span> <span class="n">er_out_test_turbine_list_scada</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_floris</span> <span class="o">=</span> <span class="n">er_out_test_turbine_list_floris</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="c1"># Public methods</span>
+
+<div class="viewcode-block" id="bias_estimation.calculate_baseline">
+<a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.calculate_baseline">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_baseline</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">time_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ws_mask</span><span class="o">=</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">),</span>
+        <span class="n">wd_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ti_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">er_wd_step</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+        <span class="n">er_ws_step</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+        <span class="n">er_wd_bin_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">er_N_btstrp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># TODO: is this calculate_baseline method needed?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_energy_ratios_allbins</span><span class="p">(</span>
+            <span class="n">wd_bias</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">time_mask</span><span class="o">=</span><span class="n">time_mask</span><span class="p">,</span>
+            <span class="n">ws_mask</span><span class="o">=</span><span class="n">ws_mask</span><span class="p">,</span>
+            <span class="n">wd_mask</span><span class="o">=</span><span class="n">wd_mask</span><span class="p">,</span>
+            <span class="n">ti_mask</span><span class="o">=</span><span class="n">ti_mask</span><span class="p">,</span>
+            <span class="n">wd_step</span><span class="o">=</span><span class="n">er_wd_step</span><span class="p">,</span>
+            <span class="n">ws_step</span><span class="o">=</span><span class="n">er_ws_step</span><span class="p">,</span>
+            <span class="n">wd_bin_width</span><span class="o">=</span><span class="n">er_wd_bin_width</span><span class="p">,</span>
+            <span class="n">N_btstrp</span><span class="o">=</span><span class="n">er_N_btstrp</span><span class="p">,</span>
+            <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="bias_estimation.estimate_wd_bias">
+<a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.estimate_wd_bias">[docs]</a>
+    <span class="k">def</span> <span class="nf">estimate_wd_bias</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">time_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ws_mask</span><span class="o">=</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">),</span>
+        <span class="n">wd_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ti_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">opt_search_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">),</span>
+        <span class="n">opt_search_brute_dx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">opt_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">er_wd_step</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+        <span class="n">er_ws_step</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+        <span class="n">er_wd_bin_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">er_N_btstrp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">plot_iter_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Estimate the wind direction bias by comparing the SCADA data</span>
+<span class="sd">        under various wind direction corrections to its FLORIS predictions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            time_mask ([iterable], optional): Wind speed mask. Should be an</span>
+<span class="sd">                iterable of length 2, e.g., [pd.to_datetime(&quot;2019-01-01&quot;),</span>
+<span class="sd">                pd.to_datetime(&quot;2019-04-01&quot;)], defining the lower and upper</span>
+<span class="sd">                bound, respectively. If not specified, will not mask the data</span>
+<span class="sd">                based on this variable. Defaults to None.</span>
+<span class="sd">            ws_mask ([iterable], optional): Wind speed mask. Should be an</span>
+<span class="sd">                iterable of length 2, e.g., [6.0, 10.0], defining the lower</span>
+<span class="sd">                and upper bound, respectively. If not specified, will not</span>
+<span class="sd">                mask the data based on this variable. Defaults to (6, 10).</span>
+<span class="sd">            wd_mask ([iterable], optional): Wind direction mask. Should</span>
+<span class="sd">                be an iterable of length 2, e.g., [0.0, 180.0], defining</span>
+<span class="sd">                the lower and upper bound, respectively. If not specified,</span>
+<span class="sd">                will not mask the data based on this variable. Defaults to</span>
+<span class="sd">                None.</span>
+<span class="sd">            ti_mask ([iterable], optional): Turbulence intensity mask.</span>
+<span class="sd">                Should be an iterable of length 2, e.g., [0.04, 0.08],</span>
+<span class="sd">                defining the lower and upper bound, respectively. If not</span>
+<span class="sd">                specified, will not mask the data based on this variable.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            opt_search_range (tuple, optional): Search range for the wind</span>
+<span class="sd">                direction offsets to consider. Defaults to (-180., 180.).</span>
+<span class="sd">            opt_search_brute_dx (float, optional): Number of points to</span>
+<span class="sd">                discretize the search space over. Defaults to 5.</span>
+<span class="sd">            er_wd_step (float, optional): Wind direction discretization step</span>
+<span class="sd">                size. This defines for what wind directions the energy ratio</span>
+<span class="sd">                is to be calculated. Note that this does not necessarily</span>
+<span class="sd">                also mean each bin has a width of this value. Namely, the</span>
+<span class="sd">                bin width can be specified separately. Defaults to 3.0.</span>
+<span class="sd">            er_ws_step (float, optional): Wind speed discretization step size.</span>
+<span class="sd">                This defines the resolution and widths of the wind speed</span>
+<span class="sd">                bins. Defaults to 5.0.</span>
+<span class="sd">            er_wd_bin_width ([type], optional): The wind direction bin width.</span>
+<span class="sd">                This value should be equal or larger than wd_step. When no</span>
+<span class="sd">                value is specified, will default to wd_bin_width = wd_step.</span>
+<span class="sd">                In the literature, it is not uncommon to specify a bin width</span>
+<span class="sd">                larger than the step size to cover for variability in the</span>
+<span class="sd">                wind direction measurements. By setting a large value for</span>
+<span class="sd">                wd_bin_width, one gets a better idea of the larger-scale</span>
+<span class="sd">                wake losses in the wind farm. Defaults to None.</span>
+<span class="sd">            er_N_btstrp (int, optional): Number of bootstrap evaluations for</span>
+<span class="sd">                uncertainty quantification (UQ). If N_btstrp=1, will not</span>
+<span class="sd">                perform any uncertainty quantification. Defaults to 1.</span>
+<span class="sd">            plot_iter_path ([type], optional): Path to save figures of the</span>
+<span class="sd">                energy ratios of each iteration to. If not specified, will</span>
+<span class="sd">                not plot or save any figures of iterations. Defaults to</span>
+<span class="sd">                None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            x_opt ([float]): Optimal wind direction offset.</span>
+<span class="sd">            J_opt ([float]): Cost function under optimal offset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Estimating the wind direction bias&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">cost_fun</span><span class="p">(</span><span class="n">wd_bias</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_energy_ratios_allbins</span><span class="p">(</span>
+                <span class="n">wd_bias</span><span class="o">=</span><span class="n">wd_bias</span><span class="p">,</span>
+                <span class="n">time_mask</span><span class="o">=</span><span class="n">time_mask</span><span class="p">,</span>
+                <span class="n">ws_mask</span><span class="o">=</span><span class="n">ws_mask</span><span class="p">,</span>
+                <span class="n">wd_mask</span><span class="o">=</span><span class="n">wd_mask</span><span class="p">,</span>
+                <span class="n">ti_mask</span><span class="o">=</span><span class="n">ti_mask</span><span class="p">,</span>
+                <span class="n">wd_step</span><span class="o">=</span><span class="n">er_wd_step</span><span class="p">,</span>
+                <span class="n">ws_step</span><span class="o">=</span><span class="n">er_ws_step</span><span class="p">,</span>
+                <span class="n">wd_bin_width</span><span class="o">=</span><span class="n">er_wd_bin_width</span><span class="p">,</span>
+                <span class="n">N_btstrp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">plot_iter_path</span><span class="o">=</span><span class="n">plot_iter_path</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Calculate cost</span>
+            <span class="n">cost_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_scada</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_turbines</span><span class="p">):</span>
+                <span class="n">y_scada</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_scada</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">df_result</span><span class="p">[</span><span class="s2">&quot;Measured data&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">y_floris</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_floris</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">df_result</span><span class="p">[</span><span class="s2">&quot;FLORIS prediction&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y_scada</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y_floris</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>  <span class="c1"># At least 6 valid data entries</span>
+                    <span class="n">r</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spst</span><span class="o">.</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">y_scada</span><span class="p">[</span><span class="n">ids</span><span class="p">],</span> <span class="n">y_floris</span><span class="p">[</span><span class="n">ids</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">cost_array</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">r</span>
+
+            <span class="n">cost</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">cost_array</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cost</span>
+
+        <span class="k">def</span> <span class="nf">opt_finish</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">()):</span>
+            <span class="k">return</span> <span class="n">opt</span><span class="o">.</span><span class="n">fmin</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">maxfun</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">dran</span> <span class="o">=</span> <span class="n">opt_search_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">opt_search_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x_opt</span><span class="p">,</span> <span class="n">J_opt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">J</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">brute</span><span class="p">(</span>
+            <span class="n">func</span><span class="o">=</span><span class="n">cost_fun</span><span class="p">,</span>
+            <span class="n">ranges</span><span class="o">=</span><span class="p">[</span><span class="n">opt_search_range</span><span class="p">],</span>
+            <span class="n">Ns</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dran</span> <span class="o">/</span> <span class="n">opt_search_brute_dx</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">full_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">disp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">finish</span><span class="o">=</span><span class="n">opt_finish</span><span class="p">,</span>
+            <span class="c1"># workers=opt_workers,</span>
+        <span class="p">)</span>
+
+        <span class="n">wd_bias</span> <span class="o">=</span> <span class="n">x_opt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_wd_bias</span> <span class="o">=</span> <span class="n">wd_bias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_cost</span> <span class="o">=</span> <span class="n">J_opt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_wd_grid</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_wd_cost</span> <span class="o">=</span> <span class="n">J</span>
+
+        <span class="c1"># End with optimal results and bootstrapping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  Evaluating optimal solution with bootstrapping&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_energy_ratios_allbins</span><span class="p">(</span>
+            <span class="n">wd_bias</span><span class="o">=</span><span class="n">x_opt</span><span class="p">,</span>
+            <span class="n">time_mask</span><span class="o">=</span><span class="n">time_mask</span><span class="p">,</span>
+            <span class="n">ws_mask</span><span class="o">=</span><span class="n">ws_mask</span><span class="p">,</span>
+            <span class="n">wd_mask</span><span class="o">=</span><span class="n">wd_mask</span><span class="p">,</span>
+            <span class="n">ti_mask</span><span class="o">=</span><span class="n">ti_mask</span><span class="p">,</span>
+            <span class="n">wd_step</span><span class="o">=</span><span class="n">er_wd_step</span><span class="p">,</span>
+            <span class="n">ws_step</span><span class="o">=</span><span class="n">er_ws_step</span><span class="p">,</span>
+            <span class="n">wd_bin_width</span><span class="o">=</span><span class="n">er_wd_bin_width</span><span class="p">,</span>
+            <span class="n">N_btstrp</span><span class="o">=</span><span class="n">er_N_btstrp</span><span class="p">,</span>
+            <span class="n">plot_iter_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Save input arguments for future use</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;time_mask&quot;</span><span class="p">:</span> <span class="n">time_mask</span><span class="p">,</span>
+            <span class="s2">&quot;ws_mask&quot;</span><span class="p">:</span> <span class="n">ws_mask</span><span class="p">,</span>
+            <span class="s2">&quot;wd_mask&quot;</span><span class="p">:</span> <span class="n">wd_mask</span><span class="p">,</span>
+            <span class="s2">&quot;ti_mask&quot;</span><span class="p">:</span> <span class="n">ti_mask</span><span class="p">,</span>
+            <span class="s2">&quot;opt_search_range&quot;</span><span class="p">:</span> <span class="n">opt_search_range</span><span class="p">,</span>
+            <span class="s2">&quot;opt_search_brute_dx&quot;</span><span class="p">:</span> <span class="n">opt_search_brute_dx</span><span class="p">,</span>
+            <span class="s2">&quot;opt_workers&quot;</span><span class="p">:</span> <span class="n">opt_workers</span><span class="p">,</span>
+            <span class="s2">&quot;er_wd_step&quot;</span><span class="p">:</span> <span class="n">er_wd_step</span><span class="p">,</span>
+            <span class="s2">&quot;er_ws_step&quot;</span><span class="p">:</span> <span class="n">er_ws_step</span><span class="p">,</span>
+            <span class="s2">&quot;er_wd_bin_width&quot;</span><span class="p">:</span> <span class="n">er_wd_bin_width</span><span class="p">,</span>
+            <span class="s2">&quot;er_N_btstrp&quot;</span><span class="p">:</span> <span class="n">er_N_btstrp</span><span class="p">,</span>
+            <span class="s2">&quot;plot_iter_path&quot;</span><span class="p">:</span> <span class="n">plot_iter_path</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">x_opt</span><span class="p">,</span> <span class="n">J_opt</span></div>
+
+
+<div class="viewcode-block" id="bias_estimation.plot_energy_ratios">
+<a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.plot_energy_ratios">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_energy_ratios</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">show_uncorrected_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">200</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the energy ratios for the currently evaluated wind</span>
+<span class="sd">        direction offset term.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            show_uncorrcted_data (bool, optional): Compute and show the</span>
+<span class="sd">                uncorrected energy ratio (with wd_bias=0) on the plot. Defaults</span>
+<span class="sd">                to False.</span>
+<span class="sd">            save_path ([str], optional): Path to save the figure to. If not</span>
+<span class="sd">                specified, will not save the figure. Defaults to None.</span>
+<span class="sd">            format (str, optional): Figure format. Defaults to &#39;png&#39;.</span>
+<span class="sd">            dpi (int, optional): Figure DPI. Defaults to 200.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ax_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">show_uncorrected_data</span><span class="p">:</span>
+            <span class="c1"># Store existing scada result</span>
+            <span class="n">er_out_test_turbine_list_scada_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_scada</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1"># (Re)compute case with wd_bias=0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_energy_ratios_allbins</span><span class="p">(</span>
+                <span class="n">wd_bias</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">time_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span><span class="p">[</span><span class="s2">&quot;time_mask&quot;</span><span class="p">],</span>
+                <span class="n">ws_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span><span class="p">[</span><span class="s2">&quot;ws_mask&quot;</span><span class="p">],</span>
+                <span class="n">wd_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span><span class="p">[</span><span class="s2">&quot;wd_mask&quot;</span><span class="p">],</span>
+                <span class="n">ti_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span><span class="p">[</span><span class="s2">&quot;ti_mask&quot;</span><span class="p">],</span>
+                <span class="n">wd_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span><span class="p">[</span><span class="s2">&quot;er_wd_step&quot;</span><span class="p">],</span>
+                <span class="n">ws_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span><span class="p">[</span><span class="s2">&quot;er_ws_step&quot;</span><span class="p">],</span>
+                <span class="n">wd_bin_width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span><span class="p">[</span><span class="s2">&quot;er_wd_bin_width&quot;</span><span class="p">],</span>
+                <span class="n">N_btstrp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_args</span><span class="p">[</span><span class="s2">&quot;er_N_btstrp&quot;</span><span class="p">],</span>  <span class="c1"># What should go here?</span>
+                <span class="n">plot_iter_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">er_out_test_turbine_list_scada_0bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_scada</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_scada</span> <span class="o">=</span> <span class="n">er_out_test_turbine_list_scada_copy</span>
+
+        <span class="c1"># Plot</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_turbines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">show_uncorrected_data</span><span class="p">:</span>
+                <span class="n">axarr</span> <span class="o">=</span> <span class="n">er_out_test_turbine_list_scada_0bias</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">plot_energy_ratios</span><span class="p">(</span>
+                    <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Measured data (uncorrected)&quot;</span><span class="p">],</span>
+                    <span class="n">color_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Measured data (uncorrected)&quot;</span><span class="p">:</span> <span class="s2">&quot;silver&quot;</span><span class="p">},</span>
+                    <span class="n">show_wind_speed_distribution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">axarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_scada</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">plot_energy_ratios</span><span class="p">(</span>
+                    <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Measured data (bias corrected)&quot;</span><span class="p">],</span>
+                    <span class="n">color_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Measured data (bias corrected)&quot;</span><span class="p">:</span> <span class="s2">&quot;C0&quot;</span><span class="p">},</span>
+                    <span class="n">axarr</span><span class="o">=</span><span class="n">axarr</span><span class="p">,</span>
+                    <span class="n">show_wind_speed_distribution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">axarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_scada</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">plot_energy_ratios</span><span class="p">(</span>
+                    <span class="n">color_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Measured data&quot;</span><span class="p">:</span> <span class="s2">&quot;C0&quot;</span><span class="p">},</span> <span class="n">show_wind_speed_distribution</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+
+            <span class="n">axarr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">er_out_test_turbine_list_floris</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">plot_energy_ratios</span><span class="p">(</span>
+                <span class="n">color_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;FLORIS prediction&quot;</span><span class="p">:</span> <span class="s2">&quot;C1&quot;</span><span class="p">},</span>
+                <span class="n">axarr</span><span class="o">=</span><span class="n">axarr</span><span class="p">,</span>
+                <span class="n">show_wind_speed_distribution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Turbine </span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">save_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span> <span class="o">+</span> <span class="s2">&quot;_</span><span class="si">{:03d}</span><span class="s2">.</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">,</span> <span class="nb">format</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+
+            <span class="n">fig_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">())</span>
+            <span class="n">ax_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axarr</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig_list</span><span class="p">,</span> <span class="n">ax_list</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By National Renewable Energy Laboratory
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

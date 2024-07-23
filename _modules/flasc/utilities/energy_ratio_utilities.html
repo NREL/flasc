@@ -1,0 +1,1260 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>flasc.utilities.energy_ratio_utilities &#8212; FLASC</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/documentation_options.js?v=30a733bc"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-3PMGTE1H70"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/flasc/utilities/energy_ratio_utilities';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
+    <script>document.write(`<img src="../../../_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    FLASC documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../energy_ratio.html">Energy ratio analysis</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../../total_uplift.html">Total uplift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licensing.html">Licensing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">API Documentation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_input.generate_block_list.html">flasc.analysis.energy_ratio_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_output.html">flasc.analysis.energy_ratio_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.html">flasc.model_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html">flasc.model_fitting.floris_sensitivity_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html">flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.html">flasc.model_fitting.floris_tuning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss.html">flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.select_best_wake_model_parameter.html">flasc.model_fitting.floris_tuning.select_best_wake_model_parameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.select_best_wd_std.html">flasc.model_fitting.floris_tuning.select_best_wd_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift.html">flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses.html">flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_wd_std_for_er.html">flasc.model_fitting.floris_tuning.sweep_wd_std_for_er</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.html">flasc.model_fitting.turbulence_estimator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html">flasc.model_fitting.turbulence_estimator.ti_estimator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.html">flasc.data_processing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.html">flasc.data_processing.dataframe_manipulations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_drop_nan_rows.html">flasc.data_processing.dataframe_manipulations.df_drop_nan_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing.html">flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_reduce_precision.html">flasc.data_processing.dataframe_manipulations.df_reduce_precision</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_ti.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_wd.html">flasc.data_processing.dataframe_manipulations.filter_df_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_ws.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.html">flasc.data_processing.filtering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.df_get_no_faulty_measurements.html">flasc.data_processing.filtering.df_get_no_faulty_measurements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html">flasc.data_processing.filtering.df_mark_turbdata_as_faulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html">flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html">flasc.data_processing.filtering.FlascFilter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.find_sensor_faults.html">flasc.data_processing.find_sensor_faults</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults.html">flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_downsample.html">flasc.data_processing.time_operations.df_downsample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_movingaverage.html">flasc.data_processing.time_operations.df_movingaverage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_resample_by_interpolation.html">flasc.data_processing.time_operations.df_resample_by_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.flatten_cols.html">flasc.data_processing.time_operations.flatten_cols</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.html">flasc.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.html">flasc.utilities.circular_statistics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.calc_wd_mean_radial.html">flasc.utilities.circular_statistics.calc_wd_mean_radial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.calculate_wd_statistics.html">flasc.utilities.circular_statistics.calculate_wd_statistics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.html">flasc.utilities.energy_ratio_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_bin_weights.html">flasc.utilities.energy_ratio_utilities.add_bin_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_ref.html">flasc.utilities.energy_ratio_utilities.add_power_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_test.html">flasc.utilities.energy_ratio_utilities.add_power_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_reflected_rows.html">flasc.utilities.energy_ratio_utilities.add_reflected_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd.html">flasc.utilities.energy_ratio_utilities.add_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd_bin.html">flasc.utilities.energy_ratio_utilities.add_wd_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws.html">flasc.utilities.energy_ratio_utilities.add_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.html">flasc.utilities.floris_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html">flasc.utilities.floris_tools.get_dependent_turbines_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_turbs_in_radius.html">flasc.utilities.floris_tools.get_turbs_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_upstream_turbs_floris.html">flasc.utilities.floris_tools.get_upstream_turbs_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html">flasc.utilities.floris_tools.interpolate_floris_from_df_approx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.lookup_table_tools.html">flasc.utilities.lookup_table_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant.html">flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.html">flasc.utilities.optimization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.estimate_ti.html">flasc.utilities.optimization.estimate_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.find_timeshift_between_dfs.html">flasc.utilities.optimization.find_timeshift_between_dfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.match_y_curves_by_offset.html">flasc.utilities.optimization.match_y_curves_by_offset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.html">flasc.utilities.tuner_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.nested_get.html">flasc.utilities.tuner_utilities.nested_get</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.nested_set.html">flasc.utilities.tuner_utilities.nested_set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.replicate_nan_values.html">flasc.utilities.tuner_utilities.replicate_nan_values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.resim_floris.html">flasc.utilities.tuner_utilities.resim_floris</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.html">flasc.utilities.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.estimate_dt.html">flasc.utilities.utilities.estimate_dt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.get_num_turbines.html">flasc.utilities.utilities.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.interp_with_max_gap.html">flasc.utilities.utilities.interp_with_max_gap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.html">flasc.utilities.utilities_examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.load_floris_artificial.html">flasc.utilities.utilities_examples.load_floris_artificial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.load_floris_smarteole.html">flasc.utilities.utilities_examples.load_floris_smarteole</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2F_modules/flasc/utilities/energy_ratio_utilities.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for flasc.utilities.energy_ratio_utilities</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">polars</span> <span class="k">as</span> <span class="nn">pl</span>
+
+
+<span class="c1"># TODO: Someday I think can replace with polars-native code: https://github.com/pola-rs/polars/issues/8551</span>
+<div class="viewcode-block" id="cut">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.cut.html#flasc.utilities.energy_ratio_utilities.cut">[docs]</a>
+<span class="k">def</span> <span class="nf">cut</span><span class="p">(</span>
+    <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">edges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">Expr</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bins the values in the specified column according to the given edges.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    col_name (str): The name of the column to bin.</span>
+<span class="sd">    edges (array-like): The edges of the bins. Values will be placed into the bin</span>
+<span class="sd">                        whose left edge is the largest edge less than or equal to</span>
+<span class="sd">                        the value, and whose right edge is the smallest edge</span>
+<span class="sd">                        greater than the value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    expression: An expression object that can be used to bin the column.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">c</span> <span class="o">&lt;</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">edge</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">labels</span><span class="p">):</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">c</span> <span class="o">&lt;</span> <span class="n">edge</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">expr</span></div>
+
+
+
+<div class="viewcode-block" id="bin_column">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_column.html#flasc.utilities.energy_ratio_utilities.bin_column">[docs]</a>
+<span class="k">def</span> <span class="nf">bin_column</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">bin_col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">edges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bins the values in the specified column of a Polars DataFrame according to the given edges.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">    col_name (str): The name of the column to bin.</span>
+<span class="sd">    bin_col_name (str): The name to give the new column containing the bin labels.</span>
+<span class="sd">    edges (array-like): The edges of the bins. Values will be placed into the bin</span>
+<span class="sd">                        whose left edge is the largest edge less than or equal to</span>
+<span class="sd">                        the value, and whose right edge is the smallest edge</span>
+<span class="sd">                        greater than the value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional column containing the bin labels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+        <span class="n">cut</span><span class="p">(</span><span class="n">col_name</span><span class="o">=</span><span class="n">col_name</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">bin_col_name</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">df_</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_ws">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws.html#flasc.utilities.energy_ratio_utilities.add_ws">[docs]</a>
+<span class="k">def</span> <span class="nf">add_ws</span><span class="p">(</span><span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add the ws column to a dataframe, given which columns to average over</span>
+
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">    ws_cols (list(str)): The name of the columns to average across.</span>
+<span class="sd">    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional ws column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">df_with_mean_ws</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="c1"># df_.select(pl.exclude(&#39;ws_bin&#39;)) # In case ws_bin already exists</span>
+        <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="c1"># df_.select(ws_cols).mean(axis=1).alias(&#39;ws_bin&#39;)</span>
+            <span class="n">ws</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">concat_list</span><span class="p">(</span><span class="n">ws_cols</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>  <span class="c1"># Initially ws_bin is just the mean</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">all_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">ws_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">remove_all_nulls</span>
+            <span class="k">else</span> <span class="n">pl</span><span class="o">.</span><span class="n">any_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">ws_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">((</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;ws&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()))</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_with_mean_ws</span></div>
+
+
+
+<div class="viewcode-block" id="add_ws_bin">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws_bin.html#flasc.utilities.energy_ratio_utilities.add_ws_bin">[docs]</a>
+<span class="k">def</span> <span class="nf">add_ws_bin</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">ws_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ws_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">ws_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+    <span class="n">edges</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add the ws_bin column to a dataframe, given which columns to average over</span>
+<span class="sd">    and the step sizes to use</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">    ws_cols (list(str)): The name of the columns to average across.</span>
+<span class="sd">    ws_step (float): Step size for binning</span>
+<span class="sd">    ws_min (float): Minimum wind speed</span>
+<span class="sd">    ws_max (float): Maximum wind speed</span>
+<span class="sd">    edges (array-like): The edges of the bins. Values will be placed into the bin</span>
+<span class="sd">                        whose left edge is the largest edge less than or equal to</span>
+<span class="sd">                        the value, and whose right edge is the smallest edge</span>
+<span class="sd">                        greater than the value.  Defaults to None, in which case</span>
+<span class="sd">                        the edges are generated using ws_step, ws_min, and ws_max.</span>
+<span class="sd">    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">edges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ws_min</span><span class="p">,</span> <span class="n">ws_max</span> <span class="o">+</span> <span class="n">ws_step</span><span class="p">,</span> <span class="n">ws_step</span><span class="p">)</span>
+
+    <span class="c1"># Check if edges is a list or numpy array or similar</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;edges must have length of at least 2&quot;</span><span class="p">)</span>
+
+    <span class="n">df_with_mean_ws</span> <span class="o">=</span> <span class="n">add_ws</span><span class="p">(</span><span class="n">df_</span><span class="p">,</span> <span class="n">ws_cols</span><span class="p">,</span> <span class="n">remove_all_nulls</span><span class="p">)</span>
+
+    <span class="c1"># Filter to min and max</span>
+    <span class="n">df_with_mean_ws</span> <span class="o">=</span> <span class="n">df_with_mean_ws</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;ws&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">ws_min</span><span class="p">)</span>  <span class="c1"># Filter the mean wind speed</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;ws&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ws_max</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bin_column</span><span class="p">(</span><span class="n">df_with_mean_ws</span><span class="p">,</span> <span class="s2">&quot;ws&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_wd">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd.html#flasc.utilities.energy_ratio_utilities.add_wd">[docs]</a>
+<span class="k">def</span> <span class="nf">add_wd</span><span class="p">(</span><span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add the wd column to a dataframe, given which columns to average over</span>
+
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">    wd_cols (list(str)): The name of the columns to average across.</span>
+<span class="sd">    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional wd column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Gather up intermediate column names and final column names</span>
+    <span class="n">wd_cols_cos</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="s2">&quot;_cos&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">wd_cols</span><span class="p">]</span>
+    <span class="n">wd_cols_sin</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="s2">&quot;_sin&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">wd_cols</span><span class="p">]</span>
+    <span class="n">cols_to_return</span> <span class="o">=</span> <span class="n">df_</span><span class="o">.</span><span class="n">columns</span>
+    <span class="k">if</span> <span class="s2">&quot;wd&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cols_to_return</span><span class="p">:</span>
+        <span class="n">cols_to_return</span> <span class="o">=</span> <span class="n">cols_to_return</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;wd&quot;</span><span class="p">]</span>
+
+    <span class="n">df_with_mean_wd</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="c1"># df_.select(pl.exclude(&#39;wd_bin&#39;)) # In case wd_bin already exists</span>
+        <span class="n">df_</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">all_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">wd_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">remove_all_nulls</span>
+            <span class="k">else</span> <span class="n">pl</span><span class="o">.</span><span class="n">any_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">wd_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="c1"># Add the cosine columns</span>
+        <span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">wd_cols</span><span class="p">)</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span><span class="o">.</span><span class="n">cos</span><span class="p">()</span><span class="o">.</span><span class="n">suffix</span><span class="p">(</span><span class="s2">&quot;_cos&quot;</span><span class="p">),</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">wd_cols</span><span class="p">)</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span><span class="o">.</span><span class="n">sin</span><span class="p">()</span><span class="o">.</span><span class="n">suffix</span><span class="p">(</span><span class="s2">&quot;_sin&quot;</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">df_with_mean_wd</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df_with_mean_wd</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="c1"># df_with_mean_wd.select(wd_cols_cos).mean(axis=1).alias(&#39;cos_mean&#39;),</span>
+                <span class="c1"># df_with_mean_wd.select(wd_cols_sin).mean(axis=1).alias(&#39;sin_mean&#39;),</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">concat_list</span><span class="p">(</span><span class="n">wd_cols_cos</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;cos_mean&quot;</span><span class="p">),</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">concat_list</span><span class="p">(</span><span class="n">wd_cols_sin</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;sin_mean&quot;</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="n">wd</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span>
+                <span class="n">pl</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">,</span> <span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;sin_mean&quot;</span><span class="p">),</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;cos_mean&quot;</span><span class="p">)])</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
+                <span class="mf">360.0</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">((</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;wd&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()))</span>
+        <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">cols_to_return</span><span class="p">)</span>  <span class="c1"># Select for just the columns we want to return</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_with_mean_wd</span></div>
+
+
+
+<span class="c1"># (df_, wd_cols, wd_step=2.0, wd_min=0.0, wd_max=360.0, edges=None):@#</span>
+<div class="viewcode-block" id="add_wd_bin">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd_bin.html#flasc.utilities.energy_ratio_utilities.add_wd_bin">[docs]</a>
+<span class="k">def</span> <span class="nf">add_wd_bin</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">wd_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">wd_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">360.0</span><span class="p">,</span>
+    <span class="n">edges</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add the wd_bin column to a dataframe, given which columns to average over</span>
+<span class="sd">    and the step sizes to use</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">    wd_cols (list(str)): The name of the columns to average across.</span>
+<span class="sd">    wd_step (float): Step size for binning</span>
+<span class="sd">    wd_min (float): Minimum wind direction</span>
+<span class="sd">    wd_max (float): Maximum wind direction</span>
+<span class="sd">    edges (array-like): The edges of the bins. Values will be placed into the bin</span>
+<span class="sd">                    whose left edge is the largest edge less than or equal to</span>
+<span class="sd">                    the value, and whose right edge is the smallest edge</span>
+<span class="sd">                    greater than the value.  Defaults to None, in which case</span>
+<span class="sd">                    the edges are generated using ws_step, ws_min, and ws_max.</span>
+<span class="sd">    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">edges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">wd_min</span><span class="p">,</span> <span class="n">wd_max</span> <span class="o">+</span> <span class="n">wd_step</span><span class="p">,</span> <span class="n">wd_step</span><span class="p">)</span>
+
+    <span class="c1"># If not none, edges must have lenght of at least 2</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;edges must have length of at least 2&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add in the mean wd column</span>
+    <span class="n">df_with_mean_wd</span> <span class="o">=</span> <span class="n">add_wd</span><span class="p">(</span><span class="n">df_</span><span class="p">,</span> <span class="n">wd_cols</span><span class="p">,</span> <span class="n">remove_all_nulls</span><span class="p">)</span>
+
+    <span class="c1"># Filter to min and max</span>
+    <span class="n">df_with_mean_wd</span> <span class="o">=</span> <span class="n">df_with_mean_wd</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;wd&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">wd_min</span><span class="p">)</span>  <span class="c1"># Filter the mean wind speed</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;wd&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">wd_max</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bin_column</span><span class="p">(</span><span class="n">df_with_mean_wd</span><span class="p">,</span> <span class="s2">&quot;wd&quot;</span><span class="p">,</span> <span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_power_test">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_test.html#flasc.utilities.energy_ratio_utilities.add_power_test">[docs]</a>
+<span class="k">def</span> <span class="nf">add_power_test</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">test_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pow_test</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">concat_list</span><span class="p">(</span><span class="n">test_cols</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="add_power_ref">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_ref.html#flasc.utilities.energy_ratio_utilities.add_power_ref">[docs]</a>
+<span class="k">def</span> <span class="nf">add_power_ref</span><span class="p">(</span><span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ref_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="k">return</span> <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pow_ref</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">concat_list</span><span class="p">(</span><span class="n">ref_cols</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="add_reflected_rows">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_reflected_rows.html#flasc.utilities.energy_ratio_utilities.add_reflected_rows">[docs]</a>
+<span class="k">def</span> <span class="nf">add_reflected_rows</span><span class="p">(</span><span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">edges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> <span class="n">overlap_distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds rows to a datrame with where the wind direction is</span>
+<span class="sd">    reflected around the neearest edge if within overlap_distance</span>
+
+<span class="sd">    Given a wind direction DataFrame `df_`, this function adds</span>
+<span class="sd">    reflected rows to the DataFrame such that each wind direction</span>
+<span class="sd">    in the original DataFrame has a corresponding reflected wind</span>
+<span class="sd">    direction. The reflected wind direction is calculated by</span>
+<span class="sd">    subtracting the wind direction from the nearest edge in `edges`</span>
+<span class="sd">    and then subtracting that difference again from the</span>
+<span class="sd">    original wind direction. The resulting wind direction</span>
+<span class="sd">    is then wrapped around to the range [0, 360) degrees. The function</span>
+<span class="sd">    returns a new DataFrame with the original rows and the added reflected rows.</span>
+
+<span class="sd">    This function enables overlapping bins in the energy ratio functions</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_ : polars.DataFrame</span>
+<span class="sd">        The DataFrame to add reflected rows to.</span>
+<span class="sd">    edges : numpy.ndarray</span>
+<span class="sd">        An array of wind direction edges to use for reflection.</span>
+<span class="sd">        (Should be same as used in energy ratio)</span>
+<span class="sd">    overlap_distance : float</span>
+<span class="sd">        The maximum distance between a wind direction and an edge</span>
+<span class="sd">        for the wind direction to be considered overlapping.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    polars.DataFrame</span>
+<span class="sd">        A new DataFrame with the original rows and the added reflected rows.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">df_add</span> <span class="o">=</span> <span class="n">df_</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="n">wd</span> <span class="o">=</span> <span class="n">df_add</span><span class="p">[</span><span class="s2">&quot;wd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">diff_matrix</span> <span class="o">=</span> <span class="n">wd</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges</span>
+    <span class="n">abs_diff_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff_matrix</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">abs_diff_matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">signed_mins</span> <span class="o">=</span> <span class="n">diff_matrix</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">diff_matrix</span><span class="p">)),</span> <span class="n">idx</span><span class="p">]</span>
+    <span class="n">df_add</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df_add</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;distances&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">signed_mins</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">Float32</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;distances&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">overlap_distance</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">((</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;wd&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;distances&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="mf">360.0</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;distances&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pl</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_</span><span class="p">,</span> <span class="n">df_add</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="filter_all_nulls">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_all_nulls.html#flasc.utilities.energy_ratio_utilities.filter_all_nulls">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_all_nulls</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">ref_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">test_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter data by requiring ALL values of ref, test, ws, and wd to be valid</span>
+<span class="sd">    numbers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): Polars dataframe possibly containing Null values</span>
+<span class="sd">        ref_cols (list[str]): A list of columns to use as the reference turbines</span>
+<span class="sd">        test_cols (list[str]): A list of columns to use as the test turbines</span>
+<span class="sd">        wd_cols (list[str]): A list of columns to derive the wind directions from</span>
+<span class="sd">        ws_cols (list[str]): A list of columns to derive the wind speeds from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">df_</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">pl</span><span class="o">.</span><span class="n">all_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">ref_cols</span> <span class="o">+</span> <span class="n">test_cols</span> <span class="o">+</span> <span class="n">ws_cols</span> <span class="o">+</span> <span class="n">wd_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">())</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="filter_any_nulls">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_any_nulls.html#flasc.utilities.energy_ratio_utilities.filter_any_nulls">[docs]</a>
+<span class="k">def</span> <span class="nf">filter_any_nulls</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">ref_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">test_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter data by requiring ANY of ref, ANY of test, ANY of ws, and ANY of wd</span>
+<span class="sd">    to be a valid number.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): Polars dataframe possibly containing Null values</span>
+<span class="sd">        ref_cols (list[str]): A list of columns to use as the reference turbines</span>
+<span class="sd">        test_cols (list[str]): A list of columns to use as the test turbines</span>
+<span class="sd">        wd_cols (list[str]): A list of columns to derive the wind directions from</span>
+<span class="sd">        ws_cols (list[str]): A list of columns to derive the wind speeds from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">df_</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">any_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">ref_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()))</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">any_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">test_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()))</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">any_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">ws_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()))</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">any_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">wd_cols</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()))</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="check_compute_energy_ratio_inputs">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html#flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs">[docs]</a>
+<span class="k">def</span> <span class="nf">check_compute_energy_ratio_inputs</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">,</span>
+    <span class="n">ref_turbines</span><span class="p">,</span>
+    <span class="n">test_turbines</span><span class="p">,</span>
+    <span class="n">wd_turbines</span><span class="p">,</span>
+    <span class="n">ws_turbines</span><span class="p">,</span>
+    <span class="n">use_predefined_ref</span><span class="p">,</span>
+    <span class="n">use_predefined_wd</span><span class="p">,</span>
+    <span class="n">use_predefined_ws</span><span class="p">,</span>
+    <span class="n">wd_step</span><span class="p">,</span>
+    <span class="n">wd_min</span><span class="p">,</span>
+    <span class="n">wd_max</span><span class="p">,</span>
+    <span class="n">ws_step</span><span class="p">,</span>
+    <span class="n">ws_min</span><span class="p">,</span>
+    <span class="n">ws_max</span><span class="p">,</span>
+    <span class="n">bin_cols_in</span><span class="p">,</span>
+    <span class="n">weight_by</span><span class="p">,</span>
+    <span class="n">df_freq</span><span class="p">,</span>
+    <span class="n">wd_bin_overlap_radius</span><span class="p">,</span>
+    <span class="n">uplift_pairs</span><span class="p">,</span>
+    <span class="n">uplift_names</span><span class="p">,</span>
+    <span class="n">uplift_absolute</span><span class="p">,</span>
+    <span class="n">N</span><span class="p">,</span>
+    <span class="n">percentiles</span><span class="p">,</span>
+    <span class="n">remove_all_nulls</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check inputs to compute_energy_ratio. Inputs reflect inputs to compute_energy_ratio,</span>
+<span class="sd">    with exception of df_, which is passed directly instead of er_in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check that the inputs are valid</span>
+    <span class="c1"># If use_predefined_ref is True, df_ must have a column named &#39;pow_ref&#39;</span>
+    <span class="k">if</span> <span class="n">use_predefined_ref</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;pow_ref&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;df_ must have a column named pow_ref when use_predefined_ref is True&quot;</span><span class="p">)</span>
+        <span class="c1"># If ref_turbines supplied, warn user that it will be ignored</span>
+        <span class="k">if</span> <span class="n">ref_turbines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;ref_turbines will be ignored when use_predefined_ref is True&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># ref_turbine must be supplied</span>
+        <span class="k">if</span> <span class="n">ref_turbines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ref_turbines must be supplied when use_predefined_ref is False&quot;</span><span class="p">)</span>
+
+    <span class="c1"># If use_predefined_ws is True, df_ must have a column named &#39;ws&#39;</span>
+    <span class="k">if</span> <span class="n">use_predefined_ws</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;ws&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;df_ must have a column named ws when use_predefined_ws is True&quot;</span><span class="p">)</span>
+        <span class="c1"># If ws_turbines supplied, warn user that it will be ignored</span>
+        <span class="k">if</span> <span class="n">ws_turbines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;ws_turbines will be ignored when use_predefined_ws is True&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># ws_turbine must be supplied</span>
+        <span class="k">if</span> <span class="n">ws_turbines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ws_turbines must be supplied when use_predefined_ws is False&quot;</span><span class="p">)</span>
+
+    <span class="c1"># If use_predefined_wd is True, df_ must have a column named &#39;wd&#39;</span>
+    <span class="k">if</span> <span class="n">use_predefined_wd</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;wd&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;df_ must have a column named wd when use_predefined_wd is True&quot;</span><span class="p">)</span>
+        <span class="c1"># If wd_turbines supplied, warn user that it will be ignored</span>
+        <span class="k">if</span> <span class="n">wd_turbines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;wd_turbines will be ignored when use_predefined_wd is True&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># wd_turbine must be supplied</span>
+        <span class="k">if</span> <span class="n">wd_turbines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wd_turbines must be supplied when use_predefined_wd is False&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Confirm that test_turbines is a list of ints or a numpy array of ints</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test_turbines</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test_turbines</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;test_turbines must be a list or numpy array of ints&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Confirm that test_turbines is not empty</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_turbines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;test_turbines cannot be empty&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Confirm that wd_bin_overlap_radius is less than or equal to wd_step/2</span>
+    <span class="k">if</span> <span class="n">wd_bin_overlap_radius</span> <span class="o">&gt;</span> <span class="n">wd_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wd_bin_overlap_radius must be less than or equal to wd_step/2&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Confirm the weight_by argument is valid</span>
+    <span class="k">if</span> <span class="n">weight_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;weight_by must be one of &quot;min&quot;, or &quot;sum&quot;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Confirm df_freq contains ws, wd and freq_val</span>
+    <span class="k">if</span> <span class="n">df_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;ws&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_freq</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;wd&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_freq</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;freq_val&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_freq</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;df_freq must have columns ws, wd and freq_val&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="bin_and_group_dataframe">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html#flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe">[docs]</a>
+<span class="k">def</span> <span class="nf">bin_and_group_dataframe</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">ref_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">test_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">wd_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">wd_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">wd_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">360.0</span><span class="p">,</span>
+    <span class="n">ws_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ws_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">ws_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+    <span class="n">wd_bin_overlap_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">bin_cols_without_df_name</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_df</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bin and aggregate a DataFrame based on wind direction and wind speed parameters.</span>
+
+<span class="sd">    This function takes a Polars DataFrame (df_) and performs</span>
+<span class="sd">    binning and aggregation operations based on</span>
+<span class="sd">    wind direction (wd) and wind speed (ws). It allows for optional</span>
+<span class="sd">    handling of reflected rows and grouping by</span>
+<span class="sd">    specific columns. The resulting DataFrame contains aggregated</span>
+<span class="sd">    statistics for reference and test power</span>
+<span class="sd">    columns within specified bins.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (DataFrame): The input Polars DataFrame to be processed.</span>
+<span class="sd">        ref_cols (List[str]): List of columns containing reference power data.</span>
+<span class="sd">        test_cols (List[str]): List of columns containing test power data.</span>
+<span class="sd">        wd_cols (List[str]): List of columns containing wind direction data.</span>
+<span class="sd">        ws_cols (List[str]): List of columns containing wind speed data.</span>
+<span class="sd">        wd_step (float, optional): Step size for wind direction binning. Defaults to 2.0.</span>
+<span class="sd">        wd_min (float, optional): Minimum wind direction value. Defaults to 0.0.</span>
+<span class="sd">        wd_max (float, optional): Maximum wind direction value. Defaults to 360.0.</span>
+<span class="sd">        ws_step (float, optional): Step size for wind speed binning. Defaults to 1.0.</span>
+<span class="sd">        ws_min (float, optional): Minimum wind speed value. Defaults to 0.0.</span>
+<span class="sd">        ws_max (float, optional): Maximum wind speed value. Defaults to 50.0.</span>
+<span class="sd">        wd_bin_overlap_radius (float, optional): Radius for overlapping wind direction bins.</span>
+<span class="sd">             Defaults to 0.0.</span>
+<span class="sd">        remove_all_nulls (bool, optional): If True, remove rows unless all valid instead of any.</span>
+<span class="sd">            Defaults to False.</span>
+<span class="sd">        bin_cols_without_df_name (List[str], optional): List of columns used</span>
+<span class="sd">            for grouping without &#39;df_name&#39;.</span>
+<span class="sd">        num_df (int, optional): Number of dataframes required for each bin combination.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        DataFrame: The resulting Polars DataFrame with aggregated statistics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If wd_bin_overlap_radius is not zero, add reflected rows</span>
+    <span class="k">if</span> <span class="n">wd_bin_overlap_radius</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="c1"># Need to obtain the wd column now rather than during binning</span>
+        <span class="n">df_</span> <span class="o">=</span> <span class="n">add_wd</span><span class="p">(</span><span class="n">df_</span><span class="p">,</span> <span class="n">wd_cols</span><span class="p">,</span> <span class="n">remove_all_nulls</span><span class="p">)</span>
+
+        <span class="c1"># Add reflected rows</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">wd_min</span><span class="p">,</span> <span class="n">wd_max</span> <span class="o">+</span> <span class="n">wd_step</span><span class="p">,</span> <span class="n">wd_step</span><span class="p">)</span>
+        <span class="n">df_</span> <span class="o">=</span> <span class="n">add_reflected_rows</span><span class="p">(</span><span class="n">df_</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">wd_bin_overlap_radius</span><span class="p">)</span>
+
+    <span class="c1"># Assign the wd/ws bins</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">add_ws_bin</span><span class="p">(</span><span class="n">df_</span><span class="p">,</span> <span class="n">ws_cols</span><span class="p">,</span> <span class="n">ws_step</span><span class="p">,</span> <span class="n">ws_min</span><span class="p">,</span> <span class="n">ws_max</span><span class="p">,</span> <span class="n">remove_all_nulls</span><span class="o">=</span><span class="n">remove_all_nulls</span><span class="p">)</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">add_wd_bin</span><span class="p">(</span><span class="n">df_</span><span class="p">,</span> <span class="n">wd_cols</span><span class="p">,</span> <span class="n">wd_step</span><span class="p">,</span> <span class="n">wd_min</span><span class="p">,</span> <span class="n">wd_max</span><span class="p">,</span> <span class="n">remove_all_nulls</span><span class="o">=</span><span class="n">remove_all_nulls</span><span class="p">)</span>
+
+    <span class="c1"># Assign the reference and test power columns</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">add_power_ref</span><span class="p">(</span><span class="n">df_</span><span class="p">,</span> <span class="n">ref_cols</span><span class="p">)</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">add_power_test</span><span class="p">(</span><span class="n">df_</span><span class="p">,</span> <span class="n">test_cols</span><span class="p">)</span>
+
+    <span class="n">bin_cols_with_df_name</span> <span class="o">=</span> <span class="n">bin_cols_without_df_name</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;df_name&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Group df_</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df_</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">all_horizontal</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">bin_cols_with_df_name</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">())</span>
+        <span class="p">)</span>  <span class="c1"># Select for all bin cols present</span>
+        <span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="n">bin_cols_with_df_name</span><span class="p">,</span> <span class="n">maintain_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="n">pl</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s2">&quot;pow_ref&quot;</span><span class="p">),</span> <span class="n">pl</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s2">&quot;pow_test&quot;</span><span class="p">),</span> <span class="n">pl</span><span class="o">.</span><span class="n">count</span><span class="p">()])</span>
+        <span class="c1"># Enforce that each ws/wd bin combination has to appear in all dataframes</span>
+        <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">bin_cols_without_df_name</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_df</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_</span></div>
+
+
+
+<div class="viewcode-block" id="add_bin_weights">
+<a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_bin_weights.html#flasc.utilities.energy_ratio_utilities.add_bin_weights">[docs]</a>
+<span class="k">def</span> <span class="nf">add_bin_weights</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">df_freq_pl</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bin_cols_without_df_name</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">weight_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add weights to DataFrame bins based on either frequency counts or</span>
+<span class="sd">    the provided frequency table df_freq_pl.</span>
+
+<span class="sd">    This function  assigns weights to DataFrame bins.  If &#39;df_freq_pl&#39; is provided,</span>
+<span class="sd">    these weights are used directly.  If &#39;df_freq_pl&#39; is not provided, the function</span>
+<span class="sd">    calculates the weights from the input DataFrame &#39;df_&#39;.</span>
+<span class="sd">    Weights can be determined as either the minimum (&#39;min&#39;) or the sum (&#39;sum&#39;) of counts.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (DataFrame): The input Polars DataFrame containing bins and frequency counts.</span>
+<span class="sd">        df_freq_pl (DataFrame, optional): A Polars DataFrame containing frequency counts for bins.</span>
+<span class="sd">            If not provided, the function will calculate these counts from &#39;df_&#39;.</span>
+<span class="sd">        bin_cols_without_df_name (List, optional): List of columns used for grouping</span>
+<span class="sd">            bins without &#39;df_name&#39;.</span>
+<span class="sd">        weight_by (str, optional): Weight calculation method, either &#39;min&#39;</span>
+<span class="sd">            (minimum count) or &#39;sum&#39; (sum of counts).</span>
+<span class="sd">            Defaults to &#39;min&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[pl.DataFrame, pl.DataFrame]: A tuple containing the modified DataFrame &#39;df_&#39;</span>
+<span class="sd">            with added weights and the DataFrame</span>
+<span class="sd">    &#39;df_freq_pl&#39; with the calculated frequency counts.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RuntimeError: If none of the ws/wd bins in data appear in df_freq.</span>
+<span class="sd">        UserWarning: If some bins in data are not in df_freq and will receive a weight of 0.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">df_freq_pl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Determine the weights per bin as either the min or sum count</span>
+        <span class="n">df_freq_pl</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">df_</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">bin_cols_without_df_name</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="n">bin_cols_without_df_name</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="n">pl</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">weight_by</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span> <span class="k">else</span> <span class="n">pl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)])</span>
+            <span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="s2">&quot;weight&quot;</span><span class="p">})</span>
+        <span class="p">)</span>
+
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">df_</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_freq_pl</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Check if all the values in the weight column are null</span>
+    <span class="k">if</span> <span class="n">df_</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_null</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;None of the ws/wd bins in data appear in df_freq&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if any of the values in the weight column are null</span>
+    <span class="k">if</span> <span class="n">df_</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_null</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Some bins in data are not in df_freq and will get 0 weight&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Fill the null values with zeros</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fill_null</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;zero&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Normalize the weights</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">truediv</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+
+    <span class="k">return</span> <span class="n">df_</span><span class="p">,</span> <span class="n">df_freq_pl</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By National Renewable Energy Laboratory
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

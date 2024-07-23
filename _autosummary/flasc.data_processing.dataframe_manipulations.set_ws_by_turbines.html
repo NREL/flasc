@@ -1,0 +1,768 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>flasc.data_processing.dataframe_manipulations.set_ws_by_turbines &#8212; FLASC</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=30a733bc"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-3PMGTE1H70"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_turbines';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html" />
+    <link rel="prev" title="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines" href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
+    <script>document.write(`<img src="../_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    FLASC documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../energy_ratio.html">Energy ratio analysis</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../total_uplift.html">Total uplift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api.html">API Documentation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_input.generate_block_list.html">flasc.analysis.energy_ratio_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_output.html">flasc.analysis.energy_ratio_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.model_fitting.html">flasc.model_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.model_fitting.floris_sensitivity_analysis.html">flasc.model_fitting.floris_sensitivity_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html">flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.model_fitting.floris_tuning.html">flasc.model_fitting.floris_tuning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss.html">flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.select_best_wake_model_parameter.html">flasc.model_fitting.floris_tuning.select_best_wake_model_parameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.select_best_wd_std.html">flasc.model_fitting.floris_tuning.select_best_wd_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift.html">flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses.html">flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.sweep_wd_std_for_er.html">flasc.model_fitting.floris_tuning.sweep_wd_std_for_er</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.model_fitting.turbulence_estimator.html">flasc.model_fitting.turbulence_estimator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.turbulence_estimator.ti_estimator.html">flasc.model_fitting.turbulence_estimator.ti_estimator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.model_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="flasc.data_processing.html">flasc.data_processing</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active has-children"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.html">flasc.data_processing.dataframe_manipulations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_drop_nan_rows.html">flasc.data_processing.dataframe_manipulations.df_drop_nan_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing.html">flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_reduce_precision.html">flasc.data_processing.dataframe_manipulations.df_reduce_precision</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_ti.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_wd.html">flasc.data_processing.dataframe_manipulations.filter_df_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_ws.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4 current active"><a class="current reference internal" href="#">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.energy_ratio_wd_bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.filtering.html">flasc.data_processing.filtering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.df_get_no_faulty_measurements.html">flasc.data_processing.filtering.df_get_no_faulty_measurements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html">flasc.data_processing.filtering.df_mark_turbdata_as_faulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html">flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.FlascFilter.html">flasc.data_processing.filtering.FlascFilter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.find_sensor_faults.html">flasc.data_processing.find_sensor_faults</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults.html">flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_downsample.html">flasc.data_processing.time_operations.df_downsample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_movingaverage.html">flasc.data_processing.time_operations.df_movingaverage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_resample_by_interpolation.html">flasc.data_processing.time_operations.df_resample_by_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.flatten_cols.html">flasc.data_processing.time_operations.flatten_cols</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.utilities.html">flasc.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.circular_statistics.html">flasc.utilities.circular_statistics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.circular_statistics.calc_wd_mean_radial.html">flasc.utilities.circular_statistics.calc_wd_mean_radial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.circular_statistics.calculate_wd_statistics.html">flasc.utilities.circular_statistics.calculate_wd_statistics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.html">flasc.utilities.energy_ratio_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_bin_weights.html">flasc.utilities.energy_ratio_utilities.add_bin_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_power_ref.html">flasc.utilities.energy_ratio_utilities.add_power_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_power_test.html">flasc.utilities.energy_ratio_utilities.add_power_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_reflected_rows.html">flasc.utilities.energy_ratio_utilities.add_reflected_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_wd.html">flasc.utilities.energy_ratio_utilities.add_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_wd_bin.html">flasc.utilities.energy_ratio_utilities.add_wd_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_ws.html">flasc.utilities.energy_ratio_utilities.add_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.floris_tools.html">flasc.utilities.floris_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html">flasc.utilities.floris_tools.get_dependent_turbines_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_turbs_in_radius.html">flasc.utilities.floris_tools.get_turbs_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_upstream_turbs_floris.html">flasc.utilities.floris_tools.get_upstream_turbs_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html">flasc.utilities.floris_tools.interpolate_floris_from_df_approx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.lookup_table_tools.html">flasc.utilities.lookup_table_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant.html">flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.optimization.html">flasc.utilities.optimization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.estimate_ti.html">flasc.utilities.optimization.estimate_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.find_timeshift_between_dfs.html">flasc.utilities.optimization.find_timeshift_between_dfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.match_y_curves_by_offset.html">flasc.utilities.optimization.match_y_curves_by_offset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.tuner_utilities.html">flasc.utilities.tuner_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.nested_get.html">flasc.utilities.tuner_utilities.nested_get</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.nested_set.html">flasc.utilities.tuner_utilities.nested_set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.replicate_nan_values.html">flasc.utilities.tuner_utilities.replicate_nan_values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.resim_floris.html">flasc.utilities.tuner_utilities.resim_floris</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.utilities.html">flasc.utilities.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.estimate_dt.html">flasc.utilities.utilities.estimate_dt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.get_num_turbines.html">flasc.utilities.utilities.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.interp_with_max_gap.html">flasc.utilities.utilities.interp_with_max_gap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.utilities_examples.html">flasc.utilities.utilities_examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities_examples.load_floris_artificial.html">flasc.utilities.utilities_examples.load_floris_artificial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities_examples.load_floris_smarteole.html">flasc.utilities.utilities_examples.load_floris_smarteole</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/edit/main/docs/_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2F_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_turbines"><code class="docutils literal notranslate"><span class="pre">set_ws_by_turbines()</span></code></a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="flasc-data-processing-dataframe-manipulations-set-ws-by-turbines">
+<h1>flasc.data_processing.dataframe_manipulations.set_ws_by_turbines<a class="headerlink" href="#flasc-data-processing-dataframe-manipulations-set-ws-by-turbines" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines">
+<span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ws_by_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_numbers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ws_by_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_turbines" title="Link to this definition">#</a></dt>
+<dd><p>Add a column called 'ws' in your dataframe with value equal
+to the circular-averaged wind direction measurements of all
+the turbines in turbine_numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
+<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
+<li><p><strong>ws_%03d</strong></p></li>
+<li><p><strong>ti_%03d</strong></p></li>
+<li><p><strong>pow_%03d</strong></p></li>
+<li><p><strong>and</strong></p></li>
+<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
+<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that</p></li>
+<li><p><strong>average.</strong> (<em>should be used to calculate the column</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataframe which equals the inserted dataframe
+plus the additional column called 'ws'.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./_autosummary"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_turbines"><code class="docutils literal notranslate"><span class="pre">set_ws_by_turbines()</span></code></a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By National Renewable Energy Laboratory
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

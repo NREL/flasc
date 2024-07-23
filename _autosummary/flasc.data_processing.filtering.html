@@ -1,0 +1,1395 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>flasc.data_processing.filtering &#8212; FLASC</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=30a733bc"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-3PMGTE1H70"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/flasc.data_processing.filtering';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="flasc.data_processing.filtering.df_get_no_faulty_measurements" href="flasc.data_processing.filtering.df_get_no_faulty_measurements.html" />
+    <link rel="prev" title="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation" href="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
+    <script>document.write(`<img src="../_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    FLASC documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../energy_ratio.html">Energy ratio analysis</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../total_uplift.html">Total uplift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api.html">API Documentation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_input.generate_block_list.html">flasc.analysis.energy_ratio_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_output.html">flasc.analysis.energy_ratio_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.model_fitting.html">flasc.model_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.model_fitting.floris_sensitivity_analysis.html">flasc.model_fitting.floris_sensitivity_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html">flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.model_fitting.floris_tuning.html">flasc.model_fitting.floris_tuning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss.html">flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.select_best_wake_model_parameter.html">flasc.model_fitting.floris_tuning.select_best_wake_model_parameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.select_best_wd_std.html">flasc.model_fitting.floris_tuning.select_best_wd_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift.html">flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses.html">flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.floris_tuning.sweep_wd_std_for_er.html">flasc.model_fitting.floris_tuning.sweep_wd_std_for_er</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.model_fitting.turbulence_estimator.html">flasc.model_fitting.turbulence_estimator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.turbulence_estimator.ti_estimator.html">flasc.model_fitting.turbulence_estimator.ti_estimator</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.model_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="flasc.data_processing.html">flasc.data_processing</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.html">flasc.data_processing.dataframe_manipulations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_drop_nan_rows.html">flasc.data_processing.dataframe_manipulations.df_drop_nan_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing.html">flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_reduce_precision.html">flasc.data_processing.dataframe_manipulations.df_reduce_precision</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_ti.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_wd.html">flasc.data_processing.dataframe_manipulations.filter_df_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_ws.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.energy_ratio_wd_bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 current active has-children"><a class="current reference internal" href="#">flasc.data_processing.filtering</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.df_get_no_faulty_measurements.html">flasc.data_processing.filtering.df_get_no_faulty_measurements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html">flasc.data_processing.filtering.df_mark_turbdata_as_faulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html">flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.FlascFilter.html">flasc.data_processing.filtering.FlascFilter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.find_sensor_faults.html">flasc.data_processing.find_sensor_faults</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults.html">flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_downsample.html">flasc.data_processing.time_operations.df_downsample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_movingaverage.html">flasc.data_processing.time_operations.df_movingaverage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_resample_by_interpolation.html">flasc.data_processing.time_operations.df_resample_by_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.flatten_cols.html">flasc.data_processing.time_operations.flatten_cols</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.utilities.html">flasc.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.circular_statistics.html">flasc.utilities.circular_statistics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.circular_statistics.calc_wd_mean_radial.html">flasc.utilities.circular_statistics.calc_wd_mean_radial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.circular_statistics.calculate_wd_statistics.html">flasc.utilities.circular_statistics.calculate_wd_statistics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.html">flasc.utilities.energy_ratio_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_bin_weights.html">flasc.utilities.energy_ratio_utilities.add_bin_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_power_ref.html">flasc.utilities.energy_ratio_utilities.add_power_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_power_test.html">flasc.utilities.energy_ratio_utilities.add_power_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_reflected_rows.html">flasc.utilities.energy_ratio_utilities.add_reflected_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_wd.html">flasc.utilities.energy_ratio_utilities.add_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_wd_bin.html">flasc.utilities.energy_ratio_utilities.add_wd_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_ws.html">flasc.utilities.energy_ratio_utilities.add_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.floris_tools.html">flasc.utilities.floris_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html">flasc.utilities.floris_tools.get_dependent_turbines_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_turbs_in_radius.html">flasc.utilities.floris_tools.get_turbs_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_upstream_turbs_floris.html">flasc.utilities.floris_tools.get_upstream_turbs_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html">flasc.utilities.floris_tools.interpolate_floris_from_df_approx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.lookup_table_tools.html">flasc.utilities.lookup_table_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant.html">flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.optimization.html">flasc.utilities.optimization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.estimate_ti.html">flasc.utilities.optimization.estimate_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.find_timeshift_between_dfs.html">flasc.utilities.optimization.find_timeshift_between_dfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.match_y_curves_by_offset.html">flasc.utilities.optimization.match_y_curves_by_offset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.tuner_utilities.html">flasc.utilities.tuner_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.nested_get.html">flasc.utilities.tuner_utilities.nested_get</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.nested_set.html">flasc.utilities.tuner_utilities.nested_set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.replicate_nan_values.html">flasc.utilities.tuner_utilities.replicate_nan_values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.resim_floris.html">flasc.utilities.tuner_utilities.resim_floris</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.utilities.html">flasc.utilities.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.estimate_dt.html">flasc.utilities.utilities.estimate_dt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.get_num_turbines.html">flasc.utilities.utilities.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.interp_with_max_gap.html">flasc.utilities.utilities.interp_with_max_gap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.utilities_examples.html">flasc.utilities.utilities_examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities_examples.load_floris_artificial.html">flasc.utilities.utilities_examples.load_floris_artificial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities_examples.load_floris_smarteole.html">flasc.utilities.utilities_examples.load_floris_smarteole</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/edit/main/docs/_autosummary/flasc.data_processing.filtering.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2F_autosummary/flasc.data_processing.filtering.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/_autosummary/flasc.data_processing.filtering.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>flasc.data_processing.filtering</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.df_get_no_faulty_measurements"><code class="docutils literal notranslate"><span class="pre">df_get_no_faulty_measurements()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.df_mark_turbdata_as_faulty"><code class="docutils literal notranslate"><span class="pre">df_mark_turbdata_as_faulty()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter"><code class="docutils literal notranslate"><span class="pre">FlascFilter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter._get_all_unique_flags"><code class="docutils literal notranslate"><span class="pre">FlascFilter._get_all_unique_flags()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves"><code class="docutils literal notranslate"><span class="pre">FlascFilter._reset_mean_power_curves()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves"><code class="docutils literal notranslate"><span class="pre">FlascFilter._get_mean_power_curves()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.reset_filters"><code class="docutils literal notranslate"><span class="pre">FlascFilter.reset_filters()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.filter_by_condition"><code class="docutils literal notranslate"><span class="pre">FlascFilter.filter_by_condition()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.filter_by_sensor_stuck_faults"><code class="docutils literal notranslate"><span class="pre">FlascFilter.filter_by_sensor_stuck_faults()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.filter_by_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.filter_by_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.filter_by_floris_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.filter_by_floris_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.get_df"><code class="docutils literal notranslate"><span class="pre">FlascFilter.get_df()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.get_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.get_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_farm_mean_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_farm_mean_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_custom_scatter()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter_bokeh"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_custom_scatter_bokeh()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_in_ws_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_postprocessed_in_ws_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_in_time()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_in_time_bokeh()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines"><code class="docutils literal notranslate"><span class="pre">filter_df_by_faulty_impacting_turbines()</span></code></a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-flasc.data_processing.filtering">
+<span id="flasc-data-processing-filtering"></span><h1>flasc.data_processing.filtering<a class="headerlink" href="#module-flasc.data_processing.filtering" title="Link to this heading">#</a></h1>
+<p class="rubric">Functions</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.filtering.df_get_no_faulty_measurements.html#flasc.data_processing.filtering.df_get_no_faulty_measurements" title="flasc.data_processing.filtering.df_get_no_faulty_measurements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_get_no_faulty_measurements</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html#flasc.data_processing.filtering.df_mark_turbdata_as_faulty" title="flasc.data_processing.filtering.df_mark_turbdata_as_faulty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_mark_turbdata_as_faulty</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html#flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines" title="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_df_by_faulty_impacting_turbines</span></code></a></p></td>
+<td><p>Assigns a turbine's measurement to NaN for each timestamp for which any of the turbines</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter" title="flasc.data_processing.filtering.FlascFilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlascFilter</span></code></a></p></td>
+<td><p>This class allows a user to filter turbine data based on the wind-speed power curve.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.df_get_no_faulty_measurements">
+<span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">df_get_no_faulty_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#df_get_no_faulty_measurements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.df_get_no_faulty_measurements" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.df_mark_turbdata_as_faulty">
+<span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">df_mark_turbdata_as_faulty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#df_mark_turbdata_as_faulty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.df_mark_turbdata_as_faulty" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">FlascFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter" title="Link to this definition">#</a></dt>
+<dd><p>This class allows a user to filter turbine data based on the
+wind-speed power curve. This class includes several useful filtering
+.. method:: 1. Filtering based on prespecified boxes/windows. Any data outside</p>
+<blockquote>
+<div><p>of the specified box is considered faulty.</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">2.</span> <span class="pre">Filtering</span> <span class="pre">based</span> <span class="pre">on</span> <span class="pre">x-wise</span> <span class="pre">distance</span> <span class="pre">from</span> <span class="pre">the</span> <span class="pre">mean</span> <span class="pre">power</span> <span class="pre">curve.</span> <span class="pre">Any</span></span></dt>
+<dd><p>data too far off the mean curve is considered faulty.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">3.</span> <span class="pre">Filtering</span> <span class="pre">based</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">standard</span> <span class="pre">deviation</span> <span class="pre">from</span> <span class="pre">the</span> <span class="pre">mean</span> <span class="pre">power</span></span></dt>
+<dd><p>curve. This is slightly different from (2) in the point that
+it allows the user to consider variations in standard deviation
+per power bin.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter._get_all_unique_flags">
+<span class="sig-name descname"><span class="pre">_get_all_unique_flags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter._get_all_unique_flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter._get_all_unique_flags" title="Link to this definition">#</a></dt>
+<dd><p>Private function that grabs all the unique filter flags
+that are available in self.df_filters and returns them
+as a list of strings. This is helpful when plotting the
+various filter sources in a scatter plot, for example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>List with all unique flags available</dt><dd><p>in self.df_filters, each entry being a string.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>all_flags (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves">
+<span class="sig-name descname"><span class="pre">_reset_mean_power_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ws_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">0.5,</span> <span class="pre">1.,</span> <span class="pre">1.5,</span> <span class="pre">2.,</span> <span class="pre">2.5,</span> <span class="pre">3.,</span> <span class="pre">3.5,</span> <span class="pre">4.,</span> <span class="pre">4.5,</span> <span class="pre">5.,</span> <span class="pre">5.5,</span> <span class="pre">6.,</span> <span class="pre">6.5,</span> <span class="pre">7.,</span> <span class="pre">7.5,</span> <span class="pre">8.,</span> <span class="pre">8.5,</span> <span class="pre">9.,</span> <span class="pre">9.5,</span> <span class="pre">10.,</span> <span class="pre">10.5,</span> <span class="pre">11.,</span> <span class="pre">11.5,</span> <span class="pre">12.,</span> <span class="pre">12.5,</span> <span class="pre">13.,</span> <span class="pre">13.5,</span> <span class="pre">14.,</span> <span class="pre">14.5,</span> <span class="pre">15.,</span> <span class="pre">15.5,</span> <span class="pre">16.,</span> <span class="pre">16.5,</span> <span class="pre">17.,</span> <span class="pre">17.5,</span> <span class="pre">18.,</span> <span class="pre">18.5,</span> <span class="pre">19.,</span> <span class="pre">19.5,</span> <span class="pre">20.,</span> <span class="pre">20.5,</span> <span class="pre">21.,</span> <span class="pre">21.5,</span> <span class="pre">22.,</span> <span class="pre">22.5,</span> <span class="pre">23.,</span> <span class="pre">23.5,</span> <span class="pre">24.,</span> <span class="pre">24.5,</span> <span class="pre">25.])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter._reset_mean_power_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">
+<span class="sig-name descname"><span class="pre">_get_mean_power_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter._get_mean_power_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves" title="Link to this definition">#</a></dt>
+<dd><p>Calculates the mean power production in bins of the wind speed,
+for all turbines in the wind farm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ws_bins</strong> (<em>[</em><em>iteratible</em><em>]</em><em>, </em><em>optional</em>) -- Wind speed bins. Defaults to
+np.arange(0.0, 25.5, 0.5).</p></li>
+<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- <p>Dataframe containing the turbine data,
+formatted in the generic SCADA data format. Namely, the
+dataframe should at the very least contain the columns:</p>
+<blockquote>
+<div><ul>
+<li><p>Time of each measurement: time</p></li>
+<li><p>Wind speed of each turbine: ws_000, ws_001, ...</p></li>
+<li><p>Power production of each turbine: pow_000, pow_001, ...</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>turbine_subset</strong> (<em>list</em><em>, </em><em>optional</em>) -- List of turbine indices to
+calculate the mean power curve for. If None is specified,
+defaults to calculating it for all turbines.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe containing the wind</dt><dd><p>speed bins and the mean power production value for every
+turbine.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pw_curve_df ([pd.DataFrame])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.reset_filters">
+<span class="sig-name descname"><span class="pre">reset_filters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.reset_filters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.reset_filters" title="Link to this definition">#</a></dt>
+<dd><p>Reset all filter variables and assume all data is clean.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.filter_by_condition">
+<span class="sig-name descname"><span class="pre">filter_by_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_filters_to_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.filter_by_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.filter_by_condition" title="Link to this definition">#</a></dt>
+<dd><p>This is a generic method to filter the dataframe for any particular
+condition, for a specific turbine or specific set of turbines. This
+provides a platform for user-specific queries to filter and then inspect
+the data with. You can call this function multiple times and the filters
+will aggregate chronologically. This filter directly cuts down the
+dataframe self.df to a filtered subset.</p>
+<dl>
+<dt>A correct usage is, for example:</dt><dd><dl class="simple">
+<dt>FlascFilter.filter_by_condition(</dt><dd><p>condition=(FlascFilter.df[&quot;pow_{:03d}&quot;.format(ti)] &lt; -1.0e-6),
+label=&quot;Power below zero&quot;,
+ti=ti,
+verbose=True,</p>
+</dd>
+</dl>
+<p>)</p>
+</dd>
+<dt>and:</dt><dd><dl class="simple">
+<dt>FlascFilter.filter_by_condition(</dt><dd><p>condition=(FlascFilter.df[&quot;is_operation_normal_{:03d}&quot;.format(ti)] == False),
+label=&quot;Self-flagged (is_operation_normal==False)&quot;,
+ti=ti,
+verbose=True,</p>
+</dd>
+</dl>
+<p>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>condition</strong> (<em>iteratible</em>) -- List or array-like variable with bool entries
+depicting whether the condition is met or not. These should be
+situations in which you classify the data as faulty. For example,
+high wind speeds but low power productions, or NaNs, self-flagged
+status variables.</p></li>
+<li><p><strong>label</strong> (<em>str</em>) -- Name or description of the fault/condition that is flagged.</p></li>
+<li><p><strong>ti</strong> (<em>int</em>) -- Turbine indentifier, typically an integer, but may also be a
+list. This flags the measurements of all these turbines as faulty
+for which condition==True.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Print information to console. Defaults to True.</p></li>
+<li><p><strong>apply_filters_to_df</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Assign the flagged measurements in
+self.df directly as NaN. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The filtered dataframe. All measurements that are flagged as faulty</dt><dd><p>are overwritten by &quot;None&quot;/&quot;NaN&quot;. If apply_filters_to_df==True, then this
+dataframe is equal to the internally filtered dataframe 'self.df'.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>df_out</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.filter_by_sensor_stuck_faults">
+<span class="sig-name descname"><span class="pre">filter_by_sensor_stuck_faults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_consecutive_measurements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stddev_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.filter_by_sensor_stuck_faults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.filter_by_sensor_stuck_faults" title="Link to this definition">#</a></dt>
+<dd><p>Filter the turbine measurements for sensor-stuck type of faults. This is
+the situation where a turbine measurement reads the exact same value for
+multiple consecutive timestamps. This typically indicates a &quot;frozen&quot; sensor
+rather than a true physical effect. This is particularly the case for
+signals that are known to change at a high rate and are measured with high
+precision, e.g., wind speed and wind direction measurements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>columns</strong> (<em>list</em>) -- List of columns which should be checked for sensor-stuck
+type of faults. A typical choice is [&quot;ws_000&quot;, &quot;wd_000&quot;] with ti=0,
+which are the wind speed and wind direction for turbine 0. We can
+safely assume that those measurements should change between every
+10-minute measurement. Note that you may not want to include &quot;pow_000&quot;,
+since that measurement may be constant for longer periods of time even
+during normal operation, e.g., when the turbine is shutdown at very
+low wind speeds or when the turbine is operating above rated wind
+speed. Note that if any of the signals in 'columns' is flagged as
+frozen (&quot;stuck&quot;), all measurements of that turbine will be marked
+faulty.</p></li>
+<li><p><strong>ti</strong> (<em>int</em>) -- The turbine identifier for which its measurements should be
+flagged as faulty when the signals in the columns are found to be
+frozen (&quot;stuck&quot;). This is typically the turbine number that corresponds
+to the columns, e.g., if you use  columns=[&quot;ws_000&quot;, &quot;wd_000&quot;] then
+ti=0, and if you use  [&quot;ws_003&quot;, &quot;wd_003&quot;] you use ti=3.</p></li>
+<li><p><strong>n_consecutive_measurements</strong> (<em>int</em><em>, </em><em>optional</em>) -- Number of consecutive
+measurements that should read the same value for the measurement to be
+considered &quot;frozen&quot;. Defaults to 3.</p></li>
+<li><p><strong>stddev_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) -- Threshold value, typically a low number.
+If the set of consecutive measurements do not differ by more than this
+value, then the measurements is considered stuck. Defaults to 0.001.</p></li>
+<li><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Produce plots highlighting a handful of situations
+in which the measurements are stuck in time. This is typically only
+helpful if you have more than 1% of measurements being faulty, and
+you would like to figure out whether this is a numerical issue or
+this is actually happening. Defaults to False.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Print information to console. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Pandas DataFrame with the filtered data, in which faulty turbine</dt><dd><p>measurements are flagged as None/NaN. This is an aggregated filtering
+variable, so it includes faulty-flagged measurements from filter
+operations in previous steps.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self.df</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.filter_by_power_curve">
+<span class="sig-name descname"><span class="pre">filter_by_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_ws_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pow_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_ws_rb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pow_rb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_deadband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pow_deadband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.filter_by_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.filter_by_power_curve" title="Link to this definition">#</a></dt>
+<dd><p>Filter the data by offset from the mean power curve in x-
+directions. This is an iterative process because the estimated mean
+curve actually changes as data is filtered. This process typically
+converges within a couple iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ti</strong> (<em>int</em>) -- The turbine identifier for which the data should be</p></li>
+<li><p><strong>filtered.</strong></p></li>
+<li><p><strong>m_ws_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining</p></li>
+<li><p><strong>this</strong> (<em>the right bound for the power curve. Any data to the right of</em>)</p></li>
+<li><p><strong>0.95.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
+<li><p><strong>m_pow_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining</p></li>
+<li><p><strong>this</strong></p></li>
+<li><p><strong>1.01.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
+<li><p><strong>m_ws_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining</p></li>
+<li><p><strong>this</strong></p></li>
+<li><p><strong>1.05.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
+<li><p><strong>m_pow_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining</p></li>
+<li><p><strong>this</strong></p></li>
+<li><p><strong>0.99.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
+<li><p><strong>no_iterations</strong> (<em>int</em><em>, </em><em>optional</em>) -- Number of iterations. The</p></li>
+<li><p><strong>steps</strong> (<em>solution typically converges in 2-3</em>)</p></li>
+<li><p><strong>is</strong> (<em>but as the process</em>)</p></li>
+<li><p><strong>fast</strong> (<em>very</em>)</p></li>
+<li><p><strong>iterations.</strong> (<em>it's better to run a higher number of</em>)</p></li>
+<li><p><strong>10.</strong> (<em>Defaults to</em>)</p></li>
+<li><p><strong>cutoff_ws</strong> (<em>float</em><em>, </em><em>optional</em>) -- Upper limit for the filtering to occur.</p></li>
+<li><p><strong>Typically</strong></p></li>
+<li><p><strong>Namely</strong> (<em>this is a value just below the cut-out wind speed.</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p>:param :
+:param issues arise if you put this wind speed above the cut-out wind speed:
+:param :
+:param because we effectively end up with two curves for the same power:
+:param production:
+:type production: one at region 2, one going down from cut-out wind speed
+:param This confuses the algorithm. Hence:
+:param suggested to put this somewhere:
+:param around 15-25 m/s. Defaults to 20 m/s.:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.filter_by_floris_power_curve">
+<span class="sig-name descname"><span class="pre">filter_by_floris_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_ws_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pow_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_ws_rb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pow_rb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_deadband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pow_deadband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.filter_by_floris_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.filter_by_floris_power_curve" title="Link to this definition">#</a></dt>
+<dd><p>Filter the data by offset from the floris power curve in x-
+directions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fm</strong> (<em>FlorisModel</em>) -- The FlorisModel object for the farm</p></li>
+<li><p><strong>m_ws_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining</p></li>
+<li><p><strong>this</strong> (<em>the right bound for the power curve. Any data to the right of</em>)</p></li>
+<li><p><strong>0.95.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
+<li><p><strong>m_pow_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining</p></li>
+<li><p><strong>this</strong></p></li>
+<li><p><strong>1.01.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
+<li><p><strong>m_ws_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining</p></li>
+<li><p><strong>this</strong></p></li>
+<li><p><strong>1.05.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
+<li><p><strong>m_pow_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining</p></li>
+<li><p><strong>this</strong></p></li>
+<li><p><strong>0.99.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
+<li><p><strong>ws_deadband</strong> (<em>float</em><em>, </em><em>optional</em>) -- Deadband in [m/s] around the median</p></li>
+<li><p><strong>valid.</strong> (<em>power curve around which data is by default classified as</em>)</p></li>
+<li><p><strong>0.50.</strong> (<em>Defaults to</em>)</p></li>
+<li><p><strong>pow_deadband</strong> (<em>float</em><em>, </em><em>optional</em>) -- Deadband in [kW] around the median</p></li>
+<li><p><strong>valid.</strong></p></li>
+<li><p><strong>20.0.</strong> (<em>Defaults to</em>)</p></li>
+<li><p><strong>cutoff_ws</strong> (<em>float</em><em>, </em><em>optional</em>) -- Wind speed up to which the median</p></li>
+<li><p><strong>should</strong> (<em>power curve is calculated and the data is filtered for. You</em>)</p></li>
+<li><p><strong>wind</strong> (<em>make sure this variable is set to a value above the rated</em>)</p></li>
+<li><p><strong>experiencing</strong> (<em>speed and below the cut-out wind speed. If you are</em>)</p></li>
+<li><p><strong>downward</strong> (<em>problems with data filtering and your data points have a</em>)</p></li>
+<li><p><strong>speeds</strong> (<em>trend near the high wind</em>)</p></li>
+<li><p><strong>variable's</strong> (<em>try decreasing this</em>)</p></li>
+<li><p><strong>15.0.</strong> (<em>value to</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.get_df">
+<span class="sig-name descname"><span class="pre">get_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.get_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.get_df" title="Link to this definition">#</a></dt>
+<dd><p>Return the filtered dataframe to the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Pandas DataFrame with the filtered data, in which faulty turbine</dt><dd><p>measurements are flagged as None/NaN. This is an aggregated filtering
+variable, so it includes faulty-flagged measurements from filter
+operations in previous steps.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>self.df</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.get_power_curve">
+<span class="sig-name descname"><span class="pre">get_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calculate_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.get_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.get_power_curve" title="Link to this definition">#</a></dt>
+<dd><p>Return the turbine estimated mean power curves to the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>calculate_missing</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Calculate the median power
+curves for the turbines for the turbines of which their
+power curves were previously not yet calculated.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe containing the wind</dt><dd><p>speed bins and the mean power production value for every
+turbine.</p>
+</dd>
+<dt>calculate_missing (bool, optional): Calculate the median power</dt><dd><p>curves for the turbines for the turbines of which their
+power curves were previously not yet calculated.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pw_curve_df ([pd.DataFrame])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_farm_mean_power_curve">
+<span class="sig-name descname"><span class="pre">plot_farm_mean_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_farm_mean_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_farm_mean_power_curve" title="Link to this definition">#</a></dt>
+<dd><p>Plot all turbines' power curves in a single figure. Also estimate
+and plot a mean turbine power curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fm</strong> (<em>FlorisModel</em>) -- The FlorisModel object for the farm. If
+specified by the user, then the farm-average turbine power curve
+from FLORIS will be plotted on top of the SCADA-based power curves.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter">
+<span class="sig-name descname"><span class="pre">plot_filters_custom_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Wind</span> <span class="pre">speed</span> <span class="pre">(m/s)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Power</span> <span class="pre">(kW)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_custom_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter" title="Link to this definition">#</a></dt>
+<dd><p>Plot the filtered data in a scatter plot, categorized
+by the source of their filter/fault. This is a generic
+function that allows the user to plot various numeric
+variables on the x and y axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ti</strong> (<em>int</em>) -- Turbine identifier. This is used to determine
+which turbine's filter history should be looked at.</p></li>
+<li><p><strong>x_col</strong> (<em>str</em>) -- Column name to plot on the x-axis. A common
+choice is &quot;ws_000&quot; for ti=0, for example.</p></li>
+<li><p><strong>y_col</strong> (<em>str</em>) -- Column name to plot on the y-axis. A common
+choice is &quot;pow_000&quot; for ti=0, for example.</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em><em>, </em><em>optional</em>) -- Figure x-axis label. Defaults to
+'Wind speed (m/s)'.</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em><em>, </em><em>optional</em>) -- Figure y-axis label. Defaults to
+'Power (kW)'.</p></li>
+<li><p><strong>ax</strong> (<em>plt.Axis</em><em>, </em><em>optional</em>) -- <p>Pyplot Figure axis in which the
+figure should be produced. If None specified, then</p>
+<blockquote>
+<div><p>creates a new figure. Defaults to None.</p>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure axis in which the scatter plot is drawn.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ax</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter_bokeh">
+<span class="sig-name descname"><span class="pre">plot_filters_custom_scatter_bokeh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Wind-speed</span> <span class="pre">vs.</span> <span class="pre">power</span> <span class="pre">curve'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Wind</span> <span class="pre">speed</span> <span class="pre">(m/s)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Power</span> <span class="pre">(kW)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_custom_scatter_bokeh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter_bokeh" title="Link to this definition">#</a></dt>
+<dd><p>Plot the filtered data in a scatter plot, categorized
+by the source of their filter/fault. This is a generic
+function that allows the user to plot various numeric
+variables on the x and y axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ti</strong> (<em>int</em>) -- Turbine identifier. This is used to determine
+which turbine's filter history should be looked at.</p></li>
+<li><p><strong>x_col</strong> (<em>str</em>) -- Column name to plot on the x-axis. A common
+choice is &quot;ws_000&quot; for ti=0, for example.</p></li>
+<li><p><strong>y_col</strong> (<em>str</em>) -- Column name to plot on the y-axis. A common
+choice is &quot;pow_000&quot; for ti=0, for example.</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) -- Figure title. Defaults to 'Wind-
+speed vs. power curve'.</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em><em>, </em><em>optional</em>) -- Figure x-axis label. Defaults to
+'Wind speed (m/s)'.</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em><em>, </em><em>optional</em>) -- Figure y-axis label. Defaults to
+'Power (kW)'.</p></li>
+<li><p><strong>p</strong> (<em>Bokeh Figure</em><em>, </em><em>optional</em>) -- Figure to plot in. If None is
+specified, creates a new figure. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure axis in which the scatter plot is drawn.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ax</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve">
+<span class="sig-name descname"><span class="pre">plot_filters_in_ws_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_in_ws_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve" title="Link to this definition">#</a></dt>
+<dd><p>Plot the wind speed power curve and connect each faulty datapoint
+to the label it was classified as faulty with.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ti</strong> (<em>int</em>) -- Turbine number which should be plotted.</p></li>
+<li><p><strong>fm</strong> (<em>FlorisModel</em><em>, </em><em>optional</em>) -- floris object. If not None, will</p></li>
+<li><p><strong>floris.</strong> (<em>use this to plot the turbine power curves as implemented in</em>)</p></li>
+<li><p><strong>None.</strong> (<em>Defaults to</em>)</p></li>
+<li><p><strong>ax</strong> (<em>plt.Axis</em>) -- Pyplot Axis object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve">
+<span class="sig-name descname"><span class="pre">plot_postprocessed_in_ws_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_postprocessed_in_ws_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve" title="Link to this definition">#</a></dt>
+<dd><p>Plot the wind speed power curve and mark faulty data according to
+their filters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ti</strong> (<em>int</em>) -- Turbine number which should be plotted.</p></li>
+<li><p><strong>fm</strong> (<em>FlorisModel</em><em>, </em><em>optional</em>) -- floris object. If not None, will</p></li>
+<li><p><strong>floris.</strong> (<em>use this to plot the turbine power curves as implemented in</em>)</p></li>
+<li><p><strong>None.</strong> (<em>Defaults to</em>)</p></li>
+<li><p><strong>ax</strong> (<em>Matplotlib.pyplot Axis</em><em>, </em><em>optional</em>) -- Axis to plot in. If None is
+specified, creates a new figure and axis. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_in_time">
+<span class="sig-name descname"><span class="pre">plot_filters_in_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_in_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time" title="Link to this definition">#</a></dt>
+<dd><p>Generate bar plot where each week of data is gathered and its
+filtering results will be shown relative to the data size of each
+week. This plot can particularly be useful to investigate whether
+certain weeks/time periods show a particular high number of faulty
+measurements. This can often be correlated with maintenance time
+windows and the user may opt to completely remove any measurements
+in the found time period from the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ti</strong> (<em>int</em>) -- Index of the turbine of interest.</p></li>
+<li><p><strong>ax</strong> (<em>Matplotlib.pyplot Axis</em><em>, </em><em>optional</em>) -- Axis to plot in. If None is
+specified, creates a new figure and axis. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh">
+<span class="sig-name descname"><span class="pre">plot_filters_in_time_bokeh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_in_time_bokeh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh" title="Link to this definition">#</a></dt>
+<dd><p>Generate bar plot where each week of data is gathered and its
+filtering results will be shown relative to the data size of each
+week. This plot can particularly be useful to investigate whether
+certain weeks/time periods show a particular high number of faulty
+measurements. This can often be correlated with maintenance time
+windows and the user may opt to completely remove any measurements
+in the found time period from the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ti</strong> (<em>int</em>) -- Index of the turbine of interest.</p></li>
+<li><p><strong>p</strong> (<em>Bokeh Figure</em><em>, </em><em>optional</em>) -- Figure to plot in. If None is
+specified, creates a new figure. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines">
+<span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">filter_df_by_faulty_impacting_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_impacting_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#filter_df_by_faulty_impacting_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines" title="Link to this definition">#</a></dt>
+<dd><dl class="simple">
+<dt>Assigns a turbine's measurement to NaN for each timestamp for which any of the turbines</dt><dd><p>that are shedding a wake on this turbine is reporting NaN measurements.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with SCADA data with measurements</p></li>
+<li><p><strong>wd_000</strong> (<em>formatted according to</em>)</p></li>
+<li><p><strong>wd_001</strong></p></li>
+<li><p><strong>wd_002</strong></p></li>
+<li><p><strong>pow_000</strong></p></li>
+<li><p><strong>pow_001</strong></p></li>
+</ul>
+</dd>
+</dl>
+<p>:param :
+:param pow_002:
+:param and so on.:
+:param ti: Turbine number for which we are filtering the data.
+:type ti: integer
+:param Basically:
+:param each turbine that impacts that power production of:
+:param turbine 'ti' by more than 0.1% is required to be reporting a:
+:param non-faulty measurement. If not:
+:param we classify the measurement of:
+:param turbine 'ti' as faulty because we cannot sufficiently know the:
+:param inflow conditions of this turbine.:
+:param df_impacting_turbines: A Pandas DataFrame in the
+:type df_impacting_turbines: pd.DataFrame
+:param format of:                0       1          2   3   4   5   6</p>
+<blockquote>
+<div><p>wd
+0.0       [6, 5]     [5]     [3, 5]  []  []  []  []
+3.0          [6]     [5]     [3, 5]  []  []  []  []
+...          ...     ...        ...  ..  ..  ..  ..
+354.0  [6, 5, 3]  [5, 0]     [3, 5]  []  []  []  []
+357.0     [6, 5]     [5]  [3, 5, 4]  []  []  []  []</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interest</strong> (<em>The columns indicate the turbine of</em>)</p></li>
+<li><p><strong>i.e.</strong></p></li>
+<li><p><strong>that</strong> (<em>the turbine</em>)</p></li>
+<li><p><strong>waked</strong> (<em>is</em>)</p></li>
+<li><p><strong>turbine</strong> (<em>and each row shows which turbines are waking that</em>)</p></li>
+<li><p><strong>direction</strong> (<em>for that particular wind</em>) -- import flasc.utilities.floris_tools as ftools
+df_impacting_turbines = ftools.get_all_impacting_turbines(fi)</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Print information to the console. Defaults</p></li>
+<li><p><strong>True.</strong> (<em>to</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The postprocessed dataframe for 'df', filtered for
+inter-turbine issues like curtailment and turbine downtime.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./_autosummary"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="flasc.data_processing.filtering.df_get_no_faulty_measurements.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">flasc.data_processing.filtering.df_get_no_faulty_measurements</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.df_get_no_faulty_measurements"><code class="docutils literal notranslate"><span class="pre">df_get_no_faulty_measurements()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.df_mark_turbdata_as_faulty"><code class="docutils literal notranslate"><span class="pre">df_mark_turbdata_as_faulty()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter"><code class="docutils literal notranslate"><span class="pre">FlascFilter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter._get_all_unique_flags"><code class="docutils literal notranslate"><span class="pre">FlascFilter._get_all_unique_flags()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves"><code class="docutils literal notranslate"><span class="pre">FlascFilter._reset_mean_power_curves()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves"><code class="docutils literal notranslate"><span class="pre">FlascFilter._get_mean_power_curves()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.reset_filters"><code class="docutils literal notranslate"><span class="pre">FlascFilter.reset_filters()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.filter_by_condition"><code class="docutils literal notranslate"><span class="pre">FlascFilter.filter_by_condition()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.filter_by_sensor_stuck_faults"><code class="docutils literal notranslate"><span class="pre">FlascFilter.filter_by_sensor_stuck_faults()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.filter_by_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.filter_by_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.filter_by_floris_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.filter_by_floris_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.get_df"><code class="docutils literal notranslate"><span class="pre">FlascFilter.get_df()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.get_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.get_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_farm_mean_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_farm_mean_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_custom_scatter()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter_bokeh"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_custom_scatter_bokeh()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_in_ws_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_postprocessed_in_ws_power_curve()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_in_time()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh"><code class="docutils literal notranslate"><span class="pre">FlascFilter.plot_filters_in_time_bokeh()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines"><code class="docutils literal notranslate"><span class="pre">filter_df_by_faulty_impacting_turbines()</span></code></a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By National Renewable Energy Laboratory
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
