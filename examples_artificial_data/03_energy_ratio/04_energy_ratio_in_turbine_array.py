@@ -1,16 +1,16 @@
 import os
 
+import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from floris.tools.visualization import visualize_cut_plane
+from floris.flow_visualization import visualize_cut_plane
 from floris.utilities import wrap_360
 
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
-from flasc.visualization import plot_floris_layout
 
 
 def load_data():
@@ -32,7 +32,7 @@ def load_data():
     return df
 
 
-def _get_angle(fi, turbine_array):
+def _get_angle(fm, turbine_array):
     # Determine the geometrical angle between the upmost and downmost turbine
     # in an array. This is equal to the wind direction that maximally overlaps
     # the wake from the most upstream turbine on the most downstream turbine.
@@ -41,8 +41,8 @@ def _get_angle(fi, turbine_array):
     # the power production of each turbine in the array.
     t0 = turbine_array[0]
     t1 = turbine_array[-1]
-    dy = fi.layout_y[t1] - fi.layout_y[t0]
-    dx = fi.layout_x[t1] - fi.layout_x[t0]
+    dy = fm.layout_y[t1] - fm.layout_y[t0]
+    dx = fm.layout_x[t1] - fm.layout_x[t0]
     wd = wrap_360(270.0 - np.arctan2(dy, dx) * 180.0 / np.pi)
     return wd
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     N_bootstrapping = 50
 
     # Load FLORIS and load SCADA data
-    fi, _ = load_floris()
+    fm, _ = load_floris()
     df = load_data()
 
     # Note that we normalize everything in our results to the first turbine in the array
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     df = dfm.set_wd_by_turbines(df, t0)
 
     # Define wind direction that perfectly aligns turbine array
-    wd = _get_angle(fi, turbine_array)
+    wd = _get_angle(fm, turbine_array)
 
     # Calculate energy ratio for narrow bin near 'wd'
     results_energy_ratio = _calculate_energy_ratios(
@@ -169,10 +169,14 @@ if __name__ == "__main__":
     ax = plot_energy_ratios(turbine_array, results_energy_ratio)
 
     # Also plot wake situation according to FLORIS
-    plot_floris_layout(fi, plot_terrain=False)
+    ax = layoutviz.plot_turbine_points(fm)
+    layoutviz.plot_turbine_labels(fm, ax=ax)
+    ax.grid()
+    ax.set_xlabel("x coordinate [m]")
+    ax.set_ylabel("y coordinate [m]")
 
     fig, ax = plt.subplots()
-    fi.reinitialize(wind_directions=[wd], wind_speeds=[10.0])
-    horizontal_plane = fi.calculate_horizontal_plane(height=90.0)
+    fm.set(wind_directions=[wd], wind_speeds=[10.0])
+    horizontal_plane = fm.calculate_horizontal_plane(height=90.0)
     visualize_cut_plane(horizontal_plane, ax=ax, title="Horizontal plane")
     plt.show()

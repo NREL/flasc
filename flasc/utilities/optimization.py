@@ -8,7 +8,11 @@ from floris.utilities import wrap_180, wrap_360
 from pandas.errors import DataError
 
 from flasc.data_processing import time_operations as fsato
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import circular_statistics as css, floris_tools as ftools, utilities as fsut
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 def find_timeshift_between_dfs(
@@ -39,7 +43,7 @@ def find_timeshift_between_dfs(
     max_time = np.datetime64(np.min([df1.tail(1)["time"], df2.tail(1)["time"]]))
 
     # Convert to arrays of a single mean quantity
-    print("Determining one column-average per dataframe to sync.")
+    logger.info("Determining one column-average per dataframe to sync.")
     if use_circular_statistics:
         df1["y1"] = css.calc_wd_mean_radial(df1[cols_df1], axis=1)
         df2["y2"] = css.calc_wd_mean_radial(df2[cols_df2], axis=1)
@@ -59,11 +63,11 @@ def find_timeshift_between_dfs(
         )
     except (ValueError, TypeError) as e:
         # Handle specific exception
-        print(f"Error estimating dt: {e}")
+        logger.info(f"Error estimating dt: {e}")
         # Use full dataframe if fails somehow
         dt = np.min([fsut.estimate_dt(df1["time"]), fsut.estimate_dt(df2["time"])])
 
-    print("Resampling dataframes to a common time vector. " + "This may take a while...")
+    logger.info("Resampling dataframes to a common time vector. " + "This may take a while...")
     time_array = min_time + np.arange(0, max_time - min_time + np.timedelta64(dt), dt)
     max_gap = 1.5 * dt
     df1 = fsato.df_resample_by_interpolation(
@@ -84,7 +88,7 @@ def find_timeshift_between_dfs(
     # Look at comparison per t_step
     current_time = min_time
     output_list = []
-    print("Estimating required timeshift for df1.")
+    logger.info("Estimating required timeshift for df1.")
     while current_time < max_time:
         t0 = np.array(current_time, dtype="datetime64")
         t1 = np.array(np.datetime64(current_time) + np.timedelta64(t_step), dtype="datetime64")
@@ -99,7 +103,7 @@ def find_timeshift_between_dfs(
         y2 = np.array(df2_sub["y2"])
 
         if verbose:
-            print("   Calculating timeshift for t0: %s, t1: %s" % (str(t0), str(t1)))
+            logger.info("   Calculating timeshift for t0: %s, t1: %s" % (str(t0), str(t1)))
 
         def cost_fun(x_shift):
             # Shift data along x-axis and then fit along y-axis, if necessary
@@ -153,7 +157,7 @@ def find_timeshift_between_dfs(
         x_opt, J_opt, x_all, J_all = opt.brute(
             cost_fun, ranges=opt_bounds, Ns=opt_Ns, finish=finish, disp=opt_disp, full_output=True
         )
-        print(
+        logger.info(
             "     Optimal time shift for df_1: %d s (%.2f hours)." % (x_opt[0], x_opt[0] / 3600.0)
         )
 
@@ -248,17 +252,17 @@ def estimate_ti(
     verbose=False,
 ):
     # Make copy so that existing object is not changed
-    fi = copy.deepcopy(fi)
-    num_turbines = len(fi.layout_x)
-    ti_0 = np.mean(fi.floris.farm.turbulence_intensity)
+    fm = copy.deepcopy(fi)
+    num_turbines = len(fm.layout_x)
+    ti_0 = np.mean(fm.core.farm.turbulence_intensity)
 
     # Define a cost function
     def cost_fun(ti):
         ti_array = np.repeat(ti_0, num_turbines)
         ti_array[turbine_upstream] = ti
         ftools._fi_set_ws_wd_ti(fi, ti=ti_array)
-        fi.calculate_wake()
-        Pturbs = np.array(fi.get_turbine_power())
+        fm.run()
+        Pturbs = np.array(fm.get_turbine_power())
         Pturbs = Pturbs[turbines_downstream]
         se = (P_measured - Pturbs) ** 2.0
         mse = np.mean(se)

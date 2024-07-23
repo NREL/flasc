@@ -6,13 +6,39 @@ import pandas as pd
 from bokeh.models import Legend
 from bokeh.palettes import Category20_20 as palette
 from bokeh.plotting import ColumnDataSource, figure
+from scipy.interpolate import interp1d
 
-from flasc.data_processing import dataframe_filtering as dff
+from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.data_processing.find_sensor_faults import find_sensor_stuck_faults
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import utilities as flascutils
 
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
-class ws_pw_curve_filtering:
+
+def df_get_no_faulty_measurements(df, turbine):
+    if isinstance(turbine, str):
+        turbine = int(turbine)
+    entryisnan = np.isnan(df["pow_%03d" % turbine].astype(float))
+    # cols = [s for s in df.columns if s[-4::] == ('_%03d' % turbine)]
+    # entryisnan = (np.sum(np.isnan(df[cols]),axis=1) > 0)
+    N_isnan = np.sum(entryisnan)
+    return N_isnan
+
+
+def df_mark_turbdata_as_faulty(df, cond, turbine_list, exclude_columns=[]):
+    if isinstance(turbine_list, (np.integer, int)):
+        turbine_list = [turbine_list]
+
+    for ti in turbine_list:
+        cols = [s for s in df.columns if s[-4::] == ("_%03d" % ti) and s not in exclude_columns]
+        df.loc[cond, cols] = None  # Delete measurements
+
+    return df
+
+
+class FlascFilter:
     """This class allows a user to filter turbine data based on the
     wind-speed power curve. This class includes several useful filtering
     methods:
@@ -26,7 +52,7 @@ class ws_pw_curve_filtering:
            per power bin.
     """
 
-    def __init__(self, df):
+    def __init__(self, df, turbine_names=None):
         """Initializes the class.
 
         Args:
@@ -41,6 +67,9 @@ class ws_pw_curve_filtering:
         # Write dataframe to self
         self._df_initial = df.copy()
         self.reset_filters()
+
+        # Save the turbine names
+        self.turbine_names = turbine_names
 
     # Private methods
     def _get_all_unique_flags(self):
@@ -179,16 +208,16 @@ class ws_pw_curve_filtering:
         dataframe self.df to a filtered subset.
 
         A correct usage is, for example:
-            ws_pow_filtering.filter_by_condition(
-                condition=(ws_pow_filtering.df["pow_{:03d}".format(ti)] < -1.0e-6),
+            FlascFilter.filter_by_condition(
+                condition=(FlascFilter.df["pow_{:03d}".format(ti)] < -1.0e-6),
                 label="Power below zero",
                 ti=ti,
                 verbose=True,
             )
 
         and:
-            ws_pow_filtering.filter_by_condition(
-                condition=(ws_pow_filtering.df["is_operation_normal_{:03d}".format(ti)] == False),
+            FlascFilter.filter_by_condition(
+                condition=(FlascFilter.df["is_operation_normal_{:03d}".format(ti)] == False),
                 label="Self-flagged (is_operation_normal==False)",
                 ti=ti,
                 verbose=True,
@@ -226,14 +255,14 @@ class ws_pw_curve_filtering:
             df_in = df_in.copy()
 
         # Mark data as faulty on the dataframe
-        N_pre = [dff.df_get_no_faulty_measurements(df_in, tii) for tii in ti]
-        df_out = dff.df_mark_turbdata_as_faulty(df=df_in, cond=condition, turbine_list=ti)
+        N_pre = [df_get_no_faulty_measurements(df_in, tii) for tii in ti]
+        df_out = df_mark_turbdata_as_faulty(df=df_in, cond=condition, turbine_list=ti)
 
         # Print the reduction in useful data to the console, if verbose
         if verbose:
             for iii, tii in enumerate(ti):
-                N_post = dff.df_get_no_faulty_measurements(df_out, tii)
-                print(
+                N_post = df_get_no_faulty_measurements(df_out, tii)
+                logger.info(
                     (
                         "Faulty measurements for WTG {:03d} increased from {:.3f} % to {:.3f} "
                         "%. Reason: '{:s}'."
@@ -506,7 +535,7 @@ class ws_pw_curve_filtering:
 
     def filter_by_floris_power_curve(
         self,
-        fi,
+        fm,
         ti,
         m_ws_lb=0.95,
         m_pow_lb=1.01,
@@ -520,7 +549,7 @@ class ws_pw_curve_filtering:
         directions.
 
         Args:
-            fi (FlorisInterface): The FlorisInterface object for the farm
+            fm (FlorisModel): The FlorisModel object for the farm
             m_ws_lb (float, optional): Multiplier on the wind speed defining
             the left bound for the power curve. Any data to the left of this
             curve is considered faulty. Defaults to 0.95.
@@ -547,7 +576,7 @@ class ws_pw_curve_filtering:
             trend near the high wind speeds, try decreasing this variable's
             value to 15.0.
         """
-        print("Filtering data by deviations from the floris power curve...")
+        logger.info("Filtering data by deviations from the floris power curve...")
 
         # Create upper and lower bounds around floris curve
 
@@ -556,12 +585,12 @@ class ws_pw_curve_filtering:
             self._get_mean_power_curves(turbine_subset=[ti])
 
         df_xy = self.pw_curve_df.copy()
-        rho = fi.floris.flow_field.air_density
-        for ti in range(len(fi.layout_x)):
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
-            Ad = 0.25 * np.pi * fi_turb["rotor_diameter"] ** 2.0
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            cp_array = np.array(fi_turb["power_thrust_table"]["power"])
+        rho = fm.core.flow_field.air_density
+        for ti in range(len(fm.layout_x)):
+            fm_turb = fm.core.farm.turbine_definitions[ti]
+            Ad = 0.25 * np.pi * fm_turb["rotor_diameter"] ** 2.0
+            ws_array = np.array(fm_turb["power_thrust_table"]["wind_speed"])
+            cp_array = np.array(fm_turb["power_thrust_table"]["power"])
             pow_array = 0.5 * rho * ws_array**3.0 * Ad * cp_array * 1.0e-3
             df_xy.loc[df_xy.index, "pow_{:03d}".format(ti)] = np.interp(
                 xp=ws_array, fp=pow_array, x=df_xy["ws"]
@@ -704,12 +733,12 @@ class ws_pw_curve_filtering:
 
         return self.pw_curve_df
 
-    def plot_farm_mean_power_curve(self, fi=None):
+    def plot_farm_mean_power_curve(self, fm=None):
         """Plot all turbines' power curves in a single figure. Also estimate
         and plot a mean turbine power curve.
 
         Args:
-            fi (FlorisInterface): The FlorisInterface object for the farm. If
+            fm (FlorisModel): The FlorisModel object for the farm. If
               specified by the user, then the farm-average turbine power curve
               from FLORIS will be plotted on top of the SCADA-based power curves.
         """
@@ -743,10 +772,10 @@ class ws_pw_curve_filtering:
         )
         ax.plot(x, pow_mean_array, color="tab:red", label="Mean curve")
 
-        if fi is not None:
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
+        if fm is not None:
+            fm_turb = fm.core.farm.turbine_definitions[ti]
+            ws_array = np.array(fm_turb["power_thrust_table"]["wind_speed"])
+            pow_array = np.array(fm_turb["power_thrust_table"]["power"])
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
         ax.legend()
@@ -812,7 +841,11 @@ class ws_pw_curve_filtering:
         for h in lgd.legendHandles:
             h.set_alpha(1)  # Force alpha in legend to 1.0
 
-        ax.set_title("WTG {:03d}: Filters".format(ti))
+        if self.turbine_names is not None:
+            ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
+        else:
+            ax.set_title("WTG {:03d}: Filters".format(ti))
+
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.grid(True)
@@ -917,13 +950,13 @@ class ws_pw_curve_filtering:
 
         return p
 
-    def plot_filters_in_ws_power_curve(self, ti, fi=None, ax=None):
+    def plot_filters_in_ws_power_curve(self, ti, fm=None, ax=None):
         """Plot the wind speed power curve and connect each faulty datapoint
         to the label it was classified as faulty with.
 
         Args:
             ti (int): Turbine number which should be plotted.
-            fi (FlorisInterface, optional): floris object. If not None, will
+            fm (FlorisModel, optional): floris object. If not None, will
             use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
             ax (plt.Axis): Pyplot Axis object.
@@ -948,10 +981,10 @@ class ws_pw_curve_filtering:
             label="Approximate power curve",
         )
 
-        if fi is not None:
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
+        if fm is not None:
+            fm_turb = fm.core.farm.turbine_definitions[ti]
+            ws_array = np.array(fm_turb["power_thrust_table"]["wind_speed"])
+            pow_array = np.array(fm_turb["power_thrust_table"]["power"])
 
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
@@ -973,20 +1006,23 @@ class ws_pw_curve_filtering:
         for h in lgd.legendHandles:
             h.set_alpha(1)  # Force alpha in legend to 1.0
 
-        ax.set_title("WTG {:03d}: Filters".format(ti))
+        if self.turbine_names is not None:
+            ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
+        else:
+            ax.set_title("WTG {:03d}: Filters".format(ti))
         ax.set_xlabel("Wind speed (m/s)")
         ax.set_ylabel("Power (kW)")
         ax.grid(True)
 
         return ax
 
-    def plot_postprocessed_in_ws_power_curve(self, ti, fi=None, ax=None):
+    def plot_postprocessed_in_ws_power_curve(self, ti, fm=None, ax=None):
         """Plot the wind speed power curve and mark faulty data according to
         their filters.
 
         Args:
             ti (int): Turbine number which should be plotted.
-            fi (FlorisInterface, optional): floris object. If not None, will
+            fm (FlorisModel, optional): floris object. If not None, will
             use this to plot the turbine power curves as implemented in floris.
             Defaults to None.
             ax (Matplotlib.pyplot Axis, optional): Axis to plot in. If None is
@@ -1021,10 +1057,10 @@ class ws_pw_curve_filtering:
             label="Approximate power curve",
         )
 
-        if fi is not None:
-            fi_turb = fi.floris.farm.turbine_definitions[ti]
-            ws_array = np.array(fi_turb["power_thrust_table"]["wind_speed"])
-            pow_array = np.array(fi_turb["power_thrust_table"]["power"])
+        if fm is not None:
+            fm_turb = fm.core.farm.turbine_definitions[ti]
+            ws_array = np.array(fm_turb["power_thrust_table"]["wind_speed"])
+            pow_array = np.array(fm_turb["power_thrust_table"]["power"])
 
             ax.plot(ws_array, pow_array, "--", label="FLORIS curve")
 
@@ -1046,7 +1082,10 @@ class ws_pw_curve_filtering:
         for h in lgd.legendHandles:
             h.set_alpha(1)  # Force alpha in legend to 1.0
 
-        ax.set_title("WTG {:03d}: Postprocessed dataset".format(ti))
+        if self.turbine_names is not None:
+            ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Postprocessed dataset")
+        else:
+            ax.set_title("WTG {:03d}: Postprocessed dataset".format(ti))
         ax.set_xlabel("Wind speed (m/s)")
         ax.set_ylabel("Power (kW)")
         ax.grid(True)
@@ -1086,7 +1125,11 @@ class ws_pw_curve_filtering:
         # Plot the histogram information
         ax = df_histogram.plot.bar(stacked=True, ax=ax)
         ax.set_ylabel("Count (-)")
-        ax.set_title("WTG {:03d}".format(ti))
+        if self.turbine_names is not None:
+            ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]")
+        else:
+            ax.set_title("WTG {:03d}".format(ti))
+
         ax.grid(True)
 
         return ax
@@ -1154,3 +1197,105 @@ class ws_pw_curve_filtering:
         p.legend.click_policy = "hide"
 
         return p
+
+
+def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbose=True):
+    """Assigns a turbine's measurement to NaN for each timestamp for which any of the turbines
+      that are shedding a wake on this turbine is reporting NaN measurements.
+
+    Args:
+        df (pd.DataFrame): Dataframe with SCADA data with measurements
+        formatted according to wd_000, wd_001, wd_002, pow_000, pow_001,
+        pow_002, and so on.
+        ti (integer): Turbine number for which we are filtering the data.
+        Basically, each turbine that impacts that power production of
+        turbine 'ti' by more than 0.1% is required to be reporting a
+        non-faulty measurement. If not, we classify the measurement of
+        turbine 'ti' as faulty because we cannot sufficiently know the
+        inflow conditions of this turbine.
+        df_impacting_turbines (pd.DataFrame): A Pandas DataFrame in the
+        format of:
+
+                               0       1          2   3   4   5   6
+                wd
+                0.0       [6, 5]     [5]     [3, 5]  []  []  []  []
+                3.0          [6]     [5]     [3, 5]  []  []  []  []
+                ...          ...     ...        ...  ..  ..  ..  ..
+                354.0  [6, 5, 3]  [5, 0]     [3, 5]  []  []  []  []
+                357.0     [6, 5]     [5]  [3, 5, 4]  []  []  []  []
+
+        The columns indicate the turbine of interest, i.e., the turbine that
+        is waked, and each row shows which turbines are waking that turbine
+        for that particular wind direction ('wd'). Typically calculated using:
+
+            import flasc.utilities.floris_tools as ftools
+            df_impacting_turbines = ftools.get_all_impacting_turbines(fi)
+
+        verbose (bool, optional): Print information to the console. Defaults
+        to True.
+
+    Returns:
+        pd.DataFrame: The postprocessed dataframe for 'df', filtered for
+        inter-turbine issues like curtailment and turbine downtime.
+    """
+
+    # Get number of turbines
+    n_turbines = dfm.get_num_turbines(df)
+
+    # Drop all measurements where an upstream turbine is affecting this turbine but also has
+    # a NaN measurement itself
+    ws_cols = ["ws_{:03d}".format(ti) for ti in range(n_turbines)]
+    pow_cols = ["pow_{:03d}".format(ti) for ti in range(n_turbines)]
+
+    # Get array of which turbines affect our test turbine
+    wd_array = df["wd"]
+
+    # Create interpolant returning impacting turbines
+    xp = np.array(df_impacting_turbines[ti].index, dtype=float)
+    fp = np.arange(len(xp), dtype=int)
+
+    # Copy values over from 0 to 360 deg
+    if (np.abs(xp[0]) < 0.001) & (np.max(xp) < 360.0):
+        xp = np.hstack([xp, 360.0])
+        fp = np.hstack([fp, fp[0]])
+
+    # Get nearest neighbor indices
+    f = interp1d(x=xp, y=fp, kind="nearest")
+
+    ids = np.array(f(wd_array), dtype=int)
+    turbines_impacted = df_impacting_turbines[ti].values[ids]
+
+    # Organize as matrix for easy manipulations
+    impacting_turbines_matrix = np.zeros((len(wd_array), n_turbines), dtype=bool)
+    for ii, turbines_impacted_onewd in enumerate(turbines_impacted):
+        impacting_turbines_matrix[ii, turbines_impacted_onewd] = True
+
+    # Calculate True/False statement whether any of the turbines shedding a wake on our test_turbine
+    # has a NaN ws or pow measurement
+    test_turbine_impacted_by_nan_ws = np.any(
+        np.isnan(np.array(df[ws_cols], dtype=float)) & impacting_turbines_matrix, axis=1
+    )
+    test_turbine_impacted_by_nan_pow = np.any(
+        np.isnan(np.array(df[pow_cols], dtype=float)) & impacting_turbines_matrix, axis=1
+    )
+    test_turbine_impacted = test_turbine_impacted_by_nan_ws | test_turbine_impacted_by_nan_pow
+
+    # Assign test turbine's measurements to NaN if any turbine that is waking this turbine
+    # is reporting NaN measurements
+    N_pre = df_get_no_faulty_measurements(df, ti)
+    df_out = df_mark_turbdata_as_faulty(
+        df=df,
+        cond=test_turbine_impacted,
+        turbine_list=[ti],
+    )
+    N_post = df_get_no_faulty_measurements(df_out, ti)
+
+    if verbose:
+        logger.info(
+            "Faulty measurements for WTG {:02d} increased from {:.3f} % to {:.3f} %. Reason: "
+            "'Turbine is impacted by faulty upstream turbine'.".format(
+                ti, 100.0 * N_pre / df.shape[0], 100.0 * N_post / df.shape[0]
+            )
+        )
+
+    return df_out

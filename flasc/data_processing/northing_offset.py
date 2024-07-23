@@ -1,16 +1,3 @@
-# Copyright 2021 NREL and SHELL
-
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
-
 from datetime import timedelta as td
 
 import matplotlib.pyplot as plt
@@ -18,17 +5,18 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
-from flasc.utilities import (
-    floris_tools as ftools,
-    optimization as opt,
-)
+from flasc.logging_manager import LoggingManager
+from flasc.utilities import floris_tools as ftools, optimization as opt
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 def crosscheck_northing_offset_consistency(
-    df, fi, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True
+    df, fm, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True
 ):
     # Load data and extract info
-    num_turbines = len(fi.layout_x)
+    num_turbines = len(fm.layout_x)
     turbine_list = range(num_turbines)
 
     # Set up time_array and split into chunks
@@ -47,8 +35,8 @@ def crosscheck_northing_offset_consistency(
     bias_output_list = [[] for _ in turbine_list]
     for ti in turbine_list:
         turbs_in_radius = ftools.get_turbs_in_radius(
-            fi.layout_x,
-            fi.layout_y,
+            fm.layout_x,
+            fm.layout_y,
             ti,
             max_radius=1.0e9,
             include_itself=False,
@@ -61,7 +49,7 @@ def crosscheck_northing_offset_consistency(
         )
 
     for ti in turbine_list:
-        print("Matching curves for turbine %03d..." % ti)
+        logger.info("Matching curves for turbine %03d..." % ti)
         ref_turb_subset = turbs_ref_list[ti]
         ref_turb_subset = [
             r for r in ref_turb_subset if all(np.isnan(bias_output_list[ti]["T%03d" % r]))
@@ -83,19 +71,14 @@ def crosscheck_northing_offset_consistency(
                         ytest=wd_turb,
                         angle_wrapping=True,
                     )
-                    # fig, ax = plt.subplots()
-                    # ax.plot(wrap_360(wd_turb_sub - dx_opt), 'o')
-                    # ax.plot(wd_ref_sub, 'o')
-                    # plt.show()
+
                 else:
                     dx_opt = np.nan
                 bias_output_list[ti].loc[ii, "T%03d" % ti_ref] = dx_opt
                 if ti in turbs_ref_list[ti_ref]:
                     bias_output_list[ti_ref].loc[ii, "T%03d" % ti] = -dx_opt
-                # print('Estimated dx_opt = %.3f, J_opt = %.3f' % (dx_opt, J_opt))
-                # plt.show()
 
-        print(bias_output_list[ti])
+        logger.info(bias_output_list[ti])
 
     # Find turbines where dx barely changes (low variance)
     turb_is_clean = ["bad" for _ in turbine_list]
@@ -113,17 +96,17 @@ def crosscheck_northing_offset_consistency(
 
     for ti in turbine_list:
         if turb_is_clean[ti] == "disputed":
-            print(
+            logger.info(
                 "Turbine %03d may or may not have jumps in WD measurement calibration. [DISPUTED]"
                 % ti
             )
         elif turb_is_clean[ti] == "clean":
-            print(
+            logger.info(
                 "Turbine %03d seems to have no jumps in its WD measurement calibration. [CLEAN]"
                 % ti
             )
         elif turb_is_clean[ti] == "bad":
-            print(
+            logger.info(
                 "Turbine %03d seems to have one or multiple jumps in "
                 "its WD measurement calibration. [BAD]" % ti
             )
@@ -140,16 +123,16 @@ def crosscheck_northing_offset_consistency(
                 clr = "orange"
 
             ax.plot(
-                fi.layout_x[ti],
-                fi.layout_y[ti],
+                fm.layout_x[ti],
+                fm.layout_y[ti],
                 "o",
                 markersize=15,
                 markerfacecolor=clr,
                 markeredgewidth=0.0,
             )
             ax.text(
-                fi.layout_x[ti] + 100,
-                fi.layout_y[ti],
+                fm.layout_x[ti] + 100,
+                fm.layout_y[ti],
                 "T%03d (%s)" % (ti, turb_is_clean[ti]),
                 color="black",
             )

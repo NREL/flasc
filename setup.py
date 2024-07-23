@@ -17,7 +17,7 @@ AUTHOR = "NREL National Wind Technology Center"
 # What packages are required for this module to be executed?
 REQUIRED = [
     "bokeh>=2, <4",
-    "floris @ git+https://github.com/NREL/floris.git@v4",
+    "floris~=4.0",
     "feather-format~=0.0",
     "ipympl~=0.9",
     "matplotlib~=3.8",
@@ -26,12 +26,12 @@ REQUIRED = [
     "pyproj~=3.0",
     "SALib~=1.0",
     "scipy~=1.1",
-    "sqlalchemy~=2.0",
     "streamlit~=1.0",
     "tkcalendar~=1.0",
     "seaborn~=0.0",
     "polars==0.19.5",
     "ephem",
+    "coloredlogs~=10.0",
 ]
 
 EXTRAS = {
@@ -70,6 +70,7 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     long_description=README,
+    long_description_content_type="text/markdown",
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,

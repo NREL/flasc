@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from floris.tools import FlorisInterface
+from floris import FlorisModel
 
 from flasc.utilities.floris_tools import get_all_impacting_turbines_geometrical
 
@@ -8,10 +8,10 @@ from flasc.utilities.floris_tools import get_all_impacting_turbines_geometrical
 # function in floris_tools
 
 # Load a large FLORIS object
-fi = FlorisInterface("../floris_input_artificial/gch.yaml")
+fm = FlorisModel("../floris_input_artificial/gch.yaml")
 D = 126.0
 X, Y = np.meshgrid(7.0 * D * np.arange(20), 5.0 * D * np.arange(20))
-fi.reinitialize(layout_x=X.flatten(), layout_y=Y.flatten())
+fm.set(layout_x=X.flatten(), layout_y=Y.flatten())
 
 # Specify which turbines are of interest
 turbine_weights = np.zeros(len(X.flatten()), dtype=float)
@@ -19,7 +19,7 @@ turbine_weights[np.hstack([a + range(10) for a in np.arange(50, 231, 20)])] = 1.
 
 # Get all impacting turbines for each wind direction using simple geometry rules
 df_impacting = get_all_impacting_turbines_geometrical(
-    fi=fi, turbine_weights=turbine_weights, wd_array=np.arange(0.0, 360.0, 30.0)
+    fm=fm, turbine_weights=turbine_weights, wd_array=np.arange(0.0, 360.0, 30.0)
 )
 
 # Produce plots showcasing which turbines are estimated to be impacting
@@ -27,15 +27,15 @@ for ii in range(df_impacting.shape[0]):
     wd = df_impacting.loc[ii, "wd"]
 
     fig, ax = plt.subplots()
-    ax.plot(fi.layout_x, fi.layout_y, "o", color="lightgray", label="All turbines")
+    ax.plot(fm.layout_x, fm.layout_y, "o", color="lightgray", label="All turbines")
 
     ids = df_impacting.loc[ii, "impacting_turbines"]
-    no_turbines_total = len(fi.layout_x)
+    no_turbines_total = len(fm.layout_x)
     no_turbines_reduced = len(ids)
-    ax.plot(fi.layout_x[ids], fi.layout_y[ids], "o", color="black", label="Impacting turbines")
+    ax.plot(fm.layout_x[ids], fm.layout_y[ids], "o", color="black", label="Impacting turbines")
 
     ids = np.where(turbine_weights > 0.001)[0]
-    ax.plot(fi.layout_x[ids], fi.layout_y[ids], "o", color="red", label="Turbines of interest")
+    ax.plot(fm.layout_x[ids], fm.layout_y[ids], "o", color="red", label="Turbines of interest")
 
     ax.set_xlabel("X location (m)")
     ax.set_ylabel("Y location (m)")

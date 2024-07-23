@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from floris.tools import FlorisInterface
+from floris import FlorisModel
 
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities.utilities_examples import load_floris_smarteole
 
-# from floris.tools import ParallelComputingInterface
+# from floris import ParallelComputingInterface
 
 
 def replicate_nan_values(df_1: pd.DataFrame, df_2: pd.DataFrame):
@@ -88,40 +88,28 @@ def nested_set(dic: Dict[str, Any], keys: List[str], value: Any, idx: Optional[i
         dic[keys[-1]] = par_list
 
 
-def set_fi_param(
-    fi_in: FlorisInterface, param: List[str], value: Any, param_idx: Optional[int] = None
-) -> FlorisInterface:
-    """Set a parameter in a FlorisInterface object.
-
-    Args:
-        fi_in (FlorisInterface): The FlorisInterface object to modify.
-        param (List[str]): A list of keys to traverse the FlorisInterface dictionary.
-        value (Any): The value to set.
-        idx (Optional[int], optional): The index to set the value at. Defaults to None.
-
-    Returns:
-        FlorisInterface: The modified FlorisInterface object.
-    """
-    fi_dict_mod = fi_in.floris.as_dict()
-    nested_set(fi_dict_mod, param, value, param_idx)
-    return FlorisInterface(fi_dict_mod)
-
-
-def resim_floris(fi_in: FlorisInterface, df_scada: pd.DataFrame, yaw_angles: np.array = None):
+def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.array = None):
     # Get wind speeds and directions
     wind_speeds = df_scada["ws"].values
     wind_directions = df_scada["wd"].values
+    # TODO: better handling of TIs?
+    turbulence_intensities = fm_in.turbulence_intensities[0] * np.ones_like(wind_speeds)
 
     # Get the number of turbiens
     num_turbines = dfm.get_num_turbines(df_scada)
 
     # Set up the FLORIS model
-    fi = fi_in.copy()
-    fi.reinitialize(wind_speeds=wind_speeds, wind_directions=wind_directions)
-    fi.calculate_wake(yaw_angles=yaw_angles)
+    fm = fm_in.copy()
+    fm.set(
+        wind_speeds=wind_speeds,
+        wind_directions=wind_directions,
+        turbulence_intensities=turbulence_intensities,
+        yaw_angles=yaw_angles,
+    )
+    fm.run()
 
     # Get the turbines in kW
-    turbine_powers = fi.get_turbine_powers().squeeze() / 1000
+    turbine_powers = fm.get_turbine_powers().squeeze() / 1000
 
     # Generate FLORIS dataframe
     df_floris = pd.DataFrame(
@@ -147,7 +135,7 @@ if __name__ == "__main__":
     fi, _ = load_floris_smarteole(wake_model="emgauss")
 
     # Testing parameter setting
-    # fi_dict_mod = fi.floris.as_dict()
+    # fi_dict_mod = fm.core.as_dict()
 
     # param = ['wake','wake_velocity_parameters','empirical_gauss',\
     #             'wake_expansion_rates']
@@ -156,7 +144,7 @@ if __name__ == "__main__":
 
     # print(fi_dict_mod)
     # print('******')
-    # print(fi_2.floris.as_dict())
+    # print(fi_2.core.as_dict())
 
     # Load the SCADA data
     scada_path = Path(

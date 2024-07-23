@@ -1,15 +1,19 @@
-import floris.tools as wfct
+import floris as wfct
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools, optimization as opt
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 class ti_estimator:
-    def __init__(self, fi):
-        self.fi = fi
-        self.num_turbs = len(fi.layout_x)
+    def __init__(self, fm):
+        self.fm = fm
+        self.num_turbs = len(fm.layout_x)
 
         self._reset_outputs()
 
@@ -30,15 +34,15 @@ class ti_estimator:
         self.P_measured = P_measured
 
     def get_turbine_order(self):
-        wd = (180 - self.fi.floris.farm.wind_direction[0]) * np.pi / 180.0
+        wd = (180 - self.fm.core.farm.wind_direction[0]) * np.pi / 180.0
         rotz = np.matrix([[np.cos(wd), -np.sin(wd), 0], [np.sin(wd), np.cos(wd), 0], [0, 0, 1]])
-        x0 = np.mean(self.fi.layout_x)
-        y0 = np.mean(self.fi.layout_y)
+        x0 = np.mean(self.fm.layout_x)
+        y0 = np.mean(self.fm.layout_y)
 
         xyz_init = np.matrix(
             [
-                np.array(self.fi.layout_x) - x0,
-                np.array(self.fi.layout_y) - y0,
+                np.array(self.fm.layout_x) - x0,
+                np.array(self.fm.layout_y) - y0,
                 [0.0 for _ in range(self.num_turbs)],
             ]
         )
@@ -51,29 +55,29 @@ class ti_estimator:
         return turbine_list_ordered
 
     def get_turbine_pairs(self, wake_loss_thrs=0.20):
-        fi = self.fi
-        fi.calculate_wake()
-        power_baseline = np.array(fi.get_turbine_power())
+        fm = self.fi
+        fm.run()
+        power_baseline = np.array(fm.get_turbine_power())
         disabled_turb_cp_ct = {
             "wind_speed": [0.0, 50.0],
             "power": [0.0, 0.0],
             "thrust_coefficient": [0.0001, 0.0001],
         }
-        regular_turb_cp_ct = fi.floris.farm.turbines[0].power_thrust_table
+        regular_turb_cp_ct = fm.core.farm.turbines[0].power_thrust_table
         df_pairs = pd.DataFrame(
             {"turbine": pd.Series([], dtype="int"), "affected_turbines": pd.Series([], dtype="int")}
         )
         for ti in range(self.num_turbs):
-            fi.change_turbine([ti], {"power_thrust_table": disabled_turb_cp_ct})
-            fi.calculate_wake()
-            power_excl = np.array(fi.get_turbine_power())
+            fm.change_turbine([ti], {"power_thrust_table": disabled_turb_cp_ct})
+            fm.run()
+            power_excl = np.array(fm.get_turbine_power())
             power_excl[ti] = power_baseline[ti]  # Placeholder
             wake_losses = 1 - power_baseline / power_excl
             affectedturbs = np.where(wake_losses >= wake_loss_thrs)[0]
             df_pairs = df_pairs.append(
                 {"turbine": int(ti), "affected_turbines": affectedturbs}, ignore_index=True
             )
-            fi.change_turbine([ti], {"power_thrust_table": regular_turb_cp_ct})
+            fm.change_turbine([ti], {"power_thrust_table": regular_turb_cp_ct})
 
         # Save to self
         df_pairs = df_pairs.set_index("turbine", drop=True)
@@ -81,14 +85,14 @@ class ti_estimator:
         return df_pairs
 
     def plot_flowfield(self):
-        self.fi.calculate_wake()
+        self.fm.run()
         fig, ax = plt.subplots()
-        hor_plane = self.fi.get_hor_plane()
+        hor_plane = self.fm.get_hor_plane()
         wfct.visualization.visualize_cut_plane(hor_plane, ax=ax)
         return fig, ax, hor_plane
 
     def floris_set_ws_wd_ti(self, wd=None, ws=None, ti=None):
-        self.fi = ftools._fi_set_ws_wd_ti(self.fi, wd=wd, ws=ws, ti=ti)
+        self.fm = ftools._fi_set_ws_wd_ti(self.fi, wd=wd, ws=ws, ti=ti)
 
     def _check_measurements(self):
         if self.P_measured is None:
@@ -115,7 +119,7 @@ class ti_estimator:
         self.opt_farm = out
         ti_opt = out["x_opt"]
         self.floris_set_ws_wd_ti(ti=ti_opt)
-        print("Optimal farm-averaged ti: %.3f" % ti_opt)
+        logger.info("Optimal farm-averaged ti: %.3f" % ti_opt)
 
         return ti_opt
 
@@ -148,7 +152,7 @@ class ti_estimator:
 
         self.opt_turbines = out_array
         for ti in range(self.num_turbs):
-            print("Optimal ti for turbine %03d: %.3f" % (ti, ti_array[ti]))
+            logger.info("Optimal ti for turbine %03d: %.3f" % (ti, ti_array[ti]))
 
         return out_array
 
@@ -172,10 +176,10 @@ class ti_estimator:
             ax.set_title("Turbulence intensity estimation for turbine %03d: cost function J" % ti)
 
     def plot_power_bars(self):
-        fi = self.fi
-        fi.calculate_wake()
+        fm = self.fi
+        fm.run()
         fig, ax = plt.subplots()
-        ax.bar(x=np.array(range(self.num_turbs)) - 0.15, height=fi.get_turbine_power(), width=0.3)
+        ax.bar(x=np.array(range(self.num_turbs)) - 0.15, height=fm.get_turbine_power(), width=0.3)
         ax.bar(x=np.array(range(self.num_turbs)) + 0.15, height=self.P_measured, width=0.3)
         ax.set_title("Measurement and FLORIS comparison")
         ax.set_ylabel("Power")
