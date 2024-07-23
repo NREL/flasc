@@ -49,7 +49,7 @@ exclude = [
 src = ["flasc", "tests"]
 line-length = 100
 target-version = "py310"
-extend-include = ["*.ipynb"]
+# extend-include = ["*.ipynb"]
 
 
 [tool.ruff.lint]
@@ -82,4 +82,3 @@ order-by-type = false
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-exclude = ["*.ipynb"]
