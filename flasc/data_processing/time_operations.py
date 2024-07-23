@@ -4,7 +4,11 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import utilities as fsut
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 def df_movingaverage(
@@ -343,7 +347,7 @@ def df_resample_by_interpolation(
 
         dt_raw_median = df["time"].diff().median() / td(seconds=1)
         if verbose:
-            print(
+            logger.info(
                 f"  Resampling column '{c}' with median timestep {dt_raw_median:.3f} s "
                 f"onto a prespecified time array with kind={interp_method}, max_gap={max_gap}"
                 f"s, and wrap_around_360={wrap_around_360}"

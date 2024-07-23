@@ -17,7 +17,7 @@ AUTHOR = "NREL National Wind Technology Center"
 # What packages are required for this module to be executed?
 REQUIRED = [
     "bokeh>=2, <4",
-    "floris @ git+https://github.com/NREL/floris.git@v4",
+    "floris~=4.0",
     "feather-format~=0.0",
     "ipympl~=0.9",
     "matplotlib~=3.8",
@@ -31,11 +31,12 @@ REQUIRED = [
     "seaborn~=0.0",
     "polars==0.19.5",
     "ephem",
+    "coloredlogs~=10.0",
 ]
 
 EXTRAS = {
     "docs": {
-        "jupyter-book<=0.13.3",
+        "jupyter-book",
         "sphinx-book-theme",
         "sphinx-autodoc-typehints",
         "sphinxcontrib-autoyaml",
@@ -69,6 +70,7 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     long_description=README,
+    long_description_content_type="text/markdown",
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,

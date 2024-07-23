@@ -5,12 +5,16 @@ from pandas.errors import DataError
 from SALib.analyze import sobol
 from SALib.sample import saltelli
 
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools
+
+logger_manager = LoggingManager()  # Instantiate LoggingManager
+logger = logger_manager.logger  # Obtain the reusable logger
 
 
 class floris_sobol_analysis:
     def __init__(self, fi, problem, calc_second_order=False):
-        self.fi = fi
+        self.fm = fi
 
         # Default parameters
         self.param_dict = {
@@ -75,7 +79,7 @@ class floris_sobol_analysis:
         }
 
         return params
-        # self.fi.set_model_parameters(params=params, verbose=False)
+        # self.fm.set_model_parameters(params=params, verbose=False)
 
     def _create_evals_dataframe(self):
         Nt = self.samples_x.shape[0]
@@ -109,27 +113,15 @@ class floris_sobol_analysis:
         # Copy and write wd and ws to dataframe
         # Nt = self.df_eval.shape[0]
         df = self.df_eval
-        df["wd"] = self.fi.floris.farm.wind_direction[0]
-        df["ws"] = self.fi.floris.farm.wind_speed[0]
+        df["wd"] = self.fm.core.farm.wind_direction[0]
+        df["ws"] = self.fm.core.farm.wind_speed[0]
 
         # Calculate floris predictions
         df_out = ftools.calc_floris(df, self.fi, num_threads=10, num_workers=2)
-        pow_cols = ["pow_%03d" % ti for ti in range(len(self.fi.layout_x))]
+        pow_cols = ["pow_%03d" % ti for ti in range(len(self.fm.layout_x))]
         self.samples_y = np.array(df_out[pow_cols].sum(axis=1), dtype=float)
 
         return self.samples_y
-
-    # def calculate_aep_for_samples(self, wd, ws, freq):
-    #     if self.samples_x is None:
-    #         raise DataError('Please run generate_samples first.')
-
-    #     print('Calculating AEP for %d samples.' % self.N)
-    #     for i in range(self.N):
-    #         self._set_fi_by_sample_id(i)
-    #         aep = self.fi.get_farm_AEP(wd=wd, ws=ws, freq=freq)
-    #         self.samples_y[i] = aep
-
-    #     return self.samples_y
 
     def get_sobol_sensitivity_indices(self, verbose=False):
         self.Si = sobol.analyze(
@@ -240,7 +232,7 @@ class floris_sobol_analysis:
         return fig, ax
 
     def plot_convergence(self, save_path=None, fig_format="png", fig_dpi=200):
-        print("Analyzing convergence...")
+        logger.info("Analyzing convergence...")
 
         # Create copies of original results
         samples_x_full = self.samples_x

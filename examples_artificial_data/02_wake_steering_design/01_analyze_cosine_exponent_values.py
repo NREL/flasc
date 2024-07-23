@@ -14,9 +14,9 @@ if __name__ == "__main__":
     # Compare optimizing over different pPs and evaluating over different pPs
     for pP_opt in pP_list:
         # Optimize yaw angles
-        fi, _ = load_floris(pP=pP_opt)
+        fm, _ = load_floris(cosine_exponent=pP_opt)
         df_opt = optimize_yaw_angles(
-            fi=fi,
+            fm=fm,
         )
 
         # Make an interpolant
@@ -24,9 +24,9 @@ if __name__ == "__main__":
 
         # Calculate AEP uplift
         for pP_eval in pP_list:
-            fi, _ = load_floris(pP=pP_eval)
+            fm, _ = load_floris(cosine_exponent=pP_eval)
             AEP_baseline, AEP_opt, _ = evaluate_optimal_yaw_angles(
-                fi=fi,
+                fm=fm,
                 yaw_angle_interpolant=yaw_angle_interpolant,
             )
 

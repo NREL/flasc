@@ -26,7 +26,7 @@ import flasc.utilities.floris_tools as ftools
 from flasc.analysis import energy_ratio as er, total_uplift as tup
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.utilities.energy_ratio_utilities import add_power_ref, add_power_test
-from flasc.utilities.tuner_utilities import replicate_nan_values, resim_floris, set_fi_param
+from flasc.utilities.tuner_utilities import replicate_nan_values, resim_floris
 
 
 def evaluate_overall_wake_loss(df_, df_freq=None):
@@ -50,7 +50,7 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     parameter,
     value_candidates,
     df_scada_in,
-    fi_in,
+    fm_in,
     ref_turbines,
     test_turbines,
     param_idx=None,
@@ -100,12 +100,13 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
 
     # Now loop over FLORIS candidates and collect the wake loss
     floris_wake_losses = np.zeros(len(value_candidates))
+    fm = fm_in.copy()
     for idx, vc in enumerate(value_candidates):
         # Set the parameter
-        fi = set_fi_param(fi_in, parameter, vc, param_idx)
+        fm.set_param(parameter, vc, param_idx)
 
         # Collect the FLORIS results
-        df_floris = resim_floris(fi, df_scada.to_pandas(), yaw_angles=yaw_angles)
+        df_floris = resim_floris(fm, df_scada.to_pandas(), yaw_angles=yaw_angles)
         df_floris = pl.from_pandas(df_floris)
 
         # Assign the ref and test cols
@@ -269,7 +270,7 @@ def sweep_deflection_parameter_for_total_uplift(
     value_candidates,
     df_scada_baseline_in,
     df_scada_wakesteering_in,
-    fi_in,
+    fm_in,
     ref_turbines,
     test_turbines,
     yaw_angles_baseline=None,
@@ -366,15 +367,16 @@ def sweep_deflection_parameter_for_total_uplift(
     # df_list = []
     for idx, vc in enumerate(value_candidates):
         # Set the parameter for baseline and wake steering
-        fi_baseline = set_fi_param(fi_in, parameter, vc)
-        fi_wakesteering = fi_baseline.copy()
+        fm_baseline = fm_in.copy()
+        fm_baseline.set_param(parameter, vc)
+        fm_wakesteering = fm_baseline.copy()
 
         # Collect the FLORIS results
         df_floris_baseline = resim_floris(
-            fi_baseline, df_scada_baseline, yaw_angles=yaw_angles_baseline
+            fm_baseline, df_scada_baseline, yaw_angles=yaw_angles_baseline
         )
         df_floris_wakesteering = resim_floris(
-            fi_wakesteering, df_scada_wakesteering, yaw_angles=yaw_angles_wakesteering
+            fm_wakesteering, df_scada_wakesteering, yaw_angles=yaw_angles_wakesteering
         )
 
         df_floris_baseline = pl.from_pandas(df_floris_baseline)

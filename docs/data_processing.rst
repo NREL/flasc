@@ -203,7 +203,7 @@ done by:
 
  .. code-block:: python
 
-    ws_pow_filtering.window_add(
+    FlascFilter.window_add(
         ws_range=[0.0, 10.2],
         pow_range=[3100.0, 3200.0],
         axis=0,
@@ -221,7 +221,7 @@ faulty and removed.
 
 The second method for data filtering is by looking at the deviation of
 measurements in comparison to the nominal power curve. This filtering method
-is enforced by the ``ws_pow_filtering.filter_by_power_curve()`` function.
+is enforced by the ``FlascFilter.filter_by_power_curve()`` function.
 In the figure above, the allowable deviations from the median power curve
 are denoted in the brown and pink dashed line.
 

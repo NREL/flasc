@@ -10,11 +10,11 @@ from scipy import optimize as opt, stats as spst
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing import dataframe_manipulations as dfm
+from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools
-from flasc.utilities.utilities import printnow as print
 
 
-class bias_estimation:
+class bias_estimation(LoggingManager):
     """This class can be used to estimate the bias (offset) in a wind
     direction measurement by comparing the energy ratios in the SCADA
     data with the predicted energy ratios from FLORIS under various
@@ -30,7 +30,7 @@ class bias_estimation:
     def __init__(
         self,
         df: pd.DataFrame,
-        df_fi_approx: pd.DataFrame,
+        df_fm_approx: pd.DataFrame,
         test_turbines_subset: List[int],
         df_ws_mapping_func: Callable,
         df_pow_ref_mapping_func: Callable,
@@ -46,7 +46,7 @@ class bias_estimation:
                 * Power production of every turbine: pow_000, pow_001, ...
                 * Reference power production used to normalize the energy
                     ratio: 'pow_ref'
-            df_fi_approx ([pd.DataFrame]): Dataframe containing a large set
+            df_fm_approx ([pd.DataFrame]): Dataframe containing a large set
                 of precomputed solutions of the FLORIS model for a range of
                 wind directions, wind speeds (and optionally turbulence
                 intensities). This table can be generated using the following:
@@ -68,12 +68,12 @@ class bias_estimation:
                 returns the reference power production based on an array of
                 wind directions as input.
         """
-        print("Initializing a bias_estimation() object...")
+        self.logger.info("Initializing a bias_estimation() object...")
 
         # Import inputs
         self.df = df.reset_index(drop=("time" in df.columns))
         self.n_turbines = dfm.get_num_turbines(self.df)
-        self.df_fi_approx = df_fi_approx
+        self.df_fm_approx = df_fm_approx
         self.df_ws_mapping_func = df_ws_mapping_func
         self.df_pow_ref_mapping_func = df_pow_ref_mapping_func
         self.test_turbines = test_turbines_subset
@@ -106,7 +106,7 @@ class bias_estimation:
                 wind direction measurement, offset by 'wd_bias' compared
                 to the nominal dataset.
         """
-        print("  Constructing energy table for wd_bias of %.2f deg." % wd_bias)
+        self.logger.info("  Constructing energy table for wd_bias of %.2f deg." % wd_bias)
 
         er_in_test_turbine_list_scada = []
         er_in_test_turbine_list_floris = []
@@ -122,26 +122,26 @@ class bias_estimation:
         df_cor_all = df_cor_all.reset_index(drop=True)
 
         # Get FLORIS predictions
-        print("    Interpolating FLORIS predictions for dataframe.")
+        self.logger.info("    Interpolating FLORIS predictions for dataframe.")
         ws_cols = ["ws_{:03d}".format(ti) for ti in range(self.n_turbines)]
         pow_cols = ["pow_{:03d}".format(ti) for ti in range(self.n_turbines)]
-        df_fi_all = df_cor_all[["time", "wd", "ws", "ti", *ws_cols, *pow_cols]].copy()
+        df_fm_all = df_cor_all[["time", "wd", "ws", "ti", *ws_cols, *pow_cols]].copy()
 
-        df_fi_all = ftools.interpolate_floris_from_df_approx(
-            df=df_fi_all, df_approx=self.df_fi_approx, verbose=False, mirror_nans=True
+        df_fm_all = ftools.interpolate_floris_from_df_approx(
+            df=df_fm_all, df_approx=self.df_fm_approx, verbose=False, mirror_nans=True
         )
-        df_fi_all = self.df_pow_ref_mapping_func(df_fi_all)
+        df_fm_all = self.df_pow_ref_mapping_func(df_fm_all)
 
         for ti in self.test_turbines:
             valid_entries = (~df_cor_all["pow_{:03d}".format(ti)].isna()) & (
-                ~df_fi_all["pow_{:03d}".format(ti)].isna()
+                ~df_fm_all["pow_{:03d}".format(ti)].isna()
             )
             df_cor = df_cor_all[valid_entries].copy().reset_index(drop=True)
-            df_fi = df_fi_all[valid_entries].copy().reset_index(drop=True)
+            df_fm = df_fm_all[valid_entries].copy().reset_index(drop=True)
 
             # Initialize SCADA analysis class and add dataframes
             er_in_test_turbine_list_scada.append(EnergyRatioInput([df_cor], ["Measured data"]))
-            er_in_test_turbine_list_floris.append(EnergyRatioInput([df_fi], ["FLORIS prediction"]))
+            er_in_test_turbine_list_floris.append(EnergyRatioInput([df_fm], ["FLORIS prediction"]))
 
         # Save to self
         self.er_in_test_turbine_list_scada = er_in_test_turbine_list_scada
@@ -203,11 +203,11 @@ class bias_estimation:
         if wd_mask is None:
             wd_mask = [0.0, 360.0]
 
-        print("    Initializing energy ratio inputs.")
+        self.logger.info("    Initializing energy ratio inputs.")
         self._load_er_input_for_wd_bias(wd_bias=wd_bias)
 
         for ii, ti in enumerate(self.test_turbines):
-            print(
+            self.logger.info(
                 "    Determining energy ratios for test turbine = %03d." % (ti)
                 + " WD bias: %.3f deg." % wd_bias
             )
@@ -252,7 +252,7 @@ class bias_estimation:
 
         # Debugging: plot iteration to path
         if plot_iter_path is not None:
-            print("    Plotting energy ratios and saving figures")
+            self.logger.info("    Plotting energy ratios and saving figures")
             fp = os.path.join(
                 plot_iter_path,
                 "bias%+.3f" % (self.fsc_wd_bias_list[ii]),
@@ -364,7 +364,7 @@ class bias_estimation:
             x_opt ([float]): Optimal wind direction offset.
             J_opt ([float]): Cost function under optimal offset.
         """
-        print("Estimating the wind direction bias")
+        self.logger.info("Estimating the wind direction bias")
 
         def cost_fun(wd_bias):
             self._get_energy_ratios_allbins(
@@ -420,7 +420,7 @@ class bias_estimation:
         self.opt_wd_cost = J
 
         # End with optimal results and bootstrapping
-        print("  Evaluating optimal solution with bootstrapping")
+        self.logger.info("  Evaluating optimal solution with bootstrapping")
         self._get_energy_ratios_allbins(
             wd_bias=x_opt,
             time_mask=time_mask,
