@@ -82,3 +82,4 @@ order-by-type = false
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+exclude = ["*.ipynb"]
