@@ -22,26 +22,6 @@ filterwarnings = [
 
 
 [tool.ruff]
-src = ["flasc", "tests"]
-line-length = 100
-target-version = "py310"
-extend-include = ["*.ipynb"]
-ignore-init-module-imports = true
-
-# See https://github.com/charliermarsh/ruff#supported-rules
-# for rules included and matching to prefix.
-select = ["E", "F", "I"]
-
-# F401 unused-import: Ignore until all used isort flags are adopted in ruff
-# ignore = ["F401"]
-
-# Ignore == -> is as this breaks in pandas
-ignore = ["E712"]
-
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-# fixable = ["A", "B", "C", "D", "E", "F"]
-fixable = ["E", "F", "I"]
-unfixable = []
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -66,17 +46,39 @@ exclude = [
     "venv",
 ]
 
+src = ["flasc", "tests"]
+line-length = 100
+target-version = "py310"
+extend-include = ["*.ipynb"]
+
+
+[tool.ruff.lint]
+
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+# See https://github.com/charliermarsh/ruff#supported-rules
+# for rules included and matching to prefix.
+select = ["E", "F", "I", "D"]
 
-[tool.ruff.isort]
+# Ignore == -> is as this breaks in pandas
+ignore = ["E712"]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+# fixable = ["A", "B", "C", "D", "E", "F"]
+fixable = ["E", "F", "I"]
+unfixable = []
+
+[tool.ruff.lint.isort]
 combine-as-imports = true
 known-first-party = ["flasc"]
 order-by-type = false
 
 # [tool.ruff.format]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # Ignore `F401` (import violations) in all `__init__.py` files, and in `path/to/file.py`.
 "__init__.py" = ["F401"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
