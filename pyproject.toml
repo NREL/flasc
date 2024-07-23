@@ -66,7 +66,7 @@ ignore = ["E712"]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 # fixable = ["A", "B", "C", "D", "E", "F"]
-fixable = ["E", "F", "I"]
+fixable = ["E", "F", "I", "D"]
 unfixable = []
 
 [tool.ruff.lint.isort]
