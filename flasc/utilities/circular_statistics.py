@@ -1,54 +1,42 @@
+"""Circular statistics utility functions."""
+
 import numpy as np
 from floris.utilities import wrap_360
 from scipy.stats import circmean
 
 
 def calc_wd_mean_radial(angles_array_deg, axis=0, nan_policy="omit"):
-    """
-    Compute the mean wind direction over a given axis. Assumes that the
+    """Compute the mean wind direction over a given axis.
+
+    Assumes that the
     input angles are specified in degrees, and returns the mean wind
     direction in degrees. Wrapper for scipy.stats.circmean
 
-    Inputs:
-        angles_array_deg - numpy array or pandas dataframe of input
-            wind directions.
-        axis - axis of array/dataframe to take average over
-        nan_policy - option to pass to scipy.stats.circmean; defaults to
-           'omit'. (Options: 'propagate', 'raise', 'omit')
+    Args:
+        angles_array_deg (numpy array): Array of angles in degrees
+        axis (int): Axis along which to calculate the mean
+            Default is 0
+        nan_policy (str): How to handle NaN values.  Default is 'omit'
 
-    Outputs:
-        mean_wd - numpy array of mean wind directions over the provided
-            axis
+    Returns:
+         np.array: Mean wind direction in degrees
     """
-
     return circmean(angles_array_deg, high=360.0, axis=axis, nan_policy=nan_policy)
-
-
-# def calc_wd_mean_radial_list(angles_array_list):
-#     if isinstance(angles_array_list, (pd.DataFrame, pd.Series)):
-#         array = np.array(angles_array_list)
-#     elif isinstance(angles_array_list, list):
-#         array = np.vstack(angles_array_list).T
-#     else:
-#         array = np.array(angles_array_list)
-
-#     # Use unit vectors to calculate the mean
-#     dir_x = np.cos(array * np.pi / 180.).sum(axis=1)
-#     dir_y = np.sin(array * np.pi / 180.).sum(axis=1)
-
-#     mean_dirs = np.arctan2(dir_y, dir_x)
-#     mean_out = wrap_360(mean_dirs * 180. / np.pi)
-
-#     return mean_out
 
 
 def calculate_wd_statistics(angles_array_deg, axis=0, calc_median_min_max_std=True):
     """Determine statistical properties of an array of wind directions.
+
     This includes the mean of the array, the median, the standard deviation,
     the minimum value and the maximum value.
 
     Args:
-        angles_array_deg ([float/int]): Array of angles in degrees
+        angles_array_deg (numpy array): Array of wind directions in degrees
+        axis (int): Axis along which to calculate the statistics
+            Default is 0
+        calc_median_min_max_std (bool): Whether to calculate the median, minimum,
+            maximum, and standard deviation of the wind directions
+            Default is True
 
     Returns:
         mean_wd (float): Mean wind direction in [0, 360] deg
@@ -57,7 +45,6 @@ def calculate_wd_statistics(angles_array_deg, axis=0, calc_median_min_max_std=Tr
         min_wd (float): Minimum wind direction in [0, 360] deg
         max_wd (float): Maximum wind direction in [0, 360] deg
     """
-
     # Preprocessing
     angles_array_deg = np.array(angles_array_deg, dtype=float)
     angles_array_deg = wrap_360(angles_array_deg)
