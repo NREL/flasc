@@ -1,3 +1,5 @@
+"""Module for computing the total uplift in energy production."""
+
 # This is a work in progress as we try to synthesize ideas from the
 # table based methods and energy ratios back into one thing,
 # some ideas we're incorporating:
@@ -42,8 +44,7 @@ def _compute_total_uplift_single(
     uplift_names=[],
     remove_all_nulls=False,
 ):
-    """
-    Compute the total change in energy production between two sets of turbines.
+    """Compute the total change in energy production between two sets of turbines.
 
     Args:
         df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
@@ -64,7 +65,7 @@ def _compute_total_uplift_single(
             the minimum count across the dataframes
             is used to weight the energy ratio.   'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.   Defaults to 'min'.
-        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
+        df_freq_pl (pl.Dataframe): Polars dataframe of pre-provided per bin weights
         wd_bin_overlap_radius (float): The distance
             in degrees one wd bin overlaps into the next, must be
             less or equal to half the value of wd_step
@@ -83,7 +84,6 @@ def _compute_total_uplift_single(
         dict: A dictionary with results indexed for each element of uplift_names
         pl.DataFrame: A dataframe containing the weights each wind direction and wind speed bin
     """
-
     # Get the number of dataframes
     num_df = len(df_names)
 
@@ -202,8 +202,7 @@ def _compute_total_uplift_bootstrap(
     percentiles=[5.0, 95.0],
     remove_all_nulls=False,
 ):
-    """
-    Compute the total change in energy production between two sets of turbines with bootstrapping
+    """Compute the total change in energy between two sets of turbines with bootstrapping.
 
     Args:
         er_in (EnergyRatioInput): An EnergyRatioInput object
@@ -224,7 +223,7 @@ def _compute_total_uplift_bootstrap(
             the minimum count across the dataframes
             is used to weight the energy ratio. 'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.
-        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
+        df_freq_pl (pl.Dataframe): Polars dataframe of pre-provided per bin weights
         wd_bin_overlap_radius (float): The distance
             in degrees one wd bin overlaps into the next, must be
             less or equal to half the value of wd_step
@@ -247,7 +246,6 @@ def _compute_total_uplift_bootstrap(
         pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
 
     """
-
     # Otherwise run the function N times and concatenate the results to compute statistics
     uplift_single_outs = [
         _compute_total_uplift_single(
@@ -333,8 +331,7 @@ def compute_total_uplift(
     percentiles=None,
     remove_all_nulls=False,
 ) -> dict:  # dict output for now, may change later
-    """
-    Compute the energy ratio between two sets of turbines with bootstrapping
+    """Compute the energy ratio between two sets of turbines with bootstrapping.
 
     Args:
         er_in (EnergyRatioInput): An EnergyRatioInput object
@@ -392,7 +389,6 @@ def compute_total_uplift(
         two sets of turbines.
 
     """
-
     # Get the polars dataframe from within the er_in
     df_ = er_in.get_df()
 
