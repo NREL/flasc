@@ -13,7 +13,7 @@ def estimate_dt(time_array):
         time_array (list): List or dataframe with time entries
 
     Returns:
-        dt (datetime.timedelta): Timestep in dt.timedelta format
+        datetime.timedelta: Timestep in dt.timedelta format
     """
     if len(time_array) < 2:
         # Assume arbitrary value
@@ -37,7 +37,7 @@ def get_num_turbines(df):
         df (pd.DataFrame): Dataframe with turbine data
 
     Returns:
-        nt (int): Number of turbines in the dataframe
+       int: Number of turbines in the dataframe
     """
     nt = 0
     while ("pow_%03d" % nt) in df.columns:
@@ -64,7 +64,7 @@ def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
             fashion, i.e., the interpolation will wrap around 360 degrees.
 
     Returns:
-        y (np.array): The interpolation results.
+        np.array: The interpolation results.
     """
     if not ((kind == "linear") or (kind == "nearest")):
         raise NotImplementedError("Unknown interpolation method specified.")
@@ -118,7 +118,7 @@ def _interpolate_with_max_gap(
         extrapolate (bool): If True, extrapolate the data points on the boundaries
 
     Returns:
-        y (np.array): The interpolation results.
+        np.array: The interpolation results.
     """
     if not assume_sorted:
         # Sort xp and fp to be monotonous
