@@ -1,3 +1,6 @@
+"""Module for visualizing yaw optimizer results."""
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -15,6 +18,18 @@ def plot_uplifts_by_atmospheric_conditions(
     wd_edges=np.arange(0.0, 360.0001, 3.0),
     ti_edges=np.arange(0.0, 0.30, 0.02),
 ):
+    """Plot relative power gains and contributions to AEP uplift by atmospheric conditions.
+
+    This function plots the relative power gains and contributions to AEP uplift
+
+    Args:
+        df_list (List[pd.DataFrame]): List of dataframes with power gains and contributions
+            to AEP uplift.
+        labels (List[str]): List of labels for the dataframes. Defaults to None.
+        ws_edges (np.array): Wind speed bin edges. Defaults to np.arange(3.0, 17.0, 1.0).
+        wd_edges (np.array): Wind direction bin edges. Defaults to np.arange(0.0, 360.0001, 3.0).
+        ti_edges (np.array): Turbulence intensity bin edges. Defaults to np.arange(0.0, 0.30, 0.02).
+    """
     # Calculate bin means
     ws_labels = (ws_edges[0:-1] + ws_edges[1::]) / 2.0
     wd_labels = (wd_edges[0:-1] + wd_edges[1::]) / 2.0
@@ -142,7 +157,8 @@ def _plot_bins(x, y, yn, xlabel=None, ylabel=None, labels=None):
 
 
 def plot_offsets_wswd_heatmap(df_offsets, turb_id, ax=None):
-    """
+    """Plot offsets for a single turbine as a heatmap in wind speed.
+
     df_offsets should be a dataframe with columns:
        - wind_direction,
        - wind_speed,
@@ -153,8 +169,17 @@ def plot_offsets_wswd_heatmap(df_offsets, turb_id, ax=None):
     to contain individual turbine offsets in distinct columns (unlike
     the yaw_angles_opt column from FLORIS.
 
-    """
+    Args:
+        df_offsets (pd.DataFrame): dataframe with offsets
+        turb_id (int or str): turbine id or column name
+        ax (matplotlib.axes.Axes): axis to plot on.  If None, a new figure is created.
+            Default is None.
 
+    Returns:
+        matplotlib.axes.Axes: axis with heatmap
+        matplotlib.colorbar.Colorbar: colorbar for heatmap
+
+    """
     if isinstance(turb_id, int):
         if "yaw_angles_opt" in df_offsets.columns:
             offsets = np.vstack(df_offsets.yaw_angles_opt.to_numpy())[:, turb_id]
@@ -197,8 +222,10 @@ def plot_offsets_wswd_heatmap(df_offsets, turb_id, ax=None):
     return ax, cbar
 
 
+# TODO: This function feels a little old fashioned
 def plot_offsets_wd(df_offsets, turb_id, ws_plot, color="black", alpha=1.0, label=None, ax=None):
-    """
+    """Plot offsets for a single turbine as a function of wind direction.
+
     df_offsets should be a dataframe with columns:
        - wind_direction,
        - wind_speed,
@@ -208,8 +235,17 @@ def plot_offsets_wd(df_offsets, turb_id, ws_plot, color="black", alpha=1.0, labe
     a two-element tuple or list, that range of wind speeds is plotted.
 
     label only allowed is single wind speed is given.
-    """
 
+    Args:
+        df_offsets (pd.DataFrame): dataframe with offsets
+        turb_id (int or str): turbine id or column name
+        ws_plot (float or list): wind speed to plot
+        color (str): color of line
+        alpha (float): transparency of line
+        label (str): label for line
+        ax (matplotlib.axes.Axes): axis to plot on.  If None, a new figure is created.
+            Default is None.
+    """
     if isinstance(turb_id, int):
         if "yaw_angles_opt" in df_offsets.columns:
             offsets = np.vstack(df_offsets.yaw_angles_opt.to_numpy())[:, turb_id]
