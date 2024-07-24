@@ -1,3 +1,4 @@
+"""Module for fitting yaw loss power curve."""
 import os
 
 import matplotlib.pyplot as plt
@@ -11,8 +12,18 @@ logger_manager = LoggingManager()  # Instantiate LoggingManager
 logger = logger_manager.logger  # Obtain the reusable logger
 
 
+# TODO: Is this class still used anywhere?
 class yaw_pow_fitting:
+    """Class for fitting yaw loss power curve."""
+
     def __init__(self, df, df_upstream=None, ti=0):  # , turbine_list='all'):
+        """Initialize the yaw power curve fitting object.
+
+        Args:
+            df (pd.DataFrame): DataFrame containing the relevant data.
+            df_upstream (pd.DataFrame): DataFrame containing the upstream conditions.
+            ti (int): Index of the turbine to fit the yaw power curve to.
+        """
         logger.info("Initializing yaw power curve filtering object.")
         # Assign dataframes to self
         # self.df_upstream = df_upstream
@@ -22,6 +33,13 @@ class yaw_pow_fitting:
         # self.set_turbine_mode(turbine_list)
 
     def set_df(self, df, df_upstream, ti):
+        """Set the dataframe for the yaw power curve fitting object.
+
+        Args:
+            df (pd.DataFrame): DataFrame containing the relevant data.
+            df_upstream (pd.DataFrame): DataFrame containing the upstream conditions.
+            ti (int): Index of the turbine to fit the yaw power curve to.
+        """
         # if 'vane_000' not in df.columns:
         #     raise KeyError('vane_000 not found in dataset.')
 
@@ -69,6 +87,14 @@ class yaw_pow_fitting:
     #     self.num_turbines = len(turbine_list)
 
     def calculate_curves(self, vane_bounds=(-15.0, 15.0), dv=1.0, Pmin=10.0):
+        """Calculate the yaw-power curve.
+
+        Args:
+            vane_bounds (tuple): Tuple containing the lower and upper bounds of the vane angle.
+                Default is (-15.0, 15.0).
+            dv (float): Bin width for the vane angle. Default is 1.0.
+            Pmin (float): Minimum power value to consider. Default is 10.0.
+        """
         df = self.df
         # df_upstream = self.df_upstream
         # turbine_list = self.turbine_list
@@ -117,6 +143,20 @@ class yaw_pow_fitting:
         opt_pp_range=(1.0, 10.0),
         opt_Ns=41,
     ):
+        """Estimate the best fit for a cos(x-x0)^pp curve.
+
+        Args:
+            opt_yshift_range (tuple): Tuple containing the lower and upper bounds for the y shift.
+                Default is None.
+            opt_bias_range (tuple): Tuple containing the lower and upper bounds for the bias.
+                Default is (-15.0, 15.0).
+            opt_pp_range (tuple): Tuple containing the lower and upper bounds for the power.
+                Default is (1.0, 10.0).
+            opt_Ns (int): Number of samples to use for the optimization. Default is 41.
+
+        Returns:
+            x_opt (np.array): Optimal parameters for the cos(x-x0)^pp curve.
+        """
         # for ti in self.turbine_list:
         bins_x = self.bins_x
         bins_y = self.bins_y
@@ -163,6 +203,16 @@ class yaw_pow_fitting:
         return x_opt
 
     def plot(self, save_path=None, fig_dpi=250):
+        """Plot the yaw-power curve.
+
+        Args:
+            save_path (str): Path to save the figure. Default is None.
+            fig_dpi (int): DPI of the figure. Default is 250.
+
+        Returns:
+            fig (matplotlib.figure.Figure): Figure object.
+            ax (matplotlib.axes.Axes): Axes object.
+        """
         # for ti in self.turbine_list:
         bins_x = self.bins_x
         bins_y = self.bins_y
