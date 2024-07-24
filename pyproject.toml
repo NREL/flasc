@@ -80,5 +80,10 @@ order-by-type = false
 # Ignore `F401` (import violations) in all `__init__.py` files, and in `path/to/file.py`.
 "__init__.py" = ["F401"]
 
+# Ignore pydocstyle in directories besides flasc
+"tests/*" = ["D"]
+"examples_*/*" = ["D"]
+"docs/*" = ["D"]
+
 [tool.ruff.lint.pydocstyle]
 convention = "google"
