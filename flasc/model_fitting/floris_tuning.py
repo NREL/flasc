@@ -1,15 +1,4 @@
-# Copyright 2023 NREL
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License. You may obtain a copy of
-# the License at http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations under
-# the License.
-
-# See https://nrel.github.io/flasc/ for documentation
+"""Module for tuning FLORIS to SCADA data."""
 
 # This is a preliminary implementation of tuning methods for FLORIS to SCADA.
 # The code is focused on methods for the Empirical Guassian wake model and is
@@ -30,18 +19,16 @@ from flasc.utilities.tuner_utilities import replicate_nan_values, resim_floris
 
 
 def evaluate_overall_wake_loss(df_, df_freq=None):
-    """
-    Evaluate the overall wake loss from pow_ref to pow_test as percent reductions
+    """Evaluate the overall wake loss from pow_ref to pow_test as percent reductions.
 
     Args:
-        df_ (DataFrame): Polars dataframe possibly containing Null values
+        df_ (pl.DataFrame): Polars dataframe possibly containing Null values
         df_freq (Dataframe): Not yet used
 
     Returns:
         float: Overall wake losses
 
     """
-
     # Not sure yet if we want to figure out how to use df_freq here
     return 100 * (df_["pow_ref"].sum() - df_["pow_test"].sum()) / df_["pow_ref"].sum()
 
@@ -62,11 +49,28 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
     ws_max=50.0,
     df_freq=None,  # Not yet certain we will use this
 ):
-    """
-    Sweep the parameter in FLORIS using the values in value_candidates, and compare to
-    SCADA data in df_scada_in using the overall_wake_loss
-    """
+    """Sweep the parameter in FLORIS using the values in value_candidates.
 
+    Compare to SCADA data in df_scada_in using the overall_wake_loss
+
+    Args:
+        parameter (str): The parameter to sweep
+        value_candidates (list): The values to sweep
+        df_scada_in (DataFrame): The SCADA data
+        fm_in (floris.tools.Floris): The FLORIS model
+        ref_turbines (list): The reference turbines
+        test_turbines (list): The test turbines
+        param_idx (int): The parameter index
+        yaw_angles (np.ndarray): The yaw angles
+        wd_min (float): The minimum wind direction
+        wd_max (float): The maximum wind direction
+        ws_min (float): The minimum wind speed
+        ws_max (float): The maximum wind speed
+        df_freq (DataFrame): The frequency data
+
+    Returns:
+        (np.ndarray, np.ndarray): The FLORIS wake losses and the SCADA wake loss
+    """
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?
 
@@ -121,11 +125,18 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
 
 
 def select_best_wake_model_parameter(floris_results, scada_results, value_candidates, ax=None):
-    """
-    Consider the provided velocity parameters and determine the best fit with
-    respect to squared error
-    """
+    """Determine the best fit with respect to squared error.
 
+    Args:
+        floris_results (np.ndarray): The FLORIS wake losses
+        scada_results (np.ndarray): The SCADA wake losses
+        value_candidates (np.ndarray): The parameter values
+        ax (Axes): The axes to plot on.  If None, no plot is made.
+            Default is None.
+
+    Returns:
+        float: The best parameter value
+    """
     error_values = (floris_results - scada_results) ** 2
 
     best_param = value_candidates[np.argmin(error_values)]
@@ -159,12 +170,33 @@ def sweep_wd_std_for_er(
     df_freq=None,  # Not yet certain we will use this,
     remove_all_nulls=False,
 ):
-    """
-    Determine the best-fit wd_std for FLORIS by comparison with energy ratio plots
+    """Determine the best-fit wd_std for FLORIS by comparison with energy ratio plots.
 
     TODO: Reimplement that comparison only takes place when FLORIS value is below some threshold
-    """
 
+    Args:
+        value_candidates (list): The values to sweep
+        df_scada_in (DataFrame): The SCADA data
+        df_approx_ (DataFrame): The FLORIS approximation data
+        ref_turbines (list): The reference turbines
+        test_turbines (list): The test turbines
+        yaw_angles (np.ndarray): The yaw angles
+        wd_step (float): The wind direction step
+        wd_min (float): The minimum wind direction
+        wd_max (float): The maximum wind direction
+        ws_step (float): The wind speed step
+        ws_min (float): The minimum wind speed
+        ws_max (float): The maximum wind speed
+        bin_cols_in (list): The bin columns
+        weight_by (str): The weight method.  Can be 'min' or 'sum'.
+            Default is 'min'.
+        df_freq (DataFrame): The frequency data
+        remove_all_nulls (bool): Remove all nulls.  Default is False.
+
+    Returns:
+        (np.ndarray, list): The FLORIS energy ratio errors and the dataframes
+
+    """
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?
 
@@ -245,11 +277,17 @@ def sweep_wd_std_for_er(
 
 
 def select_best_wd_std(er_results, value_candidates, ax=None):
-    """
-    Consider the provided wd_std and determine the best fit with
-    respect to squared error
-    """
+    """Consider wd_std and determine the best fit with respect to squared error.
 
+    Args:
+        er_results (np.ndarray): The energy ratio errors
+        value_candidates (np.ndarray): The parameter values
+        ax (Axes): The axes to plot on.  If None, no plot is made.
+            Default is None.
+
+    Returns:
+        float: The best parameter value
+    """
     error_sq = er_results**2
 
     best_param = value_candidates[np.argmin(error_sq)]
@@ -286,11 +324,35 @@ def sweep_deflection_parameter_for_total_uplift(
     df_freq=None,  # Not yet certain we will use this,
     remove_all_nulls=False,
 ):
-    """
-    Sweep values of the deflection parameter in FLORIS and compare to SCADA
-    data with respect to overall uplift
-    """
+    """Sweep values of the deflection parameter in FLORIS and compare to SCADA.
 
+    Comparison is made wrt overall uplift.
+
+    Args:
+        parameter (str): The parameter to sweep
+        value_candidates (list): The values to sweep
+        df_scada_baseline_in (DataFrame): The baseline SCADA data
+        df_scada_wakesteering_in (DataFrame): The wake steering SCADA data
+        fm_in (floris.tools.Floris): The FLORIS model
+        ref_turbines (list): The reference turbines
+        test_turbines (list): The test turbines
+        yaw_angles_baseline (np.ndarray): The yaw angles for the baseline
+        yaw_angles_wakesteering (np.ndarray): The yaw angles for the wake steering
+        wd_step (float): The wind direction step
+        wd_min (float): The minimum wind direction
+        wd_max (float): The maximum wind direction
+        ws_step (float): The wind speed step
+        ws_min (float): The minimum wind speed
+        ws_max (float): The maximum wind speed
+        bin_cols_in (list): The bin columns
+        weight_by (str): The weight method.  Can be 'min' or 'sum'.
+            Default is 'min'.
+        df_freq (DataFrame): The frequency data
+        remove_all_nulls (bool): Remove all nulls.  Default is False.
+
+    Returns:
+        (np.ndarray, np.ndarray): The FLORIS total uplifts and the SCADA total uplifts
+    """
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?
 
