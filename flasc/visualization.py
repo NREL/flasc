@@ -1,3 +1,9 @@
+"""Module for visualization of FLASC data.
+
+This module contains functions for visualizing data from the FLASC package.
+
+"""
+
 import numpy as np
 import pandas as pd
 import scipy.stats as st
@@ -16,7 +22,9 @@ def plot_with_wrapping(
     label=None,
     rasterized=False,
 ):
-    """Plot a line on an axis that deals with angle wrapping. Normally, using
+    """Plot a line on an axis that deals with angle wrapping.
+
+    Normally, using
     pyplot will blindly connects points that wrap around 360 degrees, e.g.,
     going from 357 degrees to 2 degrees. This will create a strong vertical
     line through the plot that connects the two points, while actually these
@@ -56,12 +64,14 @@ def plot_with_wrapping(
         its vectorized properties. This can help reduce the size of a .pdf or
         .eps file when this figure is saved, at the cost of a potential
         reduction in image quality.
+        rasterized (bool, optional): Rasterize the plot/line and thereby remove
+        its vectorized properties. Defaults to False.
+
 
     Returns:
         ax: Axis object of the matplotlib.pyplot class on which the line (and
         optionally markers) are plotted.
     """
-
     # Create figure, if not provided
     if ax is None:
         fig, ax = plt.subplots()
@@ -139,11 +149,27 @@ def plot_with_wrapping(
 
 
 def generate_default_labels(fm):
+    """Generate default labels for a FlorisModel.
+
+    Args:
+        fm (FlorisModel): A FlorisModel instance.
+
+    Returns:
+        list: A list of labels for the turbines in the FlorisModel.
+    """
     labels = ["T{0:02d}".format(ti) for ti in range(len(fm.layout_x))]
     return labels
 
 
 def generate_labels_with_hub_heights(fm):
+    """Generate labels for a FlorisModel with hub heights.
+
+    Args:
+        fm (FlorisModel): A FlorisModel instance.
+
+    Returns:
+        list: A list of labels for the turbines in the FlorisModel.
+    """
     labels = [
         "T{0:02d} ({1:.1f} m)".format(ti, h)
         for ti, h in enumerate(fm.core.farm.hub_heights.flatten())
@@ -164,9 +190,9 @@ def plot_binned_mean_and_ci(
     alpha_scatter=0.1,
     confidence_level=0.95,
 ):
-    """
-    Plot data to a single axis.  Method
-    has options to include scatter of underlying data, specifiying
+    """Plot the mean and confidence interval of y as a function of x.
+
+    Method has options to include scatter of underlying data, specifying
     bin edges, and plotting confidence interval.
 
     Args:
@@ -188,11 +214,10 @@ def plot_binned_mean_and_ci(
             confidence interval. Defaults to True.
         alpha_scatter (float, optional): Alpha for scatter
             plot. Defaults to 0.5.
-        confidenceLevel (float, optional): Confidence level for
+        confidence_level (float, optional): Confidence level for
             confidence interval. Defaults to 0.95.
 
     """
-
     # Check the length of x equals length of y
     if len(x) != len(y):
         raise ValueError("x and y must be the same length")
