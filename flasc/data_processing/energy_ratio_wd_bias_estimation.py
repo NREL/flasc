@@ -1,3 +1,5 @@
+"""Module to estimate the wind direction bias."""
+
 import os as os
 from typing import Callable, List
 
@@ -15,7 +17,9 @@ from flasc.utilities import floris_tools as ftools
 
 
 class bias_estimation(LoggingManager):
-    """This class can be used to estimate the bias (offset) in a wind
+    """Class to determine bias in wind direction measurement.
+
+    This class can be used to estimate the bias (offset) in a wind
     direction measurement by comparing the energy ratios in the SCADA
     data with the predicted energy ratios from FLORIS under various
     bias correction values. Essentially, this class solves the following
@@ -38,7 +42,7 @@ class bias_estimation(LoggingManager):
         """Initialize the bias estimation class.
 
         Args:
-            df ([pd.DataFrame]): Dataframe with the SCADA data measurements
+            df (pd.Dataframe): Dataframe with the SCADA data measurements
                 formatted in the generic format. The dataframe should contain
                 at the minimum the following columns:
                 * Reference wind direction for the test turbine, 'wd'
@@ -46,7 +50,7 @@ class bias_estimation(LoggingManager):
                 * Power production of every turbine: pow_000, pow_001, ...
                 * Reference power production used to normalize the energy
                     ratio: 'pow_ref'
-            df_fm_approx ([pd.DataFrame]): Dataframe containing a large set
+            df_fm_approx (pd.Dataframe): Dataframe containing a large set
                 of precomputed solutions of the FLORIS model for a range of
                 wind directions, wind speeds (and optionally turbulence
                 intensities). This table can be generated using the following:
@@ -84,7 +88,9 @@ class bias_estimation(LoggingManager):
         self,
         wd_bias,
     ):
-        """This function initializes an instance of the EnergyRatioInput
+        """Load EnergyRatioInput objects with bias.
+
+        This function initializes an instance of the EnergyRatioInput
         where the dataframe is shifted by wd_bias for each test turbine.
         This facilitates the calculation of the energy ratios under this
         hypothesized wind direction bias. Additionally, the FLORIS predictions
@@ -92,7 +98,7 @@ class bias_estimation(LoggingManager):
         predictions are also calculated.
 
         Args:
-            wd_bias ([float]): Hypothesized wind direction bias in degrees.
+            wd_bias (float): Hypothesized wind direction bias in degrees.
             test_turbines ([iteratible]): List of test turbines for
                 which each the energy ratios are calculated and the Pearson
                 correlation coefficients are calculated. Note that this
@@ -160,10 +166,26 @@ class bias_estimation(LoggingManager):
         N_btstrp=1,
         plot_iter_path=None,
     ):
-        """Calculate the energy ratios for the energy_ratio_suite objects
-        contained in 'self.fsc_list'.
+        """Calculate the energy ratios.
 
         Args:
+            wd_bias (float): Wind direction bias in degrees.
+            time_mask ([iterable], optional): Mask.  If None, will not mask
+                the data based on this variable. Defaults to None.
+            ws_mask ([iterable], optional): Wind speed mask. Should be an
+                iterable of length 2, e.g., [6.0, 10.0], defining the lower
+                and upper bound, respectively. If not specified, will not
+                mask the data based on this variable. Defaults to (6, 10).
+            wd_mask ([iterable], optional): Wind direction mask. Should
+                be an iterable of length 2, e.g., [0.0, 180.0], defining
+                the lower and upper bound, respectively. If not specified,
+                will not mask the data based on this variable. Defaults to
+                None.
+            ti_mask ([iterable], optional): Turbulence intensity mask.
+                Should be an iterable of length 2, e.g., [0.04, 0.08],
+                defining the lower and upper bound, respectively. If not
+                specified, will not mask the data based on this variable.
+                Defaults to None.
             wd_step (float, optional): Wind direction discretization step
                 size. This defines for what wind directions the energy ratio
                 is to be calculated. Note that this does not necessarily
@@ -280,6 +302,31 @@ class bias_estimation(LoggingManager):
         er_wd_bin_width=None,
         er_N_btstrp=1,
     ):
+        """Calculate Baseline energy ratios.
+
+        Args:
+            time_mask ([iterable], optional): Time Mask.
+            ws_mask ([iterable], optional): Wind speed mask. Should be an
+                iterable of length 2, e.g., [6.0, 10.0], defining the lower
+                and upper bound, respectively. If not specified, will not
+                mask the data based on this variable. Defaults to (6, 10).
+            wd_mask ([iterable], optional): Wind direction mask. Should
+                be an iterable of length 2, e.g., [0.0, 180.0], defining
+                the lower and upper bound, respectively. If not specified,
+                will not mask the data based on this variable. Defaults to
+                None.
+            ti_mask ([iterable], optional): Turbulence intensity mask.
+                Should be an iterable of length 2, e.g., [0.04, 0.08],
+                defining the lower and upper bound, respectively. If not
+                specified, will not mask the data based on this variable.
+                Defaults to None.
+            er_wd_step (float, optional): Wind direction step size.  Defaults to 3.0.
+            er_ws_step (float, optional): Wind speed step size. Defaults to 5.0.
+            er_wd_bin_width ([type], optional): Wind direction bin width.  Defaults to None.
+            er_N_btstrp (int, optional): Number of bootstrap evaluations for
+                uncertainty quantification (UQ). If N_btstrp=1, will not
+                perform any uncertainty quantification. Defaults to 1.
+        """
         # TODO: is this calculate_baseline method needed?
         self._get_energy_ratios_allbins(
             wd_bias=0.0,
@@ -309,11 +356,13 @@ class bias_estimation(LoggingManager):
         er_N_btstrp=1,
         plot_iter_path=None,
     ):
-        """Estimate the wind direction bias by comparing the SCADA data
+        """Estimate wd bias.
+
+        Estimate the wind direction bias by comparing the SCADA data
         under various wind direction corrections to its FLORIS predictions.
 
         Args:
-            time_mask ([iterable], optional): Wind speed mask. Should be an
+            time_mask ([iterable], optional): Time mask. Should be an
                 iterable of length 2, e.g., [pd.to_datetime("2019-01-01"),
                 pd.to_datetime("2019-04-01")], defining the lower and upper
                 bound, respectively. If not specified, will not mask the data
@@ -336,6 +385,8 @@ class bias_estimation(LoggingManager):
                 direction offsets to consider. Defaults to (-180., 180.).
             opt_search_brute_dx (float, optional): Number of points to
                 discretize the search space over. Defaults to 5.
+            opt_workers (int, optional): Number of workers to use for the
+                optimization. Defaults to 4.
             er_wd_step (float, optional): Wind direction discretization step
                 size. This defines for what wind directions the energy ratio
                 is to be calculated. Note that this does not necessarily
@@ -361,8 +412,8 @@ class bias_estimation(LoggingManager):
                 None.
 
         Returns:
-            x_opt ([float]): Optimal wind direction offset.
-            J_opt ([float]): Cost function under optimal offset.
+            x_opt (float): Optimal wind direction offset.
+            J_opt (float): Cost function under optimal offset.
         """
         self.logger.info("Estimating the wind direction bias")
 
@@ -455,11 +506,13 @@ class bias_estimation(LoggingManager):
     def plot_energy_ratios(
         self, show_uncorrected_data=False, save_path=None, format="png", dpi=200
     ):
-        """Plot the energy ratios for the currently evaluated wind
+        """Plot energy ratios.
+
+        Plot the energy ratios for the currently evaluated wind
         direction offset term.
 
         Args:
-            show_uncorrcted_data (bool, optional): Compute and show the
+            show_uncorrected_data (bool, optional): Compute and show the
                 uncorrected energy ratio (with wd_bias=0) on the plot. Defaults
                 to False.
             save_path ([str], optional): Path to save the figure to. If not
