@@ -1,3 +1,5 @@
+"""Module for creating interpolants from lookup tables."""
+
 import numpy as np
 from scipy.interpolate import LinearNDInterpolator
 
@@ -5,7 +7,9 @@ from scipy.interpolate import LinearNDInterpolator
 def get_yaw_angles_interpolant(
     df_opt, ramp_up_ws=[4, 5], ramp_down_ws=[10, 12], minimum_yaw_angle=None, maximum_yaw_angle=None
 ):
-    """Create an interpolant for the optimal yaw angles from a dataframe
+    """Get an interpolant for the optimal yaw angles from a dataframe.
+
+    Create an interpolant for the optimal yaw angles from a dataframe
     'df_opt', which contains the rows 'wind_direction', 'wind_speed',
     'turbulence_intensity', and 'yaw_angles_opt'. This dataframe is typically
     produced automatically from a FLORIS yaw optimization using Serial Refine
@@ -26,6 +30,12 @@ def get_yaw_angles_interpolant(
         end. This variable defaults to [10, 12], meaning that the yaw offsets are
         full at and below 10 m/s, then linearly transition to zero offsets
         at 12 m/s, and continue to be zero past 12 m/s. Defaults to [10, 12].
+        minimum_yaw_angle (float, optional): The minimum yaw angle in degrees.
+        Defaults to None.  If None, the minimum yaw angle is set to the minimum
+        yaw angle in the dataset.
+        maximum_yaw_angle (float, optional): The maximum yaw angle in degrees.
+        Defaults to None.  If None, the maximum yaw angle is set to the maximum
+        yaw angle in the dataset.
 
     Returns:
         LinearNDInterpolator: An interpolant function which takes the inputs
@@ -33,7 +43,6 @@ def get_yaw_angles_interpolant(
         dimensions, and returns the yaw angles for all turbines. This function
         incorporates the ramp-up and ramp-down regions.
     """
-
     # Load data and set up a linear interpolant
     points = df_opt[["wind_direction", "wind_speed", "turbulence_intensity"]]
     values = np.vstack(df_opt["yaw_angles_opt"])
