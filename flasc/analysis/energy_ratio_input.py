@@ -1,3 +1,5 @@
+"""Energy ratio input module."""
+
 from typing import List
 
 import numpy as np
@@ -8,15 +10,16 @@ from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 
 
 def generate_block_list(N: int, num_blocks: int = 10):
-    """Generate an np.array of length N where each element is an integer between 0 and num_blocks-1
+    """Generate an np.array of length N where each element is an integer between 0 and num_blocks-1.
+
+    Generate an np.array of length N where each element is an integer between 0 and num_blocks-1
     with each value repeating N/num_blocks times.
 
     Args:
         N (int): Length of the array to generate
-        num_blocks (int): Number of blocks to generate
+        num_blocks (int): Number of blocks to generate. Defaults to 10.
 
     """
-
     # Test than N and num_blocks are integers greater than 0
     if not isinstance(N, int) or not isinstance(num_blocks, int):
         raise ValueError("N and num_blocks must be integers")
@@ -34,7 +37,10 @@ def generate_block_list(N: int, num_blocks: int = 10):
 
 
 class EnergyRatioInput:
-    """This class holds the structured inputs for calculating energy ratios"""
+    """EnergyRatioInput class.
+
+    This class holds the structured inputs for calculating energy ratios
+    """
 
     def __init__(
         self,
@@ -42,14 +48,14 @@ class EnergyRatioInput:
         df_names: List[str],
         num_blocks: int = 10,
     ) -> None:
-        """Initialize the EnergyRatioInput class
+        """Initialize the EnergyRatioInput class.
 
         Args:
             df_list_in (List[pd.DataFrame]): A list of pandas dataframes to be concatenated
             df_names (List[str]): A list of names for the dataframes
-            num_blocks (int): The number of blocks to use for the energy ratio calculation
+            num_blocks (int): The number of blocks to use for the energy ratio calculation.
+                Defaults to 10.
         """
-
         # Reduce precision if needed and convert to polars
         df_list = [
             pl.from_pandas(df_reduce_precision(df, allow_convert_to_integer=False))
@@ -86,7 +92,7 @@ class EnergyRatioInput:
         self.num_blocks = num_blocks
 
     def get_df(self) -> pl.DataFrame:
-        """Get the concatenated dataframe
+        """Get the concatenated dataframe.
 
         Returns:
             pl.DataFrame: The concatenated dataframe
@@ -97,14 +103,12 @@ class EnergyRatioInput:
         """Use the block column of an energy table to resample the data.
 
         Args:
-            df_e_ (pl.DataFrame): An energy table with a block column
-            perform_resample: Boolean, if False returns original energy table
+            perform_resample: Boolean, if False returns original energy table. Defaults to True.
 
         Returns:
             pl.DataFrame: A new energy table with (approximately)
                 the same number of rows as the original
         """
-
         if perform_resample:
             # Generate a random np.array, num_blocks long, where each element is
             #  an integer between 0 and num_blocks-1
