@@ -1,22 +1,20 @@
+"""Utility functions for the FLASC module."""
+
 import datetime
 
-# import numba
 import numpy as np
-
-# import scipy.interpolate as interp
 from floris.utilities import wrap_360
 
 
 def estimate_dt(time_array):
-    """Automatically estimate timestep in a time_array
+    """Automatically estimate timestep in a time_array.
 
     Args:
-        time_array ([list]): List or dataframe with time entries
+        time_array (list): List or dataframe with time entries
 
     Returns:
-        dt ([datetime.timedelta]): Timestep in dt.timedelta format
+        dt (datetime.timedelta): Timestep in dt.timedelta format
     """
-
     if len(time_array) < 2:
         # Assume arbitrary value
         return datetime.timedelta(seconds=0)
@@ -33,6 +31,14 @@ def estimate_dt(time_array):
 
 
 def get_num_turbines(df):
+    """Get the number of turbines in a dataframe.
+
+    Args:
+        df (pd.DataFrame): Dataframe with turbine data
+
+    Returns:
+        nt (int): Number of turbines in the dataframe
+    """
     nt = 0
     while ("pow_%03d" % nt) in df.columns:
         nt += 1
@@ -40,6 +46,26 @@ def get_num_turbines(df):
 
 
 def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
+    """Interpolate data linearly or using nearest-neighbor with maximum gap.
+
+    If there is larger gap in data than `max_gap`, the gap will be filled
+    with np.nan.
+
+    Args:
+        x (np.array): The output x-data; the data points in x-axis that
+            you want the interpolation results from.
+        xp (np.array): The input x-data.
+        fp (np.array): The input y-data.
+        max_gap (float): The maximum allowable distance between x and `xp` for which
+            interpolation is still performed. Gaps larger than
+            this will be filled with np.nan in the output `target_y`.
+        kind (str): The interpolation method to use. Can be 'linear' or 'nearest'.
+        wrap_around_360 (bool): If True, the interpolation will be done in a circular
+            fashion, i.e., the interpolation will wrap around 360 degrees.
+
+    Returns:
+        y (np.array): The interpolation results.
+    """
     if not ((kind == "linear") or (kind == "nearest")):
         raise NotImplementedError("Unknown interpolation method specified.")
 
@@ -71,38 +97,28 @@ def _interpolate_with_max_gap(
     kind="linear",
     extrapolate=True,
 ):
-    """
-    Interpolate data linearly or using nearest-neighbor with maximum gap.
+    """Interpolate data linearly or using nearest-neighbor with maximum gap.
+
     If there is larger gap in data than `max_gap`, the gap will be filled
     with np.nan.
 
     The input values should not contain NaNs.
 
-    Parameters
-    ---------
-    xp: np.array
-        The input x-data.
-    fp: np.array
-        The input y-data.
-    x: np.array
-        The output x-data; the data points in x-axis that
-        you want the interpolation results from.
-    max_gap: float
-        The maximum allowable distance between x and `xp` for which
-        interpolation is still performed. Gaps larger than
-        this will be filled with np.nan in the output `target_y`.
-    xp_is_sorted: boolean, default: True
-        If True, the input data `xp` is assumed to be monotonically
-        increasing. Some performance gain if you supply sorted input data.
-    x_is_sorted: boolean, default: True
-        If True, the input data `x` is assumed to be
-        monotonically increasing. Some performance gain if you supply
-        sorted input data.
+    Args:
+        x (np.array): The output x-data; the data points in x-axis that
+            you want the interpolation results from.
+        xp (np.array): The input x-data.
+        fp (np.array): The input y-data.
+        max_gap (float): The maximum allowable distance between x and `xp` for which
+            interpolation is still performed. Gaps larger than
+            this will be filled with np.nan in the output `target_y`.
+        assume_sorted (bool): If True, assume that `xp` is sorted in ascending
+            order. If False, sort `xp` and `fp` to be monotonous.
+        kind (str): The interpolation method to use. Can be 'linear' or 'nearest'.
+        extrapolate (bool): If True, extrapolate the data points on the boundaries
 
-    Returns
-    ------
-    target_y: np.array
-        The interpolation results.
+    Returns:
+        y (np.array): The interpolation results.
     """
     if not assume_sorted:
         # Sort xp and fp to be monotonous
