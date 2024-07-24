@@ -81,6 +81,7 @@ order-by-type = false
 "__init__.py" = ["F401"]
 
 # Ignore pydocstyle in directories besides flasc
+"flasc/timing_tests/*" = ["D"]
 "tests/*" = ["D"]
 "examples_*/*" = ["D"]
 "docs/*" = ["D"]
