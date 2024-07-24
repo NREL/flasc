@@ -1,3 +1,5 @@
+"""Store the results of the energy ratio calculations."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Union
@@ -18,8 +20,9 @@ from flasc.utilities.energy_ratio_utilities import (
 
 
 class EnergyRatioOutput:
-    """This class is used to store the results of the energy ratio calculations
-    and provide convenient methods for plotting and saving the results.
+    """Store the results of the energy ratio calculations.
+
+    Additionally provide convenient methods for plotting and saving the results.
     """
 
     def __init__(
@@ -393,7 +396,7 @@ class EnergyRatioOutput:
         show_wind_speed_distribution: bool = True,
         overlay_frequency: bool = False,
     ) -> Union[axes.Axes, List[axes.Axes]]:
-        """Plot the uplift in energy ratio
+        """Plot the uplift in energy ratio.
 
         Args:
             uplift_names_subset (Optional[List[str]], optional): A subset
@@ -534,9 +537,11 @@ class EnergyRatioOutput:
         return axarr
 
     def _compute_ws_counts(self):
-        """Compute the of ws bin counts as previously computed but not presently
-        computed with the energy calculation."""
+        """Compute the of ws bin counts.
 
+        Compute as previously computed but not presently
+        computed with the energy calculation.
+        """
         # Temporary copy of energy table
         df_ = self.er_in.get_df()
 
