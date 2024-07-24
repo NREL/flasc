@@ -1,3 +1,5 @@
+"""Time operations for data processing."""
+
 from datetime import timedelta as td
 
 import numpy as np
@@ -19,12 +21,25 @@ def df_movingaverage(
     center=True,
     calc_median_min_max_std=False,
 ):
-    """
+    """Compute a moving average of a dataframe with angular columns.
+
     Note that median, minimum, and maximum do not handle angular
     quantities and should be treated carefully.
     Standard deviation handles angular quantities.
-    """
 
+    Args:
+        df_in (pd.DataFrame): Input dataframe.
+        cols_angular (list): List of angular columns.
+        window_width (timedelta): Width of the moving average window.
+        min_periods (int): Minimum number of periods to consider.
+        center (bool): Center the time index.  Default is True.
+        calc_median_min_max_std (bool): Calculate median, min, max, and std.
+            Default is False.
+
+    Returns:
+        pd.DataFrame: Output dataframe with moving averages.
+
+    """
     df = df_in.set_index("time").copy()
 
     # Find non-angular columns
@@ -103,6 +118,23 @@ def df_downsample(
     calc_median_min_max_std=False,
     return_index_mapping=False,
 ):
+    """Downsample a dataframe to a average accounting for angular columns.
+
+    Args:
+        df_in (pd.DataFrame): Input dataframe.
+        cols_angular (list): List of angular columns.
+        window_width (timedelta): Width of the average window.
+        min_periods (int): Minimum number of data points for a bin to be valid.
+        center (bool): Center the time index.  Default is False.
+        calc_median_min_max_std (bool): Calculate median, min, max, and std.
+            Default is False.
+        return_index_mapping (bool): Return index mapping.  Default is False.
+
+    Returns:
+        pd.DataFrame: Downsampled dataframe.
+        np.ndarray: Index mapping (if return_index_mapping is True)
+
+    """
     # Copy and ensure dataframe is indexed by time
     df = df_in.copy()
     if "time" not in df.columns:
@@ -308,6 +340,21 @@ def df_downsample(
 def df_resample_by_interpolation(
     df, time_array, circular_cols, interp_method="linear", max_gap=None, verbose=True
 ):
+    """Resample a dataframe by interpolation onto a new time array.
+
+    Args:
+        df (pd.DataFrame): Input dataframe.
+        time_array (np.array): New time array.
+        circular_cols (list): List of columns that are circular.
+        interp_method (str): Interpolation method.  Default is "linear".
+        max_gap (float): Maximum gap for interpolation.  Default is None.
+            If None, will be set to 1.5 times the median timestep.
+        verbose (bool): Print information.  Default is True.
+
+    Returns:
+        pd.DataFrame: Resampled dataframe
+
+    """
     # Copy with properties but no actual data
     df_res = df.head(0).copy()
 
@@ -371,6 +418,15 @@ def df_resample_by_interpolation(
 
 # Function from "EFFECTIVE PANDAS" for flattening multi-level column names
 def flatten_cols(df):
+    """Flatten multi-level columns in a DataFrame.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: Flattened DataFrame.
+
+    """
     cols = ["_".join(map(str, vals)) for vals in df.columns.to_flat_index()]
     df.columns = cols
     return df
