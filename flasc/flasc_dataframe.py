@@ -1,5 +1,6 @@
 from pandas import DataFrame
 
+
 # Create a new DataFrame subclass
 class FlascDataFrame(DataFrame):
     """
@@ -10,16 +11,18 @@ class FlascDataFrame(DataFrame):
     Then, can offer a transformation to export as the user would like it, for them to work on it
     further. How, then, would I revert it back to the needed format
     """
+
     # Add to list, an initialize with Nones or similar
-    _metadata = ["new_property", "name_map", "newnew_property"] 
+    _metadata = ["new_property", "name_map", "newnew_property"]
+
     def __init__(self, *args, name_map=None, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         self._flasc = True
         # add an attribute here, make sure it's in the metadata
         self.new_property = 23
 
-        self._user_format = "wide" # or "long" or "semiwide"
+        self._user_format = "wide"  # or "long" or "semiwide"
 
         # check that name_map dictionary is valid
         if name_map is not None:
@@ -38,9 +41,9 @@ class FlascDataFrame(DataFrame):
     @property
     def _constructor(self):
         return FlascDataFrame
-    
+
     def __str__(self):
-        return "This is a FlascDataFrame!\n"+super().__str__()
+        return "This is a FlascDataFrame!\n" + super().__str__()
 
     def convert_to_user_format(self, inplace=False):
         """
@@ -50,7 +53,7 @@ class FlascDataFrame(DataFrame):
             return self.rename(columns={v: k for k, v in self.name_map.items()}, inplace=inplace)
         else:
             return None if inplace else self.copy()
-        
+
     def convert_to_flasc_format(self, inplace=False):
         """
         Convert the DataFrame to the format that FLASC expects.
@@ -59,13 +62,13 @@ class FlascDataFrame(DataFrame):
             return self.rename(columns=self.name_map, inplace=inplace)
         else:
             return None if inplace else self.copy()
-        
+
     def _convert_long_to_wide(self):
         """
         Convert a long format DataFrame to a wide format DataFrame.
         """
         pass
-    
+
     def _convert_semiwide_to_wide(self):
         """
         Convert a semiwide format DataFrame to a wide format DataFrame.
@@ -84,12 +87,13 @@ class FlascDataFrame(DataFrame):
         """
         pass
 
+
 # Likely this will be used for testing, later but it's convenient for prototyping here
 if __name__ == "__main__":
-    df = FlascDataFrame({"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]}, name_map={"a":"AA"})
+    df = FlascDataFrame({"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]}, name_map={"a": "AA"})
     print(df)
     print(df.new_property)
-    df.flasc_method() # Assigns newnew_property
+    df.flasc_method()  # Assigns newnew_property
     print(df._flasc)
     print(df._metadata)
 
@@ -97,13 +101,12 @@ if __name__ == "__main__":
     print(type(df))
     df.new_property = 42
     df.name_map = 6
-    df = df.drop(columns="c") # Modifies the dataframe, returns a copy
+    df = df.drop(columns="c")  # Modifies the dataframe, returns a copy
     print(df)
     print(df.new_property)
     print(df.name_map)
     # Not retained with copy, unless in _metadata. If in _metadata, retained!
     print(df.newnew_property)
-
 
     # Try out the convert methods (seem good)
     data = {"AA": [1, 2, 3], "BB": [4, 5, 6], "CC": [7, 8, 9]}
@@ -140,4 +143,3 @@ if __name__ == "__main__":
     Converting between semilong and wide should be relatively straightforward.
     Actually, neither of these should be too bad
     """
-    
