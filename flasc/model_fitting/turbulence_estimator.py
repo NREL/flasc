@@ -10,6 +10,7 @@ logger_manager = LoggingManager()  # Instantiate LoggingManager
 logger = logger_manager.logger  # Obtain the reusable logger
 
 
+# TODO IS THIS USED ANYWHERE?  Excluding from docstring checks for now
 class ti_estimator:
     def __init__(self, fm):
         self.fm = fm
