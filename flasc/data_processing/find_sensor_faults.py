@@ -1,3 +1,5 @@
+"""Module for finding sensor-stuck faults in a dataframe."""
+
 import os
 
 import matplotlib.pyplot as plt
@@ -19,6 +21,25 @@ def find_sensor_stuck_faults(
     verbose=False,
     return_by_column=False,
 ):
+    """Find sensor-stuck faults in a dataframe.
+
+    Args:
+        df (pd.DataFrame): The dataframe containing the data.
+        columns (list): The columns to check for sensor-stuck faults.
+        ti (Any): unused
+        stddev_threshold (float, optional): The threshold for the standard deviation of the
+            consecutive measurements. Defaults to 0.001.
+        n_consecutive_measurements (int, optional): The number of consecutive measurements to
+            compare. Defaults to 3.
+        plot_figures (bool, optional): Whether to plot figures for the sensor-stuck faults.
+            Defaults to True.
+        verbose (bool, optional): Whether to print verbose output. Defaults to False.
+        return_by_column (bool, optional): Whether to return the faults by column.
+            Defaults to False.
+
+    Returns:
+        np.array: The indices of the sensor-stuck faults
+    """
     # Settings which indicate a sensor-stuck type of fault: the standard
     # deviation between the [no_consecutive_measurements] number of
     # consecutive measurements is less than [stddev_threshold].
