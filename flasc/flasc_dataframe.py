@@ -10,7 +10,8 @@ class FlascDataFrame(DataFrame):
     Then, can offer a transformation to export as the user would like it, for them to work on it
     further. How, then, would I revert it back to the needed format
     """
-    _metadata = ["new_property", "name_map", "newnew_property"] # Add to list, an initialize with Nones or similar
+    # Add to list, an initialize with Nones or similar
+    _metadata = ["new_property", "name_map", "newnew_property"] 
     def __init__(self, *args, name_map=None, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -100,7 +101,8 @@ if __name__ == "__main__":
     print(df)
     print(df.new_property)
     print(df.name_map)
-    print(df.newnew_property) # Not retained with copy, unless in _metadata. If in _metadata, retained!
+    # Not retained with copy, unless in _metadata. If in _metadata, retained!
+    print(df.newnew_property)
 
 
     # Try out the convert methods (seem good)
