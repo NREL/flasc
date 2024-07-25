@@ -82,6 +82,7 @@ order-by-type = false
 
 # Ignore pydocstyle in directories besides flasc
 "flasc/timing_tests/*" = ["D"]
+"flasc/model_fitting/turbulence_estimator.py" = ["D"]
 "tests/*" = ["D"]
 "examples_*/*" = ["D"]
 "docs/*" = ["D"]
