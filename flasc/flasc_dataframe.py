@@ -79,7 +79,10 @@ class FlascDataFrame(DataFrame):
         """
         Convert a wide format DataFrame to a long format DataFrame.
         """
-        pass
+        if "time" not in self.columns:
+            raise ValueError("Column 'time' must be present in the DataFrame")
+
+        return self.melt(id_vars="time", var_name="variable", value_name="value")
 
     def _convert_wide_to_semiwide(self):
         """
