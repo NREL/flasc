@@ -1,3 +1,6 @@
+"""_summary_."""
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -13,7 +16,16 @@ logger = logger_manager.logger  # Obtain the reusable logger
 
 
 class floris_sobol_analysis:
+    """_summary_."""
+
     def __init__(self, fi, problem, calc_second_order=False):
+        """_summary_.
+
+        Args:
+            fi (_type_): _description_
+            problem (_type_): _description_
+            calc_second_order (bool, optional): _description_. Defaults to False.
+        """
         self.fm = fi
 
         # Default parameters
@@ -91,6 +103,13 @@ class floris_sobol_analysis:
 
     # Step 1: generating samples for a particular problem
     def generate_samples(self, N, problem=None, calc_second_order=None):
+        """_summary_.
+
+        Args:
+            N (_type_): _description_
+            problem (_type_, optional): _description_. Defaults to None.
+            calc_second_order (_type_, optional): _description_. Defaults to None.
+        """
         if problem is None:
             problem = self.problem
 
@@ -107,6 +126,17 @@ class floris_sobol_analysis:
         self._create_evals_dataframe()
 
     def calculate_wfpower_for_samples(self, num_threads=1):
+        """_summary_.
+
+        Args:
+            num_threads (int, optional): _description_. Defaults to 1.
+
+        Raises:
+            DataError: _description_
+
+        Returns:
+            _type_: _description_
+        """
         if self.samples_x is None:
             raise DataError("Please run generate_samples first.")
 
@@ -124,6 +154,14 @@ class floris_sobol_analysis:
         return self.samples_y
 
     def get_sobol_sensitivity_indices(self, verbose=False):
+        """_summary_.
+
+        Args:
+            verbose (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            _type_: _description_
+        """
         self.Si = sobol.analyze(
             self.problem,
             self.samples_y,
@@ -133,6 +171,19 @@ class floris_sobol_analysis:
         return self.Si
 
     def plot_sobol_results(self, save_path=None, fig_format="png", fig_dpi=200):
+        """_summary_.
+
+        Args:
+            save_path (_type_, optional): _description_. Defaults to None.
+            fig_format (str, optional): _description_. Defaults to "png".
+            fig_dpi (int, optional): _description_. Defaults to 200.
+
+        Raises:
+            DataError: _description_
+
+        Returns:
+            _type_: _description_
+        """
         if self.Si is None:
             raise DataError(
                 "No Sobol results to show. " + "Have you run get_sobol_sensitivity_indices()?"
@@ -232,6 +283,16 @@ class floris_sobol_analysis:
         return fig, ax
 
     def plot_convergence(self, save_path=None, fig_format="png", fig_dpi=200):
+        """_summary_.
+
+        Args:
+            save_path (_type_, optional): _description_. Defaults to None.
+            fig_format (str, optional): _description_. Defaults to "png".
+            fig_dpi (int, optional): _description_. Defaults to 200.
+
+        Returns:
+            _type_: _description_
+        """
         logger.info("Analyzing convergence...")
 
         # Create copies of original results
