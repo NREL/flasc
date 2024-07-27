@@ -819,16 +819,17 @@ def get_dependent_turbines_by_wd(
             test_turbine on all turbines.
 
     Returns:
-        dep_indices_by_wd (list): A 2-dimensional list. Each element of
-            the outer level list, which represents wind direction,
-            contains a list of the turbines that depend on test_turbine
-            for that wind direction. The second-level list may be empty
-            if no turbine depends on the test_turbine for that wind
-            direciton (e.g., the turbine is in the back row).
-        all_influence_magnitudes ([np.array]): 2-D numpy array of
-            influences of test_turbine on all other turbines, with size
-            (number of wind directions) x (number of turbines). Returned
-            only if return_influence_magnitudes is True.
+        A tuple containing:
+            dep_indices_by_wd (list): A 2-dimensional list. Each element of
+                the outer level list, which represents wind direction,
+                contains a list of the turbines that depend on test_turbine
+                for that wind direction. The second-level list may be empty
+                if no turbine depends on the test_turbine for that wind
+                direciton (e.g., the turbine is in the back row).
+            all_influence_magnitudes ([np.array]): 2-D numpy array of
+                influences of test_turbine on all other turbines, with size
+                (number of wind directions) x (number of turbines). Returned
+                only if return_influence_magnitudes is True.
     """
     # Copy fi to a local to not mess with incoming
     fm = copy.deepcopy(fm_in)

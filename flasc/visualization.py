@@ -35,42 +35,40 @@ def plot_with_wrapping(
 
     Args:
         x (iteratible): NumPy array or list containing indices/time stamps of
-        the data.
+            the data.
         y (iteratible): NumPy array containing direction/angle data that
-        requires 360 deg angle wrapping. These are typically wind directions
-        or nacelle headings.
+            requires 360 deg angle wrapping. These are typically wind directions
+            or nacelle headings.
         ax (plt.Axis, optional): Axis object of the matplotlib.pyplot class.
-        The line will be plotted on this axis. If None specified, will create
-        a figure and axis, and plot the line in there. Defaults to None.
+            The line will be plotted on this axis. If None specified, will create
+            a figure and axis, and plot the line in there. Defaults to None.
         low (float, optional): Lower limit at which the angles should be
-        wrapped. When using degrees, this should be typically 0.0 deg for wind
-        directions and nacelle directions (i.e., compass directions). When using
-        vane signals, this is typically -180.0 deg. When using radians,
-        this should be the equivalent in radians (e.g., 0 or - np.pi).
-        Defaults to 0.0.
+            wrapped. When using degrees, this should be typically 0.0 deg for wind
+            directions and nacelle directions (i.e., compass directions). When using
+            vane signals, this is typically -180.0 deg. When using radians,
+            this should be the equivalent in radians (e.g., 0 or - np.pi).
+            Defaults to 0.0.
         high (float, optional): Upper limit at which the angles should be
-        wrapped. When using degrees, this should be 360.0 deg for wind
-        directions and nacelle directions (i.e., compass directions).
-        When using radians, this should be the equivalent in radians.
-        Defaults to 360.0.
+            wrapped. When using degrees, this should be 360.0 deg for wind
+            directions and nacelle directions (i.e., compass directions).
+            When using radians, this should be the equivalent in radians.
+            Defaults to 360.0.
         linestyle (str, optional): Linestyle for the plot. Defaults to "-".
         marker (str, optional): Marker style for the plot. If None is
-        specified, will not use markers. Defaults to None.
+            specified, will not use markers. Defaults to None.
         color (str, optional): Color of the line and markers. Defaults to
-        "black".
+            "black".
         label (string, optional): Label for the line and markers. If None is
-        specified, will not label the line. Defaults to None.
-        rasterize (bool, optional): Rasterize the plot/line and thereby remove
-        its vectorized properties. This can help reduce the size of a .pdf or
-        .eps file when this figure is saved, at the cost of a potential
-        reduction in image quality.
+            specified, will not label the line. Defaults to None.
         rasterized (bool, optional): Rasterize the plot/line and thereby remove
-        its vectorized properties. Defaults to False.
+            its vectorized properties. This can help reduce the size of a .pdf or
+            .eps file when this figure is saved, at the cost of a potential
+            reduction in image quality.
 
 
     Returns:
         ax: Axis object of the matplotlib.pyplot class on which the line (and
-        optionally markers) are plotted.
+            optionally markers) are plotted.
     """
     # Create figure, if not provided
     if ax is None:

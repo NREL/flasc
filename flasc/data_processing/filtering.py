@@ -772,12 +772,7 @@ class FlascFilter:
                 power curves were previously not yet calculated.
 
         Returns:
-            pw_curve_df (pd.DataFrame): Dataframe containing the wind
-                speed bins and the mean power production value for every
-                turbine.
-            calculate_missing (bool, optional): Calculate the median power
-                curves for the turbines for the turbines of which their
-                power curves were previously not yet calculated.
+            pd.DataFrame: Dataframe containing the estimated mean power curves.
         """
         if calculate_missing and (self.pw_curve_df.isna().all(axis=0).any()):
             turbine_subset = np.where(
@@ -790,7 +785,7 @@ class FlascFilter:
         return self.pw_curve_df
 
     def plot_farm_mean_power_curve(self, fm=None):
-        """Plot all turbines' power curves in a single figure.
+        """Plot mean of all turbines' power curves and show individual curves.
 
         Also estimate
         and plot a mean turbine power curve.
@@ -801,9 +796,8 @@ class FlascFilter:
               from FLORIS will be plotted on top of the SCADA-based power curves.
 
         Returns:
-            fig, ax: The figure and axis objects of the
-                plot. The user can further manipulate the plot
-                by calling methods on these objects
+            tuple (fig, ax): The figure and axis objects of the plot.
+
         """
         # Get mean power curves for the turbines that are not yet calculated
         if self.pw_curve_df.isna().all(axis=0).any():

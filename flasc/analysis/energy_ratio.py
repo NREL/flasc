@@ -83,8 +83,9 @@ def _compute_energy_ratio_single(
             must be available to compute the bin. Defaults to False.
 
     Returns:
-        pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
-        pl.DataFrame: A dataframe containing the weights each wind direction and wind speed bin
+        A tuple (pl.DataFrame, pl.DataFrame): A dataframe containing the energy ratio for each wind
+            direction bin and a dataframe containing the weights each wind direction
+            and wind speed bin
     """
     # Get the number of dataframes
     num_df = len(df_names)

@@ -69,7 +69,8 @@ def sweep_velocity_model_parameter_for_overall_wake_losses(
         df_freq (DataFrame): The frequency data
 
     Returns:
-        (np.ndarray, np.ndarray): The FLORIS wake losses and the SCADA wake loss
+        A tuple (np.ndarray, np.ndarray) where the first element is the FLORIS wake losses
+        and the second element is the SCADA wake losses
     """
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?
@@ -135,7 +136,7 @@ def select_best_wake_model_parameter(floris_results, scada_results, value_candid
             Default is None.
 
     Returns:
-        float: The best parameter value
+        float: best fit parameter value
     """
     error_values = (floris_results - scada_results) ** 2
 
@@ -194,7 +195,8 @@ def sweep_wd_std_for_er(
         remove_all_nulls (bool): Remove all nulls.  Default is False.
 
     Returns:
-        (np.ndarray, list): The FLORIS energy ratio errors and the dataframes
+        A tuple (np.ndarray, list): The first element is the FLORIS energy ratio errors
+            and the second element is the dataframes.
 
     """
     # Currently assuming pow_ref and pow_test already assigned
@@ -351,7 +353,8 @@ def sweep_deflection_parameter_for_total_uplift(
         remove_all_nulls (bool): Remove all nulls.  Default is False.
 
     Returns:
-        (np.ndarray, np.ndarray): The FLORIS total uplifts and the SCADA total uplifts
+        A typle (np.ndarray, np.ndarray) where the first element is the FLORIS total uplifts
+        and the second element is the SCADA total uplifts
     """
     # Currently assuming pow_ref and pow_test already assigned
     # Also assuming limit to ws/wd range accomplished but could revisit?

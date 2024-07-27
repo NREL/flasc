@@ -73,8 +73,6 @@ def filter_df_by_ti(df, ti_range):
     return df
 
 
-# TODO: This function just wraps the other, is it needed?  Maybe to avoid
-# breaking changes?
 def get_num_turbines(df):
     """Get the number of turbines in a dataframe.
 
@@ -935,7 +933,7 @@ def df_drop_nan_rows(df, verbose=False):
 
 
 def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.0):
-    """Find and fill data gap with missing.
+    """Find and fill data gap and mark as missing data with NaN.
 
     This function takes a pd.DataFrame object and look for large jumps in
        the 'time' column. Rather than simply interpolating these values using
@@ -1094,7 +1092,7 @@ def is_day_or_night(
 
 
 def plot_sun_altitude_with_day_night_color(df: pd.DataFrame, ax: plt.axis = None):
-    """Plot Sun Altitude with Day-Night Color Differentiation.
+    """Plot sun altitude with day-night color differentiation.
 
     This function creates a plot of Sun Altitude over time,
     distinguishing between day and night periods

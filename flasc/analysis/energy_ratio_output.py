@@ -537,11 +537,7 @@ class EnergyRatioOutput:
         return axarr
 
     def _compute_ws_counts(self):
-        """Compute the of ws bin counts.
-
-        Compute as previously computed but not presently
-        computed with the energy calculation.
-        """
+        """Compute the ws bin counts."""
         # Temporary copy of energy table
         df_ = self.er_in.get_df()
 

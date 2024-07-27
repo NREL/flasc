@@ -81,8 +81,10 @@ def _compute_total_uplift_single(
             must be available to compute the bin. Defaults to False.
 
     Returns:
-        dict: A dictionary with results indexed for each element of uplift_names
-        pl.DataFrame: A dataframe containing the weights each wind direction and wind speed bin
+        A tuple (dict, pl.DataFrame): containing the results of the computation
+            and the frequency table.  The dictionary contains the uplift results indexed by the
+            uplift_names.  The dataframe contains the weights for each wind direction
+                and wind speed bin.
     """
     # Get the number of dataframes
     num_df = len(df_names)

@@ -39,11 +39,12 @@ def calculate_wd_statistics(angles_array_deg, axis=0, calc_median_min_max_std=Tr
             Default is True
 
     Returns:
-        mean_wd (float): Mean wind direction in [0, 360] deg
-        median_wd (float): Median wind direction in [0, 360] deg
-        std_wd (float): Standard deviation in deg
-        min_wd (float): Minimum wind direction in [0, 360] deg
-        max_wd (float): Maximum wind direction in [0, 360] deg
+        A tuple containing the following values:
+            mean_wd (float): Mean wind direction in [0, 360] deg
+            median_wd (float): Median wind direction in [0, 360] deg
+            std_wd (float): Standard deviation in deg
+            min_wd (float): Minimum wind direction in [0, 360] deg
+            max_wd (float): Maximum wind direction in [0, 360] deg
     """
     # Preprocessing
     angles_array_deg = np.array(angles_array_deg, dtype=float)

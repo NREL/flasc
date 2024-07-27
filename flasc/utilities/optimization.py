@@ -268,9 +268,9 @@ def match_y_curves_by_offset(yref, ytest, dy_eval=None, angle_wrapping=True):
             Default is True.
 
     Returns:
-        tuple: Tuple with the following elements:
-            - dwd_opt: Optimal offset.
-            - J_opt: Optimal cost function value.
+        Tuple (float, float) with the following elements:
+            dwd_opt: Optimal offset.
+            J_opt: Optimal cost function value.
 
     """
     if dy_eval is None:

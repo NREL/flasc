@@ -18,30 +18,30 @@ def get_yaw_angles_interpolant(
 
     Args:
         df_opt (pd.DataFrame): Dataframe containing the rows 'wind_direction',
-        'wind_speed', 'turbulence_intensity', and 'yaw_angles_opt'.
+            'wind_speed', 'turbulence_intensity', and 'yaw_angles_opt'.
         ramp_up_ws (list, optional): List with length 2 depicting the wind
-        speeds at which the ramp starts and ends, respectively, on the lower
-        end. This variable defaults to [4, 5], meaning that the yaw offsets are
-        zero at and below 4 m/s, then linearly transition to their full offsets
-        at 5 m/s, and continue to be their full offsets past 5 m/s. Defaults to
-        [4, 5].
+            speeds at which the ramp starts and ends, respectively, on the lower
+            end. This variable defaults to [4, 5], meaning that the yaw offsets are
+            zero at and below 4 m/s, then linearly transition to their full offsets
+            at 5 m/s, and continue to be their full offsets past 5 m/s. Defaults to
+            [4, 5].
         ramp_down_ws (list, optional): List with length 2 depicting the wind
-        speeds at which the ramp starts and ends, respectively, on the higher
-        end. This variable defaults to [10, 12], meaning that the yaw offsets are
-        full at and below 10 m/s, then linearly transition to zero offsets
-        at 12 m/s, and continue to be zero past 12 m/s. Defaults to [10, 12].
+            speeds at which the ramp starts and ends, respectively, on the higher
+            end. This variable defaults to [10, 12], meaning that the yaw offsets are
+            full at and below 10 m/s, then linearly transition to zero offsets
+            at 12 m/s, and continue to be zero past 12 m/s. Defaults to [10, 12].
         minimum_yaw_angle (float, optional): The minimum yaw angle in degrees.
-        Defaults to None.  If None, the minimum yaw angle is set to the minimum
-        yaw angle in the dataset.
+            Defaults to None.  If None, the minimum yaw angle is set to the minimum
+            yaw angle in the dataset.
         maximum_yaw_angle (float, optional): The maximum yaw angle in degrees.
-        Defaults to None.  If None, the maximum yaw angle is set to the maximum
-        yaw angle in the dataset.
+            Defaults to None.  If None, the maximum yaw angle is set to the maximum
+            yaw angle in the dataset.
 
     Returns:
         LinearNDInterpolator: An interpolant function which takes the inputs
-        (wind_directions, wind_speeds, turbulence_intensities), all of equal
-        dimensions, and returns the yaw angles for all turbines. This function
-        incorporates the ramp-up and ramp-down regions.
+            (wind_directions, wind_speeds, turbulence_intensities), all of equal
+            dimensions, and returns the yaw angles for all turbines. This function
+            incorporates the ramp-up and ramp-down regions.
     """
     # Load data and set up a linear interpolant
     points = df_opt[["wind_direction", "wind_speed", "turbulence_intensity"]]

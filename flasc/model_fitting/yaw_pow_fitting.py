@@ -156,6 +156,7 @@ class yaw_pow_fitting:
 
         Returns:
             x_opt (np.array): Optimal parameters for the cos(x-x0)^pp curve.
+                Where x[0] is the y shift, x[1] is the bias, and x[2] is the exponent pp.
         """
         # for ti in self.turbine_list:
         bins_x = self.bins_x
@@ -210,8 +211,7 @@ class yaw_pow_fitting:
             fig_dpi (int): DPI of the figure. Default is 250.
 
         Returns:
-            fig (matplotlib.figure.Figure): Figure object.
-            ax (matplotlib.axes.Axes): Axes object.
+            A tuple (matplotlib.figure.Figure, matplotlib.axes.Axes) containing the figure and axes.
         """
         # for ti in self.turbine_list:
         bins_x = self.bins_x

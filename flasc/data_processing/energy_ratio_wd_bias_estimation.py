@@ -412,8 +412,8 @@ class bias_estimation(LoggingManager):
                 None.
 
         Returns:
-            x_opt (float): Optimal wind direction offset.
-            J_opt (float): Cost function under optimal offset.
+            A tuple (float, float): The optimal wind direction offset and
+                the cost function under the optimal offset.
         """
         self.logger.info("Estimating the wind direction bias")
 

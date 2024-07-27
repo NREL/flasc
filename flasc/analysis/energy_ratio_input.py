@@ -19,6 +19,9 @@ def generate_block_list(N: int, num_blocks: int = 10):
         N (int): Length of the array to generate
         num_blocks (int): Number of blocks to generate. Defaults to 10.
 
+    Returns:
+        np.array: An array of length N with values between 0 and num_blocks-1
+
     """
     # Test than N and num_blocks are integers greater than 0
     if not isinstance(N, int) or not isinstance(num_blocks, int):

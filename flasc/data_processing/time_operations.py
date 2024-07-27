@@ -131,8 +131,10 @@ def df_downsample(
         return_index_mapping (bool): Return index mapping.  Default is False.
 
     Returns:
-        pd.DataFrame: Downsampled dataframe.
-        np.ndarray: Index mapping (if return_index_mapping is True)
+        A tuple (pd.DataFrame, np.ndarray) if return_index_mapping is True.  Where
+            the DataFrame is the downsampled dataframe and the np.ndarray is the
+            index mapping.
+        A pd.DataFrame if return_index_mapping is False.
 
     """
     # Copy and ensure dataframe is indexed by time

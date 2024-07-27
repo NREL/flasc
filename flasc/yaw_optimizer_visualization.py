@@ -176,8 +176,7 @@ def plot_offsets_wswd_heatmap(df_offsets, turb_id, ax=None):
             Default is None.
 
     Returns:
-        matplotlib.axes.Axes: axis with heatmap
-        matplotlib.colorbar.Colorbar: colorbar for heatmap
+        A tuple containing a matplotlib.axes.Axes object and a matplotlib.colorbar.Colorbar
 
     """
     if isinstance(turb_id, int):

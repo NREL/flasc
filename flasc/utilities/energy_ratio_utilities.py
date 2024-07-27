@@ -15,11 +15,11 @@ def cut(
     """Bins the values in the specified column according to the given edges.
 
     Args:
-    col_name (str): The name of the column to bin.
-    edges (array-like): The edges of the bins. Values will be placed into the bin
-                        whose left edge is the largest edge less than or equal to
-                        the value, and whose right edge is the smallest edge
-                        greater than the value.
+        col_name (str): The name of the column to bin.
+        edges (array-like): The edges of the bins. Values will be placed into the bin
+                            whose left edge is the largest edge less than or equal to
+                            the value, and whose right edge is the smallest edge
+                            greater than the value.
 
     Returns:
     expression: An expression object that can be used to bin the column.
@@ -43,16 +43,16 @@ def bin_column(
     """Bins the values in the specified column of a Polars DataFrame according to the given edges.
 
     Args:
-    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    col_name (str): The name of the column to bin.
-    bin_col_name (str): The name to give the new column containing the bin labels.
-    edges (array-like): The edges of the bins. Values will be placed into the bin
-                        whose left edge is the largest edge less than or equal to
-                        the value, and whose right edge is the smallest edge
-                        greater than the value.
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        col_name (str): The name of the column to bin.
+        bin_col_name (str): The name to give the new column containing the bin labels.
+        edges (array-like): The edges of the bins. Values will be placed into the bin
+                            whose left edge is the largest edge less than or equal to
+                            the value, and whose right edge is the smallest edge
+                            greater than the value.
 
     Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional column containing the bin labels.
+        pl.DataFrame: A new Polars DataFrame with an additional column containing the bin labels.
     """
     return df_.with_columns(
         cut(col_name=col_name, edges=edges).alias(bin_col_name).cast(df_[col_name].dtype)
@@ -63,12 +63,12 @@ def add_ws(df_: pl.DataFrame, ws_cols: List[str], remove_all_nulls: bool = False
     """Add the ws column to a dataframe, given which columns to average over.
 
     Args:
-    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    ws_cols (list(str)): The name of the columns to average across.
-    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        ws_cols (list(str)): The name of the columns to average across.
+        remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)
 
     Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional ws column
+        pl.DataFrame: A new Polars DataFrame with an additional ws column
     """
     df_with_mean_ws = (
         # df_.select(pl.exclude('ws_bin')) # In case ws_bin already exists
@@ -205,20 +205,20 @@ def add_wd_bin(
     and the step sizes to use
 
     Args:
-    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    wd_cols (list(str)): The name of the columns to average across.
-    wd_step (float): Step size for binning
-    wd_min (float): Minimum wind direction
-    wd_max (float): Maximum wind direction
-    edges (array-like): The edges of the bins. Values will be placed into the bin
-                    whose left edge is the largest edge less than or equal to
-                    the value, and whose right edge is the smallest edge
-                    greater than the value.  Defaults to None, in which case
-                    the edges are generated using ws_step, ws_min, and ws_max.
-    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        wd_cols (list(str)): The name of the columns to average across.
+        wd_step (float): Step size for binning
+        wd_min (float): Minimum wind direction
+        wd_max (float): Maximum wind direction
+        edges (array-like): The edges of the bins. Values will be placed into the bin
+                        whose left edge is the largest edge less than or equal to
+                        the value, and whose right edge is the smallest edge
+                        greater than the value.  Defaults to None, in which case
+                        the edges are generated using ws_step, ws_min, and ws_max.
+        remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)
 
     Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional ws_bin column
+        pl.DataFrame: A new Polars DataFrame with an additional ws_bin column
     """
     if edges is None:
         edges = np.arange(wd_min, wd_max + wd_step, wd_step)
