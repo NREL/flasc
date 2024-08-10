@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.data_processing.find_sensor_faults</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="sd">&quot;&quot;&quot;Module for finding sensor-stuck faults in a dataframe.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -562,6 +563,25 @@ document.write(`
     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">return_by_column</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find sensor-stuck faults in a dataframe.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): The dataframe containing the data.</span>
+<span class="sd">        columns (list): The columns to check for sensor-stuck faults.</span>
+<span class="sd">        ti (Any): unused</span>
+<span class="sd">        stddev_threshold (float, optional): The threshold for the standard deviation of the</span>
+<span class="sd">            consecutive measurements. Defaults to 0.001.</span>
+<span class="sd">        n_consecutive_measurements (int, optional): The number of consecutive measurements to</span>
+<span class="sd">            compare. Defaults to 3.</span>
+<span class="sd">        plot_figures (bool, optional): Whether to plot figures for the sensor-stuck faults.</span>
+<span class="sd">            Defaults to True.</span>
+<span class="sd">        verbose (bool, optional): Whether to print verbose output. Defaults to False.</span>
+<span class="sd">        return_by_column (bool, optional): Whether to return the faults by column.</span>
+<span class="sd">            Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: The indices of the sensor-stuck faults</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Settings which indicate a sensor-stuck type of fault: the standard</span>
     <span class="c1"># deviation between the [no_consecutive_measurements] number of</span>
     <span class="c1"># consecutive measurements is less than [stddev_threshold].</span>

@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,48 +616,31 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">filter_df_by_faulty_impacting_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_impacting_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#filter_df_by_faulty_impacting_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines" title="Link to this definition">#</a></dt>
-<dd><dl class="simple">
+<dd><p>Assign faulty measurements based on upstream turbines faults.</p>
+<dl class="simple">
 <dt>Assigns a turbine's measurement to NaN for each timestamp for which any of the turbines</dt><dd><p>that are shedding a wake on this turbine is reporting NaN measurements.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with SCADA data with measurements</p></li>
-<li><p><strong>wd_000</strong> (<em>formatted according to</em>)</p></li>
-<li><p><strong>wd_001</strong></p></li>
-<li><p><strong>wd_002</strong></p></li>
-<li><p><strong>pow_000</strong></p></li>
-<li><p><strong>pow_001</strong></p></li>
-</ul>
-</dd>
-</dl>
-<p>:param :
-:param pow_002:
-:param and so on.:
-:param ti: Turbine number for which we are filtering the data.
-:type ti: integer
-:param Basically:
-:param each turbine that impacts that power production of:
-:param turbine 'ti' by more than 0.1% is required to be reporting a:
-:param non-faulty measurement. If not:
-:param we classify the measurement of:
-:param turbine 'ti' as faulty because we cannot sufficiently know the:
-:param inflow conditions of this turbine.:
-:param df_impacting_turbines: A Pandas DataFrame in the
-:type df_impacting_turbines: pd.DataFrame
-:param format of:                0       1          2   3   4   5   6</p>
-<blockquote>
-<div><p>wd
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with SCADA data with measurements
+formatted according to wd_000, wd_001, wd_002, pow_000, pow_001,
+pow_002, and so on.</p></li>
+<li><p><strong>ti</strong> (<em>int</em>) -- Turbine number for which we are filtering the data.
+Basically, each turbine that impacts that power production of
+turbine 'ti' by more than 0.1% is required to be reporting a
+non-faulty measurement. If not, we classify the measurement of
+turbine 'ti' as faulty because we cannot sufficiently know the
+inflow conditions of this turbine.</p></li>
+<li><p><strong>df_impacting_turbines</strong> (<em>pd.DataFrame</em>) -- A Pandas DataFrame in the</p></li>
+<li><p><strong>of</strong> (<em>format</em>) -- 0       1          2   3   4   5   6
+wd
 0.0       [6, 5]     [5]     [3, 5]  []  []  []  []
 3.0          [6]     [5]     [3, 5]  []  []  []  []
 ...          ...     ...        ...  ..  ..  ..  ..
 354.0  [6, 5, 3]  [5, 0]     [3, 5]  []  []  []  []
-357.0     [6, 5]     [5]  [3, 5, 4]  []  []  []  []</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
+357.0     [6, 5]     [5]  [3, 5, 4]  []  []  []  []</p></li>
 <li><p><strong>interest</strong> (<em>The columns indicate the turbine of</em>)</p></li>
 <li><p><strong>i.e.</strong></p></li>
 <li><p><strong>that</strong> (<em>the turbine</em>)</p></li>

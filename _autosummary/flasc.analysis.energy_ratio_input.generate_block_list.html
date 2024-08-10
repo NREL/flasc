@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,14 +616,21 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.analysis.energy_ratio_input.generate_block_list">
 <span class="sig-prename descclassname"><span class="pre">flasc.analysis.energy_ratio_input.</span></span><span class="sig-name descname"><span class="pre">generate_block_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/analysis/energy_ratio_input.html#generate_block_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.analysis.energy_ratio_input.generate_block_list" title="Link to this definition">#</a></dt>
-<dd><p>Generate an np.array of length N where each element is an integer between 0 and num_blocks-1
+<dd><p>Generate an np.array of length N where each element is an integer between 0 and num_blocks-1.</p>
+<p>Generate an np.array of length N where each element is an integer between 0 and num_blocks-1
 with each value repeating N/num_blocks times.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>N</strong> (<em>int</em>) -- Length of the array to generate</p></li>
-<li><p><strong>num_blocks</strong> (<em>int</em>) -- Number of blocks to generate</p></li>
+<li><p><strong>num_blocks</strong> (<em>int</em>) -- Number of blocks to generate. Defaults to 10.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array of length N with values between 0 and num_blocks-1</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>

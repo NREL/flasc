@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -628,11 +627,12 @@ document.write(`
                   
   <section id="module-flasc.model_fitting.turbulence_estimator">
 <span id="flasc-model-fitting-turbulence-estimator"></span><h1>flasc.model_fitting.turbulence_estimator<a class="headerlink" href="#module-flasc.model_fitting.turbulence_estimator" title="Link to this heading">#</a></h1>
+<p>_summary_.</p>
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator" title="flasc.model_fitting.turbulence_estimator.ti_estimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ti_estimator</span></code></a></p></td>
-<td><p></p></td>
+<td><p>_summary_.</p></td>
 </tr>
 </tbody>
 </table>
@@ -640,7 +640,8 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flasc.model_fitting.turbulence_estimator.</span></span><span class="sig-name descname"><span class="pre">ti_estimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><p>_summary_.</p>
+<dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator._reset_outputs">
 <span class="sig-name descname"><span class="pre">_reset_outputs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator._reset_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator._reset_outputs" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -648,27 +649,73 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.set_measurements">
 <span class="sig-name descname"><span class="pre">set_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P_measured</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.set_measurements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.set_measurements" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>P_measured</strong> (<em>_type_</em>) -- _description_</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_order">
 <span class="sig-name descname"><span class="pre">get_turbine_order</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.get_turbine_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_order" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_pairs">
 <span class="sig-name descname"><span class="pre">get_turbine_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wake_loss_thrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.get_turbine_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_pairs" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>wake_loss_thrs</strong> (<em>float</em><em>, </em><em>optional</em>) -- _description_. Defaults to 0.20.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.plot_flowfield">
 <span class="sig-name descname"><span class="pre">plot_flowfield</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.plot_flowfield"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_flowfield" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.floris_set_ws_wd_ti">
 <span class="sig-name descname"><span class="pre">floris_set_ws_wd_ti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.floris_set_ws_wd_ti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.floris_set_ws_wd_ti" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wd</strong> (<em>_type_</em><em>, </em><em>optional</em>) -- _description_. Defaults to None.</p></li>
+<li><p><strong>ws</strong> (<em>_type_</em><em>, </em><em>optional</em>) -- _description_. Defaults to None.</p></li>
+<li><p><strong>ti</strong> (<em>_type_</em><em>, </em><em>optional</em>) -- _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator._check_measurements">
@@ -678,27 +725,72 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_farmaveraged_ti">
 <span class="sig-name descname"><span class="pre">estimate_farmaveraged_ti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.01,</span> <span class="pre">0.5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_with_fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.estimate_farmaveraged_ti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_farmaveraged_ti" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Ns</strong> (<em>int</em><em>, </em><em>optional</em>) -- _description_. Defaults to 50.</p></li>
+<li><p><strong>bounds</strong> (<em>tuple</em><em>, </em><em>optional</em>) -- _description_. Defaults to (0.01, 0.50).</p></li>
+<li><p><strong>refine_with_fmin</strong> (<em>bool</em><em>, </em><em>optional</em>) -- _description_. Defaults to False.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- _description_. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_local_tis">
 <span class="sig-name descname"><span class="pre">estimate_local_tis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.01,</span> <span class="pre">0.5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_with_fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.estimate_local_tis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_local_tis" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Ns</strong> (<em>int</em><em>, </em><em>optional</em>) -- _description_. Defaults to 50.</p></li>
+<li><p><strong>bounds</strong> (<em>tuple</em><em>, </em><em>optional</em>) -- _description_. Defaults to (0.01, 0.50).</p></li>
+<li><p><strong>refine_with_fmin</strong> (<em>bool</em><em>, </em><em>optional</em>) -- _description_. Defaults to False.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- _description_. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_function_farm">
 <span class="sig-name descname"><span class="pre">plot_cost_function_farm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.plot_cost_function_farm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_function_farm" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_functions_turbines">
 <span class="sig-name descname"><span class="pre">plot_cost_functions_turbines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.plot_cost_functions_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_functions_turbines" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.model_fitting.turbulence_estimator.ti_estimator.plot_power_bars">
 <span class="sig-name descname"><span class="pre">plot_power_bars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/turbulence_estimator.html#ti_estimator.plot_power_bars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_power_bars" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>_summary_.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

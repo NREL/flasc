@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,7 +616,32 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.find_sensor_faults.</span></span><span class="sig-name descname"><span class="pre">find_sensor_stuck_faults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stddev_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_consecutive_measurements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_figures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_by_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/find_sensor_faults.html#find_sensor_stuck_faults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Find sensor-stuck faults in a dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- The dataframe containing the data.</p></li>
+<li><p><strong>columns</strong> (<em>list</em>) -- The columns to check for sensor-stuck faults.</p></li>
+<li><p><strong>ti</strong> (<em>Any</em>) -- unused</p></li>
+<li><p><strong>stddev_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) -- The threshold for the standard deviation of the
+consecutive measurements. Defaults to 0.001.</p></li>
+<li><p><strong>n_consecutive_measurements</strong> (<em>int</em><em>, </em><em>optional</em>) -- The number of consecutive measurements to
+compare. Defaults to 3.</p></li>
+<li><p><strong>plot_figures</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Whether to plot figures for the sensor-stuck faults.
+Defaults to True.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Whether to print verbose output. Defaults to False.</p></li>
+<li><p><strong>return_by_column</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Whether to return the faults by column.
+Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The indices of the sensor-stuck faults</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

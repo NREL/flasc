@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.analysis.energy_ratio_heterogeneity_mapper</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span></span><span class="sd">&quot;&quot;&quot;Module to calculate and visualize the heterogeneity in the inflow wind speed.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">scipy.spatial._qhull</span>
@@ -586,7 +587,9 @@ document.write(`
 <div class="viewcode-block" id="heterogeneity_mapper">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper">[docs]</a>
 <span class="k">class</span> <span class="nc">heterogeneity_mapper</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class is useful to calculate the energy ratios of a set</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for calculating and visualizing the heterogeneity in the inflow wind speed.</span>
+
+<span class="sd">    This class is useful to calculate the energy ratios of a set</span>
 <span class="sd">    of upstream turbines to then derive the heterogeneity in the</span>
 <span class="sd">    inflow wind speed. This can be helpful in characterizing the</span>
 <span class="sd">    ambient wind speed distribution for operational assets where</span>
@@ -597,6 +600,13 @@ document.write(`
 
     <span class="c1"># Private functions</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_raw</span><span class="p">,</span> <span class="n">fm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the heterogeneity_mapper class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df_raw (pd.DataFrame): The raw SCADA data to use for the analysis.</span>
+<span class="sd">            fm (FlorisModel): The FLORIS model</span>
+<span class="sd">                to use for the analysis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Save to self</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df_raw</span> <span class="o">=</span> <span class="n">df_raw</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fm</span> <span class="o">=</span> <span class="n">fm</span>
@@ -678,6 +688,18 @@ document.write(`
         <span class="n">wd_bin_width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span>
         <span class="n">ws_range</span><span class="o">=</span><span class="p">[</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">11.0</span><span class="p">],</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Estimate the heterogeneity in the inflow wind speed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df_upstream (_type_): _description_</span>
+<span class="sd">            wd_array (_type_, optional): _description_. Defaults to np.arange(0.0, 360.0, 3.0).</span>
+<span class="sd">            wd_bin_width (float, optional): _description_. Defaults to 6.0.</span>
+<span class="sd">            ws_range (list, optional): _description_. Defaults to [6.0, 11.0].</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: A dataframe containing the energy ratios for all upstream turbines</span>
+<span class="sd">                for each wind direction bin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df_list</span> <span class="o">=</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_process_single_wd</span><span class="p">(</span><span class="n">wd</span><span class="p">,</span> <span class="n">wd_bin_width</span><span class="p">,</span> <span class="n">ws_range</span><span class="p">,</span> <span class="n">df_upstream</span><span class="p">)</span> <span class="k">for</span> <span class="n">wd</span> <span class="ow">in</span> <span class="n">wd_array</span>
         <span class="p">]</span>
@@ -688,6 +710,12 @@ document.write(`
 <div class="viewcode-block" id="heterogeneity_mapper.plot_graphs">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_graphs">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">],</span> <span class="n">pdf_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the energy ratios for all upstream turbines for each wind direction bin.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ylim (list, optional): The y-axis limits for the plots. Defaults to [0.8, 1.2].</span>
+<span class="sd">            pdf_save_path (str, optional): The path to save the plots as a PDF. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_heterogeneity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Please call &#39;estimate_heterogeneity(...)&#39; first.&quot;</span><span class="p">)</span>
 
@@ -742,6 +770,11 @@ document.write(`
 <div class="viewcode-block" id="heterogeneity_mapper.generate_floris_hetmap">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.generate_floris_hetmap">[docs]</a>
     <span class="k">def</span> <span class="nf">generate_floris_hetmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a dataframe for a FLORIS heterogeneous map.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: A dataframe containing the FLORIS heterogeneous map values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_heterogeneity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Please call &#39;estimate_heterogeneity(...)&#39; first.&quot;</span><span class="p">)</span>
 
@@ -789,6 +822,17 @@ document.write(`
 <div class="viewcode-block" id="heterogeneity_mapper.plot_layout">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_layout">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">],</span> <span class="n">plot_background_flow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pdf_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the layout of the wind farm with the inflow wind speed heterogeneity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ylim (list, optional): The y-axis limits for the plots. Defaults to [0.8, 1.2].</span>
+<span class="sd">            plot_background_flow (bool, optional): Whether to plot the background flow.</span>
+<span class="sd">                Defaults to False.</span>
+<span class="sd">            pdf_save_path (str, optional): The path to save the plots as a PDF. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: The figure and axis objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_heterogeneity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Please call &#39;estimate_heterogeneity(...)&#39; first.&quot;</span><span class="p">)</span>
 

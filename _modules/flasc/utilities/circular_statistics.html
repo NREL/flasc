@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.utilities.circular_statistics</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="sd">&quot;&quot;&quot;Circular statistics utility functions.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">floris.utilities</span> <span class="kn">import</span> <span class="n">wrap_360</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">circmean</span>
 
@@ -547,63 +548,49 @@ document.write(`
 <div class="viewcode-block" id="calc_wd_mean_radial">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.circular_statistics.calc_wd_mean_radial.html#flasc.utilities.circular_statistics.calc_wd_mean_radial">[docs]</a>
 <span class="k">def</span> <span class="nf">calc_wd_mean_radial</span><span class="p">(</span><span class="n">angles_array_deg</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s2">&quot;omit&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute the mean wind direction over a given axis. Assumes that the</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the mean wind direction over a given axis.</span>
+
+<span class="sd">    Assumes that the</span>
 <span class="sd">    input angles are specified in degrees, and returns the mean wind</span>
 <span class="sd">    direction in degrees. Wrapper for scipy.stats.circmean</span>
 
-<span class="sd">    Inputs:</span>
-<span class="sd">        angles_array_deg - numpy array or pandas dataframe of input</span>
-<span class="sd">            wind directions.</span>
-<span class="sd">        axis - axis of array/dataframe to take average over</span>
-<span class="sd">        nan_policy - option to pass to scipy.stats.circmean; defaults to</span>
-<span class="sd">           &#39;omit&#39;. (Options: &#39;propagate&#39;, &#39;raise&#39;, &#39;omit&#39;)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        angles_array_deg (numpy array): Array of angles in degrees</span>
+<span class="sd">        axis (int): Axis along which to calculate the mean</span>
+<span class="sd">            Default is 0</span>
+<span class="sd">        nan_policy (str): How to handle NaN values.  Default is &#39;omit&#39;</span>
 
-<span class="sd">    Outputs:</span>
-<span class="sd">        mean_wd - numpy array of mean wind directions over the provided</span>
-<span class="sd">            axis</span>
+<span class="sd">    Returns:</span>
+<span class="sd">         np.array: Mean wind direction in degrees</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">return</span> <span class="n">circmean</span><span class="p">(</span><span class="n">angles_array_deg</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">360.0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="n">nan_policy</span><span class="p">)</span></div>
 
-
-
-<span class="c1"># def calc_wd_mean_radial_list(angles_array_list):</span>
-<span class="c1">#     if isinstance(angles_array_list, (pd.DataFrame, pd.Series)):</span>
-<span class="c1">#         array = np.array(angles_array_list)</span>
-<span class="c1">#     elif isinstance(angles_array_list, list):</span>
-<span class="c1">#         array = np.vstack(angles_array_list).T</span>
-<span class="c1">#     else:</span>
-<span class="c1">#         array = np.array(angles_array_list)</span>
-
-<span class="c1">#     # Use unit vectors to calculate the mean</span>
-<span class="c1">#     dir_x = np.cos(array * np.pi / 180.).sum(axis=1)</span>
-<span class="c1">#     dir_y = np.sin(array * np.pi / 180.).sum(axis=1)</span>
-
-<span class="c1">#     mean_dirs = np.arctan2(dir_y, dir_x)</span>
-<span class="c1">#     mean_out = wrap_360(mean_dirs * 180. / np.pi)</span>
-
-<span class="c1">#     return mean_out</span>
 
 
 <div class="viewcode-block" id="calculate_wd_statistics">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.circular_statistics.calculate_wd_statistics.html#flasc.utilities.circular_statistics.calculate_wd_statistics">[docs]</a>
 <span class="k">def</span> <span class="nf">calculate_wd_statistics</span><span class="p">(</span><span class="n">angles_array_deg</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">calc_median_min_max_std</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine statistical properties of an array of wind directions.</span>
+
 <span class="sd">    This includes the mean of the array, the median, the standard deviation,</span>
 <span class="sd">    the minimum value and the maximum value.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        angles_array_deg ([float/int]): Array of angles in degrees</span>
+<span class="sd">        angles_array_deg (numpy array): Array of wind directions in degrees</span>
+<span class="sd">        axis (int): Axis along which to calculate the statistics</span>
+<span class="sd">            Default is 0</span>
+<span class="sd">        calc_median_min_max_std (bool): Whether to calculate the median, minimum,</span>
+<span class="sd">            maximum, and standard deviation of the wind directions</span>
+<span class="sd">            Default is True</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        mean_wd (float): Mean wind direction in [0, 360] deg</span>
-<span class="sd">        median_wd (float): Median wind direction in [0, 360] deg</span>
-<span class="sd">        std_wd (float): Standard deviation in deg</span>
-<span class="sd">        min_wd (float): Minimum wind direction in [0, 360] deg</span>
-<span class="sd">        max_wd (float): Maximum wind direction in [0, 360] deg</span>
+<span class="sd">        A tuple containing the following values:</span>
+<span class="sd">            mean_wd (float): Mean wind direction in [0, 360] deg</span>
+<span class="sd">            median_wd (float): Median wind direction in [0, 360] deg</span>
+<span class="sd">            std_wd (float): Standard deviation in deg</span>
+<span class="sd">            min_wd (float): Minimum wind direction in [0, 360] deg</span>
+<span class="sd">            max_wd (float): Maximum wind direction in [0, 360] deg</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Preprocessing</span>
     <span class="n">angles_array_deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angles_array_deg</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="n">angles_array_deg</span> <span class="o">=</span> <span class="n">wrap_360</span><span class="p">(</span><span class="n">angles_array_deg</span><span class="p">)</span>

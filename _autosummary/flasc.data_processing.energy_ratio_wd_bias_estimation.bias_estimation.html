@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -627,6 +626,7 @@ document.write(`
 <dt class="sig sig-object py" id="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flasc.data_processing.energy_ratio_wd_bias_estimation.</span></span><span class="sig-name descname"><span class="pre">bias_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_fm_approx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_turbines_subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_ws_mapping_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_pow_ref_mapping_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/energy_ratio_wd_bias_estimation.html#bias_estimation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LoggingManager</span></code></p>
+<p>Class to determine bias in wind direction measurement.</p>
 <p>This class can be used to estimate the bias (offset) in a wind
 direction measurement by comparing the energy ratios in the SCADA
 data with the predicted energy ratios from FLORIS under various
@@ -641,13 +641,13 @@ direction.</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.calculate_baseline" title="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.calculate_baseline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_baseline</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Calculate Baseline energy ratios.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.estimate_wd_bias" title="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.estimate_wd_bias"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_wd_bias</span></code></a></p></td>
-<td><p>Estimate the wind direction bias by comparing the SCADA data under various wind direction corrections to its FLORIS predictions.</p></td>
+<td><p>Estimate wd bias.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.plot_energy_ratios" title="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.plot_energy_ratios"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_energy_ratios</span></code></a></p></td>
-<td><p>Plot the energy ratios for the currently evaluated wind direction offset term.</p></td>
+<td><p>Plot energy ratios.</p></td>
 </tr>
 </tbody>
 </table>
@@ -656,7 +656,7 @@ direction.</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.logger" title="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Get the logger for the class.</p></td>
 </tr>
 </tbody>
 </table>
@@ -675,7 +675,8 @@ direction.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_er_input_for_wd_bias">
 <span class="sig-name descname"><span class="pre">_load_er_input_for_wd_bias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wd_bias</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/energy_ratio_wd_bias_estimation.html#bias_estimation._load_er_input_for_wd_bias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_er_input_for_wd_bias" title="Link to this definition">#</a></dt>
-<dd><p>This function initializes an instance of the EnergyRatioInput
+<dd><p>Load EnergyRatioInput objects with bias.</p>
+<p>This function initializes an instance of the EnergyRatioInput
 where the dataframe is shifted by wd_bias for each test turbine.
 This facilitates the calculation of the energy ratios under this
 hypothesized wind direction bias. Additionally, the FLORIS predictions
@@ -684,7 +685,7 @@ predictions are also calculated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>wd_bias</strong> (<em>[</em><em>float</em><em>]</em>) -- Hypothesized wind direction bias in degrees.</p></li>
+<li><p><strong>wd_bias</strong> (<em>float</em>) -- Hypothesized wind direction bias in degrees.</p></li>
 <li><p><strong>test_turbines</strong> (<em>[</em><em>iteratible</em><em>]</em>) -- List of test turbines for
 which each the energy ratios are calculated and the Pearson
 correlation coefficients are calculated. Note that this
@@ -711,11 +712,27 @@ to the nominal dataset.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._get_energy_ratios_allbins">
 <span class="sig-name descname"><span class="pre">_get_energy_ratios_allbins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wd_bias</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(6.0,</span> <span class="pre">10.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_btstrp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_iter_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/energy_ratio_wd_bias_estimation.html#bias_estimation._get_energy_ratios_allbins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._get_energy_ratios_allbins" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the energy ratios for the energy_ratio_suite objects
-contained in 'self.fsc_list'.</p>
+<dd><p>Calculate the energy ratios.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>wd_bias</strong> (<em>float</em>) -- Wind direction bias in degrees.</p></li>
+<li><p><strong>time_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Mask.  If None, will not mask
+the data based on this variable. Defaults to None.</p></li>
+<li><p><strong>ws_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Wind speed mask. Should be an
+iterable of length 2, e.g., [6.0, 10.0], defining the lower
+and upper bound, respectively. If not specified, will not
+mask the data based on this variable. Defaults to (6, 10).</p></li>
+<li><p><strong>wd_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Wind direction mask. Should
+be an iterable of length 2, e.g., [0.0, 180.0], defining
+the lower and upper bound, respectively. If not specified,
+will not mask the data based on this variable. Defaults to
+None.</p></li>
+<li><p><strong>ti_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Turbulence intensity mask.
+Should be an iterable of length 2, e.g., [0.04, 0.08],
+defining the lower and upper bound, respectively. If not
+specified, will not mask the data based on this variable.
+Defaults to None.</p></li>
 <li><p><strong>wd_step</strong> (<em>float</em><em>, </em><em>optional</em>) -- Wind direction discretization step
 size. This defines for what wind directions the energy ratio
 is to be calculated. Note that this does not necessarily
@@ -747,17 +764,46 @@ None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.calculate_baseline">
 <span class="sig-name descname"><span class="pre">calculate_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(6.0,</span> <span class="pre">10.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">er_wd_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">er_ws_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">er_wd_bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">er_N_btstrp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/energy_ratio_wd_bias_estimation.html#bias_estimation.calculate_baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.calculate_baseline" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Calculate Baseline energy ratios.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Time Mask.</p></li>
+<li><p><strong>ws_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Wind speed mask. Should be an
+iterable of length 2, e.g., [6.0, 10.0], defining the lower
+and upper bound, respectively. If not specified, will not
+mask the data based on this variable. Defaults to (6, 10).</p></li>
+<li><p><strong>wd_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Wind direction mask. Should
+be an iterable of length 2, e.g., [0.0, 180.0], defining
+the lower and upper bound, respectively. If not specified,
+will not mask the data based on this variable. Defaults to
+None.</p></li>
+<li><p><strong>ti_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Turbulence intensity mask.
+Should be an iterable of length 2, e.g., [0.04, 0.08],
+defining the lower and upper bound, respectively. If not
+specified, will not mask the data based on this variable.
+Defaults to None.</p></li>
+<li><p><strong>er_wd_step</strong> (<em>float</em><em>, </em><em>optional</em>) -- Wind direction step size.  Defaults to 3.0.</p></li>
+<li><p><strong>er_ws_step</strong> (<em>float</em><em>, </em><em>optional</em>) -- Wind speed step size. Defaults to 5.0.</p></li>
+<li><p><strong>er_wd_bin_width</strong> (<em>[</em><em>type</em><em>]</em><em>, </em><em>optional</em>) -- Wind direction bin width.  Defaults to None.</p></li>
+<li><p><strong>er_N_btstrp</strong> (<em>int</em><em>, </em><em>optional</em>) -- Number of bootstrap evaluations for
+uncertainty quantification (UQ). If N_btstrp=1, will not
+perform any uncertainty quantification. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.estimate_wd_bias">
 <span class="sig-name descname"><span class="pre">estimate_wd_bias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(6.0,</span> <span class="pre">10.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_search_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-180.0,</span> <span class="pre">180.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_search_brute_dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">er_wd_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">er_ws_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">er_wd_bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">er_N_btstrp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_iter_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/energy_ratio_wd_bias_estimation.html#bias_estimation.estimate_wd_bias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.estimate_wd_bias" title="Link to this definition">#</a></dt>
-<dd><p>Estimate the wind direction bias by comparing the SCADA data
+<dd><p>Estimate wd bias.</p>
+<p>Estimate the wind direction bias by comparing the SCADA data
 under various wind direction corrections to its FLORIS predictions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>time_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Wind speed mask. Should be an
+<li><p><strong>time_mask</strong> (<em>[</em><em>iterable</em><em>]</em><em>, </em><em>optional</em>) -- Time mask. Should be an
 iterable of length 2, e.g., [pd.to_datetime(&quot;2019-01-01&quot;),
 pd.to_datetime(&quot;2019-04-01&quot;)], defining the lower and upper
 bound, respectively. If not specified, will not mask the data
@@ -780,6 +826,8 @@ Defaults to None.</p></li>
 direction offsets to consider. Defaults to (-180., 180.).</p></li>
 <li><p><strong>opt_search_brute_dx</strong> (<em>float</em><em>, </em><em>optional</em>) -- Number of points to
 discretize the search space over. Defaults to 5.</p></li>
+<li><p><strong>opt_workers</strong> (<em>int</em><em>, </em><em>optional</em>) -- Number of workers to use for the
+optimization. Defaults to 4.</p></li>
 <li><p><strong>er_wd_step</strong> (<em>float</em><em>, </em><em>optional</em>) -- Wind direction discretization step
 size. This defines for what wind directions the energy ratio
 is to be calculated. Note that this does not necessarily
@@ -806,11 +854,14 @@ None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Optimal wind direction offset.
-J_opt ([float]): Cost function under optimal offset.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>The optimal wind direction offset and</dt><dd><p>the cost function under the optimal offset.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>x_opt ([float])</p>
+<dd class="field-odd"><p>A tuple (float, float)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -818,12 +869,13 @@ J_opt ([float]): Cost function under optimal offset.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.plot_energy_ratios">
 <span class="sig-name descname"><span class="pre">plot_energy_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show_uncorrected_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/energy_ratio_wd_bias_estimation.html#bias_estimation.plot_energy_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.plot_energy_ratios" title="Link to this definition">#</a></dt>
-<dd><p>Plot the energy ratios for the currently evaluated wind
+<dd><p>Plot energy ratios.</p>
+<p>Plot the energy ratios for the currently evaluated wind
 direction offset term.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>show_uncorrcted_data</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Compute and show the
+<li><p><strong>show_uncorrected_data</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Compute and show the
 uncorrected energy ratio (with wd_bias=0) on the plot. Defaults
 to False.</p></li>
 <li><p><strong>save_path</strong> (<em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) -- Path to save the figure to. If not
@@ -838,8 +890,8 @@ specified, will not save the figure. Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._setup_logger">
 <span class="sig-name descname"><span class="pre">_setup_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._setup_logger" title="Link to this definition">#</a></dt>
-<dd><p>Configures the root logger based on the default or user-specified settings.
-As needed, a StreamHandler is created for console logging or FileHandler
+<dd><p>Configures the root logger based on the default or user-specified settings.</p>
+<p>As needed, a StreamHandler is created for console logging or FileHandler
 is created for file logging. Both can be attached to the root
 logger for use throughout FLASC.</p>
 <dl class="field-list simple">
@@ -855,7 +907,16 @@ logger for use throughout FLASC.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.logger">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.logger" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Get the logger for the class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The logger for the class.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>logging.Logger</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

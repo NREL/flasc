@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,29 +616,29 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ws_by_all_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ws_by_all_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ws' in your dataframe with value equal
+<dd><p>Add ws column by all turbines.</p>
+<p>Add a column called 'ws' in your dataframe with value equal
 to the circular-averaged wind direction measurements of all
 turbines.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that</p></li>
-<li><p><strong>average.</strong> (<em>should be used to calculate the column</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that
+should be used to calculate the column average.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'ws'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'ws'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>

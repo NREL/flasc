@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,18 +616,19 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.floris_tools.get_turbs_in_radius">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.floris_tools.</span></span><span class="sig-name descname"><span class="pre">get_turbs_in_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turb_no</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_itself</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/floris_tools.html#get_turbs_in_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.floris_tools.get_turbs_in_radius" title="Link to this definition">#</a></dt>
-<dd><p>Determine which turbines are within a certain radius of other
+<dd><p>Find turbines within a certain radius of a turbine.</p>
+<p>Determine which turbines are within a certain radius of other
 wind turbines.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Long. locations of turbines</p></li>
 <li><p><strong>y_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Lat. locations of turbines</p></li>
-<li><p><strong>turb_no</strong> (<em>[</em><em>int</em><em>]</em>) -- Turbine number for which the distance is</p></li>
+<li><p><strong>turb_no</strong> (<em>int</em>) -- Turbine number for which the distance is</p></li>
 <li><p><strong>turbines.</strong> (<em>calculated w.r.t. the other</em>)</p></li>
-<li><p><strong>max_radius</strong> (<em>[</em><em>float</em><em>]</em>) -- Maximum distance between turbines to be</p></li>
+<li><p><strong>max_radius</strong> (<em>float</em>) -- Maximum distance between turbines to be</p></li>
 <li><p><strong>[</strong><strong>turb_no</strong><strong>]</strong><strong>.</strong> (<em>considered within the radius</em><em> of </em><em>turbine</em>)</p></li>
-<li><p><strong>include_itself</strong> (<em>[</em><em>type</em><em>]</em>) -- Include itself in the list of turbines</p></li>
+<li><p><strong>include_itself</strong> (<em>bool</em>) -- Include itself in the list of turbines</p></li>
 <li><p><strong>radius.</strong> (<em>within the</em>)</p></li>
 <li><p><strong>sort_by_distance</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Sort the output list of turbines</p></li>
 <li><p><strong>turbine</strong> (<em>according to distance to the</em>)</p></li>
@@ -641,7 +641,7 @@ wind turbines.</p>
 prespecified distance from turbine [turb_no].</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>turbs_within_radius ([list])</p>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>

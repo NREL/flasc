@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,10 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.model_fitting.floris_sensitivity_analysis</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span></span><span class="sd">&quot;&quot;&quot;_summary_.&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pandas.errors</span> <span class="kn">import</span> <span class="n">DataError</span>
@@ -556,7 +558,16 @@ document.write(`
 <div class="viewcode-block" id="floris_sobol_analysis">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis">[docs]</a>
 <span class="k">class</span> <span class="nc">floris_sobol_analysis</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fi</span><span class="p">,</span> <span class="n">problem</span><span class="p">,</span> <span class="n">calc_second_order</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fi (_type_): _description_</span>
+<span class="sd">            problem (_type_): _description_</span>
+<span class="sd">            calc_second_order (bool, optional): _description_. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fm</span> <span class="o">=</span> <span class="n">fi</span>
 
         <span class="c1"># Default parameters</span>
@@ -642,6 +653,13 @@ document.write(`
 <div class="viewcode-block" id="floris_sobol_analysis.generate_samples">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.generate_samples">[docs]</a>
     <span class="k">def</span> <span class="nf">generate_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">problem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">calc_second_order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            N (_type_): _description_</span>
+<span class="sd">            problem (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            calc_second_order (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">problem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">problem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span>
 
@@ -661,6 +679,17 @@ document.write(`
 <div class="viewcode-block" id="floris_sobol_analysis.calculate_wfpower_for_samples">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.calculate_wfpower_for_samples">[docs]</a>
     <span class="k">def</span> <span class="nf">calculate_wfpower_for_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            num_threads (int, optional): _description_. Defaults to 1.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            DataError: _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples_x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DataError</span><span class="p">(</span><span class="s2">&quot;Please run generate_samples first.&quot;</span><span class="p">)</span>
 
@@ -681,6 +710,14 @@ document.write(`
 <div class="viewcode-block" id="floris_sobol_analysis.get_sobol_sensitivity_indices">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.get_sobol_sensitivity_indices">[docs]</a>
     <span class="k">def</span> <span class="nf">get_sobol_sensitivity_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            verbose (bool, optional): _description_. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Si</span> <span class="o">=</span> <span class="n">sobol</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">problem</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">samples_y</span><span class="p">,</span>
@@ -693,6 +730,19 @@ document.write(`
 <div class="viewcode-block" id="floris_sobol_analysis.plot_sobol_results">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.plot_sobol_results">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_sobol_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">fig_dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save_path (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            fig_format (str, optional): _description_. Defaults to &quot;png&quot;.</span>
+<span class="sd">            fig_dpi (int, optional): _description_. Defaults to 200.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            DataError: _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Si</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DataError</span><span class="p">(</span>
                 <span class="s2">&quot;No Sobol results to show. &quot;</span> <span class="o">+</span> <span class="s2">&quot;Have you run get_sobol_sensitivity_indices()?&quot;</span>
@@ -795,6 +845,16 @@ document.write(`
 <div class="viewcode-block" id="floris_sobol_analysis.plot_convergence">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.plot_convergence">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_convergence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">fig_dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save_path (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            fig_format (str, optional): _description_. Defaults to &quot;png&quot;.</span>
+<span class="sd">            fig_dpi (int, optional): _description_. Defaults to 200.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Analyzing convergence...&quot;</span><span class="p">)</span>
 
         <span class="c1"># Create copies of original results</span>

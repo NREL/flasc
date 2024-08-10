@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,7 +616,8 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.floris_tools.</span></span><span class="sig-name descname"><span class="pre">get_all_impacting_turbines_geometrical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">3.,</span> <span class="pre">6.,</span> <span class="pre">9.,</span> <span class="pre">12.,</span> <span class="pre">15.,</span> <span class="pre">18.,</span> <span class="pre">21.,</span> <span class="pre">24.,</span> <span class="pre">27.,</span> <span class="pre">30.,</span> <span class="pre">33.,</span> <span class="pre">36.,</span> <span class="pre">39.,</span> <span class="pre">42.,</span> <span class="pre">45.,</span> <span class="pre">48.,</span> <span class="pre">51.,</span> <span class="pre">54.,</span> <span class="pre">57.,</span> <span class="pre">60.,</span> <span class="pre">63.,</span> <span class="pre">66.,</span> <span class="pre">69.,</span> <span class="pre">72.,</span> <span class="pre">75.,</span> <span class="pre">78.,</span> <span class="pre">81.,</span> <span class="pre">84.,</span> <span class="pre">87.,</span> <span class="pre">90.,</span> <span class="pre">93.,</span> <span class="pre">96.,</span> <span class="pre">99.,</span> <span class="pre">102.,</span> <span class="pre">105.,</span> <span class="pre">108.,</span> <span class="pre">111.,</span> <span class="pre">114.,</span> <span class="pre">117.,</span> <span class="pre">120.,</span> <span class="pre">123.,</span> <span class="pre">126.,</span> <span class="pre">129.,</span> <span class="pre">132.,</span> <span class="pre">135.,</span> <span class="pre">138.,</span> <span class="pre">141.,</span> <span class="pre">144.,</span> <span class="pre">147.,</span> <span class="pre">150.,</span> <span class="pre">153.,</span> <span class="pre">156.,</span> <span class="pre">159.,</span> <span class="pre">162.,</span> <span class="pre">165.,</span> <span class="pre">168.,</span> <span class="pre">171.,</span> <span class="pre">174.,</span> <span class="pre">177.,</span> <span class="pre">180.,</span> <span class="pre">183.,</span> <span class="pre">186.,</span> <span class="pre">189.,</span> <span class="pre">192.,</span> <span class="pre">195.,</span> <span class="pre">198.,</span> <span class="pre">201.,</span> <span class="pre">204.,</span> <span class="pre">207.,</span> <span class="pre">210.,</span> <span class="pre">213.,</span> <span class="pre">216.,</span> <span class="pre">219.,</span> <span class="pre">222.,</span> <span class="pre">225.,</span> <span class="pre">228.,</span> <span class="pre">231.,</span> <span class="pre">234.,</span> <span class="pre">237.,</span> <span class="pre">240.,</span> <span class="pre">243.,</span> <span class="pre">246.,</span> <span class="pre">249.,</span> <span class="pre">252.,</span> <span class="pre">255.,</span> <span class="pre">258.,</span> <span class="pre">261.,</span> <span class="pre">264.,</span> <span class="pre">267.,</span> <span class="pre">270.,</span> <span class="pre">273.,</span> <span class="pre">276.,</span> <span class="pre">279.,</span> <span class="pre">282.,</span> <span class="pre">285.,</span> <span class="pre">288.,</span> <span class="pre">291.,</span> <span class="pre">294.,</span> <span class="pre">297.,</span> <span class="pre">300.,</span> <span class="pre">303.,</span> <span class="pre">306.,</span> <span class="pre">309.,</span> <span class="pre">312.,</span> <span class="pre">315.,</span> <span class="pre">318.,</span> <span class="pre">321.,</span> <span class="pre">324.,</span> <span class="pre">327.,</span> <span class="pre">330.,</span> <span class="pre">333.,</span> <span class="pre">336.,</span> <span class="pre">339.,</span> <span class="pre">342.,</span> <span class="pre">345.,</span> <span class="pre">348.,</span> <span class="pre">351.,</span> <span class="pre">354.,</span> <span class="pre">357.])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/floris_tools.html#get_all_impacting_turbines_geometrical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical" title="Link to this definition">#</a></dt>
-<dd><p>Determine which turbines affect the turbines of interest
+<dd><p>Get all impacting turbines using a simple geometric model.</p>
+<p>Determine which turbines affect the turbines of interest
 (i.e., those with a turbine_weights &gt; 0.00001). This function
 uses very simplified geometric functions to very quickly
 derive which turbines are supposedly waking at least one
@@ -625,16 +625,12 @@ turbine in the farm of interest.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fm</strong> (<em>[</em><em>floris object</em><em>]</em>) -- FLORIS object of the farm of interest.</p></li>
-<li><p><strong>[</strong><strong>list</strong><strong>]</strong> (<em>turbine_weights</em>) -- List of with turbine weights with length</p></li>
-<li><p><strong>turbines</strong> (<em>equal to the number</em><em> of </em><em>wind</em>)</p></li>
-<li><p><strong>with</strong> (<em>and typically filled</em>)</p></li>
-<li><p><strong>0s</strong> (<em>neighbouring farms</em><em>) </em><em>and 1s</em><em> (</em><em>farm</em><em> of </em><em>interest</em>)</p></li>
-<li><p><strong>wd_step</strong> (<em>float</em><em>, </em><em>optional</em>) -- Wind direction discretization step.</p></li>
-<li><p><strong>3.0.</strong> (<em>Defaults to</em>)</p></li>
+<li><p><strong>fm</strong> (<em>FlorisModel</em>) -- FLORIS object of the farm of interest.</p></li>
+<li><p><strong>turbine_weights</strong> (<em>list</em>) -- List of with turbine weights with length
+equal to the number of wind turbines, and typically filled with
+0s (neighboring farms) and 1s (farm of interest).</p></li>
+<li><p><strong>wd_array</strong> (<em>array</em><em>, </em><em>optional</em>) -- Array of wind directions to evaluate in [deg].</p></li>
 <li><p><strong>wake_slope</strong> (<em>float</em><em>, </em><em>optional</em>) -- linear slope of the wake (dy/dx)</p></li>
-<li><p><strong>plot_lines</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Enable plotting wakes/turbines.</p></li>
-<li><p><strong>False.</strong> (<em>Defaults to</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -647,7 +643,7 @@ the simulation without affecting any of the turbines that have a nonzero
 turbine weight.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df_impacting_simple ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>

@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -616,17 +615,18 @@ document.write(`
                   
   <section id="module-flasc.utilities.optimization">
 <span id="flasc-utilities-optimization"></span><h1>flasc.utilities.optimization<a class="headerlink" href="#module-flasc.utilities.optimization" title="Link to this heading">#</a></h1>
+<p>Module for optimization functions.</p>
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.optimization.estimate_ti.html#flasc.utilities.optimization.estimate_ti" title="flasc.utilities.optimization.estimate_ti"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_ti</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Estimate the turbulence intensity for a given turbine.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.optimization.find_timeshift_between_dfs.html#flasc.utilities.optimization.find_timeshift_between_dfs" title="flasc.utilities.optimization.find_timeshift_between_dfs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_timeshift_between_dfs</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Find the optimal time shift between two dataframes.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.optimization.match_y_curves_by_offset.html#flasc.utilities.optimization.match_y_curves_by_offset" title="flasc.utilities.optimization.match_y_curves_by_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_y_curves_by_offset</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Match two curves by finding the optimal offset.</p></td>
 </tr>
 </tbody>
 </table>
@@ -634,17 +634,123 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.optimization.find_timeshift_between_dfs">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.optimization.</span></span><span class="sig-name descname"><span class="pre">find_timeshift_between_dfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols_df1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols_df2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_circular_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">numpy.timedelta64(720,</span> <span class="pre">'h')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_y_shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_shift_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([-180.,</span> <span class="pre">-178.,</span> <span class="pre">-176.,</span> <span class="pre">-174.,</span> <span class="pre">-172.,</span> <span class="pre">-170.,</span> <span class="pre">-168.,</span> <span class="pre">-166.,</span> <span class="pre">-164.,</span> <span class="pre">-162.,</span> <span class="pre">-160.,</span> <span class="pre">-158.,</span> <span class="pre">-156.,</span> <span class="pre">-154.,</span> <span class="pre">-152.,</span> <span class="pre">-150.,</span> <span class="pre">-148.,</span> <span class="pre">-146.,</span> <span class="pre">-144.,</span> <span class="pre">-142.,</span> <span class="pre">-140.,</span> <span class="pre">-138.,</span> <span class="pre">-136.,</span> <span class="pre">-134.,</span> <span class="pre">-132.,</span> <span class="pre">-130.,</span> <span class="pre">-128.,</span> <span class="pre">-126.,</span> <span class="pre">-124.,</span> <span class="pre">-122.,</span> <span class="pre">-120.,</span> <span class="pre">-118.,</span> <span class="pre">-116.,</span> <span class="pre">-114.,</span> <span class="pre">-112.,</span> <span class="pre">-110.,</span> <span class="pre">-108.,</span> <span class="pre">-106.,</span> <span class="pre">-104.,</span> <span class="pre">-102.,</span> <span class="pre">-100.,</span> <span class="pre">-98.,</span> <span class="pre">-96.,</span> <span class="pre">-94.,</span> <span class="pre">-92.,</span> <span class="pre">-90.,</span> <span class="pre">-88.,</span> <span class="pre">-86.,</span> <span class="pre">-84.,</span> <span class="pre">-82.,</span> <span class="pre">-80.,</span> <span class="pre">-78.,</span> <span class="pre">-76.,</span> <span class="pre">-74.,</span> <span class="pre">-72.,</span> <span class="pre">-70.,</span> <span class="pre">-68.,</span> <span class="pre">-66.,</span> <span class="pre">-64.,</span> <span class="pre">-62.,</span> <span class="pre">-60.,</span> <span class="pre">-58.,</span> <span class="pre">-56.,</span> <span class="pre">-54.,</span> <span class="pre">-52.,</span> <span class="pre">-50.,</span> <span class="pre">-48.,</span> <span class="pre">-46.,</span> <span class="pre">-44.,</span> <span class="pre">-42.,</span> <span class="pre">-40.,</span> <span class="pre">-38.,</span> <span class="pre">-36.,</span> <span class="pre">-34.,</span> <span class="pre">-32.,</span> <span class="pre">-30.,</span> <span class="pre">-28.,</span> <span class="pre">-26.,</span> <span class="pre">-24.,</span> <span class="pre">-22.,</span> <span class="pre">-20.,</span> <span class="pre">-18.,</span> <span class="pre">-16.,</span> <span class="pre">-14.,</span> <span class="pre">-12.,</span> <span class="pre">-10.,</span> <span class="pre">-8.,</span> <span class="pre">-6.,</span> <span class="pre">-4.,</span> <span class="pre">-2.,</span> <span class="pre">0.,</span> <span class="pre">2.,</span> <span class="pre">4.,</span> <span class="pre">6.,</span> <span class="pre">8.,</span> <span class="pre">10.,</span> <span class="pre">12.,</span> <span class="pre">14.,</span> <span class="pre">16.,</span> <span class="pre">18.,</span> <span class="pre">20.,</span> <span class="pre">22.,</span> <span class="pre">24.,</span> <span class="pre">26.,</span> <span class="pre">28.,</span> <span class="pre">30.,</span> <span class="pre">32.,</span> <span class="pre">34.,</span> <span class="pre">36.,</span> <span class="pre">38.,</span> <span class="pre">40.,</span> <span class="pre">42.,</span> <span class="pre">44.,</span> <span class="pre">46.,</span> <span class="pre">48.,</span> <span class="pre">50.,</span> <span class="pre">52.,</span> <span class="pre">54.,</span> <span class="pre">56.,</span> <span class="pre">58.,</span> <span class="pre">60.,</span> <span class="pre">62.,</span> <span class="pre">64.,</span> <span class="pre">66.,</span> <span class="pre">68.,</span> <span class="pre">70.,</span> <span class="pre">72.,</span> <span class="pre">74.,</span> <span class="pre">76.,</span> <span class="pre">78.,</span> <span class="pre">80.,</span> <span class="pre">82.,</span> <span class="pre">84.,</span> <span class="pre">86.,</span> <span class="pre">88.,</span> <span class="pre">90.,</span> <span class="pre">92.,</span> <span class="pre">94.,</span> <span class="pre">96.,</span> <span class="pre">98.,</span> <span class="pre">100.,</span> <span class="pre">102.,</span> <span class="pre">104.,</span> <span class="pre">106.,</span> <span class="pre">108.,</span> <span class="pre">110.,</span> <span class="pre">112.,</span> <span class="pre">114.,</span> <span class="pre">116.,</span> <span class="pre">118.,</span> <span class="pre">120.,</span> <span class="pre">122.,</span> <span class="pre">124.,</span> <span class="pre">126.,</span> <span class="pre">128.,</span> <span class="pre">130.,</span> <span class="pre">132.,</span> <span class="pre">134.,</span> <span class="pre">136.,</span> <span class="pre">138.,</span> <span class="pre">140.,</span> <span class="pre">142.,</span> <span class="pre">144.,</span> <span class="pre">146.,</span> <span class="pre">148.,</span> <span class="pre">150.,</span> <span class="pre">152.,</span> <span class="pre">154.,</span> <span class="pre">156.,</span> <span class="pre">158.,</span> <span class="pre">160.,</span> <span class="pre">162.,</span> <span class="pre">164.,</span> <span class="pre">166.,</span> <span class="pre">168.,</span> <span class="pre">170.,</span> <span class="pre">172.,</span> <span class="pre">174.,</span> <span class="pre">176.,</span> <span class="pre">178.])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_Ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/optimization.html#find_timeshift_between_dfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.optimization.find_timeshift_between_dfs" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Find the optimal time shift between two dataframes.</p>
+<p>This function is used to find the optimal time shift between two dataframes
+'df1' and 'df2'. The function will resample the dataframes to a common time
+vector and then compare the dataframes in time steps of 't_step'. The function
+will then find the optimal time shift between the two dataframes by minimizing
+the Pearson correlation coefficient between the two dataframes. The function
+can also correct for a bias in the y-values of the dataframes by minimizing
+the Pearson correlation coefficient between the two dataframes after a bias
+has been removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df1</strong> (<em>pd.DataFrame</em>) -- Dataframe 1.</p></li>
+<li><p><strong>df2</strong> (<em>pd.DataFrame</em>) -- Dataframe 2.</p></li>
+<li><p><strong>cols_df1</strong> (<em>list</em>) -- Columns to use in dataframe 1.</p></li>
+<li><p><strong>cols_df2</strong> (<em>list</em>) -- Columns to use in dataframe 2.</p></li>
+<li><p><strong>use_circular_statistics</strong> (<em>bool</em>) -- Use circular statistics for averaging.
+Default is False.</p></li>
+<li><p><strong>t_step</strong> (<em>np.timedelta64</em>) -- Time step for comparison.
+Default is 30 days.</p></li>
+<li><p><strong>correct_y_shift</strong> (<em>bool</em>) -- Correct for a bias in the y-values.
+Default is False.</p></li>
+<li><p><strong>y_shift_range</strong> (<em>np.array</em>) -- Range of y-shifts to evaluate.
+Default is np.arange(-180.0, 180.0, 2.0).</p></li>
+<li><p><strong>opt_bounds</strong> (<em>list</em>) -- Bounds for optimization.
+Default is None.</p></li>
+<li><p><strong>opt_Ns</strong> (<em>int</em>) -- Number of steps for optimization.
+Default is None.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) -- Print verbose output.
+Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>List of dictionaries with the following keys:</dt><dd><ul class="simple">
+<li><p>t0: Start time of comparison.</p></li>
+<li><p>t1: End time of comparison.</p></li>
+<li><p>x_opt: Optimal time shift.</p></li>
+<li><p>J_opt: Optimal cost function value.</p></li>
+<li><p>x: Time shifts evaluated.</p></li>
+<li><p>J: Cost function values evaluated.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.optimization.match_y_curves_by_offset">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.optimization.</span></span><span class="sig-name descname"><span class="pre">match_y_curves_by_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ytest</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_wrapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/optimization.html#match_y_curves_by_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.optimization.match_y_curves_by_offset" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Match two curves by finding the optimal offset.</p>
+<p>This function is used to match two curves by finding the optimal offset
+between the two curves. The function will minimize the mean squared error
+between the two curves for a range of offsets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>yref</strong> (<em>np.array</em>) -- Reference curve.</p></li>
+<li><p><strong>ytest</strong> (<em>np.array</em>) -- Test curve.</p></li>
+<li><p><strong>dy_eval</strong> (<em>np.array</em>) -- Range of offsets to evaluate.
+Default is None.</p></li>
+<li><p><strong>angle_wrapping</strong> (<em>bool</em>) -- Use angle wrapping for evaluation.
+Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dwd_opt: Optimal offset.
+J_opt: Optimal cost function value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple (float, float) with the following elements</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.optimization.estimate_ti">
-<span class="sig-prename descclassname"><span class="pre">flasc.utilities.optimization.</span></span><span class="sig-name descname"><span class="pre">estimate_ti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_measured</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbines_downstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_with_fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/optimization.html#estimate_ti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.optimization.estimate_ti" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">flasc.utilities.optimization.</span></span><span class="sig-name descname"><span class="pre">estimate_ti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_measured</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbines_downstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_with_fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/optimization.html#estimate_ti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.optimization.estimate_ti" title="Link to this definition">#</a></dt>
+<dd><p>Estimate the turbulence intensity for a given turbine.</p>
+<p>This function is used to estimate the turbulence intensity for a given
+turbine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fm</strong> (<em>FlorisModel</em>) -- FlorisModel object.</p></li>
+<li><p><strong>P_measured</strong> (<em>np.array</em>) -- Measured power data.</p></li>
+<li><p><strong>Ns</strong> (<em>int</em>) -- Number of steps for optimization.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em>) -- Bounds for optimization.</p></li>
+<li><p><strong>turbine_upstream</strong> (<em>int</em>) -- Upstream turbine.</p></li>
+<li><p><strong>turbines_downstream</strong> (<em>list</em>) -- Downstream turbines.</p></li>
+<li><p><strong>refine_with_fmin</strong> (<em>bool</em>) -- Refine with fmin.
+Default is False.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) -- Print verbose output.
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dictionary with the following</dt><dd><p>keys:
+- x_opt: Optimal time shift.
+- J_opt: Optimal cost function value.
+- x: Time shifts evaluated.
+- J: Cost function values evaluated.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

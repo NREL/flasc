@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.utilities.lookup_table_tools</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="sd">&quot;&quot;&quot;Module for creating interpolants from lookup tables.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">LinearNDInterpolator</span>
 
 
@@ -548,7 +549,9 @@ document.write(`
 <span class="k">def</span> <span class="nf">get_yaw_angles_interpolant</span><span class="p">(</span>
     <span class="n">df_opt</span><span class="p">,</span> <span class="n">ramp_up_ws</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">ramp_down_ws</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="n">minimum_yaw_angle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maximum_yaw_angle</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an interpolant for the optimal yaw angles from a dataframe</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get an interpolant for the optimal yaw angles from a dataframe.</span>
+
+<span class="sd">    Create an interpolant for the optimal yaw angles from a dataframe</span>
 <span class="sd">    &#39;df_opt&#39;, which contains the rows &#39;wind_direction&#39;, &#39;wind_speed&#39;,</span>
 <span class="sd">    &#39;turbulence_intensity&#39;, and &#39;yaw_angles_opt&#39;. This dataframe is typically</span>
 <span class="sd">    produced automatically from a FLORIS yaw optimization using Serial Refine</span>
@@ -557,26 +560,31 @@ document.write(`
 
 <span class="sd">    Args:</span>
 <span class="sd">        df_opt (pd.DataFrame): Dataframe containing the rows &#39;wind_direction&#39;,</span>
-<span class="sd">        &#39;wind_speed&#39;, &#39;turbulence_intensity&#39;, and &#39;yaw_angles_opt&#39;.</span>
+<span class="sd">            &#39;wind_speed&#39;, &#39;turbulence_intensity&#39;, and &#39;yaw_angles_opt&#39;.</span>
 <span class="sd">        ramp_up_ws (list, optional): List with length 2 depicting the wind</span>
-<span class="sd">        speeds at which the ramp starts and ends, respectively, on the lower</span>
-<span class="sd">        end. This variable defaults to [4, 5], meaning that the yaw offsets are</span>
-<span class="sd">        zero at and below 4 m/s, then linearly transition to their full offsets</span>
-<span class="sd">        at 5 m/s, and continue to be their full offsets past 5 m/s. Defaults to</span>
-<span class="sd">        [4, 5].</span>
+<span class="sd">            speeds at which the ramp starts and ends, respectively, on the lower</span>
+<span class="sd">            end. This variable defaults to [4, 5], meaning that the yaw offsets are</span>
+<span class="sd">            zero at and below 4 m/s, then linearly transition to their full offsets</span>
+<span class="sd">            at 5 m/s, and continue to be their full offsets past 5 m/s. Defaults to</span>
+<span class="sd">            [4, 5].</span>
 <span class="sd">        ramp_down_ws (list, optional): List with length 2 depicting the wind</span>
-<span class="sd">        speeds at which the ramp starts and ends, respectively, on the higher</span>
-<span class="sd">        end. This variable defaults to [10, 12], meaning that the yaw offsets are</span>
-<span class="sd">        full at and below 10 m/s, then linearly transition to zero offsets</span>
-<span class="sd">        at 12 m/s, and continue to be zero past 12 m/s. Defaults to [10, 12].</span>
+<span class="sd">            speeds at which the ramp starts and ends, respectively, on the higher</span>
+<span class="sd">            end. This variable defaults to [10, 12], meaning that the yaw offsets are</span>
+<span class="sd">            full at and below 10 m/s, then linearly transition to zero offsets</span>
+<span class="sd">            at 12 m/s, and continue to be zero past 12 m/s. Defaults to [10, 12].</span>
+<span class="sd">        minimum_yaw_angle (float, optional): The minimum yaw angle in degrees.</span>
+<span class="sd">            Defaults to None.  If None, the minimum yaw angle is set to the minimum</span>
+<span class="sd">            yaw angle in the dataset.</span>
+<span class="sd">        maximum_yaw_angle (float, optional): The maximum yaw angle in degrees.</span>
+<span class="sd">            Defaults to None.  If None, the maximum yaw angle is set to the maximum</span>
+<span class="sd">            yaw angle in the dataset.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        LinearNDInterpolator: An interpolant function which takes the inputs</span>
-<span class="sd">        (wind_directions, wind_speeds, turbulence_intensities), all of equal</span>
-<span class="sd">        dimensions, and returns the yaw angles for all turbines. This function</span>
-<span class="sd">        incorporates the ramp-up and ramp-down regions.</span>
+<span class="sd">            (wind_directions, wind_speeds, turbulence_intensities), all of equal</span>
+<span class="sd">            dimensions, and returns the yaw angles for all turbines. This function</span>
+<span class="sd">            incorporates the ramp-up and ramp-down regions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Load data and set up a linear interpolant</span>
     <span class="n">points</span> <span class="o">=</span> <span class="n">df_opt</span><span class="p">[[</span><span class="s2">&quot;wind_direction&quot;</span><span class="p">,</span> <span class="s2">&quot;wind_speed&quot;</span><span class="p">,</span> <span class="s2">&quot;turbulence_intensity&quot;</span><span class="p">]]</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">df_opt</span><span class="p">[</span><span class="s2">&quot;yaw_angles_opt&quot;</span><span class="p">])</span>

@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.utilities.energy_ratio_utilities</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="sd">&quot;&quot;&quot;Utility functions for calculating energy ratios.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -553,15 +554,14 @@ document.write(`
     <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">edges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">Expr</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Bins the values in the specified column according to the given edges.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bins the values in the specified column according to the given edges.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    col_name (str): The name of the column to bin.</span>
-<span class="sd">    edges (array-like): The edges of the bins. Values will be placed into the bin</span>
-<span class="sd">                        whose left edge is the largest edge less than or equal to</span>
-<span class="sd">                        the value, and whose right edge is the smallest edge</span>
-<span class="sd">                        greater than the value.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        col_name (str): The name of the column to bin.</span>
+<span class="sd">        edges (array-like): The edges of the bins. Values will be placed into the bin</span>
+<span class="sd">                            whose left edge is the largest edge less than or equal to</span>
+<span class="sd">                            the value, and whose right edge is the smallest edge</span>
+<span class="sd">                            greater than the value.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">    expression: An expression object that can be used to bin the column.</span>
@@ -585,20 +585,19 @@ document.write(`
     <span class="n">bin_col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">edges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Bins the values in the specified column of a Polars DataFrame according to the given edges.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bins the values in the specified column of a Polars DataFrame according to the given edges.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
-<span class="sd">    col_name (str): The name of the column to bin.</span>
-<span class="sd">    bin_col_name (str): The name to give the new column containing the bin labels.</span>
-<span class="sd">    edges (array-like): The edges of the bins. Values will be placed into the bin</span>
-<span class="sd">                        whose left edge is the largest edge less than or equal to</span>
-<span class="sd">                        the value, and whose right edge is the smallest edge</span>
-<span class="sd">                        greater than the value.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">        col_name (str): The name of the column to bin.</span>
+<span class="sd">        bin_col_name (str): The name to give the new column containing the bin labels.</span>
+<span class="sd">        edges (array-like): The edges of the bins. Values will be placed into the bin</span>
+<span class="sd">                            whose left edge is the largest edge less than or equal to</span>
+<span class="sd">                            the value, and whose right edge is the smallest edge</span>
+<span class="sd">                            greater than the value.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional column containing the bin labels.</span>
+<span class="sd">        pl.DataFrame: A new Polars DataFrame with an additional column containing the bin labels.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
         <span class="n">cut</span><span class="p">(</span><span class="n">col_name</span><span class="o">=</span><span class="n">col_name</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">bin_col_name</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">df_</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
@@ -609,19 +608,16 @@ document.write(`
 <div class="viewcode-block" id="add_ws">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws.html#flasc.utilities.energy_ratio_utilities.add_ws">[docs]</a>
 <span class="k">def</span> <span class="nf">add_ws</span><span class="p">(</span><span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add the ws column to a dataframe, given which columns to average over</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the ws column to a dataframe, given which columns to average over.</span>
 
-
-<span class="sd">    Parameters:</span>
-<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
-<span class="sd">    ws_cols (list(str)): The name of the columns to average across.</span>
-<span class="sd">    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">        ws_cols (list(str)): The name of the columns to average across.</span>
+<span class="sd">        remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional ws column</span>
+<span class="sd">        pl.DataFrame: A new Polars DataFrame with an additional ws column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">df_with_mean_ws</span> <span class="o">=</span> <span class="p">(</span>
         <span class="c1"># df_.select(pl.exclude(&#39;ws_bin&#39;)) # In case ws_bin already exists</span>
         <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
@@ -651,27 +647,26 @@ document.write(`
     <span class="n">edges</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add the ws_bin column to a dataframe, given which columns to average over</span>
-<span class="sd">    and the step sizes to use</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the ws_bin column to a dataframe.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
-<span class="sd">    ws_cols (list(str)): The name of the columns to average across.</span>
-<span class="sd">    ws_step (float): Step size for binning</span>
-<span class="sd">    ws_min (float): Minimum wind speed</span>
-<span class="sd">    ws_max (float): Maximum wind speed</span>
-<span class="sd">    edges (array-like): The edges of the bins. Values will be placed into the bin</span>
-<span class="sd">                        whose left edge is the largest edge less than or equal to</span>
-<span class="sd">                        the value, and whose right edge is the smallest edge</span>
-<span class="sd">                        greater than the value.  Defaults to None, in which case</span>
-<span class="sd">                        the edges are generated using ws_step, ws_min, and ws_max.</span>
-<span class="sd">    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)</span>
+<span class="sd">    Given which columns to average over and the step sizes to use</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">        ws_cols (list(str)): The name of the columns to average across.</span>
+<span class="sd">        ws_step (float): Step size for binning</span>
+<span class="sd">        ws_min (float): Minimum wind speed</span>
+<span class="sd">        ws_max (float): Maximum wind speed</span>
+<span class="sd">        edges (array-like): The edges of the bins. Values will be placed into the bin</span>
+<span class="sd">                            whose left edge is the largest edge less than or equal to</span>
+<span class="sd">                            the value, and whose right edge is the smallest edge</span>
+<span class="sd">                            greater than the value.  Defaults to None, in which case</span>
+<span class="sd">                            the edges are generated using ws_step, ws_min, and ws_max.</span>
+<span class="sd">        remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</span>
+<span class="sd">        pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">if</span> <span class="n">edges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ws_min</span><span class="p">,</span> <span class="n">ws_max</span> <span class="o">+</span> <span class="n">ws_step</span><span class="p">,</span> <span class="n">ws_step</span><span class="p">)</span>
 
@@ -694,19 +689,16 @@ document.write(`
 <div class="viewcode-block" id="add_wd">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd.html#flasc.utilities.energy_ratio_utilities.add_wd">[docs]</a>
 <span class="k">def</span> <span class="nf">add_wd</span><span class="p">(</span><span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add the wd column to a dataframe, given which columns to average over</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the wd column to a dataframe, given which columns to average over.</span>
 
-
-<span class="sd">    Parameters:</span>
-<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
-<span class="sd">    wd_cols (list(str)): The name of the columns to average across.</span>
-<span class="sd">    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">        wd_cols (list(str)): The name of the columns to average across.</span>
+<span class="sd">        remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional wd column</span>
+<span class="sd">        pl.DataFrame: A new Polars DataFrame with an additional wd column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Gather up intermediate column names and final column names</span>
     <span class="n">wd_cols_cos</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="s2">&quot;_cos&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">wd_cols</span><span class="p">]</span>
     <span class="n">wd_cols_sin</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="s2">&quot;_sin&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">wd_cols</span><span class="p">]</span>
@@ -764,27 +756,27 @@ document.write(`
     <span class="n">edges</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">remove_all_nulls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add the wd_bin column to a dataframe, given which columns to average over</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the wd_bin column to a dataframe.</span>
+
+<span class="sd">    Given which columns to average over</span>
 <span class="sd">    and the step sizes to use</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
-<span class="sd">    wd_cols (list(str)): The name of the columns to average across.</span>
-<span class="sd">    wd_step (float): Step size for binning</span>
-<span class="sd">    wd_min (float): Minimum wind direction</span>
-<span class="sd">    wd_max (float): Maximum wind direction</span>
-<span class="sd">    edges (array-like): The edges of the bins. Values will be placed into the bin</span>
-<span class="sd">                    whose left edge is the largest edge less than or equal to</span>
-<span class="sd">                    the value, and whose right edge is the smallest edge</span>
-<span class="sd">                    greater than the value.  Defaults to None, in which case</span>
-<span class="sd">                    the edges are generated using ws_step, ws_min, and ws_max.</span>
-<span class="sd">    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">        wd_cols (list(str)): The name of the columns to average across.</span>
+<span class="sd">        wd_step (float): Step size for binning</span>
+<span class="sd">        wd_min (float): Minimum wind direction</span>
+<span class="sd">        wd_max (float): Maximum wind direction</span>
+<span class="sd">        edges (array-like): The edges of the bins. Values will be placed into the bin</span>
+<span class="sd">                        whose left edge is the largest edge less than or equal to</span>
+<span class="sd">                        the value, and whose right edge is the smallest edge</span>
+<span class="sd">                        greater than the value.  Defaults to None, in which case</span>
+<span class="sd">                        the edges are generated using ws_step, ws_min, and ws_max.</span>
+<span class="sd">        remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</span>
+<span class="sd">        pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">if</span> <span class="n">edges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">wd_min</span><span class="p">,</span> <span class="n">wd_max</span> <span class="o">+</span> <span class="n">wd_step</span><span class="p">,</span> <span class="n">wd_step</span><span class="p">)</span>
 
@@ -811,6 +803,15 @@ document.write(`
     <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">test_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the pow_test column to a dataframe, given which columns to average over.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">        test_cols (list(str)): The name of the columns to average across.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pl.DataFrame: A new Polars DataFrame with an additional pow_test column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pow_test</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">concat_list</span><span class="p">(</span><span class="n">test_cols</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span></div>
 
 
@@ -818,6 +819,15 @@ document.write(`
 <div class="viewcode-block" id="add_power_ref">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_ref.html#flasc.utilities.energy_ratio_utilities.add_power_ref">[docs]</a>
 <span class="k">def</span> <span class="nf">add_power_ref</span><span class="p">(</span><span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ref_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the pow_ref column to a dataframe, given which columns to average over.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.</span>
+<span class="sd">        ref_cols (list(str)): The name of the columns to average across.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pl.DataFrame: A new Polars DataFrame with an additional pow_ref column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">df_</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pow_ref</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">concat_list</span><span class="p">(</span><span class="n">ref_cols</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span></div>
 
 
@@ -825,9 +835,10 @@ document.write(`
 <div class="viewcode-block" id="add_reflected_rows">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_reflected_rows.html#flasc.utilities.energy_ratio_utilities.add_reflected_rows">[docs]</a>
 <span class="k">def</span> <span class="nf">add_reflected_rows</span><span class="p">(</span><span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">edges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> <span class="n">overlap_distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Adds rows to a datrame with where the wind direction is</span>
-<span class="sd">    reflected around the neearest edge if within overlap_distance</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add reflected rows to a dataframe.</span>
+
+<span class="sd">    Adds rows to a dataframe with where the wind direction is</span>
+<span class="sd">    reflected around the nearest edge if within overlap_distance</span>
 
 <span class="sd">    Given a wind direction DataFrame `df_`, this function adds</span>
 <span class="sd">    reflected rows to the DataFrame such that each wind direction</span>
@@ -841,23 +852,20 @@ document.write(`
 
 <span class="sd">    This function enables overlapping bins in the energy ratio functions</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    df_ : polars.DataFrame</span>
-<span class="sd">        The DataFrame to add reflected rows to.</span>
-<span class="sd">    edges : numpy.ndarray</span>
-<span class="sd">        An array of wind direction edges to use for reflection.</span>
-<span class="sd">        (Should be same as used in energy ratio)</span>
-<span class="sd">    overlap_distance : float</span>
-<span class="sd">        The maximum distance between a wind direction and an edge</span>
-<span class="sd">        for the wind direction to be considered overlapping.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        df_ : polars.DataFrame</span>
+<span class="sd">            The DataFrame to add reflected rows to.</span>
+<span class="sd">        edges : numpy.ndarray</span>
+<span class="sd">            An array of wind direction edges to use for reflection.</span>
+<span class="sd">            (Should be same as used in energy ratio)</span>
+<span class="sd">        overlap_distance : float</span>
+<span class="sd">            The maximum distance between a wind direction and an edge</span>
+<span class="sd">            for the wind direction to be considered overlapping.</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    polars.DataFrame</span>
-<span class="sd">        A new DataFrame with the original rows and the added reflected rows.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        polars.DataFrame</span>
+<span class="sd">            A new DataFrame with the original rows and the added reflected rows.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">df_add</span> <span class="o">=</span> <span class="n">df_</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
     <span class="n">wd</span> <span class="o">=</span> <span class="n">df_add</span><span class="p">[</span><span class="s2">&quot;wd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">diff_matrix</span> <span class="o">=</span> <span class="n">wd</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges</span>
@@ -884,7 +892,8 @@ document.write(`
     <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter dataframe for ALL nulls.</span>
+
 <span class="sd">    Filter data by requiring ALL values of ref, test, ws, and wd to be valid</span>
 <span class="sd">    numbers.</span>
 
@@ -914,7 +923,8 @@ document.write(`
     <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter dataframe for ANY nulls.</span>
+
 <span class="sd">    Filter data by requiring ANY of ref, ANY of test, ANY of ws, and ANY of wd</span>
 <span class="sd">    to be a valid number.</span>
 
@@ -966,11 +976,40 @@ document.write(`
     <span class="n">percentiles</span><span class="p">,</span>
     <span class="n">remove_all_nulls</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check the inputs to compute_energy_ratio.</span>
+
 <span class="sd">    Check inputs to compute_energy_ratio. Inputs reflect inputs to compute_energy_ratio,</span>
 <span class="sd">    with exception of df_, which is passed directly instead of er_in.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    All the inputs of compute_energy_ratio are checked for validity. This function does not</span>
+<span class="sd">    check every input, although they are all accepted.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): The Polars DataFrame</span>
+<span class="sd">        ref_turbines (list): A list of the reference turbine columns</span>
+<span class="sd">        test_turbines (list): A list of the test turbine columns</span>
+<span class="sd">        wd_turbines (list): A list of the wind direction columns</span>
+<span class="sd">        ws_turbines (list): A list of the wind speed columns</span>
+<span class="sd">        use_predefined_ref (bool): Whether to use predefined reference turbines</span>
+<span class="sd">        use_predefined_wd (bool): Whether to use predefined wind direction turbines</span>
+<span class="sd">        use_predefined_ws (bool): Whether to use predefined wind speed turbines</span>
+<span class="sd">        wd_step (float): Step size for binning wind direction</span>
+<span class="sd">        wd_min (float): Minimum wind direction</span>
+<span class="sd">        wd_max (float): Maximum wind direction</span>
+<span class="sd">        ws_step (float): Step size for binning wind speed</span>
+<span class="sd">        ws_min (float): Minimum wind speed</span>
+<span class="sd">        ws_max (float): Maximum wind speed</span>
+<span class="sd">        bin_cols_in (list): A list of columns to bin</span>
+<span class="sd">        weight_by (str): A string indicating how to weight the bins</span>
+<span class="sd">        df_freq (pl.DataFrame): A DataFrame containing frequency data</span>
+<span class="sd">        wd_bin_overlap_radius (float): The radius for overlapping wind direction bins</span>
+<span class="sd">        uplift_pairs (list): A list of uplift pairs</span>
+<span class="sd">        uplift_names (list): A list of uplift names</span>
+<span class="sd">        uplift_absolute (bool): Whether to use absolute uplift</span>
+<span class="sd">        N (int): Number of bootstrapping iterations</span>
+<span class="sd">        percentiles (list): A list of percentiles to calculate from bootstrap</span>
+<span class="sd">        remove_all_nulls (bool): Whether to remove all nulls</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check that the inputs are valid</span>
     <span class="c1"># If use_predefined_ref is True, df_ must have a column named &#39;pow_ref&#39;</span>
     <span class="k">if</span> <span class="n">use_predefined_ref</span><span class="p">:</span>
@@ -1056,8 +1095,7 @@ document.write(`
     <span class="n">bin_cols_without_df_name</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">num_df</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Bin and aggregate a DataFrame based on wind direction and wind speed parameters.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bin and aggregate a DataFrame based on wind direction and wind speed parameters.</span>
 
 <span class="sd">    This function takes a Polars DataFrame (df_) and performs</span>
 <span class="sd">    binning and aggregation operations based on</span>
@@ -1090,7 +1128,6 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        DataFrame: The resulting Polars DataFrame with aggregated statistics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># If wd_bin_overlap_radius is not zero, add reflected rows</span>
     <span class="k">if</span> <span class="n">wd_bin_overlap_radius</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
         <span class="c1"># Need to obtain the wd column now rather than during binning</span>
@@ -1133,7 +1170,8 @@ document.write(`
     <span class="n">bin_cols_without_df_name</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">weight_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add weights to DataFrame bins.</span>
+
 <span class="sd">    Add weights to DataFrame bins based on either frequency counts or</span>
 <span class="sd">    the provided frequency table df_freq_pl.</span>
 

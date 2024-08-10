@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,11 +616,36 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift">
 <span class="sig-prename descclassname"><span class="pre">flasc.model_fitting.floris_tuning.</span></span><span class="sig-name descname"><span class="pre">sweep_deflection_parameter_for_total_uplift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_candidates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_scada_baseline_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_scada_wakesteering_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fm_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw_angles_baseline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw_angles_wakesteering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">360.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_cols_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['wd_bin',</span> <span class="pre">'ws_bin']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'min'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_all_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/floris_tuning.html#sweep_deflection_parameter_for_total_uplift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift" title="Link to this definition">#</a></dt>
-<dd><p>Sweep values of the deflection parameter in FLORIS and compare to SCADA
-data with respect to overall uplift</p>
+<dd><p>Sweep values of the deflection parameter in FLORIS and compare to SCADA.</p>
+<p>Comparison is made wrt overall uplift.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ws_step</strong> (<em>float</em>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameter</strong> (<em>str</em>) -- The parameter to sweep</p></li>
+<li><p><strong>value_candidates</strong> (<em>list</em>) -- The values to sweep</p></li>
+<li><p><strong>df_scada_baseline_in</strong> (<em>DataFrame</em>) -- The baseline SCADA data</p></li>
+<li><p><strong>df_scada_wakesteering_in</strong> (<em>DataFrame</em>) -- The wake steering SCADA data</p></li>
+<li><p><strong>fm_in</strong> (<em>floris.tools.Floris</em>) -- The FLORIS model</p></li>
+<li><p><strong>ref_turbines</strong> (<em>list</em>) -- The reference turbines</p></li>
+<li><p><strong>test_turbines</strong> (<em>list</em>) -- The test turbines</p></li>
+<li><p><strong>yaw_angles_baseline</strong> (<em>np.ndarray</em>) -- The yaw angles for the baseline</p></li>
+<li><p><strong>yaw_angles_wakesteering</strong> (<em>np.ndarray</em>) -- The yaw angles for the wake steering</p></li>
+<li><p><strong>wd_step</strong> (<em>float</em>) -- The wind direction step</p></li>
+<li><p><strong>wd_min</strong> (<em>float</em>) -- The minimum wind direction</p></li>
+<li><p><strong>wd_max</strong> (<em>float</em>) -- The maximum wind direction</p></li>
+<li><p><strong>ws_step</strong> (<em>float</em>) -- The wind speed step</p></li>
+<li><p><strong>ws_min</strong> (<em>float</em>) -- The minimum wind speed</p></li>
+<li><p><strong>ws_max</strong> (<em>float</em>) -- The maximum wind speed</p></li>
+<li><p><strong>bin_cols_in</strong> (<em>list</em>) -- The bin columns</p></li>
+<li><p><strong>weight_by</strong> (<em>str</em>) -- The weight method.  Can be 'min' or 'sum'.
+Default is 'min'.</p></li>
+<li><p><strong>df_freq</strong> (<em>DataFrame</em>) -- The frequency data</p></li>
+<li><p><strong>remove_all_nulls</strong> (<em>bool</em>) -- Remove all nulls.  Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A typle (np.ndarray, np.ndarray) where the first element is the FLORIS total uplifts
+and the second element is the SCADA total uplifts</p>
 </dd>
 </dl>
 </dd></dl>

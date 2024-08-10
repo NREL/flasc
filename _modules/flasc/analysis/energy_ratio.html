@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.analysis.energy_ratio</h1><div class="highlight"><pre>
-<span></span><span class="c1"># This is a work in progress as we try to synthesize ideas from the</span>
+<span></span><span class="sd">&quot;&quot;&quot;Energy ratio analysis module.&quot;&quot;&quot;</span>
+
+<span class="c1"># This is a work in progress as we try to synthesize ideas from the</span>
 <span class="c1"># table based methods and energy ratios back into one thing,</span>
 <span class="c1"># some ideas we&#39;re incorporating:</span>
 
@@ -584,8 +585,7 @@ document.write(`
     <span class="n">uplift_absolute</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">remove_all_nulls</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute the energy ratio between two sets of turbines.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the energy ratio between two sets of turbines.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.</span>
@@ -604,9 +604,9 @@ document.write(`
 <span class="sd">            the wind speed and wind direction bins.</span>
 <span class="sd">        weight_by (str): How to weight the energy ratio, options are &#39;min&#39;, or &#39;sum&#39;.  &#39;min&#39; means</span>
 <span class="sd">            the minimum count across the dataframes is used to weight the energy ratio.</span>
-<span class="sd">            &#39;sum&#39; means the sum of the counts</span>
-<span class="sd">            across the dataframes is used to weight the energy ratio.   Defaults to &#39;min&#39;.</span>
-<span class="sd">        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights</span>
+<span class="sd">            &#39;sum&#39; means the sum of the counts across the dataframes is</span>
+<span class="sd">             used to weight the energy ratio.  Defaults to &#39;min&#39;.</span>
+<span class="sd">        df_freq_pl (pl.Dataframe): Polars dataframe of pre-provided per bin weights</span>
 <span class="sd">        wd_bin_overlap_radius (float): The distance in degrees one wd bin</span>
 <span class="sd">            overlaps into the next, must be</span>
 <span class="sd">            less or equal to half the value of wd_step</span>
@@ -625,10 +625,10 @@ document.write(`
 <span class="sd">            must be available to compute the bin. Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin</span>
-<span class="sd">        pl.DataFrame: A dataframe containing the weights each wind direction and wind speed bin</span>
+<span class="sd">        A tuple (pl.DataFrame, pl.DataFrame): A dataframe containing the energy ratio for each wind</span>
+<span class="sd">            direction bin and a dataframe containing the weights each wind direction</span>
+<span class="sd">            and wind speed bin</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Get the number of dataframes</span>
     <span class="n">num_df</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_names</span><span class="p">)</span>
 
@@ -749,8 +749,7 @@ document.write(`
     <span class="n">percentiles</span><span class="o">=</span><span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">95.0</span><span class="p">],</span>
     <span class="n">remove_all_nulls</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute the energy ratio between two sets of turbines with bootstrapping</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the energy ratio between two sets of turbines with bootstrapping.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        er_in (EnergyRatioInput): An EnergyRatioInput object containing</span>
@@ -771,7 +770,7 @@ document.write(`
 <span class="sd">            the minimum count across the dataframes is used to weight the energy ratio.</span>
 <span class="sd">            &#39;sum&#39; means the sum of the counts</span>
 <span class="sd">            across the dataframes is used to weight the energy ratio.</span>
-<span class="sd">        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights</span>
+<span class="sd">        df_freq_pl (pl.Dataframe): Polars dataframe of pre-provided per bin weights</span>
 <span class="sd">        wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps</span>
 <span class="sd">            into the next, must be</span>
 <span class="sd">            less or equal to half the value of wd_step</span>
@@ -797,7 +796,6 @@ document.write(`
 <span class="sd">        pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Otherwise run the function N times and concatenate the results to compute statistics</span>
     <span class="n">er_single_outs</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">_compute_energy_ratio_single</span><span class="p">(</span>
@@ -871,8 +869,7 @@ document.write(`
     <span class="n">percentiles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">remove_all_nulls</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnergyRatioOutput</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute the energy ratio between two sets of turbines with bootstrapping</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the energy ratio between two sets of turbines with bootstrapping.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        er_in (EnergyRatioInput): An EnergyRatioInput object containing</span>
@@ -933,7 +930,6 @@ document.write(`
 <span class="sd">            ratio between the two sets of turbines.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Get the polars dataframe from within the er_in</span>
     <span class="n">df_</span> <span class="o">=</span> <span class="n">er_in</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
 

@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -632,7 +631,6 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates"><code class="docutils literal notranslate"><span class="pre">df_sort_and_find_duplicates()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.is_day_or_night"><code class="docutils literal notranslate"><span class="pre">is_day_or_night()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color"><code class="docutils literal notranslate"><span class="pre">plot_sun_altitude_with_day_night_color()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.make_df_wide"><code class="docutils literal notranslate"><span class="pre">make_df_wide()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates"><code class="docutils literal notranslate"><span class="pre">df_sort_and_fix_duplicates()</span></code></a></li>
 </ul>
             </nav>
@@ -647,95 +645,93 @@ document.write(`
                   
   <section id="module-flasc.data_processing.dataframe_manipulations">
 <span id="flasc-data-processing-dataframe-manipulations"></span><h1>flasc.data_processing.dataframe_manipulations<a class="headerlink" href="#module-flasc.data_processing.dataframe_manipulations" title="Link to this heading">#</a></h1>
+<p>Module containing methods for FLASC dataframe manipulations.</p>
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_drop_nan_rows.html#flasc.data_processing.dataframe_manipulations.df_drop_nan_rows" title="flasc.data_processing.dataframe_manipulations.df_drop_nan_rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_drop_nan_rows</span></code></a></p></td>
-<td><p>Remove entries in dataframe where all rows (besides 'time') have nan values.</p></td>
+<td><p>Drop all-nan rows.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing.html#flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing" title="flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_find_and_fill_data_gaps_with_missing</span></code></a></p></td>
-<td><p>This function takes a pd.DataFrame object and look for large jumps in</p></td>
+<td><p>Find and fill data gap and mark as missing data with NaN.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_reduce_precision.html#flasc.data_processing.dataframe_manipulations.df_reduce_precision" title="flasc.data_processing.dataframe_manipulations.df_reduce_precision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_reduce_precision</span></code></a></p></td>
-<td><p>Reduce the precision in dataframes from float64 to float32, or possibly even further to int32, int16, int8 or even bool.</p></td>
+<td><p>Reduce dataframe precision.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates.html#flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates" title="flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_sort_and_find_duplicates</span></code></a></p></td>
 <td><p>This function sorts the dataframe and finds rows with equal time index.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates.html#flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates" title="flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_sort_and_fix_duplicates</span></code></a></p></td>
-<td><p>This function sorts the dataframe and addresses duplicate rows (i.e., rows in which the time index is equal).</p></td>
+<td><p>Sort dataframe and fill duplicates.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_ti.html#flasc.data_processing.dataframe_manipulations.filter_df_by_ti" title="flasc.data_processing.dataframe_manipulations.filter_df_by_ti"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_df_by_ti</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Filter a dataframe by turbulence intensity range.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_wd.html#flasc.data_processing.dataframe_manipulations.filter_df_by_wd" title="flasc.data_processing.dataframe_manipulations.filter_df_by_wd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_df_by_wd</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Filter a dataframe by wind direction range.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_ws.html#flasc.data_processing.dataframe_manipulations.filter_df_by_ws" title="flasc.data_processing.dataframe_manipulations.filter_df_by_ws"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_df_by_ws</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Filter a dataframe by wind speed range.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html#flasc.data_processing.dataframe_manipulations.get_column_mean" title="flasc.data_processing.dataframe_manipulations.get_column_mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_column_mean</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Get the mean of a column for a list of turbines.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html#flasc.data_processing.dataframe_manipulations.get_num_turbines" title="flasc.data_processing.dataframe_manipulations.get_num_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_turbines</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Get the number of turbines in a dataframe.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html#flasc.data_processing.dataframe_manipulations.is_day_or_night" title="flasc.data_processing.dataframe_manipulations.is_day_or_night"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_day_or_night</span></code></a></p></td>
-<td><p>Determine whether it's day or night for a given set of coordinates and UTC timestamp in a DataFrame.</p></td>
+<td><p>Determine night or day in dataframe.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html#flasc.data_processing.dataframe_manipulations.make_df_wide" title="flasc.data_processing.dataframe_manipulations.make_df_wide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_df_wide</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html#flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color" title="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_sun_altitude_with_day_night_color</span></code></a></p></td>
+<td><p>Plot sun altitude with day-night color differentiation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html#flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color" title="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_sun_altitude_with_day_night_color</span></code></a></p></td>
-<td><p>Plot Sun Altitude with Day-Night Color Differentiation.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_pow_ref_by_n_closest_upstream_turbines</span></code></a></p></td>
+<td><p>Add pow_ref column using N-nearest upstream turbines.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_pow_ref_by_n_closest_upstream_turbines</span></code></a></p></td>
-<td><p>Add a column called 'pow_ref' to your dataframe, which is the mean of the columns pow_%03d for the 5 closest turbines that are upstream of the turbine of interest [turb_no].</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines" title="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_pow_ref_by_turbines</span></code></a></p></td>
+<td><p>Add power reference column by list of turbines.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines" title="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_pow_ref_by_turbines</span></code></a></p></td>
-<td><p>Add a column called 'pow_ref' in your dataframe with value equal to the averaged turbulence intensity measurements of all the turbines listed in turbine_numbers.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_pow_ref_by_upstream_turbines</span></code></a></p></td>
+<td><p>Add pow_ref column using upstream turbines.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_pow_ref_by_upstream_turbines</span></code></a></p></td>
-<td><p>Add a column called 'pow_ref' in your dataframe with value equal to the averaged power measurements of all the turbines upstream, excluding the turbines listed in exclude_turbs.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius" title="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_pow_ref_by_upstream_turbines_in_radius</span></code></a></p></td>
+<td><p>Add pow_ref column using upstream turbines within a radius.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius" title="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_pow_ref_by_upstream_turbines_in_radius</span></code></a></p></td>
-<td><p>Add a column called 'pow_ref' to your dataframe, which is the mean of the columns pow_%03d for turbines that are upstream and also within radius [max_radius] of the turbine of interest [turb_no].</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html#flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines" title="flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ti_by_all_turbines</span></code></a></p></td>
+<td><p>Add TI column using all turbines.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html#flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines" title="flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ti_by_all_turbines</span></code></a></p></td>
-<td><p>Add a column called 'ti' in your dataframe with value equal to the averaged turbulence intensity measurements of all turbines.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_ti_by_turbines" title="flasc.data_processing.dataframe_manipulations.set_ti_by_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ti_by_turbines</span></code></a></p></td>
+<td><p>Add TI column by list of turbines.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_ti_by_turbines" title="flasc.data_processing.dataframe_manipulations.set_ti_by_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ti_by_turbines</span></code></a></p></td>
-<td><p>Add a column called 'ti' in your dataframe with value equal to the averaged turbulence intensity measurements of all the turbines listed in turbine_numbers.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ti_by_upstream_turbines</span></code></a></p></td>
+<td><p>Add TI column using upstream turbines.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ti_by_upstream_turbines</span></code></a></p></td>
-<td><p>Add a column called 'ti' in your dataframe with value equal to the averaged turbulence intensity measurements of all the turbines upstream, excluding the turbines listed in exclude_turbs.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius" title="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ti_by_upstream_turbines_in_radius</span></code></a></p></td>
+<td><p>Add TI column by upstream turbines within a radius.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius" title="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ti_by_upstream_turbines_in_radius</span></code></a></p></td>
-<td><p>Add a column called 'ti' to your dataframe, which is the mean of the columns ti_%03d for turbines that are upstream and also within radius [max_radius] of the turbine of interest [turb_no].</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html#flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines" title="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_wd_by_all_turbines</span></code></a></p></td>
+<td><p>Add a wind direction column using all turbines.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html#flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines" title="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_wd_by_all_turbines</span></code></a></p></td>
-<td><p>Add a column called 'wd' in your dataframe with value equal to the circular-averaged wind direction measurements of all turbines.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html#flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine" title="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_wd_by_radius_from_turbine</span></code></a></p></td>
+<td><p>Add wind direction column by turbines in radius.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html#flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine" title="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_wd_by_radius_from_turbine</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_wd_by_turbines" title="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_wd_by_turbines</span></code></a></p></td>
+<td><p>Add WD column by list of turbines.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_wd_by_turbines" title="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_wd_by_turbines</span></code></a></p></td>
-<td><p>Add a column called 'wd' in your dataframe with value equal to the circular-averaged wind direction measurements of all the turbines in turbine_numbers.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html#flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines" title="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_all_turbines</span></code></a></p></td>
+<td><p>Add ws column by all turbines.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html#flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines" title="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_all_turbines</span></code></a></p></td>
-<td><p>Add a column called 'ws' in your dataframe with value equal to the circular-averaged wind direction measurements of all turbines.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_n_closest_upstream_turbines</span></code></a></p></td>
+<td><p>Add wind speed column by N closest upstream turbines.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_n_closest_upstream_turbines</span></code></a></p></td>
-<td><p>Add a column called 'pow_ref' to your dataframe, which is the mean of the columns pow_%03d for the 5 closest turbines that are upstream of the turbine of interest [turb_no].</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_ws_by_turbines" title="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_turbines</span></code></a></p></td>
+<td><p>Add ws column by list of turbines.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_ws_by_turbines" title="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_turbines</span></code></a></p></td>
-<td><p>Add a column called 'ws' in your dataframe with value equal to the circular-averaged wind direction measurements of all the turbines in turbine_numbers.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_upstream_turbines</span></code></a></p></td>
+<td><p>Add wind speed column using upstream turbines.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines" title="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_upstream_turbines</span></code></a></p></td>
-<td><p>Add a column called 'ws' in your dataframe with value equal to the averaged wind speed measurements of all the turbines upstream, excluding the turbines listed in exclude_turbs.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html#flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius" title="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_upstream_turbines_in_radius</span></code></a></p></td>
-<td><p>Add a column called 'ws' to your dataframe, which is the mean of the columns pow_%03d for turbines that are upstream and also within radius [max_radius] of the turbine of interest [turb_no].</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html#flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius" title="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ws_by_upstream_turbines_in_radius</span></code></a></p></td>
+<td><p>Add wind speed column using in-radius upstream turbines.</p></td>
 </tr>
 </tbody>
 </table>
@@ -743,27 +739,102 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.filter_df_by_ws">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">filter_df_by_ws</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_range</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#filter_df_by_ws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.filter_df_by_ws" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Filter a dataframe by wind speed range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements.</p></li>
+<li><p><strong>ws_range</strong> (<em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) -- Wind speed range [lower bound, upper bound].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filtered dataframe.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.filter_df_by_wd">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">filter_df_by_wd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_range</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#filter_df_by_wd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.filter_df_by_wd" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Filter a dataframe by wind direction range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements.</p></li>
+<li><p><strong>wd_range</strong> (<em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) -- Wind direction range [lower bound, upper bound].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filtered dataframe.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.filter_df_by_ti">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">filter_df_by_ti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti_range</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#filter_df_by_ti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.filter_df_by_ti" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Filter a dataframe by turbulence intensity range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements.</p></li>
+<li><p><strong>ti_range</strong> (<em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) -- Turbulence intensity range [lower bound, upper bound].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Filtered dataframe.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.get_num_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">get_num_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#get_num_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.get_num_turbines" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Get the number of turbines in a dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with turbine data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of turbines in the dataframe</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.get_column_mean">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">get_column_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circular_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#get_column_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.get_column_mean" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Get the mean of a column for a list of turbines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Dataframe with measurements.</p></li>
+<li><p><strong>col_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) -- Column prefix to use. Defaults to &quot;pow&quot;.</p></li>
+<li><p><strong>turbine_list</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em><em>, </em><em>optional</em>) -- List of turbine numbers to use.
+If None, all turbines are used.  Defaults to None.</p></li>
+<li><p><strong>circular_mean</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Use circular mean. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mean of the column for the specified turbines.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations._set_col_by_turbines">
@@ -788,34 +859,35 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations._set_col_by_upstream_turbines_in_radius">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">_set_col_by_upstream_turbines_in_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turb_no</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circular_mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_itself</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#_set_col_by_upstream_turbines_in_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations._set_col_by_upstream_turbines_in_radius" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called [col_out] to your dataframe, which is the
+<dd><p>Add a column of averaged upstream turbine values.</p>
+<p>Add a column called [col_out] to your dataframe, which is the
 mean of the columns pow_%03d for turbines that are upstream and
 also within radius [max_radius] of the turbine of interest
 [turb_no].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>turb_no</strong> (<em>[</em><em>int</em><em>]</em>) -- Turbine number from which the radius should be</p></li>
-<li><p><strong>calculated.</strong></p></li>
+<li><p><strong>col_out</strong> (<em>str</em>) -- Column name to be added to the dataframe.</p></li>
+<li><p><strong>col_prefix</strong> (<em>str</em>) -- Column prefix to use.</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.DataFrame</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+turb_no (int): Turbine number from which the radius should be
+calculated.</p></li>
+<li><p><strong>turb_no</strong> (<em>int</em>) -- Turbine number from which the radius should be</p></li>
 <li><p><strong>x_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing x locations of turbines.</p></li>
 <li><p><strong>y_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing y locations of turbines.</p></li>
-<li><p><strong>max_radius</strong> (<em>[</em><em>float</em><em>]</em>) -- Maximum radius for the upstream turbines</p></li>
-<li><p><strong>the</strong> (<em>until which they are still considered as relevant/used for</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>calculation</em><em> of </em><em>the averaged column</em>)</p></li>
-<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine</p></li>
-<li><p><strong>Defaults</strong> (<em>turb_no in the determination</em><em> of </em><em>the averaged column quantity.</em>)</p></li>
-<li><p><strong>False.</strong> (<em>to</em>)</p></li>
+<li><p><strong>max_radius</strong> (<em>float</em>) -- Maximum radius for the upstream turbines
+until which they are still considered as relevant/used for the
+calculation of the averaged column quantity.</p></li>
+<li><p><strong>circular_mean</strong> (<em>bool</em>) -- Use circular mean.  Defaults to False.</p></li>
+<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine
+turb_no in the determination of the averaged column quantity. Defaults
+to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -823,7 +895,7 @@ also within radius [max_radius] of the turbine of interest
 plus the additional column called [col_ref].</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>df (pd.Dataframe)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -831,29 +903,29 @@ plus the additional column called [col_ref].</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_wd_by_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_numbers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_wd_by_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_wd_by_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'wd' in your dataframe with value equal
+<dd><p>Add WD column by list of turbines.</p>
+<p>Add a column called 'wd' in your dataframe with value equal
 to the circular-averaged wind direction measurements of all
 the turbines in turbine_numbers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that</p></li>
-<li><p><strong>average.</strong> (<em>should be used to calculate the column</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that
+should be used to calculate the column average.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'wd'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'wd'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>df (pd.DataFrame)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -861,27 +933,25 @@ plus the additional column called 'wd'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_wd_by_all_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_wd_by_all_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'wd' in your dataframe with value equal
+<dd><p>Add a wind direction column using all turbines.</p>
+<p>Add a column called 'wd' in your dataframe with value equal
 to the circular-averaged wind direction measurements of all
 turbines.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'wd'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'wd'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -889,18 +959,51 @@ plus the additional column called 'wd'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_wd_by_radius_from_turbine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turb_no</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_itself</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_wd_by_radius_from_turbine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Add wind direction column by turbines in radius.</p>
+<p>Add a column called 'wd' to your dataframe, which is the
+mean of the columns wd_%03d for turbines that are within radius
+[max_radius] of the turbine of interest [turb_no].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>turb_no</strong> (<em>int</em>) -- Turbine number from which the radius should be calculated.</p></li>
+<li><p><strong>x_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing x locations of turbines.</p></li>
+<li><p><strong>y_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing y locations of turbines.</p></li>
+<li><p><strong>max_radius</strong> (<em>float</em>) -- Maximum radius for the upstream turbines
+until which they are still considered as relevant/used for the
+calculation of the averaged column quantity.</p></li>
+<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine
+turb_no in the determination of the averaged column quantity. Defaults
+to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'wd'.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ws_by_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_numbers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ws_by_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ws' in your dataframe with value equal
-to the circular-averaged wind direction measurements of all
-the turbines in turbine_numbers.</p>
+<dd><p>Add ws column by list of turbines.</p>
+<p>Add a column called 'ws' in your dataframe with value equal
+to the mean wind speed measurements of all the turbines in
+turbine_numbers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe</p></li>
 <li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
 <li><p><strong>ws_%03d</strong></p></li>
 <li><p><strong>ti_%03d</strong></p></li>
@@ -916,7 +1019,7 @@ the turbines in turbine_numbers.</p>
 plus the additional column called 'ws'.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>df (pd.DataFrame)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -924,29 +1027,29 @@ plus the additional column called 'ws'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ws_by_all_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ws_by_all_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ws' in your dataframe with value equal
+<dd><p>Add ws column by all turbines.</p>
+<p>Add a column called 'ws' in your dataframe with value equal
 to the circular-averaged wind direction measurements of all
 turbines.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that</p></li>
-<li><p><strong>average.</strong> (<em>should be used to calculate the column</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that
+should be used to calculate the column average.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'ws'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'ws'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -954,34 +1057,37 @@ plus the additional column called 'ws'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ws_by_upstream_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_turbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ws_by_upstream_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ws' in your dataframe with value equal
+<dd><p>Add wind speed column using upstream turbines.</p>
+<p>Add a column called 'ws' in your dataframe with value equal
 to the averaged wind speed measurements of all the turbines
 upstream, excluding the turbines listed in exclude_turbs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>exclude_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- array-like variable containing</p></li>
-<li><p><strong>column</strong> (<em>turbine indices that should be excluded in determining the</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>mean</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.DataFrame</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+exclude_turbs ([list, array]): array-like variable containing
+turbine indices that should be excluded in determining the column
+mean quantity.</p></li>
+<li><p><strong>exclude_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- array-like variable containing
+turbine indices that should be excluded in determining the column
+mean quantity.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'ws'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'ws'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -989,34 +1095,32 @@ plus the additional column called 'ws'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ws_by_upstream_turbines_in_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turb_no</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_itself</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ws_by_upstream_turbines_in_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ws' to your dataframe, which is the
+<dd><p>Add wind speed column using in-radius upstream turbines.</p>
+<p>Add a column called 'ws' to your dataframe, which is the
 mean of the columns pow_%03d for turbines that are upstream and
 also within radius [max_radius] of the turbine of interest
 [turb_no].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>turb_no</strong> (<em>[</em><em>int</em><em>]</em>) -- Turbine number from which the radius should be</p></li>
-<li><p><strong>calculated.</strong></p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.DataFrame</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+turb_no (int): Turbine number from which the radius should be
+calculated.</p></li>
+<li><p><strong>turb_no</strong> (<em>int</em>) -- Turbine number from which the radius should be</p></li>
 <li><p><strong>x_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing x locations of turbines.</p></li>
 <li><p><strong>y_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing y locations of turbines.</p></li>
-<li><p><strong>max_radius</strong> (<em>[</em><em>float</em><em>]</em>) -- Maximum radius for the upstream turbines</p></li>
-<li><p><strong>the</strong> (<em>until which they are still considered as relevant/used for</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>calculation</em><em> of </em><em>the averaged column</em>)</p></li>
-<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine</p></li>
-<li><p><strong>Defaults</strong> (<em>turb_no in the determination</em><em> of </em><em>the averaged column quantity.</em>)</p></li>
-<li><p><strong>False.</strong> (<em>to</em>)</p></li>
+<li><p><strong>max_radius</strong> (<em>float</em>) -- Maximum radius for the upstream turbines
+until which they are still considered as relevant/used for the
+calculation of the averaged column quantity.</p></li>
+<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine
+turb_no in the determination of the averaged column quantity. Defaults
+to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1024,7 +1128,7 @@ also within radius [max_radius] of the turbine of interest
 plus the additional column called 'ws'.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1032,39 +1136,37 @@ plus the additional column called 'ws'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ws_by_n_closest_upstream_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turb_no</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_turbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ws_by_n_closest_upstream_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'pow_ref' to your dataframe, which is the
-mean of the columns pow_%03d for the 5 closest turbines that are
+<dd><p>Add wind speed column by N closest upstream turbines.</p>
+<p>Add a column called 'ws' to your dataframe, which is the
+mean of the columns ws_%03d for the N closest turbines that are
 upstream of the turbine of interest [turb_no].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>turb_no</strong> (<em>[</em><em>int</em><em>]</em>) -- Turbine number from which the radius should be</p></li>
-<li><p><strong>calculated.</strong></p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.DataFrame</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+turb_no (int): Turbine number from which the radius should be
+calculated.</p></li>
+<li><p><strong>turb_no</strong> (<em>int</em>) -- Turbine number from which the radius should be</p></li>
 <li><p><strong>x_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing x locations of turbines.</p></li>
 <li><p><strong>y_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing y locations of turbines.</p></li>
-<li><p><strong>max_radius</strong> (<em>[</em><em>float</em><em>]</em>) -- Maximum radius for the upstream turbines</p></li>
-<li><p><strong>the</strong> (<em>until which they are still considered as relevant/used for</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>calculation</em><em> of </em><em>the averaged column</em>)</p></li>
-<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine</p></li>
-<li><p><strong>Defaults</strong> (<em>turb_no in the determination</em><em> of </em><em>the averaged column quantity.</em>)</p></li>
-<li><p><strong>False.</strong> (<em>to</em>) -- <dl class="simple">
-<dt>Returns:</dt><dd><p>df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
+<li><p><strong>exclude_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- array-like variable containing
+turbine indices that should be excluded in determining the column
+mean quantity.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) -- Number of closest turbines to consider for the calculation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataframe which equals the inserted dataframe
 plus the additional column called 'pow_ref'.</p>
 </dd>
-</dl>
-</p></li>
-</ul>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1072,29 +1174,29 @@ plus the additional column called 'pow_ref'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ti_by_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ti_by_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_numbers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ti_by_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ti_by_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ti' in your dataframe with value equal
+<dd><p>Add TI column by list of turbines.</p>
+<p>Add a column called 'ti' in your dataframe with value equal
 to the averaged turbulence intensity measurements of all the
 turbines listed in turbine_numbers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that</p></li>
-<li><p><strong>average.</strong> (<em>should be used to calculate the column</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that
+should be used to calculate the column average.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'ti'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'ti'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1102,21 +1204,18 @@ plus the additional column called 'ti'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ti_by_all_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ti_by_all_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ti' in your dataframe with value equal
+<dd><p>Add TI column using all turbines.</p>
+<p>Add a column called 'ti' in your dataframe with value equal
 to the averaged turbulence intensity measurements of all
 turbines.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that</p></li>
-<li><p><strong>average.</strong> (<em>should be used to calculate the column</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that
+should be used to calculate the column average.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1124,7 +1223,7 @@ turbines.</p>
 plus the additional column called 'ti'.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>df (pd.Dataframe)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1132,34 +1231,37 @@ plus the additional column called 'ti'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ti_by_upstream_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_turbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ti_by_upstream_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ti' in your dataframe with value equal
+<dd><p>Add TI column using upstream turbines.</p>
+<p>Add a column called 'ti' in your dataframe with value equal
 to the averaged turbulence intensity measurements of all the turbines
 upstream, excluding the turbines listed in exclude_turbs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>exclude_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- array-like variable containing</p></li>
-<li><p><strong>column</strong> (<em>turbine indices that should be excluded in determining the</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>mean</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.Dataframe</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+exclude_turbs ([list, array]): array-like variable containing
+turbine indices that should be excluded in determining the column
+mean quantity.</p></li>
+<li><p><strong>exclude_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- array-like variable containing
+turbine indices that should be excluded in determining the column
+mean quantity.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'ti'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'ti'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1167,34 +1269,32 @@ plus the additional column called 'ti'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_ti_by_upstream_turbines_in_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turb_no</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_itself</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_ti_by_upstream_turbines_in_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'ti' to your dataframe, which is the
+<dd><p>Add TI column by upstream turbines within a radius.</p>
+<p>Add a column called 'ti' to your dataframe, which is the
 mean of the columns ti_%03d for turbines that are upstream and
 also within radius [max_radius] of the turbine of interest
 [turb_no].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>turb_no</strong> (<em>[</em><em>int</em><em>]</em>) -- Turbine number from which the radius should be</p></li>
-<li><p><strong>calculated.</strong></p></li>
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.Dataframe</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+turb_no (int): Turbine number from which the radius should be
+calculated.</p></li>
+<li><p><strong>turb_no</strong> (<em>int</em>) -- Turbine number from which the radius should be</p></li>
 <li><p><strong>x_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing x locations of turbines.</p></li>
 <li><p><strong>y_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing y locations of turbines.</p></li>
-<li><p><strong>max_radius</strong> (<em>[</em><em>float</em><em>]</em>) -- Maximum radius for the upstream turbines</p></li>
-<li><p><strong>the</strong> (<em>until which they are still considered as relevant/used for</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>calculation</em><em> of </em><em>the averaged column</em>)</p></li>
-<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine</p></li>
-<li><p><strong>Defaults</strong> (<em>turb_no in the determination</em><em> of </em><em>the averaged column quantity.</em>)</p></li>
-<li><p><strong>False.</strong> (<em>to</em>)</p></li>
+<li><p><strong>max_radius</strong> (<em>float</em>) -- Maximum radius for the upstream turbines
+until which they are still considered as relevant/used for the
+calculation of the averaged column quantity.</p></li>
+<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine
+turb_no in the determination of the averaged column quantity. Defaults
+to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1202,7 +1302,7 @@ also within radius [max_radius] of the turbine of interest
 plus the additional column called 'ti'.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1210,29 +1310,29 @@ plus the additional column called 'ti'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_pow_ref_by_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_numbers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_pow_ref_by_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'pow_ref' in your dataframe with value equal
+<dd><p>Add power reference column by list of turbines.</p>
+<p>Add a column called 'pow_ref' in your dataframe with value equal
 to the averaged turbulence intensity measurements of all the
 turbines listed in turbine_numbers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that</p></li>
-<li><p><strong>average.</strong> (<em>should be used to calculate the column</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>turbine_numbers</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- List of turbine numbers that
+should be used to calculate the column average.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'ti'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'ti'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1240,34 +1340,34 @@ plus the additional column called 'ti'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_pow_ref_by_upstream_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_turbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_pow_ref_by_upstream_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'pow_ref' in your dataframe with value equal
+<dd><p>Add pow_ref column using upstream turbines.</p>
+<p>Add a column called 'pow_ref' in your dataframe with value equal
 to the averaged power measurements of all the turbines upstream,
 excluding the turbines listed in exclude_turbs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>exclude_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- array-like variable containing</p></li>
-<li><p><strong>column</strong> (<em>turbine indices that should be excluded in determining the</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>mean</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.Dataframe</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).</p></li>
+<li><p><strong>exclude_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- array-like variable containing
+turbine indices that should be excluded in determining the column
+mean quantity.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'pow_ref'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'pow_ref'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1275,42 +1375,40 @@ plus the additional column called 'pow_ref'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_pow_ref_by_upstream_turbines_in_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turb_no</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_itself</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_pow_ref_by_upstream_turbines_in_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'pow_ref' to your dataframe, which is the
+<dd><p>Add pow_ref column using upstream turbines within a radius.</p>
+<p>Add a column called 'pow_ref' to your dataframe, which is the
 mean of the columns pow_%03d for turbines that are upstream and
 also within radius [max_radius] of the turbine of interest
 [turb_no].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>turb_no</strong> (<em>[</em><em>int</em><em>]</em>) -- Turbine number from which the radius should be</p></li>
-<li><p><strong>calculated.</strong></p></li>
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.Dataframe</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+turb_no (int): Turbine number from which the radius should be
+calculated.</p></li>
+<li><p><strong>turb_no</strong> (<em>int</em>) -- Turbine number from which the radius should be</p></li>
 <li><p><strong>x_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing x locations of turbines.</p></li>
 <li><p><strong>y_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing y locations of turbines.</p></li>
-<li><p><strong>max_radius</strong> (<em>[</em><em>float</em><em>]</em>) -- Maximum radius for the upstream turbines</p></li>
-<li><p><strong>the</strong> (<em>until which they are still considered as relevant/used for</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>calculation</em><em> of </em><em>the averaged column</em>)</p></li>
-<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine</p></li>
-<li><p><strong>Defaults</strong> (<em>turb_no in the determination</em><em> of </em><em>the averaged column quantity.</em>)</p></li>
-<li><p><strong>False.</strong> (<em>to</em>)</p></li>
+<li><p><strong>max_radius</strong> (<em>float</em>) -- Maximum radius for the upstream turbines
+until which they are still considered as relevant/used for the
+calculation of the averaged column quantity.</p></li>
+<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine
+turb_no in the determination of the averaged column quantity. Defaults
+to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe which equals the inserted dataframe
-plus the additional column called 'pow_ref'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>pd.Dataframe Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'pow_ref'.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+</dl>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1318,39 +1416,40 @@ plus the additional column called 'pow_ref'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">set_pow_ref_by_n_closest_upstream_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_upstream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turb_no</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_turbs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_turbs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#set_pow_ref_by_n_closest_upstream_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines" title="Link to this definition">#</a></dt>
-<dd><p>Add a column called 'pow_ref' to your dataframe, which is the
-mean of the columns pow_%03d for the 5 closest turbines that are
+<dd><p>Add pow_ref column using N-nearest upstream turbines.</p>
+<p>Add a column called 'pow_ref' to your dataframe, which is the
+mean of the columns pow_%03d for the N closest turbines that are
 upstream of the turbine of interest [turb_no].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe with measurements. This dataframe</p></li>
-<li><p><strong>wd_%03d</strong> (<em>typically consists of</em>)</p></li>
-<li><p><strong>ws_%03d</strong></p></li>
-<li><p><strong>ti_%03d</strong></p></li>
-<li><p><strong>pow_%03d</strong></p></li>
-<li><p><strong>and</strong></p></li>
-<li><p><strong>measurements.</strong> (<em>potentially additional</em>)</p></li>
-<li><p><strong>df_upstream</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe containing rows indicating</p></li>
-<li><p><strong>for</strong> (<em>wind direction ranges and the corresponding upstream turbines</em>)</p></li>
-<li><p><strong>with</strong> (<em>that wind direction range. This variable can be generated</em>)</p></li>
-<li><p><strong>flasc.utilities.floris_tools.get_upstream_turbs_floris</strong></p></li>
-<li><p><strong>turb_no</strong> (<em>[</em><em>int</em><em>]</em>) -- Turbine number from which the radius should be</p></li>
-<li><p><strong>calculated.</strong></p></li>
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Dataframe with measurements. This dataframe
+typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+potentially additional measurements.</p></li>
+<li><p><strong>df_upstream</strong> (<em>pd.Dataframe</em>) -- Dataframe containing rows indicating
+wind direction ranges and the corresponding upstream turbines for
+that wind direction range. This variable can be generated with
+flasc.utilities.floris_tools.get_upstream_turbs_floris(...).</p></li>
+<li><p><strong>turb_no</strong> (<em>int</em>) -- Turbine number from which the radius should be
+calculated.</p></li>
 <li><p><strong>x_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing x locations of turbines.</p></li>
 <li><p><strong>y_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- Array containing y locations of turbines.</p></li>
-<li><p><strong>max_radius</strong> (<em>[</em><em>float</em><em>]</em>) -- Maximum radius for the upstream turbines</p></li>
-<li><p><strong>the</strong> (<em>until which they are still considered as relevant/used for</em>)</p></li>
-<li><p><strong>quantity.</strong> (<em>calculation</em><em> of </em><em>the averaged column</em>)</p></li>
-<li><p><strong>include_itself</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Include the measurements of turbine</p></li>
-<li><p><strong>Defaults</strong> (<em>turb_no in the determination</em><em> of </em><em>the averaged column quantity.</em>)</p></li>
-<li><p><strong>False.</strong> (<em>to</em>) -- <dl class="simple">
-<dt>Returns:</dt><dd><p>df ([pd.DataFrame]): Dataframe which equals the inserted dataframe
-plus the additional column called 'pow_ref'.</p>
+<li><p><strong>exclude_turbs</strong> (<em>[</em><em>list</em><em>, </em><em>array</em><em>]</em>) -- array-like variable containing
+turbine indices that should be excluded in determining the column
+mean quantity.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) -- Number of closest turbines to consider for the calculation
+of the averaged column quantity.  Defaults to 5.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dataframe which equals the inserted dataframe</dt><dd><p>plus the additional column called 'pow_ref'.</p>
 </dd>
 </dl>
-</p></li>
-</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1358,7 +1457,8 @@ plus the additional column called 'pow_ref'.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.df_reduce_precision">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">df_reduce_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_convert_to_integer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#df_reduce_precision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.df_reduce_precision" title="Link to this definition">#</a></dt>
-<dd><p>Reduce the precision in dataframes from float64 to float32, or possibly
+<dd><p>Reduce dataframe precision.</p>
+<p>Reduce the precision in dataframes from float64 to float32, or possibly
 even further to int32, int16, int8 or even bool. This operation typically
 reduces the size of the dataframe by a factor 2 without any real loss in
 precision. This can make particular operations and data storage much more
@@ -1367,7 +1467,7 @@ these variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df_in</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Dataframe that needs to be reduced.</p></li>
+<li><p><strong>df_in</strong> (<em>pd.Dataframe</em>) -- Dataframe that needs to be reduced.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Print progress. Defaults to False.</p></li>
 <li><p><strong>allow_convert_to_integer</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Allow reduction to integer
 type if possible. Defaults to True.</p></li>
@@ -1377,7 +1477,7 @@ type if possible. Defaults to True.</p></li>
 <dd class="field-even"><p>Reduced dataframe</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df_out ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1385,14 +1485,30 @@ type if possible. Defaults to True.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.df_drop_nan_rows">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">df_drop_nan_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#df_drop_nan_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.df_drop_nan_rows" title="Link to this definition">#</a></dt>
-<dd><p>Remove entries in dataframe where all rows (besides 'time')
+<dd><p>Drop all-nan rows.</p>
+<p>Remove entries in dataframe where all rows (besides 'time')
 have nan values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Input pandas dataframe</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Print progress. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataframe with all-nan rows removed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Dataframe</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">df_find_and_fill_data_gaps_with_missing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_data_buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#df_find_and_fill_data_gaps_with_missing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing" title="Link to this definition">#</a></dt>
-<dd><dl class="simple">
+<dd><p>Find and fill data gap and mark as missing data with NaN.</p>
+<dl class="simple">
 <dt>This function takes a pd.DataFrame object and look for large jumps in</dt><dd><p>the 'time' column. Rather than simply interpolating these values using
 a ZOH, this rather indicates that measurements are missing. Hence,
 this function finds these time gaps and inserts an additional row
@@ -1404,19 +1520,21 @@ will be ignored in any further analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- Merged dataframe for all imported files</p></li>
-<li><p><strong>missing_data_buffer</strong> (<em>int</em><em>, </em><em>optional</em>) -- If the time gaps are equal or</p></li>
-<li><p><strong>[</strong><strong>s</strong><strong>]</strong> (<em>larger than this limit</em>)</p></li>
-<li><p><strong>as</strong> (<em>then it will consider the data</em>)</p></li>
-<li><p><strong>10.</strong> (<em>corrupted</em><em> or </em><em>missing. Defaults to</em>)</p></li>
+<li><p><strong>df</strong> (<em>pd.Dataframe</em>) -- Merged dataframe for all imported files</p></li>
+<li><p><strong>missing_data_buffer</strong> (<em>int</em><em>, </em><em>optional</em>) -- If the time gaps are equal or
+larger than this limit [s], then it will consider the data as
+corrupted or missing. Defaults to 10.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The postprocessed dataframe where all data
-within large time gaps hold value 'missing'.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>The postprocessed dataframe where all data</dt><dd><p>within large time gaps hold value 'missing'.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1427,15 +1545,18 @@ within large time gaps hold value 'missing'.</p>
 <dd><p>This function sorts the dataframe and finds rows with equal time index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- An (unsorted) dataframe</p>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.Dataframe</em>) -- An (unsorted) dataframe</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe sorted by time
-duplicate_entries_idx ([list of int]): list with indices of the former
-of two duplicate rows. The indices correspond to the time-sorted df.</p>
+<dd class="field-even"><p><p>Dataframe sorted by time
+duplicate_entries_idx ([list of int]): list with indices of the former</p>
+<blockquote>
+<div><p>of two duplicate rows. The indices correspond to the time-sorted df.</p>
+</div></blockquote>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1443,7 +1564,8 @@ of two duplicate rows. The indices correspond to the time-sorted df.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.is_day_or_night">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">is_day_or_night</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sunrise_altitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sunset_altitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lag_hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#is_day_or_night"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.is_day_or_night" title="Link to this definition">#</a></dt>
-<dd><p>Determine whether it's day or night for a given set of coordinates and
+<dd><p>Determine night or day in dataframe.</p>
+<p>Determine whether it's day or night for a given set of coordinates and
 UTC timestamp in a DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1479,7 +1601,7 @@ and 'is_day' (a boolean indicating whether it's daytime at the given timestamp).
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">plot_sun_altitude_with_day_night_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#plot_sun_altitude_with_day_night_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color" title="Link to this definition">#</a></dt>
-<dd><p>Plot Sun Altitude with Day-Night Color Differentiation.</p>
+<dd><p>Plot sun altitude with day-night color differentiation.</p>
 <p>This function creates a plot of Sun Altitude over time,
 distinguishing between day and night periods
 with different background colors. The input DataFrame 'df'
@@ -1489,9 +1611,8 @@ as well as a boolean 'is_day' column to indicate day and night periods.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- A DataFrame containing time, sun_altitude, and is_day columns.</p></li>
-<li><p><strong>ax</strong> (<em>plt.axis</em><em>, </em><em>optional</em>) -- An optional Matplotlib axis to use for the plot.</p></li>
-<li><p><strong>provided</strong> (<em>If not</em>)</p></li>
-<li><p><strong>created.</strong> (<em>a new axis will be</em>)</p></li>
+<li><p><strong>ax</strong> (<em>plt.axis</em><em>, </em><em>optional</em>) -- An optional Matplotlib axis to use for the plot.
+If not provided, a new axis will be created.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1504,28 +1625,24 @@ as well as a boolean 'is_day' column to indicate day and night periods.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.make_df_wide">
-<span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">make_df_wide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#make_df_wide"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.make_df_wide" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.dataframe_manipulations.</span></span><span class="sig-name descname"><span class="pre">df_sort_and_fix_duplicates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/dataframe_manipulations.html#df_sort_and_fix_duplicates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates" title="Link to this definition">#</a></dt>
-<dd><p>This function sorts the dataframe and addresses duplicate rows (i.e.,
+<dd><p>Sort dataframe and fill duplicates.</p>
+<p>This function sorts the dataframe and addresses duplicate rows (i.e.,
 rows in which the time index is equal). It does this by merging the two
 rows, replacing the 'nan' entries of one row with the non-'nan' entries
 of the other row. If someone both rows have different values for the same
 column, then an exception is thrown.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- An (unsorted) dataframe</p>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.Dataframe</em>) -- An (unsorted) dataframe</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A time-sorted Dataframe in which its duplicate
 rows have been merged.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>df (pd.Dataframe)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1628,7 +1745,6 @@ rows have been merged.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates"><code class="docutils literal notranslate"><span class="pre">df_sort_and_find_duplicates()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.is_day_or_night"><code class="docutils literal notranslate"><span class="pre">is_day_or_night()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color"><code class="docutils literal notranslate"><span class="pre">plot_sun_altitude_with_day_night_color()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.make_df_wide"><code class="docutils literal notranslate"><span class="pre">make_df_wide()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates"><code class="docutils literal notranslate"><span class="pre">df_sort_and_fix_duplicates()</span></code></a></li>
 </ul>
   </nav></div>

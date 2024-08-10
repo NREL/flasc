@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.utilities.floris_tools</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span></span><span class="sd">&quot;&quot;&quot;Utility functions that use FlorisModels.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">perf_counter</span> <span class="k">as</span> <span class="n">timerpc</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -574,7 +575,9 @@ document.write(`
     <span class="n">mirror_nans</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function generates the FLORIS predictions for a set of historical</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate FLORIS predictions from a precalculated table of solutions.</span>
+
+<span class="sd">    This function generates the FLORIS predictions for a set of historical</span>
 <span class="sd">    data, &#39;df&#39;, quickly by linearly interpolating from a precalculated set of</span>
 <span class="sd">    FLORIS solutions, &#39;df_approx&#39;. We use linear interpolation to eliminate</span>
 <span class="sd">    dependency of the computation time on the size of the dataframe/number of</span>
@@ -663,7 +666,6 @@ document.write(`
 <span class="sd">        52103   2018-12-31 23:30:00    15.6   11.0    0.08  4235128.7   3825108.4  ...  2725108.3</span>
 <span class="sd">        52104   2018-12-31 23:40:00    15.3   11.1    0.08  3860281.3   3987634.7  ...  2957021.7</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Format dataframe and get number of turbines</span>
     <span class="c1"># df = df.reset_index(drop=(&#39;time&#39; in df.columns))</span>
     <span class="n">nturbs</span> <span class="o">=</span> <span class="n">fsut</span><span class="o">.</span><span class="n">get_num_turbines</span><span class="p">(</span><span class="n">df_approx</span><span class="p">)</span>
@@ -873,7 +875,9 @@ document.write(`
     <span class="n">ti_array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.1801</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">),</span>
     <span class="n">save_turbine_inflow_conditions_to_df</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function calculates a large number of floris solutions for a rectangular grid</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the FLORIS approximate table from a FlorisModel object.</span>
+
+<span class="sd">    This function calculates a large number of floris solutions for a rectangular grid</span>
 <span class="sd">    of wind directions (&#39;wd_array&#39;), wind speeds (&#39;ws_array&#39;), and optionally turbulence</span>
 <span class="sd">    intensities (&#39;ti_array&#39;). The variables that are saved are each turbine&#39;s power</span>
 <span class="sd">    production, and optionally also each turbine&#39;s inflow wind direction, wind speed and</span>
@@ -892,7 +896,7 @@ document.write(`
 <span class="sd">        dataframe size but can provide useful information. Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        df_approx (pd.DataFrame): A Pandas DataFrame containing the floris simulation results for all wind</span>
+<span class="sd">        pd.DataFrame: A Pandas DataFrame containing the floris simulation results for all wind</span>
 <span class="sd">          direction, wind speed and turbulence intensity combinations. The outputs are the power production</span>
 <span class="sd">          for each turbine, &#39;pow_000&#39; until &#39;pow_{nturbs-1}&#39;, and optionally als each turbine&#39;s inflow wind</span>
 <span class="sd">          direction, wind speed and turbulence intensity when save_turbine_inflow_conditions_to_df==True.</span>
@@ -903,8 +907,7 @@ document.write(`
 <span class="sd">            ti_array=np.arange(0.03, 0.1801, 0.03)</span>
 <span class="sd">            save_turbine_inflow_conditions_to_df=True</span>
 
-<span class="sd">        Yields:</span>
-
+<span class="sd">    Yields:</span>
 <span class="sd">        df_approx=</span>
 <span class="sd">                  wd    ws    ti    pow_000     ws_000  wd_000  ti_000  pow_001  ...    pow_006     ws_006  wd_006  ti_006</span>
 <span class="sd">        0        0.0   1.0    0.03      0.0      1.0       0.0     0.03     0.0  ...        0.0      1.0       0.0     0.03</span>
@@ -920,7 +923,6 @@ document.write(`
 <span class="sd">        32399  357.0  25.0    0.18      0.0  24.880829   357.0     0.18     0.0  ...        0.0  24.881165   357.0     0.18</span>
 <span class="sd">        32400  360.0  25.0    0.18      0.0  24.880829   360.0     0.18     0.0  ...        0.0  24.881165   360.0     0.18</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># if ti_array is None, use the current value in the FLORIS object</span>
     <span class="k">if</span> <span class="n">ti_array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ti</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">flow_field</span><span class="o">.</span><span class="n">turbulence_intensity</span>
@@ -979,7 +981,9 @@ document.write(`
 <div class="viewcode-block" id="add_gaussian_blending_to_floris_approx_table">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html#flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table">[docs]</a>
 <span class="k">def</span> <span class="nf">add_gaussian_blending_to_floris_approx_table</span><span class="p">(</span><span class="n">df_fi_approx</span><span class="p">,</span> <span class="n">wd_std</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">pdf_cutoff</span><span class="o">=</span><span class="mf">0.995</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function applies a Gaussian blending across the wind direction for the predicted</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add Gaussian blending to the precalculated FLORIS solutions.</span>
+
+<span class="sd">    This function applies a Gaussian blending across the wind direction for the predicted</span>
 <span class="sd">    turbine power productions from FLORIS. This is a post-processing step and achieves the</span>
 <span class="sd">    same result as evaluating FLORIS directly with the UncertainFlorisModel module. However,</span>
 <span class="sd">    having this as a postprocess step allows for rapid generation of the FLORIS solutions for</span>
@@ -995,7 +999,7 @@ document.write(`
 <span class="sd">          deviations to the left and to the right of the evaluation.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        df_fi_approx_gauss (pd.DataFrame): Pandas DataFrame with Gaussian-blurred precalculated</span>
+<span class="sd">        pd.DataFrame: Pandas DataFrame with Gaussian-blurred precalculated</span>
 <span class="sd">          FLORIS solutions. The DataFrame typically has the columns &quot;wd&quot;, &quot;ws&quot;, &quot;ti&quot;, and</span>
 <span class="sd">          &quot;pow_000&quot; until &quot;pow_{nturbs-1}&quot;, with nturbs being the number of turbines.</span>
 
@@ -1047,29 +1051,33 @@ document.write(`
 
 
 
+<span class="c1"># TODO Is this function in the right module?</span>
+<span class="c1"># TODO Should include itself have a default?</span>
 <div class="viewcode-block" id="get_turbs_in_radius">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.floris_tools.get_turbs_in_radius.html#flasc.utilities.floris_tools.get_turbs_in_radius">[docs]</a>
 <span class="k">def</span> <span class="nf">get_turbs_in_radius</span><span class="p">(</span>
     <span class="n">x_turbs</span><span class="p">,</span> <span class="n">y_turbs</span><span class="p">,</span> <span class="n">turb_no</span><span class="p">,</span> <span class="n">max_radius</span><span class="p">,</span> <span class="n">include_itself</span><span class="p">,</span> <span class="n">sort_by_distance</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine which turbines are within a certain radius of other</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find turbines within a certain radius of a turbine.</span>
+
+<span class="sd">    Determine which turbines are within a certain radius of other</span>
 <span class="sd">    wind turbines.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        x_turbs ([list, array]): Long. locations of turbines</span>
 <span class="sd">        y_turbs ([list, array]): Lat. locations of turbines</span>
-<span class="sd">        turb_no ([int]): Turbine number for which the distance is</span>
+<span class="sd">        turb_no (int): Turbine number for which the distance is</span>
 <span class="sd">        calculated w.r.t. the other turbines.</span>
-<span class="sd">        max_radius ([float]): Maximum distance between turbines to be</span>
+<span class="sd">        max_radius (float): Maximum distance between turbines to be</span>
 <span class="sd">        considered within the radius of turbine [turb_no].</span>
-<span class="sd">        include_itself ([type]): Include itself in the list of turbines</span>
+<span class="sd">        include_itself (bool): Include itself in the list of turbines</span>
 <span class="sd">        within the radius.</span>
 <span class="sd">        sort_by_distance (bool, optional): Sort the output list of turbines</span>
 <span class="sd">        according to distance to the turbine, from closest to furthest (but</span>
 <span class="sd">        still within radius). Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        turbs_within_radius ([list]): List of turbines that are within the</span>
+<span class="sd">        list: List of turbines that are within the</span>
 <span class="sd">        prespecified distance from turbine [turb_no].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dr_turb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x_turbs</span> <span class="o">-</span> <span class="n">x_turbs</span><span class="p">[</span><span class="n">turb_no</span><span class="p">])</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">y_turbs</span> <span class="o">-</span> <span class="n">y_turbs</span><span class="p">[</span><span class="n">turb_no</span><span class="p">])</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span>
@@ -1093,25 +1101,24 @@ document.write(`
 <span class="k">def</span> <span class="nf">get_all_impacting_turbines_geometrical</span><span class="p">(</span>
     <span class="n">fm</span><span class="p">,</span> <span class="n">turbine_weights</span><span class="p">,</span> <span class="n">wd_array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">360.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">),</span> <span class="n">wake_slope</span><span class="o">=</span><span class="mf">0.30</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine which turbines affect the turbines of interest</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all impacting turbines using a simple geometric model.</span>
+
+<span class="sd">    Determine which turbines affect the turbines of interest</span>
 <span class="sd">    (i.e., those with a turbine_weights &gt; 0.00001). This function</span>
 <span class="sd">    uses very simplified geometric functions to very quickly</span>
 <span class="sd">    derive which turbines are supposedly waking at least one</span>
 <span class="sd">    turbine in the farm of interest.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fm ([floris object]): FLORIS object of the farm of interest.</span>
-<span class="sd">        turbine_weights [list]: List of with turbine weights with length</span>
-<span class="sd">        equal to the number of wind turbines, and typically filled with</span>
-<span class="sd">        0s (neighbouring farms) and 1s (farm of interest).</span>
-<span class="sd">        wd_step (float, optional): Wind direction discretization step.</span>
-<span class="sd">        Defaults to 3.0.</span>
+<span class="sd">        fm (FlorisModel): FLORIS object of the farm of interest.</span>
+<span class="sd">        turbine_weights (list): List of with turbine weights with length</span>
+<span class="sd">            equal to the number of wind turbines, and typically filled with</span>
+<span class="sd">            0s (neighboring farms) and 1s (farm of interest).</span>
+<span class="sd">        wd_array (array, optional): Array of wind directions to evaluate in [deg].</span>
 <span class="sd">        wake_slope (float, optional): linear slope of the wake (dy/dx)</span>
-<span class="sd">        plot_lines (bool, optional): Enable plotting wakes/turbines.</span>
-<span class="sd">        Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        df_impacting_simple ([pd.DataFrame]): A Pandas Dataframe in which each row</span>
+<span class="sd">        pd.Dataframe: A Pandas Dataframe in which each row</span>
 <span class="sd">        contains a wind direction and a list of turbine numbers. The turbine</span>
 <span class="sd">        numbers are those turbines that should be modelled to accurately</span>
 <span class="sd">        capture the wake losses for the wind farm of interest. Turbine numbers</span>
@@ -1119,7 +1126,6 @@ document.write(`
 <span class="sd">        the simulation without affecting any of the turbines that have a nonzero</span>
 <span class="sd">        turbine weight.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Get farm layout</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">layout_x</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">layout_y</span>
@@ -1197,14 +1203,16 @@ document.write(`
 <div class="viewcode-block" id="get_upstream_turbs_floris">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.floris_tools.get_upstream_turbs_floris.html#flasc.utilities.floris_tools.get_upstream_turbs_floris">[docs]</a>
 <span class="k">def</span> <span class="nf">get_upstream_turbs_floris</span><span class="p">(</span><span class="n">fm</span><span class="p">,</span> <span class="n">wd_step</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">wake_slope</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span> <span class="n">plot_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine which turbines are operating in freestream (unwaked)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use FLORIS to determine which turbines are operating in freestream flow.</span>
+
+<span class="sd">    Determine which turbines are operating in freestream (unwaked)</span>
 <span class="sd">    flow, for the entire wind rose. This function will return a data-</span>
 <span class="sd">    frame where each row will present a wind direction range and a set</span>
 <span class="sd">    of wind turbine numbers for which those turbines are operating</span>
 <span class="sd">    upstream. This is useful in determining the freestream conditions.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fi ([floris object]): FLORIS object of the farm of interest.</span>
+<span class="sd">        fm ([FlorisModel): FLORIS object of the farm of interest.</span>
 <span class="sd">        wd_step (float, optional): Wind direction discretization step.</span>
 <span class="sd">        It will test what the upstream turbines are every [wd_step]</span>
 <span class="sd">        degrees. A lower number means more accurate results, but</span>
@@ -1215,7 +1223,7 @@ document.write(`
 <span class="sd">        Defaults to False.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row</span>
+<span class="sd">        df_upstream (pd.Dataframe): A Pandas Dataframe in which each row</span>
 <span class="sd">        contains a wind direction range and a list of turbine numbers. For</span>
 <span class="sd">        that particular wind direction range, the turbines numbered are</span>
 <span class="sd">        all upstream according to the FLORIS predictions. Depending on</span>
@@ -1226,7 +1234,6 @@ document.write(`
 <span class="sd">        turbines are waked/unwaked and has served useful for determining</span>
 <span class="sd">        what turbines to use as reference.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Get farm layout</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">layout_x</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">layout_y</span>
@@ -1348,14 +1355,15 @@ document.write(`
     <span class="n">ws_test</span><span class="o">=</span><span class="mf">9.0</span><span class="p">,</span>
     <span class="n">return_influence_magnitudes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get dependent turbines for a test turbine for each wind direction.</span>
+
 <span class="sd">    Computes all turbines that depend on the operation of a specified</span>
 <span class="sd">    turbine (test_turbine) for each wind direction in wd_array, using</span>
 <span class="sd">    the FLORIS model specified by fm_in to detect dependencies.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fi ([floris object]): FLORIS object of the farm of interest.</span>
-<span class="sd">        test_turbine ([int]): Turbine for which dependencies are found.</span>
+<span class="sd">        fm_in (FlorisModels): FLORIS object of the farm of interest.</span>
+<span class="sd">        test_turbine (int): Turbine for which dependencies are found.</span>
 <span class="sd">        wd_array ([np.array]): Wind directions at which to determine</span>
 <span class="sd">            dependencies. Defaults to [0, 2, ... , 358].</span>
 <span class="sd">        change_threshold (float): Fractional change in power needed</span>
@@ -1371,16 +1379,17 @@ document.write(`
 <span class="sd">            test_turbine on all turbines.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dep_indices_by_wd (list): A 2-dimensional list. Each element of</span>
-<span class="sd">            the outer level list, which represents wind direction,</span>
-<span class="sd">            contains a list of the turbines that depend on test_turbine</span>
-<span class="sd">            for that wind direction. The second-level list may be empty</span>
-<span class="sd">            if no turbine depends on the test_turbine for that wind</span>
-<span class="sd">            direciton (e.g., the turbine is in the back row).</span>
-<span class="sd">        all_influence_magnitudes ([np.array]): 2-D numpy array of</span>
-<span class="sd">            influences of test_turbine on all other turbines, with size</span>
-<span class="sd">            (number of wind directions) x (number of turbines). Returned</span>
-<span class="sd">            only if return_influence_magnitudes is True.</span>
+<span class="sd">        A tuple containing:</span>
+<span class="sd">            dep_indices_by_wd (list): A 2-dimensional list. Each element of</span>
+<span class="sd">                the outer level list, which represents wind direction,</span>
+<span class="sd">                contains a list of the turbines that depend on test_turbine</span>
+<span class="sd">                for that wind direction. The second-level list may be empty</span>
+<span class="sd">                if no turbine depends on the test_turbine for that wind</span>
+<span class="sd">                direciton (e.g., the turbine is in the back row).</span>
+<span class="sd">            all_influence_magnitudes ([np.array]): 2-D numpy array of</span>
+<span class="sd">                influences of test_turbine on all other turbines, with size</span>
+<span class="sd">                (number of wind directions) x (number of turbines). Returned</span>
+<span class="sd">                only if return_influence_magnitudes is True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Copy fi to a local to not mess with incoming</span>
     <span class="n">fm</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">fm_in</span><span class="p">)</span>
@@ -1444,13 +1453,14 @@ document.write(`
     <span class="n">limit_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">ws_test</span><span class="o">=</span><span class="mf">9.0</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all dependent turbines for each turbine in the farm.</span>
+
 <span class="sd">    Wrapper for get_dependent_turbines_by_wd() that loops over all</span>
 <span class="sd">    turbines in the farm and packages their dependencies as a pandas</span>
 <span class="sd">    dataframe.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fi ([floris object]): FLORIS object of the farm of interest.</span>
+<span class="sd">        fm_in (FlorisModel): FLORIS object of the farm of interest.</span>
 <span class="sd">        wd_array ([np.array]): Wind directions at which to determine</span>
 <span class="sd">            dependencies. Defaults to [0, 2, ... , 358].</span>
 <span class="sd">        change_threshold (float): Fractional change in power needed</span>
@@ -1463,7 +1473,7 @@ document.write(`
 <span class="sd">            determine dependencies. Defaults to 9. m/s.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        df_out ([pd.DataFrame]): A Pandas Dataframe in which each row</span>
+<span class="sd">        df_out (pd.Dataframe): A Pandas Dataframe in which each row</span>
 <span class="sd">            contains a wind direction, each column is a turbine, and</span>
 <span class="sd">            each entry is the turbines that depend on the column turbine</span>
 <span class="sd">            at the row wind direction. Dependencies can be extracted</span>
@@ -1471,7 +1481,6 @@ document.write(`
 <span class="sd">            turbine T are df_out.loc[wd, T]. Dependencies are ordered,</span>
 <span class="sd">            with strongest dependencies appearing first.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">t_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fm_in</span><span class="o">.</span><span class="n">layout_x</span><span class="p">)):</span>
         <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -1501,14 +1510,15 @@ document.write(`
     <span class="n">limit_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">ws_test</span><span class="o">=</span><span class="mf">9.0</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all impacting turbines for each turbine in the farm.</span>
+
 <span class="sd">    Calculate which turbines impact a specified turbine based on the</span>
 <span class="sd">    FLORIS model. Essentially a wrapper for</span>
 <span class="sd">    get_dependent_turbines_by_wd() that loops over all turbines and</span>
 <span class="sd">    extracts their impact magnitudes, then sorts.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fi ([floris object]): FLORIS object of the farm of interest.</span>
+<span class="sd">        fm_in (FlorisModel): FLORIS object of the farm of interest.</span>
 <span class="sd">        wd_array ([np.array]): Wind directions at which to determine</span>
 <span class="sd">            dependencies. Defaults to [0, 2, ... , 358].</span>
 <span class="sd">        change_threshold (float): Fractional change in power needed</span>
@@ -1521,7 +1531,7 @@ document.write(`
 <span class="sd">            determine dependencies. Defaults to 9. m/s.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        df_out ([pd.DataFrame]): A Pandas Dataframe in which each row</span>
+<span class="sd">        df_out (pd.Dataframe): A Pandas Dataframe in which each row</span>
 <span class="sd">            contains a wind direction, each column is a turbine, and</span>
 <span class="sd">            each entry is the turbines that the column turbine depends</span>
 <span class="sd">            on at the row wind direction. Dependencies can be extracted</span>
@@ -1529,7 +1539,6 @@ document.write(`
 <span class="sd">            T are df_out.loc[wd, T]. Impacting turbines are simply</span>
 <span class="sd">            ordered by magnitude of impact.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">dependency_magnitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">wd_array</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">fm_in</span><span class="o">.</span><span class="n">layout_x</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">fm_in</span><span class="o">.</span><span class="n">layout_x</span><span class="p">)))</span>
 
     <span class="k">for</span> <span class="n">t_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fm_in</span><span class="o">.</span><span class="n">layout_x</span><span class="p">)):</span>

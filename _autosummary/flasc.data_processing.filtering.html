@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -636,17 +635,18 @@ document.write(`
                   
   <section id="module-flasc.data_processing.filtering">
 <span id="flasc-data-processing-filtering"></span><h1>flasc.data_processing.filtering<a class="headerlink" href="#module-flasc.data_processing.filtering" title="Link to this heading">#</a></h1>
+<p>Implement filtering class and functions for FLASC data.</p>
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.filtering.df_get_no_faulty_measurements.html#flasc.data_processing.filtering.df_get_no_faulty_measurements" title="flasc.data_processing.filtering.df_get_no_faulty_measurements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_get_no_faulty_measurements</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Get the number of faulty measurements for a specific turbine.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html#flasc.data_processing.filtering.df_mark_turbdata_as_faulty" title="flasc.data_processing.filtering.df_mark_turbdata_as_faulty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_mark_turbdata_as_faulty</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Mark turbine data as faulty based on a condition.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html#flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines" title="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_df_by_faulty_impacting_turbines</span></code></a></p></td>
-<td><p>Assigns a turbine's measurement to NaN for each timestamp for which any of the turbines</p></td>
+<td><p>Assign faulty measurements based on upstream turbines faults.</p></td>
 </tr>
 </tbody>
 </table>
@@ -655,7 +655,7 @@ document.write(`
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter" title="flasc.data_processing.filtering.FlascFilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FlascFilter</span></code></a></p></td>
-<td><p>This class allows a user to filter turbine data based on the wind-speed power curve.</p></td>
+<td><p>Implement filtering class for SCADA data.</p></td>
 </tr>
 </tbody>
 </table>
@@ -663,17 +663,68 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.df_get_no_faulty_measurements">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">df_get_no_faulty_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#df_get_no_faulty_measurements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.df_get_no_faulty_measurements" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Get the number of faulty measurements for a specific turbine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- <p>Dataframe containing the turbine data,
+formatted in the generic SCADA data format. Namely, the
+dataframe should at the very least contain the columns:</p>
+<blockquote>
+<div><ul>
+<li><p>Time of each measurement: time</p></li>
+<li><p>Wind speed of each turbine: ws_000, ws_001, ...</p></li>
+<li><p>Power production of each turbine: pow_000, pow_001, ...</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>turbine</strong> (<em>int</em>) -- The turbine identifier for which the number of
+faulty measurements should be counted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of faulty measurements for the turbine.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>N_isnan (int)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.df_mark_turbdata_as_faulty">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">df_mark_turbdata_as_faulty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#df_mark_turbdata_as_faulty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.df_mark_turbdata_as_faulty" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Mark turbine data as faulty based on a condition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe containing the turbine data,
+formatted in the generic SCADA data format.</p></li>
+<li><p><strong>cond</strong> (<em>iteratible</em>) -- List or array-like variable with bool entries
+depicting whether the condition is met or not. These should be
+situations in which you classify the data as faulty. For example,
+high wind speeds but low power productions, or NaNs, self-flagged
+status variables.</p></li>
+<li><p><strong>turbine_list</strong> (<em>int</em><em>, </em><em>list</em>) -- Turbine identifier(s) for which the data
+should be flagged as faulty when the condition is met.</p></li>
+<li><p><strong>exclude_columns</strong> (<em>list</em><em>, </em><em>optional</em>) -- List of columns that should not
+be considered for the filtering. Defaults to [].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataframe with the faulty measurements marked as None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">FlascFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter" title="Link to this definition">#</a></dt>
-<dd><p>This class allows a user to filter turbine data based on the
+<dd><p>Implement filtering class for SCADA data.</p>
+<p>This class allows a user to filter turbine data based on the
 wind-speed power curve. This class includes several useful filtering
 .. method:: 1. Filtering based on prespecified boxes/windows. Any data outside</p>
 <blockquote>
@@ -696,7 +747,8 @@ per power bin.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter._get_all_unique_flags">
 <span class="sig-name descname"><span class="pre">_get_all_unique_flags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter._get_all_unique_flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter._get_all_unique_flags" title="Link to this definition">#</a></dt>
-<dd><p>Private function that grabs all the unique filter flags
+<dd><p>Returns all unique flags in the dataframe.</p>
+<p>Private function that grabs all the unique filter flags
 that are available in self.df_filters and returns them
 as a list of strings. This is helpful when plotting the
 various filter sources in a scatter plot, for example.</p>
@@ -722,14 +774,15 @@ various filter sources in a scatter plot, for example.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">
 <span class="sig-name descname"><span class="pre">_get_mean_power_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter._get_mean_power_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves" title="Link to this definition">#</a></dt>
-<dd><p>Calculates the mean power production in bins of the wind speed,
+<dd><p>Calculates the mean power production in bins of the wind speed.</p>
+<p>Calculates the mean power production in bins of the wind speed,
 for all turbines in the wind farm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ws_bins</strong> (<em>[</em><em>iteratible</em><em>]</em><em>, </em><em>optional</em>) -- Wind speed bins. Defaults to
 np.arange(0.0, 25.5, 0.5).</p></li>
-<li><p><strong>df</strong> (<em>[</em><em>pd.DataFrame</em><em>]</em>) -- <p>Dataframe containing the turbine data,
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- <p>Dataframe containing the turbine data,
 formatted in the generic SCADA data format. Namely, the
 dataframe should at the very least contain the columns:</p>
 <blockquote>
@@ -754,7 +807,7 @@ turbine.</p>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pw_curve_df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -768,7 +821,8 @@ turbine.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.filter_by_condition">
 <span class="sig-name descname"><span class="pre">filter_by_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_filters_to_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.filter_by_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.filter_by_condition" title="Link to this definition">#</a></dt>
-<dd><p>This is a generic method to filter the dataframe for any particular
+<dd><p>Filter the dataframe for a specific condition, for a specific turbine.</p>
+<p>This is a generic method to filter the dataframe for any particular
 condition, for a specific turbine or specific set of turbines. This
 provides a platform for user-specific queries to filter and then inspect
 the data with. You can call this function multiple times and the filters
@@ -803,7 +857,7 @@ situations in which you classify the data as faulty. For example,
 high wind speeds but low power productions, or NaNs, self-flagged
 status variables.</p></li>
 <li><p><strong>label</strong> (<em>str</em>) -- Name or description of the fault/condition that is flagged.</p></li>
-<li><p><strong>ti</strong> (<em>int</em>) -- Turbine indentifier, typically an integer, but may also be a
+<li><p><strong>ti</strong> (<em>int</em>) -- Turbine identifier, typically an integer, but may also be a
 list. This flags the measurements of all these turbines as faulty
 for which condition==True.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Print information to console. Defaults to True.</p></li>
@@ -820,7 +874,7 @@ dataframe is equal to the internally filtered dataframe 'self.df'.</p>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df_out</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -828,7 +882,8 @@ dataframe is equal to the internally filtered dataframe 'self.df'.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.filter_by_sensor_stuck_faults">
 <span class="sig-name descname"><span class="pre">filter_by_sensor_stuck_faults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_consecutive_measurements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stddev_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.filter_by_sensor_stuck_faults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.filter_by_sensor_stuck_faults" title="Link to this definition">#</a></dt>
-<dd><p>Filter the turbine measurements for sensor-stuck type of faults. This is
+<dd><p>Filter the turbine measurements for sensor-stuck type of faults.</p>
+<p>This is
 the situation where a turbine measurement reads the exact same value for
 multiple consecutive timestamps. This typically indicates a &quot;frozen&quot; sensor
 rather than a true physical effect. This is particularly the case for
@@ -877,7 +932,7 @@ operations in previous steps.</p>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>self.df</p>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -885,86 +940,97 @@ operations in previous steps.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.filter_by_power_curve">
 <span class="sig-name descname"><span class="pre">filter_by_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_ws_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pow_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_ws_rb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pow_rb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_deadband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pow_deadband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.filter_by_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.filter_by_power_curve" title="Link to this definition">#</a></dt>
-<dd><p>Filter the data by offset from the mean power curve in x-
-directions. This is an iterative process because the estimated mean
+<dd><p>Filter the data by offset from the mean power curve in x-directions.</p>
+<p>This is an iterative process because the estimated mean
 curve actually changes as data is filtered. This process typically
 converges within a couple iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ti</strong> (<em>int</em>) -- The turbine identifier for which the data should be</p></li>
-<li><p><strong>filtered.</strong></p></li>
-<li><p><strong>m_ws_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining</p></li>
-<li><p><strong>this</strong> (<em>the right bound for the power curve. Any data to the right of</em>)</p></li>
-<li><p><strong>0.95.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
-<li><p><strong>m_pow_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining</p></li>
-<li><p><strong>this</strong></p></li>
-<li><p><strong>1.01.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
-<li><p><strong>m_ws_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining</p></li>
-<li><p><strong>this</strong></p></li>
-<li><p><strong>1.05.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
-<li><p><strong>m_pow_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining</p></li>
-<li><p><strong>this</strong></p></li>
-<li><p><strong>0.99.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
-<li><p><strong>no_iterations</strong> (<em>int</em><em>, </em><em>optional</em>) -- Number of iterations. The</p></li>
-<li><p><strong>steps</strong> (<em>solution typically converges in 2-3</em>)</p></li>
-<li><p><strong>is</strong> (<em>but as the process</em>)</p></li>
-<li><p><strong>fast</strong> (<em>very</em>)</p></li>
-<li><p><strong>iterations.</strong> (<em>it's better to run a higher number of</em>)</p></li>
-<li><p><strong>10.</strong> (<em>Defaults to</em>)</p></li>
-<li><p><strong>cutoff_ws</strong> (<em>float</em><em>, </em><em>optional</em>) -- Upper limit for the filtering to occur.</p></li>
-<li><p><strong>Typically</strong></p></li>
-<li><p><strong>Namely</strong> (<em>this is a value just below the cut-out wind speed.</em>)</p></li>
+<li><p><strong>ti</strong> (<em>int</em>) -- The turbine identifier for which the data should be
+filtered.</p></li>
+<li><p><strong>m_ws_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining
+the left bound for the power curve. Any data to the left of this
+curve is considered faulty. Defaults to 0.95.</p></li>
+<li><p><strong>m_pow_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining
+the left bound for the power curve. Any data to the left of this
+curve is considered faulty. Defaults to 1.01.</p></li>
+<li><p><strong>m_ws_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining
+the right bound for the power curve. Any data to the right of this
+curve is considered faulty. Defaults to 1.05.</p></li>
+<li><p><strong>m_pow_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining
+the right bound for the power curve. Any data to the right of this
+curve is considered faulty. Defaults to 0.99.</p></li>
+<li><p><strong>ws_deadband</strong> (<em>float</em><em>, </em><em>optional</em>) -- Deadband in [m/s] around the median
+power curve around which data is by default classified as valid.
+Defaults to 0.50.</p></li>
+<li><p><strong>pow_deadband</strong> (<em>float</em><em>, </em><em>optional</em>) -- Deadband in [kW] around the median
+power curve around which data is by default classified as valid.
+Defaults to 20.0.</p></li>
+<li><p><strong>no_iterations</strong> (<em>int</em><em>, </em><em>optional</em>) -- Number of iterations. The
+solution typically converges in 2-3 steps, but as the process is
+very fast, it's better to run a higher number of iterations.
+Defaults to 10.</p></li>
+<li><p><strong>cutoff_ws</strong> (<em>float</em><em>, </em><em>optional</em>) -- Upper limit for the filtering to occur.
+Typically, this is a value just below the cut-out wind speed. Namely,
+issues arise if you put this wind speed above the cut-out wind speed,
+because we effectively end up with two curves for the same power
+production (one at region 2, one going down from cut-out wind speed).
+This confuses the algorithm. Hence, suggested to put this somewhere
+around 15-25 m/s. Defaults to 20 m/s.</p></li>
 </ul>
 </dd>
 </dl>
-<p>:param :
-:param issues arise if you put this wind speed above the cut-out wind speed:
-:param :
-:param because we effectively end up with two curves for the same power:
-:param production:
-:type production: one at region 2, one going down from cut-out wind speed
-:param This confuses the algorithm. Hence:
-:param suggested to put this somewhere:
-:param around 15-25 m/s. Defaults to 20 m/s.:</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.filter_by_floris_power_curve">
 <span class="sig-name descname"><span class="pre">filter_by_floris_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_ws_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pow_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_ws_rb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_pow_rb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_deadband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pow_deadband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.filter_by_floris_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.filter_by_floris_power_curve" title="Link to this definition">#</a></dt>
-<dd><p>Filter the data by offset from the floris power curve in x-
-directions.</p>
+<dd><p>Filter the data by offset from the floris power curve.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fm</strong> (<em>FlorisModel</em>) -- The FlorisModel object for the farm</p></li>
-<li><p><strong>m_ws_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining</p></li>
-<li><p><strong>this</strong> (<em>the right bound for the power curve. Any data to the right of</em>)</p></li>
-<li><p><strong>0.95.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
-<li><p><strong>m_pow_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining</p></li>
-<li><p><strong>this</strong></p></li>
-<li><p><strong>1.01.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
-<li><p><strong>m_ws_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining</p></li>
-<li><p><strong>this</strong></p></li>
-<li><p><strong>1.05.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
-<li><p><strong>m_pow_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining</p></li>
-<li><p><strong>this</strong></p></li>
-<li><p><strong>0.99.</strong> (<em>curve is considered faulty. Defaults to</em>)</p></li>
-<li><p><strong>ws_deadband</strong> (<em>float</em><em>, </em><em>optional</em>) -- Deadband in [m/s] around the median</p></li>
-<li><p><strong>valid.</strong> (<em>power curve around which data is by default classified as</em>)</p></li>
-<li><p><strong>0.50.</strong> (<em>Defaults to</em>)</p></li>
-<li><p><strong>pow_deadband</strong> (<em>float</em><em>, </em><em>optional</em>) -- Deadband in [kW] around the median</p></li>
-<li><p><strong>valid.</strong></p></li>
-<li><p><strong>20.0.</strong> (<em>Defaults to</em>)</p></li>
-<li><p><strong>cutoff_ws</strong> (<em>float</em><em>, </em><em>optional</em>) -- Wind speed up to which the median</p></li>
-<li><p><strong>should</strong> (<em>power curve is calculated and the data is filtered for. You</em>)</p></li>
-<li><p><strong>wind</strong> (<em>make sure this variable is set to a value above the rated</em>)</p></li>
-<li><p><strong>experiencing</strong> (<em>speed and below the cut-out wind speed. If you are</em>)</p></li>
-<li><p><strong>downward</strong> (<em>problems with data filtering and your data points have a</em>)</p></li>
-<li><p><strong>speeds</strong> (<em>trend near the high wind</em>)</p></li>
-<li><p><strong>variable's</strong> (<em>try decreasing this</em>)</p></li>
-<li><p><strong>15.0.</strong> (<em>value to</em>)</p></li>
+<li><p><strong>ti</strong> (<em>int</em>) -- The turbine identifier for which the data should be
+filtered.</p></li>
+<li><p><strong>m_ws_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining
+the left bound for the power curve. Any data to the left of this
+curve is considered faulty. Defaults to 0.95.</p></li>
+<li><p><strong>m_pow_lb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining
+the left bound for the power curve. Any data to the left of this
+curve is considered faulty. Defaults to 1.01.</p></li>
+<li><p><strong>m_ws_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the wind speed defining
+the right bound for the power curve. Any data to the right of this
+curve is considered faulty. Defaults to 1.05.</p></li>
+<li><p><strong>m_pow_rb</strong> (<em>float</em><em>, </em><em>optional</em>) -- Multiplier on the power defining
+the right bound for the power curve. Any data to the right of this
+curve is considered faulty. Defaults to 0.99.</p></li>
+<li><p><strong>ws_deadband</strong> (<em>float</em><em>, </em><em>optional</em>) -- Deadband in [m/s] around the median
+power curve around which data is by default classified as valid.
+Defaults to 0.50.</p></li>
+<li><p><strong>pow_deadband</strong> (<em>float</em><em>, </em><em>optional</em>) -- Deadband in [kW] around the median
+power curve around which data is by default classified as valid.
+Defaults to 20.0.</p></li>
+<li><p><strong>cutoff_ws</strong> (<em>float</em><em>, </em><em>optional</em>) -- Wind speed up to which the median
+power curve is calculated and the data is filtered for. You should
+make sure this variable is set to a value above the rated wind
+speed and below the cut-out wind speed. If you are experiencing
+problems with data filtering and your data points have a downward
+trend near the high wind speeds, try decreasing this variable's
+value to 15.0.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Pandas DataFrame with the filtered data, in which faulty turbine</dt><dd><p>measurements are flagged as None/NaN. This is an aggregated filtering
+variable, so it includes faulty-flagged measurements from filter
+operations in previous steps.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Dataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1000,18 +1066,10 @@ curves for the turbines for the turbines of which their
 power curves were previously not yet calculated.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>Dataframe containing the wind</dt><dd><p>speed bins and the mean power production value for every
-turbine.</p>
-</dd>
-<dt>calculate_missing (bool, optional): Calculate the median power</dt><dd><p>curves for the turbines for the turbines of which their
-power curves were previously not yet calculated.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p>Dataframe containing the estimated mean power curves.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pw_curve_df ([pd.DataFrame])</p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1019,7 +1077,8 @@ power curves were previously not yet calculated.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_farm_mean_power_curve">
 <span class="sig-name descname"><span class="pre">plot_farm_mean_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_farm_mean_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_farm_mean_power_curve" title="Link to this definition">#</a></dt>
-<dd><p>Plot all turbines' power curves in a single figure. Also estimate
+<dd><p>Plot mean of all turbines' power curves and show individual curves.</p>
+<p>Also estimate
 and plot a mean turbine power curve.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1027,13 +1086,20 @@ and plot a mean turbine power curve.</p>
 specified by the user, then the farm-average turbine power curve
 from FLORIS will be plotted on top of the SCADA-based power curves.</p>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure and axis objects of the plot.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple (fig, ax)</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter">
 <span class="sig-name descname"><span class="pre">plot_filters_custom_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Wind</span> <span class="pre">speed</span> <span class="pre">(m/s)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Power</span> <span class="pre">(kW)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_custom_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter" title="Link to this definition">#</a></dt>
-<dd><p>Plot the filtered data in a scatter plot, categorized
+<dd><p>Plot the filtered data in a scatter plot.</p>
+<p>Plot the filtered data in a scatter plot, categorized
 by the source of their filter/fault. This is a generic
 function that allows the user to plot various numeric
 variables on the x and y axis.</p>
@@ -1070,7 +1136,8 @@ figure should be produced. If None specified, then</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter_bokeh">
 <span class="sig-name descname"><span class="pre">plot_filters_custom_scatter_bokeh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Wind-speed</span> <span class="pre">vs.</span> <span class="pre">power</span> <span class="pre">curve'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Wind</span> <span class="pre">speed</span> <span class="pre">(m/s)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Power</span> <span class="pre">(kW)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_custom_scatter_bokeh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter_bokeh" title="Link to this definition">#</a></dt>
-<dd><p>Plot the filtered data in a scatter plot, categorized
+<dd><p>Plot the filtered data in a scatter plot.</p>
+<p>Plot the filtered data in a scatter plot, categorized
 by the source of their filter/fault. This is a generic
 function that allows the user to plot various numeric
 variables on the x and y axis.</p>
@@ -1105,7 +1172,8 @@ specified, creates a new figure. Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve">
 <span class="sig-name descname"><span class="pre">plot_filters_in_ws_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_in_ws_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve" title="Link to this definition">#</a></dt>
-<dd><p>Plot the wind speed power curve and connect each faulty datapoint
+<dd><p>Plot faulty data in the wind speed power curve.</p>
+<p>Plot the wind speed power curve and connect each faulty datapoint
 to the label it was classified as faulty with.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1117,13 +1185,20 @@ to the label it was classified as faulty with.</p>
 <li><p><strong>ax</strong> (<em>plt.Axis</em>) -- Pyplot Axis object.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure axis in which the scatter plot is drawn.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ax</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve">
 <span class="sig-name descname"><span class="pre">plot_postprocessed_in_ws_power_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_postprocessed_in_ws_power_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve" title="Link to this definition">#</a></dt>
-<dd><p>Plot the wind speed power curve and mark faulty data according to
+<dd><p>Plot the postprocessed data in the wind speed power curve.</p>
+<p>Plot the wind speed power curve and mark faulty data according to
 their filters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1136,13 +1211,20 @@ their filters.</p>
 specified, creates a new figure and axis. Defaults to None.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure axis in which the scatter plot is drawn.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ax</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_in_time">
 <span class="sig-name descname"><span class="pre">plot_filters_in_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_in_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time" title="Link to this definition">#</a></dt>
-<dd><p>Generate bar plot where each week of data is gathered and its
+<dd><p>Plot the filtered data in time.</p>
+<p>Generate bar plot where each week of data is gathered and its
 filtering results will be shown relative to the data size of each
 week. This plot can particularly be useful to investigate whether
 certain weeks/time periods show a particular high number of faulty
@@ -1163,7 +1245,8 @@ specified, creates a new figure and axis. Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh">
 <span class="sig-name descname"><span class="pre">plot_filters_in_time_bokeh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#FlascFilter.plot_filters_in_time_bokeh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh" title="Link to this definition">#</a></dt>
-<dd><p>Generate bar plot where each week of data is gathered and its
+<dd><p>Plot the filtered data in time.</p>
+<p>Generate bar plot where each week of data is gathered and its
 filtering results will be shown relative to the data size of each
 week. This plot can particularly be useful to investigate whether
 certain weeks/time periods show a particular high number of faulty
@@ -1178,6 +1261,12 @@ in the found time period from the dataset.</p>
 specified, creates a new figure. Defaults to None.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure axis in which the scatter plot is</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>axis</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -1186,48 +1275,31 @@ specified, creates a new figure. Defaults to None.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines">
 <span class="sig-prename descclassname"><span class="pre">flasc.data_processing.filtering.</span></span><span class="sig-name descname"><span class="pre">filter_df_by_faulty_impacting_turbines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_impacting_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/data_processing/filtering.html#filter_df_by_faulty_impacting_turbines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines" title="Link to this definition">#</a></dt>
-<dd><dl class="simple">
+<dd><p>Assign faulty measurements based on upstream turbines faults.</p>
+<dl class="simple">
 <dt>Assigns a turbine's measurement to NaN for each timestamp for which any of the turbines</dt><dd><p>that are shedding a wake on this turbine is reporting NaN measurements.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with SCADA data with measurements</p></li>
-<li><p><strong>wd_000</strong> (<em>formatted according to</em>)</p></li>
-<li><p><strong>wd_001</strong></p></li>
-<li><p><strong>wd_002</strong></p></li>
-<li><p><strong>pow_000</strong></p></li>
-<li><p><strong>pow_001</strong></p></li>
-</ul>
-</dd>
-</dl>
-<p>:param :
-:param pow_002:
-:param and so on.:
-:param ti: Turbine number for which we are filtering the data.
-:type ti: integer
-:param Basically:
-:param each turbine that impacts that power production of:
-:param turbine 'ti' by more than 0.1% is required to be reporting a:
-:param non-faulty measurement. If not:
-:param we classify the measurement of:
-:param turbine 'ti' as faulty because we cannot sufficiently know the:
-:param inflow conditions of this turbine.:
-:param df_impacting_turbines: A Pandas DataFrame in the
-:type df_impacting_turbines: pd.DataFrame
-:param format of:                0       1          2   3   4   5   6</p>
-<blockquote>
-<div><p>wd
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) -- Dataframe with SCADA data with measurements
+formatted according to wd_000, wd_001, wd_002, pow_000, pow_001,
+pow_002, and so on.</p></li>
+<li><p><strong>ti</strong> (<em>int</em>) -- Turbine number for which we are filtering the data.
+Basically, each turbine that impacts that power production of
+turbine 'ti' by more than 0.1% is required to be reporting a
+non-faulty measurement. If not, we classify the measurement of
+turbine 'ti' as faulty because we cannot sufficiently know the
+inflow conditions of this turbine.</p></li>
+<li><p><strong>df_impacting_turbines</strong> (<em>pd.DataFrame</em>) -- A Pandas DataFrame in the</p></li>
+<li><p><strong>of</strong> (<em>format</em>) -- 0       1          2   3   4   5   6
+wd
 0.0       [6, 5]     [5]     [3, 5]  []  []  []  []
 3.0          [6]     [5]     [3, 5]  []  []  []  []
 ...          ...     ...        ...  ..  ..  ..  ..
 354.0  [6, 5, 3]  [5, 0]     [3, 5]  []  []  []  []
-357.0     [6, 5]     [5]  [3, 5, 4]  []  []  []  []</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
+357.0     [6, 5]     [5]  [3, 5, 4]  []  []  []  []</p></li>
 <li><p><strong>interest</strong> (<em>The columns indicate the turbine of</em>)</p></li>
 <li><p><strong>i.e.</strong></p></li>
 <li><p><strong>that</strong> (<em>the turbine</em>)</p></li>

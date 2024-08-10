@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.model_fitting.turbulence_estimator</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">floris</span> <span class="k">as</span> <span class="nn">wfct</span>
+<span></span><span class="sd">&quot;&quot;&quot;_summary_.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">floris</span> <span class="k">as</span> <span class="nn">wfct</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -551,10 +552,18 @@ document.write(`
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logger_manager</span><span class="o">.</span><span class="n">logger</span>  <span class="c1"># Obtain the reusable logger</span>
 
 
+<span class="c1"># TODO IS THIS USED ANYWHERE?</span>
 <div class="viewcode-block" id="ti_estimator">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator">[docs]</a>
 <span class="k">class</span> <span class="nc">ti_estimator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fm (_type_): _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fm</span> <span class="o">=</span> <span class="n">fm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_turbs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">layout_x</span><span class="p">)</span>
 
@@ -573,6 +582,11 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.set_measurements">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.set_measurements">[docs]</a>
     <span class="k">def</span> <span class="nf">set_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P_measured</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            P_measured (_type_): _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">P_measured</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">P_measured</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
             <span class="n">P_measured</span> <span class="o">=</span> <span class="p">[</span><span class="n">P_measured</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">P_measured</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -585,6 +599,11 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.get_turbine_order">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_order">[docs]</a>
     <span class="k">def</span> <span class="nf">get_turbine_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">wd</span> <span class="o">=</span> <span class="p">(</span><span class="mi">180</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fm</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">farm</span><span class="o">.</span><span class="n">wind_direction</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
         <span class="n">rotz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">wd</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">wd</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">wd</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">wd</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fm</span><span class="o">.</span><span class="n">layout_x</span><span class="p">)</span>
@@ -609,6 +628,14 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.get_turbine_pairs">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_pairs">[docs]</a>
     <span class="k">def</span> <span class="nf">get_turbine_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wake_loss_thrs</span><span class="o">=</span><span class="mf">0.20</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            wake_loss_thrs (float, optional): _description_. Defaults to 0.20.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fi</span>
         <span class="n">fm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
         <span class="n">power_baseline</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fm</span><span class="o">.</span><span class="n">get_turbine_power</span><span class="p">())</span>
@@ -642,6 +669,11 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.plot_flowfield">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_flowfield">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_flowfield</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">hor_plane</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fm</span><span class="o">.</span><span class="n">get_hor_plane</span><span class="p">()</span>
@@ -652,6 +684,13 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.floris_set_ws_wd_ti">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.floris_set_ws_wd_ti">[docs]</a>
     <span class="k">def</span> <span class="nf">floris_set_ws_wd_ti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ws</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ti</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            wd (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            ws (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            ti (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fm</span> <span class="o">=</span> <span class="n">ftools</span><span class="o">.</span><span class="n">_fi_set_ws_wd_ti</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fi</span><span class="p">,</span> <span class="n">wd</span><span class="o">=</span><span class="n">wd</span><span class="p">,</span> <span class="n">ws</span><span class="o">=</span><span class="n">ws</span><span class="p">,</span> <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">)</span></div>
 
 
@@ -670,6 +709,17 @@ document.write(`
     <span class="k">def</span> <span class="nf">estimate_farmaveraged_ti</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">Ns</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.50</span><span class="p">),</span> <span class="n">refine_with_fmin</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Ns (int, optional): _description_. Defaults to 50.</span>
+<span class="sd">            bounds (tuple, optional): _description_. Defaults to (0.01, 0.50).</span>
+<span class="sd">            refine_with_fmin (bool, optional): _description_. Defaults to False.</span>
+<span class="sd">            verbose (bool, optional): _description_. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_measurements</span><span class="p">()</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">estimate_ti</span><span class="p">(</span>
             <span class="n">fi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fi</span><span class="p">,</span>
@@ -693,6 +743,17 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.estimate_local_tis">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_local_tis">[docs]</a>
     <span class="k">def</span> <span class="nf">estimate_local_tis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Ns</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.50</span><span class="p">),</span> <span class="n">refine_with_fmin</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Ns (int, optional): _description_. Defaults to 50.</span>
+<span class="sd">            bounds (tuple, optional): _description_. Defaults to (0.01, 0.50).</span>
+<span class="sd">            refine_with_fmin (bool, optional): _description_. Defaults to False.</span>
+<span class="sd">            verbose (bool, optional): _description_. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_measurements</span><span class="p">()</span>
         <span class="n">turbines_sorted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">turbine_list_ordered</span>
         <span class="n">df_turbine_pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">turbine_pairs</span>
@@ -729,6 +790,7 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.plot_cost_function_farm">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_function_farm">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_cost_function_farm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.&quot;&quot;&quot;</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_farm</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_farm</span><span class="p">[</span><span class="s2">&quot;J&quot;</span><span class="p">])</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_farm</span><span class="p">[</span><span class="s2">&quot;x_opt&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_farm</span><span class="p">[</span><span class="s2">&quot;J_opt&quot;</span><span class="p">],</span> <span class="s2">&quot;ro&quot;</span><span class="p">)</span>
@@ -741,6 +803,7 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.plot_cost_functions_turbines">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_functions_turbines">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_cost_functions_turbines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_turbs</span><span class="p">):</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_turbines</span><span class="p">[</span><span class="n">ti</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_turbines</span><span class="p">[</span><span class="n">ti</span><span class="p">][</span><span class="s2">&quot;J&quot;</span><span class="p">])</span>
@@ -754,8 +817,14 @@ document.write(`
 <div class="viewcode-block" id="ti_estimator.plot_power_bars">
 <a class="viewcode-back" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_power_bars">[docs]</a>
     <span class="k">def</span> <span class="nf">plot_power_bars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fi</span>
         <span class="n">fm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_turbs</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">fm</span><span class="o">.</span><span class="n">get_turbine_power</span><span class="p">(),</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_turbs</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">P_measured</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>

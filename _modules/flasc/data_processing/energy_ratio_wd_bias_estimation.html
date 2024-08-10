@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.data_processing.energy_ratio_wd_bias_estimation</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span> <span class="k">as</span> <span class="nn">os</span>
+<span></span><span class="sd">&quot;&quot;&quot;Module to estimate the wind direction bias.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span> <span class="k">as</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -558,7 +559,9 @@ document.write(`
 <div class="viewcode-block" id="bias_estimation">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation">[docs]</a>
 <span class="k">class</span> <span class="nc">bias_estimation</span><span class="p">(</span><span class="n">LoggingManager</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class can be used to estimate the bias (offset) in a wind</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to determine bias in wind direction measurement.</span>
+
+<span class="sd">    This class can be used to estimate the bias (offset) in a wind</span>
 <span class="sd">    direction measurement by comparing the energy ratios in the SCADA</span>
 <span class="sd">    data with the predicted energy ratios from FLORIS under various</span>
 <span class="sd">    bias correction values. Essentially, this class solves the following</span>
@@ -581,7 +584,7 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the bias estimation class.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            df ([pd.DataFrame]): Dataframe with the SCADA data measurements</span>
+<span class="sd">            df (pd.Dataframe): Dataframe with the SCADA data measurements</span>
 <span class="sd">                formatted in the generic format. The dataframe should contain</span>
 <span class="sd">                at the minimum the following columns:</span>
 <span class="sd">                * Reference wind direction for the test turbine, &#39;wd&#39;</span>
@@ -589,7 +592,7 @@ document.write(`
 <span class="sd">                * Power production of every turbine: pow_000, pow_001, ...</span>
 <span class="sd">                * Reference power production used to normalize the energy</span>
 <span class="sd">                    ratio: &#39;pow_ref&#39;</span>
-<span class="sd">            df_fm_approx ([pd.DataFrame]): Dataframe containing a large set</span>
+<span class="sd">            df_fm_approx (pd.Dataframe): Dataframe containing a large set</span>
 <span class="sd">                of precomputed solutions of the FLORIS model for a range of</span>
 <span class="sd">                wind directions, wind speeds (and optionally turbulence</span>
 <span class="sd">                intensities). This table can be generated using the following:</span>
@@ -629,7 +632,9 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">wd_bias</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function initializes an instance of the EnergyRatioInput</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load EnergyRatioInput objects with bias.</span>
+
+<span class="sd">        This function initializes an instance of the EnergyRatioInput</span>
 <span class="sd">        where the dataframe is shifted by wd_bias for each test turbine.</span>
 <span class="sd">        This facilitates the calculation of the energy ratios under this</span>
 <span class="sd">        hypothesized wind direction bias. Additionally, the FLORIS predictions</span>
@@ -637,7 +642,7 @@ document.write(`
 <span class="sd">        predictions are also calculated.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            wd_bias ([float]): Hypothesized wind direction bias in degrees.</span>
+<span class="sd">            wd_bias (float): Hypothesized wind direction bias in degrees.</span>
 <span class="sd">            test_turbines ([iteratible]): List of test turbines for</span>
 <span class="sd">                which each the energy ratios are calculated and the Pearson</span>
 <span class="sd">                correlation coefficients are calculated. Note that this</span>
@@ -708,10 +713,26 @@ document.write(`
         <span class="n">N_btstrp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">plot_iter_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the energy ratios for the energy_ratio_suite objects</span>
-<span class="sd">        contained in &#39;self.fsc_list&#39;.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the energy ratios.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            wd_bias (float): Wind direction bias in degrees.</span>
+<span class="sd">            time_mask ([iterable], optional): Mask.  If None, will not mask</span>
+<span class="sd">                the data based on this variable. Defaults to None.</span>
+<span class="sd">            ws_mask ([iterable], optional): Wind speed mask. Should be an</span>
+<span class="sd">                iterable of length 2, e.g., [6.0, 10.0], defining the lower</span>
+<span class="sd">                and upper bound, respectively. If not specified, will not</span>
+<span class="sd">                mask the data based on this variable. Defaults to (6, 10).</span>
+<span class="sd">            wd_mask ([iterable], optional): Wind direction mask. Should</span>
+<span class="sd">                be an iterable of length 2, e.g., [0.0, 180.0], defining</span>
+<span class="sd">                the lower and upper bound, respectively. If not specified,</span>
+<span class="sd">                will not mask the data based on this variable. Defaults to</span>
+<span class="sd">                None.</span>
+<span class="sd">            ti_mask ([iterable], optional): Turbulence intensity mask.</span>
+<span class="sd">                Should be an iterable of length 2, e.g., [0.04, 0.08],</span>
+<span class="sd">                defining the lower and upper bound, respectively. If not</span>
+<span class="sd">                specified, will not mask the data based on this variable.</span>
+<span class="sd">                Defaults to None.</span>
 <span class="sd">            wd_step (float, optional): Wind direction discretization step</span>
 <span class="sd">                size. This defines for what wind directions the energy ratio</span>
 <span class="sd">                is to be calculated. Note that this does not necessarily</span>
@@ -831,6 +852,31 @@ document.write(`
         <span class="n">er_wd_bin_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">er_N_btstrp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate Baseline energy ratios.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            time_mask ([iterable], optional): Time Mask.</span>
+<span class="sd">            ws_mask ([iterable], optional): Wind speed mask. Should be an</span>
+<span class="sd">                iterable of length 2, e.g., [6.0, 10.0], defining the lower</span>
+<span class="sd">                and upper bound, respectively. If not specified, will not</span>
+<span class="sd">                mask the data based on this variable. Defaults to (6, 10).</span>
+<span class="sd">            wd_mask ([iterable], optional): Wind direction mask. Should</span>
+<span class="sd">                be an iterable of length 2, e.g., [0.0, 180.0], defining</span>
+<span class="sd">                the lower and upper bound, respectively. If not specified,</span>
+<span class="sd">                will not mask the data based on this variable. Defaults to</span>
+<span class="sd">                None.</span>
+<span class="sd">            ti_mask ([iterable], optional): Turbulence intensity mask.</span>
+<span class="sd">                Should be an iterable of length 2, e.g., [0.04, 0.08],</span>
+<span class="sd">                defining the lower and upper bound, respectively. If not</span>
+<span class="sd">                specified, will not mask the data based on this variable.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            er_wd_step (float, optional): Wind direction step size.  Defaults to 3.0.</span>
+<span class="sd">            er_ws_step (float, optional): Wind speed step size. Defaults to 5.0.</span>
+<span class="sd">            er_wd_bin_width ([type], optional): Wind direction bin width.  Defaults to None.</span>
+<span class="sd">            er_N_btstrp (int, optional): Number of bootstrap evaluations for</span>
+<span class="sd">                uncertainty quantification (UQ). If N_btstrp=1, will not</span>
+<span class="sd">                perform any uncertainty quantification. Defaults to 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO: is this calculate_baseline method needed?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_get_energy_ratios_allbins</span><span class="p">(</span>
             <span class="n">wd_bias</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
@@ -863,11 +909,13 @@ document.write(`
         <span class="n">er_N_btstrp</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">plot_iter_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Estimate the wind direction bias by comparing the SCADA data</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Estimate wd bias.</span>
+
+<span class="sd">        Estimate the wind direction bias by comparing the SCADA data</span>
 <span class="sd">        under various wind direction corrections to its FLORIS predictions.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            time_mask ([iterable], optional): Wind speed mask. Should be an</span>
+<span class="sd">            time_mask ([iterable], optional): Time mask. Should be an</span>
 <span class="sd">                iterable of length 2, e.g., [pd.to_datetime(&quot;2019-01-01&quot;),</span>
 <span class="sd">                pd.to_datetime(&quot;2019-04-01&quot;)], defining the lower and upper</span>
 <span class="sd">                bound, respectively. If not specified, will not mask the data</span>
@@ -890,6 +938,8 @@ document.write(`
 <span class="sd">                direction offsets to consider. Defaults to (-180., 180.).</span>
 <span class="sd">            opt_search_brute_dx (float, optional): Number of points to</span>
 <span class="sd">                discretize the search space over. Defaults to 5.</span>
+<span class="sd">            opt_workers (int, optional): Number of workers to use for the</span>
+<span class="sd">                optimization. Defaults to 4.</span>
 <span class="sd">            er_wd_step (float, optional): Wind direction discretization step</span>
 <span class="sd">                size. This defines for what wind directions the energy ratio</span>
 <span class="sd">                is to be calculated. Note that this does not necessarily</span>
@@ -915,8 +965,8 @@ document.write(`
 <span class="sd">                None.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            x_opt ([float]): Optimal wind direction offset.</span>
-<span class="sd">            J_opt ([float]): Cost function under optimal offset.</span>
+<span class="sd">            A tuple (float, float): The optimal wind direction offset and</span>
+<span class="sd">                the cost function under the optimal offset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Estimating the wind direction bias&quot;</span><span class="p">)</span>
 
@@ -1012,11 +1062,13 @@ document.write(`
     <span class="k">def</span> <span class="nf">plot_energy_ratios</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">show_uncorrected_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">200</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the energy ratios for the currently evaluated wind</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot energy ratios.</span>
+
+<span class="sd">        Plot the energy ratios for the currently evaluated wind</span>
 <span class="sd">        direction offset term.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            show_uncorrcted_data (bool, optional): Compute and show the</span>
+<span class="sd">            show_uncorrected_data (bool, optional): Compute and show the</span>
 <span class="sd">                uncorrected energy ratio (with wd_bias=0) on the plot. Defaults</span>
 <span class="sd">                to False.</span>
 <span class="sd">            save_path ([str], optional): Path to save the figure to. If not</span>

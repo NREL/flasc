@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,27 +538,25 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.utilities.utilities</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span></span><span class="sd">&quot;&quot;&quot;Utility functions for the FLASC module.&quot;&quot;&quot;</span>
 
-<span class="c1"># import numba</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="c1"># import scipy.interpolate as interp</span>
 <span class="kn">from</span> <span class="nn">floris.utilities</span> <span class="kn">import</span> <span class="n">wrap_360</span>
 
 
 <div class="viewcode-block" id="estimate_dt">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.utilities.estimate_dt.html#flasc.utilities.utilities.estimate_dt">[docs]</a>
 <span class="k">def</span> <span class="nf">estimate_dt</span><span class="p">(</span><span class="n">time_array</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatically estimate timestep in a time_array</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatically estimate timestep in a time_array.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        time_array ([list]): List or dataframe with time entries</span>
+<span class="sd">        time_array (list): List or dataframe with time entries</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dt ([datetime.timedelta]): Timestep in dt.timedelta format</span>
+<span class="sd">        datetime.timedelta: Timestep in dt.timedelta format</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_array</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="c1"># Assume arbitrary value</span>
         <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -579,6 +576,14 @@ document.write(`
 <div class="viewcode-block" id="get_num_turbines">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.utilities.get_num_turbines.html#flasc.utilities.utilities.get_num_turbines">[docs]</a>
 <span class="k">def</span> <span class="nf">get_num_turbines</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the number of turbines in a dataframe.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): Dataframe with turbine data</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       int: Number of turbines in the dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">nt</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="p">(</span><span class="s2">&quot;pow_</span><span class="si">%03d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nt</span><span class="p">)</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">nt</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -589,6 +594,26 @@ document.write(`
 <div class="viewcode-block" id="interp_with_max_gap">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.utilities.interp_with_max_gap.html#flasc.utilities.utilities.interp_with_max_gap">[docs]</a>
 <span class="k">def</span> <span class="nf">interp_with_max_gap</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">max_gap</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">wrap_around_360</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate data linearly or using nearest-neighbor with maximum gap.</span>
+
+<span class="sd">    If there is larger gap in data than `max_gap`, the gap will be filled</span>
+<span class="sd">    with np.nan.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.array): The output x-data; the data points in x-axis that</span>
+<span class="sd">            you want the interpolation results from.</span>
+<span class="sd">        xp (np.array): The input x-data.</span>
+<span class="sd">        fp (np.array): The input y-data.</span>
+<span class="sd">        max_gap (float): The maximum allowable distance between x and `xp` for which</span>
+<span class="sd">            interpolation is still performed. Gaps larger than</span>
+<span class="sd">            this will be filled with np.nan in the output `target_y`.</span>
+<span class="sd">        kind (str): The interpolation method to use. Can be &#39;linear&#39; or &#39;nearest&#39;.</span>
+<span class="sd">        wrap_around_360 (bool): If True, the interpolation will be done in a circular</span>
+<span class="sd">            fashion, i.e., the interpolation will wrap around 360 degrees.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: The interpolation results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;nearest&quot;</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Unknown interpolation method specified.&quot;</span><span class="p">)</span>
 
@@ -623,38 +648,28 @@ document.write(`
     <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
     <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Interpolate data linearly or using nearest-neighbor with maximum gap.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate data linearly or using nearest-neighbor with maximum gap.</span>
+
 <span class="sd">    If there is larger gap in data than `max_gap`, the gap will be filled</span>
 <span class="sd">    with np.nan.</span>
 
 <span class="sd">    The input values should not contain NaNs.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ---------</span>
-<span class="sd">    xp: np.array</span>
-<span class="sd">        The input x-data.</span>
-<span class="sd">    fp: np.array</span>
-<span class="sd">        The input y-data.</span>
-<span class="sd">    x: np.array</span>
-<span class="sd">        The output x-data; the data points in x-axis that</span>
-<span class="sd">        you want the interpolation results from.</span>
-<span class="sd">    max_gap: float</span>
-<span class="sd">        The maximum allowable distance between x and `xp` for which</span>
-<span class="sd">        interpolation is still performed. Gaps larger than</span>
-<span class="sd">        this will be filled with np.nan in the output `target_y`.</span>
-<span class="sd">    xp_is_sorted: boolean, default: True</span>
-<span class="sd">        If True, the input data `xp` is assumed to be monotonically</span>
-<span class="sd">        increasing. Some performance gain if you supply sorted input data.</span>
-<span class="sd">    x_is_sorted: boolean, default: True</span>
-<span class="sd">        If True, the input data `x` is assumed to be</span>
-<span class="sd">        monotonically increasing. Some performance gain if you supply</span>
-<span class="sd">        sorted input data.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.array): The output x-data; the data points in x-axis that</span>
+<span class="sd">            you want the interpolation results from.</span>
+<span class="sd">        xp (np.array): The input x-data.</span>
+<span class="sd">        fp (np.array): The input y-data.</span>
+<span class="sd">        max_gap (float): The maximum allowable distance between x and `xp` for which</span>
+<span class="sd">            interpolation is still performed. Gaps larger than</span>
+<span class="sd">            this will be filled with np.nan in the output `target_y`.</span>
+<span class="sd">        assume_sorted (bool): If True, assume that `xp` is sorted in ascending</span>
+<span class="sd">            order. If False, sort `xp` and `fp` to be monotonous.</span>
+<span class="sd">        kind (str): The interpolation method to use. Can be &#39;linear&#39; or &#39;nearest&#39;.</span>
+<span class="sd">        extrapolate (bool): If True, extrapolate the data points on the boundaries</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    ------</span>
-<span class="sd">    target_y: np.array</span>
-<span class="sd">        The interpolation results.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: The interpolation results.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">assume_sorted</span><span class="p">:</span>
         <span class="c1"># Sort xp and fp to be monotonous</span>

@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -627,32 +626,33 @@ document.write(`
                   
   <section id="module-flasc.utilities.energy_ratio_utilities">
 <span id="flasc-utilities-energy-ratio-utilities"></span><h1>flasc.utilities.energy_ratio_utilities<a class="headerlink" href="#module-flasc.utilities.energy_ratio_utilities" title="Link to this heading">#</a></h1>
+<p>Utility functions for calculating energy ratios.</p>
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_bin_weights.html#flasc.utilities.energy_ratio_utilities.add_bin_weights" title="flasc.utilities.energy_ratio_utilities.add_bin_weights"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_bin_weights</span></code></a></p></td>
-<td><p>Add weights to DataFrame bins based on either frequency counts or the provided frequency table df_freq_pl.</p></td>
+<td><p>Add weights to DataFrame bins.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_power_ref.html#flasc.utilities.energy_ratio_utilities.add_power_ref" title="flasc.utilities.energy_ratio_utilities.add_power_ref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_power_ref</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Add the pow_ref column to a dataframe, given which columns to average over.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_power_test.html#flasc.utilities.energy_ratio_utilities.add_power_test" title="flasc.utilities.energy_ratio_utilities.add_power_test"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_power_test</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Add the pow_test column to a dataframe, given which columns to average over.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_reflected_rows.html#flasc.utilities.energy_ratio_utilities.add_reflected_rows" title="flasc.utilities.energy_ratio_utilities.add_reflected_rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_reflected_rows</span></code></a></p></td>
-<td><p>Adds rows to a datrame with where the wind direction is reflected around the neearest edge if within overlap_distance</p></td>
+<td><p>Add reflected rows to a dataframe.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_wd.html#flasc.utilities.energy_ratio_utilities.add_wd" title="flasc.utilities.energy_ratio_utilities.add_wd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_wd</span></code></a></p></td>
-<td><p>Add the wd column to a dataframe, given which columns to average over</p></td>
+<td><p>Add the wd column to a dataframe, given which columns to average over.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_wd_bin.html#flasc.utilities.energy_ratio_utilities.add_wd_bin" title="flasc.utilities.energy_ratio_utilities.add_wd_bin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_wd_bin</span></code></a></p></td>
-<td><p>Add the wd_bin column to a dataframe, given which columns to average over and the step sizes to use</p></td>
+<td><p>Add the wd_bin column to a dataframe.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_ws.html#flasc.utilities.energy_ratio_utilities.add_ws" title="flasc.utilities.energy_ratio_utilities.add_ws"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_ws</span></code></a></p></td>
-<td><p>Add the ws column to a dataframe, given which columns to average over</p></td>
+<td><p>Add the ws column to a dataframe, given which columns to average over.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_ws_bin.html#flasc.utilities.energy_ratio_utilities.add_ws_bin" title="flasc.utilities.energy_ratio_utilities.add_ws_bin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_ws_bin</span></code></a></p></td>
-<td><p>Add the ws_bin column to a dataframe, given which columns to average over and the step sizes to use</p></td>
+<td><p>Add the ws_bin column to a dataframe.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html#flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe" title="flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bin_and_group_dataframe</span></code></a></p></td>
 <td><p>Bin and aggregate a DataFrame based on wind direction and wind speed parameters.</p></td>
@@ -661,16 +661,16 @@ document.write(`
 <td><p>Bins the values in the specified column of a Polars DataFrame according to the given edges.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html#flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs" title="flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_compute_energy_ratio_inputs</span></code></a></p></td>
-<td><p>Check inputs to compute_energy_ratio.</p></td>
+<td><p>Check the inputs to compute_energy_ratio.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.cut.html#flasc.utilities.energy_ratio_utilities.cut" title="flasc.utilities.energy_ratio_utilities.cut"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut</span></code></a></p></td>
 <td><p>Bins the values in the specified column according to the given edges.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.filter_all_nulls.html#flasc.utilities.energy_ratio_utilities.filter_all_nulls" title="flasc.utilities.energy_ratio_utilities.filter_all_nulls"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_all_nulls</span></code></a></p></td>
-<td><p>Filter data by requiring ALL values of ref, test, ws, and wd to be valid numbers.</p></td>
+<td><p>Filter dataframe for ALL nulls.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.filter_any_nulls.html#flasc.utilities.energy_ratio_utilities.filter_any_nulls" title="flasc.utilities.energy_ratio_utilities.filter_any_nulls"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_any_nulls</span></code></a></p></td>
-<td><p>Filter data by requiring ANY of ref, ANY of test, ANY of ws, and ANY of wd to be a valid number.</p></td>
+<td><p>Filter dataframe for ANY nulls.</p></td>
 </tr>
 </tbody>
 </table>
@@ -679,58 +679,49 @@ document.write(`
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.cut">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">cut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#cut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.cut" title="Link to this definition">#</a></dt>
 <dd><p>Bins the values in the specified column according to the given edges.</p>
-<p>Parameters:
-:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expr</span></code></span></p>
-<p>col_name (str): The name of the column to bin.
-edges (array-like): The edges of the bins. Values will be placed into the bin</p>
-<blockquote>
-<div><p>whose left edge is the largest edge less than or equal to
-the value, and whose right edge is the smallest edge
-greater than the value.</p>
-</div></blockquote>
-<p>Returns:
-expression: An expression object that can be used to bin the column.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>col_name</strong> (<em>str</em>)</p></li>
-<li><p><strong>edges</strong> (<em>ndarray</em><em> | </em><em>list</em>)</p></li>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expr</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>col_name</strong> (<em>str</em>) -- The name of the column to bin.</p></li>
+<li><p><strong>edges</strong> (<em>array-like</em>) -- The edges of the bins. Values will be placed into the bin
+whose left edge is the largest edge less than or equal to
+the value, and whose right edge is the smallest edge
+greater than the value.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>Expr</em></p>
-</dd>
 </dl>
+<p>Returns:
+expression: An expression object that can be used to bin the column.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.bin_column">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">bin_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_col_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#bin_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.bin_column" title="Link to this definition">#</a></dt>
 <dd><p>Bins the values in the specified column of a Polars DataFrame according to the given edges.</p>
-<p>Parameters:
-<a href="#id1"><span class="problematic" id="id2">df_</span></a> (pl.DataFrame): The Polars DataFrame containing the column to bin.
-col_name (str): The name of the column to bin.
-:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
-<p>bin_col_name (str): The name to give the new column containing the bin labels.
-edges (array-like): The edges of the bins. Values will be placed into the bin</p>
-<blockquote>
-<div><p>whose left edge is the largest edge less than or equal to
-the value, and whose right edge is the smallest edge
-greater than the value.</p>
-</div></blockquote>
-<p>Returns:
-pl.DataFrame: A new Polars DataFrame with an additional column containing the bin labels.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>df</strong> (<em>pl.DataFrame</em>) -- The Polars DataFrame containing the column to bin.</p></li>
+<li><p><strong>col_name</strong> (<em>str</em>) -- The name of the column to bin.</p></li>
+<li><p><strong>bin_col_name</strong> (<em>str</em>) -- The name to give the new column containing the bin labels.</p></li>
+<li><p><strong>edges</strong> (<em>array-like</em>) -- The edges of the bins. Values will be placed into the bin
+whose left edge is the largest edge less than or equal to
+the value, and whose right edge is the smallest edge
+greater than the value.</p></li>
 <li><p><strong>df_</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>col_name</strong> (<em>str</em>)</p></li>
-<li><p><strong>bin_col_name</strong> (<em>str</em>)</p></li>
-<li><p><strong>edges</strong> (<em>ndarray</em><em> | </em><em>list</em>)</p></li>
 </ul>
 </dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new Polars DataFrame with an additional column containing the bin labels.</p>
+</dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>DataFrame</em></p>
+<dd class="field-even"><p>pl.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -738,23 +729,24 @@ pl.DataFrame: A new Polars DataFrame with an additional column containing the bi
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.add_ws">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">add_ws</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_all_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#add_ws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.add_ws" title="Link to this definition">#</a></dt>
-<dd><p>Add the ws column to a dataframe, given which columns to average over</p>
-<p>Parameters:
-<a href="#id3"><span class="problematic" id="id4">df_</span></a> (pl.DataFrame): The Polars DataFrame containing the column to bin.
-ws_cols (list(str)): The name of the columns to average across.
-remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)</p>
-<p>Returns:
-pl.DataFrame: A new Polars DataFrame with an additional ws column</p>
+<dd><p>Add the ws column to a dataframe, given which columns to average over.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
+<li><p><strong>df</strong> (<em>pl.DataFrame</em>) -- The Polars DataFrame containing the column to bin.</p></li>
+<li><p><strong>ws_cols</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) -- The name of the columns to average across.</p></li>
+<li><p><strong>remove_all_nulls</strong> (<em>bool</em>) -- (bool): Remove all null values in ws_cols (rather than any)</p></li>
 <li><p><strong>df_</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>ws_cols</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
-<li><p><strong>remove_all_nulls</strong> (<em>bool</em>)</p></li>
 </ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new Polars DataFrame with an additional ws column</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pl.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -762,39 +754,33 @@ pl.DataFrame: A new Polars DataFrame with an additional ws column</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.add_ws_bin">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">add_ws_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_all_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#add_ws_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.add_ws_bin" title="Link to this definition">#</a></dt>
-<dd><p>Add the ws_bin column to a dataframe, given which columns to average over
-and the step sizes to use</p>
-<p>Parameters:
-<a href="#id5"><span class="problematic" id="id6">df_</span></a> (pl.DataFrame): The Polars DataFrame containing the column to bin.
-ws_cols (list(str)): The name of the columns to average across.
-ws_step (float): Step size for binning
-ws_min (float): Minimum wind speed
-:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
-<p>ws_max (float): Maximum wind speed
-edges (array-like): The edges of the bins. Values will be placed into the bin</p>
-<blockquote>
-<div><p>whose left edge is the largest edge less than or equal to
+<dd><p>Add the ws_bin column to a dataframe.</p>
+<p>Given which columns to average over and the step sizes to use</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>df</strong> (<em>pl.DataFrame</em>) -- The Polars DataFrame containing the column to bin.</p></li>
+<li><p><strong>ws_cols</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) -- The name of the columns to average across.</p></li>
+<li><p><strong>ws_step</strong> (<em>float</em>) -- Step size for binning</p></li>
+<li><p><strong>ws_min</strong> (<em>float</em>) -- Minimum wind speed</p></li>
+<li><p><strong>ws_max</strong> (<em>float</em>) -- Maximum wind speed</p></li>
+<li><p><strong>edges</strong> (<em>array-like</em>) -- The edges of the bins. Values will be placed into the bin
+whose left edge is the largest edge less than or equal to
 the value, and whose right edge is the smallest edge
 greater than the value.  Defaults to None, in which case
-the edges are generated using ws_step, ws_min, and ws_max.</p>
-</div></blockquote>
-<p>remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)</p>
-<p>Returns:
-pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
+the edges are generated using ws_step, ws_min, and ws_max.</p></li>
+<li><p><strong>remove_all_nulls</strong> (<em>bool</em>) -- (bool): Remove all null values in ws_cols (rather than any)</p></li>
 <li><p><strong>df_</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>ws_cols</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
-<li><p><strong>ws_step</strong> (<em>float</em>)</p></li>
-<li><p><strong>ws_min</strong> (<em>float</em>)</p></li>
-<li><p><strong>ws_max</strong> (<em>float</em>)</p></li>
-<li><p><strong>edges</strong> (<em>ndarray</em><em> | </em><em>list</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>remove_all_nulls</strong> (<em>bool</em>)</p></li>
 </ul>
 </dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new Polars DataFrame with an additional ws_bin column</p>
+</dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><em>DataFrame</em></p>
+<dd class="field-even"><p>pl.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -802,23 +788,24 @@ pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.add_wd">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">add_wd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_all_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#add_wd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.add_wd" title="Link to this definition">#</a></dt>
-<dd><p>Add the wd column to a dataframe, given which columns to average over</p>
-<p>Parameters:
-<a href="#id7"><span class="problematic" id="id8">df_</span></a> (pl.DataFrame): The Polars DataFrame containing the column to bin.
-wd_cols (list(str)): The name of the columns to average across.
-remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)</p>
-<p>Returns:
-pl.DataFrame: A new Polars DataFrame with an additional wd column</p>
+<dd><p>Add the wd column to a dataframe, given which columns to average over.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
+<li><p><strong>df</strong> (<em>pl.DataFrame</em>) -- The Polars DataFrame containing the column to bin.</p></li>
+<li><p><strong>wd_cols</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) -- The name of the columns to average across.</p></li>
+<li><p><strong>remove_all_nulls</strong> (<em>bool</em>) -- (bool): Remove all null values in wd_cols (rather than any)</p></li>
 <li><p><strong>df_</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>wd_cols</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
-<li><p><strong>remove_all_nulls</strong> (<em>bool</em>)</p></li>
 </ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new Polars DataFrame with an additional wd column</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pl.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -826,35 +813,31 @@ pl.DataFrame: A new Polars DataFrame with an additional wd column</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.add_wd_bin">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">add_wd_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">360.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_all_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#add_wd_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.add_wd_bin" title="Link to this definition">#</a></dt>
-<dd><p>Add the wd_bin column to a dataframe, given which columns to average over
+<dd><p>Add the wd_bin column to a dataframe.</p>
+<p>Given which columns to average over
 and the step sizes to use</p>
-<p>Parameters:
-<a href="#id9"><span class="problematic" id="id10">df_</span></a> (pl.DataFrame): The Polars DataFrame containing the column to bin.
-wd_cols (list(str)): The name of the columns to average across.
-wd_step (float): Step size for binning
-wd_min (float): Minimum wind direction
-wd_max (float): Maximum wind direction
-edges (array-like): The edges of the bins. Values will be placed into the bin</p>
-<blockquote>
-<div><p>whose left edge is the largest edge less than or equal to
-the value, and whose right edge is the smallest edge
-greater than the value.  Defaults to None, in which case
-the edges are generated using ws_step, ws_min, and ws_max.</p>
-</div></blockquote>
-<p>remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)</p>
-<p>Returns:
-pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pl.DataFrame</em>) -- The Polars DataFrame containing the column to bin.</p></li>
+<li><p><strong>wd_cols</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) -- The name of the columns to average across.</p></li>
+<li><p><strong>wd_step</strong> (<em>float</em>) -- Step size for binning</p></li>
+<li><p><strong>wd_min</strong> (<em>float</em>) -- Minimum wind direction</p></li>
+<li><p><strong>wd_max</strong> (<em>float</em>) -- Maximum wind direction</p></li>
+<li><p><strong>edges</strong> (<em>array-like</em>) -- The edges of the bins. Values will be placed into the bin
+whose left edge is the largest edge less than or equal to
+the value, and whose right edge is the smallest edge
+greater than the value.  Defaults to None, in which case
+the edges are generated using ws_step, ws_min, and ws_max.</p></li>
+<li><p><strong>remove_all_nulls</strong> (<em>bool</em>) -- (bool): Remove all null values in wd_cols (rather than any)</p></li>
 <li><p><strong>df_</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>wd_cols</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
-<li><p><strong>wd_step</strong> (<em>float</em>)</p></li>
-<li><p><strong>wd_min</strong> (<em>float</em>)</p></li>
-<li><p><strong>wd_max</strong> (<em>float</em>)</p></li>
-<li><p><strong>edges</strong> (<em>ndarray</em><em> | </em><em>list</em><em> | </em><em>None</em>)</p></li>
-<li><p><strong>remove_all_nulls</strong> (<em>bool</em>)</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Polars DataFrame with an additional ws_bin column</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -862,15 +845,23 @@ pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.add_power_test">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">add_power_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_cols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#add_power_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.add_power_test" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Add the pow_test column to a dataframe, given which columns to average over.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
+<li><p><strong>df</strong> (<em>pl.DataFrame</em>) -- The Polars DataFrame containing the column to bin.</p></li>
+<li><p><strong>test_cols</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) -- The name of the columns to average across.</p></li>
 <li><p><strong>df_</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>test_cols</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
 </ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new Polars DataFrame with an additional pow_test column</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pl.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -878,12 +869,20 @@ pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.add_power_ref">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">add_power_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_cols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#add_power_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.add_power_ref" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Add the pow_ref column to a dataframe, given which columns to average over.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pl.DataFrame</em>) -- The Polars DataFrame containing the column to bin.</p></li>
+<li><p><strong>ref_cols</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) -- The name of the columns to average across.</p></li>
 <li><p><strong>df_</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>ref_cols</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Polars DataFrame with an additional pow_ref column</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pl.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -891,8 +890,9 @@ pl.DataFrame: A new Polars DataFrame with an additional ws_bin column</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.add_reflected_rows">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">add_reflected_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#add_reflected_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.add_reflected_rows" title="Link to this definition">#</a></dt>
-<dd><p>Adds rows to a datrame with where the wind direction is
-reflected around the neearest edge if within overlap_distance</p>
+<dd><p>Add reflected rows to a dataframe.</p>
+<p>Adds rows to a dataframe with where the wind direction is
+reflected around the nearest edge if within overlap_distance</p>
 <p>Given a wind direction DataFrame <cite>df_</cite>, this function adds
 reflected rows to the DataFrame such that each wind direction
 in the original DataFrame has a corresponding reflected wind
@@ -906,19 +906,23 @@ returns a new DataFrame with the original rows and the added reflected rows.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>polars.DataFrame</em>) -- The DataFrame to add reflected rows to.</p></li>
-<li><p><strong>edges</strong> (<em>numpy.ndarray</em>) -- An array of wind direction edges to use for reflection.
+<li><p><strong>df</strong> -- polars.DataFrame
+The DataFrame to add reflected rows to.</p></li>
+<li><p><strong>edges</strong> (<em>ndarray</em><em> | </em><em>list</em>) -- numpy.ndarray
+An array of wind direction edges to use for reflection.
 (Should be same as used in energy ratio)</p></li>
-<li><p><strong>overlap_distance</strong> (<em>float</em>) -- The maximum distance between a wind direction and an edge
+<li><p><strong>overlap_distance</strong> (<em>float</em>) -- float
+The maximum distance between a wind direction and an edge
 for the wind direction to be considered overlapping.</p></li>
 <li><p><strong>df_</strong> (<em>DataFrame</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A new DataFrame with the original rows and the added reflected rows.</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>polars.DataFrame</dt><dd><p>A new DataFrame with the original rows and the added reflected rows.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>polars.DataFrame</p>
+</dl>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -926,7 +930,8 @@ for the wind direction to be considered overlapping.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.filter_all_nulls">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">filter_all_nulls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_cols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#filter_all_nulls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.filter_all_nulls" title="Link to this definition">#</a></dt>
-<dd><p>Filter data by requiring ALL values of ref, test, ws, and wd to be valid
+<dd><p>Filter dataframe for ALL nulls.</p>
+<p>Filter data by requiring ALL values of ref, test, ws, and wd to be valid
 numbers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -951,7 +956,8 @@ numbers.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.filter_any_nulls">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">filter_any_nulls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_cols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#filter_any_nulls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.filter_any_nulls" title="Link to this definition">#</a></dt>
-<dd><p>Filter data by requiring ANY of ref, ANY of test, ANY of ws, and ANY of wd
+<dd><p>Filter dataframe for ANY nulls.</p>
+<p>Filter data by requiring ANY of ref, ANY of test, ANY of ws, and ANY of wd
 to be a valid number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -976,15 +982,48 @@ to be a valid number.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">check_compute_energy_ratio_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_predefined_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_predefined_wd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_predefined_ws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_cols_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_by</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_bin_overlap_radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uplift_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uplift_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uplift_absolute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_all_nulls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#check_compute_energy_ratio_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs" title="Link to this definition">#</a></dt>
-<dd><p>Check inputs to compute_energy_ratio. Inputs reflect inputs to compute_energy_ratio,
-with exception of <a href="#id11"><span class="problematic" id="id12">df_</span></a>, which is passed directly instead of er_in.</p>
+<dd><p>Check the inputs to compute_energy_ratio.</p>
+<p>Check inputs to compute_energy_ratio. Inputs reflect inputs to compute_energy_ratio,
+with exception of <a href="#id1"><span class="problematic" id="id2">df_</span></a>, which is passed directly instead of er_in.</p>
+<p>All the inputs of compute_energy_ratio are checked for validity. This function does not
+check every input, although they are all accepted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pl.DataFrame</em>) -- The Polars DataFrame</p></li>
+<li><p><strong>ref_turbines</strong> (<em>list</em>) -- A list of the reference turbine columns</p></li>
+<li><p><strong>test_turbines</strong> (<em>list</em>) -- A list of the test turbine columns</p></li>
+<li><p><strong>wd_turbines</strong> (<em>list</em>) -- A list of the wind direction columns</p></li>
+<li><p><strong>ws_turbines</strong> (<em>list</em>) -- A list of the wind speed columns</p></li>
+<li><p><strong>use_predefined_ref</strong> (<em>bool</em>) -- Whether to use predefined reference turbines</p></li>
+<li><p><strong>use_predefined_wd</strong> (<em>bool</em>) -- Whether to use predefined wind direction turbines</p></li>
+<li><p><strong>use_predefined_ws</strong> (<em>bool</em>) -- Whether to use predefined wind speed turbines</p></li>
+<li><p><strong>wd_step</strong> (<em>float</em>) -- Step size for binning wind direction</p></li>
+<li><p><strong>wd_min</strong> (<em>float</em>) -- Minimum wind direction</p></li>
+<li><p><strong>wd_max</strong> (<em>float</em>) -- Maximum wind direction</p></li>
+<li><p><strong>ws_step</strong> (<em>float</em>) -- Step size for binning wind speed</p></li>
+<li><p><strong>ws_min</strong> (<em>float</em>) -- Minimum wind speed</p></li>
+<li><p><strong>ws_max</strong> (<em>float</em>) -- Maximum wind speed</p></li>
+<li><p><strong>bin_cols_in</strong> (<em>list</em>) -- A list of columns to bin</p></li>
+<li><p><strong>weight_by</strong> (<em>str</em>) -- A string indicating how to weight the bins</p></li>
+<li><p><strong>df_freq</strong> (<em>pl.DataFrame</em>) -- A DataFrame containing frequency data</p></li>
+<li><p><strong>wd_bin_overlap_radius</strong> (<em>float</em>) -- The radius for overlapping wind direction bins</p></li>
+<li><p><strong>uplift_pairs</strong> (<em>list</em>) -- A list of uplift pairs</p></li>
+<li><p><strong>uplift_names</strong> (<em>list</em>) -- A list of uplift names</p></li>
+<li><p><strong>uplift_absolute</strong> (<em>bool</em>) -- Whether to use absolute uplift</p></li>
+<li><p><strong>N</strong> (<em>int</em>) -- Number of bootstrapping iterations</p></li>
+<li><p><strong>percentiles</strong> (<em>list</em>) -- A list of percentiles to calculate from bootstrap</p></li>
+<li><p><strong>remove_all_nulls</strong> (<em>bool</em>) -- Whether to remove all nulls</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">bin_and_group_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">360.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_bin_overlap_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_all_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_cols_without_df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#bin_and_group_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe" title="Link to this definition">#</a></dt>
 <dd><p>Bin and aggregate a DataFrame based on wind direction and wind speed parameters.</p>
-<p>This function takes a Polars DataFrame (<a href="#id13"><span class="problematic" id="id14">df_</span></a>) and performs
+<p>This function takes a Polars DataFrame (<a href="#id3"><span class="problematic" id="id4">df_</span></a>) and performs
 binning and aggregation operations based on
 wind direction (wd) and wind speed (ws). It allows for optional
 handling of reflected rows and grouping by
@@ -1027,18 +1066,19 @@ for grouping without 'df_name'.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.energy_ratio_utilities.add_bin_weights">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.energy_ratio_utilities.</span></span><span class="sig-name descname"><span class="pre">add_bin_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_freq_pl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_cols_without_df_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'min'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/energy_ratio_utilities.html#add_bin_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.energy_ratio_utilities.add_bin_weights" title="Link to this definition">#</a></dt>
-<dd><p>Add weights to DataFrame bins based on either frequency counts or
+<dd><p>Add weights to DataFrame bins.</p>
+<p>Add weights to DataFrame bins based on either frequency counts or
 the provided frequency table df_freq_pl.</p>
 <p>This function  assigns weights to DataFrame bins.  If 'df_freq_pl' is provided,
 these weights are used directly.  If 'df_freq_pl' is not provided, the function
-calculates the weights from the input DataFrame '<a href="#id15"><span class="problematic" id="id16">df_</span></a>'.
+calculates the weights from the input DataFrame '<a href="#id5"><span class="problematic" id="id6">df_</span></a>'.
 Weights can be determined as either the minimum ('min') or the sum ('sum') of counts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>DataFrame</em>) -- The input Polars DataFrame containing bins and frequency counts.</p></li>
 <li><p><strong>df_freq_pl</strong> (<em>DataFrame</em><em>, </em><em>optional</em>) -- A Polars DataFrame containing frequency counts for bins.
-If not provided, the function will calculate these counts from '<a href="#id17"><span class="problematic" id="id18">df_</span></a>'.</p></li>
+If not provided, the function will calculate these counts from '<a href="#id7"><span class="problematic" id="id8">df_</span></a>'.</p></li>
 <li><p><strong>bin_cols_without_df_name</strong> (<em>List</em><em>, </em><em>optional</em>) -- List of columns used for grouping
 bins without 'df_name'.</p></li>
 <li><p><strong>weight_by</strong> (<em>str</em><em>, </em><em>optional</em>) -- Weight calculation method, either 'min'
@@ -1049,7 +1089,7 @@ Defaults to 'min'.</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>A tuple containing the modified DataFrame '<a href="#id19"><span class="problematic" id="id20">df_</span></a>'</dt><dd><p>with added weights and the DataFrame</p>
+<dt>A tuple containing the modified DataFrame '<a href="#id9"><span class="problematic" id="id10">df_</span></a>'</dt><dd><p>with added weights and the DataFrame</p>
 </dd>
 </dl>
 </p>

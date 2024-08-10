@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -614,11 +613,12 @@ document.write(`
                   
   <section id="module-flasc.utilities.lookup_table_tools">
 <span id="flasc-utilities-lookup-table-tools"></span><h1>flasc.utilities.lookup_table_tools<a class="headerlink" href="#module-flasc.utilities.lookup_table_tools" title="Link to this heading">#</a></h1>
+<p>Module for creating interpolants from lookup tables.</p>
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant.html#flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant" title="flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_yaw_angles_interpolant</span></code></a></p></td>
-<td><p>Create an interpolant for the optimal yaw angles from a dataframe 'df_opt', which contains the rows 'wind_direction', 'wind_speed', 'turbulence_intensity', and 'yaw_angles_opt'.</p></td>
+<td><p>Get an interpolant for the optimal yaw angles from a dataframe.</p></td>
 </tr>
 </tbody>
 </table>
@@ -626,7 +626,8 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.lookup_table_tools.</span></span><span class="sig-name descname"><span class="pre">get_yaw_angles_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_opt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ramp_up_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[4,</span> <span class="pre">5]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ramp_down_ws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[10,</span> <span class="pre">12]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_yaw_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_yaw_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/lookup_table_tools.html#get_yaw_angles_interpolant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant" title="Link to this definition">#</a></dt>
-<dd><p>Create an interpolant for the optimal yaw angles from a dataframe
+<dd><p>Get an interpolant for the optimal yaw angles from a dataframe.</p>
+<p>Create an interpolant for the optimal yaw angles from a dataframe
 'df_opt', which contains the rows 'wind_direction', 'wind_speed',
 'turbulence_intensity', and 'yaw_angles_opt'. This dataframe is typically
 produced automatically from a FLORIS yaw optimization using Serial Refine
@@ -635,42 +636,35 @@ to transition between non-wake-steering and wake-steering operation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df_opt</strong> (<em>pd.DataFrame</em>) -- Dataframe containing the rows 'wind_direction',</p></li>
-<li><p><strong>'wind_speed'</strong></p></li>
-<li><p><strong>'turbulence_intensity'</strong></p></li>
-<li><p><strong>'yaw_angles_opt'.</strong> (<em>and</em>)</p></li>
-<li><p><strong>ramp_up_ws</strong> (<em>list</em><em>, </em><em>optional</em>) -- List with length 2 depicting the wind</p></li>
-<li><p><strong>ends</strong> (<em>speeds at which the ramp starts and</em>)</p></li>
-<li><p><strong>respectively</strong></p></li>
-<li><p><strong>lower</strong> (<em>on the</em>)</p></li>
-<li><p><strong>[</strong><strong>4</strong> (<em>end. This variable defaults to</em>)</p></li>
-<li><p><strong>5</strong><strong>]</strong></p></li>
-<li><p><strong>are</strong> (<em>meaning that the yaw offsets</em>)</p></li>
-<li><p><strong>m/s</strong> (<em>at 12</em>)</p></li>
-<li><p><strong>offsets</strong> (<em>then linearly transition to zero</em>)</p></li>
-<li><p><strong>m/s</strong></p></li>
-<li><p><strong>to</strong> (<em>and continue to be their full offsets past 5 m/s. Defaults</em>)</p></li>
-<li><p><strong>[</strong><strong>4</strong></p></li>
-<li><p><strong>5</strong><strong>]</strong><strong>.</strong></p></li>
-<li><p><strong>ramp_down_ws</strong> (<em>list</em><em>, </em><em>optional</em>) -- List with length 2 depicting the wind</p></li>
-<li><p><strong>ends</strong></p></li>
-<li><p><strong>respectively</strong></p></li>
-<li><p><strong>higher</strong> (<em>on the</em>)</p></li>
-<li><p><strong>[</strong><strong>10</strong> (<em>and continue to be zero past 12 m/s. Defaults to</em>)</p></li>
-<li><p><strong>12</strong><strong>]</strong></p></li>
-<li><p><strong>are</strong></p></li>
-<li><p><strong>m/s</strong></p></li>
-<li><p><strong>offsets</strong></p></li>
-<li><p><strong>m/s</strong></p></li>
-<li><p><strong>[</strong><strong>10</strong></p></li>
-<li><p><strong>12</strong><strong>]</strong><strong>.</strong></p></li>
+<li><p><strong>df_opt</strong> (<em>pd.DataFrame</em>) -- Dataframe containing the rows 'wind_direction',
+'wind_speed', 'turbulence_intensity', and 'yaw_angles_opt'.</p></li>
+<li><p><strong>ramp_up_ws</strong> (<em>list</em><em>, </em><em>optional</em>) -- List with length 2 depicting the wind
+speeds at which the ramp starts and ends, respectively, on the lower
+end. This variable defaults to [4, 5], meaning that the yaw offsets are
+zero at and below 4 m/s, then linearly transition to their full offsets
+at 5 m/s, and continue to be their full offsets past 5 m/s. Defaults to
+[4, 5].</p></li>
+<li><p><strong>ramp_down_ws</strong> (<em>list</em><em>, </em><em>optional</em>) -- List with length 2 depicting the wind
+speeds at which the ramp starts and ends, respectively, on the higher
+end. This variable defaults to [10, 12], meaning that the yaw offsets are
+full at and below 10 m/s, then linearly transition to zero offsets
+at 12 m/s, and continue to be zero past 12 m/s. Defaults to [10, 12].</p></li>
+<li><p><strong>minimum_yaw_angle</strong> (<em>float</em><em>, </em><em>optional</em>) -- The minimum yaw angle in degrees.
+Defaults to None.  If None, the minimum yaw angle is set to the minimum
+yaw angle in the dataset.</p></li>
+<li><p><strong>maximum_yaw_angle</strong> (<em>float</em><em>, </em><em>optional</em>) -- The maximum yaw angle in degrees.
+Defaults to None.  If None, the maximum yaw angle is set to the maximum
+yaw angle in the dataset.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>An interpolant function which takes the inputs
-(wind_directions, wind_speeds, turbulence_intensities), all of equal
+<dd class="field-even"><p><dl class="simple">
+<dt>An interpolant function which takes the inputs</dt><dd><p>(wind_directions, wind_speeds, turbulence_intensities), all of equal
 dimensions, and returns the yaw angles for all turbines. This function
 incorporates the ramp-up and ramp-down regions.</p>
+</dd>
+</dl>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>LinearNDInterpolator</p>

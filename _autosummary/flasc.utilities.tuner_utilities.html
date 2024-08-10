@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,6 +616,10 @@ document.write(`
                   
   <section id="module-flasc.utilities.tuner_utilities">
 <span id="flasc-utilities-tuner-utilities"></span><h1>flasc.utilities.tuner_utilities<a class="headerlink" href="#module-flasc.utilities.tuner_utilities" title="Link to this heading">#</a></h1>
+<p>Utilities for tuning FLORIS parameters.</p>
+<p>This module contains utilities for tuning FLORIS parameters. This includes
+functions for resimulating FLORIS with SCADA data, and functions for setting
+parameters in a FLORIS model.</p>
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
@@ -630,7 +633,7 @@ document.write(`
 <td><p>Replicate NaN Values in DataFrame df_2 to Match DataFrame df_1.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.tuner_utilities.resim_floris.html#flasc.utilities.tuner_utilities.resim_floris" title="flasc.utilities.tuner_utilities.resim_floris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resim_floris</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Resimulate FLORIS with SCADA data.</p></td>
 </tr>
 </tbody>
 </table>
@@ -643,17 +646,18 @@ document.write(`
 NaN values in df_2 appear in the same locations as NaN values in df_1. This is
 primarily useful when df_2 represents a FLORIS resimulation of
 df_1, and you want to ensure that missing data is consistent between the two DataFrames.</p>
-<p>Parameters:
-- df_1 (pandas.DataFrame): The reference DataFrame containing NaN values.
-- df_2 (pandas.DataFrame): The DataFrame to be updated to match NaN positions in df_1.</p>
-<p>Returns:
-- pandas.DataFrame: A new DataFrame with NaN values in df_2 replaced to match df_1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df_1</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>df_2</strong> (<em>DataFrame</em>)</p></li>
+<li><p><strong>df_1</strong> (<em>pandas.DataFrame</em>) -- The reference DataFrame containing NaN values.</p></li>
+<li><p><strong>df_2</strong> (<em>pandas.DataFrame</em>) -- The DataFrame to be updated to match NaN positions in df_1.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new DataFrame with NaN values in df_2 replaced to match df_1.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -661,8 +665,8 @@ df_1, and you want to ensure that missing data is consistent between the two Dat
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.tuner_utilities.nested_get">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.tuner_utilities.</span></span><span class="sig-name descname"><span class="pre">nested_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/tuner_utilities.html#nested_get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.tuner_utilities.nested_get" title="Link to this definition">#</a></dt>
-<dd><p>Get a value from a nested dictionary using a list of keys.
-Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-via-a-list-of-keys</p>
+<dd><p>Get a value from a nested dictionary using a list of keys.</p>
+<p>Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-via-a-list-of-keys</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
@@ -685,8 +689,8 @@ Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-vi
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.tuner_utilities.nested_set">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.tuner_utilities.</span></span><span class="sig-name descname"><span class="pre">nested_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/tuner_utilities.html#nested_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.tuner_utilities.nested_set" title="Link to this definition">#</a></dt>
-<dd><p>Set a value in a nested dictionary using a list of keys.
-Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-via-a-list-of-keys</p>
+<dd><p>Set a value in a nested dictionary using a list of keys.</p>
+<p>Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-via-a-list-of-keys</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
@@ -706,13 +710,24 @@ Defaults to None.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.utilities.tuner_utilities.resim_floris">
 <span class="sig-prename descclassname"><span class="pre">flasc.utilities.tuner_utilities.</span></span><span class="sig-name descname"><span class="pre">resim_floris</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fm_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_scada</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw_angles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/utilities/tuner_utilities.html#resim_floris"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.tuner_utilities.resim_floris" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Resimulate FLORIS with SCADA data.</p>
+<p>This function takes a FlorisModel  and a SCADA dataframe, and resimulates the
+FlorisModel with the SCADA data. The SCADA data is expected to contain columns
+for wind speed, wind direction, and power reference. The function returns a
+dataframe containing the power output of each turbine in the FlorisModel.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fm_in</strong> (<em>FlorisModel</em>)</p></li>
-<li><p><strong>df_scada</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>yaw_angles</strong> (<em>array</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>fm_in</strong> (<em>FlorisModel</em>) -- The FlorisModel to resimulate.</p></li>
+<li><p><strong>df_scada</strong> (<em>pd.DataFrame</em>) -- The SCADA data to use for resimulation.</p></li>
+<li><p><strong>yaw_angles</strong> (<em>np.array</em><em>, </em><em>optional</em>) -- The yaw angles to use for resimulation. Defaults to None.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame containing the power output of each turbine in the FlorisModel.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>

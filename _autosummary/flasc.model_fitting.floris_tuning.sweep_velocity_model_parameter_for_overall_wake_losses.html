@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -617,8 +616,31 @@ document.write(`
 <dl class="py function">
 <dt class="sig sig-object py" id="flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses">
 <span class="sig-prename descclassname"><span class="pre">flasc.model_fitting.floris_tuning.</span></span><span class="sig-name descname"><span class="pre">sweep_velocity_model_parameter_for_overall_wake_losses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_candidates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_scada_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fm_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_turbines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw_angles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wd_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">360.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ws_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/model_fitting/floris_tuning.html#sweep_velocity_model_parameter_for_overall_wake_losses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses" title="Link to this definition">#</a></dt>
-<dd><p>Sweep the parameter in FLORIS using the values in value_candidates, and compare to
-SCADA data in df_scada_in using the overall_wake_loss</p>
+<dd><p>Sweep the parameter in FLORIS using the values in value_candidates.</p>
+<p>Compare to SCADA data in df_scada_in using the overall_wake_loss</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameter</strong> (<em>str</em>) -- The parameter to sweep</p></li>
+<li><p><strong>value_candidates</strong> (<em>list</em>) -- The values to sweep</p></li>
+<li><p><strong>df_scada_in</strong> (<em>DataFrame</em>) -- The SCADA data</p></li>
+<li><p><strong>fm_in</strong> (<em>floris.tools.Floris</em>) -- The FLORIS model</p></li>
+<li><p><strong>ref_turbines</strong> (<em>list</em>) -- The reference turbines</p></li>
+<li><p><strong>test_turbines</strong> (<em>list</em>) -- The test turbines</p></li>
+<li><p><strong>param_idx</strong> (<em>int</em>) -- The parameter index</p></li>
+<li><p><strong>yaw_angles</strong> (<em>np.ndarray</em>) -- The yaw angles</p></li>
+<li><p><strong>wd_min</strong> (<em>float</em>) -- The minimum wind direction</p></li>
+<li><p><strong>wd_max</strong> (<em>float</em>) -- The maximum wind direction</p></li>
+<li><p><strong>ws_min</strong> (<em>float</em>) -- The minimum wind speed</p></li>
+<li><p><strong>ws_max</strong> (<em>float</em>) -- The maximum wind speed</p></li>
+<li><p><strong>df_freq</strong> (<em>DataFrame</em>) -- The frequency data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (np.ndarray, np.ndarray) where the first element is the FLORIS wake losses
+and the second element is the SCADA wake losses</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

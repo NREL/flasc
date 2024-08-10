@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -273,7 +273,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -622,12 +621,13 @@ document.write(`
 <dt class="sig sig-object py" id="flasc.analysis.energy_ratio_input.EnergyRatioInput">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flasc.analysis.energy_ratio_input.</span></span><span class="sig-name descname"><span class="pre">EnergyRatioInput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_list_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_blocks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/analysis/energy_ratio_input.html#EnergyRatioInput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.analysis.energy_ratio_input.EnergyRatioInput" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>EnergyRatioInput class.</p>
 <p>This class holds the structured inputs for calculating energy ratios</p>
 <p class="rubric">Methods</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#flasc.analysis.energy_ratio_input.EnergyRatioInput.get_df" title="flasc.analysis.energy_ratio_input.EnergyRatioInput.get_df"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_df</span></code></a></p></td>
-<td><p>Get the concatenated dataframe</p></td>
+<td><p>Get the concatenated dataframe.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#flasc.analysis.energy_ratio_input.EnergyRatioInput.resample_energy_table" title="flasc.analysis.energy_ratio_input.EnergyRatioInput.resample_energy_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_energy_table</span></code></a></p></td>
 <td><p>Use the block column of an energy table to resample the data.</p></td>
@@ -647,7 +647,7 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="flasc.analysis.energy_ratio_input.EnergyRatioInput.get_df">
 <span class="sig-name descname"><span class="pre">get_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/analysis/energy_ratio_input.html#EnergyRatioInput.get_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.analysis.energy_ratio_input.EnergyRatioInput.get_df" title="Link to this definition">#</a></dt>
-<dd><p>Get the concatenated dataframe</p>
+<dd><p>Get the concatenated dataframe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
@@ -670,10 +670,7 @@ document.write(`
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>df_e</strong> (<em>pl.DataFrame</em>) -- An energy table with a block column</p></li>
-<li><p><strong>perform_resample</strong> (<em>bool</em>) -- Boolean, if False returns original energy table</p></li>
-</ul>
+<dd class="field-even"><p><strong>perform_resample</strong> (<em>bool</em>) -- Boolean, if False returns original energy table. Defaults to True.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">

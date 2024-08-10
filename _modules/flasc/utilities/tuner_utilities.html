@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,16 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.utilities.tuner_utilities</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="sd">&quot;&quot;&quot;Utilities for tuning FLORIS parameters.</span>
+
+<span class="sd">This module contains utilities for tuning FLORIS parameters. This includes</span>
+<span class="sd">functions for resimulating FLORIS with SCADA data, and functions for setting</span>
+<span class="sd">parameters in a FLORIS model.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -549,29 +557,26 @@ document.write(`
 <span class="kn">from</span> <span class="nn">flasc.data_processing</span> <span class="kn">import</span> <span class="n">dataframe_manipulations</span> <span class="k">as</span> <span class="n">dfm</span>
 <span class="kn">from</span> <span class="nn">flasc.utilities.utilities_examples</span> <span class="kn">import</span> <span class="n">load_floris_smarteole</span>
 
-<span class="c1"># from floris import ParallelComputingInterface</span>
-
 
 <div class="viewcode-block" id="replicate_nan_values">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.tuner_utilities.replicate_nan_values.html#flasc.utilities.tuner_utilities.replicate_nan_values">[docs]</a>
 <span class="k">def</span> <span class="nf">replicate_nan_values</span><span class="p">(</span><span class="n">df_1</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">df_2</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Replicate NaN Values in DataFrame df_2 to Match DataFrame df_1.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replicate NaN Values in DataFrame df_2 to Match DataFrame df_1.</span>
 
 <span class="sd">    For columns that are common between df_1 and df_2, this function ensures that</span>
 <span class="sd">    NaN values in df_2 appear in the same locations as NaN values in df_1. This is</span>
 <span class="sd">    primarily useful when df_2 represents a FLORIS resimulation of</span>
 <span class="sd">    df_1, and you want to ensure that missing data is consistent between the two DataFrames.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    - df_1 (pandas.DataFrame): The reference DataFrame containing NaN values.</span>
-<span class="sd">    - df_2 (pandas.DataFrame): The DataFrame to be updated to match NaN positions in df_1.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        df_1 (pandas.DataFrame): The reference DataFrame containing NaN values.</span>
+<span class="sd">        df_2 (pandas.DataFrame): The DataFrame to be updated to match NaN positions in df_1.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    - pandas.DataFrame: A new DataFrame with NaN values in df_2 replaced to match df_1.</span>
+<span class="sd">        pandas.DataFrame: A new DataFrame with NaN values in df_2 replaced to match df_1.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># For columns which df_1 and df_2 have in common, make sure</span>
-    <span class="c1"># occurences of NaNs which appear in df_1</span>
+    <span class="c1"># occurrences of NaNs which appear in df_1</span>
     <span class="c1"># appear in the same location in df_2</span>
     <span class="c1"># This function is primarily for the case where df_2 is</span>
     <span class="c1"># a FLORIS resimulation of df_1 and making sure</span>
@@ -593,6 +598,7 @@ document.write(`
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.tuner_utilities.nested_get.html#flasc.utilities.tuner_utilities.nested_get">[docs]</a>
 <span class="k">def</span> <span class="nf">nested_get</span><span class="p">(</span><span class="n">dic</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a value from a nested dictionary using a list of keys.</span>
+
 <span class="sd">    Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-via-a-list-of-keys</span>
 
 <span class="sd">    Args:</span>
@@ -612,6 +618,7 @@ document.write(`
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.tuner_utilities.nested_set.html#flasc.utilities.tuner_utilities.nested_set">[docs]</a>
 <span class="k">def</span> <span class="nf">nested_set</span><span class="p">(</span><span class="n">dic</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a value in a nested dictionary using a list of keys.</span>
+
 <span class="sd">    Based on: stackoverflow.com/questions/14692690/access-nested-dictionary-items-via-a-list-of-keys</span>
 
 <span class="sd">    Args:</span>
@@ -641,13 +648,28 @@ document.write(`
 <div class="viewcode-block" id="resim_floris">
 <a class="viewcode-back" href="../../../_autosummary/flasc.utilities.tuner_utilities.resim_floris.html#flasc.utilities.tuner_utilities.resim_floris">[docs]</a>
 <span class="k">def</span> <span class="nf">resim_floris</span><span class="p">(</span><span class="n">fm_in</span><span class="p">:</span> <span class="n">FlorisModel</span><span class="p">,</span> <span class="n">df_scada</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">yaw_angles</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resimulate FLORIS with SCADA data.</span>
+
+<span class="sd">    This function takes a FlorisModel  and a SCADA dataframe, and resimulates the</span>
+<span class="sd">    FlorisModel with the SCADA data. The SCADA data is expected to contain columns</span>
+<span class="sd">    for wind speed, wind direction, and power reference. The function returns a</span>
+<span class="sd">    dataframe containing the power output of each turbine in the FlorisModel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fm_in (FlorisModel): The FlorisModel to resimulate.</span>
+<span class="sd">        df_scada (pd.DataFrame): The SCADA data to use for resimulation.</span>
+<span class="sd">        yaw_angles (np.array, optional): The yaw angles to use for resimulation. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: A DataFrame containing the power output of each turbine in the FlorisModel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get wind speeds and directions</span>
     <span class="n">wind_speeds</span> <span class="o">=</span> <span class="n">df_scada</span><span class="p">[</span><span class="s2">&quot;ws&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="n">wind_directions</span> <span class="o">=</span> <span class="n">df_scada</span><span class="p">[</span><span class="s2">&quot;wd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
     <span class="c1"># TODO: better handling of TIs?</span>
     <span class="n">turbulence_intensities</span> <span class="o">=</span> <span class="n">fm_in</span><span class="o">.</span><span class="n">turbulence_intensities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">wind_speeds</span><span class="p">)</span>
 
-    <span class="c1"># Get the number of turbiens</span>
+    <span class="c1"># Get the number of turbines</span>
     <span class="n">num_turbines</span> <span class="o">=</span> <span class="n">dfm</span><span class="o">.</span><span class="n">get_num_turbines</span><span class="p">(</span><span class="n">df_scada</span><span class="p">)</span>
 
     <span class="c1"># Set up the FLORIS model</span>

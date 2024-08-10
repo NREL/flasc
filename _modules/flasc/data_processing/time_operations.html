@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -274,7 +274,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.make_df_wide.html">flasc.data_processing.dataframe_manipulations.make_df_wide</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
@@ -539,7 +538,9 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for flasc.data_processing.time_operations</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span> <span class="k">as</span> <span class="n">td</span>
+<span></span><span class="sd">&quot;&quot;&quot;Time operations for data processing.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span> <span class="k">as</span> <span class="n">td</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -562,12 +563,25 @@ document.write(`
     <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">calc_median_min_max_std</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a moving average of a dataframe with angular columns.</span>
+
 <span class="sd">    Note that median, minimum, and maximum do not handle angular</span>
 <span class="sd">    quantities and should be treated carefully.</span>
 <span class="sd">    Standard deviation handles angular quantities.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        df_in (pd.DataFrame): Input dataframe.</span>
+<span class="sd">        cols_angular (list): List of angular columns.</span>
+<span class="sd">        window_width (timedelta): Width of the moving average window.</span>
+<span class="sd">        min_periods (int): Minimum number of periods to consider.</span>
+<span class="sd">        center (bool): Center the time index.  Default is True.</span>
+<span class="sd">        calc_median_min_max_std (bool): Calculate median, min, max, and std.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Output dataframe with moving averages.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df_in</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="c1"># Find non-angular columns</span>
@@ -649,6 +663,25 @@ document.write(`
     <span class="n">calc_median_min_max_std</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">return_index_mapping</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Downsample a dataframe to a average accounting for angular columns.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_in (pd.DataFrame): Input dataframe.</span>
+<span class="sd">        cols_angular (list): List of angular columns.</span>
+<span class="sd">        window_width (timedelta): Width of the average window.</span>
+<span class="sd">        min_periods (int): Minimum number of data points for a bin to be valid.</span>
+<span class="sd">        center (bool): Center the time index.  Default is False.</span>
+<span class="sd">        calc_median_min_max_std (bool): Calculate median, min, max, and std.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        return_index_mapping (bool): Return index mapping.  Default is False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple (pd.DataFrame, np.ndarray) if return_index_mapping is True.  Where</span>
+<span class="sd">            the DataFrame is the downsampled dataframe and the np.ndarray is the</span>
+<span class="sd">            index mapping.</span>
+<span class="sd">        A pd.DataFrame if return_index_mapping is False.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Copy and ensure dataframe is indexed by time</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -857,6 +890,21 @@ document.write(`
 <span class="k">def</span> <span class="nf">df_resample_by_interpolation</span><span class="p">(</span>
     <span class="n">df</span><span class="p">,</span> <span class="n">time_array</span><span class="p">,</span> <span class="n">circular_cols</span><span class="p">,</span> <span class="n">interp_method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">max_gap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resample a dataframe by interpolation onto a new time array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): Input dataframe.</span>
+<span class="sd">        time_array (np.array): New time array.</span>
+<span class="sd">        circular_cols (list): List of columns that are circular.</span>
+<span class="sd">        interp_method (str): Interpolation method.  Default is &quot;linear&quot;.</span>
+<span class="sd">        max_gap (float): Maximum gap for interpolation.  Default is None.</span>
+<span class="sd">            If None, will be set to 1.5 times the median timestep.</span>
+<span class="sd">        verbose (bool): Print information.  Default is True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Resampled dataframe</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Copy with properties but no actual data</span>
     <span class="n">df_res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -923,6 +971,15 @@ document.write(`
 <div class="viewcode-block" id="flatten_cols">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.time_operations.flatten_cols.html#flasc.data_processing.time_operations.flatten_cols">[docs]</a>
 <span class="k">def</span> <span class="nf">flatten_cols</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flatten multi-level columns in a DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): Input DataFrame.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Flattened DataFrame.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">vals</span><span class="p">))</span> <span class="k">for</span> <span class="n">vals</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_flat_index</span><span class="p">()]</span>
     <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">cols</span>
     <span class="k">return</span> <span class="n">df</span></div>
