@@ -1,3 +1,5 @@
+"""Utility functions for examples."""
+
 import copy
 from pathlib import Path
 from time import perf_counter as timerpc
@@ -24,7 +26,6 @@ def load_floris_smarteole(wake_model="gch", wd_std=0.0):
     Returns:
         FlorisModel: Floris object.
     """
-
     # Use the local FLORIS GCH/CC model for the wake model settings
     root_path = (
         Path(__file__).resolve().parents[2] / "examples_smarteole" / "floris_input_smarteole"
@@ -58,16 +59,14 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, cosine_exponent=None):
         wake_model (str, optional): The wake model that FLORIS should use. Common
           options are 'cc', 'gch', 'jensen',  'turbopark' and 'emgauss'
           . Defaults to "gch".
-        operation_modes (array, optional): Array or list of integers denoting each
-          turbine's operation mode. When None is specified, will assume each turbine
-          is in its first operation mode (0). Defaults to None.
         wd_std (float, optional): Uncertainty; standard deviation in the inflow
           wind direction in degrees. Defaults to 0.0 deg meaning no uncertainty.
+        cosine_exponent (float, optional): The cosine exponent for the power-thrust
+            table. Defaults to None.
 
     Returns:
         FlorisModel: Floris object.
     """
-
     # Use the local FLORIS GCH/CC model for the wake model settings
     root_path = (
         Path(__file__).resolve().parents[2] / "examples_artificial_data" / "floris_input_artificial"

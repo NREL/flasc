@@ -1,3 +1,5 @@
+"""Utility functions that use FlorisModels."""
+
 import copy
 from time import perf_counter as timerpc
 
@@ -31,7 +33,9 @@ def interpolate_floris_from_df_approx(
     mirror_nans=True,
     verbose=True,
 ):
-    """This function generates the FLORIS predictions for a set of historical
+    """Interpolate FLORIS predictions from a precalculated table of solutions.
+
+    This function generates the FLORIS predictions for a set of historical
     data, 'df', quickly by linearly interpolating from a precalculated set of
     FLORIS solutions, 'df_approx'. We use linear interpolation to eliminate
     dependency of the computation time on the size of the dataframe/number of
@@ -120,7 +124,6 @@ def interpolate_floris_from_df_approx(
         52103   2018-12-31 23:30:00    15.6   11.0    0.08  4235128.7   3825108.4  ...  2725108.3
         52104   2018-12-31 23:40:00    15.3   11.1    0.08  3860281.3   3987634.7  ...  2957021.7
     """
-
     # Format dataframe and get number of turbines
     # df = df.reset_index(drop=('time' in df.columns))
     nturbs = fsut.get_num_turbines(df_approx)
@@ -327,7 +330,9 @@ def calc_floris_approx_table(
     ti_array=np.arange(0.03, 0.1801, 0.03),
     save_turbine_inflow_conditions_to_df=False,
 ):
-    """This function calculates a large number of floris solutions for a rectangular grid
+    """Calculate the FLORIS approximate table from a FlorisModel object.
+
+    This function calculates a large number of floris solutions for a rectangular grid
     of wind directions ('wd_array'), wind speeds ('ws_array'), and optionally turbulence
     intensities ('ti_array'). The variables that are saved are each turbine's power
     production, and optionally also each turbine's inflow wind direction, wind speed and
@@ -346,7 +351,7 @@ def calc_floris_approx_table(
         dataframe size but can provide useful information. Defaults to False.
 
     Returns:
-        df_approx (pd.DataFrame): A Pandas DataFrame containing the floris simulation results for all wind
+        pd.DataFrame: A Pandas DataFrame containing the floris simulation results for all wind
           direction, wind speed and turbulence intensity combinations. The outputs are the power production
           for each turbine, 'pow_000' until 'pow_{nturbs-1}', and optionally als each turbine's inflow wind
           direction, wind speed and turbulence intensity when save_turbine_inflow_conditions_to_df==True.
@@ -357,8 +362,7 @@ def calc_floris_approx_table(
             ti_array=np.arange(0.03, 0.1801, 0.03)
             save_turbine_inflow_conditions_to_df=True
 
-        Yields:
-
+    Yields:
         df_approx=
                   wd    ws    ti    pow_000     ws_000  wd_000  ti_000  pow_001  ...    pow_006     ws_006  wd_006  ti_006
         0        0.0   1.0    0.03      0.0      1.0       0.0     0.03     0.0  ...        0.0      1.0       0.0     0.03
@@ -374,7 +378,6 @@ def calc_floris_approx_table(
         32399  357.0  25.0    0.18      0.0  24.880829   357.0     0.18     0.0  ...        0.0  24.881165   357.0     0.18
         32400  360.0  25.0    0.18      0.0  24.880829   360.0     0.18     0.0  ...        0.0  24.881165   360.0     0.18
     """
-
     # if ti_array is None, use the current value in the FLORIS object
     if ti_array is None:
         ti = fm.core.flow_field.turbulence_intensity
@@ -430,7 +433,9 @@ def calc_floris_approx_table(
 
 
 def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_cutoff=0.995):
-    """This function applies a Gaussian blending across the wind direction for the predicted
+    """Add Gaussian blending to the precalculated FLORIS solutions.
+
+    This function applies a Gaussian blending across the wind direction for the predicted
     turbine power productions from FLORIS. This is a post-processing step and achieves the
     same result as evaluating FLORIS directly with the UncertainFlorisModel module. However,
     having this as a postprocess step allows for rapid generation of the FLORIS solutions for
@@ -446,7 +451,7 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
           deviations to the left and to the right of the evaluation.
 
     Returns:
-        df_fi_approx_gauss (pd.DataFrame): Pandas DataFrame with Gaussian-blurred precalculated
+        pd.DataFrame: Pandas DataFrame with Gaussian-blurred precalculated
           FLORIS solutions. The DataFrame typically has the columns "wd", "ws", "ti", and
           "pow_000" until "pow_{nturbs-1}", with nturbs being the number of turbines.
 
@@ -497,27 +502,31 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
     return df_fi_approx_gauss
 
 
+# TODO Is this function in the right module?
+# TODO Should include itself have a default?
 def get_turbs_in_radius(
     x_turbs, y_turbs, turb_no, max_radius, include_itself, sort_by_distance=False
 ):
-    """Determine which turbines are within a certain radius of other
+    """Find turbines within a certain radius of a turbine.
+
+    Determine which turbines are within a certain radius of other
     wind turbines.
 
     Args:
         x_turbs ([list, array]): Long. locations of turbines
         y_turbs ([list, array]): Lat. locations of turbines
-        turb_no ([int]): Turbine number for which the distance is
+        turb_no (int): Turbine number for which the distance is
         calculated w.r.t. the other turbines.
-        max_radius ([float]): Maximum distance between turbines to be
+        max_radius (float): Maximum distance between turbines to be
         considered within the radius of turbine [turb_no].
-        include_itself ([type]): Include itself in the list of turbines
+        include_itself (bool): Include itself in the list of turbines
         within the radius.
         sort_by_distance (bool, optional): Sort the output list of turbines
         according to distance to the turbine, from closest to furthest (but
         still within radius). Defaults to False.
 
     Returns:
-        turbs_within_radius ([list]): List of turbines that are within the
+        list: List of turbines that are within the
         prespecified distance from turbine [turb_no].
     """
     dr_turb = np.sqrt((x_turbs - x_turbs[turb_no]) ** 2.0 + (y_turbs - y_turbs[turb_no]) ** 2.0)
@@ -538,25 +547,24 @@ def get_turbs_in_radius(
 def get_all_impacting_turbines_geometrical(
     fm, turbine_weights, wd_array=np.arange(0.0, 360.0, 3.0), wake_slope=0.30
 ):
-    """Determine which turbines affect the turbines of interest
+    """Get all impacting turbines using a simple geometric model.
+
+    Determine which turbines affect the turbines of interest
     (i.e., those with a turbine_weights > 0.00001). This function
     uses very simplified geometric functions to very quickly
     derive which turbines are supposedly waking at least one
     turbine in the farm of interest.
 
     Args:
-        fm ([floris object]): FLORIS object of the farm of interest.
-        turbine_weights [list]: List of with turbine weights with length
-        equal to the number of wind turbines, and typically filled with
-        0s (neighbouring farms) and 1s (farm of interest).
-        wd_step (float, optional): Wind direction discretization step.
-        Defaults to 3.0.
+        fm (FlorisModel): FLORIS object of the farm of interest.
+        turbine_weights (list): List of with turbine weights with length
+            equal to the number of wind turbines, and typically filled with
+            0s (neighboring farms) and 1s (farm of interest).
+        wd_array (array, optional): Array of wind directions to evaluate in [deg].
         wake_slope (float, optional): linear slope of the wake (dy/dx)
-        plot_lines (bool, optional): Enable plotting wakes/turbines.
-        Defaults to False.
 
     Returns:
-        df_impacting_simple ([pd.DataFrame]): A Pandas Dataframe in which each row
+        pd.Dataframe: A Pandas Dataframe in which each row
         contains a wind direction and a list of turbine numbers. The turbine
         numbers are those turbines that should be modelled to accurately
         capture the wake losses for the wind farm of interest. Turbine numbers
@@ -564,7 +572,6 @@ def get_all_impacting_turbines_geometrical(
         the simulation without affecting any of the turbines that have a nonzero
         turbine weight.
     """
-
     # Get farm layout
     x = fm.layout_x
     y = fm.layout_y
@@ -639,14 +646,16 @@ def get_all_impacting_turbines_geometrical(
 
 
 def get_upstream_turbs_floris(fm, wd_step=0.1, wake_slope=0.10, plot_lines=False):
-    """Determine which turbines are operating in freestream (unwaked)
+    """Use FLORIS to determine which turbines are operating in freestream flow.
+
+    Determine which turbines are operating in freestream (unwaked)
     flow, for the entire wind rose. This function will return a data-
     frame where each row will present a wind direction range and a set
     of wind turbine numbers for which those turbines are operating
     upstream. This is useful in determining the freestream conditions.
 
     Args:
-        fi ([floris object]): FLORIS object of the farm of interest.
+        fm ([FlorisModel): FLORIS object of the farm of interest.
         wd_step (float, optional): Wind direction discretization step.
         It will test what the upstream turbines are every [wd_step]
         degrees. A lower number means more accurate results, but
@@ -657,7 +666,7 @@ def get_upstream_turbs_floris(fm, wd_step=0.1, wake_slope=0.10, plot_lines=False
         Defaults to False.
 
     Returns:
-        df_upstream ([pd.DataFrame]): A Pandas Dataframe in which each row
+        df_upstream (pd.Dataframe): A Pandas Dataframe in which each row
         contains a wind direction range and a list of turbine numbers. For
         that particular wind direction range, the turbines numbered are
         all upstream according to the FLORIS predictions. Depending on
@@ -668,7 +677,6 @@ def get_upstream_turbs_floris(fm, wd_step=0.1, wake_slope=0.10, plot_lines=False
         turbines are waked/unwaked and has served useful for determining
         what turbines to use as reference.
     """
-
     # Get farm layout
     x = fm.layout_x
     y = fm.layout_y
@@ -787,14 +795,15 @@ def get_dependent_turbines_by_wd(
     ws_test=9.0,
     return_influence_magnitudes=False,
 ):
-    """
+    """Get dependent turbines for a test turbine for each wind direction.
+
     Computes all turbines that depend on the operation of a specified
     turbine (test_turbine) for each wind direction in wd_array, using
     the FLORIS model specified by fm_in to detect dependencies.
 
     Args:
-        fi ([floris object]): FLORIS object of the farm of interest.
-        test_turbine ([int]): Turbine for which dependencies are found.
+        fm_in (FlorisModels): FLORIS object of the farm of interest.
+        test_turbine (int): Turbine for which dependencies are found.
         wd_array ([np.array]): Wind directions at which to determine
             dependencies. Defaults to [0, 2, ... , 358].
         change_threshold (float): Fractional change in power needed
@@ -810,16 +819,17 @@ def get_dependent_turbines_by_wd(
             test_turbine on all turbines.
 
     Returns:
-        dep_indices_by_wd (list): A 2-dimensional list. Each element of
-            the outer level list, which represents wind direction,
-            contains a list of the turbines that depend on test_turbine
-            for that wind direction. The second-level list may be empty
-            if no turbine depends on the test_turbine for that wind
-            direciton (e.g., the turbine is in the back row).
-        all_influence_magnitudes ([np.array]): 2-D numpy array of
-            influences of test_turbine on all other turbines, with size
-            (number of wind directions) x (number of turbines). Returned
-            only if return_influence_magnitudes is True.
+        A tuple containing:
+            dep_indices_by_wd (list): A 2-dimensional list. Each element of
+                the outer level list, which represents wind direction,
+                contains a list of the turbines that depend on test_turbine
+                for that wind direction. The second-level list may be empty
+                if no turbine depends on the test_turbine for that wind
+                direciton (e.g., the turbine is in the back row).
+            all_influence_magnitudes ([np.array]): 2-D numpy array of
+                influences of test_turbine on all other turbines, with size
+                (number of wind directions) x (number of turbines). Returned
+                only if return_influence_magnitudes is True.
     """
     # Copy fi to a local to not mess with incoming
     fm = copy.deepcopy(fm_in)
@@ -880,13 +890,14 @@ def get_all_dependent_turbines(
     limit_number=None,
     ws_test=9.0,
 ):
-    """
+    """Get all dependent turbines for each turbine in the farm.
+
     Wrapper for get_dependent_turbines_by_wd() that loops over all
     turbines in the farm and packages their dependencies as a pandas
     dataframe.
 
     Args:
-        fi ([floris object]): FLORIS object of the farm of interest.
+        fm_in (FlorisModel): FLORIS object of the farm of interest.
         wd_array ([np.array]): Wind directions at which to determine
             dependencies. Defaults to [0, 2, ... , 358].
         change_threshold (float): Fractional change in power needed
@@ -899,7 +910,7 @@ def get_all_dependent_turbines(
             determine dependencies. Defaults to 9. m/s.
 
     Returns:
-        df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
+        df_out (pd.Dataframe): A Pandas Dataframe in which each row
             contains a wind direction, each column is a turbine, and
             each entry is the turbines that depend on the column turbine
             at the row wind direction. Dependencies can be extracted
@@ -907,7 +918,6 @@ def get_all_dependent_turbines(
             turbine T are df_out.loc[wd, T]. Dependencies are ordered,
             with strongest dependencies appearing first.
     """
-
     results = []
     for t_i in range(len(fm_in.layout_x)):
         results.append(
@@ -934,14 +944,15 @@ def get_all_impacting_turbines(
     limit_number=None,
     ws_test=9.0,
 ):
-    """
+    """Get all impacting turbines for each turbine in the farm.
+
     Calculate which turbines impact a specified turbine based on the
     FLORIS model. Essentially a wrapper for
     get_dependent_turbines_by_wd() that loops over all turbines and
     extracts their impact magnitudes, then sorts.
 
     Args:
-        fi ([floris object]): FLORIS object of the farm of interest.
+        fm_in (FlorisModel): FLORIS object of the farm of interest.
         wd_array ([np.array]): Wind directions at which to determine
             dependencies. Defaults to [0, 2, ... , 358].
         change_threshold (float): Fractional change in power needed
@@ -954,7 +965,7 @@ def get_all_impacting_turbines(
             determine dependencies. Defaults to 9. m/s.
 
     Returns:
-        df_out ([pd.DataFrame]): A Pandas Dataframe in which each row
+        df_out (pd.Dataframe): A Pandas Dataframe in which each row
             contains a wind direction, each column is a turbine, and
             each entry is the turbines that the column turbine depends
             on at the row wind direction. Dependencies can be extracted
@@ -962,7 +973,6 @@ def get_all_impacting_turbines(
             T are df_out.loc[wd, T]. Impacting turbines are simply
             ordered by magnitude of impact.
     """
-
     dependency_magnitudes = np.zeros((len(wd_array), len(fm_in.layout_x), len(fm_in.layout_x)))
 
     for t_i in range(len(fm_in.layout_x)):

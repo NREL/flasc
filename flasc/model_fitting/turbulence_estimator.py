@@ -1,3 +1,5 @@
+"""_summary_."""
+
 import floris as wfct
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,8 +12,16 @@ logger_manager = LoggingManager()  # Instantiate LoggingManager
 logger = logger_manager.logger  # Obtain the reusable logger
 
 
+# TODO IS THIS USED ANYWHERE?
 class ti_estimator:
+    """_summary_."""
+
     def __init__(self, fm):
+        """_summary_.
+
+        Args:
+            fm (_type_): _description_
+        """
         self.fm = fm
         self.num_turbs = len(fm.layout_x)
 
@@ -25,6 +35,11 @@ class ti_estimator:
         self.P_measured = None
 
     def set_measurements(self, P_measured):
+        """_summary_.
+
+        Args:
+            P_measured (_type_): _description_
+        """
         if isinstance(P_measured, int) | isinstance(P_measured, float):
             P_measured = [P_measured]
         if isinstance(P_measured, list):
@@ -34,6 +49,11 @@ class ti_estimator:
         self.P_measured = P_measured
 
     def get_turbine_order(self):
+        """_summary_.
+
+        Returns:
+            _type_: _description_
+        """
         wd = (180 - self.fm.core.farm.wind_direction[0]) * np.pi / 180.0
         rotz = np.matrix([[np.cos(wd), -np.sin(wd), 0], [np.sin(wd), np.cos(wd), 0], [0, 0, 1]])
         x0 = np.mean(self.fm.layout_x)
@@ -55,6 +75,14 @@ class ti_estimator:
         return turbine_list_ordered
 
     def get_turbine_pairs(self, wake_loss_thrs=0.20):
+        """_summary_.
+
+        Args:
+            wake_loss_thrs (float, optional): _description_. Defaults to 0.20.
+
+        Returns:
+            _type_: _description_
+        """
         fm = self.fi
         fm.run()
         power_baseline = np.array(fm.get_turbine_power())
@@ -85,6 +113,11 @@ class ti_estimator:
         return df_pairs
 
     def plot_flowfield(self):
+        """_summary_.
+
+        Returns:
+            _type_: _description_
+        """
         self.fm.run()
         fig, ax = plt.subplots()
         hor_plane = self.fm.get_hor_plane()
@@ -92,6 +125,13 @@ class ti_estimator:
         return fig, ax, hor_plane
 
     def floris_set_ws_wd_ti(self, wd=None, ws=None, ti=None):
+        """_summary_.
+
+        Args:
+            wd (_type_, optional): _description_. Defaults to None.
+            ws (_type_, optional): _description_. Defaults to None.
+            ti (_type_, optional): _description_. Defaults to None.
+        """
         self.fm = ftools._fi_set_ws_wd_ti(self.fi, wd=wd, ws=ws, ti=ti)
 
     def _check_measurements(self):
@@ -104,6 +144,17 @@ class ti_estimator:
     def estimate_farmaveraged_ti(
         self, Ns=50, bounds=(0.01, 0.50), refine_with_fmin=False, verbose=False
     ):
+        """_summary_.
+
+        Args:
+            Ns (int, optional): _description_. Defaults to 50.
+            bounds (tuple, optional): _description_. Defaults to (0.01, 0.50).
+            refine_with_fmin (bool, optional): _description_. Defaults to False.
+            verbose (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            _type_: _description_
+        """
         self._check_measurements()
         out = opt.estimate_ti(
             fi=self.fi,
@@ -124,6 +175,17 @@ class ti_estimator:
         return ti_opt
 
     def estimate_local_tis(self, Ns=50, bounds=(0.01, 0.50), refine_with_fmin=False, verbose=False):
+        """_summary_.
+
+        Args:
+            Ns (int, optional): _description_. Defaults to 50.
+            bounds (tuple, optional): _description_. Defaults to (0.01, 0.50).
+            refine_with_fmin (bool, optional): _description_. Defaults to False.
+            verbose (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            _type_: _description_
+        """
         self._check_measurements()
         turbines_sorted = self.turbine_list_ordered
         df_turbine_pairs = self.turbine_pairs
@@ -157,6 +219,7 @@ class ti_estimator:
         return out_array
 
     def plot_cost_function_farm(self):
+        """_summary_."""
         fig, ax = plt.subplots()
         ax.plot(self.opt_farm["x"], self.opt_farm["J"])
         ax.plot(self.opt_farm["x_opt"], self.opt_farm["J_opt"], "ro")
@@ -166,6 +229,7 @@ class ti_estimator:
         ax.set_title("Farm-wide turbulence intensity estimation: cost function J")
 
     def plot_cost_functions_turbines(self):
+        """_summary_."""
         for ti in range(self.num_turbs):
             fig, ax = plt.subplots()
             ax.plot(self.opt_turbines[ti]["x"], self.opt_turbines[ti]["J"])
@@ -176,8 +240,14 @@ class ti_estimator:
             ax.set_title("Turbulence intensity estimation for turbine %03d: cost function J" % ti)
 
     def plot_power_bars(self):
+        """_summary_.
+
+        Returns:
+            _type_: _description_
+        """
         fm = self.fi
         fm.run()
+
         fig, ax = plt.subplots()
         ax.bar(x=np.array(range(self.num_turbs)) - 0.15, height=fm.get_turbine_power(), width=0.3)
         ax.bar(x=np.array(range(self.num_turbs)) + 0.15, height=self.P_measured, width=0.3)
