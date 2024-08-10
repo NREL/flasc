@@ -1,3 +1,5 @@
+"""Module for cross-checking the consistency of the northing offset between turbines."""
+
 from datetime import timedelta as td
 
 import matplotlib.pyplot as plt
@@ -12,9 +14,23 @@ logger_manager = LoggingManager()  # Instantiate LoggingManager
 logger = logger_manager.logger  # Obtain the reusable logger
 
 
+# TODO: This one is used but is it all fully up to date?
 def crosscheck_northing_offset_consistency(
     df, fm, bias_timestep=td(days=120), nan_thrshld=0.50, plot_figure=True
 ):
+    """Cross-check the consistency of the northing offset between turbines.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing the relevant data.
+        fm (floris.simulation.Floris): Floris object.
+        bias_timestep (timedelta, optional): Time step for bias calculation.
+            Defaults to td(days=120).
+        nan_thrshld (float, optional): Threshold for NaN values. Defaults to 0.50.
+        plot_figure (bool, optional): Whether to plot the figure. Defaults to True.
+
+    Returns:
+        list: List of strings indicating the status of each turbine
+    """
     # Load data and extract info
     num_turbines = len(fm.layout_x)
     turbine_list = range(num_turbines)

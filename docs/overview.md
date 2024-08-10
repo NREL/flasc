@@ -17,7 +17,7 @@ FLASC consists of multiple modules, including:
 
 This module contains functions that supports importing and processing raw
 SCADA data files. Data is saved in feather
-format for optimal balance of storage size and load/write speed.
+format for optimal balance of storage size and load and write speed.
 
 Functions include filtering data by wind direction, wind speed an/or TI,
 deriving the ambient conditions from the upstream turbines, all the while

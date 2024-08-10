@@ -1,3 +1,5 @@
+"""Module for optimization functions."""
+
 import copy
 from datetime import timedelta as td
 
@@ -28,6 +30,47 @@ def find_timeshift_between_dfs(
     opt_Ns=None,
     verbose=True,
 ):
+    """Find the optimal time shift between two dataframes.
+
+    This function is used to find the optimal time shift between two dataframes
+    'df1' and 'df2'. The function will resample the dataframes to a common time
+    vector and then compare the dataframes in time steps of 't_step'. The function
+    will then find the optimal time shift between the two dataframes by minimizing
+    the Pearson correlation coefficient between the two dataframes. The function
+    can also correct for a bias in the y-values of the dataframes by minimizing
+    the Pearson correlation coefficient between the two dataframes after a bias
+    has been removed.
+
+    Args:
+        df1 (pd.DataFrame): Dataframe 1.
+        df2 (pd.DataFrame): Dataframe 2.
+        cols_df1 (list): Columns to use in dataframe 1.
+        cols_df2 (list): Columns to use in dataframe 2.
+        use_circular_statistics (bool): Use circular statistics for averaging.
+            Default is False.
+        t_step (np.timedelta64): Time step for comparison.
+            Default is 30 days.
+        correct_y_shift (bool): Correct for a bias in the y-values.
+            Default is False.
+        y_shift_range (np.array): Range of y-shifts to evaluate.
+            Default is np.arange(-180.0, 180.0, 2.0).
+        opt_bounds (list): Bounds for optimization.
+            Default is None.
+        opt_Ns (int): Number of steps for optimization.
+            Default is None.
+        verbose (bool): Print verbose output.
+            Default is True.
+
+    Returns:
+        list: List of dictionaries with the following keys:
+            - t0: Start time of comparison.
+            - t1: End time of comparison.
+            - x_opt: Optimal time shift.
+            - J_opt: Optimal cost function value.
+            - x: Time shifts evaluated.
+            - J: Cost function values evaluated.
+
+    """
     if np.any(df1["time"].diff() < td(seconds=0)):
         raise DataError("Dataframe 1 not sorted by time.")
 
@@ -210,6 +253,26 @@ def find_timeshift_between_dfs(
 
 
 def match_y_curves_by_offset(yref, ytest, dy_eval=None, angle_wrapping=True):
+    """Match two curves by finding the optimal offset.
+
+    This function is used to match two curves by finding the optimal offset
+    between the two curves. The function will minimize the mean squared error
+    between the two curves for a range of offsets.
+
+    Args:
+        yref (np.array): Reference curve.
+        ytest (np.array): Test curve.
+        dy_eval (np.array): Range of offsets to evaluate.
+            Default is None.
+        angle_wrapping (bool): Use angle wrapping for evaluation.
+            Default is True.
+
+    Returns:
+        Tuple (float, float) with the following elements:
+            dwd_opt: Optimal offset.
+            J_opt: Optimal cost function value.
+
+    """
     if dy_eval is None:
         if angle_wrapping:
             dy_eval = np.arange(-180.0, 180.0, 2.0)
@@ -242,7 +305,7 @@ def match_y_curves_by_offset(yref, ytest, dy_eval=None, angle_wrapping=True):
 
 
 def estimate_ti(
-    fi,
+    fm,
     P_measured,
     Ns,
     bounds,
@@ -251,8 +314,34 @@ def estimate_ti(
     refine_with_fmin=False,
     verbose=False,
 ):
+    """Estimate the turbulence intensity for a given turbine.
+
+    This function is used to estimate the turbulence intensity for a given
+    turbine.
+
+    Args:
+        fm (FlorisModel): FlorisModel object.
+        P_measured (np.array): Measured power data.
+        Ns (int): Number of steps for optimization.
+        bounds (list): Bounds for optimization.
+        turbine_upstream (int): Upstream turbine.
+        turbines_downstream (list): Downstream turbines.
+        refine_with_fmin (bool): Refine with fmin.
+            Default is False.
+        verbose (bool): Print verbose output.
+            Default is False.
+
+    Returns:
+        dict: Dictionary with the following
+            keys:
+            - x_opt: Optimal time shift.
+            - J_opt: Optimal cost function value.
+            - x: Time shifts evaluated.
+            - J: Cost function values evaluated.
+
+    """
     # Make copy so that existing object is not changed
-    fm = copy.deepcopy(fi)
+    fm = copy.deepcopy(fm)
     num_turbines = len(fm.layout_x)
     ti_0 = np.mean(fm.core.farm.turbulence_intensity)
 
@@ -260,7 +349,7 @@ def estimate_ti(
     def cost_fun(ti):
         ti_array = np.repeat(ti_0, num_turbines)
         ti_array[turbine_upstream] = ti
-        ftools._fi_set_ws_wd_ti(fi, ti=ti_array)
+        ftools._fi_set_ws_wd_ti(fm, ti=ti_array)
         fm.run()
         Pturbs = np.array(fm.get_turbine_power())
         Pturbs = Pturbs[turbines_downstream]
