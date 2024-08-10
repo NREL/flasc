@@ -838,8 +838,13 @@ class FlascFilter:
                 )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        try:
+            for h in lgd.legendHandles:
+                h.set_alpha(1)  # Force alpha in legend to 1.0
+        except AttributeError:
+            # see https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#legend-legendhandles
+            for h in lgd.legend_handles:
+                h.set_alpha(1)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
@@ -1003,8 +1008,13 @@ class FlascFilter:
             )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        try:
+            for h in lgd.legendHandles:
+                h.set_alpha(1)  # Force alpha in legend to 1.0
+        except AttributeError:
+            # see https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#legend-legendhandles
+            for h in lgd.legend_handles:
+                h.set_alpha(1)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
@@ -1079,8 +1089,13 @@ class FlascFilter:
             )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        try:
+            for h in lgd.legendHandles:
+                h.set_alpha(1)  # Force alpha in legend to 1.0
+        except AttributeError:
+            # see https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#legend-legendhandles
+            for h in lgd.legend_handles:
+                h.set_alpha(1)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Postprocessed dataset")
