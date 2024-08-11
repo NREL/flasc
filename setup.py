@@ -32,6 +32,7 @@ REQUIRED = [
     "polars==0.19.5",
     "ephem",
     "coloredlogs~=10.0",
+    "res-wind-up~=0.1.8",
 ]
 
 EXTRAS = {
