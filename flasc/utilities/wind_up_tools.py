@@ -1,7 +1,6 @@
-from pathlib import Path
 
 import pandas as pd
-from wind_up.constants import DataColumns
+from wind_up.constants import DataColumns, TIMESTAMP_COL
 
 
 def df_scada_to_wind_up(
@@ -18,8 +17,10 @@ def df_scada_to_wind_up(
     # if turbine_names provided check it matches
     if turbine_names is not None:
         if not len(turbine_names) == nt:
-            msg = (f"Number of names in turbine_names, {len(turbine_names)}, "
-                   f"does not match number of turbines in SCADA data, {nt}.")
+            msg = (
+                f"Number of names in turbine_names, {len(turbine_names)}, "
+                f"does not match number of turbines in SCADA data, {nt}."
+            )
             raise ValueError(msg)
     # build a new dataframe one turbine at a time
     scada_df = pd.DataFrame()
@@ -30,9 +31,7 @@ def df_scada_to_wind_up(
         wtg_df["TurbineName"] = turbine_names[i] if turbine_names is not None else f"{i:03d}"
         scada_df = pd.concat([scada_df, wtg_df])
     scada_df = scada_df.set_index("time")
-    scada_df.index.name = (
-        "TimeStamp_StartFormat"  # assumption is that flasc timestamps are UTC start format
-    )
+    scada_df.index.name = TIMESTAMP_COL  # assumption is that flasc timestamps are UTC start format
     scada_df = scada_df.rename(
         columns={
             "pow": DataColumns.active_power_mean,
@@ -40,13 +39,8 @@ def df_scada_to_wind_up(
             "wd": DataColumns.yaw_angle_mean,
         }
     )
+    # fill in other columns with placeholding values
+    scada_df[DataColumns.pitch_angle_mean] = 0
+    scada_df[DataColumns.gen_rpm_mean] = 1000
+    scada_df[DataColumns.shutdown_duration] = 0
     return scada_df
-
-
-if __name__ == "__main__":
-    df_scada = pd.read_feather(
-        Path(
-            "../../examples_smarteole/postprocessed/df_scada_data_60s_filtered_and_northing_calibrated.ftr"
-        )
-    )
-    df_wind_up = df_scada_to_wind_up(df_scada)
