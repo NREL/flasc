@@ -50,7 +50,7 @@ categories in Discussions.
 details for a feature request. [Q&A](https://github.com/NREL/flasc/discussions/categories/q-a)
 is where to get usage support.
 [Show and tell](https://github.com/NREL/flasc/discussions/categories/show-and-tell) is a free-form
-space to show off the things you are doing with FLORIS.
+space to show off the things you are doing with FLASC.
 
 # License
 
