@@ -31,7 +31,7 @@ REQUIRED = [
     "seaborn~=0.0",
     "polars==0.19.5",
     "ephem",
-    "coloredlogs~=10.0",
+    "coloredlogs~=15.0",
 ]
 
 EXTRAS = {
