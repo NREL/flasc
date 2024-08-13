@@ -41,11 +41,23 @@ in an interactive environment like Jupyter. -->
 
 # Installation
 
-FLASC is currently not available as a package on any repository manager.
-Instead, it must be installed by the user by cloning the GitHub repository.
+FLASC is available as a package on PyPI. We strongly recommend installing FLASC
+into a conda environment. To do this, use the following commands (replacing
+`flasc-env` with the conda environment name of your choosing).
+```bash
+# Create a conda environment containing python and activate it
+conda create --name flasc-env python
+conda activate flasc-env
 
-To download the source code, use `git clone`. Then, add it to
-your Python path with the "local editable install" through `pip`.
+# Pip install flasc and its dependencies from PyPI
+pip install flasc
+```
+That's it, now you're ready to use FLASC.
+
+To download the source code from the GitHub repository (which will also give
+you access to the examples) and install locally,
+use `git clone`. Then, add it to your Python path with the "local editable install" through `pip`. Again, we recommend doing this in a dedicated conda environment
+(see conda commands above).
 
 ```bash
 # Download the source code.
