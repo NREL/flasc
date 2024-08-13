@@ -653,10 +653,22 @@ to re-import the FLASC module when changes are made if you are working
 in an interactive environment like Jupyter. -->
 <section class="tex2jax_ignore mathjax_ignore" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
-<p>FLASC is currently not available as a package on any repository manager.
-Instead, it must be installed by the user by cloning the GitHub repository.</p>
-<p>To download the source code, use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code>. Then, add it to
-your Python path with the &quot;local editable install&quot; through <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
+<p>FLASC is available as a package on PyPI. We strongly recommend installing FLASC
+into a conda environment. To do this, use the following commands (replacing
+<code class="docutils literal notranslate"><span class="pre">flasc-env</span></code> with the conda environment name of your choosing).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a conda environment containing python and activate it</span>
+conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>flasc-env<span class="w"> </span>python
+conda<span class="w"> </span>activate<span class="w"> </span>flasc-env
+
+<span class="c1"># Pip install flasc and its dependencies from PyPI</span>
+pip<span class="w"> </span>install<span class="w"> </span>flasc
+</pre></div>
+</div>
+<p>That's it, now you're ready to use FLASC.</p>
+<p>To download the source code from the GitHub repository (which will also give
+you access to the examples) and install locally,
+use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code>. Then, add it to your Python path with the &quot;local editable install&quot; through <code class="docutils literal notranslate"><span class="pre">pip</span></code>. Again, we recommend doing this in a dedicated conda environment
+(see conda commands above).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download the source code.</span>
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/NREL/flasc.git
 
