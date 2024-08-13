@@ -1,9 +1,11 @@
+"""FLASC DataFrame module."""
 from pandas import DataFrame
 
 
 # Create a new DataFrame subclass
 class FlascDataFrame(DataFrame):
-    """
+    """Subclass of pandas.DataFrame for working with FLASC data.
+
     I think it makes most sense to store it as FLASC expects it:
     - with the correct column names
     - in wide format
@@ -16,6 +18,14 @@ class FlascDataFrame(DataFrame):
     _metadata = ["new_property", "name_map", "newnew_property"]
 
     def __init__(self, *args, name_map=None, **kwargs):
+        """Initialize the FlascDataFrame class, a subclass of pandas.DataFrame.
+
+        Args:
+            *args: arguments to pass to the DataFrame constructor
+            name_map (dict): Dictionary of column names to map from the user format to the FLASC
+                format.
+            **kwargs: keyword arguments to pass to the DataFrame constructor
+        """
         super().__init__(*args, **kwargs)
 
         self._flasc = True
@@ -35,6 +45,7 @@ class FlascDataFrame(DataFrame):
         self.convert_to_flasc_format(inplace=True)
 
     def flasc_method(self):
+        """Temporary method."""
         print("This is a method of the FlascDataFrame class")
         self.newnew_property = 20
 
@@ -43,51 +54,40 @@ class FlascDataFrame(DataFrame):
         return FlascDataFrame
 
     def __str__(self):
+        """Printout when calling print(df)."""
         return "This is a FlascDataFrame!\n" + super().__str__()
 
     def convert_to_user_format(self, inplace=False):
-        """
-        Convert the DataFrame to the format that the user expects, given the name_map.
-        """
+        """Convert the DataFrame to the format that the user expects, given the name_map."""
         if self.name_map is not None:
             return self.rename(columns={v: k for k, v in self.name_map.items()}, inplace=inplace)
         else:
             return None if inplace else self.copy()
 
     def convert_to_flasc_format(self, inplace=False):
-        """
-        Convert the DataFrame to the format that FLASC expects.
-        """
+        """Convert the DataFrame to the format that FLASC expects."""
         if self.name_map is not None:
             return self.rename(columns=self.name_map, inplace=inplace)
         else:
             return None if inplace else self.copy()
 
     def _convert_long_to_wide(self):
-        """
-        Convert a long format DataFrame to a wide format DataFrame.
-        """
+        """Convert a long format DataFrame to a wide format DataFrame."""
         pass
 
     def _convert_semiwide_to_wide(self):
-        """
-        Convert a semiwide format DataFrame to a wide format DataFrame.
-        """
+        """Convert a semiwide format DataFrame to a wide format DataFrame."""
         pass
 
     def _convert_wide_to_long(self):
-        """
-        Convert a wide format DataFrame to a long format DataFrame.
-        """
+        """Convert a wide format DataFrame to a long format DataFrame."""
         if "time" not in self.columns:
             raise ValueError("Column 'time' must be present in the DataFrame")
 
         return self.melt(id_vars="time", var_name="variable", value_name="value")
 
     def _convert_wide_to_semiwide(self):
-        """
-        Convert a wide format DataFrame to a semiwide format DataFrame.
-        """
+        """Convert a wide format DataFrame to a semiwide format DataFrame."""
         pass
 
 
