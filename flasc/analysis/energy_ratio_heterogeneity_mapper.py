@@ -1,3 +1,5 @@
+"""Module to calculate and visualize the heterogeneity in the inflow wind speed."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -40,7 +42,9 @@ def _get_energy_ratio(df, ti, wd_bins, ws_range):
 # extract and plot heterogeneity
 # derived from upstream turbine's power measurements
 class heterogeneity_mapper:
-    """This class is useful to calculate the energy ratios of a set
+    """Class for calculating and visualizing the heterogeneity in the inflow wind speed.
+
+    This class is useful to calculate the energy ratios of a set
     of upstream turbines to then derive the heterogeneity in the
     inflow wind speed. This can be helpful in characterizing the
     ambient wind speed distribution for operational assets where
@@ -51,6 +55,13 @@ class heterogeneity_mapper:
 
     # Private functions
     def __init__(self, df_raw, fm):
+        """Initialize the heterogeneity_mapper class.
+
+        Args:
+            df_raw (pd.DataFrame): The raw SCADA data to use for the analysis.
+            fm (FlorisModel): The FLORIS model
+                to use for the analysis.
+        """
         # Save to self
         self.df_raw = df_raw
         self.fm = fm
@@ -127,6 +138,18 @@ class heterogeneity_mapper:
         wd_bin_width=6.0,
         ws_range=[6.0, 11.0],
     ):
+        """Estimate the heterogeneity in the inflow wind speed.
+
+        Args:
+            df_upstream (_type_): _description_
+            wd_array (_type_, optional): _description_. Defaults to np.arange(0.0, 360.0, 3.0).
+            wd_bin_width (float, optional): _description_. Defaults to 6.0.
+            ws_range (list, optional): _description_. Defaults to [6.0, 11.0].
+
+        Returns:
+            pd.DataFrame: A dataframe containing the energy ratios for all upstream turbines
+                for each wind direction bin.
+        """
         df_list = [
             self._process_single_wd(wd, wd_bin_width, ws_range, df_upstream) for wd in wd_array
         ]
@@ -134,6 +157,12 @@ class heterogeneity_mapper:
         return self.df_heterogeneity
 
     def plot_graphs(self, ylim=[0.8, 1.2], pdf_save_path=None):
+        """Plot the energy ratios for all upstream turbines for each wind direction bin.
+
+        Args:
+            ylim (list, optional): The y-axis limits for the plots. Defaults to [0.8, 1.2].
+            pdf_save_path (str, optional): The path to save the plots as a PDF. Defaults to None.
+        """
         if self.df_heterogeneity is None:
             raise UserWarning("Please call 'estimate_heterogeneity(...)' first.")
 
@@ -185,6 +214,11 @@ class heterogeneity_mapper:
             pdf.close()
 
     def generate_floris_hetmap(self):
+        """Generate a dataframe for a FLORIS heterogeneous map.
+
+        Returns:
+            pd.DataFrame: A dataframe containing the FLORIS heterogeneous map values.
+        """
         if self.df_heterogeneity is None:
             raise UserWarning("Please call 'estimate_heterogeneity(...)' first.")
 
@@ -229,6 +263,17 @@ class heterogeneity_mapper:
 
     # # Visualization
     def plot_layout(self, ylim=[0.8, 1.2], plot_background_flow=False, pdf_save_path=None):
+        """Plot the layout of the wind farm with the inflow wind speed heterogeneity.
+
+        Args:
+            ylim (list, optional): The y-axis limits for the plots. Defaults to [0.8, 1.2].
+            plot_background_flow (bool, optional): Whether to plot the background flow.
+                Defaults to False.
+            pdf_save_path (str, optional): The path to save the plots as a PDF. Defaults to None.
+
+        Returns:
+            tuple: The figure and axis objects.
+        """
         if self.df_heterogeneity is None:
             raise UserWarning("Please call 'estimate_heterogeneity(...)' first.")
 

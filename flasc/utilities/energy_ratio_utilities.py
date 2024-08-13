@@ -1,3 +1,5 @@
+"""Utility functions for calculating energy ratios."""
+
 import warnings
 from typing import List, Optional, Union
 
@@ -10,15 +12,14 @@ def cut(
     col_name: str,
     edges: Union[np.ndarray, list],
 ) -> pl.Expr:
-    """
-    Bins the values in the specified column according to the given edges.
+    """Bins the values in the specified column according to the given edges.
 
-    Parameters:
-    col_name (str): The name of the column to bin.
-    edges (array-like): The edges of the bins. Values will be placed into the bin
-                        whose left edge is the largest edge less than or equal to
-                        the value, and whose right edge is the smallest edge
-                        greater than the value.
+    Args:
+        col_name (str): The name of the column to bin.
+        edges (array-like): The edges of the bins. Values will be placed into the bin
+                            whose left edge is the largest edge less than or equal to
+                            the value, and whose right edge is the smallest edge
+                            greater than the value.
 
     Returns:
     expression: An expression object that can be used to bin the column.
@@ -39,20 +40,19 @@ def bin_column(
     bin_col_name: str,
     edges: Union[np.ndarray, list],
 ) -> pl.DataFrame:
-    """
-    Bins the values in the specified column of a Polars DataFrame according to the given edges.
+    """Bins the values in the specified column of a Polars DataFrame according to the given edges.
 
-    Parameters:
-    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    col_name (str): The name of the column to bin.
-    bin_col_name (str): The name to give the new column containing the bin labels.
-    edges (array-like): The edges of the bins. Values will be placed into the bin
-                        whose left edge is the largest edge less than or equal to
-                        the value, and whose right edge is the smallest edge
-                        greater than the value.
+    Args:
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        col_name (str): The name of the column to bin.
+        bin_col_name (str): The name to give the new column containing the bin labels.
+        edges (array-like): The edges of the bins. Values will be placed into the bin
+                            whose left edge is the largest edge less than or equal to
+                            the value, and whose right edge is the smallest edge
+                            greater than the value.
 
     Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional column containing the bin labels.
+        pl.DataFrame: A new Polars DataFrame with an additional column containing the bin labels.
     """
     return df_.with_columns(
         cut(col_name=col_name, edges=edges).alias(bin_col_name).cast(df_[col_name].dtype)
@@ -60,19 +60,16 @@ def bin_column(
 
 
 def add_ws(df_: pl.DataFrame, ws_cols: List[str], remove_all_nulls: bool = False) -> pl.DataFrame:
-    """
-    Add the ws column to a dataframe, given which columns to average over
+    """Add the ws column to a dataframe, given which columns to average over.
 
-
-    Parameters:
-    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    ws_cols (list(str)): The name of the columns to average across.
-    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)
+    Args:
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        ws_cols (list(str)): The name of the columns to average across.
+        remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)
 
     Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional ws column
+        pl.DataFrame: A new Polars DataFrame with an additional ws column
     """
-
     df_with_mean_ws = (
         # df_.select(pl.exclude('ws_bin')) # In case ws_bin already exists
         df_.with_columns(
@@ -99,27 +96,26 @@ def add_ws_bin(
     edges: Optional[Union[np.ndarray, list]] = None,
     remove_all_nulls: bool = False,
 ) -> pl.DataFrame:
-    """
-    Add the ws_bin column to a dataframe, given which columns to average over
-    and the step sizes to use
+    """Add the ws_bin column to a dataframe.
 
-    Parameters:
-    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    ws_cols (list(str)): The name of the columns to average across.
-    ws_step (float): Step size for binning
-    ws_min (float): Minimum wind speed
-    ws_max (float): Maximum wind speed
-    edges (array-like): The edges of the bins. Values will be placed into the bin
-                        whose left edge is the largest edge less than or equal to
-                        the value, and whose right edge is the smallest edge
-                        greater than the value.  Defaults to None, in which case
-                        the edges are generated using ws_step, ws_min, and ws_max.
-    remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)
+    Given which columns to average over and the step sizes to use
+
+    Args:
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        ws_cols (list(str)): The name of the columns to average across.
+        ws_step (float): Step size for binning
+        ws_min (float): Minimum wind speed
+        ws_max (float): Maximum wind speed
+        edges (array-like): The edges of the bins. Values will be placed into the bin
+                            whose left edge is the largest edge less than or equal to
+                            the value, and whose right edge is the smallest edge
+                            greater than the value.  Defaults to None, in which case
+                            the edges are generated using ws_step, ws_min, and ws_max.
+        remove_all_nulls: (bool): Remove all null values in ws_cols (rather than any)
 
     Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional ws_bin column
+        pl.DataFrame: A new Polars DataFrame with an additional ws_bin column
     """
-
     if edges is None:
         edges = np.arange(ws_min, ws_max + ws_step, ws_step)
 
@@ -139,19 +135,16 @@ def add_ws_bin(
 
 
 def add_wd(df_: pl.DataFrame, wd_cols: List[str], remove_all_nulls: bool = False) -> pl.DataFrame:
-    """
-    Add the wd column to a dataframe, given which columns to average over
+    """Add the wd column to a dataframe, given which columns to average over.
 
-
-    Parameters:
-    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    wd_cols (list(str)): The name of the columns to average across.
-    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)
+    Args:
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        wd_cols (list(str)): The name of the columns to average across.
+        remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)
 
     Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional wd column
+        pl.DataFrame: A new Polars DataFrame with an additional wd column
     """
-
     # Gather up intermediate column names and final column names
     wd_cols_cos = [c + "_cos" for c in wd_cols]
     wd_cols_sin = [c + "_sin" for c in wd_cols]
@@ -206,27 +199,27 @@ def add_wd_bin(
     edges: Optional[Union[np.ndarray, list]] = None,
     remove_all_nulls: bool = False,
 ):
-    """
-    Add the wd_bin column to a dataframe, given which columns to average over
+    """Add the wd_bin column to a dataframe.
+
+    Given which columns to average over
     and the step sizes to use
 
-    Parameters:
-    df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
-    wd_cols (list(str)): The name of the columns to average across.
-    wd_step (float): Step size for binning
-    wd_min (float): Minimum wind direction
-    wd_max (float): Maximum wind direction
-    edges (array-like): The edges of the bins. Values will be placed into the bin
-                    whose left edge is the largest edge less than or equal to
-                    the value, and whose right edge is the smallest edge
-                    greater than the value.  Defaults to None, in which case
-                    the edges are generated using ws_step, ws_min, and ws_max.
-    remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)
+    Args:
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        wd_cols (list(str)): The name of the columns to average across.
+        wd_step (float): Step size for binning
+        wd_min (float): Minimum wind direction
+        wd_max (float): Maximum wind direction
+        edges (array-like): The edges of the bins. Values will be placed into the bin
+                        whose left edge is the largest edge less than or equal to
+                        the value, and whose right edge is the smallest edge
+                        greater than the value.  Defaults to None, in which case
+                        the edges are generated using ws_step, ws_min, and ws_max.
+        remove_all_nulls: (bool): Remove all null values in wd_cols (rather than any)
 
     Returns:
-    pl.DataFrame: A new Polars DataFrame with an additional ws_bin column
+        pl.DataFrame: A new Polars DataFrame with an additional ws_bin column
     """
-
     if edges is None:
         edges = np.arange(wd_min, wd_max + wd_step, wd_step)
 
@@ -250,17 +243,36 @@ def add_power_test(
     df_: pl.DataFrame,
     test_cols: List[str],
 ) -> pl.DataFrame:
+    """Add the pow_test column to a dataframe, given which columns to average over.
+
+    Args:
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        test_cols (list(str)): The name of the columns to average across.
+
+    Returns:
+        pl.DataFrame: A new Polars DataFrame with an additional pow_test column
+    """
     return df_.with_columns(pow_test=pl.concat_list(test_cols).list.mean())
 
 
 def add_power_ref(df_: pl.DataFrame, ref_cols: List[str]):
+    """Add the pow_ref column to a dataframe, given which columns to average over.
+
+    Args:
+        df_ (pl.DataFrame): The Polars DataFrame containing the column to bin.
+        ref_cols (list(str)): The name of the columns to average across.
+
+    Returns:
+        pl.DataFrame: A new Polars DataFrame with an additional pow_ref column
+    """
     return df_.with_columns(pow_ref=pl.concat_list(ref_cols).list.mean())
 
 
 def add_reflected_rows(df_: pl.DataFrame, edges: Union[np.ndarray, list], overlap_distance: float):
-    """
-    Adds rows to a datrame with where the wind direction is
-    reflected around the neearest edge if within overlap_distance
+    """Add reflected rows to a dataframe.
+
+    Adds rows to a dataframe with where the wind direction is
+    reflected around the nearest edge if within overlap_distance
 
     Given a wind direction DataFrame `df_`, this function adds
     reflected rows to the DataFrame such that each wind direction
@@ -274,23 +286,20 @@ def add_reflected_rows(df_: pl.DataFrame, edges: Union[np.ndarray, list], overla
 
     This function enables overlapping bins in the energy ratio functions
 
-    Parameters
-    ----------
-    df_ : polars.DataFrame
-        The DataFrame to add reflected rows to.
-    edges : numpy.ndarray
-        An array of wind direction edges to use for reflection.
-        (Should be same as used in energy ratio)
-    overlap_distance : float
-        The maximum distance between a wind direction and an edge
-        for the wind direction to be considered overlapping.
+    Args:
+        df_ : polars.DataFrame
+            The DataFrame to add reflected rows to.
+        edges : numpy.ndarray
+            An array of wind direction edges to use for reflection.
+            (Should be same as used in energy ratio)
+        overlap_distance : float
+            The maximum distance between a wind direction and an edge
+            for the wind direction to be considered overlapping.
 
-    Returns
-    -------
-    polars.DataFrame
-        A new DataFrame with the original rows and the added reflected rows.
+    Returns:
+        polars.DataFrame
+            A new DataFrame with the original rows and the added reflected rows.
     """
-
     df_add = df_.clone()
     wd = df_add["wd"].to_numpy()
     diff_matrix = wd[:, None] - edges
@@ -314,7 +323,8 @@ def filter_all_nulls(
     ws_cols: List[str],
     wd_cols: List[str],
 ):
-    """
+    """Filter dataframe for ALL nulls.
+
     Filter data by requiring ALL values of ref, test, ws, and wd to be valid
     numbers.
 
@@ -341,7 +351,8 @@ def filter_any_nulls(
     ws_cols: List[str],
     wd_cols: List[str],
 ):
-    """
+    """Filter dataframe for ANY nulls.
+
     Filter data by requiring ANY of ref, ANY of test, ANY of ws, and ANY of wd
     to be a valid number.
 
@@ -390,11 +401,40 @@ def check_compute_energy_ratio_inputs(
     percentiles,
     remove_all_nulls,
 ):
-    """
+    """Check the inputs to compute_energy_ratio.
+
     Check inputs to compute_energy_ratio. Inputs reflect inputs to compute_energy_ratio,
     with exception of df_, which is passed directly instead of er_in.
-    """
 
+    All the inputs of compute_energy_ratio are checked for validity. This function does not
+    check every input, although they are all accepted.
+
+    Args:
+        df_ (pl.DataFrame): The Polars DataFrame
+        ref_turbines (list): A list of the reference turbine columns
+        test_turbines (list): A list of the test turbine columns
+        wd_turbines (list): A list of the wind direction columns
+        ws_turbines (list): A list of the wind speed columns
+        use_predefined_ref (bool): Whether to use predefined reference turbines
+        use_predefined_wd (bool): Whether to use predefined wind direction turbines
+        use_predefined_ws (bool): Whether to use predefined wind speed turbines
+        wd_step (float): Step size for binning wind direction
+        wd_min (float): Minimum wind direction
+        wd_max (float): Maximum wind direction
+        ws_step (float): Step size for binning wind speed
+        ws_min (float): Minimum wind speed
+        ws_max (float): Maximum wind speed
+        bin_cols_in (list): A list of columns to bin
+        weight_by (str): A string indicating how to weight the bins
+        df_freq (pl.DataFrame): A DataFrame containing frequency data
+        wd_bin_overlap_radius (float): The radius for overlapping wind direction bins
+        uplift_pairs (list): A list of uplift pairs
+        uplift_names (list): A list of uplift names
+        uplift_absolute (bool): Whether to use absolute uplift
+        N (int): Number of bootstrapping iterations
+        percentiles (list): A list of percentiles to calculate from bootstrap
+        remove_all_nulls (bool): Whether to remove all nulls
+    """
     # Check that the inputs are valid
     # If use_predefined_ref is True, df_ must have a column named 'pow_ref'
     if use_predefined_ref:
@@ -477,8 +517,7 @@ def bin_and_group_dataframe(
     bin_cols_without_df_name: List = None,
     num_df: int = 0,
 ):
-    """
-    Bin and aggregate a DataFrame based on wind direction and wind speed parameters.
+    """Bin and aggregate a DataFrame based on wind direction and wind speed parameters.
 
     This function takes a Polars DataFrame (df_) and performs
     binning and aggregation operations based on
@@ -511,7 +550,6 @@ def bin_and_group_dataframe(
     Returns:
         DataFrame: The resulting Polars DataFrame with aggregated statistics.
     """
-
     # If wd_bin_overlap_radius is not zero, add reflected rows
     if wd_bin_overlap_radius > 0.0:
         # Need to obtain the wd column now rather than during binning
@@ -551,7 +589,8 @@ def add_bin_weights(
     bin_cols_without_df_name: List = None,
     weight_by: str = "min",
 ):
-    """
+    """Add weights to DataFrame bins.
+
     Add weights to DataFrame bins based on either frequency counts or
     the provided frequency table df_freq_pl.
 

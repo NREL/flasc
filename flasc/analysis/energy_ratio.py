@@ -1,3 +1,5 @@
+"""Energy ratio analysis module."""
+
 # This is a work in progress as we try to synthesize ideas from the
 # table based methods and energy ratios back into one thing,
 # some ideas we're incorporating:
@@ -41,8 +43,7 @@ def _compute_energy_ratio_single(
     uplift_absolute=False,
     remove_all_nulls=False,
 ):
-    """
-    Compute the energy ratio between two sets of turbines.
+    """Compute the energy ratio between two sets of turbines.
 
     Args:
         df_ (pl.DataFrame): A dataframe containing the data to use in the calculation.
@@ -61,9 +62,9 @@ def _compute_energy_ratio_single(
             the wind speed and wind direction bins.
         weight_by (str): How to weight the energy ratio, options are 'min', or 'sum'.  'min' means
             the minimum count across the dataframes is used to weight the energy ratio.
-            'sum' means the sum of the counts
-            across the dataframes is used to weight the energy ratio.   Defaults to 'min'.
-        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
+            'sum' means the sum of the counts across the dataframes is
+             used to weight the energy ratio.  Defaults to 'min'.
+        df_freq_pl (pl.Dataframe): Polars dataframe of pre-provided per bin weights
         wd_bin_overlap_radius (float): The distance in degrees one wd bin
             overlaps into the next, must be
             less or equal to half the value of wd_step
@@ -82,10 +83,10 @@ def _compute_energy_ratio_single(
             must be available to compute the bin. Defaults to False.
 
     Returns:
-        pl.DataFrame: A dataframe containing the energy ratio for each wind direction bin
-        pl.DataFrame: A dataframe containing the weights each wind direction and wind speed bin
+        A tuple (pl.DataFrame, pl.DataFrame): A dataframe containing the energy ratio for each wind
+            direction bin and a dataframe containing the weights each wind direction
+            and wind speed bin
     """
-
     # Get the number of dataframes
     num_df = len(df_names)
 
@@ -203,8 +204,7 @@ def _compute_energy_ratio_bootstrap(
     percentiles=[5.0, 95.0],
     remove_all_nulls=False,
 ):
-    """
-    Compute the energy ratio between two sets of turbines with bootstrapping
+    """Compute the energy ratio between two sets of turbines with bootstrapping.
 
     Args:
         er_in (EnergyRatioInput): An EnergyRatioInput object containing
@@ -225,7 +225,7 @@ def _compute_energy_ratio_bootstrap(
             the minimum count across the dataframes is used to weight the energy ratio.
             'sum' means the sum of the counts
             across the dataframes is used to weight the energy ratio.
-        df_freq_pl (pl.Dataframe) Polars dataframe of pre-provided per bin weights
+        df_freq_pl (pl.Dataframe): Polars dataframe of pre-provided per bin weights
         wd_bin_overlap_radius (float): The distance in degrees one wd bin overlaps
             into the next, must be
             less or equal to half the value of wd_step
@@ -251,7 +251,6 @@ def _compute_energy_ratio_bootstrap(
         pl.DataFrame: A dataframe containing the energy ratio between the two sets of turbines.
 
     """
-
     # Otherwise run the function N times and concatenate the results to compute statistics
     er_single_outs = [
         _compute_energy_ratio_single(
@@ -322,8 +321,7 @@ def compute_energy_ratio(
     percentiles=None,
     remove_all_nulls=False,
 ) -> EnergyRatioOutput:
-    """
-    Compute the energy ratio between two sets of turbines with bootstrapping
+    """Compute the energy ratio between two sets of turbines with bootstrapping.
 
     Args:
         er_in (EnergyRatioInput): An EnergyRatioInput object containing
@@ -384,7 +382,6 @@ def compute_energy_ratio(
             ratio between the two sets of turbines.
 
     """
-
     # Get the polars dataframe from within the er_in
     df_ = er_in.get_df()
 

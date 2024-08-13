@@ -1,3 +1,9 @@
+"""Module for visualization of FLASC data.
+
+This module contains functions for visualizing data from the FLASC package.
+
+"""
+
 import numpy as np
 import pandas as pd
 import scipy.stats as st
@@ -16,7 +22,9 @@ def plot_with_wrapping(
     label=None,
     rasterized=False,
 ):
-    """Plot a line on an axis that deals with angle wrapping. Normally, using
+    """Plot a line on an axis that deals with angle wrapping.
+
+    Normally, using
     pyplot will blindly connects points that wrap around 360 degrees, e.g.,
     going from 357 degrees to 2 degrees. This will create a strong vertical
     line through the plot that connects the two points, while actually these
@@ -27,41 +35,41 @@ def plot_with_wrapping(
 
     Args:
         x (iteratible): NumPy array or list containing indices/time stamps of
-        the data.
+            the data.
         y (iteratible): NumPy array containing direction/angle data that
-        requires 360 deg angle wrapping. These are typically wind directions
-        or nacelle headings.
+            requires 360 deg angle wrapping. These are typically wind directions
+            or nacelle headings.
         ax (plt.Axis, optional): Axis object of the matplotlib.pyplot class.
-        The line will be plotted on this axis. If None specified, will create
-        a figure and axis, and plot the line in there. Defaults to None.
+            The line will be plotted on this axis. If None specified, will create
+            a figure and axis, and plot the line in there. Defaults to None.
         low (float, optional): Lower limit at which the angles should be
-        wrapped. When using degrees, this should be typically 0.0 deg for wind
-        directions and nacelle directions (i.e., compass directions). When using
-        vane signals, this is typically -180.0 deg. When using radians,
-        this should be the equivalent in radians (e.g., 0 or - np.pi).
-        Defaults to 0.0.
+            wrapped. When using degrees, this should be typically 0.0 deg for wind
+            directions and nacelle directions (i.e., compass directions). When using
+            vane signals, this is typically -180.0 deg. When using radians,
+            this should be the equivalent in radians (e.g., 0 or - np.pi).
+            Defaults to 0.0.
         high (float, optional): Upper limit at which the angles should be
-        wrapped. When using degrees, this should be 360.0 deg for wind
-        directions and nacelle directions (i.e., compass directions).
-        When using radians, this should be the equivalent in radians.
-        Defaults to 360.0.
+            wrapped. When using degrees, this should be 360.0 deg for wind
+            directions and nacelle directions (i.e., compass directions).
+            When using radians, this should be the equivalent in radians.
+            Defaults to 360.0.
         linestyle (str, optional): Linestyle for the plot. Defaults to "-".
         marker (str, optional): Marker style for the plot. If None is
-        specified, will not use markers. Defaults to None.
+            specified, will not use markers. Defaults to None.
         color (str, optional): Color of the line and markers. Defaults to
-        "black".
+            "black".
         label (string, optional): Label for the line and markers. If None is
-        specified, will not label the line. Defaults to None.
-        rasterize (bool, optional): Rasterize the plot/line and thereby remove
-        its vectorized properties. This can help reduce the size of a .pdf or
-        .eps file when this figure is saved, at the cost of a potential
-        reduction in image quality.
+            specified, will not label the line. Defaults to None.
+        rasterized (bool, optional): Rasterize the plot/line and thereby remove
+            its vectorized properties. This can help reduce the size of a .pdf or
+            .eps file when this figure is saved, at the cost of a potential
+            reduction in image quality.
+
 
     Returns:
         ax: Axis object of the matplotlib.pyplot class on which the line (and
-        optionally markers) are plotted.
+            optionally markers) are plotted.
     """
-
     # Create figure, if not provided
     if ax is None:
         fig, ax = plt.subplots()
@@ -139,11 +147,27 @@ def plot_with_wrapping(
 
 
 def generate_default_labels(fm):
+    """Generate default labels for a FlorisModel.
+
+    Args:
+        fm (FlorisModel): A FlorisModel instance.
+
+    Returns:
+        list: A list of labels for the turbines in the FlorisModel.
+    """
     labels = ["T{0:02d}".format(ti) for ti in range(len(fm.layout_x))]
     return labels
 
 
 def generate_labels_with_hub_heights(fm):
+    """Generate labels for a FlorisModel with hub heights.
+
+    Args:
+        fm (FlorisModel): A FlorisModel instance.
+
+    Returns:
+        list: A list of labels for the turbines in the FlorisModel.
+    """
     labels = [
         "T{0:02d} ({1:.1f} m)".format(ti, h)
         for ti, h in enumerate(fm.core.farm.hub_heights.flatten())
@@ -164,9 +188,9 @@ def plot_binned_mean_and_ci(
     alpha_scatter=0.1,
     confidence_level=0.95,
 ):
-    """
-    Plot data to a single axis.  Method
-    has options to include scatter of underlying data, specifiying
+    """Plot the mean and confidence interval of y as a function of x.
+
+    Method has options to include scatter of underlying data, specifying
     bin edges, and plotting confidence interval.
 
     Args:
@@ -188,11 +212,10 @@ def plot_binned_mean_and_ci(
             confidence interval. Defaults to True.
         alpha_scatter (float, optional): Alpha for scatter
             plot. Defaults to 0.5.
-        confidenceLevel (float, optional): Confidence level for
+        confidence_level (float, optional): Confidence level for
             confidence interval. Defaults to 0.95.
 
     """
-
     # Check the length of x equals length of y
     if len(x) != len(y):
         raise ValueError("x and y must be the same length")
