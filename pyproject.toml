@@ -25,6 +25,7 @@ filterwarnings = [
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
+    "flasc/version.py",
     ".bzr",
     ".direnv",
     ".eggs",
