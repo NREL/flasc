@@ -87,15 +87,15 @@ historical SCADA data of three offshore wind farms.
 If FLASC played a role in your research, please cite it. This software can be
 cited as:
 
-   FLASC. Version 2.0 (2024). Available at https://github.com/NREL/flasc.
+   FLASC. Version 2.0.1 (2024). Available at https://github.com/NREL/flasc.
 
 For LaTeX users:
 
 
     @misc{flasc2024,
       author = {NREL},
-      title = {FLASC. Version 2.0},
-      year = {2022},
+      title = {FLASC. Version 2.0.1},
+      year = {2024},
       publisher = {GitHub},
       journal = {GitHub repository},
       url = {https://github.com/NREL/flasc},
