@@ -25,7 +25,7 @@ jobs:
 
         # Necessary to install develop branch of FLORIS until next release for tests to pass
         # Checkout develop branch of installed floris package
-        pip uninstall floris
+        pip uninstall floris -y
         pip install git+https://github.com/nrel/floris@develop
 
 
