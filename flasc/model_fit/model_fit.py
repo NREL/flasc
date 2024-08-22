@@ -10,6 +10,7 @@ from floris import FlorisModel, ParallelFlorisModel
 
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.flasc_dataframe import FlascDataFrame
+from flasc.utilities.tuner_utilities import replicate_nan_values
 
 
 class ModelFit:
@@ -48,6 +49,9 @@ class ModelFit:
         """
         # Save the dataframe as a FlascDataFrame
         self.df = FlascDataFrame(df)
+
+        # Check the dataframe
+        self._check_flasc_dataframe(self.df)
 
         # Check if fmodel if FlorisModel or ParallelFlorisModel
         if not isinstance(fmodel, (FlorisModel, ParallelFlorisModel)):
@@ -140,6 +144,74 @@ class ModelFit:
 
         # Save the optimization algorithm
         self.optimization_algorithm = optimization_algorithm
+
+    def _check_flasc_dataframe(self, df: FlascDataFrame) -> None:
+        """Check that the provided FlascDataFrame is valid.
+
+        Args:
+            df (FlascDataFrame): DataFrame to check.
+        """
+        # Data frame must contain a 'ws' and 'wd' column
+        if "ws" not in df.columns or "wd" not in df.columns:
+            raise ValueError("DataFrame must contain 'ws' and 'wd' columns.")
+
+    def run_floris_model(self, **kwargs) -> FlascDataFrame:
+        """Run the FLORIS model with the current parameter values.
+
+        Given the provided FLORIS model and SCADA data, run the FLORIS model
+        and generate a FlascDataFrame of FLORIS values.  Note **kwargs are
+        provided to allow additional settings to be passed to the
+        ParallelFlorisModel.set method.
+
+        Args:
+            **kwargs: Additional keyword arguments to pass to the
+                ParallelFlorisModel.set method.
+
+        Returns:
+            FlascDataFrame: _description_
+        """
+        # Get the wind speeds, wind directions and turbulence intensities
+        wind_speeds = self.df["ws"].values
+        wind_directions = self.df["wd"].values
+
+        # TODO: Possible code for handling TI, but we might not want to force
+        # TI inclusion
+        # if "ti" in self.df.columns:
+        #     turbulence_intensities = self.df["ti"].values
+        # else:
+        #     turbulence_intensities = None
+
+        # For now just set to first value of current model
+        turbulence_intensities = np.ones_like(wind_speeds) * self.fmodel.turbulence_intensities[0]
+
+        # Set the FLORIS model
+        self.fmodel.set(
+            wind_speeds=wind_speeds,
+            wind_directions=wind_directions,
+            turbulence_intensities=turbulence_intensities,
+            **kwargs,
+        )
+
+        # Run the FLORIS model
+        # self.fmodel.run()
+
+        # Get the turbines in kW
+        turbine_powers = self.fmodel.get_turbine_powers().squeeze() / 1000
+
+        # Generate FLORIS dataframe
+        df_floris = FlascDataFrame(
+            data=turbine_powers, columns=[f"pow_{i:>03}" for i in range(self.n_turbines)]
+        )
+
+        # Assign the FLORIS results to a dataframe
+        df_floris = df_floris.assign(ws=wind_speeds, wd=wind_directions)
+
+        # Make sure the NaN values in the SCADA data appear in the same locations in the
+        # FLORIS data
+        df_floris = replicate_nan_values(self.df, df_floris)
+
+        # Return df_floris
+        return df_floris
 
     def get_parameter_values(
         self,
