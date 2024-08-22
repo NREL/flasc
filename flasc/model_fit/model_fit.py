@@ -1,4 +1,4 @@
-"""Modular Class for Calibrating FLORIS models to SCADA data."""
+"""Modular Class for computing a fitness evaluation of a FLORIS model to SCADA data."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from flasc.flasc_dataframe import FlascDataFrame
 
 
 class ModelFit:
-    """Class Sumamry.
+    """Fit a FlorisModel to SCADA data.
 
     Description
     """
@@ -23,11 +23,11 @@ class ModelFit:
         df: pd.DataFrame | FlascDataFrame,
         fmodel: FlorisModel | ParallelFlorisModel,
         cost_function_handle: Callable[[FlascDataFrame, FlascDataFrame], float],
-        optimization_algorithm: Callable,
-        parameter_list: List[List] | List[Tuple],
-        parameter_name_list: List[str],
-        parameter_range_list: List[List] | List[Tuple],
+        parameter_list: List[List] | List[Tuple] | None = None,
+        parameter_name_list: List[str] | None = None,
+        parameter_range_list: List[List] | List[Tuple] | None = None,
         parameter_index_list: List[int] | None = None,
+        optimization_algorithm: Callable | None = None,
     ):
         """Initialize the ModelFit class.
 
@@ -35,25 +35,34 @@ class ModelFit:
             df (pd.DataFrame | FlascDataFrame): DataFrame containing SCADA data.
             fmodel (FlorisModel | ParallelFlorisModel): FLORIS model to calibrate.
             cost_function_handle (Callable): Handle to the cost function.
-            optimization_algorithm (Callable): Handle to the optimization algorithm.
-            parameter_list (List[List] | List[Tuple]): List of FLORIS parameters to calibrate.
-            parameter_name_list (List[str]): List of names for the parameters.
-            parameter_range_list (List[List] | List[Tuple]): List of parameter ranges.
+            parameter_list (List[List] | List[Tuple]): List of FLORIS parameters to calibrate.  If
+                None, no parameters are calibrated.  Defaults to None.
+            parameter_name_list (List[str]): List of names for the parameters.  If None, no names
+                are provided.  Defaults to None.
+            parameter_range_list (List[List] | List[Tuple]): List of parameter ranges.  If None, no
+                ranges are provided.  Defaults to None.
             parameter_index_list (List[int], optional): List of parameter indices. Defaults to None.
+            optimization_algorithm (Callable): Handle to the optimization algorithm.  If None,
+                no optimization can be performed but fitness can still be evaluated.
+                Defaults to None.
         """
         # Save the dataframe as a FlascDataFrame
         self.df = FlascDataFrame(df)
 
-        # Save the FlorisModel
-        self.fmodel = fmodel
-
         # Check if fmodel if FlorisModel or ParallelFlorisModel
         if not isinstance(fmodel, (FlorisModel, ParallelFlorisModel)):
             raise ValueError("fmodel must be a FlorisModel or ParallelFlorisModel.")
-        if isinstance(fmodel, ParallelFlorisModel):
-            self.is_parallel = True
+
+        # If FlorisModel, set to ParallelFlorisModel with 16 workers
+        if isinstance(fmodel, FlorisModel):
+            max_workers = 16
+            self.fmodel = ParallelFlorisModel(
+                fmodel,
+                max_workers=max_workers,
+                n_wind_condition_splits=max_workers,
+            )
         else:
-            self.is_parallel = False
+            self.fmodel = fmodel.copy()
 
         # Get the number of turbines and confirm that
         # the dataframe and floris model have the same number of turbines
@@ -64,47 +73,77 @@ class ModelFit:
                 "The number of turbines in the dataframe and the Floris model do not match."
             )
 
-        # Save the FLORIS mode
-        self.fmodel = fmodel
-
         # Save the cost function handle
         self.cost_function_handle = cost_function_handle
+
+        # If any of parameter_list, parameter_name_list, or parameter_range_list are provided,
+        # ensure all are provided
+        if (
+            (parameter_list is None)
+            or (parameter_name_list is None)
+            or (parameter_range_list is None)
+        ):
+            if (
+                parameter_list is not None
+                or parameter_name_list is not None
+                or parameter_range_list is not None
+            ):
+                raise ValueError(
+                    "If any of parameter_list, parameter_name_list, or parameter_range_list "
+                    " are provided, all must be provided."
+                )
+
+        # If parameter list is provided get the number of get the number of parameters and
+        # set up the parameter index list if not provided
+        if parameter_list is not None:
+            # Confirm that parameter_list, parameter_name_list,
+            # and parameter_range_list are the same length
+            if len(parameter_list) != len(parameter_name_list) or len(parameter_list) != len(
+                parameter_range_list
+            ):
+                raise ValueError(
+                    "parameter_list, parameter_name_list, and parameter_range_list"
+                    " must be the same length."
+                )
+
+            # Save the parameter list, name list, and range list
+            self.parameter_list = parameter_list
+            self.parameter_name_list = parameter_name_list
+            self.parameter_range_list = parameter_range_list
+
+            # Save the number of parameters
+            self.n_parameters = len(parameter_list)
+
+            # If parameter list is provided, ensure it is the same length as parameter_list
+            if parameter_index_list is not None:
+                if len(parameter_index_list) != self.n_parameters:
+                    raise ValueError(
+                        "parameter_index_list must be the same length as parameter_list."
+                    )
+                self.parameter_index_list = parameter_index_list
+
+            # If not provided, set as list of None
+            else:
+                self.parameter_index_list = [None] * self.n_parameters
+
+            # Initialize the initial parameter values
+            self.initial_parameter_values = self.get_parameter_values()
+
+        # Else initialize parameters as None
+        else:
+            self.parameter_list = []
+            self.parameter_name_list = []
+            self.parameter_range_list = []
+            self.parameter_index_list = []
+            self.n_parameters = 0
+            self.initial_parameter_values = np.array([])
 
         # Save the optimization algorithm
         self.optimization_algorithm = optimization_algorithm
 
-        # Confirm that parameter_list, parameter_name_list,
-        # and parameter_range_list are the same length
-        if len(parameter_list) != len(parameter_name_list) or len(parameter_list) != len(
-            parameter_range_list
-        ):
-            raise ValueError(
-                "parameter_list, parameter_name_list, and parameter_range_list"
-                " must be the same length."
-            )
-
-        # Save the parameter list, name list, and range list
-        self.parameter_list = parameter_list
-        self.parameter_name_list = parameter_name_list
-        self.parameter_range_list = parameter_range_list
-
-        # If parameter list is provided, ensure it is the same length as parameter_list
-        if parameter_index_list is not None:
-            if len(parameter_index_list) != len(parameter_list):
-                raise ValueError("parameter_index_list must be the same length as parameter_list.")
-            self.parameter_index_list = parameter_index_list
-
-        # If not provided, set as list of None
-        else:
-            self.parameter_index_list = [None] * len(parameter_list)
-
-        # Save the number of parameters
-        self.n_parameters = len(parameter_list)
-
-        # Initialize the initial parameter values
-        self.initial_parameter_values = self._get_parameter_values()
-
-    def _get_parameter_values(self):
+    def get_parameter_values(
+        self,
+    ) -> np.ndarray:
         """Get the current parameter values from the FLORIS model.
 
         Returns:
@@ -119,13 +158,16 @@ class ModelFit:
 
         return parameter_values
 
-    def _set_parameter_values(self, parameter_values):
+    def set_parameter_values(
+        self,
+        parameter_values: np.ndarray,
+    ) -> None:
         """Set the parameter values in the FLORIS model.
 
         Args:
             parameter_values (np.ndarray): Array of parameter values.
         """
-        # Check that parameters values is self.n_parameters long
+        # Check that parameters values is len(parameter_list) long
         if len(parameter_values) != self.n_parameters:
             raise ValueError("parameter_values must have length equal to the number of parameters.")
 
