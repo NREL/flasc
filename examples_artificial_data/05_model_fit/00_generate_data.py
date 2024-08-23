@@ -10,9 +10,9 @@ from flasc.utilities.utilities_examples import load_floris_artificial
 with both uncertain and certain wind speed data."""
 
 # Parameters
-N = 365 * 24 * 6  # Assume 1 year of 10 minute data
+N = 365 * 24  # * 6  # Assume 1 year of 10 minute data
 wd_std = 3.0  # Standard deviation of wind direction in for uncertain model
-we_value = 0.03  # Wake expansion value that will be the used to generate the test data
+we_value_set = 0.03  # Wake expansion value that will be the used to generate the test data
 
 # Get default FLORIS model
 fm_default, _ = load_floris_artificial(wake_model="jensen")
@@ -42,7 +42,9 @@ fm_param = fm_default.copy()
 
 # Set the FLORIS model parameter
 parameter = ("wake", "wake_velocity_parameters", "jensen", "we")
-fm_param.set_param(parameter, we_value)
+we_value_original = fm_param.get_param(parameter)
+fm_param.set_param(parameter, we_value_set)
+
 # ufm.set_param(parameter, we_value)
 
 # Run
@@ -64,7 +66,8 @@ with open("two_turbine_data.pkl", "wb") as f:
             "df": df,
             "fm_default": fm_default,
             "parameter": parameter,
-            "we_value": we_value,
+            "we_value_original": we_value_original,
+            "we_value_set": we_value_set,
         },
         f,
     )

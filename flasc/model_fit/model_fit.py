@@ -239,6 +239,20 @@ class ModelFit:
         # Return df_floris
         return df_floris
 
+    def evaluate_floris(self, **kwargs) -> float:
+        """Evaluate the FLORIS model.
+
+        Given the current parameter values, run the FLORIS model and evaluate the cost function.
+
+        Returns:
+            float: cost value.
+        """
+        # Run the FLORIS model
+        df_floris = self.run_floris_model(**kwargs)
+
+        # Evaluate the cost function
+        return self.cost_function_handle(self.df, df_floris)
+
     def get_parameter_values(
         self,
     ) -> np.ndarray:
