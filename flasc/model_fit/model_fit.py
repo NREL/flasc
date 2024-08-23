@@ -155,6 +155,37 @@ class ModelFit:
         if "ws" not in df.columns or "wd" not in df.columns:
             raise ValueError("DataFrame must contain 'ws' and 'wd' columns.")
 
+    @staticmethod
+    def form_flasc_dataframe(
+        wind_directions: np.ndarray, wind_speeds: np.ndarray, powers: np.ndarray
+    ) -> FlascDataFrame:
+        """Form a FlascDataFrame from wind directions, wind speeds, and powers.
+
+        Args:
+            wind_directions (np.ndarray): Array of wind directions.
+            wind_speeds (np.ndarray): Array of wind speeds.
+            powers (np.ndarray): Array of powers.  Must be (n_findex, n_turbines).
+
+        Returns:
+            FlascDataFrame: FlascDataFrame containing the wind directions, wind speeds, and powers.
+        """
+        # Check that the shapes of the arrays are correct
+        if wind_directions.shape[0] != wind_speeds.shape[0]:
+            raise ValueError("wind_directions and wind_speeds must have the same length.")
+
+        if wind_directions.shape[0] != powers.shape[0]:
+            raise ValueError("wind_directions and powers must have the same length.")
+
+        if powers.ndim != 2:
+            raise ValueError("powers must be a 2D array.")
+
+        # Assign the powers
+        _df = FlascDataFrame(data=powers, columns=[f"pow_{i:>03}" for i in range(powers.shape[1])])
+        # Assign the wind directions and wind speeds
+        _df = _df.assign(wd=wind_directions, ws=wind_speeds)
+
+        return _df
+
     def run_floris_model(self, **kwargs) -> FlascDataFrame:
         """Run the FLORIS model with the current parameter values.
 
@@ -199,12 +230,7 @@ class ModelFit:
         turbine_powers = self.fmodel.get_turbine_powers().squeeze() / 1000
 
         # Generate FLORIS dataframe
-        df_floris = FlascDataFrame(
-            data=turbine_powers, columns=[f"pow_{i:>03}" for i in range(self.n_turbines)]
-        )
-
-        # Assign the FLORIS results to a dataframe
-        df_floris = df_floris.assign(ws=wind_speeds, wd=wind_directions)
+        df_floris = self.form_flasc_dataframe(wind_directions, wind_speeds, turbine_powers)
 
         # Make sure the NaN values in the SCADA data appear in the same locations in the
         # FLORIS data
