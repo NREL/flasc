@@ -24,10 +24,10 @@ class ModelFit:
         df: pd.DataFrame | FlascDataFrame,
         fmodel: FlorisModel | ParallelFlorisModel,
         cost_function: Callable[[FlascDataFrame, FlascDataFrame], float],
-        parameter_list: List[List] | List[Tuple] | None = None,
-        parameter_name_list: List[str] | None = None,
-        parameter_range_list: List[List] | List[Tuple] | None = None,
-        parameter_index_list: List[int] | None = None,
+        parameter_list: List[List] | List[Tuple] = [],
+        parameter_name_list: List[str] = [],
+        parameter_range_list: List[List] | List[Tuple] = [],
+        parameter_index_list: List[int] = [],
         optimization_algorithm: Callable | None = None,
     ):
         """Initialize the ModelFit class.
@@ -80,67 +80,60 @@ class ModelFit:
         # Save the cost function handle
         self.cost_function = cost_function
 
-        # If any of parameter_list, parameter_name_list, or parameter_range_list are provided,
-        # ensure all are provided
-        if (
-            (parameter_list is None)
-            or (parameter_name_list is None)
-            or (parameter_range_list is None)
+        # Confirm that parameter_list, parameter_name_list, and parameter_range_list and
+        # parameter_index_list are lists
+        if not isinstance(parameter_list, list):
+            raise ValueError("parameter_list must be a list.")
+        if not isinstance(parameter_name_list, list):
+            raise ValueError("parameter_name_list must be a list.")
+        if not isinstance(parameter_range_list, list):
+            raise ValueError("parameter_range_list must be a list.")
+        if not isinstance(parameter_index_list, list):
+            raise ValueError("parameter_index_list must be a list.")
+
+        # Confirm that parameter_list, parameter_name_list,
+        # and parameter_range_list are the same length
+        if len(parameter_list) != len(parameter_name_list) or len(parameter_list) != len(
+            parameter_range_list
         ):
+            raise ValueError(
+                "parameter_list, parameter_name_list, and parameter_range_list"
+                " must be the same length."
+            )
+
+        # If any of parameter_list, parameter_name_list, or parameter_range_list are provided,
+        # (in that they have lengths greater than 0) then all must be provided
+        if len(parameter_list) > 0 or len(parameter_name_list) > 0 or len(parameter_range_list) > 0:
             if (
-                parameter_list is not None
-                or parameter_name_list is not None
-                or parameter_range_list is not None
+                len(parameter_list) == 0
+                or len(parameter_name_list) == 0
+                or len(parameter_range_list) == 0
             ):
                 raise ValueError(
-                    "If any of parameter_list, parameter_name_list, or parameter_range_list "
+                    "If any of parameter_list, parameter_name_list, or parameter_range_list"
                     " are provided, all must be provided."
                 )
 
-        # If parameter list is provided get the number of get the number of parameters and
-        # set up the parameter index list if not provided
-        if parameter_list is not None:
-            # Confirm that parameter_list, parameter_name_list,
-            # and parameter_range_list are the same length
-            if len(parameter_list) != len(parameter_name_list) or len(parameter_list) != len(
-                parameter_range_list
-            ):
-                raise ValueError(
-                    "parameter_list, parameter_name_list, and parameter_range_list"
-                    " must be the same length."
-                )
+        # Save the parameter list, name list, and range list
+        self.parameter_list = parameter_list
+        self.parameter_name_list = parameter_name_list
+        self.parameter_range_list = parameter_range_list
 
-            # Save the parameter list, name list, and range list
-            self.parameter_list = parameter_list
-            self.parameter_name_list = parameter_name_list
-            self.parameter_range_list = parameter_range_list
+        # Save the number of parameters
+        self.n_parameters = len(parameter_list)
 
-            # Save the number of parameters
-            self.n_parameters = len(parameter_list)
+        # If  arameter_index_list is empty, set as a list of None equal to the number of parameters
+        if len(parameter_index_list) == 0:
+            self.parameter_index_list = [None] * self.n_parameters
 
-            # If parameter list is provided, ensure it is the same length as parameter_list
-            if parameter_index_list is not None:
-                if len(parameter_index_list) != self.n_parameters:
-                    raise ValueError(
-                        "parameter_index_list must be the same length as parameter_list."
-                    )
-                self.parameter_index_list = parameter_index_list
-
-            # If not provided, set as list of None
-            else:
-                self.parameter_index_list = [None] * self.n_parameters
-
-            # Initialize the initial parameter values
-            self.initial_parameter_values = self.get_parameter_values()
-
-        # Else initialize parameters as None
+        # Else ensure it is the same length as parameter_list
         else:
-            self.parameter_list = []
-            self.parameter_name_list = []
-            self.parameter_range_list = []
-            self.parameter_index_list = []
-            self.n_parameters = 0
-            self.initial_parameter_values = np.array([])
+            if len(parameter_index_list) != self.n_parameters:
+                raise ValueError("parameter_index_list must be the same length as parameter_list.")
+            self.parameter_index_list = parameter_index_list
+
+        # Initialize the initial parameter values
+        self.initial_parameter_values = self.get_parameter_values()
 
         # Save the optimization algorithm
         self.optimization_algorithm = optimization_algorithm

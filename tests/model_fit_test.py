@@ -32,7 +32,7 @@ def get_simple_inputs_gch():
     parameter_list = [("wake", "wake_velocity_parameters", "gauss", "ka")]
     parameter_name_list = ["kA"]
     parameter_range_list = [(0.1, 0.5)]
-    parameter_index_list = None
+    parameter_index_list = []
 
     # Define the optimization algorithm as a simple function
     def optimization_algorithm():
@@ -163,6 +163,12 @@ def test_get_set_param_no_params():
         cost_function,
     )
 
+    # Assert that parameter_index_list is an empty list
+    assert model_fit.parameter_index_list == []
+
+    # Assert number parameters = 0
+    assert model_fit.n_parameters == 0
+
     # Assert that initial_parameter_values is a numpy array with length 0
     np.testing.assert_array_equal(model_fit.initial_parameter_values, np.array([]))
 
@@ -204,6 +210,9 @@ def test_get_set_param_with_params():
 
     # Check the set value
     np.testing.assert_array_equal(model_fit.get_parameter_values(), np.array([10.0]))
+
+    # Assert that parameter_index_list is a list with one element, and that element is None
+    assert model_fit.parameter_index_list == [None]
 
 
 def test_run_floris():
