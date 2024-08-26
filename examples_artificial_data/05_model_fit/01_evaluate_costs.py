@@ -1,5 +1,6 @@
 import pickle
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from flasc.model_fit.model_fit import ModelFit
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     n_steps = 10
     param_result = []
     cost_result = []
-    for i, param_value in enumerate(np.linspace(0.01, 0.2, n_steps)):
+    for i, param_value in enumerate(np.arange(0.01, 0.07, 0.01)):
         print(f"Evaluating cost function for parameter value {param_value} ({i+1}/{n_steps})")
         fm_default.set_param(parameter, param_value)
         mf = ModelFit(
@@ -48,10 +49,9 @@ if __name__ == "__main__":
 
         param_result.append(param_value)
         cost_result.append(cost_value)
+        print(f"... cost value: {cost_value}")
 
-    # plot the results
-    import matplotlib.pyplot as plt
-
+    # Show the results
     fix, ax = plt.subplots()
     ax.plot(param_result, cost_result)
     ax.axvline(we_value_original, color="k", linestyle="--", label="Original value")

@@ -10,7 +10,7 @@ from flasc.utilities.utilities_examples import load_floris_artificial
 with both uncertain and certain wind speed data."""
 
 # Parameters
-N = 365 * 24  # * 6  # Assume 1 year of 10 minute data
+N = 200  # Number of data points
 wd_std = 3.0  # Standard deviation of wind direction in for uncertain model
 we_value_set = 0.03  # Wake expansion value that will be the used to generate the test data
 
@@ -52,12 +52,13 @@ fm_param.run()
 # ufm.run()
 
 # Get the turbine powers in kW
-powers = fm_param.get_turbine_powers()
+powers = fm_param.get_turbine_powers() / 1000
 
 # Build the dataframe
 df = ModelFit.form_flasc_dataframe(
     wind_directions=wind_directions, wind_speeds=wind_speeds, powers=powers
 )
+
 
 # Save the dataframe and default model and target parameter to a pickle file
 with open("two_turbine_data.pkl", "wb") as f:
