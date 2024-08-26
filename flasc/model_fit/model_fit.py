@@ -243,6 +243,51 @@ class ModelFit:
         # Evaluate the cost function
         return self.cost_function(self.df, df_floris)
 
+    def _internal_opt_step(self, parameter_values: np.ndarray, **kwargs) -> float:
+        """Internal function to evaluate the cost function with a given set of parameters.
+
+        Args:
+            parameter_values (np.ndarray): Array of parameter values.
+            **kwargs: Additional keyword arguments to pass to the optimization algorithm.
+
+        Returns:
+            float: Cost value.
+        """
+        # Set the parameter values
+        self.set_parameter_values(parameter_values)
+
+        # Evaluate the cost function
+        return self.evaluate_floris(**kwargs)
+
+    def optimize_parameters(self, **kwargs) -> None:
+        """Optimize the parameters of the FLORIS model.
+
+        Given the current parameter values, run the FLORIS model and optimize the parameters.
+
+        Args:
+            **kwargs: Additional keyword arguments to pass to the optimization algorithm.
+        """
+        # Check that the optimization algorithm is provided
+        if self.optimization_algorithm is None:
+            raise ValueError("No optimization algorithm is provided.")
+
+        # Get the current parameter values for initialization
+        self.initial_parameter_values = self.get_parameter_values()
+
+        print(
+            f"Starting optimization with initial parameter values: {self.initial_parameter_values}"
+        )
+
+        # Run the optimization algorithm
+        result = self.optimization_algorithm(
+            self._internal_opt_step,
+            self.initial_parameter_values,
+            bounds=self.parameter_range_list,
+            **kwargs,
+        )
+
+        print(result)
+
     def get_parameter_values(
         self,
     ) -> np.ndarray:
