@@ -7,23 +7,18 @@ from flasc.utilities.utilities_examples import load_floris_artificial
 
 
 def get_simple_inputs_gch():
-    n_findex = 5
-
     # Create a simple dataframe
     df = pd.DataFrame(
         {
-            "time": np.arange(0, n_findex),
-            "pow_000": np.random.uniform(0.0, 1000.0, n_findex),
-            "ws_000": np.random.uniform(1.0, 10.0, n_findex),
-            "wd_000": np.random.uniform(0.0, 360.0, n_findex),
+            "time": np.array([0, 1, 2]),
+            "pow_000": np.array([1000.0, np.nan, 1200.0]),
+            "ws_000": np.array([8.0, 9.0, 10.0]),
+            "wd_000": np.array([270.0, 270.0, 270.0]),
         }
     )
 
     # Assign ws_000 to ws and wd_000 to wd using the assign function
     df = df.assign(ws=df["ws_000"], wd=df["wd_000"])
-
-    # Make the second element of pow_000 a NaN
-    df.loc[1, "pow_000"] = np.nan
 
     # Load floris and set to single turbine layout
     fm, _ = load_floris_artificial(wake_model="gch")
@@ -250,7 +245,6 @@ def test_run_floris():
     # The second element of df_floris['pow_000'] is a NaN
     assert np.isnan(df_floris.loc[1, "pow_000"])
 
-    # If we sort df_floris by ws, the pow_000 column should be sorted
-    # Assert that df_floris_sorted['pow_000'] is ascending if we drop nans
-    df_floris_sorted = df_floris.sort_values("ws")
-    assert np.all(np.diff(df_floris_sorted.dropna()["pow_000"].values) >= 0)
+    # Check that the first element in power corresponds to power of 8 m/s
+    # for default NREL 5MW turbine
+    assert np.isclose(df_floris.loc[0, "pow_000"], 1753.9, atol=10)
