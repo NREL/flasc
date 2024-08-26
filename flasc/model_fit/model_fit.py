@@ -60,19 +60,19 @@ class ModelFit:
         # If FlorisModel, set to ParallelFlorisModel with 16 workers
         if isinstance(fmodel, FlorisModel):
             max_workers = 16
-            self.fmodel = ParallelFlorisModel(
+            self.pfmodel = ParallelFlorisModel(
                 fmodel,
                 max_workers=max_workers,
                 n_wind_condition_splits=max_workers,
             )
         else:
-            self.fmodel = fmodel.copy()
+            self.pfmodel = fmodel.copy()
 
         # Get the number of turbines and confirm that
         # the dataframe and floris model have the same number of turbines
         self.n_turbines = dfm.get_num_turbines(self.df)
 
-        if self.n_turbines != fmodel.n_turbines:
+        if self.n_turbines != self.pfmodel.n_turbines:
             raise ValueError(
                 "The number of turbines in the dataframe and the Floris model do not match."
             )
@@ -213,21 +213,18 @@ class ModelFit:
         #     turbulence_intensities = None
 
         # For now just set to first value of current model
-        turbulence_intensities = np.ones_like(wind_speeds) * self.fmodel.turbulence_intensities[0]
+        turbulence_intensities = np.ones_like(wind_speeds) * self.pfmodel.turbulence_intensities[0]
 
-        # Set the FLORIS model
-        self.fmodel.set(
+        # Set the ParallelFlorisModel model
+        self.pfmodel.set(
             wind_speeds=wind_speeds,
             wind_directions=wind_directions,
             turbulence_intensities=turbulence_intensities,
             **kwargs,
         )
 
-        # Run the FLORIS model
-        # self.fmodel.run()
-
         # Get the turbines in kW
-        turbine_powers = self.fmodel.get_turbine_powers().squeeze() / 1000
+        turbine_powers = self.pfmodel.get_turbine_powers() / 1000
 
         # Generate FLORIS dataframe
         df_floris = self.form_flasc_dataframe(wind_directions, wind_speeds, turbine_powers)
@@ -266,7 +263,7 @@ class ModelFit:
         for i, (parameter, parameter_index) in enumerate(
             zip(self.parameter_list, self.parameter_index_list)
         ):
-            parameter_values[i] = self.fmodel.get_param(parameter, parameter_index)
+            parameter_values[i] = self.pfmodel.get_param(parameter, parameter_index)
 
         return parameter_values
 
@@ -286,4 +283,4 @@ class ModelFit:
         for i, (parameter, parameter_index) in enumerate(
             zip(self.parameter_list, self.parameter_index_list)
         ):
-            self.fmodel.set_param(parameter, parameter_values[i], parameter_index)
+            self.pfmodel.set_param(parameter, parameter_values[i], parameter_index)
