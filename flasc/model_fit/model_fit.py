@@ -23,7 +23,7 @@ class ModelFit:
         self,
         df: pd.DataFrame | FlascDataFrame,
         fmodel: FlorisModel | ParallelFlorisModel,
-        cost_function_handle: Callable[[FlascDataFrame, FlascDataFrame], float],
+        cost_function: Callable[[FlascDataFrame, FlascDataFrame], float],
         parameter_list: List[List] | List[Tuple] | None = None,
         parameter_name_list: List[str] | None = None,
         parameter_range_list: List[List] | List[Tuple] | None = None,
@@ -35,7 +35,7 @@ class ModelFit:
         Args:
             df (pd.DataFrame | FlascDataFrame): DataFrame containing SCADA data.
             fmodel (FlorisModel | ParallelFlorisModel): FLORIS model to calibrate.
-            cost_function_handle (Callable): Handle to the cost function.
+            cost_function (Callable): Handle to the cost function.
             parameter_list (List[List] | List[Tuple]): List of FLORIS parameters to calibrate.  If
                 None, no parameters are calibrated.  Defaults to None.
             parameter_name_list (List[str]): List of names for the parameters.  If None, no names
@@ -78,7 +78,7 @@ class ModelFit:
             )
 
         # Save the cost function handle
-        self.cost_function_handle = cost_function_handle
+        self.cost_function = cost_function
 
         # If any of parameter_list, parameter_name_list, or parameter_range_list are provided,
         # ensure all are provided
@@ -248,7 +248,7 @@ class ModelFit:
         df_floris = self.run_floris_model(**kwargs)
 
         # Evaluate the cost function
-        return self.cost_function_handle(self.df, df_floris)
+        return self.cost_function(self.df, df_floris)
 
     def get_parameter_values(
         self,

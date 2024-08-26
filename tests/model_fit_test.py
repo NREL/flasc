@@ -29,8 +29,8 @@ def get_simple_inputs_gch():
     fm, _ = load_floris_artificial(wake_model="gch")
     fm.set(layout_x=[0.0], layout_y=[0.0])
 
-    # Define cost_function_handle as a simple function
-    def cost_function_handle():
+    # Define cost_function as a simple function
+    def cost_function():
         return None
 
     # Define the parameters to tune the kA parameter of GCH
@@ -46,7 +46,7 @@ def get_simple_inputs_gch():
     return (
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         parameter_list,
         parameter_name_list,
         parameter_range_list,
@@ -60,7 +60,7 @@ def test_instantiate_model():
     (
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         parameter_list,
         parameter_name_list,
         parameter_range_list,
@@ -72,14 +72,14 @@ def test_instantiate_model():
     ModelFit(
         df,
         fm,
-        cost_function_handle,
+        cost_function,
     )
 
     # Instantiate the ModelFit object with parameters and optimization
     ModelFit(
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         parameter_list,
         parameter_name_list,
         parameter_range_list,
@@ -93,7 +93,7 @@ def test_df():
     (
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         _,
         _,
         _,
@@ -109,7 +109,7 @@ def test_df():
         ModelFit(
             df,
             fm,
-            cost_function_handle,
+            cost_function,
         )
 
 
@@ -118,7 +118,7 @@ def test_turbine_number():
     (
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         _,
         _,
         _,
@@ -130,7 +130,7 @@ def test_turbine_number():
     model_fit = ModelFit(
         df,
         fm,
-        cost_function_handle,
+        cost_function,
     )
 
     # Check the number of turbines
@@ -144,7 +144,7 @@ def test_turbine_number():
         ModelFit(
             df,
             fm,
-            cost_function_handle,
+            cost_function,
         )
 
 
@@ -153,7 +153,7 @@ def test_get_set_param_no_params():
     (
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         _,
         _,
         _,
@@ -165,7 +165,7 @@ def test_get_set_param_no_params():
     model_fit = ModelFit(
         df,
         fm,
-        cost_function_handle,
+        cost_function,
     )
 
     # Assert that initial_parameter_values is a numpy array with length 0
@@ -180,7 +180,7 @@ def test_get_set_param_with_params():
     (
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         parameter_list,
         parameter_name_list,
         parameter_range_list,
@@ -192,7 +192,7 @@ def test_get_set_param_with_params():
     model_fit = ModelFit(
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         parameter_list,
         parameter_name_list,
         parameter_range_list,
@@ -216,7 +216,7 @@ def test_run_floris():
     (
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         parameter_list,
         parameter_name_list,
         parameter_range_list,
@@ -228,7 +228,7 @@ def test_run_floris():
     model_fit = ModelFit(
         df,
         fm,
-        cost_function_handle,
+        cost_function,
         parameter_list,
         parameter_name_list,
         parameter_range_list,
