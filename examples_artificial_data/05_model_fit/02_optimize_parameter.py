@@ -1,9 +1,9 @@
 import pickle
 
 import numpy as np
-from scipy.optimize import minimize
 
 from flasc.model_fit.model_fit import ModelFit
+from flasc.model_fit.opt_library import sweep_opt_sequential
 
 # Since ModelFit is always parallel this is important to include
 if __name__ == "__main__":
@@ -19,13 +19,8 @@ if __name__ == "__main__":
     we_value_set = data["we_value_set"]
 
     # Define a cost function that checks the RMSE between the power of the second turbine
-    def cost_function(df_scada, df_floris):
+    def cost_function(df_scada, df_floris, fmodel):
         return np.sqrt(np.mean((df_scada["pow_001"].values - df_floris["pow_001"].values) ** 2))
-
-    # Define an optimization function based on scipy minimize
-    def optimization_algorithm(optimization_step, x0, bounds, **kwargs):
-        result = minimize(optimization_step, x0, bounds=bounds, method="slsqp")
-        return result
 
     # Now pass the above cost function to the ModelFit class
     mf = ModelFit(
@@ -36,8 +31,7 @@ if __name__ == "__main__":
         parameter_name_list=["wake expansion"],
         parameter_range_list=[(0.01, 0.07)],
         parameter_index_list=[],
-        optimization_algorithm=optimization_algorithm,
     )
 
-    # Call the optimization
-    mf.optimize_parameters()
+    # Optimize the parameter
+    sweep_opt_sequential(mf)
