@@ -19,11 +19,10 @@ def sweep_opt_sequential(mf: ModelFit, n_points=10):
     # Start from the initial parameter values
     parameter_values = mf.get_parameter_values()
 
-    for i, (parameter_name, parameter_range, parameter_index) in enumerate(
+    for i, (parameter_name, parameter_range) in enumerate(
         zip(
             mf.parameter_name_list,
             mf.parameter_range_list,
-            mf.parameter_index_list,
         )
     ):
         print(f"Optimizing parameter '{parameter_name}' ({i+1}/{len(mf.parameter_list)})")
