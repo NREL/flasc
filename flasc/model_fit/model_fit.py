@@ -28,7 +28,6 @@ class ModelFit:
         parameter_name_list: List[str] = [],
         parameter_range_list: List[List] | List[Tuple] = [],
         parameter_index_list: List[int] = [],
-        optimization_algorithm: Callable | None = None,
     ):
         """Initialize the ModelFit class.
 
@@ -43,9 +42,6 @@ class ModelFit:
             parameter_range_list (List[List] | List[Tuple]): List of parameter ranges.  If None, no
                 ranges are provided.  Defaults to None.
             parameter_index_list (List[int], optional): List of parameter indices. Defaults to None.
-            optimization_algorithm (Callable): Handle to the optimization algorithm.  If None,
-                no optimization can be performed but fitness can still be evaluated.
-                Defaults to None.
         """
         # Save the dataframe as a FlascDataFrame
         self.df = FlascDataFrame(df)
@@ -134,9 +130,6 @@ class ModelFit:
 
         # Initialize the initial parameter values
         self.initial_parameter_values = self.get_parameter_values()
-
-        # Save the optimization algorithm
-        self.optimization_algorithm = optimization_algorithm
 
     def _check_flasc_dataframe(self, df: FlascDataFrame) -> None:
         """Check that the provided FlascDataFrame is valid.
@@ -243,50 +236,51 @@ class ModelFit:
         # Evaluate the cost function
         return self.cost_function(self.df, df_floris)
 
-    def _internal_opt_step(self, parameter_values: np.ndarray, **kwargs) -> float:
-        """Internal function to evaluate the cost function with a given set of parameters.
+    # def _internal_opt_step(self, parameter_values: np.ndarray, **kwargs) -> float:
+    #     """Internal function to evaluate the cost function with a given set of parameters.
 
-        Args:
-            parameter_values (np.ndarray): Array of parameter values.
-            **kwargs: Additional keyword arguments to pass to the optimization algorithm.
+    #     Args:
+    #         parameter_values (np.ndarray): Array of parameter values.
+    #         **kwargs: Additional keyword arguments to pass to the optimization algorithm.
 
-        Returns:
-            float: Cost value.
-        """
-        # Set the parameter values
-        self.set_parameter_values(parameter_values)
+    #     Returns:
+    #         float: Cost value.
+    #     """
+    #     # Set the parameter values
+    #     self.set_parameter_values(parameter_values)
 
-        # Evaluate the cost function
-        return self.evaluate_floris(**kwargs)
+    #     # Evaluate the cost function
+    #     return self.evaluate_floris(**kwargs)
 
-    def optimize_parameters(self, **kwargs) -> None:
-        """Optimize the parameters of the FLORIS model.
+    # def optimize_parameters(self, **kwargs) -> None:
+    #     """Optimize the parameters of the FLORIS model.
 
-        Given the current parameter values, run the FLORIS model and optimize the parameters.
+    #     Given the current parameter values, run the FLORIS model and optimize the parameters.
 
-        Args:
-            **kwargs: Additional keyword arguments to pass to the optimization algorithm.
-        """
-        # Check that the optimization algorithm is provided
-        if self.optimization_algorithm is None:
-            raise ValueError("No optimization algorithm is provided.")
+    #     Args:
+    #         **kwargs: Additional keyword arguments to pass to the optimization algorithm.
+    #     """
+    #     # Check that the optimization algorithm is provided
+    #     if self.optimization_algorithm is None:
+    #         raise ValueError("No optimization algorithm is provided.")
 
-        # Get the current parameter values for initialization
-        self.initial_parameter_values = self.get_parameter_values()
+    #     # Get the current parameter values for initialization
+    #     self.initial_parameter_values = self.get_parameter_values()
 
-        print(
-            f"Starting optimization with initial parameter values: {self.initial_parameter_values}"
-        )
+    #     print(
+    #         f"Starting optimization with initial parameter values:
+    # {self.initial_parameter_values}"
+    #     )
 
-        # Run the optimization algorithm
-        result = self.optimization_algorithm(
-            self._internal_opt_step,
-            self.initial_parameter_values,
-            bounds=self.parameter_range_list,
-            **kwargs,
-        )
+    #     # Run the optimization algorithm
+    #     result = self.optimization_algorithm(
+    #         self._internal_opt_step,
+    #         self.initial_parameter_values,
+    #         bounds=self.parameter_range_list,
+    #         **kwargs,
+    #     )
 
-        print(result)
+    #     print(result)
 
     def get_parameter_values(
         self,

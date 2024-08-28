@@ -34,10 +34,6 @@ def get_simple_inputs_gch():
     parameter_range_list = [(0.1, 0.5)]
     parameter_index_list = []
 
-    # Define the optimization algorithm as a simple function
-    def optimization_algorithm():
-        return None
-
     return (
         df,
         fm,
@@ -46,7 +42,6 @@ def get_simple_inputs_gch():
         parameter_name_list,
         parameter_range_list,
         parameter_index_list,
-        optimization_algorithm,
     )
 
 
@@ -60,17 +55,16 @@ def test_instantiate_model():
         parameter_name_list,
         parameter_range_list,
         parameter_index_list,
-        optimization_algorithm,
     ) = get_simple_inputs_gch()
 
-    # Instantiate the ModelFit object without parameters or optimization
+    # Instantiate the ModelFit object without parameters
     ModelFit(
         df,
         fm,
         cost_function,
     )
 
-    # Instantiate the ModelFit object with parameters and optimization
+    # Instantiate the ModelFit object with parameters
     ModelFit(
         df,
         fm,
@@ -79,7 +73,6 @@ def test_instantiate_model():
         parameter_name_list,
         parameter_range_list,
         parameter_index_list,
-        optimization_algorithm,
     )
 
 
@@ -93,13 +86,12 @@ def test_df():
         _,
         _,
         _,
-        _,
     ) = get_simple_inputs_gch()
 
     # Remove the wd column from the dataframe
     df = df.drop(columns=["wd"])
 
-    # Instantiate the ModelFit object without parameters or optimization
+    # Instantiate the ModelFit object without parameters
     with pytest.raises(ValueError):
         ModelFit(
             df,
@@ -118,10 +110,9 @@ def test_turbine_number():
         _,
         _,
         _,
-        _,
     ) = get_simple_inputs_gch()
 
-    # Instantiate the ModelFit object without parameters or optimization
+    # Instantiate the ModelFit object without parameters
     model_fit = ModelFit(
         df,
         fm,
@@ -153,10 +144,9 @@ def test_get_set_param_no_params():
         _,
         _,
         _,
-        _,
     ) = get_simple_inputs_gch()
 
-    # Instantiate the ModelFit object without parameters or optimization
+    # Instantiate the ModelFit object without parameters
     model_fit = ModelFit(
         df,
         fm,
@@ -186,10 +176,9 @@ def test_get_set_param_with_params():
         parameter_name_list,
         parameter_range_list,
         parameter_index_list,
-        optimization_algorithm,
     ) = get_simple_inputs_gch()
 
-    # Instantiate the ModelFit object with parameters and optimization
+    # Instantiate the ModelFit object with parameters
     model_fit = ModelFit(
         df,
         fm,
@@ -198,7 +187,6 @@ def test_get_set_param_with_params():
         parameter_name_list,
         parameter_range_list,
         parameter_index_list,
-        optimization_algorithm,
     )
 
     # Check the initialization of the initial parameter values
@@ -225,10 +213,9 @@ def test_run_floris():
         parameter_name_list,
         parameter_range_list,
         parameter_index_list,
-        optimization_algorithm,
     ) = get_simple_inputs_gch()
 
-    # Instantiate the ModelFit object with parameters and optimization
+    # Instantiate the ModelFit object with parameters
     model_fit = ModelFit(
         df,
         fm,
@@ -237,7 +224,6 @@ def test_run_floris():
         parameter_name_list,
         parameter_range_list,
         parameter_index_list,
-        optimization_algorithm,
     )
 
     df_floris = model_fit.run_floris_model()
