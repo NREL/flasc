@@ -25,7 +25,7 @@ def get_simple_inputs_gch():
     fm.set(layout_x=[0.0], layout_y=[0.0])
 
     # Define cost_function as a simple function
-    def cost_function():
+    def cost_function(df_scada, df_floris, fmodel):
         return None
 
     # Define the parameters to tune the kA parameter of GCH
@@ -243,3 +243,55 @@ def test_run_floris():
     # Check that the first element in power corresponds to power of 8 m/s
     # for default NREL 5MW turbine
     assert np.isclose(df_floris.loc[0, "pow_000"], 1753.9, atol=10)
+
+
+def test_cost_function():
+    # Get simple inputs
+    (
+        df,
+        fm,
+        cost_function,
+        _,
+        _,
+        _,
+        _,
+    ) = get_simple_inputs_gch()
+
+    # Cost function has to be a function
+    with pytest.raises(ValueError):
+        _ = ModelFit(
+            df,
+            fm,
+            1,
+        )
+
+    # Cost function has wrong number of inputs
+    def cost_1(df_scada):
+        return
+
+    def cost_2(df_scada, df_floris):
+        return
+
+    def cost_3(df_scada, df_floris, fm):
+        return
+
+    with pytest.raises(ValueError):
+        _ = ModelFit(
+            df,
+            fm,
+            cost_1,
+        )
+
+    with pytest.raises(ValueError):
+        _ = ModelFit(
+            df,
+            fm,
+            cost_2,
+        )
+
+    # This should work:
+    _ = ModelFit(
+        df,
+        fm,
+        cost_3,
+    )

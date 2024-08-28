@@ -23,7 +23,9 @@ class ModelFit:
         self,
         df: pd.DataFrame | FlascDataFrame,
         fmodel: FlorisModel | ParallelFlorisModel,
-        cost_function: Callable[[FlascDataFrame, FlascDataFrame], float],
+        cost_function: Callable[
+            [FlascDataFrame, FlascDataFrame, FlorisModel | ParallelFlorisModel | None], float
+        ],
         parameter_list: List[List] | List[Tuple] = [],
         parameter_name_list: List[str] = [],
         parameter_range_list: List[List] | List[Tuple] = [],
@@ -73,6 +75,13 @@ class ModelFit:
                 "The number of turbines in the dataframe and the Floris model do not match."
             )
 
+        # Check that the cost function has 3 inputs, the SCADA dataframe, the FLORIS dataframe,
+        # and the FLORIS model
+        if not callable(cost_function):
+            raise ValueError("cost_function must be a callable function.")
+        if len(cost_function.__code__.co_varnames) != 3:
+            raise ValueError("cost_function must have 3 inputs: df_scada, df_floris, fmodel.")
+
         # Save the cost function handle
         self.cost_function = cost_function
 
@@ -118,7 +127,7 @@ class ModelFit:
         # Save the number of parameters
         self.n_parameters = len(parameter_list)
 
-        # If  arameter_index_list is empty, set as a list of None equal to the number of parameters
+        # If parameter_index_list is empty, set as a list of None equal to the number of parameters
         if len(parameter_index_list) == 0:
             self.parameter_index_list = [None] * self.n_parameters
 
@@ -233,8 +242,8 @@ class ModelFit:
         # Run the FLORIS model
         df_floris = self.run_floris_model(**kwargs)
 
-        # Evaluate the cost function
-        return self.cost_function(self.df, df_floris)
+        # Evaluate the cost function passing the FlorisModel within the ParallelFlorisModel
+        return self.cost_function(self.df, df_floris, self.pfmodel.fmodel)
 
     # def _internal_opt_step(self, parameter_values: np.ndarray, **kwargs) -> float:
     #     """Internal function to evaluate the cost function with a given set of parameters.
