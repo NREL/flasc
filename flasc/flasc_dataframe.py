@@ -115,7 +115,16 @@ class FlascDataFrame(DataFrame):
         # turbine_id (as specified by the user)
         # variable
         # value
-
+    
+    def to_feather(self, path, **kwargs):
+        """Raise warning about lost information and save to feather format."""
+        print(
+            "Dataframe will be saved as a pandas DataFrame. "\
+            "Extra attributes from FlascDataFrame will be lost. "\
+            "We recommend using df.to_pickle() and pd.read_pickle() instead, "\
+            "as this will retain FlascDataFrame attributes."
+        )
+        return super().to_feather(path, **kwargs)
 
 # Likely this will be used for testing, later but it's convenient for prototyping here
 if __name__ == "__main__":
