@@ -20,6 +20,7 @@ if __name__ == "__main__":
 
     # Define a cost function that checks the RMSE between the power of the second turbine
     # Note function has to accept fmodel but does not have to use it
+
     def cost_function(df_scada, df_floris, fmodel):
         return np.sqrt(np.mean((df_scada["pow_001"].values - df_floris["pow_001"].values) ** 2))
 
