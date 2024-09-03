@@ -34,4 +34,5 @@ if __name__ == "__main__":
     )
 
     # Optimize the parameter
-    sweep_opt_sequential(mf)
+    result_dict = sweep_opt_sequential(mf)
+    print(result_dict)
