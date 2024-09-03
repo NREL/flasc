@@ -23,7 +23,8 @@ class FlascDataFrame(DataFrame):
         Args:
             *args: arguments to pass to the DataFrame constructor
             name_map (dict): Dictionary of column names to map from the user format to the FLASC
-                format.
+                format, where the key string is the user format and the value string is the FLASC
+                equivalent. Defaults to None.
             **kwargs: keyword arguments to pass to the DataFrame constructor
         """
         super().__init__(*args, **kwargs)
@@ -59,6 +60,15 @@ class FlascDataFrame(DataFrame):
 
     def convert_to_user_format(self, inplace=False):
         """Convert the DataFrame to the format that the user expects, given the name_map."""
+        # Convert the format
+        if self._user_format == "long":
+            self._convert_wide_to_long()  # Should this be assigned to something?
+        elif self._user_format == "semiwide":
+            self._convert_wide_to_semiwide()  # Should this be assigned to something?
+        elif self._user_format == "wide":
+            pass
+
+        # Convert column names and return
         if self.name_map is not None:
             return self.rename(columns={v: k for k, v in self.name_map.items()}, inplace=inplace)
         else:
@@ -66,6 +76,15 @@ class FlascDataFrame(DataFrame):
 
     def convert_to_flasc_format(self, inplace=False):
         """Convert the DataFrame to the format that FLASC expects."""
+        # Convert the format
+        if self._user_format == "long":
+            self._convert_long_to_wide()  # Should this be assigned to something?
+        elif self._user_format == "semiwide":
+            self._convert_semiwide_to_wide()  # Should this be assigned to something?
+        elif self._user_format == "wide":
+            pass
+
+        # Convert column names and return
         if self.name_map is not None:
             return self.rename(columns=self.name_map, inplace=inplace)
         else:
@@ -88,7 +107,14 @@ class FlascDataFrame(DataFrame):
 
     def _convert_wide_to_semiwide(self):
         """Convert a wide format DataFrame to a semiwide format DataFrame."""
-        pass
+        if "time" not in self.columns:
+            raise ValueError("Column 'time' must be present in the DataFrame")
+
+        # Should have columns:
+        # time
+        # turbine_id (as specified by the user)
+        # variable
+        # value
 
 
 # Likely this will be used for testing, later but it's convenient for prototyping here
@@ -143,6 +169,6 @@ if __name__ == "__main__":
     - One column for time stamp
     - One column for each channel for each turbine
 
-    Converting between semilong and wide should be relatively straightforward.
+    Converting between semiwide and wide should be relatively straightforward.
     Actually, neither of these should be too bad
     """
