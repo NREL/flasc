@@ -1,6 +1,5 @@
 """Implement filtering class and functions for FLASC data."""
 
-
 import itertools
 
 import matplotlib.legend
@@ -212,7 +211,7 @@ class FlascFilter:
         return pw_curve_df
 
     def _set_legend_alpha_to_one(self, lgd: matplotlib.legend.Legend) -> None:
-        """Set the alpha value of the provided Legend object to be 1
+        """Set the alpha value of the provided Legend object to be 1.
 
         Args:
             lgd (matplotlib.legend.Legend): Legend object
