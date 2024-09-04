@@ -1,7 +1,6 @@
 import os
 
 import pandas as pd
-
 import pytest
 
 from flasc.flasc_dataframe import FlascDataFrame
@@ -20,8 +19,29 @@ def test_type():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
     assert isinstance(df, FlascDataFrame)
 
+    df2 = df.drop(columns="c") # Modifies the dataframe, returns a copy
+    assert isinstance(df2, FlascDataFrame)
+
     # Assert df is a pandas DataFrame
     assert isinstance(df, pd.DataFrame)
+
+def test__metadata():
+    df = FlascDataFrame(test_data_dict, name_map=test_name_map)
+    df._user_format = "long"
+    df._in_flasc_format = False
+    df2 = df.drop(columns="c") # Modifies the dataframe, returns a copy
+    assert hasattr(df2, "name_map")
+    assert df2.name_map == test_name_map
+    assert hasattr(df2, "_user_format")
+    assert df2._user_format == "long" 
+    assert hasattr(df2, "_in_flasc_format")
+    assert df2._in_flasc_format == True # Resets, since "_in_flasc_format" not in _metadata.
+    # May want to add "_in_flasc_format" to _metadata in future, but this 
+    # demonstrates functionality
+
+def test_printout():
+    df = FlascDataFrame(test_data_dict, name_map=test_name_map)
+    print(df)
 
 def test_check_flasc_format():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)

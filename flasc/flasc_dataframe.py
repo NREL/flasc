@@ -12,10 +12,27 @@ class FlascDataFrame(DataFrame):
 
     Then, can offer a transformation to export as the user would like it, for them to work on it
     further. How, then, would I revert it back to the needed format
+
+
+    Two possible types of data we should try to handle:
+    1. Semiwide:
+    - One column for time stamp
+    - One column for turbine id
+    - Many data channel columns
+    2. Long:
+    - One column for time stamp
+    - One column for variable name
+    - One column for value
+
+    FLASC format is wide, i.e.
+    - One column for time stamp
+    - One column for each channel for each turbine
+
+    Want handling to go between long and wide and semiwide and wide.
     """
 
-    # Add to list, an initialize with Nones or similar
-    _metadata = ["new_property", "name_map", "newnew_property"]
+    # Attributes to pickle must be in this list
+    _metadata = ["name_map", "_user_format"]
 
     def __init__(self, *args, name_map=None, **kwargs):
         """Initialize the FlascDataFrame class, a subclass of pandas.DataFrame.
@@ -28,10 +45,6 @@ class FlascDataFrame(DataFrame):
             **kwargs: keyword arguments to pass to the DataFrame constructor
         """
         super().__init__(*args, **kwargs)
-
-        self._flasc = True
-        # add an attribute here, make sure it's in the metadata
-        self.new_property = 23
 
         self._user_format = "wide"  # or "long" or "semiwide"
 
@@ -148,60 +161,3 @@ class FlascDataFrame(DataFrame):
             "as this will retain FlascDataFrame attributes."
         )
         return super().to_feather(path, **kwargs)
-
-
-# Likely this will be used for testing, later but it's convenient for prototyping here
-if __name__ == "__main__":
-    df = FlascDataFrame({"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]}, name_map={"a": "AA"})
-    print(df)
-    print(df.new_property)
-    df.flasc_method()  # Assigns newnew_property
-    print(df._flasc)
-    print(df._metadata)
-
-    # Check that modifying df still returns an FlascDataFrame
-    print(type(df))
-    df.new_property = 42
-    df.name_map = 6
-    df = df.drop(columns="c")  # Modifies the dataframe, returns a copy
-    print(df)
-    print(df.new_property)
-    print(df.name_map)
-    # Not retained with copy, unless in _metadata. If in _metadata, retained!
-    print(df.newnew_property)
-
-    # Try out the convert methods (seem good)
-    data = {"AA": [1, 2, 3], "BB": [4, 5, 6], "CC": [7, 8, 9]}
-    df = FlascDataFrame(data, name_map={"AA": "a", "BB": "b", "CC": "c"})
-    print(df)
-    df2 = df.convert_to_user_format()
-    print(df2)
-    df.convert_to_user_format(inplace=True)
-    print(df)
-
-    # Drop a column, convert back
-    df = df.drop(columns="CC")
-    df.convert_to_flasc_format(inplace=True)
-    print(df)
-    # Works great!
-
-    # Next, the long format conversion... more complicated
-
-    """
-    Two possible types of data we should try to handle:
-    1. Semiwide:
-    - One column for time stamp
-    - One column for turbine id
-    - Many data channel columns
-    2. Long:
-    - One column for time stamp
-    - One column for variable name
-    - One column for value
-
-    FLASC format is wide, i.e.
-    - One column for time stamp
-    - One column for each channel for each turbine
-
-    Converting between semiwide and wide should be relatively straightforward.
-    Actually, neither of these should be too bad
-    """
