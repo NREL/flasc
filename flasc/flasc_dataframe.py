@@ -2,7 +2,14 @@
 
 import pandas as pd
 from pandas import DataFrame
-from wind_up.constants import DataColumns, TIMESTAMP_COL
+from wind_up.constants import (
+    DataColumns,
+    RAW_DOWNTIME_S_COL,
+    RAW_POWER_COL,
+    RAW_WINDSPEED_COL,
+    RAW_YAWDIR_COL,
+    TIMESTAMP_COL,
+)
 
 
 # Create a new DataFrame subclass
@@ -97,13 +104,14 @@ class FlascDataFrame(DataFrame):
         self,
         turbine_names: list[str] | None = None,
         time_col: str = "time",
-        normal_operation_col: str = "is_operation_normal",
         power_col: str = "pow",
         windspeed_col: str = "ws",
         winddirection_col: str = "wd",
+        normal_operation_col: str | None = None,
         pitchangle_col: str | None = None,
         genrpm_col: str | None = None,
         downtimecounter_col: str | None = None,
+        turbine_num_digits: int = 3,
     ):
         """Convert the DataFrame to the format that wind-up expects."""
         # figure out how many turbines there are from columns
@@ -111,7 +119,7 @@ class FlascDataFrame(DataFrame):
             [
                 1
                 for col in self.columns
-                if col.startswith(f"{normal_operation_col}_") and col[-3:].isdigit()
+                if col.startswith(f"{power_col}_") and col[-turbine_num_digits:].isdigit()
             ]
         )
         # if turbine_names provided check it matches
@@ -123,12 +131,15 @@ class FlascDataFrame(DataFrame):
                 )
                 raise ValueError(msg)
         # build a new dataframe one turbine at a time
+        turbine_num_format = f"0{turbine_num_digits}d"
         scada_df = pd.DataFrame()
         for i in range(nt):
-            wtg_cols = [col for col in self.columns if col.endswith(f"_{i:03d}")]
-            wtg_df = self[[time_col, *wtg_cols]].copy()
-            wtg_df.columns = [time_col, *[x[:-4] for x in wtg_cols]]
-            wtg_df["TurbineName"] = turbine_names[i] if turbine_names is not None else f"{i:03d}"
+            wtg_cols = [col for col in self.columns if col.endswith(f"_{i:{turbine_num_format}}")]
+            wtg_df = pd.DataFrame(self[[time_col, *wtg_cols]]).__finalize__(None)
+            wtg_df.columns = [time_col, *[x[: -(turbine_num_digits + 1)] for x in wtg_cols]]
+            wtg_df[DataColumns.turbine_name] = (
+                turbine_names[i] if turbine_names is not None else f"{i:{turbine_num_format}}"
+            )
             scada_df = pd.concat([scada_df, wtg_df])
         scada_df = scada_df.set_index(time_col)
         scada_df.index.name = (
@@ -136,11 +147,12 @@ class FlascDataFrame(DataFrame):
         )
         scada_df = scada_df.rename(
             columns={
-                power_col: DataColumns.active_power_mean,
-                windspeed_col: DataColumns.wind_speed_mean,
-                winddirection_col: DataColumns.yaw_angle_mean,
+                power_col: RAW_POWER_COL,  # DataColumns.active_power_mean,
+                windspeed_col: RAW_WINDSPEED_COL,  # DataColumns.wind_speed_mean,
+                winddirection_col: RAW_YAWDIR_COL,  # DataColumns.yaw_angle_mean,
             }
         )
+
         if pitchangle_col is None:
             scada_df[DataColumns.pitch_angle_mean] = 0
         else:
@@ -150,9 +162,23 @@ class FlascDataFrame(DataFrame):
         else:
             scada_df = scada_df.rename(columns={genrpm_col: DataColumns.gen_rpm_mean})
         if downtimecounter_col is None:
-            scada_df[DataColumns.shutdown_duration] = 0
+            scada_df[RAW_DOWNTIME_S_COL] = 0
         else:
             scada_df = scada_df.rename(columns={downtimecounter_col: DataColumns.shutdown_duration})
+
+        scada_df[DataColumns.active_power_mean] = scada_df[RAW_POWER_COL]
+        scada_df[DataColumns.wind_speed_mean] = scada_df[RAW_WINDSPEED_COL]
+        scada_df[DataColumns.yaw_angle_mean] = scada_df[RAW_YAWDIR_COL]
+        scada_df[DataColumns.shutdown_duration] = scada_df[RAW_DOWNTIME_S_COL]
+        if normal_operation_col is not None:
+            cols_to_filter = [
+                col
+                for col in scada_df.columns
+                if col != normal_operation_col
+                and "raw_" not in col
+                and col != DataColumns.turbine_name
+            ]
+            scada_df.loc[~scada_df[normal_operation_col], cols_to_filter] = pd.NA
         return scada_df
 
 
