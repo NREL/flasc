@@ -56,7 +56,7 @@ class FlascDataFrame(DataFrame):
                 raise ValueError("name_map must be a dictionary of strings")
         self.name_map = name_map
         # Apply the name_map
-        self.convert_to_flasc_format(inplace=True) # Do we want to do this here?
+        self.convert_to_flasc_format(inplace=True)  # Do we want to do this here?
 
     @property
     def _constructor(self):
@@ -82,10 +82,12 @@ class FlascDataFrame(DataFrame):
     def check_flasc_format(self):
         """Raise an error if the data is not in FLASC format."""
         if not self._in_flasc_format:
-            raise ValueError((
-                "Data must be in FLASC format to perform this operation."
-                "Call df.convert_to_flasc_format() to convert the data to FLASC format."
-            ))
+            raise ValueError(
+                (
+                    "Data must be in FLASC format to perform this operation."
+                    "Call df.convert_to_flasc_format() to convert the data to FLASC format."
+                )
+            )
         else:
             pass
 
@@ -129,7 +131,7 @@ class FlascDataFrame(DataFrame):
 
     def _convert_long_to_wide(self):
         """Convert a long format DataFrame to a wide format DataFrame."""
-        #raise NotImplementedError("TO DO")
+        # raise NotImplementedError("TO DO")
         pass
 
     def _convert_semiwide_to_wide(self):

@@ -5,12 +5,7 @@ import pytest
 
 from flasc.flasc_dataframe import FlascDataFrame
 
-test_data_dict = {
-    "time":[0, 10, 20],
-    "a": [1, 2, 3],
-    "b": [4, 5, 6],
-    "c": [7, 8, 9]
-}
+test_data_dict = {"time": [0, 10, 20], "a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]}
 
 test_name_map = {"a": "AA"}
 
@@ -19,25 +14,27 @@ def test_type():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
     assert isinstance(df, FlascDataFrame)
 
-    df2 = df.drop(columns="c") # Modifies the dataframe, returns a copy
+    df2 = df.drop(columns="c")  # Modifies the dataframe, returns a copy
     assert isinstance(df2, FlascDataFrame)
 
     # Assert df is a pandas DataFrame
     assert isinstance(df, pd.DataFrame)
 
+
 def test__metadata():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
     df._user_format = "long"
     df._in_flasc_format = False
-    df2 = df.drop(columns="c") # Modifies the dataframe, returns a copy
+    df2 = df.drop(columns="c")  # Modifies the dataframe, returns a copy
     assert hasattr(df2, "name_map")
     assert df2.name_map == test_name_map
     assert hasattr(df2, "_user_format")
-    assert df2._user_format == "long" 
+    assert df2._user_format == "long"
     assert hasattr(df2, "_in_flasc_format")
-    assert df2._in_flasc_format == True # Resets, since "_in_flasc_format" not in _metadata.
-    # May want to add "_in_flasc_format" to _metadata in future, but this 
+    assert df2._in_flasc_format == True  # Resets, since "_in_flasc_format" not in _metadata.
+    # May want to add "_in_flasc_format" to _metadata in future, but this
     # demonstrates functionality
+
 
 def test_printout():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
@@ -47,7 +44,8 @@ def test_printout():
     df._in_flasc_format = False
     print(df)
     print("\n")
-    print(df.head()) # In FLASC format, presumably because .head() returns a reinstantiated copy?
+    print(df.head())  # In FLASC format, presumably because .head() returns a reinstantiated copy?
+
 
 def test_check_flasc_format():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
@@ -61,16 +59,18 @@ def test_check_flasc_format():
     with pytest.raises(ValueError):
         df.check_flasc_format()
 
+
 def test_convert_to_long_format():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
-    df._user_format = "long" # Should be detected internally
-    df.convert_to_user_format(inplace=True) # Should not pass
+    df._user_format = "long"  # Should be detected internally
+    df.convert_to_user_format(inplace=True)  # Should not pass
 
     # Check operation not allowed if no "time" column
     df.convert_to_flasc_format(inplace=True)
     df.drop(columns="time", inplace=True)
     with pytest.raises(ValueError):
         df.convert_to_user_format(inplace=True)
+
 
 def test_pickle():
     df = FlascDataFrame(test_data_dict)
@@ -108,6 +108,7 @@ def test_csv():
     assert not hasattr(df2, "name_map")
 
     os.remove("test_csv.csv")
+
 
 def test_n_turbines():
     # Currently, n_turbines based only on number of pow columns
