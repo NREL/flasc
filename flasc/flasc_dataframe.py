@@ -45,11 +45,6 @@ class FlascDataFrame(DataFrame):
         # Apply the name_map
         self.convert_to_flasc_format(inplace=True)
 
-    def flasc_method(self):
-        """Temporary method."""
-        print("This is a method of the FlascDataFrame class")
-        self.newnew_property = 20
-
     @property
     def _constructor(self):
         return FlascDataFrame
@@ -57,6 +52,26 @@ class FlascDataFrame(DataFrame):
     def __str__(self):
         """Printout when calling print(df)."""
         return "This is a FlascDataFrame!\n" + super().__str__()
+
+    @property
+    def n_turbines(self):
+        """Return the number of turbines in the dataset."""
+        self.check_flasc_format()
+
+        nt = 0
+        while ("pow_%03d" % nt) in self.columns:
+            nt += 1
+        return nt
+
+    def check_flasc_format(self):
+        """Raise an error if the data is not in FLASC format."""
+        if not self._in_flasc_format:
+            raise ValueError((
+                "Data must be in FLASC format to perform this operation."
+                "Call df.convert_to_flasc_format() to convert the data to FLASC format."
+            ))
+        else:
+            pass
 
     def convert_to_user_format(self, inplace=False):
         """Convert the DataFrame to the format that the user expects, given the name_map."""
@@ -67,6 +82,9 @@ class FlascDataFrame(DataFrame):
             self._convert_wide_to_semiwide()  # Should this be assigned to something?
         elif self._user_format == "wide":
             pass
+
+        # Set the flag
+        self._in_flasc_format = False
 
         # Convert column names and return
         if self.name_map is not None:
@@ -83,6 +101,9 @@ class FlascDataFrame(DataFrame):
             self._convert_semiwide_to_wide()  # Should this be assigned to something?
         elif self._user_format == "wide":
             pass
+
+        # Set the flag
+        self._in_flasc_format = True
 
         # Convert column names and return
         if self.name_map is not None:
