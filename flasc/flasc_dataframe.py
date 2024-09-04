@@ -178,7 +178,7 @@ class FlascDataFrame(DataFrame):
                 and "raw_" not in col
                 and col != DataColumns.turbine_name
             ]
-            scada_df.loc[~scada_df[normal_operation_col], cols_to_filter] = pd.NA
+            scada_df.loc[~scada_df[normal_operation_col].isin([True]), cols_to_filter] = pd.NA
         return scada_df
 
 
