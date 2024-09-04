@@ -56,7 +56,7 @@ class FlascDataFrame(DataFrame):
                 raise ValueError("name_map must be a dictionary of strings")
         self.name_map = name_map
         # Apply the name_map
-        self.convert_to_flasc_format(inplace=True)
+        self.convert_to_flasc_format(inplace=True) # Do we want to do this here?
 
     @property
     def _constructor(self):
@@ -64,7 +64,10 @@ class FlascDataFrame(DataFrame):
 
     def __str__(self):
         """Printout when calling print(df)."""
-        return "This is a FlascDataFrame!\n" + super().__str__()
+        if self._in_flasc_format:
+            return "FlascDataFrame in FLASC format\n" + super().__str__()
+        else:
+            return "FlascDataFrame in user format\n" + super().__str__()
 
     @property
     def n_turbines(self):

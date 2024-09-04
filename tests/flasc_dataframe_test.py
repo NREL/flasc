@@ -41,7 +41,13 @@ def test__metadata():
 
 def test_printout():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
+    df._in_flasc_format = True
     print(df)
+    print("\n")
+    df._in_flasc_format = False
+    print(df)
+    print("\n")
+    print(df.head()) # In FLASC format, presumably because .head() returns a reinstantiated copy?
 
 def test_check_flasc_format():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
