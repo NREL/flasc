@@ -44,6 +44,9 @@ def test_convert_to_windup_format():
     assert windup_df.index.name == TIMESTAMP_COL
     assert DataColumns.turbine_name in windup_df.columns
     assert DataColumns.active_power_mean in windup_df.columns
+    assert windup_df[DataColumns.turbine_name].to_list() == ["000"] * len(example_data) + [
+        "001"
+    ] * len(example_data)
     assert windup_df[DataColumns.active_power_mean].to_list() == example_data * 2
     assert windup_df[DataColumns.wind_speed_mean].to_list() == more_example_data * 2
     assert windup_df[DataColumns.yaw_angle_mean].to_list() == [
@@ -55,6 +58,18 @@ def test_convert_to_windup_format():
     assert windup_df[DataColumns.gen_rpm_mean].to_list() == [1000] * 2 * len(example_data)
     assert windup_df[DataColumns.shutdown_duration].to_list() == [0] * 2 * len(example_data)
     assert windup_df[RAW_POWER_COL].equals(windup_df[DataColumns.active_power_mean])
+    windup_df_turbine_names = FlascDataFrame(df).convert_to_windup_format(
+        turbine_names=["T1", "T2"]
+    )
+    assert windup_df_turbine_names[DataColumns.turbine_name].to_list() == ["T1"] * len(
+        example_data
+    ) + ["T2"] * len(example_data)
+    assert (
+        windup_df_turbine_names[windup_df_turbine_names[DataColumns.turbine_name] == "T2"][
+            DataColumns.yaw_angle_mean
+        ].to_list()
+        == still_more_example_data
+    )
     windup_df_filt = FlascDataFrame(df).convert_to_windup_format(
         normal_operation_col="is_operation_normal"
     )
