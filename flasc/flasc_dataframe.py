@@ -1,7 +1,8 @@
 """FLASC DataFrame module."""
+
 import pandas as pd
 from pandas import DataFrame
-from wind_up.constants import TIMESTAMP_COL, DataColumns
+from wind_up.constants import DataColumns, TIMESTAMP_COL
 
 
 # Create a new DataFrame subclass
@@ -92,14 +93,25 @@ class FlascDataFrame(DataFrame):
         """Convert a wide format DataFrame to a semiwide format DataFrame."""
         pass
 
-    def convert_to_windup_format(self, turbine_names: list[str] | None = None):
+    def convert_to_windup_format(
+        self,
+        turbine_names: list[str] | None = None,
+        time_col: str = "time",
+        normal_operation_col: str = "is_operation_normal",
+        power_col: str = "pow",
+        windspeed_col: str = "ws",
+        winddirection_col: str = "wd",
+        pitchangle_col: str | None = None,
+        genrpm_col: str | None = None,
+        downtimecounter_col: str | None = None,
+    ):
         """Convert the DataFrame to the format that wind-up expects."""
         # figure out how many turbines there are from columns
         nt = sum(
             [
                 1
                 for col in self.columns
-                if col.startswith("is_operation_normal_") and col[-3:].isdigit()
+                if col.startswith(f"{normal_operation_col}_") and col[-3:].isdigit()
             ]
         )
         # if turbine_names provided check it matches
@@ -114,23 +126,33 @@ class FlascDataFrame(DataFrame):
         scada_df = pd.DataFrame()
         for i in range(nt):
             wtg_cols = [col for col in self.columns if col.endswith(f"_{i:03d}")]
-            wtg_df = self[["time", *wtg_cols]].copy()
-            wtg_df.columns = ["time", *[x[:-4] for x in wtg_cols]]
+            wtg_df = self[[time_col, *wtg_cols]].copy()
+            wtg_df.columns = [time_col, *[x[:-4] for x in wtg_cols]]
             wtg_df["TurbineName"] = turbine_names[i] if turbine_names is not None else f"{i:03d}"
             scada_df = pd.concat([scada_df, wtg_df])
-        scada_df = scada_df.set_index("time")
-        scada_df.index.name = TIMESTAMP_COL  # assumption is that flasc timestamps are UTC start format
+        scada_df = scada_df.set_index(time_col)
+        scada_df.index.name = (
+            TIMESTAMP_COL  # assumption is that flasc timestamps are UTC start format
+        )
         scada_df = scada_df.rename(
             columns={
-                "pow": DataColumns.active_power_mean,
-                "ws": DataColumns.wind_speed_mean,
-                "wd": DataColumns.yaw_angle_mean,
+                power_col: DataColumns.active_power_mean,
+                windspeed_col: DataColumns.wind_speed_mean,
+                winddirection_col: DataColumns.yaw_angle_mean,
             }
         )
-        # fill in other columns with placeholding values
-        scada_df[DataColumns.pitch_angle_mean] = 0
-        scada_df[DataColumns.gen_rpm_mean] = 1000
-        scada_df[DataColumns.shutdown_duration] = 0
+        if pitchangle_col is None:
+            scada_df[DataColumns.pitch_angle_mean] = 0
+        else:
+            scada_df = scada_df.rename(columns={pitchangle_col: DataColumns.pitch_angle_mean})
+        if genrpm_col is None:
+            scada_df[DataColumns.gen_rpm_mean] = 1000
+        else:
+            scada_df = scada_df.rename(columns={genrpm_col: DataColumns.gen_rpm_mean})
+        if downtimecounter_col is None:
+            scada_df[DataColumns.shutdown_duration] = 0
+        else:
+            scada_df = scada_df.rename(columns={downtimecounter_col: DataColumns.shutdown_duration})
         return scada_df
 
 
