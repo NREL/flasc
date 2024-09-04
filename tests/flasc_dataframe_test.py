@@ -37,8 +37,8 @@ def test_check_flasc_format():
 
 def test_convert_to_long_format():
     df = FlascDataFrame(test_data_dict, name_map=test_name_map)
-    df._user_format = "long"
-    df.convert_to_user_format(inplace=True)
+    df._user_format = "long" # Should be detected internally
+    df.convert_to_user_format(inplace=True) # Should not pass
 
     # Check operation not allowed if no "time" column
     df.convert_to_flasc_format(inplace=True)

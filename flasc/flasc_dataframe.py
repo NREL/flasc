@@ -113,11 +113,12 @@ class FlascDataFrame(DataFrame):
 
     def _convert_long_to_wide(self):
         """Convert a long format DataFrame to a wide format DataFrame."""
+        #raise NotImplementedError("TO DO")
         pass
 
     def _convert_semiwide_to_wide(self):
         """Convert a semiwide format DataFrame to a wide format DataFrame."""
-        pass
+        raise NotImplementedError("TO DO")
 
     def _convert_wide_to_long(self):
         """Convert a wide format DataFrame to a long format DataFrame."""
@@ -131,6 +132,7 @@ class FlascDataFrame(DataFrame):
         if "time" not in self.columns:
             raise ValueError("Column 'time' must be present in the DataFrame")
 
+        raise NotImplementedError("TO DO")
         # Should have columns:
         # time
         # turbine_id (as specified by the user)
