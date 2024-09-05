@@ -1,4 +1,5 @@
 """FLASC DataFrame module."""
+
 from pandas import DataFrame
 
 
@@ -34,7 +35,7 @@ class FlascDataFrame(DataFrame):
     # Attributes to pickle must be in this list
     _metadata = ["name_map", "_user_format"]
 
-    def __init__(self, *args, name_map=None, **kwargs):
+    def __init__(self, *args, name_map=None, in_flasc_format=True, user_format="wide", **kwargs):
         """Initialize the FlascDataFrame class, a subclass of pandas.DataFrame.
 
         Args:
@@ -42,11 +43,12 @@ class FlascDataFrame(DataFrame):
             name_map (dict): Dictionary of column names to map from the user format to the FLASC
                 format, where the key string is the user format and the value string is the FLASC
                 equivalent. Defaults to None.
+            in_flasc_format (bool): Whether the data is in FLASC format. Defaults to True.
+            user_format (str): The format that the user expects the data to be in. Must be one of
+                'long', 'semiwide', or 'wide'. Defaults to 'wide'.
             **kwargs: keyword arguments to pass to the DataFrame constructor
         """
         super().__init__(*args, **kwargs)
-
-        self._user_format = "wide"  # or "long" or "semiwide"
 
         # check that name_map dictionary is valid
         if name_map is not None:
@@ -55,8 +57,26 @@ class FlascDataFrame(DataFrame):
             if not all(isinstance(k, str) and isinstance(v, str) for k, v in name_map.items()):
                 raise ValueError("name_map must be a dictionary of strings")
         self.name_map = name_map
-        # Apply the name_map
-        self.convert_to_flasc_format(inplace=True)  # Do we want to do this here?
+
+        # Save the reversed name_map (to go to user_format)
+        self._name_map_to_user = (
+            {v: k for k, v in name_map.items()} if name_map is not None else None
+        )
+
+        # Set the format
+        self._in_flasc_format = in_flasc_format
+
+        # Save the user format
+        if user_format not in ["long", "semiwide", "wide"]:
+            raise ValueError("user_format must be one of 'long', 'semiwide', 'wide'")
+        self._user_format = user_format
+
+        # I think we should not convert to allow to stay in user format
+        # # Convert to flasc format if not already
+        # if not in_flasc_format:
+        #     self.convert_to_flasc_format(inplace=True)
+        # else:
+        #     self._in_flasc_format = True
 
     @property
     def _constructor(self):
@@ -95,55 +115,110 @@ class FlascDataFrame(DataFrame):
         """Convert the DataFrame to the format that the user expects, given the name_map."""
         # Convert the format
         if self._user_format == "long":
-            self._convert_wide_to_long()  # Should this be assigned to something?
+            df_user = self._convert_wide_to_long()
         elif self._user_format == "semiwide":
-            self._convert_wide_to_semiwide()  # Should this be assigned to something?
+            df_user = self._convert_wide_to_semiwide()
         elif self._user_format == "wide":
-            pass
+            df_user = self.copy()
 
-        # Set the flag
-        self._in_flasc_format = False
+            # In wide to wide conversion, only need to rename the columns
+            if self.name_map is not None:
+                df_user.rename(self._name_map_to_user, inplace=inplace)
 
-        # Convert column names and return
-        if self.name_map is not None:
-            return self.rename(columns={v: k for k, v in self.name_map.items()}, inplace=inplace)
+        # Assign to self or return
+        if inplace:
+            self.__init__(
+                df_user,
+                name_map=self.name_map,
+                in_flasc_format=False,
+                user_format=self._user_format,
+            )
         else:
-            return None if inplace else self.copy()
+            # Force in flasc format to False
+            df_user._in_flasc_format = False
+
+            return df_user
 
     def convert_to_flasc_format(self, inplace=False):
         """Convert the DataFrame to the format that FLASC expects."""
         # Convert the format
         if self._user_format == "long":
-            self._convert_long_to_wide()  # Should this be assigned to something?
+            df_flasc = self._convert_long_to_wide()  # Should this be assigned to something?
         elif self._user_format == "semiwide":
-            self._convert_semiwide_to_wide()  # Should this be assigned to something?
+            df_flasc = self._convert_semiwide_to_wide()  # Should this be assigned to something?
         elif self._user_format == "wide":
-            pass
+            df_flasc = self.copy()
 
-        # Set the flag
-        self._in_flasc_format = True
+            # In wide to wide conversion, only need to rename the columns
+            if self.name_map is not None:
+                df_flasc.rename(columns=self.name_map, inplace=inplace)
 
-        # Convert column names and return
-        if self.name_map is not None:
-            return self.rename(columns=self.name_map, inplace=inplace)
+        # Assign to self or return
+        if inplace:
+            self.__init__(
+                df_flasc,
+                name_map=self.name_map,
+                in_flasc_format=True,
+                user_format=self._user_format,
+            )
         else:
-            return None if inplace else self.copy()
+            # Force in flasc format to True
+            df_flasc._in_flasc_format = True
+
+            return df_flasc
 
     def _convert_long_to_wide(self):
         """Convert a long format DataFrame to a wide format DataFrame."""
-        # raise NotImplementedError("TO DO")
-        pass
+        # Start by converting the variable names
+        df_wide = self.copy()
+        if df_wide.name_map is not None:
+            df_wide["variable"] = df_wide["variable"].map(df_wide.name_map)
+
+        # Pivot the table so the variable column becomes the column names with time
+        # kept as the first column and value as the values
+        df_wide = df_wide.pivot(index="time", columns="variable", values="value").reset_index()
+
+        # Remove the name
+        df_wide.columns.name = None
+
+        # Reset the index to make the time column a regular column
+        return FlascDataFrame(
+            df_wide,
+            name_map=self.name_map,
+            in_flasc_format=self._in_flasc_format,
+            user_format=self._user_format,
+        )
 
     def _convert_semiwide_to_wide(self):
         """Convert a semiwide format DataFrame to a wide format DataFrame."""
         raise NotImplementedError("TO DO")
 
     def _convert_wide_to_long(self):
-        """Convert a wide format DataFrame to a long format DataFrame."""
+        """Convert a wide format DataFrame to a long format DataFrame.
+
+        Returns:
+            FlascDataFrame: Long format FlascDataFrame
+
+        """
         if "time" not in self.columns:
             raise ValueError("Column 'time' must be present in the DataFrame")
 
-        return self.melt(id_vars="time", var_name="variable", value_name="value")
+        df_long = self.melt(id_vars="time", var_name="variable", value_name="value").sort_values(
+            ["time", "variable"]
+        )
+
+        if self.name_map is not None:
+            df_long["variable"] = df_long["variable"].map(self._name_map_to_user)
+
+        # Reset index for cleanliness
+        df_long = df_long.reset_index(drop=True)
+
+        return FlascDataFrame(
+            df_long,
+            name_map=self.name_map,
+            in_flasc_format=self._in_flasc_format,
+            user_format=self._user_format,
+        )
 
     def _convert_wide_to_semiwide(self):
         """Convert a wide format DataFrame to a semiwide format DataFrame."""
