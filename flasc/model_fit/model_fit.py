@@ -6,7 +6,7 @@ from typing import Callable, List, Tuple
 
 import numpy as np
 import pandas as pd
-from floris import FlorisModel, ParallelFlorisModel
+from floris import FlorisModel, ParallelFlorisModel, UncertainFlorisModel
 
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.flasc_dataframe import FlascDataFrame
@@ -22,9 +22,14 @@ class ModelFit:
     def __init__(
         self,
         df: pd.DataFrame | FlascDataFrame,
-        fmodel: FlorisModel | ParallelFlorisModel,
+        fmodel: FlorisModel | ParallelFlorisModel | UncertainFlorisModel,
         cost_function: Callable[
-            [FlascDataFrame, FlascDataFrame, FlorisModel | ParallelFlorisModel | None], float
+            [
+                FlascDataFrame,
+                FlascDataFrame,
+                FlorisModel | ParallelFlorisModel | UncertainFlorisModel | None,
+            ],
+            float,
         ],
         parameter_list: List[List] | List[Tuple] = [],
         parameter_name_list: List[str] = [],
@@ -35,7 +40,8 @@ class ModelFit:
 
         Args:
             df (pd.DataFrame | FlascDataFrame): DataFrame containing SCADA data.
-            fmodel (FlorisModel | ParallelFlorisModel): FLORIS model to calibrate.
+            fmodel (FlorisModel | ParallelFlorisModel | UncertainFlorisModel):
+                FLORIS model to calibrate.
             cost_function (Callable): Handle to the cost function.
             parameter_list (List[List] | List[Tuple]): List of FLORIS parameters to calibrate.  If
                 None, no parameters are calibrated.  Defaults to None.
@@ -52,11 +58,13 @@ class ModelFit:
         self._check_flasc_dataframe(self.df)
 
         # Check if fmodel if FlorisModel or ParallelFlorisModel
-        if not isinstance(fmodel, (FlorisModel, ParallelFlorisModel)):
-            raise ValueError("fmodel must be a FlorisModel or ParallelFlorisModel.")
+        if not isinstance(fmodel, (FlorisModel, ParallelFlorisModel, UncertainFlorisModel)):
+            raise ValueError(
+                "fmodel must be a FlorisModel, ParallelFlorisModel or UncertainFlorisModel."
+            )
 
         # If FlorisModel, set to ParallelFlorisModel with 16 workers
-        if isinstance(fmodel, FlorisModel):
+        if isinstance(fmodel, FlorisModel) or isinstance(fmodel, UncertainFlorisModel):
             max_workers = 16
             self.pfmodel = ParallelFlorisModel(
                 fmodel,
@@ -241,6 +249,8 @@ class ModelFit:
         """
         # Run the FLORIS model
         df_floris = self.run_floris_model(**kwargs)
+
+        print(df_floris)
 
         # Evaluate the cost function passing the FlorisModel within the ParallelFlorisModel
         return self.cost_function(self.df, df_floris, self.pfmodel.fmodel)
