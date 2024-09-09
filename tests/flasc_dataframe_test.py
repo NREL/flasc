@@ -14,15 +14,9 @@ test_wide_dict = {
     "ws_001": [9, 9, 9],
 }
 
-test_name_map = {"T1PWR": "pow_000", "T1WS": "ws_000", "T2PWR": "pow_001", "T2WS": "ws_001"}
+test_channel_name_map = {"T1PWR": "pow_000", "T1WS": "ws_000", "T2PWR": "pow_001", "T2WS": "ws_001"}
+test_long_columns = {"variable_column": "variable", "value_column": "value"}
 
-
-test_semi_wide_dict = {
-    "time": [0, 0, 10, 10, 20, 20],
-    "turbine_id": [0, 1, 0, 1, 0, 1],
-    "pow": [0, 50, 100, 150, 200, 250],
-    "ws": [8, 9, 8, 9, 8, 9],
-}
 
 test_long_dict = {
     "time": [0, 0, 0, 0, 10, 10, 10, 10, 20, 20, 20, 20],
@@ -40,7 +34,7 @@ test_wide_user_dict = {
 
 
 def test_type():
-    df = FlascDataFrame(test_wide_dict, name_map=test_name_map)
+    df = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
     assert isinstance(df, FlascDataFrame)
 
     df2 = df.drop(columns="ws_001")  # Modifies the dataframe, returns a copy
@@ -51,145 +45,206 @@ def test_type():
 
 
 def test__metadata():
-    df = FlascDataFrame(test_wide_dict, name_map=test_name_map)
-    df._user_format = "long"
-    df._in_flasc_format = False
+    df = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
     df2 = df.drop(columns="ws_001")  # Modifies the dataframe, returns a copy
-    assert hasattr(df2, "name_map")
-    assert df2.name_map == test_name_map
+    assert hasattr(df2, "channel_name_map")
+    assert df2.channel_name_map == test_channel_name_map
     assert hasattr(df2, "_user_format")
     assert df2._user_format == "long"
-    assert hasattr(df2, "_in_flasc_format")
-    assert df2._in_flasc_format == True  # Resets, since "_in_flasc_format" not in _metadata.
-    # May want to add "_in_flasc_format" to _metadata in future, but this
-    # demonstrates functionality
+    assert hasattr(df2, "in_flasc_format")
+    assert df2.in_flasc_format == True
 
 
 def test_printout():
-    df = FlascDataFrame(test_wide_dict, name_map=test_name_map)
-    df._in_flasc_format = True
+    df = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
+    # df._in_flasc_format = True
     print(df)
     print("\n")
-    df._in_flasc_format = False
-    print(df)
-    print("\n")
-    print(df.head())  # In FLASC format, presumably because .head() returns a reinstantiated copy?
+    # df._in_flasc_format = False
+    # print(df)
+    # print("\n")
+
+
+def test_time_required():
+    # Check that the time column is present
+    with pytest.raises(ValueError):
+        FlascDataFrame(
+            {"pow_000": [0, 100, 200], "ws_000": [8, 8, 8]}, channel_name_map=test_channel_name_map
+        )
 
 
 def test_check_flasc_format():
-    df = FlascDataFrame(test_wide_dict, name_map=test_name_map)
+    df = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
 
     # Should not raise an error
     df.check_flasc_format()
 
     # Convert to non-flasc format; should now raise an error
-    df._user_format = "long"
     df.convert_to_user_format(inplace=True)
     with pytest.raises(ValueError):
         df.check_flasc_format()
 
 
-def test_convert_to_long_format():
-    df_wide = FlascDataFrame(test_wide_dict, name_map=test_name_map)
-    df_long_test = pd.DataFrame(test_long_dict)
+def test_convert_flasc_wide_to_user_wide():
+    df_wide_flasc = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
+    df_wide_user = FlascDataFrame(test_wide_user_dict, channel_name_map=test_channel_name_map)
 
-    # Test conversion with return
-    df_wide._user_format = "long"  # Should be detected internally
-    df_wide_copy = df_wide.copy()
-    df_long = df_wide.convert_to_user_format(inplace=False)
-
-    # Test df_long is not in flasc format
-    assert not df_long._in_flasc_format
-
-    # Test returned frame is matched to expected value
-    pd.testing.assert_frame_equal(df_long, df_long_test)
-
-    # Test original frame is unchanged
-    pd.testing.assert_frame_equal(df_wide, df_wide_copy)
-
-    # Now test in place conversion
-    df_wide.convert_to_user_format(inplace=True)
-    pd.testing.assert_frame_equal(df_wide, df_long_test)
-
-    # Assert not in flasc format
-    assert not df_wide._in_flasc_format
-
-    # Now test the back conversion
-    df_back_to_wide = df_wide.convert_to_flasc_format(inplace=False)
-
-    # Resort the columns to match
-    df_back_to_wide = df_back_to_wide[df_wide_copy.columns]
-
-    pd.testing.assert_frame_equal(df_back_to_wide, df_wide_copy)
-
-    # Assert is in flasc format
-    assert df_back_to_wide._in_flasc_format
-
-    # Test in place version
-    df_wide.convert_to_flasc_format(inplace=True)
-
-    # Sort columns to match
-    df_wide = df_wide[df_wide_copy.columns]
-
-    pd.testing.assert_frame_equal(df_wide, df_wide_copy)
-
-    # Check operation not allowed if no "time" column
-    df_wide.drop(columns="time", inplace=True)
-    with pytest.raises(ValueError):
-        df_wide.convert_to_user_format(inplace=True)
+    pd.testing.assert_frame_equal(df_wide_flasc.convert_to_user_format(), df_wide_user)
 
 
-def test_convert_to_wide_format():
-    # Test wide to wide conversion
+def test_convert_user_wide_to_flasc_wide():
+    df_wide_flasc = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
+    df_wide_user = FlascDataFrame(test_wide_user_dict, channel_name_map=test_channel_name_map)
 
-    pass
+    pd.testing.assert_frame_equal(df_wide_user.convert_to_flasc_format(), df_wide_flasc)
+
+
+def test_convert_flasc_wide_in_place():
+    df_wide_flasc = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
+    df_wide_user = FlascDataFrame(test_wide_user_dict, channel_name_map=test_channel_name_map)
+
+    df_wide_flasc.convert_to_user_format(inplace=True)
+    pd.testing.assert_frame_equal(df_wide_flasc, df_wide_user)
+
+
+def test_convert_user_wide_in_place():
+    df_wide_flasc = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
+    df_wide_user = FlascDataFrame(test_wide_user_dict, channel_name_map=test_channel_name_map)
+
+    df_wide_user.convert_to_flasc_format(inplace=True)
+    pd.testing.assert_frame_equal(df_wide_user, df_wide_flasc)
+
+
+def test_convert_flasc_wide_back_and_forth():
+    df_wide_flasc = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
+    df_wide_flasc_copy = df_wide_flasc.copy()
+
+    df_wide_flasc.convert_to_user_format(inplace=True)
+    df_wide_flasc.convert_to_flasc_format(inplace=True)
+
+    pd.testing.assert_frame_equal(df_wide_flasc, df_wide_flasc_copy)
+
+
+def test_convert_long_column_names():
+    long_col_names = {"variable_column": "VA", "value_column": "VB"}
+    df_wide_flasc = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map, long_data_columns=long_col_names
+    )
+    df_long = df_wide_flasc.convert_to_user_format()
+
+    # Check that df_long has 3 columns named "VA", "VB", and "time"
+    assert "VA" in df_long.columns
+    assert "VB" in df_long.columns
+    assert "time" in df_long.columns
+
+
+def test_convert_flasc_to_user_long():
+    df_wide_flasc = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+    df_long = FlascDataFrame(
+        test_long_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+
+    pd.testing.assert_frame_equal(df_wide_flasc.convert_to_user_format(), df_long)
+
+
+def test_convert_user_long_to_flasc():
+    df_wide_flasc = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+    df_long = FlascDataFrame(
+        test_long_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+
+    # Note that the column order is different so fix that
+    pd.testing.assert_frame_equal(
+        df_long.convert_to_flasc_format()[df_wide_flasc.columns], df_wide_flasc
+    )
+
+
+def test_convert_flasc_long_in_place():
+    df_wide_flasc = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+    df_long = FlascDataFrame(
+        test_long_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+
+    df_wide_flasc.convert_to_user_format(inplace=True)
+    pd.testing.assert_frame_equal(df_wide_flasc, df_long)
+
+
+def test_convert_user_long_in_place():
+    df_wide_flasc = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+    df_long = FlascDataFrame(
+        test_long_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+
+    df_long.convert_to_flasc_format(inplace=True)
+    pd.testing.assert_frame_equal(df_long[df_wide_flasc.columns], df_wide_flasc)
+
+
+def test_convert_flasc_long_back_and_forth():
+    df_wide_flasc = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
+    )
+    df_wide_flasc_copy = df_wide_flasc.copy()
+
+    df_wide_flasc.convert_to_user_format(inplace=True)
+    df_wide_flasc.convert_to_flasc_format(inplace=True)
+
+    pd.testing.assert_frame_equal(df_wide_flasc[df_wide_flasc_copy.columns], df_wide_flasc_copy)
 
 
 def test_pickle():
     df = FlascDataFrame(test_wide_dict)
-    df.name_map = test_name_map
+    df.channel_name_map = test_channel_name_map
     df.to_pickle("test_pickle.pkl")
 
     df2 = pd.read_pickle("test_pickle.pkl")
     assert isinstance(df2, FlascDataFrame)
-    assert df2.name_map == test_name_map
+    assert df2.channel_name_map == test_channel_name_map
 
     os.remove("test_pickle.pkl")
 
 
 def test_feather():
-    df = FlascDataFrame(test_wide_dict, name_map=test_name_map)
+    df = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
     df.to_feather("test_feather.ftr")
 
     df2 = pd.read_feather("test_feather.ftr")
     # Loaded DataFrame is a pandas DataFrame, not a FlascDataFrame
     assert not isinstance(df2, FlascDataFrame)
     assert isinstance(df2, pd.DataFrame)
-    assert not hasattr(df2, "name_map")
+    assert not hasattr(df2, "channel_name_map")
 
     os.remove("test_feather.ftr")
 
 
 def test_csv():
-    df = FlascDataFrame(test_wide_dict, name_map=test_name_map)
+    df = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
     df.to_csv("test_csv.csv")
 
     df2 = pd.read_csv("test_csv.csv")
     # Loaded DataFrame is a pandas DataFrame, not a FlascDataFrame
     assert not isinstance(df2, FlascDataFrame)
     assert isinstance(df2, pd.DataFrame)
-    assert not hasattr(df2, "name_map")
+    assert not hasattr(df2, "channel_name_map")
 
     os.remove("test_csv.csv")
 
 
 def test_n_turbines():
     # Currently, n_turbines based only on number of pow columns
-    df = FlascDataFrame(test_wide_dict, name_map=test_name_map)
+    df = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
     assert df.n_turbines == 2
 
     # Check n_turbines not valid if not in flasc format
-    df._user_format = "long"
     df.convert_to_user_format(inplace=True)
     with pytest.raises(ValueError):
         df.n_turbines
