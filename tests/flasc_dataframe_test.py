@@ -133,6 +133,7 @@ def test_n_turbines():
     with pytest.raises(ValueError):
         df.n_turbines
 
+
 def test_convert_to_windup_format():
     example_data = [1.1, 2.1, 3.1]
     more_example_data = [11.1, 12.1, 13.1]
