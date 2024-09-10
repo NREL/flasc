@@ -129,15 +129,16 @@ class FlascDataFrame(DataFrame):
             else:
                 return self.copy()
 
-        # Convert the format
-        if self._user_format == "long":
-            df_user = self._convert_wide_to_long()
-        elif self._user_format == "wide":
-            df_user = self.copy()
+        # Make a copy of self
+        df_user = self.copy()
 
-            # In wide to wide conversion, only need to rename the columns
-            if self.channel_name_map is not None:
-                df_user.rename(columns=self._channel_name_map_to_user, inplace=True)
+        # Rename the channel columns to user-specified names
+        if self.channel_name_map is not None:
+            df_user.rename(columns=self._channel_name_map_to_user, inplace=True)
+
+        # Convert the format to long if _user_format is long
+        if self._user_format == "long":
+            df_user = self._convert_wide_to_long(df_user)
 
         # Assign to self or return
         if inplace:
@@ -167,15 +168,16 @@ class FlascDataFrame(DataFrame):
             else:
                 return self.copy()
 
-        # Convert the format
-        if self._user_format == "long":
-            df_flasc = self._convert_long_to_wide()  # Should this be assigned to something?
-        elif self._user_format == "wide":
-            df_flasc = self.copy()
+        # Make a copy of self
+        df_flasc = self.copy()
 
-            # In wide to wide conversion, only need to rename the columns
-            if self.channel_name_map is not None:
-                df_flasc.rename(columns=self.channel_name_map, inplace=True)
+        # Convert back from long if necessary
+        if self._user_format == "long":
+            df_flasc = self._convert_long_to_wide(df_flasc)
+
+        # Rename the channel columns to flasc-naming convention
+        if self.channel_name_map is not None:
+            df_flasc.rename(columns=self.channel_name_map, inplace=True)
 
         # Assign to self or return
         if inplace:
@@ -187,60 +189,54 @@ class FlascDataFrame(DataFrame):
         else:
             return df_flasc
 
-    def _convert_long_to_wide(self):
+    def _convert_long_to_wide(self, df_):
         """Convert a long format DataFrame to a wide format DataFrame.
+
+        Args:
+            df_ (FlascDataFrame): Long format FlascDataFrame
 
         Returns:
             FlascDataFrame: Wide format FlascDataFrame
         """
-        # Start by converting the variable names
-        df_wide = self.copy()
-        if df_wide.channel_name_map is not None:
-            df_wide[self._long_data_columns["variable_column"]] = df_wide[
-                self._long_data_columns["variable_column"]
-            ].map(df_wide.channel_name_map)
-
         # Pivot the table so the variable column becomes the column names with time
         # kept as the first column and value as the values
-        df_wide = df_wide.pivot(
+        df_ = df_.pivot(
             index="time",
             columns=self._long_data_columns["variable_column"],
             values=self._long_data_columns["value_column"],
         ).reset_index()
 
         # Remove the name
-        df_wide.columns.name = None
+        df_.columns.name = None
 
         # Reset the index to make the time column a regular column
         return FlascDataFrame(
-            df_wide,
+            df_,
             channel_name_map=self.channel_name_map,
             long_data_columns=self._long_data_columns,
         )
 
-    def _convert_wide_to_long(self):
+    def _convert_wide_to_long(self, df_):
         """Convert a wide format DataFrame to a long format DataFrame.
+
+        Args:
+            df_ (FlascDataFrame): Wide format FlascDataFrame
 
         Returns:
             FlascDataFrame: Long format FlascDataFrame
 
         """
-        df_long = self.melt(
+        df_ = df_.melt(
             id_vars="time",
             var_name=self._long_data_columns["variable_column"],
             value_name=self._long_data_columns["value_column"],
         ).sort_values(["time", self._long_data_columns["variable_column"]])
 
-        if self.channel_name_map is not None:
-            df_long[self._long_data_columns["variable_column"]] = df_long[
-                self._long_data_columns["variable_column"]
-            ].map(self._channel_name_map_to_user)
-
         # Reset index for cleanliness
-        df_long = df_long.reset_index(drop=True)
+        df_ = df_.reset_index(drop=True)
 
         return FlascDataFrame(
-            df_long,
+            df_,
             channel_name_map=self.channel_name_map,
             long_data_columns=self._long_data_columns,
         )

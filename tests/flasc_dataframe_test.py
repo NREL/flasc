@@ -15,12 +15,19 @@ test_wide_dict = {
 }
 
 test_channel_name_map = {"T1PWR": "pow_000", "T1WS": "ws_000", "T2PWR": "pow_001", "T2WS": "ws_001"}
+test_channel_name_map_incomplete = {"T1PWR": "pow_000", "T1WS": "ws_000", "T2PWR": "pow_001"}
 test_long_columns = {"variable_column": "variable", "value_column": "value"}
 
 
 test_long_dict = {
     "time": [0, 0, 0, 0, 10, 10, 10, 10, 20, 20, 20, 20],
     "variable": ["T1PWR", "T2PWR", "T1WS", "T2WS"] * 3,
+    "value": [0, 50, 8, 9, 100, 150, 8, 9, 200, 250, 8, 9],
+}
+
+test_long_dict_incomplete = {
+    "time": [0, 0, 0, 0, 10, 10, 10, 10, 20, 20, 20, 20],
+    "variable": ["T1PWR", "T2PWR", "T1WS", "ws_001"] * 3,
     "value": [0, 50, 8, 9, 100, 150, 8, 9, 200, 250, 8, 9],
 }
 
@@ -31,6 +38,31 @@ test_wide_user_dict = {
     "T2PWR": [50, 150, 250],
     "T2WS": [9, 9, 9],
 }
+
+test_wide_user_dict_incomplete = {
+    "time": [0, 10, 20],
+    "T1PWR": [0, 100, 200],
+    "T1WS": [8, 8, 8],
+    "T2PWR": [50, 150, 250],
+    "ws_001": [9, 9, 9],
+}
+
+
+def assert_equal_except_row_col_order(df1, df2):
+    # Sort the columns
+    df_1_c = df1.sort_index(axis=1)
+    df_2_c = df2.sort_index(axis=1)
+
+    # If "variable" is a column, sort by ['time', 'variable']
+    if "variable" in df_1_c.columns:
+        df_1_c = df_1_c.sort_values(by=["time", "variable"]).reset_index(drop=True)
+        df_2_c = df_2_c.sort_values(by=["time", "variable"]).reset_index(drop=True)
+
+    else:
+        df_1_c = df_1_c.sort_values(by=["time"]).reset_index(drop=True)
+        df_2_c = df_2_c.sort_values(by=["time"]).reset_index(drop=True)
+
+    pd.testing.assert_frame_equal(df_1_c, df_2_c)
 
 
 def test_type():
@@ -94,11 +126,39 @@ def test_convert_flasc_wide_to_user_wide():
     pd.testing.assert_frame_equal(df_wide_flasc.convert_to_user_format(), df_wide_user)
 
 
+def test_convert_flasc_wide_to_user_wide_incomplete():
+    # Test incomplete channel name map
+    df_wide_flasc_incomplete = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map_incomplete
+    )
+    df_wide_user_incomplete = FlascDataFrame(
+        test_wide_user_dict_incomplete, channel_name_map=test_channel_name_map_incomplete
+    )
+
+    pd.testing.assert_frame_equal(
+        df_wide_flasc_incomplete.convert_to_user_format(), df_wide_user_incomplete
+    )
+
+
 def test_convert_user_wide_to_flasc_wide():
     df_wide_flasc = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
     df_wide_user = FlascDataFrame(test_wide_user_dict, channel_name_map=test_channel_name_map)
 
     pd.testing.assert_frame_equal(df_wide_user.convert_to_flasc_format(), df_wide_flasc)
+
+
+def test_convert_user_wide_to_flasc_wide_incomplete():
+    # Test incomplete channel name map
+    df_wide_flasc_incomplete = FlascDataFrame(
+        test_wide_dict, channel_name_map=test_channel_name_map_incomplete
+    )
+    df_wide_user_incomplete = FlascDataFrame(
+        test_wide_user_dict_incomplete, channel_name_map=test_channel_name_map_incomplete
+    )
+
+    pd.testing.assert_frame_equal(
+        df_wide_user_incomplete.convert_to_flasc_format(), df_wide_flasc_incomplete
+    )
 
 
 def test_convert_flasc_wide_in_place():
@@ -148,7 +208,25 @@ def test_convert_flasc_to_user_long():
         test_long_dict, channel_name_map=test_channel_name_map, long_data_columns=test_long_columns
     )
 
-    pd.testing.assert_frame_equal(df_wide_flasc.convert_to_user_format(), df_long)
+    assert_equal_except_row_col_order(df_wide_flasc.convert_to_user_format(), df_long)
+
+
+def test_convert_flasc_to_user_long_incomplete():
+    # Test incomplete channel name map
+    df_wide_flasc_incomplete = FlascDataFrame(
+        test_wide_dict,
+        channel_name_map=test_channel_name_map_incomplete,
+        long_data_columns=test_long_columns,
+    )
+    df_long_incomplete = FlascDataFrame(
+        test_long_dict_incomplete,
+        channel_name_map=test_channel_name_map_incomplete,
+        long_data_columns=test_long_columns,
+    )
+
+    assert_equal_except_row_col_order(
+        df_wide_flasc_incomplete.convert_to_user_format(), df_long_incomplete
+    )
 
 
 def test_convert_user_long_to_flasc():
@@ -160,8 +238,25 @@ def test_convert_user_long_to_flasc():
     )
 
     # Note that the column order is different so fix that
-    pd.testing.assert_frame_equal(
-        df_long.convert_to_flasc_format()[df_wide_flasc.columns], df_wide_flasc
+    assert_equal_except_row_col_order(df_long.convert_to_flasc_format(), df_wide_flasc)
+
+
+def test_convert_user_long_to_flasc_incomplete():
+    # Test incomplete channel name map
+    df_wide_flasc_incomplete = FlascDataFrame(
+        test_wide_dict,
+        channel_name_map=test_channel_name_map_incomplete,
+        long_data_columns=test_long_columns,
+    )
+    df_long_incomplete = FlascDataFrame(
+        test_long_dict_incomplete,
+        channel_name_map=test_channel_name_map_incomplete,
+        long_data_columns=test_long_columns,
+    )
+
+    # Note that the column order is different so fix that
+    assert_equal_except_row_col_order(
+        df_long_incomplete.convert_to_flasc_format(), df_wide_flasc_incomplete
     )
 
 
@@ -174,7 +269,7 @@ def test_convert_flasc_long_in_place():
     )
 
     df_wide_flasc.convert_to_user_format(inplace=True)
-    pd.testing.assert_frame_equal(df_wide_flasc, df_long)
+    assert_equal_except_row_col_order(df_wide_flasc, df_long)
 
 
 def test_convert_user_long_in_place():
@@ -186,7 +281,7 @@ def test_convert_user_long_in_place():
     )
 
     df_long.convert_to_flasc_format(inplace=True)
-    pd.testing.assert_frame_equal(df_long[df_wide_flasc.columns], df_wide_flasc)
+    assert_equal_except_row_col_order(df_long, df_wide_flasc)
 
 
 def test_convert_flasc_long_back_and_forth():
@@ -198,7 +293,7 @@ def test_convert_flasc_long_back_and_forth():
     df_wide_flasc.convert_to_user_format(inplace=True)
     df_wide_flasc.convert_to_flasc_format(inplace=True)
 
-    pd.testing.assert_frame_equal(df_wide_flasc[df_wide_flasc_copy.columns], df_wide_flasc_copy)
+    assert_equal_except_row_col_order(df_wide_flasc, df_wide_flasc_copy)
 
 
 def test_pickle():
