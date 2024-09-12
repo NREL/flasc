@@ -1,8 +1,8 @@
 """Implement filtering class and functions for FLASC data."""
 
-
 import itertools
 
+import matplotlib.legend
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -209,6 +209,20 @@ class FlascFilter:
         # Save the finalized power curve to self and return it to the user
         self.pw_curve_df = pw_curve_df
         return pw_curve_df
+
+    def _set_legend_alpha_to_one(self, lgd: matplotlib.legend.Legend) -> None:
+        """Set the alpha value of the provided Legend object to be 1.
+
+        Args:
+            lgd (matplotlib.legend.Legend): Legend object
+        """
+        try:
+            for h in lgd.legendHandles:
+                h.set_alpha(1)  # Force alpha in legend to 1.0
+        except AttributeError:
+            # see https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#legend-legendhandles
+            for h in lgd.legend_handles:
+                h.set_alpha(1)
 
     # Public methods
     def reset_filters(self):
@@ -896,8 +910,7 @@ class FlascFilter:
                 )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        self._set_legend_alpha_to_one(lgd)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
@@ -1067,8 +1080,7 @@ class FlascFilter:
             )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        self._set_legend_alpha_to_one(lgd)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
@@ -1147,8 +1159,7 @@ class FlascFilter:
             )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        self._set_legend_alpha_to_one(lgd)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Postprocessed dataset")

@@ -22,7 +22,7 @@ REQUIRED = [
     "ipympl~=0.9",
     "matplotlib~=3.8",
     "numpy~=1.20",
-    "pandas~=2.0",
+    "pandas~=2.2",
     "pyproj~=3.0",
     "SALib~=1.0",
     "scipy~=1.1",
@@ -32,6 +32,7 @@ REQUIRED = [
     "polars==0.19.5",
     "ephem",
     "coloredlogs~=15.0",
+    "res-wind-up~=0.1.9",
 ]
 
 EXTRAS = {

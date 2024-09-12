@@ -23,6 +23,7 @@ _autosummary
 *.csv
 *.ftr
 *.png
+.venv
 
 # Documentation build files
 docs/build
