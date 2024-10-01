@@ -69,11 +69,6 @@ df_u = ModelFit.form_flasc_dataframe(
     time=time, wind_directions=wind_directions, wind_speeds=wind_speeds, powers=powers_u
 )
 
-print(df)
-
-print(df_u)
-
-
 # Save the dataframe and default model and target parameter to a pickle file
 with open("two_turbine_data.pkl", "wb") as f:
     pickle.dump(

@@ -64,16 +64,6 @@ class ModelFit:
                 "fmodel must be a FlorisModel, ParallelFlorisModel or UncertainFlorisModel."
             )
 
-        # # If FlorisModel, set to ParallelFlorisModel
-        # if isinstance(fmodel, FlorisModel)
-        #     self.pfmodel = ParallelFlorisModel(
-        #         fmodel,
-        #     )
-        # elif  isinstance(fmodel, UncertainFlorisModel):
-
-        # else:
-        #     self.pfmodel = fmodel.copy()
-
         # For now, simply save a copy of the model
         # TODO: Don't copy?
         self.fmodel = fmodel.copy()
@@ -234,7 +224,7 @@ class ModelFit:
         # For now just set to first value of current model
         turbulence_intensities = np.ones_like(wind_speeds) * self.fmodel.turbulence_intensities[0]
 
-        # Set the ParallelFlorisModel model
+        # Set the FlorisModel
         self.fmodel.set(
             wind_speeds=wind_speeds,
             wind_directions=wind_directions,
@@ -268,8 +258,6 @@ class ModelFit:
         """
         # Run the FLORIS model
         df_floris = self.run_floris_model(**kwargs)
-
-        print(df_floris)
 
         # Evaluate the cost function passing the FlorisModel within the ParallelFlorisModel
         return self.cost_function(self.df, df_floris, self.fmodel)
