@@ -31,4 +31,5 @@ SMARTEOLE_WakeSteering_ReadMe.xlsx
 SMARTEOLE_WakeSteering_Map.pdf
 SMARTEOLE-WFC-open-dataset.zip
 examples_artificial_data/03_energy_ratio/heterogeneity_layouts.pdf
-examples_artificial_data/05_model_fit/two_turbine_data.pkl
+*two_turbine_data.pkl
+*farm_data.pkl
