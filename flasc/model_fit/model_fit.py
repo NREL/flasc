@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -29,6 +29,7 @@ class ModelFit:
                 FlascDataFrame,
                 FlascDataFrame,
                 FlorisModel | ParallelFlorisModel | UncertainFlorisModel | None,
+                Dict[str, Tuple] | None,
             ],
             float,
         ],
@@ -81,8 +82,10 @@ class ModelFit:
         # and the FLORIS model
         if not callable(cost_function):
             raise ValueError("cost_function must be a callable function.")
-        if len(cost_function.__code__.co_varnames) != 3:
-            raise ValueError("cost_function must have 3 inputs: df_scada, df_floris, fmodel.")
+        if cost_function.__code__.co_argcount != 4:
+            raise ValueError(
+                "cost_function must have 4 inputs: df_scada, df_floris, fmodel, turbine_groupings."
+            )
 
         # Save the cost function handle
         self.cost_function = cost_function
@@ -248,10 +251,15 @@ class ModelFit:
         # Return df_floris
         return df_floris
 
-    def evaluate_floris(self, **kwargs) -> float:
+    def evaluate_floris(self, turbine_groupings=None, **kwargs) -> float:
         """Evaluate the FLORIS model.
 
         Given the current parameter values, run the FLORIS model and evaluate the cost function.
+
+        Args:
+            turbine_groupings (Dict[str, Tuple], optional): Dictionary of turbine groupings.
+                Defaults to None.
+            **kwargs: Additional keyword arguments to pass to the run_floris_model method.
 
         Returns:
             float: cost value.
@@ -260,13 +268,17 @@ class ModelFit:
         df_floris = self.run_floris_model(**kwargs)
 
         # Evaluate the cost function passing the FlorisModel within the ParallelFlorisModel
-        return self.cost_function(self.df, df_floris, self.fmodel)
+        return self.cost_function(self.df, df_floris, self.fmodel, turbine_groupings)
 
-    def set_parameter_and_evaluate(self, parameter_values: np.ndarray, **kwargs) -> float:
+    def set_parameter_and_evaluate(
+        self, parameter_values: np.ndarray, turbine_groupings=None, **kwargs
+    ) -> float:
         """Internal function to evaluate the cost function with a given set of parameters.
 
         Args:
             parameter_values (np.ndarray): Array of parameter values.
+            turbine_groupings (Dict[str, Tuple], optional): Dictionary of turbine groupings.
+                 Defaults to None.
             **kwargs: Additional keyword arguments to pass to the optimization algorithm.
 
         Returns:
@@ -276,7 +288,7 @@ class ModelFit:
         self.set_parameter_values(parameter_values)
 
         # Evaluate the cost function
-        return self.evaluate_floris(**kwargs)
+        return self.evaluate_floris(turbine_groupings, **kwargs)
 
     def get_parameter_values(
         self,
