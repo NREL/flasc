@@ -70,7 +70,7 @@ fm_turbo.set(layout_x=layout_x, layout_y=layout_y)
 # Generate a random series of wind speeds and directions with wind directions
 # focused on wake loss inducing wind speeds
 np.random.seed(0)
-wind_directions = np.round(np.random.uniform(200.0, 360.0, N))
+wind_directions = np.round(np.random.uniform(0.0, 360.0, N))
 wind_speeds = np.round(np.random.uniform(4.0, 15.0, N))
 
 # Generate a time series assuming 6% TI
@@ -118,8 +118,12 @@ df_turbo = ModelFit.form_flasc_dataframe(
 )
 
 # Finally get the models that will be used in tuning, in this case with and without uncertainty
-fmodel_emg = load_floris_artificial(wake_model="emgauss")
-fmodel_emg_unc = load_floris_artificial(wake_model="emgauss", wd_std=wd_std)
+fmodel_emg, _ = load_floris_artificial(wake_model="emgauss")
+fmodel_emg_unc, _ = load_floris_artificial(wake_model="emgauss", wd_std=wd_std)
+
+# Assign this layout to each of the models
+fmodel_emg.set(layout_x=layout_x, layout_y=layout_y, wind_data=time_series)
+fmodel_emg_unc.set(layout_x=layout_x, layout_y=layout_y, wind_data=time_series)
 
 
 # Save the dataframe and default model and target parameter to a pickle file
