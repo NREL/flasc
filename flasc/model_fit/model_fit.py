@@ -65,9 +65,8 @@ class ModelFit:
                 "fmodel must be a FlorisModel, ParallelFlorisModel or UncertainFlorisModel."
             )
 
-        # For now, simply save a copy of the model
-        # TODO: Don't copy?
-        self.fmodel = fmodel.copy()
+        # Save the fmodel
+        self.fmodel = fmodel
 
         # Get the number of turbines and confirm that
         # the dataframe and floris model have the same number of turbines
