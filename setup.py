@@ -33,6 +33,7 @@ REQUIRED = [
     "ephem",
     "coloredlogs~=15.0",
     "res-wind-up~=0.1",
+    "optuna~=4.0",
 ]
 
 EXTRAS = {
