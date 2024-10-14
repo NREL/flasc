@@ -23,7 +23,6 @@ REQUIRED = [
     "matplotlib~=3.8",
     "numpy~=1.20",
     "pandas~=2.0",
-    "pyproj~=3.0",
     "SALib~=1.0",
     "scipy~=1.1",
     "streamlit~=1.0",
