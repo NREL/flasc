@@ -1,5 +1,7 @@
 """Module containing methods for FLASC dataframe manipulations."""
 
+from __future__ import annotations
+
 import datetime
 import os as os
 import warnings

@@ -1,5 +1,7 @@
 """Module to estimate the wind direction bias."""
 
+from __future__ import annotations
+
 import os as os
 from typing import Callable, List, Union
 
