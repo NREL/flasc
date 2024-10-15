@@ -80,6 +80,9 @@ class TestDataFrameResampling(unittest.TestCase):
 
         self.assertAlmostEqual(df_ds.iloc[0]["ws_000_mean"], 7.10)
 
+        # Assert df_ds is a FlascDataFrame
+        self.assertTrue(isinstance(df_ds, FlascDataFrame))
+
     def test_moving_average(self):
         df = load_data()
         df_ma = df_movingaverage(
@@ -123,6 +126,9 @@ class TestDataFrameResampling(unittest.TestCase):
         # Check solutions: sixth row, for good measure
         self.assertAlmostEqual(df_ma.iloc[6]["wd_000_mean"], 0.0)  # confirm circular averaging
 
+        # Assert df_ma is a FlascDataFrame
+        self.assertTrue(isinstance(df_ma, FlascDataFrame))
+
     def test_resample_by_interpolation(self):
         # Now resample that by filling in the gaps
         df = load_data()
@@ -162,3 +168,6 @@ class TestDataFrameResampling(unittest.TestCase):
 
         # Make sure linear interpolation works correctly over gaps
         self.assertAlmostEqual(df_res.loc[68, "wd_000"], 359.9667, places=3)
+
+        # Assert df_res is a FlascDataFrame
+        self.assertTrue(isinstance(df_res, FlascDataFrame))
