@@ -3,7 +3,7 @@
 import datetime
 import os as os
 import warnings
-from typing import List
+from typing import List, Optional, Union
 from xmlrpc.client import Boolean
 
 import matplotlib.pyplot as plt
@@ -21,8 +21,8 @@ logger = logger_manager.logger  # Obtain the reusable logger
 
 # Functions related to wind farm analysis for df
 def filter_df_by_ws(
-    df: pd.DataFrame | FlascDataFrame, ws_range: List[float, float]
-) -> pd.DataFrame | FlascDataFrame:
+    df: Union[pd.DataFrame, FlascDataFrame], ws_range: List[float]
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Filter a dataframe by wind speed range.
 
     Args:
@@ -38,8 +38,8 @@ def filter_df_by_ws(
 
 
 def filter_df_by_wd(
-    df: pd.DataFrame | FlascDataFrame, wd_range: List[float, float]
-) -> pd.DataFrame | FlascDataFrame:
+    df: Union[pd.DataFrame, FlascDataFrame], wd_range: List[float]
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Filter a dataframe by wind direction range.
 
     Args:
@@ -65,8 +65,8 @@ def filter_df_by_wd(
 
 
 def filter_df_by_ti(
-    df: pd.DataFrame | FlascDataFrame, ti_range: List[float, float]
-) -> pd.DataFrame | FlascDataFrame:
+    df: Union[pd.DataFrame, FlascDataFrame], ti_range: List[float]
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Filter a dataframe by turbulence intensity range.
 
     Args:
@@ -81,7 +81,7 @@ def filter_df_by_ti(
     return df
 
 
-def get_num_turbines(df):
+def get_num_turbines(df: Union[pd.DataFrame, FlascDataFrame]) -> int:
     """Get the number of turbines in a dataframe.
 
     Args:
@@ -94,7 +94,12 @@ def get_num_turbines(df):
 
 
 # Generic functions for column operations
-def get_column_mean(df, col_prefix="pow", turbine_list=None, circular_mean=False):
+def get_column_mean(
+    df: Union[pd.DataFrame, FlascDataFrame],
+    col_prefix: str = "pow",
+    turbine_list: Optional[Union[List[int], np.ndarray]] = None,
+    circular_mean: bool = False,
+) -> np.ndarray:
     """Get the mean of a column for a list of turbines.
 
     Args:
