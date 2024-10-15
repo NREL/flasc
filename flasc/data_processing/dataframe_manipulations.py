@@ -324,7 +324,9 @@ def _set_col_by_upstream_turbines_in_radius(
 
 
 # Helper functions
-def set_wd_by_turbines(df, turbine_numbers):
+def set_wd_by_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame], turbine_numbers: List[int]
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add WD column by list of turbines.
 
     Add a column called 'wd' in your dataframe with value equal
@@ -345,7 +347,9 @@ def set_wd_by_turbines(df, turbine_numbers):
     return _set_col_by_turbines("wd", "wd", df, turbine_numbers, True)
 
 
-def set_wd_by_all_turbines(df):
+def set_wd_by_all_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame],
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add a wind direction column using all turbines.
 
     Add a column called 'wd' in your dataframe with value equal
@@ -364,7 +368,14 @@ def set_wd_by_all_turbines(df):
     return _set_col_by_turbines("wd", "wd", df, "all", True)
 
 
-def set_wd_by_radius_from_turbine(df, turb_no, x_turbs, y_turbs, max_radius, include_itself=True):
+def set_wd_by_radius_from_turbine(
+    df: Union[pd.DataFrame, FlascDataFrame],
+    turb_no: int,
+    x_turbs: List[float],
+    y_turbs: List[float],
+    max_radius: float,
+    include_itself: bool = True,
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add wind direction column by turbines in radius.
 
     Add a column called 'wd' to your dataframe, which is the
@@ -402,7 +413,9 @@ def set_wd_by_radius_from_turbine(df, turb_no, x_turbs, y_turbs, max_radius, inc
     )
 
 
-def set_ws_by_turbines(df, turbine_numbers):
+def set_ws_by_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame], turbine_numbers: List[int]
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add ws column by list of turbines.
 
     Add a column called 'ws' in your dataframe with value equal
@@ -423,7 +436,9 @@ def set_ws_by_turbines(df, turbine_numbers):
     return _set_col_by_turbines("ws", "ws", df, turbine_numbers, False)
 
 
-def set_ws_by_all_turbines(df):
+def set_ws_by_all_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame],
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add ws column by all turbines.
 
     Add a column called 'ws' in your dataframe with value equal
@@ -444,7 +459,9 @@ def set_ws_by_all_turbines(df):
     return _set_col_by_turbines("ws", "ws", df, "all", False)
 
 
-def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
+def set_ws_by_upstream_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame], df_upstream, exclude_turbs=[]
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add wind speed column using upstream turbines.
 
     Add a column called 'ws' in your dataframe with value equal
@@ -481,8 +498,14 @@ def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
 
 
 def set_ws_by_upstream_turbines_in_radius(
-    df, df_upstream, turb_no, x_turbs, y_turbs, max_radius, include_itself=True
-):
+    df: Union[pd.DataFrame, FlascDataFrame],
+    df_upstream: pd.DataFrame,
+    turb_no: int,
+    x_turbs: List[float],
+    y_turbs: List[float],
+    max_radius: float,
+    include_itself: bool = True,
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add wind speed column using in-radius upstream turbines.
 
     Add a column called 'ws' to your dataframe, which is the
@@ -529,8 +552,14 @@ def set_ws_by_upstream_turbines_in_radius(
 
 
 def set_ws_by_n_closest_upstream_turbines(
-    df, df_upstream, turb_no, x_turbs, y_turbs, exclude_turbs=[], N=5
-):
+    df: Union[pd.DataFrame, FlascDataFrame],
+    df_upstream: pd.DataFrame,
+    turb_no: int,
+    x_turbs: List[float],
+    y_turbs: List[float],
+    exclude_turbs: List[int] = [],
+    N: int = 5,
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add wind speed column by N closest upstream turbines.
 
     Add a column called 'ws' to your dataframe, which is the
@@ -572,7 +601,9 @@ def set_ws_by_n_closest_upstream_turbines(
     )
 
 
-def set_ti_by_turbines(df, turbine_numbers):
+def set_ti_by_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame], turbine_numbers: List[int]
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add TI column by list of turbines.
 
     Add a column called 'ti' in your dataframe with value equal
@@ -593,7 +624,9 @@ def set_ti_by_turbines(df, turbine_numbers):
     return _set_col_by_turbines("ti", "ti", df, turbine_numbers, False)
 
 
-def set_ti_by_all_turbines(df):
+def set_ti_by_all_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame],
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add TI column using all turbines.
 
     Add a column called 'ti' in your dataframe with value equal
@@ -614,7 +647,11 @@ def set_ti_by_all_turbines(df):
     return _set_col_by_turbines("ti", "ti", df, "all", False)
 
 
-def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
+def set_ti_by_upstream_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame],
+    df_upstream: pd.DataFrame,
+    exclude_turbs: List[int] = [],
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add TI column using upstream turbines.
 
     Add a column called 'ti' in your dataframe with value equal
@@ -651,8 +688,14 @@ def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
 
 
 def set_ti_by_upstream_turbines_in_radius(
-    df, df_upstream, turb_no, x_turbs, y_turbs, max_radius, include_itself=True
-):
+    df: Union[pd.DataFrame, FlascDataFrame],
+    df_upstream: pd.DataFrame,
+    turb_no: int,
+    x_turbs: List[float],
+    y_turbs: List[float],
+    max_radius: float,
+    include_itself: bool = True,
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add TI column by upstream turbines within a radius.
 
     Add a column called 'ti' to your dataframe, which is the
@@ -698,7 +741,9 @@ def set_ti_by_upstream_turbines_in_radius(
     )
 
 
-def set_pow_ref_by_turbines(df, turbine_numbers):
+def set_pow_ref_by_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame], turbine_numbers: List[int]
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add power reference column by list of turbines.
 
     Add a column called 'pow_ref' in your dataframe with value equal
@@ -719,7 +764,11 @@ def set_pow_ref_by_turbines(df, turbine_numbers):
     return _set_col_by_turbines("pow_ref", "pow", df, turbine_numbers, False)
 
 
-def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
+def set_pow_ref_by_upstream_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame],
+    df_upstream: pd.DataFrame,
+    exclude_turbs: List[int] = [],
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add pow_ref column using upstream turbines.
 
     Add a column called 'pow_ref' in your dataframe with value equal
@@ -754,8 +803,14 @@ def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
 
 
 def set_pow_ref_by_upstream_turbines_in_radius(
-    df, df_upstream, turb_no, x_turbs, y_turbs, max_radius, include_itself=False
-):
+    df: Union[pd.DataFrame, FlascDataFrame],
+    df_upstream: pd.DataFrame,
+    turb_no: int,
+    x_turbs: List[float],
+    y_turbs: List[float],
+    max_radius: float,
+    include_itself: bool = False,
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add pow_ref column using upstream turbines within a radius.
 
     Add a column called 'pow_ref' to your dataframe, which is the
@@ -802,8 +857,14 @@ def set_pow_ref_by_upstream_turbines_in_radius(
 
 
 def set_pow_ref_by_n_closest_upstream_turbines(
-    df, df_upstream, turb_no, x_turbs, y_turbs, exclude_turbs=[], N=5
-):
+    df: Union[pd.DataFrame, FlascDataFrame],
+    df_upstream: pd.DataFrame,
+    turb_no: int,
+    x_turbs: List[float],
+    y_turbs: List[float],
+    exclude_turbs: bool = [],
+    N: int = 5,
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Add pow_ref column using N-nearest upstream turbines.
 
     Add a column called 'pow_ref' to your dataframe, which is the
@@ -846,7 +907,11 @@ def set_pow_ref_by_n_closest_upstream_turbines(
     )
 
 
-def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
+def df_reduce_precision(
+    df_in: Union[pd.DataFrame, FlascDataFrame],
+    verbose: bool = False,
+    allow_convert_to_integer: bool = True,
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Reduce dataframe precision.
 
     Reduce the precision in dataframes from float64 to float32, or possibly
@@ -922,7 +987,9 @@ def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
 
 
 # Functions used for dataframe processing specifically
-def df_drop_nan_rows(df, verbose=False):
+def df_drop_nan_rows(
+    df: Union[pd.DataFrame, FlascDataFrame], verbose: bool = False
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Drop all-nan rows.
 
     Remove entries in dataframe where all rows (besides 'time')
@@ -945,7 +1012,9 @@ def df_drop_nan_rows(df, verbose=False):
     return df
 
 
-def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.0):
+def df_find_and_fill_data_gaps_with_missing(
+    df: Union[pd.DataFrame, FlascDataFrame], missing_data_buffer: float = 5.0
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Find and fill data gap and mark as missing data with NaN.
 
     This function takes a pd.DataFrame object and look for large jumps in
@@ -958,7 +1027,7 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.0):
 
     Args:
         df (pd.Dataframe | FlascDataFrame): Merged dataframe for all imported files
-        missing_data_buffer (int, optional): If the time gaps are equal or
+        missing_data_buffer (float, optional): If the time gaps are equal or
             larger than this limit [s], then it will consider the data as
             corrupted or missing. Defaults to 10.
 
@@ -1016,7 +1085,7 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.0):
     return df
 
 
-def df_sort_and_find_duplicates(df):
+def df_sort_and_find_duplicates(df: Union[pd.DataFrame, FlascDataFrame]):
     """This function sorts the dataframe and finds rows with equal time index.
 
     Args:
@@ -1039,14 +1108,14 @@ def df_sort_and_find_duplicates(df):
 
 
 def is_day_or_night(
-    df: pd.DataFrame,
+    df: Union[pd.DataFrame, FlascDataFrame],
     latitude: float,
     longitude: float,
     sunrise_altitude: float = 0,
     sunset_altitude: float = 0,
     lag_hours: float = 0,
     datetime_column: str = "time",
-):
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Determine night or day in dataframe.
 
     Determine whether it's day or night for a given set of coordinates and
@@ -1106,7 +1175,9 @@ def is_day_or_night(
     return df
 
 
-def plot_sun_altitude_with_day_night_color(df: pd.DataFrame, ax: plt.axis = None):
+def plot_sun_altitude_with_day_night_color(
+    df: Union[pd.DataFrame, FlascDataFrame], ax: plt.axis = None
+) -> plt.axis:
     """Plot sun altitude with day-night color differentiation.
 
     This function creates a plot of Sun Altitude over time,
@@ -1170,7 +1241,9 @@ def plot_sun_altitude_with_day_night_color(df: pd.DataFrame, ax: plt.axis = None
     return ax
 
 
-def df_sort_and_fix_duplicates(df):
+def df_sort_and_fix_duplicates(
+    df: Union[pd.DataFrame, FlascDataFrame],
+) -> Union[pd.DataFrame, FlascDataFrame]:
     """Sort dataframe and fill duplicates.
 
     This function sorts the dataframe and addresses duplicate rows (i.e.,
