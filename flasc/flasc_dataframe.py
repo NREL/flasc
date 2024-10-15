@@ -46,10 +46,6 @@ class FlascDataFrame(DataFrame):
         """
         super().__init__(*args, **kwargs)
 
-        # Check that the time column is present
-        if "time" not in self.columns:
-            raise ValueError("Column 'time' must be present in the DataFrame")
-
         # check that name_map dictionary is valid
         if channel_name_map is not None:
             if not isinstance(channel_name_map, dict):
