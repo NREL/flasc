@@ -3,6 +3,7 @@
 import datetime
 import os as os
 import warnings
+from typing import List
 from xmlrpc.client import Boolean
 
 import matplotlib.pyplot as plt
@@ -10,6 +11,7 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
+from flasc.flasc_dataframe import FlascDataFrame
 from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools, utilities as fsut
 
@@ -18,30 +20,34 @@ logger = logger_manager.logger  # Obtain the reusable logger
 
 
 # Functions related to wind farm analysis for df
-def filter_df_by_ws(df, ws_range):
+def filter_df_by_ws(
+    df: pd.DataFrame | FlascDataFrame, ws_range: List[float, float]
+) -> pd.DataFrame | FlascDataFrame:
     """Filter a dataframe by wind speed range.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements.
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements.
         ws_range ([float, float]): Wind speed range [lower bound, upper bound].
 
     Returns:
-        pd.DataFrame: Filtered dataframe.
+        pd.DataFrame | FlascDataFrame: Filtered dataframe.
     """
     df = df[df["ws"] >= ws_range[0]]
     df = df[df["ws"] < ws_range[1]]
     return df
 
 
-def filter_df_by_wd(df, wd_range):
+def filter_df_by_wd(
+    df: pd.DataFrame | FlascDataFrame, wd_range: List[float, float]
+) -> pd.DataFrame | FlascDataFrame:
     """Filter a dataframe by wind direction range.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements.
+        df (pd.DataFrame | FlascDataframe): Dataframe with measurements.
         wd_range ([float, float]): Wind direction range [lower bound, upper bound].
 
     Returns:
-        pd.DataFrame: Filtered dataframe.
+        pd.DataFrame | FlascDataFrame: Filtered dataframe.
     """
     lb = wd_range[0]
     ub = wd_range[1]
@@ -58,11 +64,13 @@ def filter_df_by_wd(df, wd_range):
     return df
 
 
-def filter_df_by_ti(df, ti_range):
+def filter_df_by_ti(
+    df: pd.DataFrame | FlascDataFrame, ti_range: List[float, float]
+) -> pd.DataFrame | FlascDataFrame:
     """Filter a dataframe by turbulence intensity range.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements.
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements.
         ti_range ([float, float]): Turbulence intensity range [lower bound, upper bound].
 
     Returns:
@@ -77,7 +85,7 @@ def get_num_turbines(df):
     """Get the number of turbines in a dataframe.
 
     Args:
-        df (pd.DataFrame): Dataframe with turbine data
+        df (pd.DataFrame | FlascDataFrame): Dataframe with turbine data
 
     Returns:
          int: Number of turbines in the dataframe
@@ -90,7 +98,7 @@ def get_column_mean(df, col_prefix="pow", turbine_list=None, circular_mean=False
     """Get the mean of a column for a list of turbines.
 
     Args:
-        df (pd.Dataframe): Dataframe with measurements.
+        df (pd.Dataframe | FlascDataFrame): Dataframe with measurements.
         col_prefix (str, optional): Column prefix to use. Defaults to "pow".
         turbine_list ([list, array], optional): List of turbine numbers to use.
             If None, all turbines are used.  Defaults to None.
@@ -319,14 +327,14 @@ def set_wd_by_turbines(df, turbine_numbers):
     the turbines in turbine_numbers.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         turbine_numbers ([list, array]): List of turbine numbers that
             should be used to calculate the column average.
 
     Returns:
-        df (pd.DataFrame): Dataframe which equals the inserted dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe which equals the inserted dataframe
             plus the additional column called 'wd'.
     """
     return _set_col_by_turbines("wd", "wd", df, turbine_numbers, True)
@@ -340,12 +348,12 @@ def set_wd_by_all_turbines(df):
     turbines.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'wd'.
     """
     return _set_col_by_turbines("wd", "wd", df, "all", True)
@@ -359,7 +367,7 @@ def set_wd_by_radius_from_turbine(df, turb_no, x_turbs, y_turbs, max_radius, inc
     [max_radius] of the turbine of interest [turb_no].
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         turb_no (int): Turbine number from which the radius should be calculated.
@@ -373,7 +381,7 @@ def set_wd_by_radius_from_turbine(df, turb_no, x_turbs, y_turbs, max_radius, inc
             to False.
 
     Returns:
-        pd.DataFrame: Dataframe which equals the inserted dataframe
+        pd.DataFrame | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'wd'.
     """
     return _set_col_by_radius_from_turbine(
@@ -397,14 +405,14 @@ def set_ws_by_turbines(df, turbine_numbers):
     turbine_numbers.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
         typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
         potentially additional measurements.
         turbine_numbers ([list, array]): List of turbine numbers that
         should be used to calculate the column average.
 
     Returns:
-        df (pd.DataFrame): Dataframe which equals the inserted dataframe
+        pd.DataFrame | FlascDataFrame: Dataframe which equals the inserted dataframe
         plus the additional column called 'ws'.
     """
     return _set_col_by_turbines("ws", "ws", df, turbine_numbers, False)
@@ -418,14 +426,14 @@ def set_ws_by_all_turbines(df):
     turbines.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         turbine_numbers ([list, array]): List of turbine numbers that
             should be used to calculate the column average.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'ws'.
     """
     return _set_col_by_turbines("ws", "ws", df, "all", False)
@@ -439,7 +447,7 @@ def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
     upstream, excluding the turbines listed in exclude_turbs.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         df_upstream (pd.DataFrame): Dataframe containing rows indicating
@@ -454,7 +462,7 @@ def set_ws_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
             mean quantity.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'ws'.
     """
     return _set_col_by_upstream_turbines(
@@ -478,7 +486,7 @@ def set_ws_by_upstream_turbines_in_radius(
     [turb_no].
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         df_upstream (pd.DataFrame): Dataframe containing rows indicating
@@ -498,7 +506,7 @@ def set_ws_by_upstream_turbines_in_radius(
             to False.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
         plus the additional column called 'ws'.
     """
     return _set_col_by_upstream_turbines_in_radius(
@@ -525,7 +533,7 @@ def set_ws_by_n_closest_upstream_turbines(
     upstream of the turbine of interest [turb_no].
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         df_upstream (pd.DataFrame): Dataframe containing rows indicating
@@ -542,7 +550,7 @@ def set_ws_by_n_closest_upstream_turbines(
             mean quantity.
         N (int): Number of closest turbines to consider for the calculation
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
         plus the additional column called 'pow_ref'.
     """
     return _set_col_by_n_closest_upstream_turbines(
@@ -567,14 +575,14 @@ def set_ti_by_turbines(df, turbine_numbers):
     turbines listed in turbine_numbers.
 
     Args:
-        df (pd.DataFrame): Dataframe with measurements. This dataframe
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         turbine_numbers ([list, array]): List of turbine numbers that
             should be used to calculate the column average.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'ti'.
     """
     return _set_col_by_turbines("ti", "ti", df, turbine_numbers, False)
@@ -588,14 +596,14 @@ def set_ti_by_all_turbines(df):
     turbines.
 
     Args:
-        df (pd.Dataframe): Dataframe with measurements. This dataframe
+        df (pd.Dataframe | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         turbine_numbers ([list, array]): List of turbine numbers that
             should be used to calculate the column average.
 
     Returns:
-        df (pd.Dataframe): Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
         plus the additional column called 'ti'.
     """
     return _set_col_by_turbines("ti", "ti", df, "all", False)
@@ -609,7 +617,7 @@ def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
     upstream, excluding the turbines listed in exclude_turbs.
 
     Args:
-        df (pd.Dataframe): Dataframe with measurements. This dataframe
+        df (pd.Dataframe | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         df_upstream (pd.Dataframe): Dataframe containing rows indicating
@@ -624,7 +632,7 @@ def set_ti_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
             mean quantity.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'ti'.
     """
     return _set_col_by_upstream_turbines(
@@ -648,7 +656,7 @@ def set_ti_by_upstream_turbines_in_radius(
     [turb_no].
 
     Args:
-        df (pd.Dataframe): Dataframe with measurements. This dataframe
+        df (pd.Dataframe | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         df_upstream (pd.Dataframe): Dataframe containing rows indicating
@@ -668,7 +676,7 @@ def set_ti_by_upstream_turbines_in_radius(
             to False.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
         plus the additional column called 'ti'.
     """
     return _set_col_by_upstream_turbines_in_radius(
@@ -693,14 +701,14 @@ def set_pow_ref_by_turbines(df, turbine_numbers):
     turbines listed in turbine_numbers.
 
     Args:
-        df (pd.Dataframe): Dataframe with measurements. This dataframe
+        df (pd.Dataframe | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         turbine_numbers ([list, array]): List of turbine numbers that
             should be used to calculate the column average.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'ti'.
     """
     return _set_col_by_turbines("pow_ref", "pow", df, turbine_numbers, False)
@@ -714,7 +722,7 @@ def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
     excluding the turbines listed in exclude_turbs.
 
     Args:
-        df (pd.Dataframe): Dataframe with measurements. This dataframe
+        df (pd.Dataframe | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         df_upstream (pd.Dataframe): Dataframe containing rows indicating
@@ -727,7 +735,7 @@ def set_pow_ref_by_upstream_turbines(df, df_upstream, exclude_turbs=[]):
 
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'pow_ref'.
     """
     return _set_col_by_upstream_turbines(
@@ -751,7 +759,7 @@ def set_pow_ref_by_upstream_turbines_in_radius(
     [turb_no].
 
     Args:
-        df (pd.Dataframe): Dataframe with measurements. This dataframe
+        df (pd.Dataframe | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         df_upstream (pd.Dataframe): Dataframe containing rows indicating
@@ -771,7 +779,7 @@ def set_pow_ref_by_upstream_turbines_in_radius(
             to False.
 
     Returns:
-        pd.Dataframe Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'pow_ref'.
     """
     return _set_col_by_upstream_turbines_in_radius(
@@ -798,7 +806,7 @@ def set_pow_ref_by_n_closest_upstream_turbines(
     upstream of the turbine of interest [turb_no].
 
     Args:
-        df (pd.Dataframe): Dataframe with measurements. This dataframe
+        df (pd.Dataframe | FlascDataFrame): Dataframe with measurements. This dataframe
             typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
             potentially additional measurements.
         df_upstream (pd.Dataframe): Dataframe containing rows indicating
@@ -816,7 +824,7 @@ def set_pow_ref_by_n_closest_upstream_turbines(
             of the averaged column quantity.  Defaults to 5.
 
     Returns:
-        pd.Dataframe: Dataframe which equals the inserted dataframe
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'pow_ref'.
     """
     return _set_col_by_n_closest_upstream_turbines(
@@ -844,13 +852,13 @@ def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
     these variables.
 
     Args:
-        df_in (pd.Dataframe): Dataframe that needs to be reduced.
+        df_in (pd.Dataframe | FlascDataFrame): Dataframe that needs to be reduced.
         verbose (bool, optional): Print progress. Defaults to False.
         allow_convert_to_integer (bool, optional): Allow reduction to integer
            type if possible. Defaults to True.
 
     Returns:
-       pd.Dataframe: Reduced dataframe
+       pd.Dataframe | FlascDataFrame: Reduced dataframe
     """
     list_out = []
     dtypes = df_in.dtypes
@@ -916,11 +924,11 @@ def df_drop_nan_rows(df, verbose=False):
     have nan values.
 
     Args:
-        df (pd.Dataframe): Input pandas dataframe
+        df (pd.Dataframe | FlascDataFrame): Input pandas dataframe
         verbose (bool, optional): Print progress. Defaults to False.
 
     Returns:
-        pd.Dataframe: Dataframe with all-nan rows removed
+        pd.Dataframe | FlascDataFrame: Dataframe with all-nan rows removed
     """
     N_init = df.shape[0]
     colnames = [c for c in df.columns if c not in ["time", "turbid", "index"]]
@@ -944,13 +952,13 @@ def df_find_and_fill_data_gaps_with_missing(df, missing_data_buffer=5.0):
        will be ignored in any further analysis.
 
     Args:
-        df (pd.Dataframe): Merged dataframe for all imported files
+        df (pd.Dataframe | FlascDataFrame): Merged dataframe for all imported files
         missing_data_buffer (int, optional): If the time gaps are equal or
             larger than this limit [s], then it will consider the data as
             corrupted or missing. Defaults to 10.
 
     Returns:
-        pd.Dataframe: The postprocessed dataframe where all data
+        pd.Dataframe | FlascDataFrame: The postprocessed dataframe where all data
             within large time gaps hold value 'missing'.
     """
     df = df.sort_values(by="time")
@@ -1007,10 +1015,10 @@ def df_sort_and_find_duplicates(df):
     """This function sorts the dataframe and finds rows with equal time index.
 
     Args:
-        df (pd.Dataframe): An (unsorted) dataframe
+        df (pd.Dataframe | FlascDataFrame): An (unsorted) dataframe
 
     Returns:
-        pd.Dataframe: Dataframe sorted by time
+        pd.Dataframe | FlascDataFrame: Dataframe sorted by time
         duplicate_entries_idx ([list of int]): list with indices of the former
             of two duplicate rows. The indices correspond to the time-sorted df.
     """
@@ -1040,7 +1048,8 @@ def is_day_or_night(
     UTC timestamp in a DataFrame.
 
     Args:
-        df (pd.DataFrame): A Pandas DataFrame containing the time in UTC and other relevant data.
+        df (pd.DataFrame | FlascDataFrame): A Pandas DataFrame containing the time in UTC
+            and other relevant data.
         latitude (float): The latitude of the location for which to determine day or night.
         longitude (float): The longitude of the location for which to determine day or night.
         sunrise_altitude (float): The altitude of the sun to denote
@@ -1054,7 +1063,8 @@ def is_day_or_night(
             the timestamp in UTC. Default is 'time'.
 
     Returns:
-        pd.DataFrame: The input DataFrame with two additional columns: 'sun_altitude'
+        pd.DataFrame | FlascDataFrame: The input DataFrame with two additional
+            columns: 'sun_altitude'
             (the sun's altitude at the given timestamp)
             and 'is_day' (a boolean indicating whether it's daytime at the given timestamp).
 
@@ -1101,7 +1111,8 @@ def plot_sun_altitude_with_day_night_color(df: pd.DataFrame, ax: plt.axis = None
     as well as a boolean 'is_day' column to indicate day and night periods.
 
     Args:
-        df (pd.DataFrame): A DataFrame containing time, sun_altitude, and is_day columns.
+        df (pd.DataFrame | FlascDataFrame): A DataFrame containing time, sun_altitude,
+            and is_day columns.
         ax (plt.axis, optional): An optional Matplotlib axis to use for the plot.
             If not provided, a new axis will be created.
 
@@ -1154,20 +1165,6 @@ def plot_sun_altitude_with_day_night_color(df: pd.DataFrame, ax: plt.axis = None
     return ax
 
 
-# TODO: This function is not referenced and doesn't connect to current code really?
-# Going to comment out rather than add docstring
-# def make_df_wide(df):
-#     df["turbid"] = df["turbid"].astype(int)
-#     df = df.reset_index(drop=False)
-#     if "index" in df.columns:
-#         df = df.drop(columns="index")
-#     df = df.set_index(["time", "turbid"], drop=True)
-#     df = df.unstack()
-#     df.columns = ["%s_%s" % c for c in df.columns]
-#     df = df.reset_index(drop=False)
-#     return df
-
-
 def df_sort_and_fix_duplicates(df):
     """Sort dataframe and fill duplicates.
 
@@ -1178,10 +1175,10 @@ def df_sort_and_fix_duplicates(df):
     column, then an exception is thrown.
 
     Args:
-        df (pd.Dataframe): An (unsorted) dataframe
+        df (pd.Dataframe | FlascDataFrame): An (unsorted) dataframe
 
     Returns:
-        df (pd.Dataframe): A time-sorted Dataframe in which its duplicate
+        df (pd.Dataframe | FlascDataFrame): A time-sorted Dataframe in which its duplicate
         rows have been merged.
     """
     # Check and merge any duplicate entries in the dataset
