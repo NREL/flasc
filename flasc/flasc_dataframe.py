@@ -25,7 +25,7 @@ class FlascDataFrame(DataFrame):
 
     # Attributes to pickle must be in this list
     _metadata = [
-        "channel_name_map",
+        "_channel_name_map",
         "_channel_name_map_to_user",
         "_user_format",
         "_long_data_columns",
