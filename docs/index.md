@@ -9,7 +9,8 @@ analysis, wind farm model validation, field experiment design, and field
 experiment monitoring. The repository is centrally built around NRELs
 in-house [FLORIS](https://github.com/NREL/floris/discussions/)
  wake modeling utility.
-FLASC also largely relies on the energy ratio to, among others, quantify wake
+
+FLASC also largely relies on the energy ratio to, among other things, quantify wake
 losses in synthetic and historical data, to perform turbine northing
 calibrations, and for model parameter estimation.
 
