@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from floris.utilities import wrap_360
 
+from flasc import FlascDataFrame
 from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools, utilities as fsut
 
@@ -905,6 +906,9 @@ def df_reduce_precision(df_in, verbose=False, allow_convert_to_integer=True):
         list_out.append(var_downsampled)
 
     df_out = pd.concat(list_out, axis=1, ignore_index=False)
+    if isinstance(df_in, FlascDataFrame):
+        df_out = FlascDataFrame(df_out)
+        df_out.copy_metadata(df_in)
     return df_out
 
 

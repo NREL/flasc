@@ -122,6 +122,11 @@ class FlascDataFrame(DataFrame):
         else:
             pass
 
+    def copy_metadata(self, other):
+        """Copy metadata from another DataFrame."""
+        for attr in self._metadata:
+            setattr(self, attr, getattr(other, attr))
+
     def convert_to_user_format(self, inplace=False):
         """Convert the DataFrame to the format that the user expects, given the channel_name_map.
 
