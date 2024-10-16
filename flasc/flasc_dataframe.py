@@ -47,7 +47,7 @@ class FlascDataFrame(DataFrame):
         super().__init__(*args, **kwargs)
 
         # Check that the time column is present
-        #if "time" not in self.columns:
+        # if "time" not in self.columns:
         #    raise ValueError("Column 'time' must be present in the DataFrame")
 
         # check that name_map dictionary is valid
@@ -83,19 +83,21 @@ class FlascDataFrame(DataFrame):
             return True
         else:
             return False
-        
+
     @property
     def channel_name_map(self):
         """Return the channel_name_map attribute."""
         return self._channel_name_map
-    
+
     @channel_name_map.setter
     def channel_name_map(self, value):
         """Set the channel_name_map attribute."""
         self._channel_name_map = value
         # Save the reversed name_map (to go to user_format)
         self._channel_name_map_to_user = (
-            {v: k for k, v in self._channel_name_map.items()} if self._channel_name_map is not None else None
+            {v: k for k, v in self._channel_name_map.items()}
+            if self._channel_name_map is not None
+            else None
         )
 
     @property
@@ -133,7 +135,7 @@ class FlascDataFrame(DataFrame):
 
     def copy_metadata(self, other):
         """Copy metadata from another FlascDataFrame to self.
-        
+
         Args:
             other (FlascDataFrame): DataFrame to copy metadata from.
         """
@@ -190,10 +192,9 @@ class FlascDataFrame(DataFrame):
             FlascDataFrame: FlascDataFrame with time column as datetime object if inplace is False,
             None otherwise
         """
-        
         if "time" not in self.columns:
             raise KeyError("Column 'time' must be present in the DataFrame")
-        
+
         if inplace:
             self["time"] = pd.to_datetime(self["time"])
         else:

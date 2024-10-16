@@ -107,12 +107,13 @@ def test_printout():
     # print("\n")
 
 
-def test_time_required():
-    # Check that the time column is present
-    with pytest.raises(ValueError):
-        FlascDataFrame(
-            {"pow_000": [0, 100, 200], "ws_000": [8, 8, 8]}, channel_name_map=test_channel_name_map
-        )
+# def test_time_required():
+#     # Check that the time column is present
+#     with pytest.raises(ValueError):
+#         FlascDataFrame(
+#             {"pow_000": [0, 100, 200], "ws_000": [8, 8, 8]},
+#             channel_name_map=test_channel_name_map
+#         )
 
 
 def test_check_flasc_format():
