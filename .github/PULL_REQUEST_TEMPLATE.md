@@ -19,7 +19,6 @@
 
 <!-- Release checklist:
 - Update the version in
-    - [ ] docs/source/conf.py
-    - [ ] flasc/VERSION
+    - [ ] pyproject.toml
 - [ ] Create a tag in the NREL/FLASC repository
 -->
