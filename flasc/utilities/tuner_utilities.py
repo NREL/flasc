@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 from floris import FlorisModel
 
+from flasc import FlascDataFrame
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities.utilities_examples import load_floris_smarteole
 
@@ -135,7 +136,7 @@ def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.arra
     turbine_powers = fm.get_turbine_powers().squeeze() / 1000
 
     # Generate FLORIS dataframe
-    df_floris = pd.DataFrame(
+    df_floris = FlascDataFrame(
         data=turbine_powers, columns=[f"pow_{i:>03}" for i in range(num_turbines)]
     )
 
