@@ -11,7 +11,7 @@ from wind_up.constants import (
     TIMESTAMP_COL,
 )
 
-from flasc.flasc_dataframe import FlascDataFrame
+from flasc import FlascDataFrame
 
 # Define dataframes in each format that relate through the test name map
 test_wide_dict = {

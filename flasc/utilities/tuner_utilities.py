@@ -17,7 +17,6 @@ from floris import FlorisModel
 
 from flasc import FlascDataFrame
 from flasc.data_processing import dataframe_manipulations as dfm
-from flasc.flasc_dataframe import FlascDataFrame
 from flasc.utilities.utilities_examples import load_floris_smarteole
 
 

@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import polars as pl
 
+from flasc import FlascDataFrame
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
-from flasc.flasc_dataframe import FlascDataFrame
 
 
 def generate_block_list(N: int, num_blocks: int = 10):

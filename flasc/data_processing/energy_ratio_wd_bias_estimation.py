@@ -11,10 +11,10 @@ import pandas as pd
 from floris.utilities import wrap_360
 from scipy import optimize as opt, stats as spst
 
+from flasc import FlascDataFrame
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing import dataframe_manipulations as dfm
-from flasc.flasc_dataframe import FlascDataFrame
 from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools
 
