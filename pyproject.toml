@@ -2,6 +2,56 @@
 requires = ["setuptools >= 40.6.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "flasc"
+version = "2.0.1"
+description = "FLASC provides a rich suite of analysis tools for SCADA data filtering & analysis, wind farm model validation, field experiment design, and field experiment monitoring."
+readme = "README.md"
+readme-content-type = "text/markdown"
+requires-python = ">=3.9"
+authors = [
+    { name = "NREL National Wind Technology Center", email = "paul.fleming@nrel.gov" }
+]
+homepage = "https://github.com/NREL/flasc"
+license = { file = "LICENSE.txt" }
+keywords = ["flasc"]
+dependencies = [
+    "bokeh>=2, <4",
+    "floris~=4.0",
+    "feather-format~=0.0",
+    "ipympl~=0.9",
+    "matplotlib~=3.8",
+    "numpy~=1.20",
+    "pandas~=2.0",
+    "SALib~=1.0",
+    "scipy~=1.1",
+    "streamlit~=1.0",
+    "tkcalendar~=1.0",
+    "seaborn~=0.0",
+    "polars==0.19.5",
+    "ephem",
+    "coloredlogs~=15.0",
+]
+
+[project.optional-dependencies]
+docs = [
+    "jupyter-book",
+    "sphinx-book-theme",
+    "sphinx-autodoc-typehints",
+    "sphinxcontrib-autoyaml",
+    "sphinxcontrib.mermaid"
+]
+develop = [
+    "pytest",
+    "pre-commit",
+    "ruff",
+    "isort"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/NREL/flasc"
+Documentation = "https://readthedocs.org"
+
 
 [coverage.run]
 # Coverage.py configuration file
