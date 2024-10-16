@@ -42,10 +42,10 @@ sphinx:
   - 'sphinx.ext.autodoc'
   - 'sphinx.ext.autosummary'
   - 'sphinx.ext.viewcode'
-  - 'sphinx_autodoc_typehints'
   - 'sphinxcontrib.autoyaml'
   - 'sphinx.ext.napoleon'       # Formats google and numpy docstring styles
   - 'sphinxcontrib.mermaid'
+  - 'numpydoc'
   config:
     html_theme: sphinx_book_theme
     templates_path:
