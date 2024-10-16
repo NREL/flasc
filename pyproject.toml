@@ -46,6 +46,9 @@ develop = [
     "isort"
 ]
 
+[tool.setuptools.packages.find]
+include = ["flasc*"]
+
 [project.urls]
 Homepage = "https://github.com/NREL/flasc"
 Documentation = "https://readthedocs.org"
