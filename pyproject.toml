@@ -9,7 +9,9 @@ description = "FLASC provides a rich suite of analysis tools for SCADA data filt
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-    { name = "NREL National Wind Technology Center", email = "paul.fleming@nrel.gov" }
+    { name = "Paul Fleming", email = "paul.fleming@nrel.gov" },
+    { name = "Michael (Misha) Sinner", email = "Michael.Sinner@nrel.gov" },
+    { name = "Eric Simley", email = "Eric.Simley@nrel.gov" },
 ]
 license = { file = "LICENSE.txt" }
 keywords = ["flasc"]
