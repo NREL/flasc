@@ -21,7 +21,7 @@ def crosscheck_northing_offset_consistency(
     """Cross-check the consistency of the northing offset between turbines.
 
     Args:
-        df (pd.DataFrame): DataFrame containing the relevant data.
+        df (pd.DataFrame | FlascDataFrame): DataFrame containing the relevant data.
         fm (floris.simulation.Floris): Floris object.
         bias_timestep (timedelta, optional): Time step for bias calculation.
             Defaults to td(days=120).

@@ -6,19 +6,24 @@ parameters in a FLORIS model.
 
 """
 
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 from floris import FlorisModel
 
 from flasc.data_processing import dataframe_manipulations as dfm
+from flasc.flasc_dataframe import FlascDataFrame
 from flasc.utilities.utilities_examples import load_floris_smarteole
 
 
-def replicate_nan_values(df_1: pd.DataFrame, df_2: pd.DataFrame):
+def replicate_nan_values(
+    df_1: Union[pd.DataFrame, FlascDataFrame],
+    df_2: Union[pd.DataFrame, FlascDataFrame],
+):
     """Replicate NaN Values in DataFrame df_2 to Match DataFrame df_1.
 
     For columns that are common between df_1 and df_2, this function ensures that
@@ -27,8 +32,9 @@ def replicate_nan_values(df_1: pd.DataFrame, df_2: pd.DataFrame):
     df_1, and you want to ensure that missing data is consistent between the two DataFrames.
 
     Args:
-        df_1 (pandas.DataFrame): The reference DataFrame containing NaN values.
-        df_2 (pandas.DataFrame): The DataFrame to be updated to match NaN positions in df_1.
+        df_1 (pandas.DataFrame | FlascDataFrame): The reference DataFrame containing NaN values.
+        df_2 (pandas.DataFrame | FlascDataFrame): The DataFrame to be updated
+             to match NaN positions in df_1.
 
     Returns:
         pandas.DataFrame: A new DataFrame with NaN values in df_2 replaced to match df_1.
@@ -96,7 +102,9 @@ def nested_set(dic: Dict[str, Any], keys: List[str], value: Any, idx: Optional[i
         dic[keys[-1]] = par_list
 
 
-def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.array = None):
+def resim_floris(
+    fm_in: FlorisModel, df_scada: Union[pd.DataFrame, FlascDataFrame], yaw_angles: np.array = None
+):
     """Resimulate FLORIS with SCADA data.
 
     This function takes a FlorisModel  and a SCADA dataframe, and resimulates the
@@ -106,7 +114,7 @@ def resim_floris(fm_in: FlorisModel, df_scada: pd.DataFrame, yaw_angles: np.arra
 
     Args:
         fm_in (FlorisModel): The FlorisModel to resimulate.
-        df_scada (pd.DataFrame): The SCADA data to use for resimulation.
+        df_scada (pd.DataFrame | FlascDataFrame): The SCADA data to use for resimulation.
         yaw_angles (np.array, optional): The yaw angles to use for resimulation. Defaults to None.
 
     Returns:

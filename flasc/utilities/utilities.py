@@ -34,7 +34,7 @@ def get_num_turbines(df):
     """Get the number of turbines in a dataframe.
 
     Args:
-        df (pd.DataFrame): Dataframe with turbine data
+        df (pd.DataFrame | FlascDataFrame): Dataframe with turbine data
 
     Returns:
        int: Number of turbines in the dataframe
