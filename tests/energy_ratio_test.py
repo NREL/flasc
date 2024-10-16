@@ -9,6 +9,7 @@ import pytest
 from flasc.analysis import energy_ratio as erp
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing import dataframe_manipulations as dfm
+from flasc.flasc_dataframe import FlascDataFrame
 from flasc.utilities import floris_tools as ftools
 from flasc.utilities.energy_ratio_utilities import add_reflected_rows
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
@@ -131,6 +132,54 @@ class TestEnergyRatio(unittest.TestCase):
         # Load data and FLORIS model
         fm, _ = load_floris()
         df = load_data()
+        df = dfm.set_wd_by_all_turbines(df)
+        df_upstream = ftools.get_upstream_turbs_floris(fm)
+        df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
+        df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
+
+        wd_step = 2.0
+        ws_step = 1.0
+
+        er_in = EnergyRatioInput([df], ["baseline"])
+
+        er_out = erp.compute_energy_ratio(
+            er_in,
+            ["baseline"],
+            test_turbines=[1],
+            use_predefined_ref=True,
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_max=360.0,
+            wd_min=0.0,
+            wd_step=wd_step,
+            ws_max=30.0,
+            ws_min=0.0,
+            ws_step=ws_step,
+            wd_bin_overlap_radius=0.5,
+        )
+
+        # Get the underlying pandas data frame
+        df_erb = er_out.df_result
+
+        self.assertAlmostEqual(df_erb["baseline"].iloc[1], 0.807713, places=4)
+        self.assertAlmostEqual(df_erb["baseline"].iloc[2], 0.884564, places=4)
+        self.assertAlmostEqual(df_erb["baseline"].iloc[3], 0.921262, places=4)
+        self.assertAlmostEqual(df_erb["baseline"].iloc[4], 0.942649, places=4)
+        self.assertAlmostEqual(df_erb["baseline"].iloc[5], 0.959025, places=4)
+
+        self.assertEqual(df_erb["count_baseline"].iloc[0], 1)
+        self.assertEqual(df_erb["count_baseline"].iloc[1], 30)
+        self.assertEqual(df_erb["count_baseline"].iloc[2], 44)
+        self.assertEqual(df_erb["count_baseline"].iloc[3], 34)
+        self.assertEqual(df_erb["count_baseline"].iloc[4], 38)
+        self.assertEqual(df_erb["count_baseline"].iloc[5], 6)
+
+    def test_flascdataframe_input(self):
+        # Repeat the test above using a FlascDataFrame as input
+
+        # Load data and FLORIS model
+        fm, _ = load_floris()
+        df = FlascDataFrame(load_data())
         df = dfm.set_wd_by_all_turbines(df)
         df_upstream = ftools.get_upstream_turbs_floris(fm)
         df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
