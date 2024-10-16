@@ -13,6 +13,13 @@ authors = [
 ]
 license = { file = "LICENSE.txt" }
 keywords = ["flasc"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+]
 dependencies = [
     "bokeh>=2, <4",
     "floris~=4.0",
