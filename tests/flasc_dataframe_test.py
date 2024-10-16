@@ -11,7 +11,7 @@ from wind_up.constants import (
     TIMESTAMP_COL,
 )
 
-from flasc.flasc_dataframe import FlascDataFrame
+from flasc import FlascDataFrame
 
 # Define dataframes in each format that relate through the test name map
 test_wide_dict = {
@@ -330,6 +330,8 @@ def test_csv():
     assert not isinstance(df2, FlascDataFrame)
     assert isinstance(df2, pd.DataFrame)
     assert not hasattr(df2, "channel_name_map")
+    assert not hasattr(df2, "name_map")
+    assert isinstance(FlascDataFrame(df2), FlascDataFrame)
 
     os.remove("test_csv.csv")
 
@@ -422,3 +424,11 @@ def test_convert_to_windup_format():
             index=windup_df.index,
         )["expected"]
     )
+
+
+def test_copy_metadata():
+    df = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
+
+    df2 = FlascDataFrame(test_wide_dict)
+    df2.copy_metadata(df)
+    assert df2.channel_name_map == test_channel_name_map

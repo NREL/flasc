@@ -4,12 +4,12 @@ from datetime import timedelta as td
 import numpy as np
 import pandas as pd
 
+from flasc import FlascDataFrame
 from flasc.data_processing.time_operations import (
     df_downsample,
     df_movingaverage,
     df_resample_by_interpolation,
 )
-from flasc.flasc_dataframe import FlascDataFrame
 
 
 def load_data():

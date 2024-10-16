@@ -18,14 +18,14 @@ def load_data():
         "..",
         "01_raw_data_processing",
         "postprocessed",
-        "df_scada_data_600s_filtered_and_northing_calibrated.ftr",
+        "df_scada_data_600s_filtered_and_northing_calibrated.pkl",
     )
     if not os.path.exists(ftr_path):
         raise FileNotFoundError(
             "Please run the scripts in /raw_data_processing/"
             + "before trying any of the other examples."
         )
-    df = pd.read_feather(ftr_path)
+    df = pd.read_pickle(ftr_path)
     return df
 
 

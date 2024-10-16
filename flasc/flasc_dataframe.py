@@ -25,7 +25,7 @@ class FlascDataFrame(DataFrame):
 
     # Attributes to pickle must be in this list
     _metadata = [
-        "channel_name_map",
+        "_channel_name_map",
         "_channel_name_map_to_user",
         "_user_format",
         "_long_data_columns",
@@ -56,11 +56,6 @@ class FlascDataFrame(DataFrame):
                 raise ValueError("channel_name_map must be a dictionary of strings")
         self.channel_name_map = channel_name_map
 
-        # Save the reversed name_map (to go to user_format)
-        self._channel_name_map_to_user = (
-            {v: k for k, v in channel_name_map.items()} if channel_name_map is not None else None
-        )
-
         # Determine the user format
         if long_data_columns is None:
             self._user_format = "wide"
@@ -84,6 +79,22 @@ class FlascDataFrame(DataFrame):
             return True
         else:
             return False
+
+    @property
+    def channel_name_map(self):
+        """Return the channel_name_map attribute."""
+        return self._channel_name_map
+
+    @channel_name_map.setter
+    def channel_name_map(self, value):
+        """Set the channel_name_map attribute."""
+        self._channel_name_map = value
+        # Save the reversed name_map (to go to user_format)
+        self._channel_name_map_to_user = (
+            {v: k for k, v in self._channel_name_map.items()}
+            if self._channel_name_map is not None
+            else None
+        )
 
     @property
     def _constructor(self):
@@ -117,6 +128,15 @@ class FlascDataFrame(DataFrame):
             )
         else:
             pass
+
+    def copy_metadata(self, other):
+        """Copy metadata from another FlascDataFrame to self.
+
+        Args:
+            other (FlascDataFrame): DataFrame to copy metadata from.
+        """
+        for attr in self._metadata:
+            setattr(self, attr, getattr(other, attr))
 
     def convert_to_user_format(self, inplace=False):
         """Convert the DataFrame to the format that the user expects, given the channel_name_map.
@@ -157,6 +177,27 @@ class FlascDataFrame(DataFrame):
         else:
             return df_user
 
+    def convert_time_to_datetime(self, inplace=False):
+        """Convert the time column to a datetime representation.
+
+        Args:
+            inplace (bool): If True, modify the DataFrame in place. If False,
+                return a new DataFrame.
+
+        Returns:
+            FlascDataFrame: FlascDataFrame with time column as datetime object if inplace is False,
+            None otherwise
+        """
+        if "time" not in self.columns:
+            raise KeyError("Column 'time' must be present in the DataFrame")
+
+        if inplace:
+            self["time"] = pd.to_datetime(self["time"])
+        else:
+            df = self.copy()
+            df["time"] = pd.to_datetime(df["time"])
+            return df
+
     def convert_to_flasc_format(self, inplace=False):
         """Convert the DataFrame to the format that FLASC expects.
 
@@ -167,6 +208,9 @@ class FlascDataFrame(DataFrame):
         Returns:
             FlascDataFrame: FlascDataFrame in FLASC format if inplace is False, None otherwise
 
+        # TODO: could consider converting "time" to datetime type here. If so, will want to keep
+        # the original "time" column for back-conversion if needed.
+        # Similarly, we could sort on time, but perhaps both are too meddlesome
         """
         # Check if already in flasc format
         if self.in_flasc_format:
