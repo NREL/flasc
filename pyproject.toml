@@ -1,6 +1,66 @@
 [build-system]
-requires = ["setuptools >= 40.6.0", "wheel"]
+requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "flasc"
+version = "2.0.1"
+description = "FLASC provides a rich suite of analysis tools for SCADA data filtering & analysis, wind farm model validation, field experiment design, and field experiment monitoring."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "Paul Fleming", email = "paul.fleming@nrel.gov" },
+    { name = "Michael (Misha) Sinner", email = "Michael.Sinner@nrel.gov" },
+    { name = "Eric Simley", email = "Eric.Simley@nrel.gov" },
+]
+license = { file = "LICENSE.txt" }
+keywords = ["flasc"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "bokeh>=2, <4",
+    "floris~=4.0",
+    "feather-format~=0.0",
+    "ipympl~=0.9",
+    "matplotlib~=3.8",
+    "numpy~=1.20",
+    "pandas~=2.0",
+    "SALib~=1.0",
+    "scipy~=1.1",
+    "streamlit~=1.0",
+    "tkcalendar~=1.0",
+    "seaborn~=0.0",
+    "polars~=1.0",
+    "ephem",
+    "coloredlogs~=15.0",
+]
+
+[project.optional-dependencies]
+docs = [
+    "jupyter-book",
+    "sphinx-book-theme",
+    "sphinx-autodoc-typehints",
+    "sphinxcontrib-autoyaml",
+    "sphinxcontrib.mermaid"
+]
+develop = [
+    "pytest",
+    "pre-commit",
+    "ruff",
+    "isort"
+]
+
+[tool.setuptools.packages.find]
+include = ["flasc*"]
+
+[project.urls]
+Homepage = "https://github.com/NREL/flasc"
+Documentation = "https://readthedocs.org"
 
 
 [coverage.run]
@@ -25,7 +85,6 @@ filterwarnings = [
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
-    "flasc/version.py",
     ".bzr",
     ".direnv",
     ".eggs",
