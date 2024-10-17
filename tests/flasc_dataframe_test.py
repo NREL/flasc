@@ -386,9 +386,7 @@ def test_export_to_windup_format():
     assert windup_df[DataColumns.gen_rpm_mean].to_list() == [1000] * 2 * len(example_data)
     assert windup_df[DataColumns.shutdown_duration].to_list() == [0] * 2 * len(example_data)
     assert windup_df[RAW_POWER_COL].equals(windup_df[DataColumns.active_power_mean])
-    windup_df_turbine_names = FlascDataFrame(df).export_to_windup_format(
-        turbine_names=["T1", "T2"]
-    )
+    windup_df_turbine_names = FlascDataFrame(df).export_to_windup_format(turbine_names=["T1", "T2"])
     assert windup_df_turbine_names[DataColumns.turbine_name].to_list() == ["T1"] * len(
         example_data
     ) + ["T2"] * len(example_data)
