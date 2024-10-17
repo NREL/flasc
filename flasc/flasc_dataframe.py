@@ -107,6 +107,13 @@ class FlascDataFrame(DataFrame):
         else:
             return f"FlascDataFrame in user ({self._user_format}) format\n" + super().__str__()
 
+    def _repr_html_(self):
+        """Printout when displaying results in jupyter notebook."""
+        if self.in_flasc_format:
+            return "FlascDataFrame in FLASC format\n" + super()._repr_html_()
+        else:
+            return f"FlascDataFrame in user ({self._user_format}) format\n" + super()._repr_html_()
+
     @property
     def n_turbines(self):
         """Return the number of turbines in the dataset."""
