@@ -23,8 +23,8 @@ def plot_uplifts_by_atmospheric_conditions(
     This function plots the relative power gains and contributions to AEP uplift
 
     Args:
-        df_list (List[pd.DataFrame]): List of dataframes with power gains and contributions
-            to AEP uplift.
+        df_list (List[pd.DataFrame | FlascDataFrame]): List of dataframes with power gains
+            and contributions to AEP uplift.
         labels (List[str]): List of labels for the dataframes. Defaults to None.
         ws_edges (np.array): Wind speed bin edges. Defaults to np.arange(3.0, 17.0, 1.0).
         wd_edges (np.array): Wind direction bin edges. Defaults to np.arange(0.0, 360.0001, 3.0).

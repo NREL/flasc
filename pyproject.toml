@@ -38,6 +38,7 @@ dependencies = [
     "polars~=1.0",
     "ephem",
     "coloredlogs~=15.0",
+    "res-wind-up~=0.1",
 ]
 
 [project.optional-dependencies]
@@ -46,7 +47,8 @@ docs = [
     "sphinx-book-theme",
     "sphinx-autodoc-typehints",
     "sphinxcontrib-autoyaml",
-    "sphinxcontrib.mermaid"
+    "sphinxcontrib.mermaid",
+    "numpydoc"
 ]
 develop = [
     "pytest",
