@@ -25,7 +25,7 @@ class FlascDataFrame(DataFrame):
 
     # Attributes to pickle must be in this list
     _metadata = [
-        "_channel_name_map",
+        "channel_name_map",
         "_channel_name_map_to_user",
         "_user_format",
         "_long_data_columns",
@@ -56,6 +56,12 @@ class FlascDataFrame(DataFrame):
                 raise ValueError("channel_name_map must be a dictionary of strings")
         self.channel_name_map = channel_name_map
 
+        self._channel_name_map_to_user = (
+            {v: k for k, v in self.channel_name_map.items()}
+            if self.channel_name_map is not None
+            else None
+        )
+
         # Determine the user format
         if long_data_columns is None:
             self._user_format = "wide"
@@ -80,21 +86,21 @@ class FlascDataFrame(DataFrame):
         else:
             return False
 
-    @property
-    def channel_name_map(self):
-        """Return the channel_name_map attribute."""
-        return self._channel_name_map
+    # @property
+    # def channel_name_map(self):
+    #     """Return the channel_name_map attribute."""
+    #     return self._channel_name_map
 
-    @channel_name_map.setter
-    def channel_name_map(self, value):
-        """Set the channel_name_map attribute."""
-        self._channel_name_map = value
-        # Save the reversed name_map (to go to user_format)
-        self._channel_name_map_to_user = (
-            {v: k for k, v in self._channel_name_map.items()}
-            if self._channel_name_map is not None
-            else None
-        )
+    # @channel_name_map.setter
+    # def channel_name_map(self, value):
+    #     """Set the channel_name_map attribute."""
+    #     self._channel_name_map = value
+    #     # Save the reversed name_map (to go to user_format)
+    #     self._channel_name_map_to_user = (
+    #         {v: k for k, v in self._channel_name_map.items()}
+    #         if self._channel_name_map is not None
+    #         else None
+    #     )
 
     @property
     def _constructor(self):
