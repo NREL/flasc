@@ -37,10 +37,6 @@ performance.
 Finally, functions are provided to detect northing bias (caused by
 miscalibrated yaw encoders) in turbine data.
 
-## flasc.model_fitting
-
-This is a module related to the estimation of parameters in the FLORIS wind
-farm wake model, as well as fitting behavior of turbines in yaw misalignment.
 
 ## flasc.analysis
 

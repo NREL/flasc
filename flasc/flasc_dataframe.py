@@ -25,8 +25,8 @@ class FlascDataFrame(DataFrame):
 
     # Attributes to pickle must be in this list
     _metadata = [
-        "_channel_name_map",
-        "_channel_name_map_to_user",
+        "channel_name_map",
+        "_channel_name_map_inverse",
         "_user_format",
         "_long_data_columns",
     ]
@@ -56,6 +56,13 @@ class FlascDataFrame(DataFrame):
                 raise ValueError("channel_name_map must be a dictionary of strings")
         self.channel_name_map = channel_name_map
 
+        # Create inverse channel_name_map
+        self._channel_name_map_inverse = (
+            {v: k for k, v in self.channel_name_map.items()}
+            if self.channel_name_map is not None
+            else None
+        )
+
         # Determine the user format
         if long_data_columns is None:
             self._user_format = "wide"
@@ -81,22 +88,6 @@ class FlascDataFrame(DataFrame):
             return False
 
     @property
-    def channel_name_map(self):
-        """Return the channel_name_map attribute."""
-        return self._channel_name_map
-
-    @channel_name_map.setter
-    def channel_name_map(self, value):
-        """Set the channel_name_map attribute."""
-        self._channel_name_map = value
-        # Save the reversed name_map (to go to user_format)
-        self._channel_name_map_to_user = (
-            {v: k for k, v in self._channel_name_map.items()}
-            if self._channel_name_map is not None
-            else None
-        )
-
-    @property
     def _constructor(self):
         return FlascDataFrame
 
@@ -106,6 +97,13 @@ class FlascDataFrame(DataFrame):
             return "FlascDataFrame in FLASC format\n" + super().__str__()
         else:
             return f"FlascDataFrame in user ({self._user_format}) format\n" + super().__str__()
+
+    def _repr_html_(self):
+        """Printout when displaying results in jupyter notebook."""
+        if self.in_flasc_format:
+            return "FlascDataFrame in FLASC format\n" + super()._repr_html_()
+        else:
+            return f"FlascDataFrame in user ({self._user_format}) format\n" + super()._repr_html_()
 
     @property
     def n_turbines(self):
@@ -161,7 +159,7 @@ class FlascDataFrame(DataFrame):
 
         # Rename the channel columns to user-specified names
         if self.channel_name_map is not None:
-            df_user.rename(columns=self._channel_name_map_to_user, inplace=True)
+            df_user.rename(columns=self._channel_name_map_inverse, inplace=True)
 
         # Convert the format to long if _user_format is long
         if self._user_format == "long":
@@ -302,7 +300,7 @@ class FlascDataFrame(DataFrame):
         )
         return super().to_feather(path, **kwargs)
 
-    def convert_to_windup_format(
+    def export_to_windup_format(
         self,
         turbine_names: list[str] | None = None,
         time_col: str = "time",
