@@ -24,6 +24,12 @@ parts:
   #   - file: development
   #   - file: testing
 
+  - caption: Examples
+    chapters:
+    # - file: flascdataframe
+    - file: examples/03_energy_ratio/00_demo_energy_ratio_syntax
+    - file: examples/03_energy_ratio/01_demo_energy_ratio_options
+
   - caption: API Reference
     chapters:
     - file: api
