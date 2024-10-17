@@ -69,8 +69,14 @@
                 gtag('config', 'G-3PMGTE1H70');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true});</script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/flasc/data_processing/energy_ratio_wd_bias_estimation';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -205,14 +211,32 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../flasc_data_format.html">FLASC data format</a></li>
+
 <li class="toctree-l1"><a class="reference internal" href="../../../energy_ratio.html">Energy ratio analysis</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="../../../total_uplift.html">Total uplift</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../licensing.html">Licensing</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_energy_ratio/00_demo_energy_ratio_syntax.html">Demonstrate energy ratio syntax</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_energy_ratio/01_demo_energy_ratio_options.html">Demonstrate energy ratio options</a></li>
+
+</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">API Documentation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.flasc_dataframe.html">flasc.flasc_dataframe</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/flasc.flasc_dataframe.FlascDataFrame.html">flasc.flasc_dataframe.FlascDataFrame</a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
@@ -233,30 +257,6 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
-</ul>
-</details></li>
-</ul>
-</details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.html">flasc.model_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html">flasc.model_fitting.floris_sensitivity_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html">flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.html">flasc.model_fitting.floris_tuning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss.html">flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.select_best_wake_model_parameter.html">flasc.model_fitting.floris_tuning.select_best_wake_model_parameter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.select_best_wd_std.html">flasc.model_fitting.floris_tuning.select_best_wd_std</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift.html">flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses.html">flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_wd_std_for_er.html">flasc.model_fitting.floris_tuning.sweep_wd_std_for_er</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.html">flasc.model_fitting.turbulence_estimator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html">flasc.model_fitting.turbulence_estimator.ti_estimator</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting</a></li>
 </ul>
 </details></li>
 </ul>
@@ -540,8 +540,10 @@ document.write(`
   <h1>Source code for flasc.data_processing.energy_ratio_wd_bias_estimation</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Module to estimate the wind direction bias.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">import</span> <span class="nn">os</span> <span class="k">as</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -549,6 +551,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">floris.utilities</span> <span class="kn">import</span> <span class="n">wrap_360</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">optimize</span> <span class="k">as</span> <span class="n">opt</span><span class="p">,</span> <span class="n">stats</span> <span class="k">as</span> <span class="n">spst</span>
 
+<span class="kn">from</span> <span class="nn">flasc</span> <span class="kn">import</span> <span class="n">FlascDataFrame</span>
 <span class="kn">from</span> <span class="nn">flasc.analysis</span> <span class="kn">import</span> <span class="n">energy_ratio</span> <span class="k">as</span> <span class="n">er</span>
 <span class="kn">from</span> <span class="nn">flasc.analysis.energy_ratio_input</span> <span class="kn">import</span> <span class="n">EnergyRatioInput</span>
 <span class="kn">from</span> <span class="nn">flasc.data_processing</span> <span class="kn">import</span> <span class="n">dataframe_manipulations</span> <span class="k">as</span> <span class="n">dfm</span>
@@ -575,7 +578,7 @@ document.write(`
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">FlascDataFrame</span><span class="p">],</span>
         <span class="n">df_fm_approx</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">test_turbines_subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
         <span class="n">df_ws_mapping_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
@@ -584,7 +587,7 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the bias estimation class.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            df (pd.Dataframe): Dataframe with the SCADA data measurements</span>
+<span class="sd">            df (pd.Dataframe | FlascDataFrame): Dataframe with the SCADA data measurements</span>
 <span class="sd">                formatted in the generic format. The dataframe should contain</span>
 <span class="sd">                at the minimum the following columns:</span>
 <span class="sd">                * Reference wind direction for the test turbine, &#39;wd&#39;</span>

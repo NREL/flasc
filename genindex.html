@@ -69,8 +69,14 @@
                 gtag('config', 'G-3PMGTE1H70');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true});</script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
@@ -205,14 +211,32 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="flasc_data_format.html">FLASC data format</a></li>
+
 <li class="toctree-l1"><a class="reference internal" href="energy_ratio.html">Energy ratio analysis</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="total_uplift.html">Total uplift</a></li>
 <li class="toctree-l1"><a class="reference internal" href="licensing.html">Licensing</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="examples/03_energy_ratio/00_demo_energy_ratio_syntax.html">Demonstrate energy ratio syntax</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="examples/03_energy_ratio/01_demo_energy_ratio_options.html">Demonstrate energy ratio options</a></li>
+
+</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="api.html">API Documentation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/flasc.flasc_dataframe.html">flasc.flasc_dataframe</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html">flasc.flasc_dataframe.FlascDataFrame</a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
@@ -233,30 +257,6 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
-</ul>
-</details></li>
-</ul>
-</details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/flasc.model_fitting.html">flasc.model_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html">flasc.model_fitting.floris_sensitivity_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html">flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_tuning.html">flasc.model_fitting.floris_tuning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss.html">flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss</a></li>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_tuning.select_best_wake_model_parameter.html">flasc.model_fitting.floris_tuning.select_best_wake_model_parameter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_tuning.select_best_wd_std.html">flasc.model_fitting.floris_tuning.select_best_wd_std</a></li>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift.html">flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift</a></li>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses.html">flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses</a></li>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.floris_tuning.sweep_wd_std_for_er.html">flasc.model_fitting.floris_tuning.sweep_wd_std_for_er</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.model_fitting.turbulence_estimator.html">flasc.model_fitting.turbulence_estimator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html">flasc.model_fitting.turbulence_estimator.ti_estimator</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.model_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting</a></li>
 </ul>
 </details></li>
 </ul>
@@ -558,13 +558,14 @@ document.write(`
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
- | <a href="#Y"><strong>Y</strong></a>
  
 </div>
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator._check_measurements">_check_measurements() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator._check_measurements">[1]</a>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._attrs">_attrs (flasc.flasc_dataframe.FlascDataFrame attribute)</a>
+</li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._cache">_cache (flasc.flasc_dataframe.FlascDataFrame attribute)</a>
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio.html#flasc.analysis.energy_ratio._compute_energy_ratio_bootstrap">_compute_energy_ratio_bootstrap() (in module flasc.analysis.energy_ratio)</a>
 </li>
@@ -576,7 +577,11 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput._compute_ws_counts">_compute_ws_counts() (flasc.analysis.energy_ratio_output.EnergyRatioOutput method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_output.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput._compute_ws_counts">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis._create_evals_dataframe">_create_evals_dataframe() (flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis method)</a>, <a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis._create_evals_dataframe">[1]</a>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._constructor">_constructor (flasc.flasc_dataframe.FlascDataFrame property)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame._constructor">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._convert_long_to_wide">_convert_long_to_wide() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame._convert_long_to_wide">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._convert_wide_to_long">_convert_wide_to_long() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame._convert_wide_to_long">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.utilities.floris_tools.html#flasc.utilities.floris_tools._fi_set_ws_wd_ti">_fi_set_ws_wd_ti() (in module flasc.utilities.floris_tools)</a>
 </li>
@@ -588,23 +593,25 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._get_energy_ratios_allbins">_get_energy_ratios_allbins() (flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation method)</a>, <a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._get_energy_ratios_allbins">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">_get_mean_power_curves() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis._get_model_params_dict">_get_model_params_dict() (flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis method)</a>, <a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis._get_model_params_dict">[1]</a>
+      <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">_get_mean_power_curves() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.utilities.utilities.html#flasc.utilities.utilities._interpolate_with_max_gap">_interpolate_with_max_gap() (in module flasc.utilities.utilities)</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_er_input_for_wd_bias">_load_er_input_for_wd_bias() (flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation method)</a>, <a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_er_input_for_wd_bias">[1]</a>
 </li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._metadata">_metadata (flasc.flasc_dataframe.FlascDataFrame attribute)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame._metadata">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._mgr">_mgr (flasc.flasc_dataframe.FlascDataFrame attribute)</a>
+</li>
       <li><a href="_autosummary/flasc.data_processing.find_sensor_faults.html#flasc.data_processing.find_sensor_faults._plot_top_sensor_faults">_plot_top_sensor_faults() (in module flasc.data_processing.find_sensor_faults)</a>
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper._process_single_wd">_process_single_wd() (flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper._process_single_wd">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves">_reset_mean_power_curves() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves">[1]</a>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._repr_html_">_repr_html_() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame._repr_html_">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator._reset_outputs">_reset_outputs() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator._reset_outputs">[1]</a>
+      <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves">_reset_mean_power_curves() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations._set_col_by_n_closest_upstream_turbines">_set_col_by_n_closest_upstream_turbines() (in module flasc.data_processing.dataframe_manipulations)</a>
 </li>
@@ -616,7 +623,7 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations._set_col_by_upstream_turbines_in_radius">_set_col_by_upstream_turbines_in_radius() (in module flasc.data_processing.dataframe_manipulations)</a>
 </li>
-      <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._setup_logger">_setup_logger() (flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation method)</a>
+      <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._set_legend_alpha_to_one">_set_legend_alpha_to_one() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._set_legend_alpha_to_one">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -670,19 +677,25 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.calculate_baseline">calculate_baseline() (flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation method)</a>, <a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.calculate_baseline">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.calculate_curves">calculate_curves() (flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting method)</a>, <a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.calculate_curves">[1]</a>
-</li>
       <li><a href="_autosummary/flasc.utilities.circular_statistics.calculate_wd_statistics.html#flasc.utilities.circular_statistics.calculate_wd_statistics">calculate_wd_statistics() (in module flasc.utilities.circular_statistics)</a>, <a href="_autosummary/flasc.utilities.circular_statistics.html#flasc.utilities.circular_statistics.calculate_wd_statistics">[1]</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.calculate_wfpower_for_samples">calculate_wfpower_for_samples() (flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis method)</a>, <a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.calculate_wfpower_for_samples">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html#flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs">check_compute_energy_ratio_inputs() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs">[1]</a>
 </li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.check_flasc_format">check_flasc_format() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.check_flasc_format">[1]</a>
+</li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html#flasc.analysis.energy_ratio.compute_energy_ratio">compute_energy_ratio() (in module flasc.analysis.energy_ratio)</a>, <a href="_autosummary/flasc.analysis.energy_ratio.html#flasc.analysis.energy_ratio.compute_energy_ratio">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html#flasc.analysis.total_uplift.compute_total_uplift">compute_total_uplift() (in module flasc.analysis.total_uplift)</a>, <a href="_autosummary/flasc.analysis.total_uplift.html#flasc.analysis.total_uplift.compute_total_uplift">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime">convert_time_to_datetime() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.convert_to_flasc_format">convert_to_flasc_format() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.convert_to_flasc_format">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.convert_to_user_format">convert_to_user_format() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.convert_to_user_format">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.copy_metadata">copy_metadata() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.copy_metadata">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html#flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency">crosscheck_northing_offset_consistency() (in module flasc.data_processing.northing_offset)</a>, <a href="_autosummary/flasc.data_processing.northing_offset.html#flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency">[1]</a>
 </li>
@@ -726,23 +739,17 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput">EnergyRatioOutput (class in flasc.analysis.energy_ratio_output)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_output.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.estimate_cos_pp_fit">estimate_cos_pp_fit() (flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting method)</a>, <a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.estimate_cos_pp_fit">[1]</a>
-</li>
       <li><a href="_autosummary/flasc.utilities.utilities.estimate_dt.html#flasc.utilities.utilities.estimate_dt">estimate_dt() (in module flasc.utilities.utilities)</a>, <a href="_autosummary/flasc.utilities.utilities.html#flasc.utilities.utilities.estimate_dt">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_farmaveraged_ti">estimate_farmaveraged_ti() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_farmaveraged_ti">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.estimate_heterogeneity">estimate_heterogeneity() (flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.estimate_heterogeneity">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_local_tis">estimate_local_tis() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.estimate_local_tis">[1]</a>
-</li>
       <li><a href="_autosummary/flasc.utilities.optimization.estimate_ti.html#flasc.utilities.optimization.estimate_ti">estimate_ti() (in module flasc.utilities.optimization)</a>, <a href="_autosummary/flasc.utilities.optimization.html#flasc.utilities.optimization.estimate_ti">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.estimate_wd_bias">estimate_wd_bias() (flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation method)</a>, <a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.estimate_wd_bias">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss.html#flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss">evaluate_overall_wake_loss() (in module flasc.model_fitting.floris_tuning)</a>, <a href="_autosummary/flasc.model_fitting.floris_tuning.html#flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss">[1]</a>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format">export_to_windup_format() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -837,6 +844,8 @@ document.write(`
         <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html#module-flasc.data_processing.energy_ratio_wd_bias_estimation">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     flasc.data_processing.filtering
 
@@ -858,8 +867,6 @@ document.write(`
         <li><a href="_autosummary/flasc.data_processing.northing_offset.html#module-flasc.data_processing.northing_offset">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     flasc.data_processing.time_operations
 
@@ -868,38 +875,10 @@ document.write(`
 </li>
       </ul></li>
       <li>
-    flasc.model_fitting
+    flasc.flasc_dataframe
 
       <ul>
-        <li><a href="_autosummary/flasc.model_fitting.html#module-flasc.model_fitting">module</a>
-</li>
-      </ul></li>
-      <li>
-    flasc.model_fitting.floris_sensitivity_analysis
-
-      <ul>
-        <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#module-flasc.model_fitting.floris_sensitivity_analysis">module</a>
-</li>
-      </ul></li>
-      <li>
-    flasc.model_fitting.floris_tuning
-
-      <ul>
-        <li><a href="_autosummary/flasc.model_fitting.floris_tuning.html#module-flasc.model_fitting.floris_tuning">module</a>
-</li>
-      </ul></li>
-      <li>
-    flasc.model_fitting.turbulence_estimator
-
-      <ul>
-        <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#module-flasc.model_fitting.turbulence_estimator">module</a>
-</li>
-      </ul></li>
-      <li>
-    flasc.model_fitting.yaw_pow_fitting
-
-      <ul>
-        <li><a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.html#module-flasc.model_fitting.yaw_pow_fitting">module</a>
+        <li><a href="_autosummary/flasc.flasc_dataframe.html#module-flasc.flasc_dataframe">module</a>
 </li>
       </ul></li>
       <li>
@@ -965,13 +944,11 @@ document.write(`
         <li><a href="_autosummary/flasc.utilities.utilities_examples.html#module-flasc.utilities.utilities_examples">module</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame">FlascDataFrame (class in flasc.flasc_dataframe)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame">[1]</a>
+</li>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter">FlascFilter (class in flasc.data_processing.filtering)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.time_operations.flatten_cols.html#flasc.data_processing.time_operations.flatten_cols">flatten_cols() (in module flasc.data_processing.time_operations)</a>, <a href="_autosummary/flasc.data_processing.time_operations.html#flasc.data_processing.time_operations.flatten_cols">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.floris_set_ws_wd_ti">floris_set_ws_wd_ti() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.floris_set_ws_wd_ti">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis">floris_sobol_analysis (class in flasc.model_fitting.floris_sensitivity_analysis)</a>, <a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -983,8 +960,6 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.generate_floris_hetmap">generate_floris_hetmap() (flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.generate_floris_hetmap">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.generate_samples">generate_samples() (flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis method)</a>, <a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.generate_samples">[1]</a>
-</li>
       <li><a href="_autosummary/flasc.utilities.floris_tools.get_all_dependent_turbines.html#flasc.utilities.floris_tools.get_all_dependent_turbines">get_all_dependent_turbines() (in module flasc.utilities.floris_tools)</a>, <a href="_autosummary/flasc.utilities.floris_tools.html#flasc.utilities.floris_tools.get_all_dependent_turbines">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines.html#flasc.utilities.floris_tools.get_all_impacting_turbines">get_all_impacting_turbines() (in module flasc.utilities.floris_tools)</a>, <a href="_autosummary/flasc.utilities.floris_tools.html#flasc.utilities.floris_tools.get_all_impacting_turbines">[1]</a>
@@ -995,14 +970,14 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html#flasc.utilities.floris_tools.get_dependent_turbines_by_wd">get_dependent_turbines_by_wd() (in module flasc.utilities.floris_tools)</a>, <a href="_autosummary/flasc.utilities.floris_tools.html#flasc.utilities.floris_tools.get_dependent_turbines_by_wd">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html#flasc.analysis.energy_ratio_input.EnergyRatioInput.get_df">get_df() (flasc.analysis.energy_ratio_input.EnergyRatioInput method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_input.html#flasc.analysis.energy_ratio_input.EnergyRatioInput.get_df">[1]</a>
 
       <ul>
         <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.get_df">(flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter.get_df">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html#flasc.data_processing.dataframe_manipulations.get_num_turbines">get_num_turbines() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.get_num_turbines">[1]</a>
 
       <ul>
@@ -1010,12 +985,6 @@ document.write(`
 </li>
       </ul></li>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.get_power_curve">get_power_curve() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter.get_power_curve">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.get_sobol_sensitivity_indices">get_sobol_sensitivity_indices() (flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis method)</a>, <a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.get_sobol_sensitivity_indices">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_order">get_turbine_order() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_order">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_pairs">get_turbine_pairs() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.get_turbine_pairs">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.utilities.floris_tools.get_turbs_in_radius.html#flasc.utilities.floris_tools.get_turbs_in_radius">get_turbs_in_radius() (in module flasc.utilities.floris_tools)</a>, <a href="_autosummary/flasc.utilities.floris_tools.html#flasc.utilities.floris_tools.get_turbs_in_radius">[1]</a>
 </li>
@@ -1037,6 +1006,8 @@ document.write(`
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.in_flasc_format">in_flasc_format (flasc.flasc_dataframe.FlascDataFrame property)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.in_flasc_format">[1]</a>
+</li>
       <li><a href="_autosummary/flasc.utilities.utilities.html#flasc.utilities.utilities.interp_with_max_gap">interp_with_max_gap() (in module flasc.utilities.utilities)</a>, <a href="_autosummary/flasc.utilities.utilities.interp_with_max_gap.html#flasc.utilities.utilities.interp_with_max_gap">[1]</a>
 </li>
   </ul></td>
@@ -1056,8 +1027,6 @@ document.write(`
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.utilities.utilities_examples.html#flasc.utilities.utilities_examples.load_floris_smarteole">load_floris_smarteole() (in module flasc.utilities.utilities_examples)</a>, <a href="_autosummary/flasc.utilities.utilities_examples.load_floris_smarteole.html#flasc.utilities.utilities_examples.load_floris_smarteole">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.logger">logger (flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1097,15 +1066,7 @@ document.write(`
 </li>
         <li><a href="_autosummary/flasc.data_processing.time_operations.html#module-flasc.data_processing.time_operations">flasc.data_processing.time_operations</a>
 </li>
-        <li><a href="_autosummary/flasc.model_fitting.html#module-flasc.model_fitting">flasc.model_fitting</a>
-</li>
-        <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#module-flasc.model_fitting.floris_sensitivity_analysis">flasc.model_fitting.floris_sensitivity_analysis</a>
-</li>
-        <li><a href="_autosummary/flasc.model_fitting.floris_tuning.html#module-flasc.model_fitting.floris_tuning">flasc.model_fitting.floris_tuning</a>
-</li>
-        <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#module-flasc.model_fitting.turbulence_estimator">flasc.model_fitting.turbulence_estimator</a>
-</li>
-        <li><a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.html#module-flasc.model_fitting.yaw_pow_fitting">flasc.model_fitting.yaw_pow_fitting</a>
+        <li><a href="_autosummary/flasc.flasc_dataframe.html#module-flasc.flasc_dataframe">flasc.flasc_dataframe</a>
 </li>
         <li><a href="_autosummary/flasc.utilities.html#module-flasc.utilities">flasc.utilities</a>
 </li>
@@ -1132,10 +1093,12 @@ document.write(`
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.utilities.tuner_utilities.html#flasc.utilities.tuner_utilities.nested_get">nested_get() (in module flasc.utilities.tuner_utilities)</a>, <a href="_autosummary/flasc.utilities.tuner_utilities.nested_get.html#flasc.utilities.tuner_utilities.nested_get">[1]</a>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.n_turbines">n_turbines (flasc.flasc_dataframe.FlascDataFrame property)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.n_turbines">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/flasc.utilities.tuner_utilities.html#flasc.utilities.tuner_utilities.nested_get">nested_get() (in module flasc.utilities.tuner_utilities)</a>, <a href="_autosummary/flasc.utilities.tuner_utilities.nested_get.html#flasc.utilities.tuner_utilities.nested_get">[1]</a>
+</li>
       <li><a href="_autosummary/flasc.utilities.tuner_utilities.html#flasc.utilities.tuner_utilities.nested_set">nested_set() (in module flasc.utilities.tuner_utilities)</a>, <a href="_autosummary/flasc.utilities.tuner_utilities.nested_set.html#flasc.utilities.tuner_utilities.nested_set">[1]</a>
 </li>
   </ul></td>
@@ -1144,14 +1107,6 @@ document.write(`
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.plot">plot() (flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting method)</a>, <a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.plot">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.plot_convergence">plot_convergence() (flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis method)</a>, <a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.plot_convergence">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_function_farm">plot_cost_function_farm() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_function_farm">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_functions_turbines">plot_cost_functions_turbines() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_cost_functions_turbines">[1]</a>
-</li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput.plot_energy_ratios">plot_energy_ratios() (flasc.analysis.energy_ratio_output.EnergyRatioOutput method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_output.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput.plot_energy_ratios">[1]</a>
 
       <ul>
@@ -1172,17 +1127,11 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve">plot_filters_in_ws_power_curve() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_flowfield">plot_flowfield() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_flowfield">[1]</a>
-</li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_graphs">plot_graphs() (flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_graphs">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_layout">plot_layout() (flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_layout">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve">plot_postprocessed_in_ws_power_curve() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_power_bars">plot_power_bars() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.plot_power_bars">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.plot_sobol_results">plot_sobol_results() (flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis method)</a>, <a href="_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html#flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.plot_sobol_results">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color">plot_sun_altitude_with_day_night_color() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html#flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color">[1]</a>
 </li>
@@ -1210,14 +1159,6 @@ document.write(`
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.model_fitting.floris_tuning.html#flasc.model_fitting.floris_tuning.select_best_wake_model_parameter">select_best_wake_model_parameter() (in module flasc.model_fitting.floris_tuning)</a>, <a href="_autosummary/flasc.model_fitting.floris_tuning.select_best_wake_model_parameter.html#flasc.model_fitting.floris_tuning.select_best_wake_model_parameter">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_tuning.html#flasc.model_fitting.floris_tuning.select_best_wd_std">select_best_wd_std() (in module flasc.model_fitting.floris_tuning)</a>, <a href="_autosummary/flasc.model_fitting.floris_tuning.select_best_wd_std.html#flasc.model_fitting.floris_tuning.select_best_wd_std">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.set_df">set_df() (flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting method)</a>, <a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.set_df">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.set_measurements">set_measurements() (flasc.model_fitting.turbulence_estimator.ti_estimator method)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator.set_measurements">[1]</a>
-</li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines">set_pow_ref_by_n_closest_upstream_turbines() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines">set_pow_ref_by_turbines() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html#flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines">[1]</a>
@@ -1232,10 +1173,10 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines">set_ti_by_upstream_turbines() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius">set_ti_by_upstream_turbines_in_radius() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html#flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines">set_wd_by_all_turbines() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html#flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine">set_wd_by_radius_from_turbine() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html#flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine">[1]</a>
@@ -1252,27 +1193,13 @@ document.write(`
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius">set_ws_by_upstream_turbines_in_radius() (in module flasc.data_processing.dataframe_manipulations)</a>, <a href="_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html#flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_tuning.html#flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift">sweep_deflection_parameter_for_total_uplift() (in module flasc.model_fitting.floris_tuning)</a>, <a href="_autosummary/flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift.html#flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_tuning.html#flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses">sweep_velocity_model_parameter_for_overall_wake_losses() (in module flasc.model_fitting.floris_tuning)</a>, <a href="_autosummary/flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses.html#flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses">[1]</a>
-</li>
-      <li><a href="_autosummary/flasc.model_fitting.floris_tuning.html#flasc.model_fitting.floris_tuning.sweep_wd_std_for_er">sweep_wd_std_for_er() (in module flasc.model_fitting.floris_tuning)</a>, <a href="_autosummary/flasc.model_fitting.floris_tuning.sweep_wd_std_for_er.html#flasc.model_fitting.floris_tuning.sweep_wd_std_for_er">[1]</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.model_fitting.turbulence_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator">ti_estimator (class in flasc.model_fitting.turbulence_estimator)</a>, <a href="_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html#flasc.model_fitting.turbulence_estimator.ti_estimator">[1]</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="Y">Y</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting">yaw_pow_fitting (class in flasc.model_fitting.yaw_pow_fitting)</a>, <a href="_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html#flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting">[1]</a>
+      <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.to_feather">to_feather() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.to_feather">[1]</a>
 </li>
   </ul></td>
 </tr></table>

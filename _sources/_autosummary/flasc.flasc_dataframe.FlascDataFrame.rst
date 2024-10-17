@@ -1,0 +1,244 @@
+flasc.flasc\_dataframe.FlascDataFrame
+=====================================
+
+.. currentmodule:: flasc.flasc_dataframe
+
+.. autoclass:: FlascDataFrame
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~FlascDataFrame.abs
+      ~FlascDataFrame.add
+      ~FlascDataFrame.add_prefix
+      ~FlascDataFrame.add_suffix
+      ~FlascDataFrame.agg
+      ~FlascDataFrame.aggregate
+      ~FlascDataFrame.align
+      ~FlascDataFrame.all
+      ~FlascDataFrame.any
+      ~FlascDataFrame.apply
+      ~FlascDataFrame.applymap
+      ~FlascDataFrame.asfreq
+      ~FlascDataFrame.asof
+      ~FlascDataFrame.assign
+      ~FlascDataFrame.astype
+      ~FlascDataFrame.at_time
+      ~FlascDataFrame.backfill
+      ~FlascDataFrame.between_time
+      ~FlascDataFrame.bfill
+      ~FlascDataFrame.bool
+      ~FlascDataFrame.boxplot
+      ~FlascDataFrame.check_flasc_format
+      ~FlascDataFrame.clip
+      ~FlascDataFrame.combine
+      ~FlascDataFrame.combine_first
+      ~FlascDataFrame.compare
+      ~FlascDataFrame.convert_dtypes
+      ~FlascDataFrame.convert_time_to_datetime
+      ~FlascDataFrame.convert_to_flasc_format
+      ~FlascDataFrame.convert_to_user_format
+      ~FlascDataFrame.copy
+      ~FlascDataFrame.copy_metadata
+      ~FlascDataFrame.corr
+      ~FlascDataFrame.corrwith
+      ~FlascDataFrame.count
+      ~FlascDataFrame.cov
+      ~FlascDataFrame.cummax
+      ~FlascDataFrame.cummin
+      ~FlascDataFrame.cumprod
+      ~FlascDataFrame.cumsum
+      ~FlascDataFrame.describe
+      ~FlascDataFrame.diff
+      ~FlascDataFrame.div
+      ~FlascDataFrame.divide
+      ~FlascDataFrame.dot
+      ~FlascDataFrame.drop
+      ~FlascDataFrame.drop_duplicates
+      ~FlascDataFrame.droplevel
+      ~FlascDataFrame.dropna
+      ~FlascDataFrame.duplicated
+      ~FlascDataFrame.eq
+      ~FlascDataFrame.equals
+      ~FlascDataFrame.eval
+      ~FlascDataFrame.ewm
+      ~FlascDataFrame.expanding
+      ~FlascDataFrame.explode
+      ~FlascDataFrame.export_to_windup_format
+      ~FlascDataFrame.ffill
+      ~FlascDataFrame.fillna
+      ~FlascDataFrame.filter
+      ~FlascDataFrame.first
+      ~FlascDataFrame.first_valid_index
+      ~FlascDataFrame.floordiv
+      ~FlascDataFrame.from_dict
+      ~FlascDataFrame.from_records
+      ~FlascDataFrame.ge
+      ~FlascDataFrame.get
+      ~FlascDataFrame.groupby
+      ~FlascDataFrame.gt
+      ~FlascDataFrame.head
+      ~FlascDataFrame.hist
+      ~FlascDataFrame.idxmax
+      ~FlascDataFrame.idxmin
+      ~FlascDataFrame.infer_objects
+      ~FlascDataFrame.info
+      ~FlascDataFrame.insert
+      ~FlascDataFrame.interpolate
+      ~FlascDataFrame.isetitem
+      ~FlascDataFrame.isin
+      ~FlascDataFrame.isna
+      ~FlascDataFrame.isnull
+      ~FlascDataFrame.items
+      ~FlascDataFrame.iterrows
+      ~FlascDataFrame.itertuples
+      ~FlascDataFrame.join
+      ~FlascDataFrame.keys
+      ~FlascDataFrame.kurt
+      ~FlascDataFrame.kurtosis
+      ~FlascDataFrame.last
+      ~FlascDataFrame.last_valid_index
+      ~FlascDataFrame.le
+      ~FlascDataFrame.lt
+      ~FlascDataFrame.map
+      ~FlascDataFrame.mask
+      ~FlascDataFrame.max
+      ~FlascDataFrame.mean
+      ~FlascDataFrame.median
+      ~FlascDataFrame.melt
+      ~FlascDataFrame.memory_usage
+      ~FlascDataFrame.merge
+      ~FlascDataFrame.min
+      ~FlascDataFrame.mod
+      ~FlascDataFrame.mode
+      ~FlascDataFrame.mul
+      ~FlascDataFrame.multiply
+      ~FlascDataFrame.ne
+      ~FlascDataFrame.nlargest
+      ~FlascDataFrame.notna
+      ~FlascDataFrame.notnull
+      ~FlascDataFrame.nsmallest
+      ~FlascDataFrame.nunique
+      ~FlascDataFrame.pad
+      ~FlascDataFrame.pct_change
+      ~FlascDataFrame.pipe
+      ~FlascDataFrame.pivot
+      ~FlascDataFrame.pivot_table
+      ~FlascDataFrame.pop
+      ~FlascDataFrame.pow
+      ~FlascDataFrame.prod
+      ~FlascDataFrame.product
+      ~FlascDataFrame.quantile
+      ~FlascDataFrame.query
+      ~FlascDataFrame.radd
+      ~FlascDataFrame.rank
+      ~FlascDataFrame.rdiv
+      ~FlascDataFrame.reindex
+      ~FlascDataFrame.reindex_like
+      ~FlascDataFrame.rename
+      ~FlascDataFrame.rename_axis
+      ~FlascDataFrame.reorder_levels
+      ~FlascDataFrame.replace
+      ~FlascDataFrame.resample
+      ~FlascDataFrame.reset_index
+      ~FlascDataFrame.rfloordiv
+      ~FlascDataFrame.rmod
+      ~FlascDataFrame.rmul
+      ~FlascDataFrame.rolling
+      ~FlascDataFrame.round
+      ~FlascDataFrame.rpow
+      ~FlascDataFrame.rsub
+      ~FlascDataFrame.rtruediv
+      ~FlascDataFrame.sample
+      ~FlascDataFrame.select_dtypes
+      ~FlascDataFrame.sem
+      ~FlascDataFrame.set_axis
+      ~FlascDataFrame.set_flags
+      ~FlascDataFrame.set_index
+      ~FlascDataFrame.shift
+      ~FlascDataFrame.skew
+      ~FlascDataFrame.sort_index
+      ~FlascDataFrame.sort_values
+      ~FlascDataFrame.squeeze
+      ~FlascDataFrame.stack
+      ~FlascDataFrame.std
+      ~FlascDataFrame.sub
+      ~FlascDataFrame.subtract
+      ~FlascDataFrame.sum
+      ~FlascDataFrame.swapaxes
+      ~FlascDataFrame.swaplevel
+      ~FlascDataFrame.tail
+      ~FlascDataFrame.take
+      ~FlascDataFrame.to_clipboard
+      ~FlascDataFrame.to_csv
+      ~FlascDataFrame.to_dict
+      ~FlascDataFrame.to_excel
+      ~FlascDataFrame.to_feather
+      ~FlascDataFrame.to_gbq
+      ~FlascDataFrame.to_hdf
+      ~FlascDataFrame.to_html
+      ~FlascDataFrame.to_json
+      ~FlascDataFrame.to_latex
+      ~FlascDataFrame.to_markdown
+      ~FlascDataFrame.to_numpy
+      ~FlascDataFrame.to_orc
+      ~FlascDataFrame.to_parquet
+      ~FlascDataFrame.to_period
+      ~FlascDataFrame.to_pickle
+      ~FlascDataFrame.to_records
+      ~FlascDataFrame.to_sql
+      ~FlascDataFrame.to_stata
+      ~FlascDataFrame.to_string
+      ~FlascDataFrame.to_timestamp
+      ~FlascDataFrame.to_xarray
+      ~FlascDataFrame.to_xml
+      ~FlascDataFrame.transform
+      ~FlascDataFrame.transpose
+      ~FlascDataFrame.truediv
+      ~FlascDataFrame.truncate
+      ~FlascDataFrame.tz_convert
+      ~FlascDataFrame.tz_localize
+      ~FlascDataFrame.unstack
+      ~FlascDataFrame.update
+      ~FlascDataFrame.value_counts
+      ~FlascDataFrame.var
+      ~FlascDataFrame.where
+      ~FlascDataFrame.xs
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FlascDataFrame.T
+      ~FlascDataFrame.at
+      ~FlascDataFrame.attrs
+      ~FlascDataFrame.axes
+      ~FlascDataFrame.columns
+      ~FlascDataFrame.dtypes
+      ~FlascDataFrame.empty
+      ~FlascDataFrame.flags
+      ~FlascDataFrame.iat
+      ~FlascDataFrame.iloc
+      ~FlascDataFrame.in_flasc_format
+      ~FlascDataFrame.index
+      ~FlascDataFrame.loc
+      ~FlascDataFrame.n_turbines
+      ~FlascDataFrame.ndim
+      ~FlascDataFrame.shape
+      ~FlascDataFrame.size
+      ~FlascDataFrame.style
+      ~FlascDataFrame.values
+   
+   

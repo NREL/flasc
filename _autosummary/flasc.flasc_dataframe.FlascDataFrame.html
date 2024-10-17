@@ -1,0 +1,1617 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>flasc.flasc_dataframe.FlascDataFrame &#8212; FLASC</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=30a733bc"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-3PMGTE1H70"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/flasc.flasc_dataframe.FlascDataFrame';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="flasc.analysis" href="flasc.analysis.html" />
+    <link rel="prev" title="flasc.flasc_dataframe" href="flasc.flasc_dataframe.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
+    <script>document.write(`<img src="../_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    FLASC documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../flasc_data_format.html">FLASC data format</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../energy_ratio.html">Energy ratio analysis</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../total_uplift.html">Total uplift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../examples/03_energy_ratio/00_demo_energy_ratio_syntax.html">Demonstrate energy ratio syntax</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../examples/03_energy_ratio/01_demo_energy_ratio_options.html">Demonstrate energy ratio options</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api.html">API Documentation</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="flasc.flasc_dataframe.html">flasc.flasc_dataframe</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">flasc.flasc_dataframe.FlascDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_input.generate_block_list.html">flasc.analysis.energy_ratio_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.energy_ratio_output.html">flasc.analysis.energy_ratio_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.data_processing.html">flasc.data_processing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.html">flasc.data_processing.dataframe_manipulations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_drop_nan_rows.html">flasc.data_processing.dataframe_manipulations.df_drop_nan_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing.html">flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_reduce_precision.html">flasc.data_processing.dataframe_manipulations.df_reduce_precision</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_ti.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_wd.html">flasc.data_processing.dataframe_manipulations.filter_df_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.filter_df_by_ws.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.energy_ratio_wd_bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.filtering.html">flasc.data_processing.filtering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.df_get_no_faulty_measurements.html">flasc.data_processing.filtering.df_get_no_faulty_measurements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html">flasc.data_processing.filtering.df_mark_turbdata_as_faulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html">flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.filtering.FlascFilter.html">flasc.data_processing.filtering.FlascFilter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.find_sensor_faults.html">flasc.data_processing.find_sensor_faults</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults.html">flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_downsample.html">flasc.data_processing.time_operations.df_downsample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_movingaverage.html">flasc.data_processing.time_operations.df_movingaverage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.df_resample_by_interpolation.html">flasc.data_processing.time_operations.df_resample_by_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.time_operations.flatten_cols.html">flasc.data_processing.time_operations.flatten_cols</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="flasc.utilities.html">flasc.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.circular_statistics.html">flasc.utilities.circular_statistics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.circular_statistics.calc_wd_mean_radial.html">flasc.utilities.circular_statistics.calc_wd_mean_radial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.circular_statistics.calculate_wd_statistics.html">flasc.utilities.circular_statistics.calculate_wd_statistics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.html">flasc.utilities.energy_ratio_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_bin_weights.html">flasc.utilities.energy_ratio_utilities.add_bin_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_power_ref.html">flasc.utilities.energy_ratio_utilities.add_power_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_power_test.html">flasc.utilities.energy_ratio_utilities.add_power_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_reflected_rows.html">flasc.utilities.energy_ratio_utilities.add_reflected_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_wd.html">flasc.utilities.energy_ratio_utilities.add_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_wd_bin.html">flasc.utilities.energy_ratio_utilities.add_wd_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_ws.html">flasc.utilities.energy_ratio_utilities.add_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.floris_tools.html">flasc.utilities.floris_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html">flasc.utilities.floris_tools.get_dependent_turbines_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_turbs_in_radius.html">flasc.utilities.floris_tools.get_turbs_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_upstream_turbs_floris.html">flasc.utilities.floris_tools.get_upstream_turbs_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html">flasc.utilities.floris_tools.interpolate_floris_from_df_approx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.lookup_table_tools.html">flasc.utilities.lookup_table_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant.html">flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.optimization.html">flasc.utilities.optimization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.estimate_ti.html">flasc.utilities.optimization.estimate_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.find_timeshift_between_dfs.html">flasc.utilities.optimization.find_timeshift_between_dfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.optimization.match_y_curves_by_offset.html">flasc.utilities.optimization.match_y_curves_by_offset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.tuner_utilities.html">flasc.utilities.tuner_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.nested_get.html">flasc.utilities.tuner_utilities.nested_get</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.nested_set.html">flasc.utilities.tuner_utilities.nested_set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.replicate_nan_values.html">flasc.utilities.tuner_utilities.replicate_nan_values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.tuner_utilities.resim_floris.html">flasc.utilities.tuner_utilities.resim_floris</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.utilities.html">flasc.utilities.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.estimate_dt.html">flasc.utilities.utilities.estimate_dt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.get_num_turbines.html">flasc.utilities.utilities.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities.interp_with_max_gap.html">flasc.utilities.utilities.interp_with_max_gap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.utilities_examples.html">flasc.utilities.utilities_examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities_examples.load_floris_artificial.html">flasc.utilities.utilities_examples.load_floris_artificial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.utilities_examples.load_floris_smarteole.html">flasc.utilities.utilities_examples.load_floris_smarteole</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/edit/main/docs/_autosummary/flasc.flasc_dataframe.FlascDataFrame.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2F_autosummary/flasc.flasc_dataframe.FlascDataFrame.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/_autosummary/flasc.flasc_dataframe.FlascDataFrame.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>flasc.flasc_dataframe.FlascDataFrame</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._metadata"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._metadata</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.in_flasc_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.in_flasc_format</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._constructor"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._constructor</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._repr_html_"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._repr_html_()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.n_turbines"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.n_turbines</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.check_flasc_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.check_flasc_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.copy_metadata"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.copy_metadata()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.convert_to_user_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.convert_to_user_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.convert_time_to_datetime()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.convert_to_flasc_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.convert_to_flasc_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._convert_long_to_wide"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._convert_long_to_wide()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._convert_wide_to_long"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._convert_wide_to_long()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.to_feather"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.to_feather()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._mgr"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._mgr</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._attrs"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._attrs</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._cache"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._cache</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.export_to_windup_format()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="flasc-flasc-dataframe-flascdataframe">
+<h1>flasc.flasc_dataframe.FlascDataFrame<a class="headerlink" href="#flasc-flasc-dataframe-flascdataframe" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flasc.flasc_dataframe.</span></span><span class="sig-name descname"><span class="pre">FlascDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_name_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_data_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+<p>Subclass of pandas.DataFrame for working with FLASC data.</p>
+<p>Stores data in preferred Flasc format, or user format, with option to convert between the two.</p>
+<p>Want handling to go between long and wide.</p>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">abs</span></code></p></td>
+<td><p>Return a Series/DataFrame with absolute numeric value of each element.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add</span></code></p></td>
+<td><p>Get Addition of dataframe and other, element-wise (binary operator <cite>add</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_prefix</span></code></p></td>
+<td><p>Prefix labels with string <cite>prefix</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_suffix</span></code></p></td>
+<td><p>Suffix labels with string <cite>suffix</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">agg</span></code></p></td>
+<td><p>Aggregate using one or more operations over the specified axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">aggregate</span></code></p></td>
+<td><p>Aggregate using one or more operations over the specified axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">align</span></code></p></td>
+<td><p>Align two objects on their axes with the specified join method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span></code></p></td>
+<td><p>Return whether all elements are True, potentially over an axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">any</span></code></p></td>
+<td><p>Return whether any element is True, potentially over an axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply</span></code></p></td>
+<td><p>Apply a function along an axis of the DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">applymap</span></code></p></td>
+<td><p>Apply a function to a Dataframe elementwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">asfreq</span></code></p></td>
+<td><p>Convert time series to specified frequency.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">asof</span></code></p></td>
+<td><p>Return the last row(s) without any NaNs before <cite>where</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assign</span></code></p></td>
+<td><p>Assign new columns to a DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">astype</span></code></p></td>
+<td><p>Cast a pandas object to a specified dtype <code class="docutils literal notranslate"><span class="pre">dtype</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">at_time</span></code></p></td>
+<td><p>Select values at particular time of day (e.g., 9:30AM).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backfill</span></code></p></td>
+<td><p>Fill NA/NaN values by using the next valid observation to fill the gap.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">between_time</span></code></p></td>
+<td><p>Select values between particular times of the day (e.g., 9:00-9:30 AM).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bfill</span></code></p></td>
+<td><p>Fill NA/NaN values by using the next valid observation to fill the gap.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Return the bool of a single element Series or DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">boxplot</span></code></p></td>
+<td><p>Make a box plot from DataFrame columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.check_flasc_format" title="flasc.flasc_dataframe.FlascDataFrame.check_flasc_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_flasc_format</span></code></a></p></td>
+<td><p>Raise an error if the data is not in FLASC format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clip</span></code></p></td>
+<td><p>Trim values at input threshold(s).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine</span></code></p></td>
+<td><p>Perform column-wise combine with another DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine_first</span></code></p></td>
+<td><p>Update null elements with value in the same location in <cite>other</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compare</span></code></p></td>
+<td><p>Compare to another DataFrame and show the differences.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_dtypes</span></code></p></td>
+<td><p>Convert columns to the best possible dtypes using dtypes supporting <code class="docutils literal notranslate"><span class="pre">pd.NA</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime" title="flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_time_to_datetime</span></code></a></p></td>
+<td><p>Convert the time column to a datetime representation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.convert_to_flasc_format" title="flasc.flasc_dataframe.FlascDataFrame.convert_to_flasc_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_to_flasc_format</span></code></a></p></td>
+<td><p>Convert the DataFrame to the format that FLASC expects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.convert_to_user_format" title="flasc.flasc_dataframe.FlascDataFrame.convert_to_user_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_to_user_format</span></code></a></p></td>
+<td><p>Convert the DataFrame to the format that the user expects, given the channel_name_map.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></p></td>
+<td><p>Make a copy of this object's indices and data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.copy_metadata" title="flasc.flasc_dataframe.FlascDataFrame.copy_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_metadata</span></code></a></p></td>
+<td><p>Copy metadata from another FlascDataFrame to self.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">corr</span></code></p></td>
+<td><p>Compute pairwise correlation of columns, excluding NA/null values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrwith</span></code></p></td>
+<td><p>Compute pairwise correlation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">count</span></code></p></td>
+<td><p>Count non-NA cells for each column or row.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov</span></code></p></td>
+<td><p>Compute pairwise covariance of columns, excluding NA/null values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cummax</span></code></p></td>
+<td><p>Return cumulative maximum over a DataFrame or Series axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cummin</span></code></p></td>
+<td><p>Return cumulative minimum over a DataFrame or Series axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumprod</span></code></p></td>
+<td><p>Return cumulative product over a DataFrame or Series axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cumsum</span></code></p></td>
+<td><p>Return cumulative sum over a DataFrame or Series axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">describe</span></code></p></td>
+<td><p>Generate descriptive statistics.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">diff</span></code></p></td>
+<td><p>First discrete difference of element.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">div</span></code></p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>truediv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">divide</span></code></p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>truediv</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dot</span></code></p></td>
+<td><p>Compute the matrix multiplication between the DataFrame and other.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop</span></code></p></td>
+<td><p>Drop specified labels from rows or columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop_duplicates</span></code></p></td>
+<td><p>Return DataFrame with duplicate rows removed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">droplevel</span></code></p></td>
+<td><p>Return Series/DataFrame with requested index / column level(s) removed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dropna</span></code></p></td>
+<td><p>Remove missing values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">duplicated</span></code></p></td>
+<td><p>Return boolean Series denoting duplicate rows.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eq</span></code></p></td>
+<td><p>Get Equal to of dataframe and other, element-wise (binary operator <cite>eq</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">equals</span></code></p></td>
+<td><p>Test whether two objects contain the same elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></p></td>
+<td><p>Evaluate a string describing operations on DataFrame columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ewm</span></code></p></td>
+<td><p>Provide exponentially weighted (EW) calculations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">expanding</span></code></p></td>
+<td><p>Provide expanding window calculations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">explode</span></code></p></td>
+<td><p>Transform each element of a list-like to a row, replicating index values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format" title="flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export_to_windup_format</span></code></a></p></td>
+<td><p>Convert the DataFrame to the format that wind-up expects.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ffill</span></code></p></td>
+<td><p>Fill NA/NaN values by propagating the last valid observation to next valid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fillna</span></code></p></td>
+<td><p>Fill NA/NaN values using the specified method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></p></td>
+<td><p>Subset the dataframe rows or columns according to the specified index labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">first</span></code></p></td>
+<td><p>Select initial periods of time series data based on a date offset.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">first_valid_index</span></code></p></td>
+<td><p>Return index for first non-NA value or None, if no non-NA value is found.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">floordiv</span></code></p></td>
+<td><p>Get Integer division of dataframe and other, element-wise (binary operator <cite>floordiv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_dict</span></code></p></td>
+<td><p>Construct DataFrame from dict of array-like or dicts.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_records</span></code></p></td>
+<td><p>Convert structured or record ndarray to DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ge</span></code></p></td>
+<td><p>Get Greater than or equal to of dataframe and other, element-wise (binary operator <cite>ge</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></p></td>
+<td><p>Get item from object for given key (ex: DataFrame column).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">groupby</span></code></p></td>
+<td><p>Group DataFrame using a mapper or by a Series of columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gt</span></code></p></td>
+<td><p>Get Greater than of dataframe and other, element-wise (binary operator <cite>gt</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">head</span></code></p></td>
+<td><p>Return the first <cite>n</cite> rows.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">hist</span></code></p></td>
+<td><p>Make a histogram of the DataFrame's columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">idxmax</span></code></p></td>
+<td><p>Return index of first occurrence of maximum over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">idxmin</span></code></p></td>
+<td><p>Return index of first occurrence of minimum over requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">infer_objects</span></code></p></td>
+<td><p>Attempt to infer better dtypes for object columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">info</span></code></p></td>
+<td><p>Print a concise summary of a DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert</span></code></p></td>
+<td><p>Insert column into DataFrame at specified location.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate</span></code></p></td>
+<td><p>Fill NaN values using an interpolation method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isetitem</span></code></p></td>
+<td><p>Set the given value in the column with position <cite>loc</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isin</span></code></p></td>
+<td><p>Whether each element in the DataFrame is contained in values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isna</span></code></p></td>
+<td><p>Detect missing values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isnull</span></code></p></td>
+<td><p>DataFrame.isnull is an alias for DataFrame.isna.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">items</span></code></p></td>
+<td><p>Iterate over (column name, Series) pairs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterrows</span></code></p></td>
+<td><p>Iterate over DataFrame rows as (index, Series) pairs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">itertuples</span></code></p></td>
+<td><p>Iterate over DataFrame rows as namedtuples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">join</span></code></p></td>
+<td><p>Join columns of another DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">keys</span></code></p></td>
+<td><p>Get the 'info axis' (see Indexing for more).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kurt</span></code></p></td>
+<td><p>Return unbiased kurtosis over requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">kurtosis</span></code></p></td>
+<td><p>Return unbiased kurtosis over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">last</span></code></p></td>
+<td><p>Select final periods of time series data based on a date offset.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">last_valid_index</span></code></p></td>
+<td><p>Return index for last non-NA value or None, if no non-NA value is found.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">le</span></code></p></td>
+<td><p>Get Less than or equal to of dataframe and other, element-wise (binary operator <cite>le</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lt</span></code></p></td>
+<td><p>Get Less than of dataframe and other, element-wise (binary operator <cite>lt</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">map</span></code></p></td>
+<td><p>Apply a function to a Dataframe elementwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code></p></td>
+<td><p>Replace values where the condition is True.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code></p></td>
+<td><p>Return the maximum of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code></p></td>
+<td><p>Return the mean of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">median</span></code></p></td>
+<td><p>Return the median of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">melt</span></code></p></td>
+<td><p>Unpivot a DataFrame from wide to long format, optionally leaving identifiers set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">memory_usage</span></code></p></td>
+<td><p>Return the memory usage of each column in bytes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></p></td>
+<td><p>Merge DataFrame or named Series objects with a database-style join.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">min</span></code></p></td>
+<td><p>Return the minimum of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mod</span></code></p></td>
+<td><p>Get Modulo of dataframe and other, element-wise (binary operator <cite>mod</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span></code></p></td>
+<td><p>Get the mode(s) of each element along the selected axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mul</span></code></p></td>
+<td><p>Get Multiplication of dataframe and other, element-wise (binary operator <cite>mul</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">multiply</span></code></p></td>
+<td><p>Get Multiplication of dataframe and other, element-wise (binary operator <cite>mul</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ne</span></code></p></td>
+<td><p>Get Not equal to of dataframe and other, element-wise (binary operator <cite>ne</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nlargest</span></code></p></td>
+<td><p>Return the first <cite>n</cite> rows ordered by <cite>columns</cite> in descending order.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">notna</span></code></p></td>
+<td><p>Detect existing (non-missing) values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">notnull</span></code></p></td>
+<td><p>DataFrame.notnull is an alias for DataFrame.notna.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nsmallest</span></code></p></td>
+<td><p>Return the first <cite>n</cite> rows ordered by <cite>columns</cite> in ascending order.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nunique</span></code></p></td>
+<td><p>Count number of distinct elements in specified axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pad</span></code></p></td>
+<td><p>Fill NA/NaN values by propagating the last valid observation to next valid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pct_change</span></code></p></td>
+<td><p>Fractional change between the current and a prior element.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipe</span></code></p></td>
+<td><p>Apply chainable functions that expect Series or DataFrames.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot</span></code></p></td>
+<td><p>Return reshaped DataFrame organized by given index / column values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pivot_table</span></code></p></td>
+<td><p>Create a spreadsheet-style pivot table as a DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></p></td>
+<td><p>Return item and drop from frame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pow</span></code></p></td>
+<td><p>Get Exponential power of dataframe and other, element-wise (binary operator <cite>pow</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">prod</span></code></p></td>
+<td><p>Return the product of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">product</span></code></p></td>
+<td><p>Return the product of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantile</span></code></p></td>
+<td><p>Return values at the given quantile over requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">query</span></code></p></td>
+<td><p>Query the columns of a DataFrame with a boolean expression.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">radd</span></code></p></td>
+<td><p>Get Addition of dataframe and other, element-wise (binary operator <cite>radd</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rank</span></code></p></td>
+<td><p>Compute numerical data ranks (1 through n) along axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rdiv</span></code></p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>rtruediv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reindex</span></code></p></td>
+<td><p>Conform DataFrame to new index with optional filling logic.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reindex_like</span></code></p></td>
+<td><p>Return an object with matching indices as other object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename</span></code></p></td>
+<td><p>Rename columns or index labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename_axis</span></code></p></td>
+<td><p>Set the name of the axis for the index or columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reorder_levels</span></code></p></td>
+<td><p>Rearrange index levels using input order.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace</span></code></p></td>
+<td><p>Replace values given in <cite>to_replace</cite> with <cite>value</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample</span></code></p></td>
+<td><p>Resample time-series data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_index</span></code></p></td>
+<td><p>Reset the index, or a level of it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rfloordiv</span></code></p></td>
+<td><p>Get Integer division of dataframe and other, element-wise (binary operator <cite>rfloordiv</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rmod</span></code></p></td>
+<td><p>Get Modulo of dataframe and other, element-wise (binary operator <cite>rmod</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rmul</span></code></p></td>
+<td><p>Get Multiplication of dataframe and other, element-wise (binary operator <cite>rmul</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rolling</span></code></p></td>
+<td><p>Provide rolling window calculations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">round</span></code></p></td>
+<td><p>Round a DataFrame to a variable number of decimal places.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rpow</span></code></p></td>
+<td><p>Get Exponential power of dataframe and other, element-wise (binary operator <cite>rpow</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsub</span></code></p></td>
+<td><p>Get Subtraction of dataframe and other, element-wise (binary operator <cite>rsub</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rtruediv</span></code></p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>rtruediv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample</span></code></p></td>
+<td><p>Return a random sample of items from an axis of object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_dtypes</span></code></p></td>
+<td><p>Return a subset of the DataFrame's columns based on the column dtypes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sem</span></code></p></td>
+<td><p>Return unbiased standard error of the mean over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_axis</span></code></p></td>
+<td><p>Assign desired index to given axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_flags</span></code></p></td>
+<td><p>Return a new object with updated flags.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_index</span></code></p></td>
+<td><p>Set the DataFrame index using existing columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift</span></code></p></td>
+<td><p>Shift index by desired number of periods with an optional time <cite>freq</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">skew</span></code></p></td>
+<td><p>Return unbiased skew over requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_index</span></code></p></td>
+<td><p>Sort object by labels (along an axis).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_values</span></code></p></td>
+<td><p>Sort by the values along either axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">squeeze</span></code></p></td>
+<td><p>Squeeze 1 dimensional axis objects into scalars.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack</span></code></p></td>
+<td><p>Stack the prescribed level(s) from columns to index.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code></p></td>
+<td><p>Return sample standard deviation over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sub</span></code></p></td>
+<td><p>Get Subtraction of dataframe and other, element-wise (binary operator <cite>sub</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subtract</span></code></p></td>
+<td><p>Get Subtraction of dataframe and other, element-wise (binary operator <cite>sub</cite>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sum</span></code></p></td>
+<td><p>Return the sum of the values over the requested axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">swapaxes</span></code></p></td>
+<td><p>Interchange axes and swap values axes appropriately.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">swaplevel</span></code></p></td>
+<td><p>Swap levels i and j in a <code class="xref py py-class docutils literal notranslate"><span class="pre">MultiIndex</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tail</span></code></p></td>
+<td><p>Return the last <cite>n</cite> rows.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">take</span></code></p></td>
+<td><p>Return the elements in the given <em>positional</em> indices along an axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_clipboard</span></code></p></td>
+<td><p>Copy object to the system clipboard.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_csv</span></code></p></td>
+<td><p>Write object to a comma-separated values (csv) file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict</span></code></p></td>
+<td><p>Convert the DataFrame to a dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_excel</span></code></p></td>
+<td><p>Write object to an Excel sheet.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.to_feather" title="flasc.flasc_dataframe.FlascDataFrame.to_feather"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_feather</span></code></a></p></td>
+<td><p>Raise warning about lost information and save to feather format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_gbq</span></code></p></td>
+<td><p>Write a DataFrame to a Google BigQuery table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_hdf</span></code></p></td>
+<td><p>Write the contained data to an HDF5 file using HDFStore.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_html</span></code></p></td>
+<td><p>Render a DataFrame as an HTML table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json</span></code></p></td>
+<td><p>Convert the object to a JSON string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_latex</span></code></p></td>
+<td><p>Render object to a LaTeX tabular, longtable, or nested table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_markdown</span></code></p></td>
+<td><p>Print DataFrame in Markdown-friendly format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_numpy</span></code></p></td>
+<td><p>Convert the DataFrame to a NumPy array.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_orc</span></code></p></td>
+<td><p>Write a DataFrame to the ORC format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_parquet</span></code></p></td>
+<td><p>Write a DataFrame to the binary parquet format.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_period</span></code></p></td>
+<td><p>Convert DataFrame from DatetimeIndex to PeriodIndex.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pickle</span></code></p></td>
+<td><p>Pickle (serialize) object to file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_records</span></code></p></td>
+<td><p>Convert DataFrame to a NumPy record array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_sql</span></code></p></td>
+<td><p>Write records stored in a DataFrame to a SQL database.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_stata</span></code></p></td>
+<td><p>Export DataFrame object to Stata dta format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_string</span></code></p></td>
+<td><p>Render a DataFrame to a console-friendly tabular output.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_timestamp</span></code></p></td>
+<td><p>Cast to DatetimeIndex of timestamps, at <em>beginning</em> of period.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_xarray</span></code></p></td>
+<td><p>Return an xarray object from the pandas object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_xml</span></code></p></td>
+<td><p>Render a DataFrame to an XML document.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></p></td>
+<td><p>Call <code class="docutils literal notranslate"><span class="pre">func</span></code> on self producing a DataFrame with the same axis shape as self.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">transpose</span></code></p></td>
+<td><p>Transpose index and columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">truediv</span></code></p></td>
+<td><p>Get Floating division of dataframe and other, element-wise (binary operator <cite>truediv</cite>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">truncate</span></code></p></td>
+<td><p>Truncate a Series or DataFrame before and after some index value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tz_convert</span></code></p></td>
+<td><p>Convert tz-aware axis to target time zone.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tz_localize</span></code></p></td>
+<td><p>Localize tz-naive index of a Series or DataFrame to target time zone.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unstack</span></code></p></td>
+<td><p>Pivot a level of the (necessarily hierarchical) index labels.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></p></td>
+<td><p>Modify in place using non-NA values from another DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_counts</span></code></p></td>
+<td><p>Return a Series containing the frequency of each distinct row in the Dataframe.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">var</span></code></p></td>
+<td><p>Return unbiased variance over requested axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">where</span></code></p></td>
+<td><p>Replace values where the condition is False.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xs</span></code></p></td>
+<td><p>Return cross-section from the Series/DataFrame.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Attributes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></p></td>
+<td><p>The transpose of the DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">at</span></code></p></td>
+<td><p>Access a single value for a row/column label pair.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">attrs</span></code></p></td>
+<td><p>Dictionary of global attributes of this dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes</span></code></p></td>
+<td><p>Return a list representing the axes of the DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">columns</span></code></p></td>
+<td><p>The column labels of the DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dtypes</span></code></p></td>
+<td><p>Return the dtypes in the DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></p></td>
+<td><p>Indicator whether Series/DataFrame is empty.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">flags</span></code></p></td>
+<td><p>Get the properties associated with this pandas object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iat</span></code></p></td>
+<td><p>Access a single value for a row/column pair by integer position.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iloc</span></code></p></td>
+<td><p>Purely integer-location based indexing for selection by position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.in_flasc_format" title="flasc.flasc_dataframe.FlascDataFrame.in_flasc_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_flasc_format</span></code></a></p></td>
+<td><p>Return True if the data is in FLASC format, False otherwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code></p></td>
+<td><p>The index (row labels) of the DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">loc</span></code></p></td>
+<td><p>Access a group of rows and columns by label(s) or a boolean array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame.n_turbines" title="flasc.flasc_dataframe.FlascDataFrame.n_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_turbines</span></code></a></p></td>
+<td><p>Return the number of turbines in the dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndim</span></code></p></td>
+<td><p>Return an int representing the number of axes / array dimensions.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<td><p>Return a tuple representing the dimensionality of the DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></p></td>
+<td><p>Return an int representing the number of elements in this object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">style</span></code></p></td>
+<td><p>Returns a Styler object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></p></td>
+<td><p>Return a Numpy representation of the DataFrame.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame._metadata">
+<span class="sig-name descname"><span class="pre">_metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['channel_name_map',</span> <span class="pre">'_channel_name_map_inverse',</span> <span class="pre">'_user_format',</span> <span class="pre">'_long_data_columns']</span></em><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame._metadata" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.in_flasc_format">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">in_flasc_format</span></span><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.in_flasc_format" title="Link to this definition">#</a></dt>
+<dd><p>Return True if the data is in FLASC format, False otherwise.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame._constructor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_constructor</span></span><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame._constructor" title="Link to this definition">#</a></dt>
+<dd><p>Used when a manipulation result has the same dimensions as the
+original.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame._repr_html_">
+<span class="sig-name descname"><span class="pre">_repr_html_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame._repr_html_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame._repr_html_" title="Link to this definition">#</a></dt>
+<dd><p>Printout when displaying results in jupyter notebook.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.n_turbines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_turbines</span></span><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.n_turbines" title="Link to this definition">#</a></dt>
+<dd><p>Return the number of turbines in the dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.check_flasc_format">
+<span class="sig-name descname"><span class="pre">check_flasc_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame.check_flasc_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.check_flasc_format" title="Link to this definition">#</a></dt>
+<dd><p>Raise an error if the data is not in FLASC format.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.copy_metadata">
+<span class="sig-name descname"><span class="pre">copy_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame.copy_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.copy_metadata" title="Link to this definition">#</a></dt>
+<dd><p>Copy metadata from another FlascDataFrame to self.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame"><em>FlascDataFrame</em></a>) -- DataFrame to copy metadata from.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.convert_to_user_format">
+<span class="sig-name descname"><span class="pre">convert_to_user_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame.convert_to_user_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.convert_to_user_format" title="Link to this definition">#</a></dt>
+<dd><p>Convert the DataFrame to the format that the user expects, given the channel_name_map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inplace</strong> (<em>bool</em>) -- If True, modify the DataFrame in place.
+If False, return a new DataFrame.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FlascDataFrame in user format if inplace is False, None otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame">FlascDataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime">
+<span class="sig-name descname"><span class="pre">convert_time_to_datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame.convert_time_to_datetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime" title="Link to this definition">#</a></dt>
+<dd><p>Convert the time column to a datetime representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inplace</strong> (<em>bool</em>) -- If True, modify the DataFrame in place. If False,
+return a new DataFrame.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FlascDataFrame with time column as datetime object if inplace is False,
+None otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame">FlascDataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.convert_to_flasc_format">
+<span class="sig-name descname"><span class="pre">convert_to_flasc_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame.convert_to_flasc_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.convert_to_flasc_format" title="Link to this definition">#</a></dt>
+<dd><p>Convert the DataFrame to the format that FLASC expects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inplace</strong> (<em>bool</em>) -- If True, modify the DataFrame in place. If False,
+return a new DataFrame.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FlascDataFrame in FLASC format if inplace is False, None otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame">FlascDataFrame</a></p>
+</dd>
+</dl>
+<p># TODO: could consider converting &quot;time&quot; to datetime type here. If so, will want to keep
+# the original &quot;time&quot; column for back-conversion if needed.
+# Similarly, we could sort on time, but perhaps both are too meddlesome</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame._convert_long_to_wide">
+<span class="sig-name descname"><span class="pre">_convert_long_to_wide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame._convert_long_to_wide"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame._convert_long_to_wide" title="Link to this definition">#</a></dt>
+<dd><p>Convert a long format DataFrame to a wide format DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame"><em>FlascDataFrame</em></a>) -- Long format FlascDataFrame</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Wide format FlascDataFrame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame">FlascDataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame._convert_wide_to_long">
+<span class="sig-name descname"><span class="pre">_convert_wide_to_long</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame._convert_wide_to_long"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame._convert_wide_to_long" title="Link to this definition">#</a></dt>
+<dd><p>Convert a wide format DataFrame to a long format DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame"><em>FlascDataFrame</em></a>) -- Wide format FlascDataFrame</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Long format FlascDataFrame</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame">FlascDataFrame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.to_feather">
+<span class="sig-name descname"><span class="pre">to_feather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame.to_feather"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.to_feather" title="Link to this definition">#</a></dt>
+<dd><p>Raise warning about lost information and save to feather format.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame._mgr">
+<span class="sig-name descname"><span class="pre">_mgr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BlockManager</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ArrayManager</span></em><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame._mgr" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame._attrs">
+<span class="sig-name descname"><span class="pre">_attrs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame._attrs" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame._cache">
+<span class="sig-name descname"><span class="pre">_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame._cache" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format">
+<span class="sig-name descname"><span class="pre">export_to_windup_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turbine_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">windspeed_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ws'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winddirection_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'wd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal_operation_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitchangle_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genrpm_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downtimecounter_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbine_num_digits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flasc/flasc_dataframe.html#FlascDataFrame.export_to_windup_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format" title="Link to this definition">#</a></dt>
+<dd><p>Convert the DataFrame to the format that wind-up expects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>turbine_names</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>time_col</strong> (<em>str</em>)</p></li>
+<li><p><strong>power_col</strong> (<em>str</em>)</p></li>
+<li><p><strong>windspeed_col</strong> (<em>str</em>)</p></li>
+<li><p><strong>winddirection_col</strong> (<em>str</em>)</p></li>
+<li><p><strong>normal_operation_col</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>pitchangle_col</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>genrpm_col</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>downtimecounter_col</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>turbine_num_digits</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./_autosummary"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="flasc.flasc_dataframe.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">flasc.flasc_dataframe</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="flasc.analysis.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">flasc.analysis</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._metadata"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._metadata</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.in_flasc_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.in_flasc_format</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._constructor"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._constructor</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._repr_html_"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._repr_html_()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.n_turbines"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.n_turbines</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.check_flasc_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.check_flasc_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.copy_metadata"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.copy_metadata()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.convert_to_user_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.convert_to_user_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.convert_time_to_datetime()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.convert_to_flasc_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.convert_to_flasc_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._convert_long_to_wide"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._convert_long_to_wide()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._convert_wide_to_long"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._convert_wide_to_long()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.to_feather"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.to_feather()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._mgr"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._mgr</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._attrs"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._attrs</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame._cache"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame._cache</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format"><code class="docutils literal notranslate"><span class="pre">FlascDataFrame.export_to_windup_format()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By National Renewable Energy Laboratory
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

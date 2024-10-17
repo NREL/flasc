@@ -69,8 +69,14 @@
                 gtag('config', 'G-3PMGTE1H70');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true});</script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/flasc/analysis/energy_ratio_output';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -205,14 +211,32 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../flasc_data_format.html">FLASC data format</a></li>
+
 <li class="toctree-l1"><a class="reference internal" href="../../../energy_ratio.html">Energy ratio analysis</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="../../../total_uplift.html">Total uplift</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../licensing.html">Licensing</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_energy_ratio/00_demo_energy_ratio_syntax.html">Demonstrate energy ratio syntax</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_energy_ratio/01_demo_energy_ratio_options.html">Demonstrate energy ratio options</a></li>
+
+</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">API Documentation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.flasc_dataframe.html">flasc.flasc_dataframe</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/flasc.flasc_dataframe.FlascDataFrame.html">flasc.flasc_dataframe.FlascDataFrame</a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
@@ -233,30 +257,6 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
-</ul>
-</details></li>
-</ul>
-</details></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.html">flasc.model_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.html">flasc.model_fitting.floris_sensitivity_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis.html">flasc.model_fitting.floris_sensitivity_analysis.floris_sobol_analysis</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.html">flasc.model_fitting.floris_tuning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss.html">flasc.model_fitting.floris_tuning.evaluate_overall_wake_loss</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.select_best_wake_model_parameter.html">flasc.model_fitting.floris_tuning.select_best_wake_model_parameter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.select_best_wd_std.html">flasc.model_fitting.floris_tuning.select_best_wd_std</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift.html">flasc.model_fitting.floris_tuning.sweep_deflection_parameter_for_total_uplift</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses.html">flasc.model_fitting.floris_tuning.sweep_velocity_model_parameter_for_overall_wake_losses</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.floris_tuning.sweep_wd_std_for_er.html">flasc.model_fitting.floris_tuning.sweep_wd_std_for_er</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.html">flasc.model_fitting.turbulence_estimator</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.turbulence_estimator.ti_estimator.html">flasc.model_fitting.turbulence_estimator.ti_estimator</a></li>
-</ul>
-</details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting.html">flasc.model_fitting.yaw_pow_fitting.yaw_pow_fitting</a></li>
 </ul>
 </details></li>
 </ul>
@@ -1114,13 +1114,13 @@ document.write(`
         <span class="p">)</span>
 
         <span class="c1"># Get the bin count by wd, ws and df_name</span>
-        <span class="n">df_group</span> <span class="o">=</span> <span class="n">df_</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;df_name&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="n">df_group</span> <span class="o">=</span> <span class="n">df_</span><span class="o">.</span><span class="n">group_by</span><span class="p">([</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;df_name&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 
         <span class="c1"># Collect the minimum number of points per bin</span>
         <span class="n">df_return</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">df_group</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">df_group</span><span class="o">.</span><span class="n">group_by</span><span class="p">([</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight_by</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span>
-            <span class="k">else</span> <span class="n">df_group</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">else</span> <span class="n">df_group</span><span class="o">.</span><span class="n">group_by</span><span class="p">([</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">df_return</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;df_name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span></div>

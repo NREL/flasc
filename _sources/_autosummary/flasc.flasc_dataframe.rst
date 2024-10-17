@@ -1,7 +1,7 @@
-flasc.model\_fitting.yaw\_pow\_fitting
-======================================
+﻿flasc.flasc\_dataframe
+======================
 
-.. automodule:: flasc.model_fitting.yaw_pow_fitting
+.. automodule:: flasc.flasc_dataframe
 
    
    
@@ -20,7 +20,7 @@ flasc.model\_fitting.yaw\_pow\_fitting
       :template: custom-class-template.rst
       :nosignatures:
    
-      yaw_pow_fitting
+      FlascDataFrame
    
    
 
