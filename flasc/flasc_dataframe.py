@@ -26,7 +26,7 @@ class FlascDataFrame(DataFrame):
     # Attributes to pickle must be in this list
     _metadata = [
         "channel_name_map",
-        "_channel_name_map_to_user",
+        "_channel_name_map_inverse",
         "_user_format",
         "_long_data_columns",
     ]
@@ -56,7 +56,8 @@ class FlascDataFrame(DataFrame):
                 raise ValueError("channel_name_map must be a dictionary of strings")
         self.channel_name_map = channel_name_map
 
-        self._channel_name_map_to_user = (
+        # Create inverse channel_name_map
+        self._channel_name_map_inverse = (
             {v: k for k, v in self.channel_name_map.items()}
             if self.channel_name_map is not None
             else None
@@ -85,22 +86,6 @@ class FlascDataFrame(DataFrame):
             return True
         else:
             return False
-
-    # @property
-    # def channel_name_map(self):
-    #     """Return the channel_name_map attribute."""
-    #     return self._channel_name_map
-
-    # @channel_name_map.setter
-    # def channel_name_map(self, value):
-    #     """Set the channel_name_map attribute."""
-    #     self._channel_name_map = value
-    #     # Save the reversed name_map (to go to user_format)
-    #     self._channel_name_map_to_user = (
-    #         {v: k for k, v in self._channel_name_map.items()}
-    #         if self._channel_name_map is not None
-    #         else None
-    #     )
 
     @property
     def _constructor(self):
@@ -174,7 +159,7 @@ class FlascDataFrame(DataFrame):
 
         # Rename the channel columns to user-specified names
         if self.channel_name_map is not None:
-            df_user.rename(columns=self._channel_name_map_to_user, inplace=True)
+            df_user.rename(columns=self._channel_name_map_inverse, inplace=True)
 
         # Convert the format to long if _user_format is long
         if self._user_format == "long":
