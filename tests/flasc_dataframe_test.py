@@ -347,7 +347,7 @@ def test_n_turbines():
         df.n_turbines
 
 
-def test_convert_to_windup_format():
+def test_export_to_windup_format():
     example_data = [1.1, 2.1, 3.1]
     more_example_data = [11.1, 12.1, 13.1]
     even_more_example_data = [111.1, 112.1, 113.1]
@@ -367,7 +367,7 @@ def test_convert_to_windup_format():
             "pitch_001": even_more_example_data,
         }
     )
-    windup_df = FlascDataFrame(df).convert_to_windup_format()
+    windup_df = FlascDataFrame(df).export_to_windup_format()
     assert isinstance(windup_df, pd.DataFrame)
     assert windup_df.index.name == TIMESTAMP_COL
     assert DataColumns.turbine_name in windup_df.columns
@@ -386,7 +386,7 @@ def test_convert_to_windup_format():
     assert windup_df[DataColumns.gen_rpm_mean].to_list() == [1000] * 2 * len(example_data)
     assert windup_df[DataColumns.shutdown_duration].to_list() == [0] * 2 * len(example_data)
     assert windup_df[RAW_POWER_COL].equals(windup_df[DataColumns.active_power_mean])
-    windup_df_turbine_names = FlascDataFrame(df).convert_to_windup_format(
+    windup_df_turbine_names = FlascDataFrame(df).export_to_windup_format(
         turbine_names=["T1", "T2"]
     )
     assert windup_df_turbine_names[DataColumns.turbine_name].to_list() == ["T1"] * len(
@@ -398,7 +398,7 @@ def test_convert_to_windup_format():
         ].to_list()
         == still_more_example_data
     )
-    windup_df_filt = FlascDataFrame(df).convert_to_windup_format(
+    windup_df_filt = FlascDataFrame(df).export_to_windup_format(
         normal_operation_col="is_operation_normal"
     )
     assert windup_df_filt[RAW_POWER_COL].equals(windup_df[RAW_POWER_COL])
@@ -409,7 +409,7 @@ def test_convert_to_windup_format():
             {"expected": [np.nan, *(example_data * 2)[1:-1], np.nan]}, index=windup_df.index
         )["expected"]
     )
-    windup_df_with_real_pitch = FlascDataFrame(df).convert_to_windup_format(
+    windup_df_with_real_pitch = FlascDataFrame(df).export_to_windup_format(
         normal_operation_col="is_operation_normal", pitchangle_col="pitch"
     )
     assert windup_df_with_real_pitch[DataColumns.pitch_angle_mean].equals(

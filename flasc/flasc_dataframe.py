@@ -300,7 +300,7 @@ class FlascDataFrame(DataFrame):
         )
         return super().to_feather(path, **kwargs)
 
-    def convert_to_windup_format(
+    def export_to_windup_format(
         self,
         turbine_names: list[str] | None = None,
         time_col: str = "time",
