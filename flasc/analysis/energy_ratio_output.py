@@ -564,13 +564,13 @@ class EnergyRatioOutput:
         )
 
         # Get the bin count by wd, ws and df_name
-        df_group = df_.groupby(["wd_bin", "ws_bin", "df_name"]).count()
+        df_group = df_.group_by(["wd_bin", "ws_bin", "df_name"]).count()
 
         # Collect the minimum number of points per bin
         df_return = (
-            df_group.groupby(["wd_bin", "ws_bin"]).min()
+            df_group.group_by(["wd_bin", "ws_bin"]).min()
             if self.weight_by == "min"
-            else df_group.groupby(["wd_bin", "ws_bin"]).sum()
+            else df_group.group_by(["wd_bin", "ws_bin"]).sum()
         )
 
         return df_return.drop("df_name").to_pandas()
