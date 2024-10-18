@@ -20,7 +20,7 @@ class yaw_pow_fitting:
         """Initialize the yaw power curve fitting object.
 
         Args:
-            df (pd.DataFrame): DataFrame containing the relevant data.
+            df (pd.DataFrame | FlascDataFrame): DataFrame containing the relevant data.
             df_upstream (pd.DataFrame): DataFrame containing the upstream conditions.
             ti (int): Index of the turbine to fit the yaw power curve to.
         """
@@ -36,7 +36,7 @@ class yaw_pow_fitting:
         """Set the dataframe for the yaw power curve fitting object.
 
         Args:
-            df (pd.DataFrame): DataFrame containing the relevant data.
+            df (pd.DataFrame | FlascDataFrame): DataFrame containing the relevant data.
             df_upstream (pd.DataFrame): DataFrame containing the upstream conditions.
             ti (int): Index of the turbine to fit the yaw power curve to.
         """

@@ -141,8 +141,8 @@ def _compute_energy_ratio_single(
             index="wd_bin",
             aggregate_function="first",
         )
-        .rename({f"energy_ratio_df_name_{n}": n for n in df_names})
-        .rename({f"count_df_name_{n}": f"count_{n}" for n in df_names})
+        .rename({f"energy_ratio_{n}": n for n in df_names})
+        .rename({f"count_{n}": f"count_{n}" for n in df_names})
         .sort("wd_bin")
     )
 

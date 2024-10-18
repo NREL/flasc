@@ -4,7 +4,8 @@ The easiest way to get started is to install FLASC and
 then follow the examples. The correct order is:
 
 ## Install FLASC
-Install the repository following the instructions `here <installation.html>`_.
+Install the repository following the instructions in
+[installation](installation).
 
 ## FLASC examples
 You can generate a demo dataset by following the examples in

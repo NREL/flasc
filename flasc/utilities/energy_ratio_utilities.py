@@ -1,5 +1,7 @@
 """Utility functions for calculating energy ratios."""
 
+from __future__ import annotations
+
 import warnings
 from typing import List, Optional, Union
 
@@ -162,8 +164,8 @@ def add_wd(df_: pl.DataFrame, wd_cols: List[str], remove_all_nulls: bool = False
         # Add the cosine columns
         .with_columns(
             [
-                pl.col(wd_cols).mul(np.pi / 180).cos().suffix("_cos"),
-                pl.col(wd_cols).mul(np.pi / 180).sin().suffix("_sin"),
+                pl.col(wd_cols).mul(np.pi / 180).cos().name.suffix("_cos"),
+                pl.col(wd_cols).mul(np.pi / 180).sin().name.suffix("_sin"),
             ]
         )
     )
