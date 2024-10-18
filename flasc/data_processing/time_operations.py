@@ -28,7 +28,7 @@ def df_movingaverage(
     Standard deviation handles angular quantities.
 
     Args:
-        df_in (pd.DataFrame): Input dataframe.
+        df_in (pd.DataFrame | FlascDataFrame): Input dataframe.
         cols_angular (list): List of angular columns.
         window_width (timedelta): Width of the moving average window.
         min_periods (int): Minimum number of periods to consider.
@@ -121,7 +121,7 @@ def df_downsample(
     """Downsample a dataframe to a average accounting for angular columns.
 
     Args:
-        df_in (pd.DataFrame): Input dataframe.
+        df_in (pd.DataFrame | FlascDataFrame): Input dataframe.
         cols_angular (list): List of angular columns.
         window_width (timedelta): Width of the average window.
         min_periods (int): Minimum number of data points for a bin to be valid.
@@ -134,7 +134,7 @@ def df_downsample(
         A tuple (pd.DataFrame, np.ndarray) if return_index_mapping is True.  Where
             the DataFrame is the downsampled dataframe and the np.ndarray is the
             index mapping.
-        A pd.DataFrame if return_index_mapping is False.
+        A pd.DataFrame | FlascDataFrame if return_index_mapping is False.
 
     """
     # Copy and ensure dataframe is indexed by time
@@ -345,7 +345,7 @@ def df_resample_by_interpolation(
     """Resample a dataframe by interpolation onto a new time array.
 
     Args:
-        df (pd.DataFrame): Input dataframe.
+        df (pd.DataFrame | FlascDataFrame): Input dataframe.
         time_array (np.array): New time array.
         circular_cols (list): List of columns that are circular.
         interp_method (str): Interpolation method.  Default is "linear".
@@ -354,7 +354,7 @@ def df_resample_by_interpolation(
         verbose (bool): Print information.  Default is True.
 
     Returns:
-        pd.DataFrame: Resampled dataframe
+        pd.DataFrame | FlascDataFrame: Resampled dataframe
 
     """
     # Copy with properties but no actual data
@@ -423,10 +423,10 @@ def flatten_cols(df):
     """Flatten multi-level columns in a DataFrame.
 
     Args:
-        df (pd.DataFrame): Input DataFrame.
+        df (pd.DataFrame | FlascDataFrame): Input DataFrame.
 
     Returns:
-        pd.DataFrame: Flattened DataFrame.
+        pd.DataFrame | FlascDataFrame: Flattened DataFrame.
 
     """
     cols = ["_".join(map(str, vals)) for vals in df.columns.to_flat_index()]

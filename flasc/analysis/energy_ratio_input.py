@@ -1,11 +1,14 @@
 """Energy ratio input module."""
 
+from __future__ import annotations
+
 from typing import List
 
 import numpy as np
 import pandas as pd
 import polars as pl
 
+from flasc import FlascDataFrame
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 
 
@@ -47,14 +50,15 @@ class EnergyRatioInput:
 
     def __init__(
         self,
-        df_list_in: List[pd.DataFrame],
+        df_list_in: List[pd.DataFrame | FlascDataFrame],
         df_names: List[str],
         num_blocks: int = 10,
     ) -> None:
         """Initialize the EnergyRatioInput class.
 
         Args:
-            df_list_in (List[pd.DataFrame]): A list of pandas dataframes to be concatenated
+            df_list_in (List[pd.DataFrame | FlascDataFrame]): A list of pandas dataframes
+                or FlascDataFrames to be used in analysis
             df_names (List[str]): A list of names for the dataframes
             num_blocks (int): The number of blocks to use for the energy ratio calculation.
                 Defaults to 10.

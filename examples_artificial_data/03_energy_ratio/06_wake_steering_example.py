@@ -1,9 +1,9 @@
 import floris.layout_visualization as layoutviz
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import seaborn as sns
 
+from flasc import FlascDataFrame
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     power_wakesteering_downstream = fm.get_turbine_powers().squeeze()[:, 2].flatten()
 
     # Build up the data frames needed for energy ratio suite
-    df_baseline = pd.DataFrame(
+    df_baseline = FlascDataFrame(
         {
             "wd": wd_array,
             "ws": ws_array,
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         }
     )
 
-    df_wakesteering = pd.DataFrame(
+    df_wakesteering = FlascDataFrame(
         {
             "wd": wd_array,
             "ws": ws_array,
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
     # Create alternative versions of each of the above dataframes
     # where the wd/ws are perturbed by noise
-    df_baseline_noisy = pd.DataFrame(
+    df_baseline_noisy = FlascDataFrame(
         {
             "wd": wd_array + np.random.randn(len(wd_array)) * 2,
             "ws": ws_array + np.random.randn(len(ws_array)),
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         }
     )
 
-    df_wakesteering_noisy = pd.DataFrame(
+    df_wakesteering_noisy = FlascDataFrame(
         {
             "wd": wd_array + np.random.randn(len(wd_array)) * 2,
             "ws": ws_array + np.random.randn(len(ws_array)),

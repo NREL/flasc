@@ -4,7 +4,7 @@
 
 __author__ = """Bart Doekemeijer, Paul Fleming"""
 __email__ = "paul.fleming@nrel.gov, michael.sinner@nrel.gov"
-__version__ = "1.0"
+
 
 from pathlib import Path
 

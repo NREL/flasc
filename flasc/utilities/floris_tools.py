@@ -42,7 +42,8 @@ def interpolate_floris_from_df_approx(
     timeseries samples.
 
     Args:
-        df (pd.DataFrame): A Pandas DataFrame containing the timeseries for
+        df (pd.DataFrame | FlascDataFrame): A Pandas DataFrame
+        containing the timeseries for
         which the FLORIS predictions should be calculated. It should contain
         at least the columns 'wd', 'ws', and 'ti', which are respectively the
         ambient wind direction, ambient wind speed, and ambient turbulence
