@@ -26,7 +26,6 @@ class FlascDataFrame(DataFrame):
     # Attributes to pickle must be in this list
     _metadata = [
         "channel_name_map",
-        "_channel_name_map_inverse",
         "_user_format",
         "_long_data_columns",
     ]
@@ -55,13 +54,6 @@ class FlascDataFrame(DataFrame):
             ):
                 raise ValueError("channel_name_map must be a dictionary of strings")
         self.channel_name_map = channel_name_map
-
-        # Create inverse channel_name_map
-        self._channel_name_map_inverse = (
-            {v: k for k, v in self.channel_name_map.items()}
-            if self.channel_name_map is not None
-            else None
-        )
 
         # Determine the user format
         if long_data_columns is None:
@@ -159,7 +151,7 @@ class FlascDataFrame(DataFrame):
 
         # Rename the channel columns to user-specified names
         if self.channel_name_map is not None:
-            df_user.rename(columns=self._channel_name_map_inverse, inplace=True)
+            df_user.rename(columns={v: k for k, v in self.channel_name_map.items()}, inplace=True)
 
         # Convert the format to long if _user_format is long
         if self._user_format == "long":
