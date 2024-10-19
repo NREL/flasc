@@ -194,7 +194,7 @@ class FlascFilter:
         pw_curve_df_subset = (
             pd.concat(
                 [
-                    df_pow_and_ws_bins_subset.groupby(by=f"ws_{ti:03d}", observed=True)[
+                    df_pow_and_ws_bins_subset.groupby(by=f"ws_{ti:03d}", observed=False)[
                         f"pow_{ti:03d}"
                     ].median()
                     for ti in turbine_subset
