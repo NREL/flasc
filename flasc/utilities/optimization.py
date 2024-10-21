@@ -42,8 +42,8 @@ def find_timeshift_between_dfs(
     has been removed.
 
     Args:
-        df1 (pd.DataFrame): Dataframe 1.
-        df2 (pd.DataFrame): Dataframe 2.
+        df1 (pd.DataFrame | FlascDataFrame): Dataframe 1.
+        df2 (pd.DataFrame | FlascDataFrame): Dataframe 2.
         cols_df1 (list): Columns to use in dataframe 1.
         cols_df2 (list): Columns to use in dataframe 2.
         use_circular_statistics (bool): Use circular statistics for averaging.

@@ -1,7 +1,9 @@
 """Module to estimate the wind direction bias."""
 
+from __future__ import annotations
+
 import os as os
-from typing import Callable, List
+from typing import Callable, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,6 +11,7 @@ import pandas as pd
 from floris.utilities import wrap_360
 from scipy import optimize as opt, stats as spst
 
+from flasc import FlascDataFrame
 from flasc.analysis import energy_ratio as er
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing import dataframe_manipulations as dfm
@@ -33,7 +36,7 @@ class bias_estimation(LoggingManager):
 
     def __init__(
         self,
-        df: pd.DataFrame,
+        df: Union[pd.DataFrame, FlascDataFrame],
         df_fm_approx: pd.DataFrame,
         test_turbines_subset: List[int],
         df_ws_mapping_func: Callable,
@@ -42,7 +45,7 @@ class bias_estimation(LoggingManager):
         """Initialize the bias estimation class.
 
         Args:
-            df (pd.Dataframe): Dataframe with the SCADA data measurements
+            df (pd.Dataframe | FlascDataFrame): Dataframe with the SCADA data measurements
                 formatted in the generic format. The dataframe should contain
                 at the minimum the following columns:
                 * Reference wind direction for the test turbine, 'wd'

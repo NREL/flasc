@@ -42,10 +42,11 @@ sphinx:
   - 'sphinx.ext.autodoc'
   - 'sphinx.ext.autosummary'
   - 'sphinx.ext.viewcode'
-  - 'sphinx_autodoc_typehints'
+ # - 'sphinx_autodoc_typehints'
   - 'sphinxcontrib.autoyaml'
   - 'sphinx.ext.napoleon'       # Formats google and numpy docstring styles
   - 'sphinxcontrib.mermaid'
+ #- 'numpydoc'
   config:
     html_theme: sphinx_book_theme
     templates_path:
@@ -62,11 +63,12 @@ sphinx:
       member-order: bysource
       undoc-members: true
       private-members: true
+      inherited-members: false
       # special-members: true
       # inherited-members
       # show-inheritance
       # ignore-module-all
-      # imported-members: true
+      # imported-members: false
       # exclude-members
       # class-doc-from
       # no-value

@@ -1,8 +1,8 @@
 """Implement filtering class and functions for FLASC data."""
 
-
 import itertools
 
+import matplotlib.legend
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ def df_get_no_faulty_measurements(df, turbine):
     """Get the number of faulty measurements for a specific turbine.
 
     Args:
-        df (pd.DataFrame): Dataframe containing the turbine data,
+        df (pd.DataFrame | FlascDataFrame): Dataframe containing the turbine data,
             formatted in the generic SCADA data format. Namely, the
             dataframe should at the very least contain the columns:
               * Time of each measurement: time
@@ -47,7 +47,7 @@ def df_mark_turbdata_as_faulty(df, cond, turbine_list, exclude_columns=[]):
     """Mark turbine data as faulty based on a condition.
 
     Args:
-        df (pd.DataFrame): Dataframe containing the turbine data,
+        df (pd.DataFrame | FlascDataFrame): Dataframe containing the turbine data,
             formatted in the generic SCADA data format.
         cond (iteratible): List or array-like variable with bool entries
             depicting whether the condition is met or not. These should be
@@ -60,7 +60,7 @@ def df_mark_turbdata_as_faulty(df, cond, turbine_list, exclude_columns=[]):
             be considered for the filtering. Defaults to [].
 
     Returns:
-        pd.DataFrame: Dataframe with the faulty measurements marked as None.
+        pd.DataFrame | FlascDataFrame: Dataframe with the faulty measurements marked as None.
     """
     if isinstance(turbine_list, (np.integer, int)):
         turbine_list = [turbine_list]
@@ -92,7 +92,7 @@ class FlascFilter:
         """Initializes the class.
 
         Args:
-            df (pd.DataFrame): Dataframe containing the turbine data,
+            df (pd.DataFrame | FlascDataFrame): Dataframe containing the turbine data,
                 formatted in the generic SCADA data format. Namely, the
                 dataframe should at the very least contain the columns:
                   * Time of each measurement: time
@@ -194,7 +194,9 @@ class FlascFilter:
         pw_curve_df_subset = (
             pd.concat(
                 [
-                    df_pow_and_ws_bins_subset.groupby(by=f"ws_{ti:03d}")[f"pow_{ti:03d}"].median()
+                    df_pow_and_ws_bins_subset.groupby(by=f"ws_{ti:03d}", observed=False)[
+                        f"pow_{ti:03d}"
+                    ].median()
                     for ti in turbine_subset
                 ],
                 axis=1,
@@ -209,6 +211,20 @@ class FlascFilter:
         # Save the finalized power curve to self and return it to the user
         self.pw_curve_df = pw_curve_df
         return pw_curve_df
+
+    def _set_legend_alpha_to_one(self, lgd: matplotlib.legend.Legend) -> None:
+        """Set the alpha value of the provided Legend object to be 1.
+
+        Args:
+            lgd (matplotlib.legend.Legend): Legend object
+        """
+        try:
+            for h in lgd.legendHandles:
+                h.set_alpha(1)  # Force alpha in legend to 1.0
+        except AttributeError:
+            # see https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#legend-legendhandles
+            for h in lgd.legend_handles:
+                h.set_alpha(1)
 
     # Public methods
     def reset_filters(self):
@@ -279,7 +295,8 @@ class FlascFilter:
                 self.df directly as NaN. Defaults to True.
 
         Returns:
-            pd.Dataframe: The filtered dataframe. All measurements that are flagged as faulty
+            pd.Dataframe | FlascDataFrame: The filtered dataframe.
+                All measurements that are flagged as faulty
                 are overwritten by "None"/"NaN". If apply_filters_to_df==True, then this
                 dataframe is equal to the internally filtered dataframe 'self.df'.
         """
@@ -374,7 +391,8 @@ class FlascFilter:
             verbose (bool, optional): Print information to console. Defaults to True.
 
         Returns:
-            pd.Dataframe: Pandas DataFrame with the filtered data, in which faulty turbine
+            pd.Dataframe | FlascDataFrame: Pandas DataFrame with the filtered data,
+                in which faulty turbine
                 measurements are flagged as None/NaN. This is an aggregated filtering
                 variable, so it includes faulty-flagged measurements from filter
                 operations in previous steps.
@@ -626,7 +644,8 @@ class FlascFilter:
                 value to 15.0.
 
         Returns:
-            pd.Dataframe: Pandas DataFrame with the filtered data, in which faulty turbine
+            pd.Dataframe | FlascDataFrame: Pandas DataFrame with the filtered data,
+                in which faulty turbine
                 measurements are flagged as None/NaN. This is an aggregated filtering
                 variable, so it includes faulty-flagged measurements from filter
                 operations in previous steps.
@@ -756,7 +775,8 @@ class FlascFilter:
         """Return the filtered dataframe to the user.
 
         Returns:
-            self.df: Pandas DataFrame with the filtered data, in which faulty turbine
+           pd.DataFrame | FlascDataFrame: Pandas DataFrame with the filtered data,
+                in which faulty turbine
                 measurements are flagged as None/NaN. This is an aggregated filtering
                 variable, so it includes faulty-flagged measurements from filter
                 operations in previous steps.
@@ -896,8 +916,7 @@ class FlascFilter:
                 )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        self._set_legend_alpha_to_one(lgd)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
@@ -1067,8 +1086,7 @@ class FlascFilter:
             )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        self._set_legend_alpha_to_one(lgd)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Filters")
@@ -1147,8 +1165,7 @@ class FlascFilter:
             )
 
         lgd = ax.legend()
-        for h in lgd.legendHandles:
-            h.set_alpha(1)  # Force alpha in legend to 1.0
+        self._set_legend_alpha_to_one(lgd)
 
         if self.turbine_names is not None:
             ax.set_title(f"WTG {self.turbine_names[ti]}, [{ti:03d}]: Postprocessed dataset")
@@ -1280,7 +1297,7 @@ def filter_df_by_faulty_impacting_turbines(df, ti, df_impacting_turbines, verbos
       that are shedding a wake on this turbine is reporting NaN measurements.
 
     Args:
-        df (pd.DataFrame): Dataframe with SCADA data with measurements
+        df (pd.DataFrame | FlascDataFrame): Dataframe with SCADA data with measurements
             formatted according to wd_000, wd_001, wd_002, pow_000, pow_001,
             pow_002, and so on.
         ti (int): Turbine number for which we are filtering the data.
