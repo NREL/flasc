@@ -41,7 +41,7 @@ class ModelFit:
 
         Args:
             df (pd.DataFrame | FlascDataFrame): DataFrame containing SCADA data.
-            fmodel (FlorisModel | ParallelFlorisModel | UncertainFlorisModel):
+            fmodel (FlorisModel | ParFlorisModel | UncertainFlorisModel):
                 FLORIS model to calibrate.
             cost_function (Callable): Handle to the cost function.
             parameter_list (List[List] | List[Tuple]): List of FLORIS parameters to calibrate.  If
@@ -201,11 +201,11 @@ class ModelFit:
         Given the provided FLORIS model and SCADA data, run the FLORIS model
         and generate a FlascDataFrame of FLORIS values.  Note **kwargs are
         provided to allow additional settings to be passed to the
-        ParallelFlorisModel.set method.
+        set method.
 
         Args:
             **kwargs: Additional keyword arguments to pass to the
-                ParallelFlorisModel.set method.
+                set method.
 
         Returns:
             FlascDataFrame: _description_
@@ -265,7 +265,7 @@ class ModelFit:
         # Run the FLORIS model
         df_floris = self.run_floris_model(**kwargs)
 
-        # Evaluate the cost function passing the FlorisModel within the ParallelFlorisModel
+        # Evaluate the cost function passing the FlorisModel
         return self.cost_function(self.df, df_floris, self.fmodel, turbine_groupings)
 
     def set_parameter_and_evaluate(
