@@ -50,8 +50,7 @@ def replicate_nan_values(
     common_columns = df_1.columns.intersection(df_2.columns)
 
     # Remove the time column from the common columns if included
-    if "time" in common_columns:
-        common_columns = common_columns.drop("time")
+    common_columns.drop("time", errors="ignore")
 
     # Use assign to create a new DataFrame with NaN values replaced
     df_2_updated = df_2.assign(
