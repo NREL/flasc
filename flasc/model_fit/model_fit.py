@@ -6,8 +6,7 @@ from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
-from floris import FlorisModel, UncertainFlorisModel
-from floris.parallel_floris_model_2 import ParallelFlorisModel
+from floris import FlorisModel, ParFlorisModel, UncertainFlorisModel
 
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.flasc_dataframe import FlascDataFrame
@@ -23,12 +22,12 @@ class ModelFit:
     def __init__(
         self,
         df: pd.DataFrame | FlascDataFrame,
-        fmodel: FlorisModel | ParallelFlorisModel | UncertainFlorisModel,
+        fmodel: FlorisModel | ParFlorisModel | UncertainFlorisModel,
         cost_function: Callable[
             [
                 FlascDataFrame,
                 FlascDataFrame,
-                FlorisModel | ParallelFlorisModel | UncertainFlorisModel | None,
+                FlorisModel | ParFlorisModel | UncertainFlorisModel | None,
                 Dict[str, Tuple] | None,
             ],
             float,
@@ -60,7 +59,7 @@ class ModelFit:
         self._check_flasc_dataframe(self.df)
 
         # Check if fmodel if FlorisModel or ParallelFlorisModel
-        if not isinstance(fmodel, (FlorisModel, ParallelFlorisModel, UncertainFlorisModel)):
+        if not isinstance(fmodel, (FlorisModel, ParFlorisModel, UncertainFlorisModel)):
             raise ValueError(
                 "fmodel must be a FlorisModel, ParallelFlorisModel or UncertainFlorisModel."
             )
