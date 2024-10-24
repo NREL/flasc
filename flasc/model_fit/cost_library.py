@@ -47,12 +47,12 @@ def total_wake_loss_error(
 
     # Not sure yet if we want to figure out how to use df_freq here
     scada_wake_loss = (
-        100 * (df_scada["pow_ref"].sum() - df_scada["pow_test"].sum()) / df_scada["pow_ref"].sum()
+        df_scada["pow_ref"].sum() - df_scada["pow_test"].sum()
     )
     floris_wake_loss = (
-        100
-        * (df_floris["pow_ref"].sum() - df_floris["pow_test"].sum())
-        / df_floris["pow_ref"].sum()
+        
+        df_floris["pow_ref"].sum() - df_floris["pow_test"].sum()
+
     )
 
     # Return the squared error
