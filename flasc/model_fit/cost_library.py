@@ -45,15 +45,36 @@ def total_wake_loss_error(
             "pow_test", "pow", df_floris, turbine_groupings["pow_test"], False
         )
 
-    # Not sure yet if we want to figure out how to use df_freq here
-    scada_wake_loss = (
-        df_scada["pow_ref"].sum() - df_scada["pow_test"].sum()
-    )
-    floris_wake_loss = (
-        
-        df_floris["pow_ref"].sum() - df_floris["pow_test"].sum()
+    scada_wake_loss = df_scada["pow_ref"] - df_scada["pow_test"]
+    floris_wake_loss = df_floris["pow_ref"] - df_floris["pow_test"]
 
-    )
+    return ((scada_wake_loss - floris_wake_loss) ** 2).sum()
 
-    # Return the squared error
-    return (scada_wake_loss - floris_wake_loss) ** 2
+def simple_floris_error(
+    df_scada: pd.DataFrame | FlascDataFrame,
+    df_floris: pd.DataFrame | FlascDataFrame,
+    fm_: FlorisModel,
+    turbine_groupings: List = None,
+):
+    """Evaluate the overall wake loss from pow_ref to pow_test as percent reductions.
+
+    Args:
+        df_scada (pd.DataFrame): SCADA data
+        df_floris (pd.DataFrame): FLORIS data
+        fm_ (FlorisModel): FLORIS model (Unused but required for compatibility)
+        turbine_groupings (List): List of turbine groupings.  Defaults to None.
+            In None case, assumes pow_ref and pow_test are already identified (note
+            this can be challenging to effect within FLORIS resimulation results).
+
+    Returns:
+        float: Overall wake losses squared error
+
+    """
+    df_scada = set_pow_ref_by_turbines(df_scada, list(range(df_scada.n_turbines)))
+    df_floris = set_pow_ref_by_turbines(df_floris, list(range(df_scada.n_turbines)))
+
+    error = df_scada["pow_ref"] - df_floris["pow_ref"]
+    error = error ** 2
+    return error.sum()
+
+
