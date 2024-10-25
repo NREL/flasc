@@ -259,7 +259,7 @@ def opt_pair(
 ## ATOMIC FUNCTIONS SHOULD PERFORM AN OPTIMIZATION AND RETURN A SINGLE RESULT
 
 
-def atomic_opt_optuna(mf: ModelFit, n_trials=None, timeout=None, turbine_groupings=None, verbose=False) -> dict:
+def atomic_opt_optuna(mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False) -> dict:
     """Optimize the model parameters using Optuna.
 
     Args:
@@ -273,8 +273,6 @@ def atomic_opt_optuna(mf: ModelFit, n_trials=None, timeout=None, turbine_groupin
     Returns:
         Dictionary containing the optimal parameter values
     """
-    if n_trials is None:
-        n_trials = 100
 
     # Set up the objective function for optuna
     def objective(trial):
