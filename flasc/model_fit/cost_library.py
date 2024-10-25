@@ -45,8 +45,8 @@ def total_wake_loss_error(
             "pow_test", "pow", df_floris, turbine_groupings["pow_test"], False
         )
 
-    scada_wake_loss = df_scada["pow_ref"] - df_scada["pow_test"]
-    floris_wake_loss = df_floris["pow_ref"] - df_floris["pow_test"]
+    scada_wake_loss = df_scada["pow_ref"].values - df_scada["pow_test"].values
+    floris_wake_loss = df_floris["pow_ref"].values - df_floris["pow_test"].values
 
     return ((scada_wake_loss - floris_wake_loss) ** 2).sum()
 
@@ -73,7 +73,8 @@ def simple_floris_error(
     df_scada = set_pow_ref_by_turbines(df_scada, list(range(df_scada.n_turbines)))
     df_floris = set_pow_ref_by_turbines(df_floris, list(range(df_scada.n_turbines)))
 
-    error = df_scada["pow_ref"] - df_floris["pow_ref"]
+
+    error = df_scada["pow_ref"].values - df_floris["pow_ref"].values
     error = error ** 2
     return error.sum()
 
