@@ -99,7 +99,7 @@ def turbine_by_turbine(
         float: Overall wake losses squared error
 
     """
-    turbine_columns = [f"pow_{i}" for i in range(df_scada.n_turbines)]
+    turbine_columns = [f"pow_{i:03d}" for i in range(df_scada.n_turbines)]
 
     df_error = (df_scada[turbine_columns] - df_floris[turbine_columns])**2
 
