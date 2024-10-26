@@ -16,17 +16,19 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
@@ -36,10 +38,11 @@
     <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
     <script src="_static/documentation_options.js?v=30a733bc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
@@ -77,6 +80,7 @@
     <link rel="prev" title="Getting started" href="getting_started.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="python"/>
+  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -92,19 +96,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -112,7 +105,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -120,8 +112,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -137,7 +129,8 @@
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -167,21 +160,17 @@
     
     
     <img src="_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
-    <script>document.write(`<img src="_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
+    <img src="_static/curve.png" class="logo__image only-dark pst-js-only" alt="FLASC - Home"/>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script></div>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -552,24 +541,16 @@
 
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
+</button>
 <button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
@@ -779,18 +760,18 @@ document.write(`
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlascDataFrame in user (wide) format
    time  wind_speed_TB01  wind_speed_TB02  wind_speed_TB03  wind_dir_TB01  \
-0     0         8.442289         8.154165         9.492146     279.484212   
-1     1         8.274572         7.511451         9.383641     279.477371   
-2     2         8.289985         7.695027         8.822967     275.097041   
-3     3         8.593468         7.731222         9.047833     274.440083   
-4     4         8.764663         8.396779         9.292339     274.710710   
+0     0         8.791620         8.378790         8.639789     273.567292   
+1     1         8.465162         8.161127         8.649358     276.211405   
+2     2         8.794605         7.534560         8.553670     272.986914   
+3     3         8.260813         7.529519         9.498715     271.136989   
+4     4         8.653954         7.834524         9.115836     278.006385   
 
    wind_dir_TB02  wind_dir_TB03  power_TB01  power_TB02  power_TB03  
-0     278.243896     276.322416  601.700910  542.173844  855.250283  
-1     271.044990     275.795184  566.547837  423.810269  826.255111  
-2     271.888900     276.954207  569.719751  455.649006  686.821647  
-3     270.668966     272.157323  634.607715  462.108940  740.685290  
-4     276.209891     278.566947  673.295360  592.022422  802.370797  
+0     278.202966     278.476628  679.527041  588.225592  644.925322  
+1     274.473193     270.849842  606.604685  543.563637  647.070485  
+2     279.969626     279.627023  680.219500  427.733847  625.831556  
+3     272.313670     270.871048  563.726432  426.875910  857.027087  
+4     273.287886     279.098815  648.102506  480.881278  757.511918  
 </pre></div>
 </div>
 </div>
@@ -820,44 +801,44 @@ document.write(`
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlascDataFrame in FLASC format
    time    ws_000    ws_001    ws_002      wd_000      wd_001      wd_002  \
-0     0  8.442289  8.154165  9.492146  279.484212  278.243896  276.322416   
-1     1  8.274572  7.511451  9.383641  279.477371  271.044990  275.795184   
+0     0  8.791620  8.378790  8.639789  273.567292  278.202966  278.476628   
+1     1  8.465162  8.161127  8.649358  276.211405  274.473193  270.849842   
 
       pow_000     pow_001     pow_002  
-0  601.700910  542.173844  855.250283  
-1  566.547837  423.810269  826.255111  
+0  679.527041  588.225592  644.925322  
+1  606.604685  543.563637  647.070485  
 
 
 
 FlascDataFrame in user (wide) format
    time  wind_speed_TB01  wind_speed_TB02  wind_speed_TB03  wind_dir_TB01  \
-0     0         8.442289         8.154165         9.492146     279.484212   
-1     1         8.274572         7.511451         9.383641     279.477371   
+0     0         8.791620         8.378790         8.639789     273.567292   
+1     1         8.465162         8.161127         8.649358     276.211405   
 
    wind_dir_TB02  wind_dir_TB03  power_TB01  power_TB02  power_TB03  
-0     278.243896     276.322416  601.700910  542.173844  855.250283  
-1     271.044990     275.795184  566.547837  423.810269  826.255111  
+0     278.202966     278.476628  679.527041  588.225592  644.925322  
+1     274.473193     270.849842  606.604685  543.563637  647.070485  
 
 
 
 FlascDataFrame in FLASC format
    time    ws_000    ws_001    ws_002      wd_000      wd_001      wd_002  \
-0     0  8.442289  8.154165  9.492146  279.484212  278.243896  276.322416   
-1     1  8.274572  7.511451  9.383641  279.477371  271.044990  275.795184   
+0     0  8.791620  8.378790  8.639789  273.567292  278.202966  278.476628   
+1     1  8.465162  8.161127  8.649358  276.211405  274.473193  270.849842   
 
       pow_000     pow_001     pow_002  
-0  601.700910  542.173844  855.250283  
-1  566.547837  423.810269  826.255111  
+0  679.527041  588.225592  644.925322  
+1  606.604685  543.563637  647.070485  
 
 
 FlascDataFrame in user (wide) format
    time  wind_speed_TB01  wind_speed_TB02  wind_speed_TB03  wind_dir_TB01  \
-0     0         8.442289         8.154165         9.492146     279.484212   
-1     1         8.274572         7.511451         9.383641     279.477371   
+0     0         8.791620         8.378790         8.639789     273.567292   
+1     1         8.465162         8.161127         8.649358     276.211405   
 
    wind_dir_TB02  wind_dir_TB03  power_TB01  power_TB02  power_TB03  
-0     278.243896     276.322416  601.700910  542.173844  855.250283  
-1     271.044990     275.795184  566.547837  423.810269  826.255111  
+0     278.202966     278.476628  679.527041  588.225592  644.925322  
+1     274.473193     270.849842  606.604685  543.563637  647.070485  
 </pre></div>
 </div>
 </div>
@@ -891,17 +872,17 @@ FlascDataFrame in user (wide) format
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     time          channel       value
-0       0  wind_speed_TB01    8.442289
-1       1  wind_speed_TB01    8.274572
-2       2  wind_speed_TB01    8.289985
-3       3  wind_speed_TB01    8.593468
-4       4  wind_speed_TB01    8.764663
+0       0  wind_speed_TB01    8.791620
+1       1  wind_speed_TB01    8.465162
+2       2  wind_speed_TB01    8.794605
+3       3  wind_speed_TB01    8.260813
+4       4  wind_speed_TB01    8.653954
 ..    ...              ...         ...
-175    15       power_TB03  616.114141
-176    16       power_TB03  794.554335
-177    17       power_TB03  663.055732
-178    18       power_TB03  731.521269
-179    19       power_TB03  837.906913
+175    15       power_TB03  795.022768
+176    16       power_TB03  715.606027
+177    17       power_TB03  686.395594
+178    18       power_TB03  824.124406
+179    19       power_TB03  654.576596
 
 [180 rows x 3 columns]
 </pre></div>
@@ -924,11 +905,11 @@ FlascDataFrame in user (wide) format
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlascDataFrame in user (long) format
    time          channel     value
-0     0  wind_speed_TB01  8.442289
-1     1  wind_speed_TB01  8.274572
-2     2  wind_speed_TB01  8.289985
-3     3  wind_speed_TB01  8.593468
-4     4  wind_speed_TB01  8.764663
+0     0  wind_speed_TB01  8.791620
+1     1  wind_speed_TB01  8.465162
+2     2  wind_speed_TB01  8.794605
+3     3  wind_speed_TB01  8.260813
+4     4  wind_speed_TB01  8.653954
 </pre></div>
 </div>
 </div>
@@ -949,19 +930,19 @@ FlascDataFrame in user (wide) format
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlascDataFrame in FLASC format
    time     pow_000     pow_001     pow_002      wd_000      wd_001  \
-0     0  601.700910  542.173844  855.250283  279.484212  278.243896   
-1     1  566.547837  423.810269  826.255111  279.477371  271.044990   
+0     0  679.527041  588.225592  644.925322  273.567292  278.202966   
+1     1  606.604685  543.563637  647.070485  276.211405  274.473193   
 
        wd_002    ws_000    ws_001    ws_002  
-0  276.322416  8.442289  8.154165  9.492146  
-1  275.795184  8.274572  7.511451  9.383641  
+0  278.476628  8.791620  8.378790  8.639789  
+1  270.849842  8.465162  8.161127  8.649358  
 
 
 
 FlascDataFrame in user (long) format
    time     channel       value
-0     0  power_TB01  601.700910
-1     0  power_TB02  542.173844
+0     0  power_TB01  679.527041
+1     0  power_TB02  588.225592
 </pre></div>
 </div>
 </div>
@@ -982,35 +963,35 @@ FlascDataFrame in user (long) format
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                       raw_ActivePowerMean  raw_YawAngleMean  \
 TimeStamp_StartFormat                                          
-0                               601.700910        279.484212   
-1                               566.547837        279.477371   
-2                               569.719751        275.097041   
-3                               634.607715        274.440083   
-4                               673.295360        274.710710   
+0                               679.527041        273.567292   
+1                               606.604685        276.211405   
+2                               680.219500        272.986914   
+3                               563.726432        271.136989   
+4                               648.102506        278.006385   
 
                        raw_WindSpeedMean TurbineName  PitchAngleMean  \
 TimeStamp_StartFormat                                                  
-0                               8.442289         000               0   
-1                               8.274572         000               0   
-2                               8.289985         000               0   
-3                               8.593468         000               0   
-4                               8.764663         000               0   
+0                               8.791620         000               0   
+1                               8.465162         000               0   
+2                               8.794605         000               0   
+3                               8.260813         000               0   
+4                               8.653954         000               0   
 
                        GenRpmMean  raw_ShutdownDuration  ActivePowerMean  \
 TimeStamp_StartFormat                                                      
-0                            1000                     0       601.700910   
-1                            1000                     0       566.547837   
-2                            1000                     0       569.719751   
-3                            1000                     0       634.607715   
-4                            1000                     0       673.295360   
+0                            1000                     0       679.527041   
+1                            1000                     0       606.604685   
+2                            1000                     0       680.219500   
+3                            1000                     0       563.726432   
+4                            1000                     0       648.102506   
 
                        WindSpeedMean  YawAngleMean  ShutdownDuration  
 TimeStamp_StartFormat                                                 
-0                           8.442289    279.484212                 0  
-1                           8.274572    279.477371                 0  
-2                           8.289985    275.097041                 0  
-3                           8.593468    274.440083                 0  
-4                           8.764663    274.710710                 0  
+0                           8.791620    273.567292                 0  
+1                           8.465162    276.211405                 0  
+2                           8.794605    272.986914                 0  
+3                           8.260813    271.136989                 0  
+4                           8.653954    278.006385                 0  
 </pre></div>
 </div>
 </div>
@@ -1073,7 +1054,8 @@ TimeStamp_StartFormat
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -1139,8 +1121,8 @@ By National Renewable Energy Laboratory
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
 
   <footer class="bd-footer">
   </footer>
