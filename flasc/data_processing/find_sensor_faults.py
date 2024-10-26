@@ -24,7 +24,7 @@ def find_sensor_stuck_faults(
     """Find sensor-stuck faults in a dataframe.
 
     Args:
-        df (pd.DataFrame): The dataframe containing the data.
+        df (pd.DataFrame | FlascDataFrame): The dataframe containing the data.
         columns (list): The columns to check for sensor-stuck faults.
         ti (Any): unused
         stddev_threshold (float, optional): The threshold for the standard deviation of the
