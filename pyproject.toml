@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flasc"
-version = "2.1"
+version = "2.1.1"
 description = "FLASC provides a rich suite of analysis tools for SCADA data filtering & analysis, wind farm model validation, field experiment design, and field experiment monitoring."
 readme = "README.md"
 requires-python = ">=3.9"
