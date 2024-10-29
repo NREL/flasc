@@ -272,7 +272,7 @@ class ModelFit:
             power_setpoint_resolution=self.fmodel.power_setpoint_resolution,
             awc_amplitude_resolution=self.fmodel.awc_amplitude_resolution,
             wd_std=wd_std,
-            wd_samples=None,  # recompute
+            wd_sample_points=None,  # recompute
             fix_yaw_to_nominal_direction=self.fmodel.fix_yaw_to_nominal_direction,
             verbose=self.fmodel.verbose,
         )
