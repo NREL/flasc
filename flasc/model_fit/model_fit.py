@@ -246,6 +246,9 @@ class ModelFit:
         # FLORIS data
         df_floris = replicate_nan_values(self.df, df_floris)
 
+        # Save the floris result frame for debugging
+        self._df_floris = df_floris
+
         # Return df_floris
         return df_floris
 
