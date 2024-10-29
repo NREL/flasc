@@ -252,6 +252,31 @@ class ModelFit:
         # Return df_floris
         return df_floris
 
+    def set_wd_std(self, wd_std: float) -> None:
+        """Set the standard deviation of the wind direction within the UncertainFlorisModel.
+
+        Args:
+            wd_std (float): Standard deviation of the wind direction.
+        """
+        # Check if the model is an UncertainFlorisModel
+        if not isinstance(self.fmodel, UncertainFlorisModel):
+            raise ValueError("The floris model must be an UncertainFlorisModel.")
+
+        # Update the UncertainFlorisModel
+        self.fmodel = UncertainFlorisModel(
+            self.fmodel.fmodel_unexpanded,
+            wd_resolution=self.fmodel.wd_resolution,
+            ws_resolution=self.fmodel.ws_resolution,
+            ti_resolution=self.fmodel.ti_resolution,
+            yaw_resolution=self.fmodel.yaw_resolution,
+            power_setpoint_resolution=self.fmodel.power_setpoint_resolution,
+            awc_amplitude_resolution=self.fmodel.awc_amplitude_resolution,
+            wd_std=wd_std,
+            wd_samples=None,  # recompute
+            fix_yaw_to_nominal_direction=self.fmodel.fix_yaw_to_nominal_direction,
+            verbose=self.fmodel.verbose,
+        )
+
     def evaluate_floris(self, turbine_groupings=None, **kwargs) -> float:
         """Evaluate the FLORIS model.
 
