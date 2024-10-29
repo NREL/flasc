@@ -301,6 +301,53 @@ def atomic_opt_optuna(mf: ModelFit, n_trials=100, timeout=None, turbine_grouping
         "best_cost": study.best_value,
     }
 
+def opt_optuna_with_unc(mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False) -> dict:
+    """Optimize the model parameters using Optuna.
+
+    Args:
+        mf: ModelFit object
+        n_trials: Number of trials to run. Defaults to None (100).
+        timeout: Timeout for the optimization. Defaults to None.
+        turbine_groupings (Dict[str, Tuple], optional): Dictionary of turbine groupings.
+            Defaults to None.
+        verbose: Whether to print out the optimization process. Defaults to False.
+
+    Returns:
+        Dictionary containing the optimal parameter values
+    """
+
+    # Set up the objective function for optuna
+    def objective(trial):
+
+        # Set wd_std
+        mf.set_wd_std(wd_std=trial.suggest_float("wd_std", 0.0, 12.0))
+
+        parameter_values = []
+        for p_idx in range(mf.n_parameters):
+            parameter_name = mf.parameter_name_list[p_idx]
+            parameter_range = mf.parameter_range_list[p_idx]
+            parameter_values.append(
+                trial.suggest_float(parameter_name, parameter_range[0], parameter_range[1])
+            )
+
+        return mf.set_parameter_and_evaluate(parameter_values, turbine_groupings)
+
+    # Run the optimization
+    study = optuna.create_study()
+    study.optimize(objective, n_trials=n_trials, timeout=timeout)
+
+    # Make a list of the best parameter values
+    best_params = []
+    for parameter_name in mf.parameter_name_list:
+        best_params.append(study.best_params[parameter_name])
+
+    # Return results as dictionary
+    return {
+        "wd_std": study.best_params["wd_std"],
+        "parameter_values": best_params,
+        "best_cost": study.best_value,
+    }
+
 
 def atomic_opt_sweep_sequential(
     mf: ModelFit, n_points=None, turbine_groupings=None, verbose=False
