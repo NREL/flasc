@@ -105,4 +105,29 @@ def turbine_by_turbine(
 
     return df_error.sum().sum()
 
+def expected_turbine(
+    df_scada: pd.DataFrame | FlascDataFrame,
+    df_floris: pd.DataFrame | FlascDataFrame,
+    fm_: FlorisModel,
+    turbine_groupings: List = None,
+):
+    """Evaluate the overall wake loss from pow_ref to pow_test as percent reductions.
+
+    Args:
+        df_scada (pd.DataFrame): SCADA data
+        df_floris (pd.DataFrame): FLORIS data
+        fm_ (FlorisModel): FLORIS model (Unused but required for compatibility)
+        turbine_groupings (List): List of turbine groupings.  Defaults to None.
+            In None case, assumes pow_ref and pow_test are already identified (note
+            this can be challenging to effect within FLORIS resimulation results).
+
+    Returns:
+        float: Overall wake losses squared error
+
+    """
+    turbine_columns = [f"pow_{i:03d}" for i in range(df_scada.n_turbines)]
+
+    df_error = (df_scada[turbine_columns].mean(axis=0) - df_floris[turbine_columns].mean(axis=0))**2
+
+    return df_error.sum()
 
