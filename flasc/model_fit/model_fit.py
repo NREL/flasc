@@ -55,6 +55,9 @@ class ModelFit:
         # Save the dataframe as a FlascDataFrame
         self.df = FlascDataFrame(df)
 
+        # Make sure the dataframe index is simple
+        self.df = self.df.reset_index(drop=True)
+
         # Check the dataframe
         self._check_flasc_dataframe(self.df)
 
@@ -245,6 +248,9 @@ class ModelFit:
         # Make sure the NaN values in the SCADA data appear in the same locations in the
         # FLORIS data
         df_floris = replicate_nan_values(self.df, df_floris)
+
+        # Make sure floris dataframe has an index identical to the SCADA dataframe
+        df_floris.index = self.df.index
 
         # Save the floris result frame for debugging
         self._df_floris = df_floris
