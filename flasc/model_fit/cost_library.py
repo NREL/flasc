@@ -50,13 +50,13 @@ def total_wake_loss_error(
 
     return ((scada_wake_loss - floris_wake_loss) ** 2).sum()
 
-def simple_floris_error(
+def farm_power_error(
     df_scada: pd.DataFrame | FlascDataFrame,
     df_floris: pd.DataFrame | FlascDataFrame,
     fm_: FlorisModel,
     turbine_groupings: List = None,
 ):
-    """Evaluate the overall wake loss from pow_ref to pow_test as percent reductions.
+    """Evaluate error with respect to farm power.
 
     Args:
         df_scada (pd.DataFrame): SCADA data
@@ -79,13 +79,13 @@ def simple_floris_error(
     return error.sum()
 
 
-def turbine_by_turbine(
+def turbine_power_error(
     df_scada: pd.DataFrame | FlascDataFrame,
     df_floris: pd.DataFrame | FlascDataFrame,
     fm_: FlorisModel,
     turbine_groupings: List = None,
 ):
-    """Evaluate the overall wake loss from pow_ref to pow_test as percent reductions.
+    """Evaluate error with respect to turbine power.
 
     Args:
         df_scada (pd.DataFrame): SCADA data
@@ -105,13 +105,13 @@ def turbine_by_turbine(
 
     return df_error.sum().sum()
 
-def expected_turbine(
+def expected_turbine_power_error(
     df_scada: pd.DataFrame | FlascDataFrame,
     df_floris: pd.DataFrame | FlascDataFrame,
     fm_: FlorisModel,
     turbine_groupings: List = None,
 ):
-    """Evaluate the overall wake loss from pow_ref to pow_test as percent reductions.
+    """Evaluate error with respect to expected turbine power.
 
     Args:
         df_scada (pd.DataFrame): SCADA data
