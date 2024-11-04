@@ -2,264 +2,13 @@
 
 import numpy as np
 import optuna
-from floris.utilities import wrap_180
 
 from flasc.model_fit.model_fit import ModelFit
-from flasc.utilities.floris_tools import get_upstream_turbs_floris
-
-## AGGREGATE FUNCTIONS
-## AGGREGATE FUNCTIONS CALL CONDITIONING FUNCTIONS WITHIN A LOOP STRUCTURE
 
 
-def agg_opt_sectors(
-    mf: ModelFit,
-    wd_sectors: np.array = np.arange(0, 360, 15.0),
-    wind_radius: float = 15.0,
-    atomic_opt: str = "atomic_opt_optuna",
-    verbose: bool = False,
-    **kwargs,
+def atomic_opt_optuna(
+    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False
 ) -> dict:
-    """Loop over wind direction sectors and optimize the model parameters for each.
-
-    Args:
-        mf (ModelFit): ModelFit object
-        wd_sectors (np.array, optional): Array of wind direction sectors to optimize over.
-            Defaults to np.arange(0,360,15.).
-        wind_radius (float, optional): Radius around wind direction to consider. Defaults to 15.
-        atomic_opt (str, optional): Atomic optimization function to use.
-            Defaults to "atomic_opt_optuna".
-        verbose (bool, optional): Whether to print out the optimization process. Defaults to False.
-        kwargs: Additional keyword arguments to pass to the atomic optimization function
-
-    Returns:
-        dict: Dictionary containing the mean, median, max, min, and std of the parameter values
-            across the sectors, the matrix of parameter values, the wind direction sectors
-    """
-    num_sectors = len(wd_sectors)
-    n_parameters = len(mf.parameter_list)
-    res_mat = np.zeros((num_sectors, n_parameters))
-
-    print(f"Starting optimization across {num_sectors} sectors")
-
-    for wd_idx, wd in enumerate(wd_sectors):
-        print(f"Optimizing for sector {wd_idx+1}/{num_sectors} ({wd} degrees)")
-        res = opt_sector(
-            mf, wd, wind_radius=wind_radius, atomic_opt=atomic_opt, verbose=verbose, **kwargs
-        )
-        res_mat[wd_idx, :] = res["parameter_values"]
-
-    # Define some results
-    mean_parameters = np.mean(res_mat, axis=0)
-    median_parameters = np.median(res_mat, axis=0)
-    max_parameters = np.max(res_mat, axis=0)
-    min_parameters = np.min(res_mat, axis=0)
-    std_parameters = np.std(res_mat, axis=0)
-
-    # Return results as dictionary
-    return {
-        "mean_parameters": mean_parameters,
-        "median_parameters": median_parameters,
-        "max_parameters": max_parameters,
-        "min_parameters": min_parameters,
-        "std_parameters": std_parameters,
-        "res_mat": res_mat,
-        "wd_sectors": wd_sectors,
-    }
-
-
-## CONDITIONING FUNCTIONS
-## CONDITIONING FUNCTIONS SET UP AN OPTIMIZATION PROBLEM AND CALL AN ATOMIC FUNCTION
-
-
-def opt_sector(
-    mf: ModelFit,
-    sector: float,
-    wind_radius: float = 15.0,
-    atomic_opt: str = "atomic_opt_optuna",
-    verbose: bool = False,
-    **kwargs,
-) -> dict:
-    """Optimize the model parameters for a given wind direction sector.
-
-    Args:
-        mf (ModelFit): ModelFit object
-        sector (float): Wind direction sector to optimize over
-        wind_radius (float, optional): Radius around wind direction to consider. Defaults to 15.
-        atomic_opt (str, optional): Atomic optimization function to use.
-            Defaults to "atomic_opt_optuna".
-        verbose (bool, optional): Whether to print out the optimization process. Defaults to False.
-        kwargs: Additional keyword arguments to pass to the atomic optimization function
-
-    Returns:
-        dict: Dictionary containing the optimal parameter values, the parameter values tested,
-            and the cost values
-    """
-    # Get df_scada from within mf
-    df_ = mf.df.copy()
-
-    # Get fm from within mf
-    fmodel = mf.fmodel
-    n_turbines = fmodel.n_turbines
-
-    # Limit df_scada to rows where distance from 'wd' column to wind_direction is
-    # less than wind_radius
-    df_ = df_[np.abs(wrap_180(df_["wd"] - sector)) < wind_radius]
-
-    # print some info about shape
-    if verbose:
-        print(f"Shape of df_ after filtering: {df_.shape}")
-        print(f"Min/Max Wind Direction (0 -- 360): {df_['wd'].min()}, {df_['wd'].max()}")
-        print(
-            f"Min/Max Wind Direction (-180 -- +180): "
-            f"{wrap_180(df_['wd']).min()}, {wrap_180(df_['wd']).max()}"
-        )
-
-    # Get the table of upstream turbines
-    upstream_turbs = get_upstream_turbs_floris(fmodel, wd_step=1.0)
-
-    # Select the upstream turbines for middle of sector
-    # TODO: This could be perhaps more precise
-    upstream_turbs = upstream_turbs[
-        (upstream_turbs["wd_min"] <= sector) & (upstream_turbs["wd_max"] >= sector)
-    ].iloc[0]["turbines"]
-    downstream_turbs = [i for i in range(n_turbines) if i not in upstream_turbs]
-
-    if verbose:
-        print(f"Upstream turbines for sector {sector}: {upstream_turbs}")
-        print(f"Downstream turbines for sector {sector}: {downstream_turbs}")
-
-    # Set the turbine groupings
-    turbine_groupings = {"pow_ref": upstream_turbs, "pow_test": downstream_turbs}
-
-    # Make a new model fit for this sector
-    mf_ = ModelFit(
-        df_,
-        mf.fmodel,
-        mf.cost_function,
-        mf.parameter_list,
-        mf.parameter_name_list,
-        mf.parameter_range_list,
-        mf.parameter_index_list,
-    )
-
-    # Now call the atomic optimization function
-    if atomic_opt == "atomic_opt_optuna":
-        # Check if n_trials is in kwargs
-        if "n_trials" in kwargs:
-            n_trials = kwargs["n_trials"]
-        else:
-            n_trials = None
-
-        return atomic_opt_optuna(
-            mf_, n_trials=n_trials, turbine_groupings=turbine_groupings, verbose=verbose
-        )
-
-    elif atomic_opt == "atomic_opt_sweep_sequential":
-        # Check if n_points is in kwargs
-        if "n_points" in kwargs:
-            n_points = kwargs["n_points"]
-        else:
-            n_points = None
-
-        # Pass this through to atomic_opt_sweep_sequential
-        return atomic_opt_sweep_sequential(
-            mf_, n_points=n_points, turbine_groupings=turbine_groupings, verbose=verbose
-        )
-
-
-def opt_pair(
-    mf: ModelFit,
-    ref_idx: int,
-    test_idx: int,
-    wind_radius: float = 15.0,
-    atomic_opt: str = "atomic_opt_optuna",
-    verbose: bool = False,
-    **kwargs,
-) -> dict:
-    """Optimize the model parameters for a pair of turbines.
-
-    Args:
-        mf (ModelFit): ModelFit object
-        ref_idx (int): Reference turbine index
-        test_idx (int): Test turbine index
-        wind_radius (float, optional): Radius around wind direction to consider.
-            Defaults to 15.
-        atomic_opt (str, optional): Atomic optimization function to use.
-            Defaults to "atomic_opt_optuna".
-        verbose (bool, optional): Whether to print out the optimization process.
-            Defaults to False.
-        kwargs: Additional keyword arguments to pass to the atomic optimization function
-
-    Returns:
-        dict: Dictionary containing the optimal parameter values, the parameter values tested,
-            and the cost values
-    """
-    # Get df_scada from within mf
-    df_ = mf.df.copy()
-
-    # Get fm from within mf
-    fmodel = mf.fmodel
-
-    # Find the direction from ref_idx to test_idx
-    x_ref = fmodel.layout_x[ref_idx]
-    y_ref = fmodel.layout_y[ref_idx]
-    x_test = fmodel.layout_x[test_idx]
-    y_test = fmodel.layout_y[test_idx]
-
-    dx = x_test - x_ref
-    dy = y_test - y_ref
-    angle_rad = np.arctan2(dy, dx)
-    angle_deg = 270 - np.rad2deg(angle_rad)
-    wind_direction = angle_deg % 360
-
-    # Limit df_scada to rows where distance from 'wd' column to wind_direction
-    #  is less than wind_radius
-    df_ = df_[np.abs(wrap_180(df_["wd"] - wind_direction)) < wind_radius]
-
-    # Make a new model fit from this
-    mf_ = ModelFit(
-        df_,
-        mf.fmodel,
-        mf.cost_function,
-        mf.parameter_list,
-        mf.parameter_name_list,
-        mf.parameter_range_list,
-        mf.parameter_index_list,
-    )
-
-    # Set up turbine groupings
-    turbine_groupings = {"pow_ref": [ref_idx], "pow_test": [test_idx]}
-
-    # Now call the atomic optimization function
-    if atomic_opt == "atomic_opt_optuna":
-        # Check if n_trials is in kwargs
-        if "n_trials" in kwargs:
-            n_trials = kwargs["n_trials"]
-        else:
-            n_trials = None
-
-        return atomic_opt_optuna(
-            mf_, n_trials=n_trials, turbine_groupings=turbine_groupings, verbose=verbose
-        )
-
-    elif atomic_opt == "atomic_opt_sweep_sequential":
-        # Check if n_points is in kwargs
-        if "n_points" in kwargs:
-            n_points = kwargs["n_points"]
-        else:
-            n_points = None
-
-        # Pass this through to atomic_opt_sweep_sequential
-        return atomic_opt_sweep_sequential(
-            mf_, n_points=n_points, turbine_groupings=turbine_groupings, verbose=verbose
-        )
-
-
-## ATOMIC FUNCTIONS
-## ATOMIC FUNCTIONS SHOULD PERFORM AN OPTIMIZATION AND RETURN A SINGLE RESULT
-
-
-def atomic_opt_optuna(mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False) -> dict:
     """Optimize the model parameters using Optuna.
 
     Args:
@@ -307,7 +56,10 @@ def atomic_opt_optuna(mf: ModelFit, n_trials=100, timeout=None, turbine_grouping
         "best_cost": study.best_value,
     }
 
-def opt_optuna_with_unc(mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False) -> dict:
+
+def opt_optuna_with_unc(
+    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False
+) -> dict:
     """Optimize the model parameters using Optuna.
 
     Args:
@@ -324,7 +76,6 @@ def opt_optuna_with_unc(mf: ModelFit, n_trials=100, timeout=None, turbine_groupi
 
     # Set up the objective function for optuna
     def objective(trial):
-
         # Set wd_std
         mf.set_wd_std(wd_std=trial.suggest_float("wd_std", 0.1, 6.0))
 
