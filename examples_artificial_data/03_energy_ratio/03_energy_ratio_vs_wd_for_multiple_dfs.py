@@ -5,7 +5,7 @@ import pandas as pd
 from floris.utilities import wrap_360
 
 from flasc.analysis import energy_ratio as er
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities import floris_tools as fsatools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
@@ -69,13 +69,13 @@ if __name__ == "__main__":
     # Initialize the energy ratio input object and add dataframes
     # separately. We will add the original data and the manipulated
     # dataset.
-    er_in = EnergyRatioInput([df, df2], ["Original data", "Data with wd bias of 7.5 degrees"])
+    a_in = AnalysisInput([df, df2], ["Original data", "Data with wd bias of 7.5 degrees"])
 
     # Calculate the energy ratios for test_turbines = [1] for a subset of
     # wind directions with uncertainty quantification using 50 bootstrap
     # samples
     er_out = er.compute_energy_ratio(
-        er_in,
+        a_in,
         test_turbines=[1],
         use_predefined_ref=True,
         use_predefined_wd=True,
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     # Look at another test turbine with the same masked datasets
     er_out = er.compute_energy_ratio(
-        er_in,
+        a_in,
         test_turbines=[3],
         use_predefined_ref=True,
         use_predefined_wd=True,

@@ -8,6 +8,7 @@ import pytest
 
 from flasc import FlascDataFrame
 from flasc.analysis import energy_ratio as erp
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.analysis.energy_ratio_input import EnergyRatioInput
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities import floris_tools as ftools
@@ -140,10 +141,10 @@ class TestEnergyRatio(unittest.TestCase):
         wd_step = 2.0
         ws_step = 1.0
 
-        er_in = EnergyRatioInput([df], ["baseline"])
+        a_in = AnalysisInput([df], ["baseline"])
 
         er_out = erp.compute_energy_ratio(
-            er_in,
+            a_in,
             ["baseline"],
             test_turbines=[1],
             use_predefined_ref=True,
@@ -188,10 +189,10 @@ class TestEnergyRatio(unittest.TestCase):
         wd_step = 2.0
         ws_step = 1.0
 
-        er_in = EnergyRatioInput([df], ["baseline"])
+        a_in = AnalysisInput([df], ["baseline"])
 
         er_out = erp.compute_energy_ratio(
-            er_in,
+            a_in,
             ["baseline"],
             test_turbines=[1],
             use_predefined_ref=True,
@@ -221,6 +222,44 @@ class TestEnergyRatio(unittest.TestCase):
         self.assertEqual(df_erb["count_baseline"].iloc[3], 34)
         self.assertEqual(df_erb["count_baseline"].iloc[4], 38)
         self.assertEqual(df_erb["count_baseline"].iloc[5], 6)
+
+    def test_energy_ratio_input(self):
+
+        # Energy ratio input is deprecated but should still work
+
+        # Load data and FLORIS model
+        fm, _ = load_floris()
+        df = FlascDataFrame(load_data())
+        df = dfm.set_wd_by_all_turbines(df)
+        df_upstream = ftools.get_upstream_turbs_floris(fm)
+        df = dfm.set_ws_by_upstream_turbines(df, df_upstream)
+        df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
+
+        wd_step = 2.0
+        ws_step = 1.0
+
+        er_in = EnergyRatioInput([df], ["baseline"])
+
+        er_out = erp.compute_energy_ratio(
+            er_in,
+            ["baseline"],
+            test_turbines=[1],
+            use_predefined_ref=True,
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_max=360.0,
+            wd_min=0.0,
+            wd_step=wd_step,
+            ws_max=30.0,
+            ws_min=0.0,
+            ws_step=ws_step,
+            wd_bin_overlap_radius=0.5,
+        )
+
+        # Get the underlying pandas data frame
+        df_erb = er_out.df_result
+
+        self.assertAlmostEqual(df_erb["baseline"].iloc[1], 0.807713, places=4)
 
     def test_row_reflection(self):
         from polars.testing import assert_frame_equal
@@ -274,12 +313,12 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
         er_out = erp.compute_energy_ratio(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -326,12 +365,12 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
         er_out = erp.compute_energy_ratio(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -379,12 +418,12 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
         er_out = erp.compute_energy_ratio(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -426,7 +465,7 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
@@ -434,7 +473,7 @@ class TestEnergyRatio(unittest.TestCase):
         df_freq = pd.DataFrame({"wd": [270.0, 270.0], "ws": [7.0, 8.0], "freq_val": [0.9, 0.1]})
 
         er_out = erp.compute_energy_ratio(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -482,7 +521,7 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
@@ -496,7 +535,7 @@ class TestEnergyRatio(unittest.TestCase):
         )
 
         er_out = erp.compute_energy_ratio(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -546,7 +585,7 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
@@ -555,7 +594,7 @@ class TestEnergyRatio(unittest.TestCase):
         df_freq = pd.DataFrame({"wd": [270.0], "ws": [7.0], "freq_val": [1.0]})
 
         er_out = erp.compute_energy_ratio(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -604,7 +643,7 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
@@ -614,7 +653,7 @@ class TestEnergyRatio(unittest.TestCase):
 
         with pytest.raises(RuntimeError):
             _ = erp.compute_energy_ratio(
-                er_in,
+                a_in,
                 ref_turbines=[0],
                 test_turbines=[1],
                 use_predefined_wd=True,
@@ -643,10 +682,10 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in_1 = EnergyRatioInput([df], ["baseline"], num_blocks=1)
+        a_in_1 = AnalysisInput([df], ["baseline"], num_blocks=1)
 
         er_out_any = erp.compute_energy_ratio(
-            er_in_1,
+            a_in_1,
             ref_turbines=[0, 1],
             test_turbines=[2],
             wd_turbines=[0, 1],
@@ -673,10 +712,10 @@ class TestEnergyRatio(unittest.TestCase):
             }
         )
 
-        er_in_2 = EnergyRatioInput([df], ["baseline"], num_blocks=1)
+        a_in_2 = AnalysisInput([df], ["baseline"], num_blocks=1)
 
         er_out_all = erp.compute_energy_ratio(
-            er_in_2,
+            a_in_2,
             ref_turbines=[0, 1],
             test_turbines=[2],
             wd_turbines=[0, 1],
@@ -691,7 +730,7 @@ class TestEnergyRatio(unittest.TestCase):
         with pytest.raises(RuntimeError):
             # Expected to fail because no bins remain after null filtering
             erp.compute_energy_ratio(
-                er_in_1,
+                a_in_1,
                 ref_turbines=[0, 1],
                 test_turbines=[2],
                 wd_turbines=[0, 1],

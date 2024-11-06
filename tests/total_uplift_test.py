@@ -3,7 +3,7 @@ import unittest
 import pandas as pd
 
 from flasc.analysis import total_uplift as tup
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 
 
 class TestTotalUplift(unittest.TestCase):
@@ -29,12 +29,12 @@ class TestTotalUplift(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
         total_uplift_result = tup.compute_total_uplift(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -108,12 +108,12 @@ class TestTotalUplift(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=df_base.shape[0]
         )
 
         total_uplift_result_1 = tup.compute_total_uplift(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -128,7 +128,7 @@ class TestTotalUplift(unittest.TestCase):
         )
 
         total_uplift_result_2 = tup.compute_total_uplift(
-            er_in,
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,

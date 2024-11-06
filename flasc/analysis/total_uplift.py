@@ -14,7 +14,7 @@ import numpy as np
 import polars as pl
 
 import flasc.utilities.energy_ratio_utilities as util
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 from flasc.logging_manager import LoggingManager
 
@@ -183,7 +183,7 @@ def _compute_total_uplift_single(
 
 # Bootstrap function wraps the _compute_energy_ratio function
 def _compute_total_uplift_bootstrap(
-    er_in,
+    a_in,
     ref_cols,
     test_cols,
     wd_cols,
@@ -207,7 +207,7 @@ def _compute_total_uplift_bootstrap(
     """Compute the total change in energy between two sets of turbines with bootstrapping.
 
     Args:
-        er_in (EnergyRatioInput): An EnergyRatioInput object
+        a_in (AnalysisInput): An AnalysisInput object
             containing the data to use in the calculation.
         ref_cols (list[str]): A list of columns to use as the reference turbines
         test_cols (list[str]): A list of columns to use as the test turbines
@@ -251,8 +251,8 @@ def _compute_total_uplift_bootstrap(
     # Otherwise run the function N times and concatenate the results to compute statistics
     uplift_single_outs = [
         _compute_total_uplift_single(
-            er_in.resample_energy_table(perform_resample=(i != 0)),
-            er_in.df_names,
+            a_in.resample_energy_table(perform_resample=(i != 0)),
+            a_in.df_names,
             ref_cols,
             test_cols,
             wd_cols,
@@ -309,7 +309,7 @@ def _compute_total_uplift_bootstrap(
 
 
 def compute_total_uplift(
-    er_in: EnergyRatioInput,
+    a_in: AnalysisInput,
     ref_turbines=None,
     test_turbines=None,
     wd_turbines=None,
@@ -336,7 +336,7 @@ def compute_total_uplift(
     """Compute the energy ratio between two sets of turbines with bootstrapping.
 
     Args:
-        er_in (EnergyRatioInput): An EnergyRatioInput object
+        a_in (AnalysisInput): An AnalysisInput object
             containing the data to use in the calculation.
         ref_turbines (list[int]): A list of turbine numbers to use as the reference.
         test_turbines (list[int]): A list of turbine numbers to use as the test.
@@ -391,11 +391,11 @@ def compute_total_uplift(
         two sets of turbines.
 
     """
-    # Get the polars dataframe from within the er_in
-    df_ = er_in.get_df()
+    # Get the polars dataframe from within the a_in
+    df_ = a_in.get_df()
 
     # Check that inputs are valid
-    util.check_compute_energy_ratio_inputs(
+    util.check_compute_analysis_inputs(
         df_,
         ref_turbines,
         test_turbines,
@@ -482,7 +482,7 @@ def compute_total_uplift(
         # Compute the energy ratio
         total_uplift_result, df_freq_pl = _compute_total_uplift_single(
             df_,
-            er_in.df_names,
+            a_in.df_names,
             ref_cols,
             test_cols,
             wd_cols,
@@ -511,7 +511,7 @@ def compute_total_uplift(
             )
 
         total_uplift_result, df_freq_pl = _compute_total_uplift_bootstrap(
-            er_in,
+            a_in,
             ref_cols,
             test_cols,
             wd_cols,
