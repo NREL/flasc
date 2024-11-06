@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from flasc import FlascDataFrame
-from flasc.analysis import total_uplift as tup
+from flasc.analysis import total_uplift_power_ratio as tup
 from flasc.analysis.analysis_input import AnalysisInput
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_binned_mean_and_ci

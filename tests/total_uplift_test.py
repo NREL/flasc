@@ -2,7 +2,7 @@ import unittest
 
 import pandas as pd
 
-from flasc.analysis import total_uplift as tup
+from flasc.analysis import total_uplift_power_ratio as tup
 from flasc.analysis.analysis_input import AnalysisInput
 
 
