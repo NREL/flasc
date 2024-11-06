@@ -224,7 +224,6 @@ class TestEnergyRatio(unittest.TestCase):
         self.assertEqual(df_erb["count_baseline"].iloc[5], 6)
 
     def test_energy_ratio_input(self):
-
         # Energy ratio input is deprecated but should still work
 
         # Load data and FLORIS model

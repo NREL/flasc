@@ -8,4 +8,4 @@ __version__ = "0.1.0"
 
 from pathlib import Path
 
-from . import energy_ratio, analysis_input, energy_ratio_output
+from . import analysis_input, energy_ratio, energy_ratio_output

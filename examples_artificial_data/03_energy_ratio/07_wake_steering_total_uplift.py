@@ -159,7 +159,7 @@ if __name__ == "__main__":
         [df_baseline, df_wakesteering], ["baseline", "wake_steering"], num_blocks=1
     )
 
-    total_uplift_result = tup.compute_total_uplift(
+    total_uplift_result = tup.total_uplift_power_ratio(
         a_in,
         ref_turbines=[0],
         test_turbines=[2],
@@ -177,7 +177,7 @@ if __name__ == "__main__":
         [df_baseline_noisy, df_wakesteering_noisy], ["baseline", "wake_steering"], num_blocks=1
     )
 
-    total_uplift_result_noisy = tup.compute_total_uplift(
+    total_uplift_result_noisy = tup.total_uplift_power_ratio(
         a_in,
         ref_turbines=[0],
         test_turbines=[2],
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     uplift_noisy = total_uplift_result_noisy["uplift"]["energy_uplift_ctr_pc"]
     print("=======Total Uplift======")
     print(
-        f"The uplift calculated using the compute_total_uplift module "
+        f"The uplift calculated using the total_uplift_power_ratio module "
         f" is {uplift_non_noisy:.3}% in the"
         f" non-noisy data and {uplift_noisy:.3}% in the noisy data"
     )
@@ -204,7 +204,7 @@ if __name__ == "__main__":
         num_blocks=df_baseline.shape[0],  # Use N blocks to do non-block boostrapping
     )
 
-    total_uplift_result = tup.compute_total_uplift(
+    total_uplift_result = tup.total_uplift_power_ratio(
         a_in,
         ref_turbines=[0],
         test_turbines=[2],
@@ -226,7 +226,7 @@ if __name__ == "__main__":
         num_blocks=df_baseline.shape[0],  # Use N blocks to do non-block boostrapping
     )
 
-    total_uplift_result_noisy = tup.compute_total_uplift(
+    total_uplift_result_noisy = tup.total_uplift_power_ratio(
         a_in,
         ref_turbines=[0],
         test_turbines=[2],

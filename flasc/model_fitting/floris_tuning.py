@@ -408,7 +408,7 @@ def sweep_deflection_parameter_for_total_uplift(
         [df_scada_baseline, df_scada_wakesteering], ["Baseline [SCADA]", "Controlled [SCADA]"]
     )
 
-    scada_uplift_result = tup.compute_total_uplift(
+    scada_uplift_result = tup.total_uplift_power_ratio(
         a_in,
         test_turbines=test_turbines,
         use_predefined_ref=True,
@@ -459,7 +459,7 @@ def sweep_deflection_parameter_for_total_uplift(
             ["Baseline [FLORIS]", "Controlled [FLORIS]"],
         )
 
-        scada_uplift_result = tup.compute_total_uplift(
+        scada_uplift_result = tup.total_uplift_power_ratio(
             a_in,
             test_turbines=test_turbines,
             use_predefined_ref=True,

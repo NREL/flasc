@@ -23,7 +23,7 @@ logger = logger_manager.logger  # Obtain the reusable logger
 
 
 # Internal version, returns a polars dataframe
-def _compute_total_uplift_single(
+def _total_uplift_power_ratio_single(
     df_,
     df_names,
     ref_cols,
@@ -182,7 +182,7 @@ def _compute_total_uplift_single(
 
 
 # Bootstrap function wraps the _compute_energy_ratio function
-def _compute_total_uplift_bootstrap(
+def _total_uplift_power_ratio_bootstrap(
     a_in,
     ref_cols,
     test_cols,
@@ -250,7 +250,7 @@ def _compute_total_uplift_bootstrap(
     """
     # Otherwise run the function N times and concatenate the results to compute statistics
     uplift_single_outs = [
-        _compute_total_uplift_single(
+        _total_uplift_power_ratio_single(
             a_in.resample_energy_table(perform_resample=(i != 0)),
             a_in.df_names,
             ref_cols,
@@ -308,7 +308,7 @@ def _compute_total_uplift_bootstrap(
     return total_uplift_result, df_freq_pl
 
 
-def compute_total_uplift(
+def total_uplift_power_ratio(
     a_in: AnalysisInput,
     ref_turbines=None,
     test_turbines=None,
@@ -480,7 +480,7 @@ def compute_total_uplift(
         if percentiles is not None:
             logger.warn("percentiles can only be used with bootstrapping (N > 1).")
         # Compute the energy ratio
-        total_uplift_result, df_freq_pl = _compute_total_uplift_single(
+        total_uplift_result, df_freq_pl = _total_uplift_power_ratio_single(
             df_,
             a_in.df_names,
             ref_cols,
@@ -510,7 +510,7 @@ def compute_total_uplift(
                 + "upper and lower desired percentiles."
             )
 
-        total_uplift_result, df_freq_pl = _compute_total_uplift_bootstrap(
+        total_uplift_result, df_freq_pl = _total_uplift_power_ratio_bootstrap(
             a_in,
             ref_cols,
             test_cols,
@@ -535,3 +535,15 @@ def compute_total_uplift(
     # Do we want some kind of more complex return object? Or are we OK
     # returning just the total_uplift_result dictionary?
     return total_uplift_result
+
+
+# For backwards compatability include a function compute_total_uplift that
+# simply wraps the total_uplift_power_ratio function and adds a deprecated
+# warning
+def compute_total_uplift(*args, **kwargs):
+    """Deprecated function for computing the total uplift in energy production."""
+    warnings.warn(
+        "compute_total_uplift is deprecated, please use total_uplift_power_ratio instead.",
+        DeprecationWarning,
+    )
+    return total_uplift_power_ratio(*args, **kwargs)
