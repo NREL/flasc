@@ -1,67 +1,306 @@
-
-
+import numpy as np
 import pandas as pd
-
+import polars as pl
 
 from flasc.analysis.analysis_input import AnalysisInput
-from flasc.analysis.expected_power_analysis import total_uplift_expected_power, _bin_and_group_dataframe_expected_power
+from flasc.analysis.expected_power_analysis import (
+    _add_wd_ws_bins,
+    _bin_and_group_dataframe_expected_power,
+    _synchronize_nulls,
+    _total_uplift_expected_power_single,
+    _total_uplift_expected_power_with_bootstrapping,
+    _total_uplift_expected_power_with_standard_error,
+    _compute_covariance
+)
 
-import numpy as np
 
 def load_data():
-
     # Test the returned energy ratio assuming alternative weightings of the wind speed bins
     df_base = pd.DataFrame(
         {
-            "wd": [270, 270.0,270.0, 270.0, 280.0, 280.0, 280.0, 290.0],
-            "ws": [8.0, 8.0,8.0, 9.0, 8.0, 8.0, 9.0, 8.0],
-            "pow_000": [10.0, 20.0,np.nan, 10.0, np.nan, 10.0, np.nan,10.0],
-            "pow_001": [10.0, 20.0, np.nan,10.0,10.0, 20.0, np.nan, 10.0]
+            "wd": [270, 270.0, 270.0, 270.0, 280.0, 280.0, 280.0, 290.0],
+            "ws": [8.0, 8.0, 8.0, 9.0, 8.0, 8.0, 9.0, 8.0],
+            "pow_000": [10.0, 20.0, np.nan, 10.0, np.nan, 10.0, np.nan, 10.0],
+            "pow_001": [10.0, 20.0, np.nan, 10.0, 10.0, 20.0, np.nan, 10.0],
         }
     )
 
     df_wake_steering = pd.DataFrame(
         {
-            "wd": [270, 270.0,  280.0, 280.0, 280.0, 290.0],
-            "ws": [8.0, 8.0, 8.0, 8.0, 9.0, 8.0],
-            "pow_000": [10.0, 10.0, 10.0, 10.,10.,10.0],
-            "pow_001": [20., 30., np.nan,np.nan, 10.0,10.0]
+            "wd": [270, 270.0, 280.0, 280.0, 280.0, 290.0, 290.0],
+            "ws": [8.0, 8.0, 8.0, 8.0, 9.0, 8.0, 8.0],
+            "pow_000": [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
+            "pow_001": [20.0, 30.0, np.nan, np.nan, 10.0, 10.0, 10.0],
         }
     )
 
-    a_in = AnalysisInput(
-        [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
-    )
+    a_in = AnalysisInput([df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=3)
 
     return a_in
 
-def test_bin_and_group_dataframe_expected_power():
+
+def test_add_wd_ws_bins():
 
     a_in = load_data()
 
-    df_ = _bin_and_group_dataframe_expected_power(df_=a_in.get_df(),
-                                      test_cols=["pow_000", "pow_001"],
-                                      wd_cols=["wd"],
-                                      ws_cols=["ws"],
-                                      wd_step=1.0,
-                                      wd_min=0.5,
-                                      ws_min=0.5)
-    
+    df_ = _add_wd_ws_bins(
+        df_=a_in.get_df(),
+        wd_cols=["wd"],
+        ws_cols=["ws"],
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+    )
+
+    # Sort df_ by wd_bin and ws_bin and df_name
+    df_ = df_.sort(["wd_bin", "ws_bin", "df_name"])
+
+    # Assert the first 3 values of ws_bin are 8.0
+    np.testing.assert_array_equal(df_["ws_bin"].to_numpy()[:3], np.array([8.0, 8.0, 8.0]))
+
+    # Assert the first 3 values of wd_bin are 270.0
+    np.testing.assert_array_equal(df_["wd_bin"].to_numpy()[:3], np.array([270.0, 270.0, 270.0]))
+
+    with pl.Config(tbl_cols=-1):
+        print(df_)
+
+
+def test_bin_and_group_dataframe_expected_power():
+    a_in = load_data()
+
+    df_ = _add_wd_ws_bins(
+        df_=a_in.get_df(),
+        wd_cols=["wd"],
+        ws_cols=["ws"],
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+    )
+
+    df_ = _bin_and_group_dataframe_expected_power(
+        df_=df_,
+        test_cols=["pow_000", "pow_001"],
+    )
+
     # Sort df_ by wd_bin and ws_bin and df_name
     df_ = df_.sort(["wd_bin", "ws_bin", "df_name"])
 
     # Test the values
-    np.testing.assert_array_equal(df_["wd_bin"].to_numpy(), np.array([270.0, 270.0, 280.0, 280.0, 290.0, 290.0]))
-    np.testing.assert_array_equal(df_["ws_bin"].to_numpy(), np.array([8.0, 8.0, 8.0, 8.0, 8.0, 8.0]))
-    np.testing.assert_array_equal(df_["df_name"].to_numpy(), np.array(["baseline", "wake_steering", "baseline", "wake_steering","baseline", "wake_steering", ]))
-    np.testing.assert_array_equal(df_["pow_000_mean"].to_numpy(), np.array([15.0, 10.0, 10.0, 10.0, 10.0, 10.0]))
-    np.testing.assert_array_equal(df_["pow_001_mean"].to_numpy(), np.array([15.0, 25.0, 15.0, np.nan,10.0,10.0]))
-    np.testing.assert_array_equal(df_["pow_000_var"].to_numpy(), np.array([50.0, 0.0, np.nan, 0.0, np.nan,np.nan]))
-    np.testing.assert_array_equal(df_["pow_000_count"].to_numpy(), np.array([2,2,1,2,1,1]))
-    np.testing.assert_array_equal(df_["pow_001_count"].to_numpy(), np.array([2,2,2,0,1,1]))
+    np.testing.assert_array_equal(
+        df_["wd_bin"].to_numpy(), np.array([270.0, 270.0, 280.0, 280.0, 290.0, 290.0])
+    )
+    np.testing.assert_array_equal(
+        df_["ws_bin"].to_numpy(), np.array([8.0, 8.0, 8.0, 8.0, 8.0, 8.0])
+    )
+    np.testing.assert_array_equal(
+        df_["df_name"].to_numpy(),
+        np.array(
+            [
+                "baseline",
+                "wake_steering",
+                "baseline",
+                "wake_steering",
+                "baseline",
+                "wake_steering",
+            ]
+        ),
+    )
+    np.testing.assert_array_equal(
+        df_["pow_000_mean"].to_numpy(), np.array([15.0, 10.0, 10.0, 10.0, 10.0, 10.0])
+    )
+    np.testing.assert_array_equal(
+        df_["pow_001_mean"].to_numpy(), np.array([15.0, 25.0, 15.0, np.nan, 10.0, 10.0])
+    )
 
-# def test_expected_power_analysis():
+    with pl.Config(tbl_cols=-1):
+
+        print(df_)
+
+    np.testing.assert_array_equal(
+        df_["pow_000_var"].to_numpy(), np.array([50.0, 0.0, np.nan, 0.0, np.nan, 0.0])
+    )
+    np.testing.assert_array_equal(df_["pow_000_count"].to_numpy(), np.array([2, 2, 1, 2, 1, 2]))
+    np.testing.assert_array_equal(df_["pow_001_count"].to_numpy(), np.array([2, 2, 2, 0, 1, 2]))
 
 
+def test_synchronize_nulls():
+    a_in = load_data()
 
-#     total_uplift_expected_power(a_in=a_in)
+    df_ = _add_wd_ws_bins(
+        df_=a_in.get_df(),
+        wd_cols=["wd"],
+        ws_cols=["ws"],
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+    )
+
+    df_ = _bin_and_group_dataframe_expected_power(
+        df_=df_,
+        test_cols=["pow_000", "pow_001"],
+    )
+
+    # Sort df_ by wd_bin and ws_bin and df_name
+    df_ = df_.sort(["wd_bin", "ws_bin", "df_name"])
+
+    # Synchronize the null values
+    df_ = _synchronize_nulls(
+        df_,
+        sync_cols=[f"{col}_mean" for col in ["pow_000", "pow_001"]],
+        uplift_pairs=[["baseline", "wake_steering"]],
+    )
+
+    # Assert the nan is copied over
+    np.testing.assert_array_equal(
+        df_["pow_001_mean"].to_numpy(), np.array([15.0, 25.0, np.nan, np.nan, 10.0, 10.0])
+    )
+
+    # Add a hypothetical 3rd df_name with on 290/8 with nans in pow_000 and pow_001
+    # to df_
+    df_add_row = pl.DataFrame(
+        {
+            "wd_bin": [290.0],
+            "ws_bin": [8.0],
+            "df_name": ["hypothetical"],
+            "pow_000_mean": [np.nan],
+            "pow_001_mean": [np.nan],
+            "pow_000_var": [np.nan],
+            "pow_001_var": [np.nan],
+            "pow_000_count": [1],
+            "pow_001_count": [1],
+            "count": [1],
+        }
+    )
+
+    # Ensure df_add_row has all same types for eac column as df_
+    for col in df_.columns:
+        df_add_row = df_add_row.with_columns(df_add_row[col].cast(df_[col].dtype))
+
+    # Vstack
+    df_ = df_.vstack(df_add_row)
+
+    # Synchronize the null values
+    df_ = _synchronize_nulls(
+        df_,
+        sync_cols=[f"{col}_mean" for col in ["pow_000", "pow_001"]],
+        uplift_pairs=[["baseline", "wake_steering"]],
+    )
+
+    # Assert the new nan is not copied over
+    np.testing.assert_array_equal(
+        df_["pow_001_mean"].to_numpy(), np.array([15.0, 25.0, np.nan, np.nan, 10.0, 10.0, np.nan])
+    )
+
+
+def test_total_uplift_expected_power_single():
+    a_in = load_data()
+
+    df_bin, df_sum, uplift_results = _total_uplift_expected_power_single(
+        df_=a_in.get_df(),
+        test_cols=["pow_000", "pow_001"],
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        wd_cols=["wd"],
+        ws_cols=["ws"],
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+    )
+
+    ## Assert df_bin has 6 rows
+    assert len(df_bin) == 6
+
+    assert uplift_results["scada_uplift"] == 1.1
+
+
+def test_total_uplift_expected_power_single_no_nulls():
+    a_in = load_data()
+
+    df_bin, df_sum, uplift_results = _total_uplift_expected_power_single(
+        df_=a_in.get_df(),
+        test_cols=["pow_000", "pow_001"],
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        wd_cols=["wd"],
+        ws_cols=["ws"],
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        remove_any_null_turbine_bins=True,
+    )
+
+    ## Assert df_bin has only 4 rows
+    assert len(df_bin) == 4
+
+
+def test_total_uplift_expected_power_with_bootstrapping():
+    # Set the random seed
+    np.random.seed(0)
+
+    a_in = load_data()
+
+    bootstrap_uplift_result = _total_uplift_expected_power_with_bootstrapping(
+        a_in=a_in,
+        test_cols=["pow_000", "pow_001"],
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        wd_cols=["wd"],
+        ws_cols=["ws"],
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        N=3,
+    )
+
+    assert bootstrap_uplift_result["scada_uplift"]["energy_uplift_ctr"] == 1.1
+    np.testing.assert_almost_equal(
+        bootstrap_uplift_result["scada_uplift"]["energy_uplift_ctr_pc"], 10
+    )
+    np.testing.assert_almost_equal(
+        bootstrap_uplift_result["scada_uplift"]["energy_uplift_lb_pc"],
+        (bootstrap_uplift_result["scada_uplift"]["energy_uplift_lb"] - 1) * 100.0,
+    )
+    np.testing.assert_almost_equal(
+        bootstrap_uplift_result["scada_uplift"]["energy_uplift_ub_pc"],
+        (bootstrap_uplift_result["scada_uplift"]["energy_uplift_ub"] - 1) * 100.0,
+    )
+
+
+def test_compute_covariance():
+
+    test_df = pl.DataFrame(
+        {
+            'wd_bin':[0, 0, 0, 0,0,0, 1, 1, 1, 1 ,1,1],
+            'ws_bin': np.ones(12),
+            'df_name': ['baseline'] * 3 + ['wake_steering'] * 3 + ['baseline'] * 3 + ['wake_steering'] * 3,
+            'pow_000': np.array([1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,0.,-1.]),
+            'pow_001': np.array([1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,2.,3.])
+        }
+    )
+
+
+    df_cov = _compute_covariance(
+        df_=test_df,
+        test_cols=["pow_000", "pow_001"],
+        bin_cols_with_df_name = ["wd_bin", "ws_bin","df_name"]
+    )
+
+    with pl.Config(tbl_cols=-1):
+        print(test_df)
+        print(df_cov)
+
+def test_total_uplift_expected_power_with_standard_error():
+
+    a_in = load_data()
+
+    _total_uplift_expected_power_with_standard_error(
+        df_=a_in.get_df(),
+        test_cols=["pow_000", "pow_001"],
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        wd_cols=["wd"],
+        ws_cols=["ws"],
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+    )
