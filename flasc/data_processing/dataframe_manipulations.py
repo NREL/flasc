@@ -370,6 +370,59 @@ def set_wd_by_all_turbines(
     return _set_col_by_turbines("wd", "wd", df, "all", True)
 
 
+def set_wd_by_upstream_turbines(
+    df: Union[pd.DataFrame, FlascDataFrame], df_upstream, exclude_turbs=[]
+) -> Union[pd.DataFrame, FlascDataFrame]:
+    """Add wind direction column using upstream turbines.
+
+    Add a column called 'wd' in your dataframe with value equal
+    to the averaged wind direction measurements of all the turbines
+    upstream, excluding the turbines listed in exclude_turbs. As an
+    intermediate step, the average wind direction over all turbines
+    is used to determine the set of upstream turbines from which the
+    final wind direction signal is derived. 
+
+    Args:
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
+            typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+            potentially additional measurements.
+        df_upstream (pd.DataFrame): Dataframe containing rows indicating
+            wind direction ranges and the corresponding upstream turbines for
+            that wind direction range. This variable can be generated with
+            flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+            exclude_turbs ([list, array]): array-like variable containing
+            turbine indices that should be excluded in determining the column
+            mean quantity.
+        exclude_turbs ([list, array]): array-like variable containing
+            turbine indices that should be excluded in determining the column
+            mean quantity.
+
+    Returns:
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
+            plus the additional column called 'wd'.
+    """
+
+    # First, set wind direction using all turbines 
+    df = set_wd_by_all_turbines(df)
+
+    # Use the farm-average wind direction to determine a new wind direction signal
+    # using only upstream turbines
+    df = _set_col_by_upstream_turbines(
+        col_out="wd_upstream",
+        col_prefix="wd",
+        df=df,
+        df_upstream=df_upstream,
+        circular_mean=True,
+        exclude_turbs=exclude_turbs,
+    )
+
+    df = df.drop(columns=["wd"])
+
+    df = df.rename(columns={"wd_upstream": "wd"})
+    
+    return df
+
+
 def set_wd_by_radius_from_turbine(
     df: Union[pd.DataFrame, FlascDataFrame],
     turb_no: int,
@@ -413,6 +466,72 @@ def set_wd_by_radius_from_turbine(
         circular_mean=True,
         include_itself=include_itself,
     )
+
+
+def set_wd_by_upstream_turbines_in_radius(
+    df: Union[pd.DataFrame, FlascDataFrame],
+    df_upstream: pd.DataFrame,
+    turb_no: int,
+    x_turbs: List[float],
+    y_turbs: List[float],
+    max_radius: float,
+    include_itself: bool = True,
+) -> Union[pd.DataFrame, FlascDataFrame]:
+    """Add wind direction column using in-radius upstream turbines.
+
+    Add a column called 'wd' to your dataframe, which is the
+    mean of the columns wd_%03d for turbines that are upstream and
+    also within radius [max_radius] of the turbine of interest
+    [turb_no]. As an intermediate step, the average wind direction
+    over all turbines is used to determine the set of upstream turbines
+    from which the final wind direction signal is derived.
+
+    Args:
+        df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
+            typically consists of wd_%03d, ws_%03d, ti_%03d, pow_%03d, and
+            potentially additional measurements.
+        df_upstream (pd.DataFrame): Dataframe containing rows indicating
+            wind direction ranges and the corresponding upstream turbines for
+            that wind direction range. This variable can be generated with
+            flasc.utilities.floris_tools.get_upstream_turbs_floris(...).
+        turb_no (int): Turbine number from which the radius should be calculated.
+        x_turbs ([list, array]): Array containing x locations of turbines.
+        y_turbs ([list, array]): Array containing y locations of turbines.
+        max_radius (float): Maximum radius for the upstream turbines
+            until which they are still considered as relevant/used for the
+            calculation of the averaged column quantity.
+        include_itself (bool, optional): Include the measurements of turbine
+            turb_no in the determination of the averaged column quantity. Defaults
+            to False.
+
+    Returns:
+        pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
+        plus the additional column called 'wd'.
+    """
+
+    # First, set wind direction using all turbines 
+    df = set_wd_by_all_turbines(df)
+    
+    # Use the farm-average wind direction to determine a new wind direction signal
+    # using only upstream turbines within radius
+    df = _set_col_by_upstream_turbines_in_radius(
+        col_out="wd_upstream",
+        col_prefix="wd",
+        df=df,
+        df_upstream=df_upstream,
+        turb_no=turb_no,
+        x_turbs=x_turbs,
+        y_turbs=y_turbs,
+        max_radius=max_radius,
+        circular_mean=True,
+        include_itself=include_itself,
+    )
+
+    df = df.drop(columns=["wd"])
+
+    df = df.rename(columns={"wd_upstream": "wd"})
+
+    return df
 
 
 def set_ws_by_turbines(
