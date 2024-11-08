@@ -380,7 +380,7 @@ def set_wd_by_upstream_turbines(
     upstream, excluding the turbines listed in exclude_turbs. As an
     intermediate step, the average wind direction over all turbines
     is used to determine the set of upstream turbines from which the
-    final wind direction signal is derived. 
+    final wind direction signal is derived.
 
     Args:
         df (pd.DataFrame | FlascDataFrame): Dataframe with measurements. This dataframe
@@ -401,8 +401,7 @@ def set_wd_by_upstream_turbines(
         pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
             plus the additional column called 'wd'.
     """
-
-    # First, set wind direction using all turbines 
+    # First, set wind direction using all turbines
     df = set_wd_by_all_turbines(df)
 
     # Use the farm-average wind direction to determine a new wind direction signal
@@ -419,7 +418,7 @@ def set_wd_by_upstream_turbines(
     df = df.drop(columns=["wd"])
 
     df = df.rename(columns={"wd_upstream": "wd"})
-    
+
     return df
 
 
@@ -508,10 +507,9 @@ def set_wd_by_upstream_turbines_in_radius(
         pd.Dataframe | FlascDataFrame: Dataframe which equals the inserted dataframe
         plus the additional column called 'wd'.
     """
-
-    # First, set wind direction using all turbines 
+    # First, set wind direction using all turbines
     df = set_wd_by_all_turbines(df)
-    
+
     # Use the farm-average wind direction to determine a new wind direction signal
     # using only upstream turbines within radius
     df = _set_col_by_upstream_turbines_in_radius(
