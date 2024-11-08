@@ -50,6 +50,7 @@ def total_wake_loss_error(
 
     return ((scada_wake_loss - floris_wake_loss) ** 2).sum()
 
+
 def farm_power_error(
     df_scada: pd.DataFrame | FlascDataFrame,
     df_floris: pd.DataFrame | FlascDataFrame,
@@ -73,9 +74,8 @@ def farm_power_error(
     df_scada = set_pow_ref_by_turbines(df_scada, list(range(df_scada.n_turbines)))
     df_floris = set_pow_ref_by_turbines(df_floris, list(range(df_scada.n_turbines)))
 
-
     error = df_scada["pow_ref"].values - df_floris["pow_ref"].values
-    error = error ** 2
+    error = error**2
     return error.sum()
 
 
@@ -101,9 +101,10 @@ def turbine_power_error(
     """
     turbine_columns = [f"pow_{i:03d}" for i in range(df_scada.n_turbines)]
 
-    df_error = (df_scada[turbine_columns] - df_floris[turbine_columns])**2
+    df_error = (df_scada[turbine_columns] - df_floris[turbine_columns]) ** 2
 
     return df_error.sum().sum()
+
 
 def expected_turbine_power_error(
     df_scada: pd.DataFrame | FlascDataFrame,
@@ -127,7 +128,8 @@ def expected_turbine_power_error(
     """
     turbine_columns = [f"pow_{i:03d}" for i in range(df_scada.n_turbines)]
 
-    df_error = (df_scada[turbine_columns].mean(axis=0) - df_floris[turbine_columns].mean(axis=0))**2
+    df_error = (
+        df_scada[turbine_columns].mean(axis=0) - df_floris[turbine_columns].mean(axis=0)
+    ) ** 2
 
     return df_error.sum()
-
