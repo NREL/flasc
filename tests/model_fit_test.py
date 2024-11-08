@@ -25,7 +25,7 @@ def get_simple_inputs_gch():
     fm.set(layout_x=[0.0], layout_y=[0.0])
 
     # Define cost_function as a simple function
-    def cost_function(df_scada, df_floris, fmodel):
+    def cost_function(df_scada, df_floris, fmodel, turbine_groupings):
         return None
 
     # Define the parameters to tune the kA parameter of GCH
@@ -272,7 +272,7 @@ def test_cost_function():
     def cost_2(df_scada, df_floris):
         return
 
-    def cost_3(df_scada, df_floris, fm):
+    def cost_3(df_scada, df_floris, fm, turbine_groupings):
         return
 
     with pytest.raises(ValueError):
