@@ -51,10 +51,13 @@ def atomic_opt_optuna(
         best_params.append(study.best_params[parameter_name])
 
     # Return results as dictionary
-    return {
+    result_dic =  {
         "parameter_values": best_params,
         "best_cost": study.best_value,
     }
+
+    # Returns results and the study object
+    return result_dic, study
 
 
 def opt_optuna_with_unc(
@@ -107,11 +110,14 @@ def opt_optuna_with_unc(
         best_params.append(study.best_params[parameter_name])
 
     # Return results as dictionary
-    return {
+    result_dic = {
         "wd_std": study.best_params["wd_std"],
         "parameter_values": best_params,
         "best_cost": study.best_value,
     }
+
+    # Returns results and the study object
+    return result_dic, study
 
 
 def atomic_opt_sweep_sequential(
