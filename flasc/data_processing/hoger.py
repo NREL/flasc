@@ -61,7 +61,7 @@ def discretize(x: np.ndarray, threshold: float = 100) -> np.ndarray:
 
 def homogenize(
     df: Union[pd.DataFrame, FlascDataFrame],
-    threshold: float = 100,
+    threshold: int = 100,
     reference: str = "last",
     verbose: bool = False,
 ) -> pd.DataFrame:
@@ -69,7 +69,7 @@ def homogenize(
     
     Args:
         df (Union[pd.DataFrame, FlascDataFrame]): DataFrame containing the SCADA data.
-        threshold (float, optional): Threshold for discretization. Defaults to 100.
+        threshold (int, optional): Threshold for discretization. Defaults to 100.
         reference (str, optional): Reference point for homogenization. Defaults to 'last'.
         verbose (bool, optional): Whether to print verbose output. Defaults to False.
     
@@ -126,8 +126,16 @@ def homogenize(
             # are verbatim from the example here
             # https://github.com/deepcharles/ruptures
             # presumably can improve somewhat
-            algo = rpt.Pelt(model="rbf", min_size=threshold).fit(wrapped_error)
-            result = algo.predict(pen=10)
+            # algo = rpt.Pelt(model="l1", min_size=threshold).fit(wrapped_error)
+            # result = algo.predict(pen=40)
+            algo = rpt.Window(width=threshold, model='l1').fit(wrapped_error)
+            print(np.log(len(wrapped_error)) )
+            print(np.std(wrapped_error))
+            print(wrapped_error[:20])
+            pen = np.log(len(wrapped_error)) * np.std(wrapped_error)**2
+            print(f"Pen: {pen}")
+            result = algo.predict(pen=pen)
+
 
             # If results is length 1 or 0, no significant jumps detected, continue
             if len(result) <= 1:
@@ -165,8 +173,13 @@ def homogenize(
                 [df_jump, pd.DataFrame({"Knot": knots, "Jump": jumps, "Turbine": t_i})]
             )
 
+
     # Process change points
     if not df_jump.empty:
+
+        print(f"Df_jump size: {df_jump.shape}")
+        df_jump_orig = df_jump.copy()
+
         # Group and summarize change points
         df_jump = (
             df_jump.assign(Count=1, Class=discretize(df_jump["Knot"].values, threshold=threshold))
@@ -185,6 +198,8 @@ def homogenize(
             .drop_duplicates("Class")
             .sort_values("Class")
         )
+
+        print(f"Df_jump size (after summarizing): {df_jump.shape}")
 
         # Apply corrections
         df_corr = df.copy()
@@ -209,62 +224,98 @@ def homogenize(
         return df
 
 
+# Engie test code
 if __name__ == "__main__":
-    # # Test discretize function
-    # x = np.array([0, 1, 2, 3,np.nan,2, 105, 1, np.nan])
-    # y = discretize(x)
-    # print(y)
 
-    # Now make a test dataframe to test the homogenize function
-    # Imagine there are 3 turbines, the first turbine's wd is
-    # set by a random walk.  Turbine 2 is equal to 1 + white noise
-    # finally turbine 3 is turbine 1 + white noise, + a jump
-    # by jump_size deg halfway through
-    n = 1000
-    jump_size = 10.0
-    np.random.seed(0)
-    time = pd.date_range("2020-01-01", periods=n, freq="10min")
-    wd_000 = wrap_360(np.cumsum(np.random.randn(n)))
-    wd_001 = wrap_360(wd_000 + np.random.randn(n))
-    wd_002 = wd_000 + np.random.randn(n)
-    wd_002[int(np.floor(n / 2)) :] += jump_size
-    wd_002 = wrap_360(wd_002)
-
-    # FlascDataFrame requires power signals, just make these up
-    pow_made_up = np.random.randn(n)
-
-    # Plot the 3 signals
-
+    df = pd.read_feather('scada_exemple.ftr')
+ 
     fig, ax = plt.subplots()
-    ax.plot(time, wd_000, label="Turbine 0")
-    ax.plot(time, wd_001, label="Turbine 1")
-    ax.plot(time, wd_002, label="Turbine 2")
+    ax.scatter(df["time"], wrap_180(df["wd_004"] -  df["wd_005"]), label="Direction E05 - E06")
     ax.legend()
     ax.grid(True)
     ax.set_title("Original Wind Directions")
+    
+    df_corr = homogenize(df, verbose=False) # the erreur occurs at this point.
 
-    # Combine into a FlascDataFrame
-    df = FlascDataFrame(
-        {
-            "time": time,
-            "wd_000": wd_000,
-            "wd_001": wd_001,
-            "wd_002": wd_002,
-            "pow_000": pow_made_up,
-            "pow_001": pow_made_up,
-            "pow_002": pow_made_up,
-        }
-    )
-
-    df_corr = homogenize(df, verbose=True)
-
-    # Plot the corrected results
     fig, ax = plt.subplots()
-    ax.plot(df_corr["time"], df_corr["wd_000"], label="Turbine 0")
-    ax.plot(df_corr["time"], df_corr["wd_001"], label="Turbine 1")
-    ax.plot(df_corr["time"], df_corr["wd_002"], label="Turbine 2")
+    ax.scatter(df_corr["time"], wrap_180(df_corr["wd_004"] -  df_corr["wd_005"]), label="Direction E05 - E06")
     ax.legend()
     ax.grid(True)
     ax.set_title("Corrected Wind Directions")
 
+    fig, axarr = plt.subplots(2,1,sharex=True)
+    ax = axarr[0]
+    ax.scatter(df["time"], df["wd_004"], label="original")
+    ax.scatter(df_corr["time"], df_corr["wd_004"], label="corrected")
+    ax.set_title("Turbine 4")
+    ax.grid(True)
+
+    ax = axarr[1]
+    ax.scatter(df["time"], df["wd_005"], label="original")
+    ax.scatter(df_corr["time"], df_corr["wd_005"], label="corrected")
+    ax.set_title("Turbine 5")
+    ax.grid(True)
+
+
     plt.show()
+
+# # Dummy test code
+# if __name__ == "__main__":
+#     # # Test discretize function
+#     # x = np.array([0, 1, 2, 3,np.nan,2, 105, 1, np.nan])
+#     # y = discretize(x)
+#     # print(y)
+
+#     # Now make a test dataframe to test the homogenize function
+#     # Imagine there are 3 turbines, the first turbine's wd is
+#     # set by a random walk.  Turbine 2 is equal to 1 + white noise
+#     # finally turbine 3 is turbine 1 + white noise, + a jump
+#     # by jump_size deg halfway through
+#     n = 1000
+#     jump_size = 10.0
+#     np.random.seed(0)
+#     time = pd.date_range("2020-01-01", periods=n, freq="10min")
+#     wd_000 = wrap_360(np.cumsum(np.random.randn(n)))
+#     wd_001 = wrap_360(wd_000 + np.random.randn(n))
+#     wd_002 = wd_000 + np.random.randn(n)
+#     wd_002[int(np.floor(n / 2)) :] += jump_size
+#     wd_002 = wrap_360(wd_002)
+
+#     # FlascDataFrame requires power signals, just make these up
+#     pow_made_up = np.random.randn(n)
+
+#     # Plot the 3 signals
+
+#     fig, ax = plt.subplots()
+#     ax.plot(time, wd_000, label="Turbine 0")
+#     ax.plot(time, wd_001, label="Turbine 1")
+#     ax.plot(time, wd_002, label="Turbine 2")
+#     ax.legend()
+#     ax.grid(True)
+#     ax.set_title("Original Wind Directions")
+
+#     # Combine into a FlascDataFrame
+#     df = FlascDataFrame(
+#         {
+#             "time": time,
+#             "wd_000": wd_000,
+#             "wd_001": wd_001,
+#             "wd_002": wd_002,
+#             "pow_000": pow_made_up,
+#             "pow_001": pow_made_up,
+#             "pow_002": pow_made_up,
+#         }
+#     )
+
+#     df_corr = homogenize(df, verbose=True)
+
+#     # Plot the corrected results
+#     fig, ax = plt.subplots()
+#     ax.plot(df_corr["time"], df_corr["wd_000"], label="Turbine 0")
+#     ax.plot(df_corr["time"], df_corr["wd_001"], label="Turbine 1")
+#     ax.plot(df_corr["time"], df_corr["wd_002"], label="Turbine 2")
+#     ax.legend()
+#     ax.grid(True)
+#     ax.set_title("Corrected Wind Directions")
+
+#     plt.show()
