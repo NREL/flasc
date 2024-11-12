@@ -324,9 +324,40 @@ def test_compute_covariance():
         bin_cols_with_df_name=["wd_bin", "ws_bin", "df_name"],
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(test_df)
-        print(df_cov)
+    df_cov = df_cov.sort(["wd_bin", "ws_bin", "df_name"])
+
+    np.testing.assert_allclose(df_cov["cov_pow_000_pow_001"].to_numpy(), [0, 0, 0, -1])
+
+    # with pl.Config(tbl_cols=-1):
+    #     print(test_df)
+    #     print(df_cov)
+
+
+def test_cov_against_var():
+    """Test that computing variance of one power signal is the same as the covariance of the signal with itself."""
+    test_df = pl.DataFrame(
+        {
+            "wd_bin": np.zeros(5),
+            "ws_bin": np.ones(5),
+            "df_name": ["baseline"] * 5,
+            "pow_000": [0, 1, 2, 3, None],
+        }
+    )
+
+    df_cov = _compute_covariance(
+        df_=test_df,
+        test_cols=["pow_000"],
+        bin_cols_with_df_name=["wd_bin", "ws_bin", "df_name"],
+    )
+
+    df_bin = _bin_and_group_dataframe_expected_power(
+        df_=test_df,
+        test_cols=["pow_000"],
+    )
+
+    np.testing.assert_almost_equal(
+        df_cov["cov_pow_000_pow_000"].to_numpy(), df_bin["pow_000_var"].to_numpy()
+    )
 
 
 def test_total_uplift_expected_power_with_standard_error():
