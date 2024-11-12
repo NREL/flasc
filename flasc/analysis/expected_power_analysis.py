@@ -1,6 +1,7 @@
 """Analyze SCADA data using expected power methods."""
 
 import warnings
+from itertools import product
 
 import numpy as np
 import pandas as pd
@@ -61,7 +62,7 @@ def _bin_and_group_dataframe_expected_power(
         df_ (pl.DataFrame): A polars dataframe, exported from a_in.get_df()
         test_cols (list): A list of column names to calculate the mean and variance of
         bin_cols_without_df_name (list): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
-        
+
 
     Returns:
         pl.DataFrame: A polars dataframe with the mean and variance of the test_cols grouped by bin_cols_without_df_name
@@ -199,7 +200,7 @@ def _total_uplift_expected_power_single(
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
 
-    # Remove rows where any of the test columns are null
+    # Remove rows where any of the test columns are null (if remove_any_null_turbine_bins is True)
     if remove_any_null_turbine_bins:
         df_bin = df_bin.filter(
             pl.all_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols])
@@ -304,8 +305,73 @@ def _total_uplift_expected_power_with_bootstrapping(
     return bootstrap_uplift_result
 
 
+def _get_num_points(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: list):
+    # Generate all pairs of columns (including same column pairs)
+    col_pairs = list(product(test_cols, test_cols))
+
+    df_group = df_.group_by(bin_cols_with_df_name).agg(pl.count().alias("count"))
+
+    for c1, c2 in col_pairs:
+        df_sub = df_.filter(
+            pl.col(c1).is_not_null()
+            & pl.col(c2).is_not_null()
+            & pl.col(c1).is_not_nan()
+            & pl.col(c2).is_not_nan()
+        )
+        df_group_sub = df_sub.group_by(bin_cols_with_df_name).agg(
+            pl.count().alias(f"count_{c1}_{c2}")
+        )
+
+        df_group = df_group.join(df_group_sub, on=bin_cols_with_df_name, how="left")
+
+    # Fill nulls to 0
+    df_group = df_group.fill_null(0)
+
+    # Sort by bin_cols_with_df_name
+    df_group = df_group.sort(bin_cols_with_df_name)
+
+    return df_group
+
+
 def _compute_covariance(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: list):
-    return df_.group_by(bin_cols_with_df_name).agg(pl.cov(test_cols[0], test_cols[1]))
+    """Compute covariance matrix with from/to turbine columns.
+
+    Args:
+        df_ (pl.DataFrame): A polars dataframe
+        test_cols (list): A list of column names to calculate the covariance of
+        bin_cols_with_df_name (list): A list of column names to bin the dataframes by.
+
+    Returns:
+        pl.DataFrame: A polars dataframe with the covariance matrix
+    """
+    # Generate all pairs of columns (including same column pairs)
+    col_pairs = list(product(test_cols, test_cols))
+
+    # Create expressions for all covariances
+    cov_exprs = [pl.cov(pair[0], pair[1]).alias(f"cov_{pair[0]}_{pair[1]}") for pair in col_pairs]
+
+    # Compute covariances
+    grouped_covs = df_.group_by(bin_cols_with_df_name).agg(cov_exprs)
+
+    return grouped_covs
+
+
+def _compute_var_of_expected_farm_power(
+    df_bin: pl.DataFrame,
+    df_cov: pl.DataFrame,
+    df_n: pl.DataFrame,
+    test_cols: list,
+    bin_cols_with_df_name: list,
+):
+    # This should calculate equation 4.16
+
+    # Need to iterate over all the test columns
+    for t1 in test_cols:
+        var_col = t1 + "_var"
+        for t2 in test_cols:
+            cov_col = "cov_" + t1 + "_" + t2
+            n_col = "count_" + t1 + "_" + t2
+            df_bin = df_bin.with_columns(var_col=pl.col(var_col) + pl.col(cov_col) / pl.col(n_col))
 
 
 def _total_uplift_expected_power_with_standard_error(
@@ -327,59 +393,68 @@ def _total_uplift_expected_power_with_standard_error(
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
 ):
-    pass
-
-    # Get the covariance matrix between turbines
-
     # with pl.Config(tbl_cols=-1):
     #     print(df_bin)
     #     print(df_sum)
     #     print(uplift_results)
 
-    # # Get the bin cols without df_name
-    # bin_cols_without_df_name = [c for c in bin_cols_in if c != "df_name"]
+    # Get the bin cols without df_name
+    bin_cols_without_df_name = [c for c in bin_cols_in if c != "df_name"]
+    bin_cols_with_df_name = bin_cols_in + ["df_name"]
 
-    # # Add the wd and ws bins
-    # df_ = _add_wd_ws_bins(
-    #     df_,
-    #     wd_cols=wd_cols,
-    #     ws_cols=ws_cols,
-    #     wd_step=wd_step,
-    #     wd_min=wd_min,
-    #     wd_max=wd_max,
-    #     ws_step=ws_step,
-    #     ws_min=ws_min,
-    #     ws_max=ws_max,
-    #     remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
-    # )
+    # Add the wd and ws bins
+    df_ = _add_wd_ws_bins(
+        df_,
+        wd_cols=wd_cols,
+        ws_cols=ws_cols,
+        wd_step=wd_step,
+        wd_min=wd_min,
+        wd_max=wd_max,
+        ws_step=ws_step,
+        ws_min=ws_min,
+        ws_max=ws_max,
+        remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
+    )
 
-    # # Bin and group the dataframe
-    # df_bin = _bin_and_group_dataframe_expected_power(
-    #     df_=df_,
-    #     test_cols=test_cols,
-    #     wd_cols=wd_cols,
-    #     ws_cols=ws_cols,
-    #     wd_step=wd_step,
-    #     wd_min=wd_min,
-    #     wd_max=wd_max,
-    #     ws_step=ws_step,
-    #     ws_min=ws_min,
-    #     ws_max=ws_max,
-    #     bin_cols_without_df_name=bin_cols_without_df_name,
-    #     remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
-    # )
+    # Compute the covariance frame
+    df_cov = _compute_covariance(
+        df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
+    )
 
-    # # Synchronize the null values
-    # df_bin = _synchronize_nulls(
-    #     df_bin=df_bin,
-    #     sync_cols=[f"{col}_mean" for col in test_cols],
-    #     uplift_pairs=uplift_pairs,
-    #     bin_cols_without_df_name=bin_cols_without_df_name,
-    # )
+    # Get the counts per turbine pair
+    df_n = _get_num_points(df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name)
 
-    # # Remove rows where any of the test columns are null
-    # if remove_any_null_turbine_bins:
-    #     df_bin = df_bin.filter(pl.all_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols]))
+    # Bin and group the dataframe
+    df_bin = _bin_and_group_dataframe_expected_power(
+        df_=df_,
+        test_cols=test_cols,
+        bin_cols_without_df_name=bin_cols_without_df_name,
+    )
+
+    # Synchronize the null values
+    df_bin = _synchronize_nulls(
+        df_bin=df_bin,
+        sync_cols=[f"{col}_mean" for col in test_cols],
+        uplift_pairs=uplift_pairs,
+        bin_cols_without_df_name=bin_cols_without_df_name,
+    )
+
+    # Remove rows where any of the test columns are null (if remove_any_null_turbine_bins is True)
+    if remove_any_null_turbine_bins:
+        df_bin = df_bin.filter(
+            pl.all_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols])
+        )
+
+    # Compute the farm power
+    df_bin = df_bin.with_columns(pow_farm=pl.sum_horizontal([f"{c}_mean" for c in test_cols]))
+
+    # Determine the weighting of the ws/wd bins
+    df_bin, df_freq_pl = add_bin_weights(df_bin, df_freq_pl, bin_cols_without_df_name, weight_by)
+
+    # Normalize the weight column over the values in df_name column
+    df_bin = df_bin.with_columns(
+        weight=pl.col("weight") / pl.col("weight").sum().over("df_name")
+    ).with_columns(weighted_power=pl.col("pow_farm") * pl.col("weight"))
 
 
 def total_uplift_expected_power(

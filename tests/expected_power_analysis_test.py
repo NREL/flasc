@@ -1,16 +1,18 @@
 import numpy as np
 import pandas as pd
 import polars as pl
+from polars.testing import assert_frame_equal
 
 from flasc.analysis.analysis_input import AnalysisInput
 from flasc.analysis.expected_power_analysis import (
     _add_wd_ws_bins,
     _bin_and_group_dataframe_expected_power,
+    _compute_covariance,
+    _get_num_points,
     _synchronize_nulls,
     _total_uplift_expected_power_single,
     _total_uplift_expected_power_with_bootstrapping,
     _total_uplift_expected_power_with_standard_error,
-    _compute_covariance
 )
 
 
@@ -40,7 +42,6 @@ def load_data():
 
 
 def test_add_wd_ws_bins():
-
     a_in = load_data()
 
     df_ = _add_wd_ws_bins(
@@ -113,7 +114,6 @@ def test_bin_and_group_dataframe_expected_power():
     )
 
     with pl.Config(tbl_cols=-1):
-
         print(df_)
 
     np.testing.assert_array_equal(
@@ -266,31 +266,70 @@ def test_total_uplift_expected_power_with_bootstrapping():
     )
 
 
-def test_compute_covariance():
-
+def test__get_num_points():
     test_df = pl.DataFrame(
         {
-            'wd_bin':[0, 0, 0, 0,0,0, 1, 1, 1, 1 ,1,1],
-            'ws_bin': np.ones(12),
-            'df_name': ['baseline'] * 3 + ['wake_steering'] * 3 + ['baseline'] * 3 + ['wake_steering'] * 3,
-            'pow_000': np.array([1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,0.,-1.]),
-            'pow_001': np.array([1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,2.,3.])
+            "wd_bin": [0, 0, 0, 1, 1, 1],
+            "ws_bin": [1, 1, 1, 1, 1, 1],
+            "df_name": ["baseline", "baseline", "baseline", "baseline", "baseline", "baseline"],
+            "pow_000": np.array([1.0, np.nan, 1.0, 1, 1, 1]),
+            "pow_001": np.array([1.0, 1.0, np.nan, 1, np.nan, 1]),
+            "pow_002": np.array([np.nan, np.nan, 1.0, np.nan, np.nan, np.nan]),
         }
     )
 
+    df_count = _get_num_points(
+        test_df, ["pow_000", "pow_001", "pow_002"], ["wd_bin", "ws_bin", "df_name"]
+    )
+
+    df_expected = pl.DataFrame(
+        {
+            "wd_bin": [0, 1],
+            "ws_bin": [1, 1],
+            "df_name": ["baseline", "baseline"],  #
+            "count": [3, 3],
+            "count_pow_000_pow_000": [2, 3],
+            "count_pow_000_pow_001": [1, 2],
+            "count_pow_000_pow_002": [1, 0],
+            "count_pow_001_pow_000": [1, 2],
+            "count_pow_001_pow_001": [2, 2],
+            "count_pow_001_pow_002": [0, 0],
+            "count_pow_002_pow_000": [1, 0],
+            "count_pow_002_pow_001": [0, 0],
+            "count_pow_002_pow_002": [1, 0],
+        }
+    )
+
+    # Test that df_count and df_expected are essentially equal
+    assert_frame_equal(df_count, df_expected, check_row_order=False, check_dtype=False)
+
+
+def test_compute_covariance():
+    test_df = pl.DataFrame(
+        {
+            "wd_bin": [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+            "ws_bin": np.ones(12),
+            "df_name": ["baseline"] * 3
+            + ["wake_steering"] * 3
+            + ["baseline"] * 3
+            + ["wake_steering"] * 3,
+            "pow_000": np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, -1.0]),
+            "pow_001": np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 3.0]),
+        }
+    )
 
     df_cov = _compute_covariance(
         df_=test_df,
         test_cols=["pow_000", "pow_001"],
-        bin_cols_with_df_name = ["wd_bin", "ws_bin","df_name"]
+        bin_cols_with_df_name=["wd_bin", "ws_bin", "df_name"],
     )
 
     with pl.Config(tbl_cols=-1):
         print(test_df)
         print(df_cov)
 
-def test_total_uplift_expected_power_with_standard_error():
 
+def test_total_uplift_expected_power_with_standard_error():
     a_in = load_data()
 
     _total_uplift_expected_power_with_standard_error(
