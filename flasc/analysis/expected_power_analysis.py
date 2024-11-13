@@ -353,6 +353,12 @@ def _compute_covariance(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_nam
     # Compute covariances
     grouped_covs = df_.group_by(bin_cols_with_df_name).agg(cov_exprs)
 
+    # Get the number of points for each pair
+    df_n = _get_num_points(df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name)
+
+    # Join the number of points to the covariance matrix
+    grouped_covs = grouped_covs.join(df_n, on=bin_cols_with_df_name, how="left")
+
     return grouped_covs
 
 
@@ -421,8 +427,11 @@ def _total_uplift_expected_power_with_standard_error(
         df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
     )
 
+    with pl.Config(tbl_cols=-1):
+        print(df_cov)
+
     # Get the counts per turbine pair
-    df_n = _get_num_points(df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name)
+    # df_n = _get_num_points(df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name)
 
     # Bin and group the dataframe
     df_bin = _bin_and_group_dataframe_expected_power(
@@ -444,6 +453,12 @@ def _total_uplift_expected_power_with_standard_error(
         df_bin = df_bin.filter(
             pl.all_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols])
         )
+
+    # Join the covariance dataframe to df_bin
+    df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
+
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
 
     # Compute the farm power
     df_bin = df_bin.with_columns(pow_farm=pl.sum_horizontal([f"{c}_mean" for c in test_cols]))
