@@ -2,6 +2,7 @@
 
 import warnings
 from itertools import product
+from typing import List, Tuple, Dict, Optional
 
 import numpy as np
 import pandas as pd
@@ -19,8 +20,8 @@ logger = logger_manager.logger  # Obtain the reusable logger
 
 def _add_wd_ws_bins(
     df_: pl.DataFrame,
-    wd_cols: list,
-    ws_cols: list,
+    wd_cols: List[str],
+    ws_cols: List[str],
     wd_step: float = 2.0,
     wd_min: float = 0.0,
     wd_max: float = 360.0,
@@ -28,13 +29,13 @@ def _add_wd_ws_bins(
     ws_min: float = 0.0,
     ws_max: float = 50.0,
     remove_all_nulls_wd_ws: bool = False,
-):
-    """Add wd and ws bin columns.
+) -> pl.DataFrame:
+    """Add wind direction (wd) and wind speed (ws) bin columns to the dataframe.
 
     Args:
         df_ (pl.DataFrame): A polars dataframe, exported from a_in.get_df()
-        wd_cols (list): A list of column names for wind direction
-        ws_cols (list): A list of column names for wind speed
+        wd_cols (List[str]): A list of column names for wind direction
+        ws_cols (List[str]): A list of column names for wind speed
         wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
         wd_min (float): The minimum wind direction value. Defaults to 0.0.
         wd_max (float): The maximum wind direction value. Defaults to 360.0.
@@ -44,7 +45,7 @@ def _add_wd_ws_bins(
         remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed. Defaults to False.
 
     Returns:
-        pl.DataFrame: A polars dataframe with the wd and ws bin columns added
+        pl.DataFrame: A polars dataframe with the wd and ws bin columns added.
     """
     df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max, remove_all_nulls=remove_all_nulls_wd_ws)
     df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max, remove_all_nulls=remove_all_nulls_wd_ws)
@@ -53,21 +54,18 @@ def _add_wd_ws_bins(
 
 def _bin_and_group_dataframe_expected_power(
     df_: pl.DataFrame,
-    test_cols: list,
-    bin_cols_without_df_name: list = ["wd_bin", "ws_bin"],
+    test_cols: List[str],
+    bin_cols_without_df_name: List[str] = ["wd_bin", "ws_bin"],
 ) -> pl.DataFrame:
-    """Group dataframes by bin_cols_without_df_name.
-
-    Group dataframes by bin_cols_without_df_name and calculate the mean and variance of the test_cols.
+    """Group dataframes by bin columns and calculate the mean and variance of the test columns.
 
     Args:
         df_ (pl.DataFrame): A polars dataframe, exported from a_in.get_df()
-        test_cols (list): A list of column names to calculate the mean and variance of
-        bin_cols_without_df_name (list): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
-
+        test_cols (List[str]): A list of column names to calculate the mean and variance of
+        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
 
     Returns:
-        pl.DataFrame: A polars dataframe with the mean and variance of the test_cols grouped by bin_cols_without_df_name
+        pl.DataFrame: A polars dataframe with the mean and variance of the test columns grouped by bin columns.
     """
     num_df = df_["df_name"].n_unique()
 
@@ -98,23 +96,20 @@ def _bin_and_group_dataframe_expected_power(
 
 def _synchronize_nulls(
     df_bin: pl.DataFrame,
-    sync_cols: list,
-    uplift_pairs: list,
-    bin_cols_without_df_name: list = ["wd_bin", "ws_bin"],
+    sync_cols: List[str],
+    uplift_pairs: List[List[str]],
+    bin_cols_without_df_name: List[str] = ["wd_bin", "ws_bin"],
 ) -> pl.DataFrame:
-    """Copy the nans from the test columns in one of the df_name values to the other.
+    """Copy the nans from the test columns in one of the df_name values to the other within each uplift pair.
 
     Args:
-        df_bin (pl.DataFrame): A polars dataframe with the mean and variance of the test_cols
-            grouped by bin_cols_with_df_name
-        sync_cols (list): Cols to synchronize
-        uplift_pairs (list): A list of the df_name values to copy the nans from
-        bin_cols_without_df_name (list): A list of column names to bin the dataframes by.
-            Defaults to ["wd_bin", "ws_bin"].
+        df_bin (pl.DataFrame): A polars dataframe with the mean and variance of the test columns grouped by bin columns.
+        sync_cols (List[str]): Columns to synchronize.
+        uplift_pairs (List[List[str]]): A list of the df_name values to copy the nans from for each pair
+        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
 
     Returns:
-        pl.DataFrame: A polars dataframe with the nans copied from one of the df_name
-            values to the other
+        pl.DataFrame: A polars dataframe with the nans copied from one of the df_name values to the other.
     """
     df_ = df_bin.clone()
 
@@ -153,23 +148,47 @@ def _synchronize_nulls(
 
 def _total_uplift_expected_power_single(
     df_: pl.DataFrame,
-    test_cols: list,
-    wd_cols: list,
-    ws_cols: list,
-    uplift_pairs: list,
-    uplift_names: list,
+    test_cols: List[str],
+    wd_cols: List[str],
+    ws_cols: List[str],
+    uplift_pairs: List[Tuple[str, str]],
+    uplift_names: List[str],
     wd_step: float = 2.0,
     wd_min: float = 0.0,
     wd_max: float = 360.0,
     ws_step: float = 1.0,
     ws_min: float = 0.0,
     ws_max: float = 50.0,
-    bin_cols_in: list = ["wd_bin", "ws_bin"],
+    bin_cols_in: List[str] = ["wd_bin", "ws_bin"],
     weight_by: str = "min",  # min or sum
     df_freq_pl: pl.DataFrame = None,
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
-):
+) -> Tuple[pl.DataFrame, pl.DataFrame, Dict[str, float]]:
+    """Calculate the total uplift in expected power for a single run.
+
+    Args:
+        df_ (pl.DataFrame): A polars dataframe, exported from a_in.get_df()
+        test_cols (List[str]): A list of column names to calculate uplift over
+        wd_cols (List[str]): A list of column names for wind direction
+        ws_cols (List[str]): A list of column names for wind speed
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to compare
+        uplift_names (List[str]): A list of names for the uplift results
+        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
+        wd_min (float): The minimum wind direction value. Defaults to 0.0.
+        wd_max (float): The maximum wind direction value. Defaults to 360.0.
+        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
+        ws_min (float): The minimum wind speed value. Defaults to 0.0.
+        ws_max (float): The maximum wind speed value. Defaults to 50.0.
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
+        weight_by (str): The method to weight the bins. Defaults to "min".
+        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin. Defaults to None.
+        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed. Defaults to False.
+        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins. Defaults to False.
+
+    Returns:
+        Tuple[pl.DataFrame, pl.DataFrame, Dict[str, float]]: A tuple containing the binned dataframe, the summed dataframe, and the uplift results.
+    """
     # Get the bin cols without df_name
     bin_cols_without_df_name = [c for c in bin_cols_in if c != "df_name"]
 
@@ -240,28 +259,51 @@ def _total_uplift_expected_power_single(
 
 def _total_uplift_expected_power_with_bootstrapping(
     a_in: AnalysisInput,
-    test_cols: list,
-    wd_cols: list,
-    ws_cols: list,
-    uplift_pairs: list,
-    uplift_names: list,
+    test_cols: List[str],
+    wd_cols: List[str],
+    ws_cols: List[str],
+    uplift_pairs: List[Tuple[str, str]],
+    uplift_names: List[str],
     wd_step: float = 2.0,
     wd_min: float = 0.0,
     wd_max: float = 360.0,
     ws_step: float = 1.0,
     ws_min: float = 0.0,
     ws_max: float = 50.0,
-    bin_cols_in: list = ["wd_bin", "ws_bin"],
+    bin_cols_in: List[str] = ["wd_bin", "ws_bin"],
     weight_by: str = "min",  # min or sum
     df_freq_pl: pl.DataFrame = None,
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     N: int = 1,
-    percentiles: list = [2.5, 97.5],
-):
-    
+    percentiles: List[float] = [2.5, 97.5],
+) -> Tuple[pl.DataFrame, pl.DataFrame, Dict[str, Dict[str, float]]]:
+    """Calculate the total uplift in expected power using bootstrapping.
 
+    Args:
+        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze
+        test_cols (List[str]): A list of column names to calculate the uplift over
+        wd_cols (List[str]): A list of column names for wind direction
+        ws_cols (List[str]): A list of column names for wind speed
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to compare
+        uplift_names (List[str]): A list of names for the uplift results
+        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
+        wd_min (float): The minimum wind direction value. Defaults to 0.0.
+        wd_max (float): The maximum wind direction value. Defaults to 360.0.
+        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
+        ws_min (float): The minimum wind speed value. Defaults to 0.0.
+        ws_max (float): The maximum wind speed value. Defaults to 50.0.
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
+        weight_by (str): The method to weight the bins. Defaults to "min".
+        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin. Defaults to None.
+        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed. Defaults to False.
+        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins. Defaults to False.
+        N (int): The number of bootstrap samples. Defaults to 1.
+        percentiles (List[float]): The percentiles to calculate for the bootstrap samples. Defaults to [2.5, 97.5].
 
+    Returns:
+        Tuple[pl.DataFrame, pl.DataFrame, Dict[str, Dict[str, float]]]: A tuple containing the binned dataframe, the summed dataframe, and the uplift results.
+    """
     uplift_single_outs = [
         _total_uplift_expected_power_single(
             a_in.resample_energy_table(perform_resample=(i != 0)),
@@ -310,7 +352,21 @@ def _total_uplift_expected_power_with_bootstrapping(
     return uplift_single_outs[0][0], uplift_single_outs[0][1], bootstrap_uplift_result
 
 
-def _get_num_points(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: list):
+def _get_num_points(
+    df_: pl.DataFrame,
+    test_cols: List[str],
+    bin_cols_with_df_name: List[str],
+) -> pl.DataFrame:
+    """Get the number of points for each pair of test columns.
+
+    Args:
+        df_ (pl.DataFrame): A polars dataframe
+        test_cols (List[str]): A list of column names to calculate the number of points for
+        bin_cols_with_df_name (List[str]): A list of column names to bin the dataframes by.
+
+    Returns:
+        pl.DataFrame: A polars dataframe with the number of points for each pair of test columns.
+    """
     # Generate all pairs of columns (including same column pairs)
     col_pairs = list(product(test_cols, test_cols))
 
@@ -336,16 +392,20 @@ def _get_num_points(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: l
     return df_n
 
 
-def _compute_covariance(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: list):
-    """Compute covariance matrix with from/to turbine columns.
+def _compute_covariance(
+    df_: pl.DataFrame,
+    test_cols: List[str],
+    bin_cols_with_df_name: List[str],
+) -> pl.DataFrame:
+    """Compute the covariance matrix for the test columns.
 
     Args:
         df_ (pl.DataFrame): A polars dataframe
-        test_cols (list): A list of column names to calculate the covariance of
-        bin_cols_with_df_name (list): A list of column names to bin the dataframes by.
+        test_cols (List[str]): A list of column names to calculate the covariance of
+        bin_cols_with_df_name (List[str]): A list of column names to bin the dataframes by.
 
     Returns:
-        pl.DataFrame: A polars dataframe with the covariance matrix
+        pl.DataFrame: A polars dataframe with the covariance matrix.
     """
     # Generate all pairs of columns (including same column pairs)
     col_pairs = list(product(test_cols, test_cols))
@@ -367,10 +427,21 @@ def _compute_covariance(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_nam
 
 def _null_and_sync_covariance(
     df_cov: pl.DataFrame,
-    test_cols: list,
-    uplift_pairs: list,
-    bin_cols_without_df_name: list = ["wd_bin", "ws_bin"],
-):
+    test_cols: List[str],
+    uplift_pairs: List[List[str]],
+    bin_cols_without_df_name: List[str] = ["wd_bin", "ws_bin"],
+) -> pl.DataFrame:
+    """Apply null values to the covariance matrix and synchronize across uplift pairs.
+
+    Args:
+        df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
+        test_cols (List[str]): A list of column names to calculate the covariance of
+        uplift_pairs (List[List[str]]): A list of the df_name values to copy the nans from
+        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
+
+    Returns:
+        pl.DataFrame: A polars dataframe with the null values applied and synchronized across uplift pairs.
+    """
     # Get the names of all the covariance and num_points columns
     cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
     n_cols = [f"count_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
@@ -413,24 +484,49 @@ def _null_and_sync_covariance(
 
 def _total_uplift_expected_power_with_standard_error(
     df_: pl.DataFrame,
-    test_cols: list,
-    wd_cols: list,
-    ws_cols: list,
-    uplift_pairs: list,
-    uplift_names: list,
+    test_cols: List[str],
+    wd_cols: List[str],
+    ws_cols: List[str],
+    uplift_pairs: List[List[str, str]],
+    uplift_names: List[str],
     wd_step: float = 2.0,
     wd_min: float = 0.0,
     wd_max: float = 360.0,
     ws_step: float = 1.0,
     ws_min: float = 0.0,
     ws_max: float = 50.0,
-    bin_cols_in: list = ["wd_bin", "ws_bin"],
+    bin_cols_in: List[str] = ["wd_bin", "ws_bin"],
     weight_by: str = "min",  # min or sum
     df_freq_pl: pl.DataFrame = None,
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     remove_any_null_turbine_std_bins: bool = False,
-):
+) -> Dict[str, Dict[str, float]]:
+    """Calculate the total uplift in expected power with standard error.
+
+    Args:
+        df_ (pl.DataFrame): A polars dataframe, exported from a_in.get_df()
+        test_cols (List[str]): A list of column names to calculate the uplift of
+        wd_cols (List[str]): A list of column names for wind direction
+        ws_cols (List[str]): A list of column names for wind speed
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to compare
+        uplift_names (List[str]): A list of names for the uplift results
+        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
+        wd_min (float): The minimum wind direction value. Defaults to 0.0.
+        wd_max (float): The maximum wind direction value. Defaults to 360.0.
+        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
+        ws_min (float): The minimum wind speed value. Defaults to 0.0.
+        ws_max (float): The maximum wind speed value. Defaults to 50.0.
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
+        weight_by (str): The method to weight the bins. Defaults to "min".
+        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin. Defaults to None.
+        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed. Defaults to False.
+        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins. Defaults to False.
+        remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error bins. Defaults to False.
+
+    Returns:
+        Dict[str, Dict[str, float]]: A dictionary containing the uplift results with standard error.
+    """
     # with pl.Config(tbl_cols=-1):
     #     print(df_bin)
     #     print(df_sum)
@@ -626,11 +722,11 @@ def _total_uplift_expected_power_with_standard_error(
 
 def total_uplift_expected_power(
     a_in: AnalysisInput,
-    uplift_pairs: list,
-    uplift_names: list,
-    test_turbines: list = None,
-    wd_turbines: list = None,
-    ws_turbines: list = None,
+    uplift_pairs: List[List[str, str]],
+    uplift_names: List[str],
+    test_turbines: List[int],
+    wd_turbines: List[int] = None,
+    ws_turbines: List[int] = None,
     use_predefined_wd: bool = False,
     use_predefined_ws: bool = False,
     wd_step: float = 2.0,
@@ -639,18 +735,46 @@ def total_uplift_expected_power(
     ws_step: float = 1.0,
     ws_min: float = 0.0,
     ws_max: float = 50.0,
-    bin_cols_in: list = ["wd_bin", "ws_bin"],
+    bin_cols_in: List[str] = ["wd_bin", "ws_bin"],
     weight_by: str = "min",  # min or sum
     df_freq: pd.DataFrame = None,
-
     use_standard_error: bool = True,
     N: int = 1,
-    percentiles: list = [2.5, 97.5],
+    percentiles: List[float] = [2.5, 97.5],
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     remove_any_null_turbine_std_bins: bool = False,
-):
-    """Calculate the total uplift in energy production using expected power methods."""
+) -> ExpectedPowerAnalysisOutput:
+    """Calculate the total uplift in energy production using expected power methods.
+
+    Args:
+        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to compare
+        uplift_names (List[str]): A list of names for the uplift results
+        test_turbines (List[int]): A list of turbine indices to test
+        wd_turbines (List[int]): A list of turbine indices for wind direction. Defaults to None.
+        ws_turbines (List[int]): A list of turbine indices for wind speed. Defaults to None.
+        use_predefined_wd (bool): Use predefined wind direction. Defaults to False.
+        use_predefined_ws (bool): Use predefined wind speed. Defaults to False.
+        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
+        wd_min (float): The minimum wind direction value. Defaults to 0.0.
+        wd_max (float): The maximum wind direction value. Defaults to 360.0.
+        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
+        ws_min (float): The minimum wind speed value. Defaults to 0.0.
+        ws_max (float): The maximum wind speed value. Defaults to 50.0.
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
+        weight_by (str): The method to weight the bins. Defaults to "min".
+        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin. Defaults to None.
+        use_standard_error (bool): Use standard error for the uplift calculation. Defaults to True.
+        N (int): The number of bootstrap samples. Defaults to 1.
+        percentiles (List[float]): The percentiles to calculate for the bootstrap samples. Defaults to [2.5, 97.5].
+        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed. Defaults to False.
+        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins. Defaults to False.
+        remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error bins. Defaults to False.
+
+    Returns:
+        ExpectedPowerAnalysisOutput: An object containing the uplift results and analysis parameters.
+    """
     # Get the polars dataframe from within the a_in
     df_ = a_in.get_df()
 
