@@ -38,7 +38,7 @@ class ExpectedPowerAnalysisOutput:
         remove_any_null_turbine_bins: bool = False,
         remove_any_null_turbine_std_bins: bool = False,
     ) -> None:
-        # Save all the inputs
+        """Init the object with the results of the uplift analysis."""
         self.uplift_results = uplift_results
         self.a_in = a_in
         self.test_turbines = test_turbines
