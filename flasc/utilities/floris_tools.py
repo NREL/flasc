@@ -421,9 +421,9 @@ def calc_floris_approx_table(
                 :, tindex
             ]
             solutions_dict["wd_{:03d}".format(tindex)] = fm.wind_directions
-            solutions_dict[
-                "ti_{:03d}".format(tindex)
-            ] = fm.core.flow_field.turbulence_intensity_field[:, tindex]
+            solutions_dict["ti_{:03d}".format(tindex)] = (
+                fm.core.flow_field.turbulence_intensity_field[:, tindex]
+            )
     df_approx = pd.DataFrame(solutions_dict)
 
     logger.info("Finished calculating the FLORIS solutions for the dataframe.")
