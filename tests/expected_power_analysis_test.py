@@ -5,16 +5,18 @@ from polars.testing import assert_frame_equal
 
 from flasc.analysis.analysis_input import AnalysisInput
 from flasc.analysis.expected_power_analysis import (
+    _total_uplift_expected_power_single,
+    _total_uplift_expected_power_with_bootstrapping,
+    _total_uplift_expected_power_with_standard_error,
+    total_uplift_expected_power,
+)
+from flasc.analysis.expected_power_analysis_utilities import (
     _add_wd_ws_bins,
     _bin_and_group_dataframe_expected_power,
     _compute_covariance,
     _get_num_points,
     _null_and_sync_covariance,
     _synchronize_nulls,
-    _total_uplift_expected_power_single,
-    _total_uplift_expected_power_with_bootstrapping,
-    _total_uplift_expected_power_with_standard_error,
-    total_uplift_expected_power,
 )
 
 
