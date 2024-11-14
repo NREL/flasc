@@ -2,7 +2,7 @@
 
 import warnings
 from itertools import product
-from typing import List, Tuple, Dict, Optional
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -637,7 +637,7 @@ def _total_uplift_expected_power_with_standard_error(
     # Normalize the weight column over the values in df_name column and compute
     # the weighted farm power and weighted var per bin
     df_bin = df_bin.with_columns(weight=pl.col("weight") / pl.col("weight").sum().over("df_name"))
-    
+
     # Add the weighted farm power column
     df_bin = df_bin.with_columns(weighted_farm_power=pl.col("pow_farm") * pl.col("weight"))
     # .with_columns(weighted_power=pl.col("pow_farm") * pl.col("weight"),
@@ -654,7 +654,8 @@ def _total_uplift_expected_power_with_standard_error(
 
         # Limit the columns to bin_cols_without_df_name, df_name, weight, pow_farm, pow_farm_var
         df_sub = df_sub.select(
-            bin_cols_without_df_name + ["df_name", "weight","weighted_farm_power", "pow_farm", "pow_farm_var"]
+            bin_cols_without_df_name
+            + ["df_name", "weight", "weighted_farm_power", "pow_farm", "pow_farm_var"]
         )
 
         # Keep bin_cols_without_df_name, weight as the index, pivot df_name across pow_farm, pow_farm_var
@@ -696,12 +697,12 @@ def _total_uplift_expected_power_with_standard_error(
         df_sub = df_sub.with_columns(
             weighted_expected_power_ratio_var=(
                 (
-                    pl.col(f"pow_farm_var_{uplift_pair[1]}") * pl.col("weight") ** 2 
+                    pl.col(f"pow_farm_var_{uplift_pair[1]}") * pl.col("weight") ** 2
                     + pl.col(f"pow_farm_var_{uplift_pair[0]}")
-                    * total_expected_power_ratio ** 2
+                    * total_expected_power_ratio**2
                     * pl.col("weight") ** 2
                 )
-                / farm_power_0 ** 2
+                / farm_power_0**2
             )
         )
 
