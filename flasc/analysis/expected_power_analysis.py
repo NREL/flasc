@@ -8,6 +8,7 @@ import pandas as pd
 import polars as pl
 
 from flasc.analysis.analysis_input import AnalysisInput
+from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 from flasc.logging_manager import LoggingManager
 from flasc.utilities.energy_ratio_utilities import add_bin_weights, add_wd_bin, add_ws_bin
 
@@ -257,6 +258,9 @@ def _total_uplift_expected_power_with_bootstrapping(
     N: int = 1,
     percentiles: list = [2.5, 97.5],
 ):
+    
+
+
     uplift_single_outs = [
         _total_uplift_expected_power_single(
             a_in.resample_energy_table(perform_resample=(i != 0)),
@@ -302,7 +306,7 @@ def _total_uplift_expected_power_with_bootstrapping(
             "energy_uplift_ub_pc": (uplift_ub - 1) * 100,
         }
 
-    return bootstrap_uplift_result
+    return uplift_single_outs[0][0], uplift_single_outs[0],[1], bootstrap_uplift_result
 
 
 def _get_num_points(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: list):
@@ -462,8 +466,8 @@ def _total_uplift_expected_power_with_standard_error(
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_cov)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_cov)
 
     # Bin and group the dataframe
     df_bin = _bin_and_group_dataframe_expected_power(
@@ -489,8 +493,8 @@ def _total_uplift_expected_power_with_standard_error(
     # Join the covariance dataframe to df_bin
     df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
 
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_bin)
 
     # Get the names of all the covariance and num_points columns
     cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
@@ -502,8 +506,8 @@ def _total_uplift_expected_power_with_standard_error(
             pl.all_horizontal([pl.col(c).is_not_null() for c in cov_cols + n_cols])
         )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_bin)
 
     # Compute the farm power
     df_bin = df_bin.with_columns(pow_farm=pl.sum_horizontal([f"{c}_mean" for c in test_cols]))
@@ -524,19 +528,21 @@ def _total_uplift_expected_power_with_standard_error(
         .alias("pow_farm_var")
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_bin)
 
     # Determine the weighting of the ws/wd bins
     df_bin, df_freq_pl = add_bin_weights(df_bin, df_freq_pl, bin_cols_without_df_name, weight_by)
 
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_bin)
 
     # Normalize the weight column over the values in df_name column and compute
     # the weighted farm power and weighted var per bin
     df_bin = df_bin.with_columns(weight=pl.col("weight") / pl.col("weight").sum().over("df_name"))
-    #
+    
+    # Add the weighted farm power column
+    df_bin = df_bin.with_columns(weighted_farm_power=pl.col("pow_farm") * pl.col("weight"))
     # .with_columns(weighted_power=pl.col("pow_farm") * pl.col("weight"),
     # weighted_power_var=pl.col("pow_farm_var") * pl.col("weight")**2)
 
@@ -551,7 +557,7 @@ def _total_uplift_expected_power_with_standard_error(
 
         # Limit the columns to bin_cols_without_df_name, df_name, weight, pow_farm, pow_farm_var
         df_sub = df_sub.select(
-            bin_cols_without_df_name + ["df_name", "weight", "pow_farm", "pow_farm_var"]
+            bin_cols_without_df_name + ["df_name", "weight","weighted_farm_power", "pow_farm", "pow_farm_var"]
         )
 
         # Keep bin_cols_without_df_name, weight as the index, pivot df_name across pow_farm, pow_farm_var
@@ -560,18 +566,24 @@ def _total_uplift_expected_power_with_standard_error(
             index=bin_cols_without_df_name + ["weight"],
         )
 
-        # Compute the expected power ratio
+        # Compute the expected power ratio per bin
         df_sub = df_sub.with_columns(
             expected_power_ratio=pl.col(f"pow_farm_{uplift_pair[1]}")
             / pl.col(f"pow_farm_{uplift_pair[0]}")
         )
 
-        # Compute the weighted expected power ratio
-        df_sub = df_sub.with_columns(
-            weighted_expected_power_ratio=pl.col("expected_power_ratio") * pl.col("weight")
-        )
+        # # Compute the weighted expected power ratio
+        # df_sub = df_sub.with_columns(
+        #     weighted_expected_power_ratio=pl.col("expected_power_ratio") * pl.col("weight")
+        # )
 
-        # Compute the variance of the expected power ratio
+        # Compute the total expected power ratio (note this is not computed by combining the expected power ratios)
+        farm_power_0 = df_sub[f"weighted_farm_power_{uplift_pair[0]}"].sum()
+        farm_power_1 = df_sub[f"weighted_farm_power_{uplift_pair[1]}"].sum()
+        total_expected_power_ratio = farm_power_1 / farm_power_0
+
+        # Compute the variance of the expected power ratio per bin
+        # This is equation 4.22
         df_sub = df_sub.with_columns(
             expected_power_ratio_var=(
                 (
@@ -583,13 +595,16 @@ def _total_uplift_expected_power_with_standard_error(
         )
 
         # Compute the weighted variance of the expected power ratio
+        # This is equation 4.29 pre-summation
         df_sub = df_sub.with_columns(
             weighted_expected_power_ratio_var=(
                 (
-                    pl.col(f"pow_farm_var_{uplift_pair[0]}") * pl.col("expected_power_ratio") ** 2 * pl.col("weight") ** 2
-                    + pl.col(f"pow_farm_var_{uplift_pair[1]}") * pl.col("weight")**2
+                    pl.col(f"pow_farm_var_{uplift_pair[1]}") * pl.col("weight") ** 2 
+                    + pl.col(f"pow_farm_var_{uplift_pair[0]}")
+                    * total_expected_power_ratio ** 2
+                    * pl.col("weight") ** 2
                 )
-                / pl.col(f"pow_farm_{uplift_pair[0]}") ** 2
+                / farm_power_0 ** 2
             )
         )
 
@@ -598,18 +613,14 @@ def _total_uplift_expected_power_with_standard_error(
 
         # The total uplift is the sum of the weighted expected power ratio and the weighted variance of the expected power ratio
         result_dict = {}
-        result_dict["energy_uplift_ctr"] = df_sub["weighted_expected_power_ratio"].sum()
+        result_dict["energy_uplift_ctr"] = total_expected_power_ratio
         result_dict["energy_uplift_var"] = df_sub["weighted_expected_power_ratio_var"].sum()
 
-        print(result_dict)
         result_dict["df"] = df_sub
 
         uplift_results[uplift_name] = result_dict
 
     return uplift_results
-
-
-
 
 
 def total_uplift_expected_power(
@@ -634,6 +645,8 @@ def total_uplift_expected_power(
     N: int = 1,
     percentiles: list = [2.5, 97.5],
     remove_all_nulls_wd_ws: bool = False,
+    remove_any_null_turbine_bins: bool = False,
+    remove_any_null_turbine_std_bins: bool = False,
 ):
     """Calculate the total uplift in energy production using expected power methods."""
     # Get the polars dataframe from within the a_in
@@ -684,6 +697,17 @@ def total_uplift_expected_power(
         ):
             raise ValueError("df_freq must have columns ws, wd and freq_val")
 
+        # If df_freq is provided, confirm is consistent with ws/wd min max and
+        # prepare a polars table of weights
+        # Convert to polars dataframe
+        df_freq_pl = pl.from_pandas(df_reduce_precision(df_freq, allow_convert_to_integer=False))
+
+        # Rename the columns
+        df_freq_pl = df_freq_pl.rename({"ws": "ws_bin", "wd": "wd_bin", "freq_val": "weight"})
+
+    else:
+        df_freq_pl = None
+
     # Check that if use_standard_error is True, than N = 1
     if use_standard_error and N != 1:
         raise ValueError("N must be 1 when use_standard_error is True")
@@ -705,11 +729,13 @@ def total_uplift_expected_power(
 
     # If N = 1 AND use_standard_error if false, then use the single method
     if N == 1 and not use_standard_error:
-        epao = _total_uplift_expected_power_single(
-            a_in,
+        df_bin, df_sum, uplift_results = _total_uplift_expected_power_single(
+            a_in.get_df(),
             test_cols=test_cols,
             wd_cols=wd_cols,
             ws_cols=ws_cols,
+            uplift_pairs=uplift_pairs,
+            uplift_names=uplift_names,
             wd_step=wd_step,
             wd_min=wd_min,
             wd_max=wd_max,
@@ -718,8 +744,50 @@ def total_uplift_expected_power(
             ws_max=ws_max,
             bin_cols_in=bin_cols_in,
             weight_by=weight_by,
-            df_freq=df_freq,
+            df_freq_pl=df_freq_pl,
+            remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
+            remove_any_null_turbine_bins=remove_any_null_turbine_bins,
+        )
+    elif N > 1:
+        df_bin, df_sum, uplift_results = _total_uplift_expected_power_with_bootstrapping(
+            a_in,
+            test_cols=test_cols,
+            wd_cols=wd_cols,
+            ws_cols=ws_cols,
             uplift_pairs=uplift_pairs,
             uplift_names=uplift_names,
+            wd_step=wd_step,
+            wd_min=wd_min,
+            wd_max=wd_max,
+            ws_step=ws_step,
+            ws_min=ws_min,
+            ws_max=ws_max,
+            bin_cols_in=bin_cols_in,
+            weight_by=weight_by,
+            df_freq_pl=df_freq_pl,
             remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
+            remove_any_null_turbine_bins=remove_any_null_turbine_bins,
+            N=N,
+            percentiles=percentiles,
+        )
+    elif use_standard_error:
+        uplift_results = _total_uplift_expected_power_with_standard_error(
+            a_in.get_df(),
+            test_cols=test_cols,
+            wd_cols=wd_cols,
+            ws_cols=ws_cols,
+            uplift_pairs=uplift_pairs,
+            uplift_names=uplift_names,
+            wd_step=wd_step,
+            wd_min=wd_min,
+            wd_max=wd_max,
+            ws_step=ws_step,
+            ws_min=ws_min,
+            ws_max=ws_max,
+            bin_cols_in=bin_cols_in,
+            weight_by=weight_by,
+            df_freq_pl=df_freq_pl,
+            remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
+            remove_any_null_turbine_bins=remove_any_null_turbine_bins,
+            remove_any_null_turbine_std_bins=remove_any_null_turbine_std_bins,
         )
