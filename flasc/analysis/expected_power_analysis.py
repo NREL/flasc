@@ -8,6 +8,7 @@ import pandas as pd
 import polars as pl
 
 from flasc.analysis.analysis_input import AnalysisInput
+from flasc.analysis.expected_power_analysis_output import ExpectedPowerAnalysisOutput
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 from flasc.logging_manager import LoggingManager
 from flasc.utilities.energy_ratio_utilities import add_bin_weights, add_wd_bin, add_ws_bin
@@ -306,7 +307,7 @@ def _total_uplift_expected_power_with_bootstrapping(
             "energy_uplift_ub_pc": (uplift_ub - 1) * 100,
         }
 
-    return uplift_single_outs[0][0], uplift_single_outs[0],[1], bootstrap_uplift_result
+    return uplift_single_outs[0][0], uplift_single_outs[0][1], bootstrap_uplift_result
 
 
 def _get_num_points(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: list):
@@ -625,6 +626,8 @@ def _total_uplift_expected_power_with_standard_error(
 
 def total_uplift_expected_power(
     a_in: AnalysisInput,
+    uplift_pairs: list,
+    uplift_names: list,
     test_turbines: list = None,
     wd_turbines: list = None,
     ws_turbines: list = None,
@@ -639,8 +642,7 @@ def total_uplift_expected_power(
     bin_cols_in: list = ["wd_bin", "ws_bin"],
     weight_by: str = "min",  # min or sum
     df_freq: pd.DataFrame = None,
-    uplift_pairs: list = None,
-    uplift_names: list = None,
+
     use_standard_error: bool = True,
     N: int = 1,
     percentiles: list = [2.5, 97.5],
@@ -791,3 +793,34 @@ def total_uplift_expected_power(
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
             remove_any_null_turbine_std_bins=remove_any_null_turbine_std_bins,
         )
+
+    # Create the output object
+    epao = ExpectedPowerAnalysisOutput(
+        uplift_results=uplift_results,
+        a_in=a_in,
+        test_turbines=test_turbines,
+        wd_turbines=wd_turbines,
+        ws_turbines=ws_turbines,
+        use_predefined_wd=use_predefined_wd,
+        use_predefined_ws=use_predefined_ws,
+        wd_step=wd_step,
+        wd_min=wd_min,
+        wd_max=wd_max,
+        ws_step=ws_step,
+        ws_min=ws_min,
+        ws_max=ws_max,
+        bin_cols_in=bin_cols_in,
+        weight_by=weight_by,
+        df_freq=df_freq,
+        uplift_pairs=uplift_pairs,
+        uplift_names=uplift_names,
+        use_standard_error=use_standard_error,
+        N=N,
+        percentiles=percentiles,
+        remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
+        remove_any_null_turbine_bins=remove_any_null_turbine_bins,
+        remove_any_null_turbine_std_bins=remove_any_null_turbine_std_bins,
+    )
+
+    # Return the object
+    return epao

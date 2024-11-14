@@ -9,11 +9,12 @@ from flasc.analysis.expected_power_analysis import (
     _bin_and_group_dataframe_expected_power,
     _compute_covariance,
     _get_num_points,
+    _null_and_sync_covariance,
     _synchronize_nulls,
     _total_uplift_expected_power_single,
     _total_uplift_expected_power_with_bootstrapping,
     _total_uplift_expected_power_with_standard_error,
-    _null_and_sync_covariance,
+    total_uplift_expected_power,
 )
 
 
@@ -240,7 +241,7 @@ def test_total_uplift_expected_power_with_bootstrapping():
 
     a_in = load_data()
 
-    bootstrap_uplift_result = _total_uplift_expected_power_with_bootstrapping(
+    _, _, bootstrap_uplift_result = _total_uplift_expected_power_with_bootstrapping(
         a_in=a_in,
         test_cols=["pow_000", "pow_001"],
         uplift_pairs=[("baseline", "wake_steering")],
@@ -335,20 +336,19 @@ def test_compute_covariance():
 
 
 def test_null_and_sync_covariance():
-
     df_cov = pl.DataFrame(
         {
-            "wd_bin": [0, 0, 0,0],
+            "wd_bin": [0, 0, 0, 0],
             "ws_bin": [0, 1, 0, 1],
             "df_name": ["baseline", "baseline", "wake_steering", "wake_steering"],
-            "cov_pow_000_pow_000": [1,2,3,4],
-            "cov_pow_000_pow_001": [5,6,7,8],
-            "cov_pow_001_pow_000": [9,10,11,12],
-            "cov_pow_001_pow_001": [13,14,15,16],
-            "count_pow_000_pow_000": [0,2,2,2],
-            "count_pow_000_pow_001": [2,2,2,2],
-            "count_pow_001_pow_000": [2,2,2,2],
-            "count_pow_001_pow_001": [2,2,2,None],
+            "cov_pow_000_pow_000": [1, 2, 3, 4],
+            "cov_pow_000_pow_001": [5, 6, 7, 8],
+            "cov_pow_001_pow_000": [9, 10, 11, 12],
+            "cov_pow_001_pow_001": [13, 14, 15, 16],
+            "count_pow_000_pow_000": [0, 2, 2, 2],
+            "count_pow_000_pow_001": [2, 2, 2, 2],
+            "count_pow_001_pow_000": [2, 2, 2, 2],
+            "count_pow_001_pow_001": [2, 2, 2, None],
         }
     )
     df_cov = _null_and_sync_covariance(
@@ -391,7 +391,7 @@ def test_cov_against_var():
 def test_total_uplift_expected_power_with_standard_error():
     a_in = load_data()
 
-    _total_uplift_expected_power_with_standard_error(
+    uplift_results = _total_uplift_expected_power_with_standard_error(
         df_=a_in.get_df(),
         test_cols=["pow_000", "pow_001"],
         uplift_pairs=[("baseline", "wake_steering")],
@@ -402,3 +402,61 @@ def test_total_uplift_expected_power_with_standard_error():
         wd_min=0.5,
         ws_min=0.5,
     )
+
+    with pl.Config(tbl_cols=-1):
+        print(uplift_results)
+
+    assert uplift_results["scada_uplift"]["energy_uplift_ctr"] == 1.1
+
+
+def test_center_uplift_identical():
+    a_in = load_data()
+
+    epao_single = total_uplift_expected_power(
+        a_in=a_in,
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        test_turbines=[0, 1],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        use_standard_error=False,
+        N=1,
+    )
+
+    epao_boot = total_uplift_expected_power(
+        a_in=a_in,
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        test_turbines=[0, 1],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        use_standard_error=False,
+        N=3,
+    )
+
+    epao_standard = total_uplift_expected_power(
+        a_in=a_in,
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        test_turbines=[0, 1],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        use_standard_error=True,
+    )
+
+    # print(epao_single.uplift_results)
+    # print(epao_boot.uplift_results)
+    # print(epao_standard.uplift_results)
+
+    assert epao_single.uplift_results["scada_uplift"] == 1.1
+    assert epao_boot.uplift_results["scada_uplift"]['energy_uplift_ctr'] == 1.1
+    assert epao_standard.uplift_results["scada_uplift"]['energy_uplift_ctr'] == 1.1
