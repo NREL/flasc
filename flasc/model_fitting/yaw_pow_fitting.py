@@ -1,4 +1,5 @@
 """Module for fitting yaw loss power curve."""
+
 import os
 
 import matplotlib.pyplot as plt

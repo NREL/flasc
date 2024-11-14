@@ -458,5 +458,5 @@ def test_center_uplift_identical():
     # print(epao_standard.uplift_results)
 
     assert epao_single.uplift_results["scada_uplift"] == 1.1
-    assert epao_boot.uplift_results["scada_uplift"]['energy_uplift_ctr'] == 1.1
-    assert epao_standard.uplift_results["scada_uplift"]['energy_uplift_ctr'] == 1.1
+    assert epao_boot.uplift_results["scada_uplift"]["energy_uplift_ctr"] == 1.1
+    assert epao_standard.uplift_results["scada_uplift"]["energy_uplift_ctr"] == 1.1

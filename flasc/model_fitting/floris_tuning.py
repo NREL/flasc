@@ -7,7 +7,6 @@
 # Doekemeijer at Shell, as well as discussions with Diederik van Binsbergen at
 # NTNU. Please see readme.txt for more information.
 
-
 import numpy as np
 import polars as pl
 
