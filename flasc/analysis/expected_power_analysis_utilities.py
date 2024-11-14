@@ -36,7 +36,8 @@ def _add_wd_ws_bins(
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed. Defaults to False.
+        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
+            Defaults to False.
 
     Returns:
         pl.DataFrame: A polars dataframe with the wd and ws bin columns added.
@@ -56,10 +57,12 @@ def _bin_and_group_dataframe_expected_power(
     Args:
         df_ (pl.DataFrame): A polars dataframe, exported from a_in.get_df()
         test_cols (List[str]): A list of column names to calculate the mean and variance of
-        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
+        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by.
+            Defaults to ["wd_bin", "ws_bin"].
 
     Returns:
-        pl.DataFrame: A polars dataframe with the mean and variance of the test columns grouped by bin columns.
+        pl.DataFrame: A polars dataframe with the mean and variance of the test columns
+            grouped by bin columns.
     """
     num_df = df_["df_name"].n_unique()
 
@@ -94,16 +97,20 @@ def _synchronize_nulls(
     uplift_pairs: List[List[str]],
     bin_cols_without_df_name: List[str] = ["wd_bin", "ws_bin"],
 ) -> pl.DataFrame:
-    """Copy the nans from the test columns in one of the df_name values to the other within each uplift pair.
+    """Copy the nans from the test columns in one of df_name to the other within uplift pairs.
 
     Args:
-        df_bin (pl.DataFrame): A polars dataframe with the mean and variance of the test columns grouped by bin columns.
+        df_bin (pl.DataFrame): A polars dataframe with the mean and variance of the test
+            columns grouped by bin columns.
         sync_cols (List[str]): Columns to synchronize.
-        uplift_pairs (List[List[str]]): A list of the df_name values to copy the nans from for each pair
-        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
+        uplift_pairs (List[List[str]]): A list of the df_name values to copy the nans from
+            for each pair
+        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by.
+            Defaults to ["wd_bin", "ws_bin"].
 
     Returns:
-        pl.DataFrame: A polars dataframe with the nans copied from one of the df_name values to the other.
+        pl.DataFrame: A polars dataframe with the nans copied from one of the df_name values
+             to the other.
     """
     df_ = df_bin.clone()
 
@@ -111,14 +118,16 @@ def _synchronize_nulls(
         #   Filter the DataFrame to include only rows where the setting is in uplift_pair
         filtered_df = df_.filter(pl.col("df_name").is_in(uplift_pair))
 
-        # First, create a mask DataFrame indicating where nulls are present for each pow_*_mean column
+        # First, create a mask DataFrame indicating where nulls are present for each pow_*_mean
+        #    column
         mask_df = filtered_df.select(
             bin_cols_without_df_name
             + ["df_name"]
             + [pl.col(col).is_null().alias(f"{col}_is_null") for col in sync_cols]
         )
 
-        # Group by the bin columns and setting column, and take the maximum of null presence for each setting
+        # Group by the bin columns and setting column, and take the maximum of null presence
+        # for each setting
         max_nulls = mask_df.group_by(bin_cols_without_df_name).agg(
             [pl.col(f"{col}_is_null").max().alias(f"{col}_should_be_null") for col in sync_cols]
         )
@@ -126,7 +135,8 @@ def _synchronize_nulls(
         # Join the mask back to the original DataFrame
         joined_df = df_.join(max_nulls, on=bin_cols_without_df_name, how="left")
 
-        # Set the columns to null only for rows in uplift_pair, according to the synchronized null masks
+        # Set the columns to null only for rows in uplift_pair, according to the
+        # synchronized null masks
         updated_columns = [
             pl.when((pl.col("df_name").is_in(uplift_pair)) & (pl.col(f"{col}_should_be_null")))
             .then(None)
@@ -225,10 +235,12 @@ def _null_and_sync_covariance(
         df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
         test_cols (List[str]): A list of column names to calculate the covariance of
         uplift_pairs (List[List[str]]): A list of the df_name values to copy the nans from
-        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by. Defaults to ["wd_bin", "ws_bin"].
+        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by.
+            Defaults to ["wd_bin", "ws_bin"].
 
     Returns:
-        pl.DataFrame: A polars dataframe with the null values applied and synchronized across uplift pairs.
+        pl.DataFrame: A polars dataframe with the null values applied and synchronized across
+            uplift pairs.
     """
     # Get the names of all the covariance and num_points columns
     cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
