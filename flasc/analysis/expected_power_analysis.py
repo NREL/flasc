@@ -170,7 +170,8 @@ def _total_uplift_expected_power_with_bootstrapping(
         test_cols (List[str]): A list of column names to calculate the uplift over
         wd_cols (List[str]): A list of column names for wind direction
         ws_cols (List[str]): A list of column names for wind speed
-        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to compare
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name
+            values to compare
         uplift_names (List[str]): A list of names for the uplift results
         wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
         wd_min (float): The minimum wind direction value. Defaults to 0.0.
@@ -288,8 +289,8 @@ def _total_uplift_expected_power_with_standard_error(
             Defaults to False.
         remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
             Defaults to False.
-        remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error bins.
-            Defaults to False.
+        remove_any_null_turbine_std_bins (bool): Remove any null cases for
+            turbine standard error bins.  Defaults to False.
 
     Returns:
         Dict[str, Dict[str, float]]: A dictionary containing the uplift results with standard error.
@@ -425,7 +426,8 @@ def _total_uplift_expected_power_with_standard_error(
             + ["df_name", "weight", "weighted_farm_power", "pow_farm", "pow_farm_var"]
         )
 
-        # Keep bin_cols_without_df_name, weight as the index, pivot df_name across pow_farm, pow_farm_var
+        # Keep bin_cols_without_df_name, weight as the index, pivot df_name across pow_farm,
+        # pow_farm_var
         df_sub = df_sub.pivot(
             on="df_name",
             index=bin_cols_without_df_name + ["weight"],
@@ -442,7 +444,8 @@ def _total_uplift_expected_power_with_standard_error(
         #     weighted_expected_power_ratio=pl.col("expected_power_ratio") * pl.col("weight")
         # )
 
-        # Compute the total expected power ratio (note this is not computed by combining the expected power ratios)
+        # Compute the total expected power ratio (note this is not computed by
+        #  combining the expected power ratios)
         farm_power_0 = df_sub[f"weighted_farm_power_{uplift_pair[0]}"].sum()
         farm_power_1 = df_sub[f"weighted_farm_power_{uplift_pair[1]}"].sum()
         total_expected_power_ratio = farm_power_1 / farm_power_0
@@ -476,7 +479,8 @@ def _total_uplift_expected_power_with_standard_error(
         with pl.Config(tbl_cols=-1):
             print(df_sub)
 
-        # The total uplift is the sum of the weighted expected power ratio and the weighted variance of the expected power ratio
+        # The total uplift is the sum of the weighted expected power ratio and the weighted
+        #  variance of the expected power ratio
         result_dict = {}
         result_dict["energy_uplift_ctr"] = total_expected_power_ratio
         result_dict["energy_uplift_var"] = df_sub["weighted_expected_power_ratio_var"].sum()
@@ -517,7 +521,8 @@ def total_uplift_expected_power(
 
     Args:
         a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze
-        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to compare
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name
+            values to compare
         uplift_names (List[str]): A list of names for the uplift results
         test_turbines (List[int]): A list of turbine indices to test
         wd_turbines (List[int]): A list of turbine indices for wind direction. Defaults to None.
@@ -546,7 +551,8 @@ def total_uplift_expected_power(
             bins.  Defaults to False.
 
     Returns:
-        ExpectedPowerAnalysisOutput: An object containing the uplift results and analysis parameters.
+        ExpectedPowerAnalysisOutput: An object containing the uplift results and
+            analysis parameters.
     """
     # Get the polars dataframe from within the a_in
     df_ = a_in.get_df()
