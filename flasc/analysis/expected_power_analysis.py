@@ -51,7 +51,7 @@ def _total_uplift_expected_power_single(
         test_cols (List[str]): A list of column names to calculate uplift over
         wd_cols (List[str]): A list of column names for wind direction
         ws_cols (List[str]): A list of column names for wind speed
-        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name 
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name
             values to compare
         uplift_names (List[str]): A list of names for the uplift results
         wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
@@ -60,18 +60,18 @@ def _total_uplift_expected_power_single(
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        bin_cols_in (List[str]): A list of column names to bin the dataframes by. 
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
             Defaults to ["wd_bin", "ws_bin"].
         weight_by (str): The method to weight the bins. Defaults to "min".
-        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin. 
+        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.
             Defaults to None.
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed. 
+        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
             Defaults to False.
-        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins. 
+        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
             Defaults to False.
 
     Returns:
-        Tuple[pl.DataFrame, pl.DataFrame, Dict[str, float]]: A tuple containing the binned 
+        Tuple[pl.DataFrame, pl.DataFrame, Dict[str, float]]: A tuple containing the binned
             dataframe, the summed dataframe, and the uplift results.
     """
     # Get the bin cols without df_name
@@ -178,17 +178,17 @@ def _total_uplift_expected_power_with_bootstrapping(
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        bin_cols_in (List[str]): A list of column names to bin the dataframes by. 
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
             Defaults to ["wd_bin", "ws_bin"].
         weight_by (str): The method to weight the bins. Defaults to "min".
-        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin. 
+        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.
             Defaults to None.
         remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
              Defaults to False.
-        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins. 
+        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
             Defaults to False.
         N (int): The number of bootstrap samples. Defaults to 1.
-        percentiles (List[float]): The percentiles to calculate for the bootstrap samples. 
+        percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
             Defaults to [2.5, 97.5].
 
     Returns:
@@ -270,7 +270,7 @@ def _total_uplift_expected_power_with_standard_error(
         test_cols (List[str]): A list of column names to calculate the uplift of
         wd_cols (List[str]): A list of column names for wind direction
         ws_cols (List[str]): A list of column names for wind speed
-        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the 
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the
             df_name values to compare
         uplift_names (List[str]): A list of names for the uplift results
         wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
@@ -279,16 +279,16 @@ def _total_uplift_expected_power_with_standard_error(
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        bin_cols_in (List[str]): A list of column names to bin the dataframes by. 
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
             Defaults to ["wd_bin", "ws_bin"].
         weight_by (str): The method to weight the bins. Defaults to "min".
-        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin. 
+        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.
             Defaults to None.
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed. 
+        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
             Defaults to False.
-        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins. 
+        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
             Defaults to False.
-        remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error bins. 
+        remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error bins.
             Defaults to False.
 
     Returns:
@@ -530,19 +530,19 @@ def total_uplift_expected_power(
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        bin_cols_in (List[str]): A list of column names to bin the dataframes by. 
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
             Defaults to ["wd_bin", "ws_bin"].
         weight_by (str): The method to weight the bins. Defaults to "min".
         df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin. Defaults to None.
         use_standard_error (bool): Use standard error for the uplift calculation. Defaults to True.
         N (int): The number of bootstrap samples. Defaults to 1.
-        percentiles (List[float]): The percentiles to calculate for the bootstrap samples. 
+        percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
             Defaults to [2.5, 97.5].
         remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
              Defaults to False.
-        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins. 
+        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
             Defaults to False.
-        remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error 
+        remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error
             bins.  Defaults to False.
 
     Returns:
