@@ -13,6 +13,7 @@ from flasc.analysis.expected_power_analysis import (
     _total_uplift_expected_power_single,
     _total_uplift_expected_power_with_bootstrapping,
     _total_uplift_expected_power_with_standard_error,
+    _null_and_sync_covariance,
 )
 
 
@@ -331,6 +332,33 @@ def test_compute_covariance():
     # with pl.Config(tbl_cols=-1):
     #     print(test_df)
     #     print(df_cov)
+
+
+def test_null_and_sync_covariance():
+
+    df_cov = pl.DataFrame(
+        {
+            "wd_bin": [0, 0, 0,0],
+            "ws_bin": [0, 1, 0, 1],
+            "df_name": ["baseline", "baseline", "wake_steering", "wake_steering"],
+            "cov_pow_000_pow_000": [1,2,3,4],
+            "cov_pow_000_pow_001": [5,6,7,8],
+            "cov_pow_001_pow_000": [9,10,11,12],
+            "cov_pow_001_pow_001": [13,14,15,16],
+            "count_pow_000_pow_000": [0,2,2,2],
+            "count_pow_000_pow_001": [2,2,2,2],
+            "count_pow_001_pow_000": [2,2,2,2],
+            "count_pow_001_pow_001": [2,2,2,None],
+        }
+    )
+    df_cov = _null_and_sync_covariance(
+        df_cov=df_cov,
+        test_cols=["pow_000", "pow_001"],
+        uplift_pairs=[["baseline", "wake_steering"]],
+    )
+
+    np.testing.assert_allclose(df_cov["cov_pow_000_pow_000"].to_numpy(), [np.nan, 2, np.nan, 4])
+    np.testing.assert_allclose(df_cov["cov_pow_001_pow_001"].to_numpy(), [13, np.nan, 15, np.nan])
 
 
 def test_cov_against_var():

@@ -309,7 +309,7 @@ def _get_num_points(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: l
     # Generate all pairs of columns (including same column pairs)
     col_pairs = list(product(test_cols, test_cols))
 
-    df_group = df_.group_by(bin_cols_with_df_name).agg(pl.count().alias("count"))
+    df_n = df_.group_by(bin_cols_with_df_name).agg(pl.count().alias("count"))
 
     for c1, c2 in col_pairs:
         df_sub = df_.filter(
@@ -318,19 +318,17 @@ def _get_num_points(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: l
             & pl.col(c1).is_not_nan()
             & pl.col(c2).is_not_nan()
         )
-        df_group_sub = df_sub.group_by(bin_cols_with_df_name).agg(
-            pl.count().alias(f"count_{c1}_{c2}")
-        )
+        df_n_sub = df_sub.group_by(bin_cols_with_df_name).agg(pl.count().alias(f"count_{c1}_{c2}"))
 
-        df_group = df_group.join(df_group_sub, on=bin_cols_with_df_name, how="left")
+        df_n = df_n.join(df_n_sub, on=bin_cols_with_df_name, how="left")
 
     # Fill nulls to 0
-    df_group = df_group.fill_null(0)
+    df_n = df_n.fill_null(0)
 
     # Sort by bin_cols_with_df_name
-    df_group = df_group.sort(bin_cols_with_df_name)
+    df_n = df_n.sort(bin_cols_with_df_name)
 
-    return df_group
+    return df_n
 
 
 def _compute_covariance(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_name: list):
@@ -351,33 +349,61 @@ def _compute_covariance(df_: pl.DataFrame, test_cols: list, bin_cols_with_df_nam
     cov_exprs = [pl.cov(pair[0], pair[1]).alias(f"cov_{pair[0]}_{pair[1]}") for pair in col_pairs]
 
     # Compute covariances
-    grouped_covs = df_.group_by(bin_cols_with_df_name).agg(cov_exprs)
+    df_cov = df_.group_by(bin_cols_with_df_name).agg(cov_exprs)
 
     # Get the number of points for each pair
     df_n = _get_num_points(df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name)
 
     # Join the number of points to the covariance matrix
-    grouped_covs = grouped_covs.join(df_n, on=bin_cols_with_df_name, how="left")
+    df_cov = df_cov.join(df_n, on=bin_cols_with_df_name, how="left")
 
-    return grouped_covs
+    return df_cov
 
 
-def _compute_var_of_expected_farm_power(
-    df_bin: pl.DataFrame,
+def _null_and_sync_covariance(
     df_cov: pl.DataFrame,
-    df_n: pl.DataFrame,
     test_cols: list,
-    bin_cols_with_df_name: list,
+    uplift_pairs: list,
+    bin_cols_without_df_name: list = ["wd_bin", "ws_bin"],
 ):
-    # This should calculate equation 4.16
+    # Get the names of all the covariance and num_points columns
+    cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
+    n_cols = [f"count_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
 
-    # Need to iterate over all the test columns
-    for t1 in test_cols:
-        var_col = t1 + "_var"
-        for t2 in test_cols:
-            cov_col = "cov_" + t1 + "_" + t2
-            n_col = "count_" + t1 + "_" + t2
-            df_bin = df_bin.with_columns(var_col=pl.col(var_col) + pl.col(cov_col) / pl.col(n_col))
+    # Convert all NaN to None
+    df_cov = df_cov.fill_nan(None)
+
+    # Loop over cov_cols and n_cols
+    for cov_col, n_col in zip(cov_cols, n_cols):
+        # Wherever n_col 0, 1  set the corresponding cov_col to NaN
+        df_cov = df_cov.with_columns(
+            pl.when(pl.col(n_col) < 2)  # | pl.col(n_col).is_null())
+            .then(None)
+            .otherwise(pl.col(cov_col))
+            .alias(cov_col)
+        )
+
+        # Wherever n_col is null, set cov_col to null
+        df_cov = df_cov.with_columns(
+            pl.when(pl.col(n_col).is_null()).then(None).otherwise(pl.col(cov_col)).alias(cov_col)
+        )
+
+        # Wherever n_col is 0, set to null
+        df_cov = df_cov.with_columns(
+            pl.when(pl.col(n_col) == 0).then(None).otherwise(pl.col(n_col)).alias(n_col)
+        )
+
+    # Now sync across df_names
+    sync_cols = cov_cols + n_cols
+
+    df_cov = _synchronize_nulls(
+        df_bin=df_cov,
+        sync_cols=sync_cols,
+        uplift_pairs=uplift_pairs,
+        bin_cols_without_df_name=bin_cols_without_df_name,
+    )
+
+    return df_cov
 
 
 def _total_uplift_expected_power_with_standard_error(
@@ -398,6 +424,7 @@ def _total_uplift_expected_power_with_standard_error(
     df_freq_pl: pl.DataFrame = None,
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
+    remove_any_null_turbine_std_bins: bool = False,
 ):
     # with pl.Config(tbl_cols=-1):
     #     print(df_bin)
@@ -427,11 +454,16 @@ def _total_uplift_expected_power_with_standard_error(
         df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
     )
 
+    # Apply Null values to covariance and sync across uplift pairs
+    df_cov = _null_and_sync_covariance(
+        df_cov=df_cov,
+        test_cols=test_cols,
+        uplift_pairs=uplift_pairs,
+        bin_cols_without_df_name=bin_cols_without_df_name,
+    )
+
     with pl.Config(tbl_cols=-1):
         print(df_cov)
-
-    # Get the counts per turbine pair
-    # df_n = _get_num_points(df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name)
 
     # Bin and group the dataframe
     df_bin = _bin_and_group_dataframe_expected_power(
@@ -460,16 +492,124 @@ def _total_uplift_expected_power_with_standard_error(
     with pl.Config(tbl_cols=-1):
         print(df_bin)
 
+    # Get the names of all the covariance and num_points columns
+    cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
+    n_cols = [f"count_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
+
+    # Remove any rows where any of the covariance or n_cols columns are null
+    if remove_any_null_turbine_std_bins:
+        df_bin = df_bin.filter(
+            pl.all_horizontal([pl.col(c).is_not_null() for c in cov_cols + n_cols])
+        )
+
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
+
     # Compute the farm power
     df_bin = df_bin.with_columns(pow_farm=pl.sum_horizontal([f"{c}_mean" for c in test_cols]))
+
+    # Computed the expected farm power variance as the sum of cov_cols / n_cols
+    # This is equation 4.16
+    df_bin = df_bin.with_columns(
+        pow_farm_var=pl.sum_horizontal(
+            [pl.col(cov) / pl.col(n) for cov, n in zip(cov_cols, n_cols)]
+        )
+    )
+
+    # If any of the cov_cols are null, set pow_farm_var to null
+    df_bin = df_bin.with_columns(
+        pl.when(pl.all_horizontal([pl.col(c).is_not_null() for c in cov_cols]))
+        .then(pl.col("pow_farm_var"))
+        .otherwise(None)
+        .alias("pow_farm_var")
+    )
+
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
 
     # Determine the weighting of the ws/wd bins
     df_bin, df_freq_pl = add_bin_weights(df_bin, df_freq_pl, bin_cols_without_df_name, weight_by)
 
-    # Normalize the weight column over the values in df_name column
-    df_bin = df_bin.with_columns(
-        weight=pl.col("weight") / pl.col("weight").sum().over("df_name")
-    ).with_columns(weighted_power=pl.col("pow_farm") * pl.col("weight"))
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
+
+    # Normalize the weight column over the values in df_name column and compute
+    # the weighted farm power and weighted var per bin
+    df_bin = df_bin.with_columns(weight=pl.col("weight") / pl.col("weight").sum().over("df_name"))
+    #
+    # .with_columns(weighted_power=pl.col("pow_farm") * pl.col("weight"),
+    # weighted_power_var=pl.col("pow_farm_var") * pl.col("weight")**2)
+
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
+
+    # Now compute uplifts
+    uplift_results = {}
+    for uplift_pair, uplift_name in zip(uplift_pairs, uplift_names):
+        # Subset the dataframe to the uplift_pair in consideration
+        df_sub = df_bin.filter(pl.col("df_name").is_in(uplift_pair))
+
+        # Limit the columns to bin_cols_without_df_name, df_name, weight, pow_farm, pow_farm_var
+        df_sub = df_sub.select(
+            bin_cols_without_df_name + ["df_name", "weight", "pow_farm", "pow_farm_var"]
+        )
+
+        # Keep bin_cols_without_df_name, weight as the index, pivot df_name across pow_farm, pow_farm_var
+        df_sub = df_sub.pivot(
+            on="df_name",
+            index=bin_cols_without_df_name + ["weight"],
+        )
+
+        # Compute the expected power ratio
+        df_sub = df_sub.with_columns(
+            expected_power_ratio=pl.col(f"pow_farm_{uplift_pair[1]}")
+            / pl.col(f"pow_farm_{uplift_pair[0]}")
+        )
+
+        # Compute the weighted expected power ratio
+        df_sub = df_sub.with_columns(
+            weighted_expected_power_ratio=pl.col("expected_power_ratio") * pl.col("weight")
+        )
+
+        # Compute the variance of the expected power ratio
+        df_sub = df_sub.with_columns(
+            expected_power_ratio_var=(
+                (
+                    pl.col(f"pow_farm_var_{uplift_pair[0]}") * pl.col("expected_power_ratio") ** 2
+                    + pl.col(f"pow_farm_var_{uplift_pair[1]}")
+                )
+                / pl.col(f"pow_farm_{uplift_pair[0]}") ** 2
+            )
+        )
+
+        # Compute the weighted variance of the expected power ratio
+        df_sub = df_sub.with_columns(
+            weighted_expected_power_ratio_var=(
+                (
+                    pl.col(f"pow_farm_var_{uplift_pair[0]}") * pl.col("expected_power_ratio") ** 2 * pl.col("weight") ** 2
+                    + pl.col(f"pow_farm_var_{uplift_pair[1]}") * pl.col("weight")**2
+                )
+                / pl.col(f"pow_farm_{uplift_pair[0]}") ** 2
+            )
+        )
+
+        with pl.Config(tbl_cols=-1):
+            print(df_sub)
+
+        # The total uplift is the sum of the weighted expected power ratio and the weighted variance of the expected power ratio
+        result_dict = {}
+        result_dict["energy_uplift_ctr"] = df_sub["weighted_expected_power_ratio"].sum()
+        result_dict["energy_uplift_var"] = df_sub["weighted_expected_power_ratio_var"].sum()
+
+        print(result_dict)
+        result_dict["df"] = df_sub
+
+        uplift_results[uplift_name] = result_dict
+
+    return uplift_results
+
+
+
 
 
 def total_uplift_expected_power(
