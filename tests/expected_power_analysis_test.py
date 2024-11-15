@@ -364,7 +364,7 @@ def test_null_and_sync_covariance():
 
 
 def test_cov_against_var():
-    """Test that computing variance of one power signal is the same as the covariance of the signal with itself."""
+    """Test that computing var of one signal is the same as the covariance of the signal."""
     test_df = pl.DataFrame(
         {
             "wd_bin": np.zeros(5),
