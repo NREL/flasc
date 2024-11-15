@@ -51,7 +51,7 @@ def atomic_opt_optuna(
         best_params.append(study.best_params[parameter_name])
 
     # Return results as dictionary
-    result_dic =  {
+    result_dic = {
         "parameter_values": best_params,
         "best_cost": study.best_value,
     }
