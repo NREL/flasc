@@ -67,9 +67,11 @@ class TestDataframeManipulations(unittest.TestCase):
         df_test = dfm.set_wd_by_all_turbines(df_test)
         df_test = dfm.set_ws_by_upstream_turbines(df_test, df_upstream)
         df_test = dfm.set_ti_by_upstream_turbines(df_test, df_upstream)
+        df_test = dfm.set_wd_by_upstream_turbines(df_test, df_upstream)
 
         self.assertAlmostEqual(df_test.loc[0, "ws"], np.mean([5.0, 17.0]))
         self.assertAlmostEqual(df_test.loc[0, "ti"], np.mean([0.03, 0.09]))
+        self.assertAlmostEqual(df_test.loc[0, "wd"], circmean([350.0, 3.0], high=360.0))
 
     def test_set_by_upstream_turbines_in_radius(self):
         # Test set_*_by_upstream_turbines_in_radius functions
@@ -104,10 +106,20 @@ class TestDataframeManipulations(unittest.TestCase):
             max_radius=1000,
             include_itself=True,  # Include itself
         )
+        df_test = dfm.set_wd_by_upstream_turbines_in_radius(
+            df_test,
+            df_upstream,
+            turb_no=1,
+            x_turbs=np.array([0.0, 500.0, 1000.0, 1500.0]),
+            y_turbs=np.array([0.0, 500.0, 1000.0, 1500.0]),
+            max_radius=1000,
+            include_itself=False,  # Include itself
+        )
 
         self.assertAlmostEqual(df_test.loc[0, "ws"], np.mean([5.0, 17.0]))
         self.assertAlmostEqual(df_test.loc[0, "ti"], np.mean([0.09]))
         self.assertAlmostEqual(df_test.loc[0, "pow_ref"], np.mean([1500.0, 1800.0]))
+        self.assertAlmostEqual(df_test.loc[0, "wd"], circmean([350.0], high=360.0))
 
     def test_is_day_or_night(self):
         # Test is day night using noon and midnight Oct 1 2023 in London, UK
