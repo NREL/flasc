@@ -565,11 +565,11 @@ def estimate_ws_with_floris(
         ws0 = 0
         ws1 = float(np.interp(rated_power * 0.1, pow_pc, ws_pc))
         ws2 = float(np.interp(rated_power * 0.9, pow_pc, ws_pc))
-        ws3 = ws2 + 1.0
+        ws3 = ws2 + 0.5
 
         # For starters make simple gain schedule
         ws_est_gain_x = [ws0, ws1, ws2, ws3]
-        ws_est_gain_y = [0, 1, 1, -1]
+        ws_est_gain_y = [0, 1, 1, 0]
 
         ws_est_gain = np.interp(df_scada["ws_{:03d}".format(ti)], ws_est_gain_x, ws_est_gain_y)
         ws_est_gain = np.clip(ws_est_gain, 0, 1)
