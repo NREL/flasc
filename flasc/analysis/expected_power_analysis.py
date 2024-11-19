@@ -7,6 +7,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 import polars as pl
+from scipy.stats import norm
 
 from flasc.analysis.analysis_input import AnalysisInput
 from flasc.analysis.expected_power_analysis_output import ExpectedPowerAnalysisOutput
@@ -263,6 +264,8 @@ def _total_uplift_expected_power_with_standard_error(
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     remove_any_null_turbine_std_bins: bool = False,
+    fill_null_cov_bin_strategy: str = "max_var",
+    percentiles: List[float] = [2.5, 97.5],
 ) -> Dict[str, Dict[str, float]]:
     """Calculate the total uplift in expected power with standard error.
 
@@ -291,6 +294,10 @@ def _total_uplift_expected_power_with_standard_error(
             Defaults to False.
         remove_any_null_turbine_std_bins (bool): Remove any null cases for
             turbine standard error bins.  Defaults to False.
+        fill_null_cov_bin_strategy (str): The strategy to fill null values in the covariance
+            bin. Can be "null", "max_var", "min_var".  Defaults to "max_var".
+        percentiles (List[float]): The percentiles to for confidence intervals.
+            Defaults to [2.5, 97.5].
 
     Returns:
         Dict[str, Dict[str, float]]: A dictionary containing the uplift results with standard error.
@@ -330,6 +337,17 @@ def _total_uplift_expected_power_with_standard_error(
         uplift_pairs=uplift_pairs,
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
+
+    # Apply fill null strategy for covariance
+    if (fill_null_cov_bin_strategy == "max_var") or (fill_null_cov_bin_strategy == "min_var"):
+        pass
+    elif fill_null_cov_bin_strategy == "null":
+        pass  # Keep as null
+    else:  # Invalid option
+        raise ValueError(
+            f"Invalid option for fill_null_cov_bin_strategy: {fill_null_cov_bin_strategy}",
+            "Valid options are 'max_var', 'min_var', 'null'",
+        )
 
     # with pl.Config(tbl_cols=-1):
     #     print(df_cov)
@@ -485,6 +503,15 @@ def _total_uplift_expected_power_with_standard_error(
         result_dict["energy_uplift_ctr"] = total_expected_power_ratio
         result_dict["energy_uplift_var"] = df_sub["weighted_expected_power_ratio_var"].sum()
 
+        # Add the confidence intervals
+        z_value = norm.ppf(percentiles[1] / 100.0)
+        result_dict["energy_uplift_lb"] = result_dict["energy_uplift_ctr"] - z_value * np.sqrt(
+            result_dict["energy_uplift_var"]
+        )
+        result_dict["energy_uplift_ub"] = result_dict["energy_uplift_ctr"] + z_value * np.sqrt(
+            result_dict["energy_uplift_var"]
+        )
+
         result_dict["df"] = df_sub
 
         uplift_results[uplift_name] = result_dict
@@ -516,6 +543,7 @@ def total_uplift_expected_power(
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     remove_any_null_turbine_std_bins: bool = False,
+    fill_null_cov_bin_strategy: str = "max_var",
 ) -> ExpectedPowerAnalysisOutput:
     """Calculate the total uplift in energy production using expected power methods.
 
@@ -549,6 +577,8 @@ def total_uplift_expected_power(
             Defaults to False.
         remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error
             bins.  Defaults to False.
+        fill_null_cov_bin_strategy (str): The strategy to fill null values in the covariance bin.
+            Can be "null", "max_var", "min_var".  Defaults to "max_var".
 
     Returns:
         ExpectedPowerAnalysisOutput: An object containing the uplift results and
@@ -695,6 +725,8 @@ def total_uplift_expected_power(
             remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
             remove_any_null_turbine_std_bins=remove_any_null_turbine_std_bins,
+            percentiles=percentiles,
+            fill_null_cov_bin_strategy=fill_null_cov_bin_strategy,
         )
 
     # Create the output object
