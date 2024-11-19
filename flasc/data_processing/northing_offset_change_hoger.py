@@ -12,32 +12,12 @@ import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from floris.utilities import wrap_180
 from matplotlib import dates
 from scipy.interpolate import interp1d
 from sklearn.tree import DecisionTreeRegressor
 
 _MODE_LIMIT = 0.05
-
-
-def modulo(x, m: float = 360.0):
-    """Compute the modulo of an angle with a period of m.
-
-    It normalizes the values of x to the [-m/2, m/2) range.
-
-    Args:
-        x (np.ndarray): Values to compute the modulo.
-        m (float, optional): Period. Defaults to 360.0.
-
-    Returns:
-        np.ndarray: New values of x.
-
-    """
-    x = x % m
-
-    w1 = x > m / 2
-    x[w1] = x[w1] - m
-
-    return x
 
 
 def _get_leaves_and_knots(tree: DecisionTreeRegressor) -> tuple[np.ndarray, np.ndarray]:
@@ -159,14 +139,15 @@ def _plot_regression(y_data: pd.Series, y_regr: np.ndarray, date_time: pd.Series
     plt.show()
 
 
+# TODO: Keep these defaults?
 def homogenize(
     scada: pd.DataFrame,
     var: str = "wd",
-    threshold: int = 100,
+    threshold: int = 1000,
     reference: str = "last",
     plot_it: bool = False,
     max_depth: int = 4,
-    ccp_alpha: float = 0.0,
+    ccp_alpha: float = 0.09,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Homogenization routine of the Scada directions of the different wind turbines based on "var".
 
@@ -233,7 +214,7 @@ def homogenize(
         df2 = df[ms2]
         for m2 in ms2:
             # Get the differences in the direction
-            df2.loc[:, m2] = modulo(df[m2] - df[m])
+            df2.loc[:, m2] = wrap_180(df[m2] - df[m])
             y = df2[m2][~df2[m2].isna()]  # Do not use the nan values
             # Use a decision tree regressor to get the points at which there are knots
             # and the values of the
@@ -306,7 +287,7 @@ if __name__ == "__main__":
     df_orig = pd.read_feather("scada_exemple.ftr")
 
     fig, ax = plt.subplots()
-    ax.scatter(df["time"], modulo(df["wd_004"] - df["wd_005"]), label="Direction E05 - E06")
+    ax.scatter(df["time"], wrap_180(df["wd_004"] - df["wd_005"]), label="Direction E05 - E06")
     ax.legend()
     ax.grid(True)
     ax.set_title("Original Wind Directions")
@@ -315,7 +296,9 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots()
     ax.scatter(
-        df_corr["time"], modulo(df_corr["wd_004"] - df_corr["wd_005"]), label="Direction E05 - E06"
+        df_corr["time"],
+        wrap_180(df_corr["wd_004"] - df_corr["wd_005"]),
+        label="Direction E05 - E06",
     )
     ax.legend()
     ax.grid(True)
@@ -325,7 +308,7 @@ if __name__ == "__main__":
 
     for wd_col in ["wd_004"]:
         fig, ax = plt.subplots()
-        ax.scatter(df_orig["time"], modulo(df_orig[wd_col] - df_corr[wd_col]))
+        ax.scatter(df_orig["time"], wrap_180(df_orig[wd_col] - df_corr[wd_col]))
         ax.set_title("Change in value of wd_004")
         ax.grid(True)
 
