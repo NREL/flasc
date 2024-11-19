@@ -159,11 +159,11 @@ def homogenize(
     Args:
         scada (Union[pd.DataFrame, FlascDataFrame]): DataFrame containing the SCADA data.
         var (str, optional): Variable to homogenize (yaw or wd). Defaults to 'wd'.
-        threshold (int, optional): Threshold for discretization. Defaults to 100.
+        threshold (int, optional): Threshold for discretization. Defaults to 1000.
         reference (str, optional): Reference point for homogenization. Defaults to 'last'.
         plot_it (bool, optional): Whether to plot the results. Defaults to False.
         max_depth (int, optional): Maximum depth of the regression tree. Defaults to 4.
-        ccp_alpha (float, optional): Complexity parameter for pruning. Defaults to 0.0.
+        ccp_alpha (float, optional): Complexity parameter for pruning. Defaults to 0.09
 
     Returns:
         tuple[pd.DataFrame, pd.DataFrame]: Homogenized SCADA data and the results used to
