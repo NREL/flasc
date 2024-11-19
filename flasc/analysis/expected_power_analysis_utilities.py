@@ -280,3 +280,33 @@ def _null_and_sync_covariance(
     )
 
     return df_cov
+
+
+def _fill_cov_null(
+    df_cov: pl.DataFrame,
+    test_cols: List[str],
+    uplift_pairs: List[List[str]],
+    bin_cols_without_df_name: List[str] = ["wd_bin", "ws_bin"],
+    fill_null_cov_bin_strategy="max_var",
+) -> pl.DataFrame:
+    """Fill null values in covariance according to strategy.
+
+    Fill the null values in the covariance matrix according to the
+    strategy specified in fill_null_cov_bin_strategy.
+    If max_var, fill null values of covariance of t1,t2 with the
+    combined variances of t1 and t2 assuming correlation
+    of 1.0.  For min var...
+
+    Args:
+        df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
+        test_cols (List[str]): A list of column names to calculate the covariance of
+        uplift_pairs (List[List[str]]): A list of the df_name values to copy the nans from
+        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by.
+            Defaults to ["wd_bin", "ws_bin"].
+        fill_null_cov_bin_strategy (str): Strategy to fill null values in covariance matrix.
+            Defaults to 'max_var'.
+
+    Returns:
+        pl.DataFrame: A polars dataframe with the null values filled according to the strategy.
+    """
+    pass
