@@ -15,8 +15,10 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _add_wd_ws_bins,
     _bin_and_group_dataframe_expected_power,
     _compute_covariance,
+    _fill_cov_null,
     _null_and_sync_covariance,
     _synchronize_nulls,
+    _zero_cov,
 )
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 from flasc.logging_manager import LoggingManager
@@ -68,8 +70,8 @@ def _total_uplift_expected_power_single(
             Defaults to None.
         remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
             Defaults to False.
-        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
-            Defaults to False.
+        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
+            and of the test turbines is null.  Defaults to False.
 
     Returns:
         Tuple[pl.DataFrame, pl.DataFrame, Dict[str, float]]: A tuple containing the binned
@@ -187,8 +189,8 @@ def _total_uplift_expected_power_with_bootstrapping(
             Defaults to None.
         remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
              Defaults to False.
-        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
-            Defaults to False.
+        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
+            and of the test turbines is null.  Defaults to False.
         N (int): The number of bootstrap samples. Defaults to 1.
         percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
             Defaults to [2.5, 97.5].
@@ -261,11 +263,12 @@ def _total_uplift_expected_power_with_standard_error(
     bin_cols_in: List[str] = ["wd_bin", "ws_bin"],
     weight_by: str = "min",  # min or sum
     df_freq_pl: pl.DataFrame = None,
+    percentiles: List[float] = [2.5, 97.5],
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     remove_any_null_turbine_std_bins: bool = False,
-    fill_null_cov_bin_strategy: str = "max_var",
-    percentiles: List[float] = [2.5, 97.5],
+    variance_only: bool = False,
+    fill_cov_with_var: bool = False,
 ) -> Dict[str, Dict[str, float]]:
     """Calculate the total uplift in expected power with standard error.
 
@@ -288,16 +291,18 @@ def _total_uplift_expected_power_with_standard_error(
         weight_by (str): The method to weight the bins. Defaults to "min".
         df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.
             Defaults to None.
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
-            Defaults to False.
-        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
-            Defaults to False.
-        remove_any_null_turbine_std_bins (bool): Remove any null cases for
-            turbine standard error bins.  Defaults to False.
-        fill_null_cov_bin_strategy (str): The strategy to fill null values in the covariance
-            bin. Can be "null", "max_var", "min_var".  Defaults to "max_var".
         percentiles (List[float]): The percentiles to for confidence intervals.
             Defaults to [2.5, 97.5].
+        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
+            Defaults to False.
+        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
+            and of the test turbines is null.  Defaults to False.
+        remove_any_null_turbine_std_bins (bool): Remove bins from consideration where any of
+            the covariance or num_points columns are null.  Defaults to False.
+        variance_only (bool): Only use the variance of turbine powers and not turbine-turbine
+            covariances. Defaults to False.
+        fill_cov_with_var (bool): Fill all missing covariance terms with the product of the
+            square root of the variances. Defaults to False.
 
     Returns:
         Dict[str, Dict[str, float]]: A dictionary containing the uplift results with standard error.
@@ -330,6 +335,14 @@ def _total_uplift_expected_power_with_standard_error(
         df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
     )
 
+    # If filling missing covariance terms, do it now
+    if fill_cov_with_var:
+        df_cov = _fill_cov_null(df_cov, test_cols=test_cols)
+
+    # If only using the variance, zero out the covariance terms
+    if variance_only:
+        df_cov = _zero_cov(df_cov, test_cols=test_cols)
+
     # Apply Null values to covariance and sync across uplift pairs
     df_cov = _null_and_sync_covariance(
         df_cov=df_cov,
@@ -337,17 +350,6 @@ def _total_uplift_expected_power_with_standard_error(
         uplift_pairs=uplift_pairs,
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
-
-    # Apply fill null strategy for covariance
-    if (fill_null_cov_bin_strategy == "max_var") or (fill_null_cov_bin_strategy == "min_var"):
-        pass
-    elif fill_null_cov_bin_strategy == "null":
-        pass  # Keep as null
-    else:  # Invalid option
-        raise ValueError(
-            f"Invalid option for fill_null_cov_bin_strategy: {fill_null_cov_bin_strategy}",
-            "Valid options are 'max_var', 'min_var', 'null'",
-        )
 
     # with pl.Config(tbl_cols=-1):
     #     print(df_cov)
@@ -543,7 +545,8 @@ def total_uplift_expected_power(
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     remove_any_null_turbine_std_bins: bool = False,
-    fill_null_cov_bin_strategy: str = "max_var",
+    variance_only: bool = False,
+    fill_cov_with_var: bool = False,
 ) -> ExpectedPowerAnalysisOutput:
     """Calculate the total uplift in energy production using expected power methods.
 
@@ -573,12 +576,14 @@ def total_uplift_expected_power(
             Defaults to [2.5, 97.5].
         remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
              Defaults to False.
-        remove_any_null_turbine_bins (bool): Remove any null cases for turbine bins.
-            Defaults to False.
-        remove_any_null_turbine_std_bins (bool): Remove any null cases for turbine standard error
-            bins.  Defaults to False.
-        fill_null_cov_bin_strategy (str): The strategy to fill null values in the covariance bin.
-            Can be "null", "max_var", "min_var".  Defaults to "max_var".
+        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
+            and of the test turbines is null.  Defaults to False.
+        remove_any_null_turbine_std_bins (bool): Remove bins from consideration where any of
+            the covariance or num_points columns are null.  Defaults to False.
+        variance_only (bool): Only use the variance of turbine powers and not turbine-turbine
+            covariances. Defaults to False.
+        fill_cov_with_var (bool): Fill all missing covariance terms with the product of the
+            square root of the variances. Defaults to False.
 
     Returns:
         ExpectedPowerAnalysisOutput: An object containing the uplift results and
@@ -722,11 +727,12 @@ def total_uplift_expected_power(
             bin_cols_in=bin_cols_in,
             weight_by=weight_by,
             df_freq_pl=df_freq_pl,
+            percentiles=percentiles,
             remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
             remove_any_null_turbine_std_bins=remove_any_null_turbine_std_bins,
-            percentiles=percentiles,
-            fill_null_cov_bin_strategy=fill_null_cov_bin_strategy,
+            variance_only=variance_only,
+            fill_cov_with_var=fill_cov_with_var,
         )
 
     # Create the output object

@@ -285,28 +285,109 @@ def _null_and_sync_covariance(
 def _fill_cov_null(
     df_cov: pl.DataFrame,
     test_cols: List[str],
-    uplift_pairs: List[List[str]],
-    bin_cols_without_df_name: List[str] = ["wd_bin", "ws_bin"],
-    fill_null_cov_bin_strategy="max_var",
 ) -> pl.DataFrame:
     """Fill null values in covariance according to strategy.
 
-    Fill the null values in the covariance matrix according to the
-    strategy specified in fill_null_cov_bin_strategy.
-    If max_var, fill null values of covariance of t1,t2 with the
-    combined variances of t1 and t2 assuming correlation
-    of 1.0.  For min var...
+    Fill the null values in the covariance matrix with the product
+    of the square root of the variances of the corresponding test columns.  Set
+    the number of points to the minimum of the number of points for the two
+    corresponding test columns.
 
     Args:
         df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
         test_cols (List[str]): A list of column names to calculate the covariance of
-        uplift_pairs (List[List[str]]): A list of the df_name values to copy the nans from
-        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by.
-            Defaults to ["wd_bin", "ws_bin"].
-        fill_null_cov_bin_strategy (str): Strategy to fill null values in covariance matrix.
-            Defaults to 'max_var'.
 
     Returns:
         pl.DataFrame: A polars dataframe with the null values filled according to the strategy.
     """
-    pass
+    n_test_cols = len(test_cols)
+
+    # Loop over all combinations of test columns
+    for t1_idx in range(n_test_cols):
+        for t2_idx in range(n_test_cols):
+            if t1_idx == t2_idx:
+                continue
+
+            t1 = test_cols[t1_idx]
+            t2 = test_cols[t2_idx]
+
+            # Get the cov_col, and the variance columns number of points for each turbine
+            cov_col = f"cov_{t1}_{t2}"
+            n_col = f"count_{t1}_{t2}"
+            var_1_col = f"cov_{t1}_{t1}"
+            var_2_col = f"cov_{t2}_{t2}"
+            n_1_col = f"count_{t1}_{t1}"
+            n_2_col = f"count_{t2}_{t2}"
+
+            # For the rows where cov_col is null, fill the cov_col with the product of the square
+            # root of the variances of the two test columns and the n_col with the minimum of the
+            # number of points for the two test columns
+            df_cov = df_cov.with_columns(null_map=pl.col(cov_col).is_null())
+
+            with pl.Config(tbl_cols=-1):
+                print(cov_col)
+                print(df_cov)
+
+            df_cov = df_cov.with_columns(
+                pl.when(pl.col("null_map"))
+                .then((pl.col(var_1_col).sqrt() * pl.col(var_2_col).sqrt()))
+                .otherwise(pl.col(cov_col))
+                .alias(cov_col)
+            )
+
+            df_cov = df_cov.with_columns(
+                pl.when(pl.col("null_map"))
+                .then(pl.min_horizontal(n_1_col, n_2_col))
+                .otherwise(pl.col(n_col))
+                .alias(n_col)
+            )
+
+            # For any rows where n_col is 0 or null, set n_col and cov_col to null
+            df_cov = df_cov.with_columns(
+                pl.when(pl.col(n_col) == 0).then(None).otherwise(pl.col(n_col)).alias(n_col)
+            )
+
+            df_cov = df_cov.with_columns(
+                pl.when(pl.col(n_col).is_null())
+                .then(None)
+                .otherwise(pl.col(cov_col))
+                .alias(cov_col)
+            )
+
+    # Remove the null_map column
+    df_cov = df_cov.drop("null_map")
+
+    return df_cov
+
+
+def _zero_cov(
+    df_cov: pl.DataFrame,
+    test_cols: List[str],
+) -> pl.DataFrame:
+    """Set all covariance terms to 0, leaving only the variances.
+
+    Args:
+        df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
+        test_cols (List[str]): A list of column names to calculate the covariance of
+
+    Returns:
+        pl.DataFrame: A polars dataframe with the covariance terms set to 0.
+    """
+    n_test_cols = len(test_cols)
+
+    # Loop over all combinations of test columns
+    for t1_idx in range(n_test_cols):
+        for t2_idx in range(n_test_cols):
+            if t1_idx == t2_idx:
+                continue
+
+            t1 = test_cols[t1_idx]
+            t2 = test_cols[t2_idx]
+
+            cov_col = f"cov_{t1}_{t2}"
+            n_col = f"count_{t1}_{t2}"
+
+            # Set all cov_col values to 0 and all n_col to 1 just to avoid divide by 0
+            df_cov = df_cov.with_columns(pl.lit(0).alias(cov_col), pl.lit(1).alias(n_col))
+
+    return df_cov
