@@ -8,6 +8,7 @@ CENER within the TWAIN project.
 """
 
 import warnings
+from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,6 +17,8 @@ from floris.utilities import wrap_180
 from matplotlib import dates
 from scipy.interpolate import interp1d
 from sklearn.tree import DecisionTreeRegressor
+
+from flasc import FlascDataFrame
 
 _MODE_LIMIT = 0.05
 
@@ -46,7 +49,7 @@ def _get_leaves_and_knots(tree: DecisionTreeRegressor) -> tuple[np.ndarray, np.n
         # If the left and right child of a node is not the same we have a split node
         is_split_node = children_left[node_id] != children_right[node_id]
         # If a split node, append left and right children and depth to `stack` so we can loop t
-        # hrough them
+        # through them
         if is_split_node:
             stack.append((children_left[node_id], depth + 1))
             stack.append((children_right[node_id], depth + 1))
@@ -141,7 +144,7 @@ def _plot_regression(y_data: pd.Series, y_regr: np.ndarray, date_time: pd.Series
 
 # TODO: Keep these defaults?
 def homogenize(
-    scada: pd.DataFrame,
+    scada: Union[pd.DataFrame | FlascDataFrame],
     var: str = "wd",
     threshold: int = 1000,
     reference: str = "last",
@@ -176,7 +179,7 @@ def homogenize(
         )
 
     # Select the columns to use in the algorithm
-    wt_names = scada.columns[scada.columns.str.startswith((var))]
+    wt_names = scada.columns[scada.columns.str.startswith((var + "_"))]
     if len(wt_names) < 3:
         raise ValueError("There must be at least 3 wind turbines for the algorithm to apply.")
     df = scada[wt_names.to_list() + ["time"]].reset_index(drop=True)
