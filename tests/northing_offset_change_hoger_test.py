@@ -1,0 +1,60 @@
+import numpy as np
+import pandas as pd
+
+from flasc import FlascDataFrame
+from flasc.data_processing.northing_offset_change_hoger import (
+    _discretize,
+    _shorth_mode,
+    homogenize,
+)
+
+
+def test_discretize():
+    """Test discretize function."""
+
+    x = pd.Series([0, 5, 1000, 2, 75])
+    expected_result = pd.Series([1, 1, 2, 1, 1])
+    threshold = 100
+    result = _discretize(x, threshold)
+    assert isinstance(result, np.ndarray)
+    assert len(result) == len(x)
+    np.testing.assert_array_equal(result, expected_result)
+
+
+def test_shorth_mode():
+    """Test shorth function."""
+    x = pd.Series([1.0, 1.0, 1.0, 1.5, 2.0])
+    expected_result = 1.0
+    result = _shorth_mode(x)
+    assert isinstance(result, np.float64)
+    assert result == expected_result
+
+
+def test_homogenize():
+    """Test homogenize function."""
+    N = 10
+
+    df = FlascDataFrame(
+        {
+            "time": pd.date_range("2024-01-01", periods=N, freq="600s"),
+            "wd": np.random.randint(0, 360, N),
+            "ws": np.random.randint(0, 20, N),
+            "pow_000": np.random.randint(0, 100, N),
+            "pow_001": np.random.randint(0, 100, N),
+            "pow_002": np.random.randint(0, 100, N),
+            "pow_003": np.random.randint(0, 100, N),
+            "pow_004": np.random.randint(0, 100, N),
+            "wd_000": np.zeros(N),
+            "wd_001": np.zeros(N),
+            "wd_002": np.zeros(N),
+            "wd_003": np.zeros(N),
+            "wd_004": np.zeros(N),
+        }
+    )
+
+    # Add a step change at N/2 in wd_004
+    df.loc[N // 2 :, "wd_004"] = 20
+
+    df_hom, d2 = homogenize(df, threshold=10)
+    print(df_hom)
+    print(d2)
