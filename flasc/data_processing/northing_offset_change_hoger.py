@@ -7,6 +7,8 @@ Alvaro Gonzalez Salcedo (https://github.com/alvarogonzalezsalcedo) of
 CENER within the TWAIN project.
 """
 
+from __future__ import annotations
+
 import warnings
 from typing import Union
 
