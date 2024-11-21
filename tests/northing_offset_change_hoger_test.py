@@ -32,7 +32,7 @@ def test_shorth_mode():
 
 def test_homogenize():
     """Test homogenize function."""
-    N = 10
+    N = 100
 
     df = FlascDataFrame(
         {
@@ -55,6 +55,16 @@ def test_homogenize():
     # Add a step change at N/2 in wd_004
     df.loc[N // 2 :, "wd_004"] = 20
 
-    df_hom, d2 = homogenize(df, threshold=10)
-    print(df_hom)
-    print(d2)
+    # If threshold is larger than number of points, df_hom should match df
+    df_hom, d2 = homogenize(df.copy(), threshold=N * 2)
+    assert df.equals(df_hom)
+
+    # If threshold is smaller than number of points, df_hom should homogenize wd_004
+    df_hom, d2 = homogenize(df.copy(), threshold=10)
+    assert not df.equals(df_hom)
+    assert df_hom["wd_004"].nunique() == 1  # Test homogenized column
+
+    # If threshold == N should homogenize all columns
+    df_hom, d2 = homogenize(df.copy(), threshold=N)
+    assert not df.equals(df_hom)
+    assert df_hom["wd_004"].nunique() == 1  # Test homogenized column
