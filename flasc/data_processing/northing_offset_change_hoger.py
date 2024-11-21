@@ -60,7 +60,7 @@ def _get_leaves_and_knots(tree: DecisionTreeRegressor) -> tuple[np.ndarray, np.n
     return leave_values, knot_positions
 
 
-def discretize(x: pd.Series, threshold: int) -> np.ndarray:
+def _discretize(x: pd.Series, threshold: int) -> np.ndarray:
     """Get the class of the knots based on the times they repeat.
 
     Args:
@@ -84,7 +84,7 @@ def discretize(x: pd.Series, threshold: int) -> np.ndarray:
     return y
 
 
-def shorth_mode(x: pd.Series) -> np.float64:
+def _shorth_mode(x: pd.Series) -> np.float64:
     """Estimates the Venter mode through the shorth method for the given data.
 
     Args:
@@ -254,9 +254,11 @@ def homogenize(
 
     # Postprocess all the data to get the main jumps for each wind turbine
     d2 = d.copy()
-    d2["Class"] = discretize(d["Knot"], threshold=threshold)
+    d2["Class"] = _discretize(d["Knot"], threshold=threshold)
     d2["Count"] = 1
-    d2 = d2.groupby(["Class", "Turbine"]).agg({"Count": "sum", "Jump": "mean", "Knot": shorth_mode})
+    d2 = d2.groupby(["Class", "Turbine"]).agg(
+        {"Count": "sum", "Jump": "mean", "Knot": _shorth_mode}
+    )
     d2.reset_index(drop=False, inplace=True)
     d2["Knot_date"] = df["time"].values[np.floor(d2["Knot"]).astype(int) - 1]
     d2 = d2.loc[d2["Count"] > len(wt_names) / 2]
