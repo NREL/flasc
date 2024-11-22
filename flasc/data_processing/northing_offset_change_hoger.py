@@ -259,7 +259,7 @@ def homogenize(
 
     # Postprocess all the data to get the main jumps for each wind turbine
     d2 = d.copy()
-    d2["Class"] = _discretize(d["Knot"], threshold=threshold)
+    d2["Class"] = _discretize(d["Knot"], threshold=threshold // 2)
     d2["Count"] = 1
     d2 = d2.groupby(["Class", "Turbine"]).agg(
         {"Count": "sum", "Jump": "mean", "Knot": _shorth_mode}
