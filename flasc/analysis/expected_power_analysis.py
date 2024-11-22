@@ -266,7 +266,6 @@ def _total_uplift_expected_power_with_standard_error(
     percentiles: List[float] = [2.5, 97.5],
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
-    remove_any_null_turbine_std_bins: bool = False,
     variance_only: bool = False,
     fill_cov_with_var: bool = False,
 ) -> Dict[str, Dict[str, float]]:
@@ -297,8 +296,6 @@ def _total_uplift_expected_power_with_standard_error(
             Defaults to False.
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
-        remove_any_null_turbine_std_bins (bool): Remove bins from consideration where any of
-            the covariance or num_points columns are null.  Defaults to False.
         variance_only (bool): Only use the variance of turbine powers and not turbine-turbine
             covariances. Defaults to False.
         fill_cov_with_var (bool): Fill all missing covariance terms with the product of the
@@ -384,12 +381,6 @@ def _total_uplift_expected_power_with_standard_error(
     # Get the names of all the covariance and num_points columns
     cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
     n_cols = [f"count_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
-
-    # Remove any rows where any of the covariance or n_cols columns are null
-    if remove_any_null_turbine_std_bins:
-        df_bin = df_bin.filter(
-            pl.all_horizontal([pl.col(c).is_not_null() for c in cov_cols + n_cols])
-        )
 
     # with pl.Config(tbl_cols=-1):
     #     print(df_bin)
@@ -544,7 +535,6 @@ def total_uplift_expected_power(
     percentiles: List[float] = [2.5, 97.5],
     remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
-    remove_any_null_turbine_std_bins: bool = False,
     variance_only: bool = False,
     fill_cov_with_var: bool = False,
 ) -> ExpectedPowerAnalysisOutput:
@@ -578,8 +568,6 @@ def total_uplift_expected_power(
              Defaults to False.
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
-        remove_any_null_turbine_std_bins (bool): Remove bins from consideration where any of
-            the covariance or num_points columns are null.  Defaults to False.
         variance_only (bool): Only use the variance of turbine powers and not turbine-turbine
             covariances. Defaults to False.
         fill_cov_with_var (bool): Fill all missing covariance terms with the product of the
@@ -730,7 +718,6 @@ def total_uplift_expected_power(
             percentiles=percentiles,
             remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
-            remove_any_null_turbine_std_bins=remove_any_null_turbine_std_bins,
             variance_only=variance_only,
             fill_cov_with_var=fill_cov_with_var,
         )
@@ -760,7 +747,6 @@ def total_uplift_expected_power(
         percentiles=percentiles,
         remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
         remove_any_null_turbine_bins=remove_any_null_turbine_bins,
-        remove_any_null_turbine_std_bins=remove_any_null_turbine_std_bins,
     )
 
     # Return the object
