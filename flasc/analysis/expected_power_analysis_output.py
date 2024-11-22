@@ -36,7 +36,6 @@ class ExpectedPowerAnalysisOutput:
         percentiles: list = [2.5, 97.5],
         remove_all_nulls_wd_ws: bool = False,
         remove_any_null_turbine_bins: bool = False,
-        remove_any_null_turbine_std_bins: bool = False,
     ) -> None:
         """Init the object with the results of the uplift analysis."""
         self.uplift_results = uplift_results
@@ -62,4 +61,3 @@ class ExpectedPowerAnalysisOutput:
         self.percentiles = percentiles
         self.remove_all_nulls_wd_ws = remove_all_nulls_wd_ws
         self.remove_any_null_turbine_bins = remove_any_null_turbine_bins
-        self.remove_any_null_turbine_std_bins = remove_any_null_turbine_std_bins
