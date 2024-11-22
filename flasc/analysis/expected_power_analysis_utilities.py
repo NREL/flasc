@@ -22,7 +22,6 @@ def _add_wd_ws_bins(
     ws_step: float = 1.0,
     ws_min: float = 0.0,
     ws_max: float = 50.0,
-    remove_all_nulls_wd_ws: bool = False,
 ) -> pl.DataFrame:
     """Add wind direction (wd) and wind speed (ws) bin columns to the dataframe.
 
@@ -36,14 +35,12 @@ def _add_wd_ws_bins(
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
-            Defaults to False.
 
     Returns:
         pl.DataFrame: A polars dataframe with the wd and ws bin columns added.
     """
-    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max, remove_all_nulls=remove_all_nulls_wd_ws)
-    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max, remove_all_nulls=remove_all_nulls_wd_ws)
+    df_ = add_ws_bin(df_, ws_cols, ws_step, ws_min, ws_max)
+    df_ = add_wd_bin(df_, wd_cols, wd_step, wd_min, wd_max)
     return df_
 
 

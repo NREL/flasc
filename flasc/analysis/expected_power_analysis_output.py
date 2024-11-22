@@ -34,7 +34,6 @@ class ExpectedPowerAnalysisOutput:
         use_standard_error: bool = True,
         N: int = 1,
         percentiles: list = [2.5, 97.5],
-        remove_all_nulls_wd_ws: bool = False,
         remove_any_null_turbine_bins: bool = False,
     ) -> None:
         """Init the object with the results of the uplift analysis."""
@@ -59,5 +58,4 @@ class ExpectedPowerAnalysisOutput:
         self.use_standard_error = use_standard_error
         self.N = N
         self.percentiles = percentiles
-        self.remove_all_nulls_wd_ws = remove_all_nulls_wd_ws
         self.remove_any_null_turbine_bins = remove_any_null_turbine_bins

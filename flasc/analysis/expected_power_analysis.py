@@ -44,7 +44,6 @@ def _total_uplift_expected_power_single(
     bin_cols_in: List[str] = ["wd_bin", "ws_bin"],
     weight_by: str = "min",  # min or sum
     df_freq_pl: pl.DataFrame = None,
-    remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
 ) -> Tuple[pl.DataFrame, pl.DataFrame, Dict[str, float]]:
     """Calculate the total uplift in expected power for a single run.
@@ -68,8 +67,6 @@ def _total_uplift_expected_power_single(
         weight_by (str): The method to weight the bins. Defaults to "min".
         df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.
             Defaults to None.
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
-            Defaults to False.
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
 
@@ -91,7 +88,6 @@ def _total_uplift_expected_power_single(
         ws_step=ws_step,
         ws_min=ws_min,
         ws_max=ws_max,
-        remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
     )
 
     # Bin and group the dataframe
@@ -161,7 +157,6 @@ def _total_uplift_expected_power_with_bootstrapping(
     bin_cols_in: List[str] = ["wd_bin", "ws_bin"],
     weight_by: str = "min",  # min or sum
     df_freq_pl: pl.DataFrame = None,
-    remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     N: int = 1,
     percentiles: List[float] = [2.5, 97.5],
@@ -187,8 +182,6 @@ def _total_uplift_expected_power_with_bootstrapping(
         weight_by (str): The method to weight the bins. Defaults to "min".
         df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.
             Defaults to None.
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
-             Defaults to False.
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
         N (int): The number of bootstrap samples. Defaults to 1.
@@ -216,7 +209,6 @@ def _total_uplift_expected_power_with_bootstrapping(
             bin_cols_in=bin_cols_in,
             weight_by=weight_by,
             df_freq_pl=df_freq_pl,
-            remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
         )
         for i in range(N)
@@ -264,7 +256,6 @@ def _total_uplift_expected_power_with_standard_error(
     weight_by: str = "min",  # min or sum
     df_freq_pl: pl.DataFrame = None,
     percentiles: List[float] = [2.5, 97.5],
-    remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     variance_only: bool = False,
     fill_cov_with_var: bool = False,
@@ -292,8 +283,6 @@ def _total_uplift_expected_power_with_standard_error(
             Defaults to None.
         percentiles (List[float]): The percentiles to for confidence intervals.
             Defaults to [2.5, 97.5].
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
-            Defaults to False.
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
         variance_only (bool): Only use the variance of turbine powers and not turbine-turbine
@@ -324,7 +313,6 @@ def _total_uplift_expected_power_with_standard_error(
         ws_step=ws_step,
         ws_min=ws_min,
         ws_max=ws_max,
-        remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
     )
 
     # Compute the covariance frame
@@ -533,7 +521,6 @@ def total_uplift_expected_power(
     use_standard_error: bool = True,
     N: int = 1,
     percentiles: List[float] = [2.5, 97.5],
-    remove_all_nulls_wd_ws: bool = False,
     remove_any_null_turbine_bins: bool = False,
     variance_only: bool = False,
     fill_cov_with_var: bool = False,
@@ -564,8 +551,6 @@ def total_uplift_expected_power(
         N (int): The number of bootstrap samples. Defaults to 1.
         percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
             Defaults to [2.5, 97.5].
-        remove_all_nulls_wd_ws (bool): Remove all null cases for wind direction and wind speed.
-             Defaults to False.
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
         variance_only (bool): Only use the variance of turbine powers and not turbine-turbine
@@ -677,7 +662,6 @@ def total_uplift_expected_power(
             bin_cols_in=bin_cols_in,
             weight_by=weight_by,
             df_freq_pl=df_freq_pl,
-            remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
         )
     elif N > 1:
@@ -697,7 +681,6 @@ def total_uplift_expected_power(
             bin_cols_in=bin_cols_in,
             weight_by=weight_by,
             df_freq_pl=df_freq_pl,
-            remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
             N=N,
             percentiles=percentiles,
@@ -720,7 +703,6 @@ def total_uplift_expected_power(
             weight_by=weight_by,
             df_freq_pl=df_freq_pl,
             percentiles=percentiles,
-            remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
             variance_only=variance_only,
             fill_cov_with_var=fill_cov_with_var,
@@ -749,7 +731,6 @@ def total_uplift_expected_power(
         use_standard_error=use_standard_error,
         N=N,
         percentiles=percentiles,
-        remove_all_nulls_wd_ws=remove_all_nulls_wd_ws,
         remove_any_null_turbine_bins=remove_any_null_turbine_bins,
     )
 
