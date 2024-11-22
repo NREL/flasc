@@ -29,7 +29,7 @@ jobs:
     - name: Copy examples to docs
       working-directory: ${{runner.workspace}}/flasc/
       run: |
-        rsync -av --mkpath  examples_artificial_data/03_energy_ratio/ docs/examples/01_raw_data_processing
+        rsync -av --mkpath  examples_artificial_data/01_raw_data_processing/ docs/examples/01_raw_data_processing
         rsync -av --mkpath  examples_artificial_data/03_energy_ratio/ docs/examples/03_energy_ratio
         rsync -av --mkpath  examples_artificial_data/floris_input_artificial/ docs/examples/floris_input_artificial
         ls docs/examples
