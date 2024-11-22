@@ -640,6 +640,10 @@ def total_uplift_expected_power(
     if use_standard_error and N != 1:
         raise ValueError("N must be 1 when use_standard_error is True")
 
+    # Raise an error if both variance_only and fill_cov_with_var are True
+    if variance_only and fill_cov_with_var:
+        raise ValueError("variance_only and fill_cov_with_var cannot both be True")
+
     # Set up the column names for the wind speed and test cols
 
     if not use_predefined_ws:
