@@ -64,7 +64,55 @@ def test_homogenize():
     assert not df.equals(df_hom)
     assert df_hom["wd_004"].nunique() == 1  # Test homogenized column
 
+    # All columns besides wd_004 are unchanged
+    assert df["wd_000"].equals(df_hom["wd_000"])
+    assert df["wd_001"].equals(df_hom["wd_001"])
+    assert df["wd_002"].equals(df_hom["wd_002"])
+    assert df["wd_003"].equals(df_hom["wd_003"])
+
     # If threshold == N should homogenize all columns
     df_hom, d2 = homogenize(df.copy(), threshold=N)
     assert not df.equals(df_hom)
     assert df_hom["wd_004"].nunique() == 1  # Test homogenized column
+
+
+def test_homogenize_double_change():
+    """Test homogenize function with two changes."""
+    N = 250
+
+    df = FlascDataFrame(
+        {
+            "time": pd.date_range("2024-01-01", periods=N, freq="600s"),
+            "wd": np.random.randint(0, 360, N),
+            "ws": np.random.randint(0, 20, N),
+            "pow_000": np.random.randint(0, 100, N),
+            "pow_001": np.random.randint(0, 100, N),
+            "pow_002": np.random.randint(0, 100, N),
+            "pow_003": np.random.randint(0, 100, N),
+            "pow_004": np.random.randint(0, 100, N),
+            "wd_000": np.zeros(N),
+            "wd_001": np.zeros(N),
+            "wd_002": np.zeros(N),
+            "wd_003": np.zeros(N),
+            "wd_004": np.zeros(N),
+        }
+    )
+
+    # Add a step change at N/2 in wd_004
+    df.loc[N // 3 :, "wd_004"] = 20
+    df.loc[2 * N // 3 :, "wd_004"] = 40
+
+    # If threshold is smaller than number of points, df_hom should homogenize wd_004
+    df_hom, d2 = homogenize(df.copy(), threshold=N // 5)
+    assert not df.equals(df_hom)
+    assert df_hom["wd_004"].nunique() == 1  # Test homogenized column
+
+    # All columns besides wd_004 are unchanged
+    assert df["wd_000"].equals(df_hom["wd_000"])
+    assert df["wd_001"].equals(df_hom["wd_001"])
+    assert df["wd_002"].equals(df_hom["wd_002"])
+    assert df["wd_003"].equals(df_hom["wd_003"])
+
+    # If threshold is larger than number of points, df_hom should match df
+    df_hom, d2 = homogenize(df.copy(), threshold=N * 2)
+    assert df.equals(df_hom)
