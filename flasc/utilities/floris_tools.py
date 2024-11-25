@@ -562,6 +562,10 @@ def estimate_ws_with_floris(
         # Following the gain scheduling approach of `add_ws_est_one_ttype`
         # define the gain via four wind speeds, however, more deterministically since
         # driven by FLORIS
+        # ws0 (zero wind speed) is the wind speed at which partial power dependence begins
+        # ws1 (10% of rated) is the wind speed at which full power dependence begins
+        # ws2 (90% of rated) is the wind speed at which full power dependence ends
+        # ws3 (90% of rated + 0.5 m/s) is the wind speed at which partial power dependence ends
         ws0 = 0
         ws1 = float(np.interp(rated_power * 0.1, pow_pc, ws_pc))
         ws2 = float(np.interp(rated_power * 0.9, pow_pc, ws_pc))
