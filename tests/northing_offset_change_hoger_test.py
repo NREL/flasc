@@ -5,7 +5,7 @@ from flasc import FlascDataFrame
 from flasc.data_processing.northing_offset_change_hoger import (
     _discretize,
     _shorth_mode,
-    homogenize,
+    homogenize_hoger,
 )
 
 
@@ -30,8 +30,8 @@ def test_shorth_mode():
     assert result == expected_result
 
 
-def test_homogenize():
-    """Test homogenize function."""
+def test_homogenize_hoger():
+    """Test homogenize_hoger function."""
     N = 100
 
     df = FlascDataFrame(
@@ -56,13 +56,13 @@ def test_homogenize():
     df.loc[N // 2 :, "wd_004"] = 20
 
     # If threshold is larger than number of points, df_hom should match df
-    df_hom, d2 = homogenize(df.copy(), threshold=N * 2)
+    df_hom, d2 = homogenize_hoger(df.copy(), threshold=N * 2)
     assert df.equals(df_hom)
 
     # If threshold is smaller than number of points, df_hom should homogenize wd_004
-    df_hom, d2 = homogenize(df.copy(), threshold=10)
+    df_hom, d2 = homogenize_hoger(df.copy(), threshold=10)
     assert not df.equals(df_hom)
-    assert df_hom["wd_004"].nunique() == 1  # Test homogenized column
+    assert df_hom["wd_004"].nunique() == 1  # Test homogenize_hoger column
 
     # All columns besides wd_004 are unchanged
     assert df["wd_000"].equals(df_hom["wd_000"])
@@ -71,13 +71,13 @@ def test_homogenize():
     assert df["wd_003"].equals(df_hom["wd_003"])
 
     # If threshold == N should homogenize all columns
-    df_hom, d2 = homogenize(df.copy(), threshold=N)
+    df_hom, d2 = homogenize_hoger(df.copy(), threshold=N)
     assert not df.equals(df_hom)
     assert df_hom["wd_004"].nunique() == 1  # Test homogenized column
 
 
-def test_homogenize_double_change():
-    """Test homogenize function with two changes."""
+def test_homogenize_hoger_double_change():
+    """Test homogenize_hoger function with two changes."""
     N = 250
 
     df = FlascDataFrame(
@@ -103,7 +103,7 @@ def test_homogenize_double_change():
     df.loc[2 * N // 3 :, "wd_004"] = 40
 
     # If threshold is smaller than number of points, df_hom should homogenize wd_004
-    df_hom, d2 = homogenize(df.copy(), threshold=N // 5)
+    df_hom, d2 = homogenize_hoger(df.copy(), threshold=N // 5)
     assert not df.equals(df_hom)
     assert df_hom["wd_004"].nunique() == 1  # Test homogenized column
 
@@ -114,5 +114,5 @@ def test_homogenize_double_change():
     assert df["wd_003"].equals(df_hom["wd_003"])
 
     # If threshold is larger than number of points, df_hom should match df
-    df_hom, d2 = homogenize(df.copy(), threshold=N * 2)
+    df_hom, d2 = homogenize_hoger(df.copy(), threshold=N * 2)
     assert df.equals(df_hom)

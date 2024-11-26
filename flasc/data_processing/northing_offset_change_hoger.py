@@ -144,8 +144,7 @@ def _plot_regression(y_data: pd.Series, y_regr: np.ndarray, date_time: pd.Series
     plt.show()
 
 
-# TODO: Keep these defaults?
-def homogenize(
+def homogenize_hoger(
     scada: Union[pd.DataFrame | FlascDataFrame],
     var: str = "wd",
     threshold: int = 1000,
