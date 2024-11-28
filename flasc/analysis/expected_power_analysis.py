@@ -17,6 +17,7 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _compute_covariance,
     _fill_cov_null,
     _null_and_sync_covariance,
+    _synchronize_mean_power_cov_nulls,
     _synchronize_nulls,
     _zero_cov,
 )
@@ -345,6 +346,9 @@ def _total_uplift_expected_power_with_standard_error(
         test_cols=test_cols,
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
+
+    # Synchronize any null values in the covariance back to df_bin
+    df_bin = _synchronize_mean_power_cov_nulls(df_bin=df_bin, df_cov=df_cov, test_cols=test_cols)
 
     # Synchronize the null values
     df_bin = _synchronize_nulls(

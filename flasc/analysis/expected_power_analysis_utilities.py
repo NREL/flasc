@@ -388,3 +388,47 @@ def _zero_cov(
             df_cov = df_cov.with_columns(pl.lit(0).alias(cov_col), pl.lit(1).alias(n_col))
 
     return df_cov
+
+
+def _synchronize_mean_power_cov_nulls(
+    df_bin: pl.DataFrame,
+    df_cov: pl.DataFrame,
+    test_cols: List[str],
+) -> pl.DataFrame:
+    """For each row, for any turbine with a null var or cov, null mean power.
+
+    For each row, if there are any turbines in df_cov with undefined variances or covariances
+      (because count < 2), then the mean power for those turbines would get set to Null as well.
+
+    Args:
+        df_bin (pl.DataFrame): A polars dataframe with the mean and variance of the test
+            columns grouped by bin columns.
+        df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
+        test_cols (List[str]): A list of column names to calculate the covariance of
+
+    Returns:
+        pl.DataFrame: Update df_bin dataframe
+    """
+    n_test_cols = len(test_cols)
+    all_cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
+
+    # Loop over all combinations of test columns for the mean column
+    for t1_idx in range(n_test_cols):
+        t1 = test_cols[t1_idx]
+        t1_mean_col = f"{t1}_mean"
+
+        # Get a list of cov_cols that include the present turbine
+        cov_cols = [c for c in all_cov_cols if t1 in c]
+
+        # Get a mask for the rows where any of the cov_cols are null
+        # using the horizontal or operator
+        mask = df_cov.select(
+            pl.any_horizontal([pl.col(c).is_null() for c in cov_cols]).alias("mask")
+        )
+
+        # Set the mean power to null for the rows where the mask is true
+        df_bin = df_bin.with_columns(
+            pl.when(mask["mask"]).then(None).otherwise(pl.col(t1_mean_col)).alias(t1_mean_col)
+        )
+
+    return df_bin
