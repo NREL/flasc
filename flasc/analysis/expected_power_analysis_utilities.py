@@ -77,12 +77,12 @@ def _bin_and_group_dataframe_expected_power(
             [pl.mean(c).alias(f"{c}_mean") for c in test_cols]
             + [pl.var(c).alias(f"{c}_var") for c in test_cols]
             + [pl.count(c).alias(f"{c}_count") for c in test_cols]
-            + [pl.count().alias("count")]
+            + [pl.len().alias("count")]
         )
         # Drop any row in which all the mean values are null
         .filter(pl.any_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols]))
         # # Enforce that each ws/wd bin combination has to appear in all dataframes
-        .filter(pl.count().over(bin_cols_without_df_name) == num_df)
+        .filter(pl.len().over(bin_cols_without_df_name) == num_df)
     )
 
     return df_
@@ -165,7 +165,7 @@ def _get_num_points_pair(
     # Generate all pairs of columns (including same column pairs)
     col_pairs = list(product(test_cols, test_cols))
 
-    df_n = df_.group_by(bin_cols_with_df_name).agg(pl.count().alias("count"))
+    df_n = df_.group_by(bin_cols_with_df_name).agg(pl.len().alias("count"))
 
     for c1, c2 in col_pairs:
         df_sub = df_.filter(
@@ -174,7 +174,7 @@ def _get_num_points_pair(
             & pl.col(c1).is_not_nan()
             & pl.col(c2).is_not_nan()
         )
-        df_n_sub = df_sub.group_by(bin_cols_with_df_name).agg(pl.count().alias(f"count_{c1}_{c2}"))
+        df_n_sub = df_sub.group_by(bin_cols_with_df_name).agg(pl.len().alias(f"count_{c1}_{c2}"))
 
         df_n = df_n.join(df_n_sub, on=bin_cols_with_df_name, how="left")
 
@@ -222,7 +222,7 @@ def _compute_covariance(
     # Enforce that each ws/wd bin combination has to appear in all dataframes
     bin_cols_without_df_name = [c for c in bin_cols_with_df_name if c != "df_name"]
     num_df = df_["df_name"].n_unique()
-    df_cov = df_cov.filter(pl.count().over(bin_cols_without_df_name) == num_df)
+    df_cov = df_cov.filter(pl.len().over(bin_cols_without_df_name) == num_df)
 
     return df_cov
 
