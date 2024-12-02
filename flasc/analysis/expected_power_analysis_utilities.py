@@ -393,8 +393,9 @@ def _set_cov_to_zero(
             cov_col = f"cov_{t1}_{t2}"
             n_col = f"count_{t1}_{t2}"
 
-            # Set all cov_col values to 0 and all n_col to 1 just to avoid divide by 0
-            df_cov = df_cov.with_columns(pl.lit(0).alias(cov_col), pl.lit(1).alias(n_col))
+            # Set all cov_col values to 0 and all n_col to 2 just to avoid divide by 0
+            # and having the 0 in the cov replaced by null for lacking points
+            df_cov = df_cov.with_columns(pl.lit(0).alias(cov_col), pl.lit(2).alias(n_col))
 
     return df_cov
 
