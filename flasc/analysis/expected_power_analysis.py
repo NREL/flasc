@@ -374,7 +374,7 @@ def _total_uplift_expected_power_with_standard_error(
     with pl.Config(tbl_cols=-1):
         print(df_bin)
 
-    # Synchronize the null values
+    # Synchronize the null values in the mean columns
     df_bin = _synchronize_nulls(
         df_bin=df_bin,
         sync_cols=[f"{col}_mean" for col in test_cols],
@@ -392,6 +392,9 @@ def _total_uplift_expected_power_with_standard_error(
     df_bin = df_bin.filter(
         pl.any_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols])
     )
+
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
 
     # with pl.Config(tbl_cols=-1):
     #     print(df_bin)

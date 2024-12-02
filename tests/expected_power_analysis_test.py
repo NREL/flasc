@@ -353,7 +353,7 @@ def test__get_num_points_pair():
     )
 
     # Test that df_count and df_expected are essentially equal
-    assert_frame_equal(df_count, df_expected, check_row_order=False, check_dtype=False)
+    assert_frame_equal(df_count, df_expected, check_row_order=False, check_dtypes=False)
 
 
 def test_compute_covariance():
@@ -474,7 +474,7 @@ def test_fill_cov_with_var_dont_fill_all():
 
     filled_df = _fill_cov_with_var(test_df, test_cols=["pow_000", "pow_001"], fill_all=False)
 
-    assert_frame_equal(filled_df, expected_df, check_row_order=False, check_dtype=False)
+    assert_frame_equal(filled_df, expected_df, check_row_order=False, check_dtypes=False)
 
 
 def test_fill_cov_with_var_fill_all():
@@ -513,7 +513,7 @@ def test_fill_cov_with_var_fill_all():
 
     filled_df = _fill_cov_with_var(test_df, test_cols=["pow_000", "pow_001"], fill_all=True)
 
-    assert_frame_equal(filled_df, expected_df, check_row_order=False, check_dtype=False)
+    assert_frame_equal(filled_df, expected_df, check_row_order=False, check_dtypes=False)
 
 
 def test_set_cov_to_zero():
@@ -552,7 +552,7 @@ def test_set_cov_to_zero():
 
     zero_cov_df = _set_cov_to_zero(test_df, test_cols=["pow_000", "pow_001"])
 
-    assert_frame_equal(zero_cov_df, expected_df, check_row_order=False, check_dtype=False)
+    assert_frame_equal(zero_cov_df, expected_df, check_row_order=False, check_dtypes=False)
 
 
 def test_synchronize_cov_nulls_back_to_mean():
@@ -599,7 +599,7 @@ def test_synchronize_cov_nulls_back_to_mean():
         test_cols=["pow_000", "pow_001"],
     )
 
-    assert_frame_equal(df_res, expected_df_bin, check_row_order=False, check_dtype=False)
+    assert_frame_equal(df_res, expected_df_bin, check_row_order=False, check_dtypes=False)
 
 
 def test_total_uplift_expected_power_with_standard_error():
@@ -624,7 +624,7 @@ def test_total_uplift_expected_power_with_standard_error():
 
 
 def test_center_uplift_identical():
-    a_in = load_data()
+    a_in = load_repeated_data()
 
     epao_single = total_uplift_expected_power(
         a_in=a_in,
@@ -667,10 +667,91 @@ def test_center_uplift_identical():
         use_standard_error=True,
     )
 
-    # print(epao_single.uplift_results)
-    # print(epao_boot.uplift_results)
-    # print(epao_standard.uplift_results)
-
     assert epao_single.uplift_results["scada_uplift"] == 1.1
     assert epao_boot.uplift_results["scada_uplift"]["energy_uplift_ctr"] == 1.1
     assert epao_standard.uplift_results["scada_uplift"]["energy_uplift_ctr"] == 1.1
+
+
+def test_uncertain_intervals():
+    a_in = load_repeated_data()
+
+    epao_boot = total_uplift_expected_power(
+        a_in=a_in,
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        test_turbines=[0, 1],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        use_standard_error=False,
+        N=10,
+    )
+
+    epao_standard_zero = total_uplift_expected_power(
+        a_in=a_in,
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        test_turbines=[0, 1],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        use_standard_error=True,
+        set_cov_to_zero_or_var="zero",
+    )
+
+    epao_standard_var = total_uplift_expected_power(
+        a_in=a_in,
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        test_turbines=[0, 1],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        use_standard_error=True,
+        set_cov_to_zero_or_var="var",
+    )
+
+    print("Bootstrapping")
+    print(epao_boot.uplift_results["scada_uplift"]["energy_uplift_ctr"])
+    print(epao_boot.uplift_results["scada_uplift"]["energy_uplift_lb"])
+    print(epao_boot.uplift_results["scada_uplift"]["energy_uplift_ub"])
+    assert (
+        epao_boot.uplift_results["scada_uplift"]["energy_uplift_lb"]
+        <= epao_boot.uplift_results["scada_uplift"]["energy_uplift_ctr"]
+    )
+    assert (
+        epao_boot.uplift_results["scada_uplift"]["energy_uplift_ub"]
+        >= epao_boot.uplift_results["scada_uplift"]["energy_uplift_ctr"]
+    )
+
+    print("Standard error zero")
+    print(epao_standard_zero.uplift_results["scada_uplift"]["energy_uplift_ctr"])
+    print(epao_standard_zero.uplift_results["scada_uplift"]["energy_uplift_lb"])
+    print(epao_standard_zero.uplift_results["scada_uplift"]["energy_uplift_ub"])
+    assert (
+        epao_standard_zero.uplift_results["scada_uplift"]["energy_uplift_lb"]
+        <= epao_standard_zero.uplift_results["scada_uplift"]["energy_uplift_ctr"]
+    )
+    assert (
+        epao_standard_zero.uplift_results["scada_uplift"]["energy_uplift_ub"]
+        >= epao_standard_zero.uplift_results["scada_uplift"]["energy_uplift_ctr"]
+    )
+
+    print("Standard error var")
+    print(epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_ctr"])
+    print(epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_lb"])
+    print(epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_ub"])
+    assert (
+        epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_lb"]
+        <= epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_ctr"]
+    )
+    assert (
+        epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_ub"]
+        >= epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_ctr"]
+    )
