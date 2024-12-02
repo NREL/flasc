@@ -1,0 +1,1743 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Import dependencies &#8212; FLASC</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="../../_static/documentation_options.js?v=30a733bc"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-3PMGTE1H70"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/01_raw_data_processing/00_filter_ws_power_curves';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
+    <img src="../../_static/curve.png" class="logo__image only-dark pst-js-only" alt="FLASC - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    FLASC documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../flasc_data_format.html">FLASC data format</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../energy_ratio.html">Energy ratio analysis</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../total_uplift.html">Total uplift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licensing.html">Licensing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Data Processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="03_northing_calibration_hoger.html">Northing Calibration in FLASC</a></li>
+
+
+
+
+
+
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Energy Ratio</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../03_energy_ratio/00_demo_energy_ratio_syntax.html">Demonstrate energy ratio syntax</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../03_energy_ratio/01_demo_energy_ratio_options.html">Demonstrate energy ratio options</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api.html">API Documentation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/flasc.flasc_dataframe.html">flasc.flasc_dataframe</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/flasc.flasc_dataframe.FlascDataFrame.html">flasc.flasc_dataframe.FlascDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio_input.generate_block_list.html">flasc.analysis.energy_ratio_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio_output.html">flasc.analysis.energy_ratio_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/flasc.data_processing.html">flasc.data_processing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.html">flasc.data_processing.dataframe_manipulations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.df_drop_nan_rows.html">flasc.data_processing.dataframe_manipulations.df_drop_nan_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing.html">flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.df_reduce_precision.html">flasc.data_processing.dataframe_manipulations.df_reduce_precision</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_ti.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_wd.html">flasc.data_processing.dataframe_manipulations.filter_df_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_ws.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.data_processing.filtering.html">flasc.data_processing.filtering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.filtering.df_get_no_faulty_measurements.html">flasc.data_processing.filtering.df_get_no_faulty_measurements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html">flasc.data_processing.filtering.df_mark_turbdata_as_faulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html">flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.filtering.FlascFilter.html">flasc.data_processing.filtering.FlascFilter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.data_processing.find_sensor_faults.html">flasc.data_processing.find_sensor_faults</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults.html">flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.data_processing.northing_offset_change_hoger.html">flasc.data_processing.northing_offset_change_hoger</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.northing_offset_change_hoger.homogenize_hoger.html">flasc.data_processing.northing_offset_change_hoger.homogenize_hoger</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.time_operations.df_downsample.html">flasc.data_processing.time_operations.df_downsample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.time_operations.df_movingaverage.html">flasc.data_processing.time_operations.df_movingaverage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.time_operations.df_resample_by_interpolation.html">flasc.data_processing.time_operations.df_resample_by_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.data_processing.time_operations.flatten_cols.html">flasc.data_processing.time_operations.flatten_cols</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.html">flasc.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.circular_statistics.html">flasc.utilities.circular_statistics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.circular_statistics.calc_wd_mean_radial.html">flasc.utilities.circular_statistics.calc_wd_mean_radial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.circular_statistics.calculate_wd_statistics.html">flasc.utilities.circular_statistics.calculate_wd_statistics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.html">flasc.utilities.energy_ratio_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.add_bin_weights.html">flasc.utilities.energy_ratio_utilities.add_bin_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_ref.html">flasc.utilities.energy_ratio_utilities.add_power_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_test.html">flasc.utilities.energy_ratio_utilities.add_power_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.add_reflected_rows.html">flasc.utilities.energy_ratio_utilities.add_reflected_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd.html">flasc.utilities.energy_ratio_utilities.add_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd_bin.html">flasc.utilities.energy_ratio_utilities.add_wd_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws.html">flasc.utilities.energy_ratio_utilities.add_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.html">flasc.utilities.floris_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.estimate_ws_with_floris.html">flasc.utilities.floris_tools.estimate_ws_with_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html">flasc.utilities.floris_tools.get_dependent_turbines_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.get_turbs_in_radius.html">flasc.utilities.floris_tools.get_turbs_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.get_upstream_turbs_floris.html">flasc.utilities.floris_tools.get_upstream_turbs_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html">flasc.utilities.floris_tools.interpolate_floris_from_df_approx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.lookup_table_tools.html">flasc.utilities.lookup_table_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant.html">flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.optimization.html">flasc.utilities.optimization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.optimization.estimate_ti.html">flasc.utilities.optimization.estimate_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.optimization.find_timeshift_between_dfs.html">flasc.utilities.optimization.find_timeshift_between_dfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.optimization.match_y_curves_by_offset.html">flasc.utilities.optimization.match_y_curves_by_offset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.tuner_utilities.html">flasc.utilities.tuner_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.tuner_utilities.nested_get.html">flasc.utilities.tuner_utilities.nested_get</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.tuner_utilities.nested_set.html">flasc.utilities.tuner_utilities.nested_set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.tuner_utilities.replicate_nan_values.html">flasc.utilities.tuner_utilities.replicate_nan_values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.tuner_utilities.resim_floris.html">flasc.utilities.tuner_utilities.resim_floris</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.utilities.html">flasc.utilities.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.utilities.estimate_dt.html">flasc.utilities.utilities.estimate_dt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.utilities.get_num_turbines.html">flasc.utilities.utilities.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.utilities.interp_with_max_gap.html">flasc.utilities.utilities.interp_with_max_gap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/flasc.utilities.utilities_examples.html">flasc.utilities.utilities_examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.utilities_examples.load_floris_artificial.html">flasc.utilities.utilities_examples.load_floris_artificial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/flasc.utilities.utilities_examples.load_floris_smarteole.html">flasc.utilities.utilities_examples.load_floris_smarteole</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/edit/main/docs/examples/01_raw_data_processing/00_filter_ws_power_curves.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2Fexamples/01_raw_data_processing/00_filter_ws_power_curves.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/examples/01_raw_data_processing/00_filter_ws_power_curves.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Import dependencies</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#"><strong>Import dependencies</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-initial-data-pulldown"><strong>Step 0</strong>: Initial data pulldown</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-format-to-common-flasc-format"><strong>Step 1</strong>: Format to common FLASC format</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-filter-the-data-for-outliers"><strong>Step 2</strong>: Filter the data for outliers</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-plot-faults-vs-the-layout"><strong>Step 3</strong>: Plot faults vs. the layout</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#save-postprocessed-data-to-a-local-file"><strong>Save postprocessed data</strong> to a local file</a></li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="import-dependencies">
+<h1><strong>Import dependencies</strong><a class="headerlink" href="#import-dependencies" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">zipfile</span> <span class="kn">import</span> <span class="n">ZipFile</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">output_notebook</span><span class="p">,</span> <span class="n">save</span><span class="p">,</span> <span class="n">show</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="kn">from</span> <span class="nn">flasc</span> <span class="kn">import</span> <span class="n">FlascDataFrame</span>
+<span class="kn">from</span> <span class="nn">flasc.data_processing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">dataframe_manipulations</span> <span class="k">as</span> <span class="n">dfm</span><span class="p">,</span>
+    <span class="n">filtering</span> <span class="k">as</span> <span class="n">filt</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">flasc.utilities.utilities_examples</span> <span class="kn">import</span> <span class="n">load_floris_artificial</span> <span class="k">as</span> <span class="n">load_floris</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># User settings</span>
+<span class="n">plot_figures</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Produce figures</span>
+<span class="n">save_figures</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Save the produced figures</span>
+
+<span class="c1"># New feature: use the Bokeh plotting library for interactive plots.</span>
+<span class="c1"># Use with &#39;%matplotlib widget&#39; or with save_figures=True.</span>
+<span class="n">use_bokeh_plotting_library</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># Specify plotting option in your Jupyter Notebook. We recommend &#39;%matplotlib widget&#39; for</span>
+<span class="c1"># interactive figures, allowing you to rescale, zoom in, etc. If this does not work, try</span>
+<span class="c1"># &#39;%matplotlib inline&#39;, which is the default and plots static figures.</span>
+<span class="c1"># %matplotlib widget</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="step-0-initial-data-pulldown">
+<h1><strong>Step 0</strong>: Initial data pulldown<a class="headerlink" href="#step-0-initial-data-pulldown" title="Link to this heading">#</a></h1>
+<p>First, we import the data from the common_windfarm_information folder. This may take a while, so we keep these variables unchanged. These are df_scada_raw and df_metmast_raw. These variables are not manipulated throughout the script.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_data</span><span class="p">():</span>
+    <span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">source_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Unzip .zip file and decompress raw data files (.csv)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="s2">&quot;raw_artificial_data.zip&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">zipfile</span><span class="p">:</span>
+        <span class="n">zipfile</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+
+    <span class="n">df_scada_raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="s2">&quot;demo_dataset_scada_600s.csv&quot;</span><span class="p">))</span>
+    <span class="n">df_metmast_raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="s2">&quot;demo_dataset_metmast_600s.csv&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">FlascDataFrame</span><span class="p">(</span><span class="n">df_scada_raw</span><span class="p">),</span> <span class="n">df_metmast_raw</span>
+
+
+<span class="n">df_scada_raw</span><span class="p">,</span> <span class="n">df_metmast_raw</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Columns available in df_scada_raw: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">df_scada_raw</span><span class="o">.</span><span class="n">columns</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Columns available in df_scada_raw: [&#39;wd_truth&#39;, &#39;ws_truth&#39;, &#39;ti_truth&#39;, &#39;time&#39;, &#39;pow_000&#39;, &#39;pow_001&#39;, &#39;pow_002&#39;, &#39;pow_003&#39;, &#39;pow_004&#39;, &#39;pow_005&#39;, &#39;pow_006&#39;, &#39;ws_000&#39;, &#39;ws_001&#39;, &#39;ws_002&#39;, &#39;ws_003&#39;, &#39;ws_004&#39;, &#39;ws_005&#39;, &#39;ws_006&#39;, &#39;wd_000&#39;, &#39;wd_001&#39;, &#39;wd_002&#39;, &#39;wd_003&#39;, &#39;wd_004&#39;, &#39;wd_005&#39;, &#39;wd_006&#39;, &#39;ti_000&#39;, &#39;ti_001&#39;, &#39;ti_002&#39;, &#39;ti_003&#39;, &#39;ti_004&#39;, &#39;ti_005&#39;, &#39;ti_006&#39;, &#39;is_operation_normal_000&#39;, &#39;is_operation_normal_001&#39;, &#39;is_operation_normal_002&#39;, &#39;is_operation_normal_003&#39;, &#39;is_operation_normal_004&#39;, &#39;is_operation_normal_005&#39;, &#39;is_operation_normal_006&#39;].
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="step-1-format-to-common-flasc-format">
+<h1><strong>Step 1</strong>: Format to common FLASC format<a class="headerlink" href="#step-1-format-to-common-flasc-format" title="Link to this heading">#</a></h1>
+<p>Format df_scada to pour the dataframe into the common FLASC format. For example, wind speeds are columns denoted by ws_{ti}, with {ti} the turbine number with prevailing zeros. Hence, for wind speed for the third turbine is defined by ws_002, and the power production of the thirteenth turbine is defined by pow_012.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Format columns and data. The operations required differ per dataset.</span>
+<span class="n">df_scada</span> <span class="o">=</span> <span class="n">df_scada_raw</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df_metmast</span> <span class="o">=</span> <span class="n">df_metmast_raw</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="n">df_scada</span><span class="o">.</span><span class="n">convert_time_to_datetime</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Use FlascDataFrame method to convert</span>
+<span class="n">df_metmast</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_metmast</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">])</span>  <span class="c1"># Convert strings to timestamps</span>
+
+<span class="c1"># In FLORIS, turbines are numbered from 0 to nturbs - 1. In SCADA data,</span>
+<span class="c1"># turbines often have a different name. We save the mapping between</span>
+<span class="c1"># the turbine indices in FLORIS and the turbine names to a separate .csv</span>
+<span class="c1"># file.</span>
+<span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s2">&quot;postprocessed&quot;</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">turbine_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;A1&quot;</span><span class="p">,</span> <span class="s2">&quot;A2&quot;</span><span class="p">,</span> <span class="s2">&quot;A3&quot;</span><span class="p">,</span> <span class="s2">&quot;B1&quot;</span><span class="p">,</span> <span class="s2">&quot;B2&quot;</span><span class="p">,</span> <span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="s2">&quot;C2&quot;</span><span class="p">]</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;turbine_names&quot;</span><span class="p">:</span> <span class="n">turbine_names</span><span class="p">})</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;turbine_names.csv&quot;</span><span class="p">))</span>
+
+<span class="c1"># Now map columns to conventional format</span>
+<span class="n">channel_name_map_artificial</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">turbine_names</span><span class="p">):</span>
+    <span class="n">channel_name_map_artificial</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;ActivePower_</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">):</span> <span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">ii</span>
+            <span class="p">),</span>  <span class="c1"># We want to use the &#39;active&#39; power production for our analysis in FLASC</span>
+            <span class="s2">&quot;NacWSpeed_</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">):</span> <span class="s2">&quot;ws_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">ii</span>
+            <span class="p">),</span>  <span class="c1"># Turbine-felt wind speed. This should be the freestream-equivalent</span>
+            <span class="c1"># wind speed at this turbine.</span>
+            <span class="s2">&quot;NacTI_</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">):</span> <span class="s2">&quot;ti_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">ii</span>
+            <span class="p">),</span>  <span class="c1"># Turbine-felt turbulence intensity at each turbine,</span>
+            <span class="c1"># with 0.06 meaning 6 % turbulence intensity</span>
+            <span class="s2">&quot;NacWDir_</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">):</span> <span class="s2">&quot;wd_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">ii</span>
+            <span class="p">),</span>  <span class="c1"># Wind direction from the data. If this is not available,</span>
+            <span class="c1"># can approximate this with the nacelle heading.</span>
+            <span class="s2">&quot;is_operation_normal_</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">):</span> <span class="s2">&quot;is_operation_normal_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ii</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+<span class="c1"># Reduce precision in dataframe to use half of the memory</span>
+<span class="n">df_scada</span> <span class="o">=</span> <span class="n">dfm</span><span class="o">.</span><span class="n">df_reduce_precision</span><span class="p">(</span><span class="n">df_scada</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df_metmast</span> <span class="o">=</span> <span class="n">dfm</span><span class="o">.</span><span class="n">df_reduce_precision</span><span class="p">(</span><span class="n">df_metmast</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Format the dataframe</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Formatting dataframe...&quot;</span><span class="p">)</span>
+<span class="n">df_scada</span><span class="o">.</span><span class="n">channel_name_map</span> <span class="o">=</span> <span class="n">channel_name_map_artificial</span>
+<span class="n">df_scada_formatted</span> <span class="o">=</span> <span class="n">df_scada</span><span class="o">.</span><span class="n">convert_to_flasc_format</span><span class="p">()</span>
+
+<span class="c1"># Sort dataframe and save</span>
+<span class="n">df_scada_formatted</span> <span class="o">=</span> <span class="n">df_scada_formatted</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+<span class="n">df_scada_formatted</span> <span class="o">=</span> <span class="n">df_scada_formatted</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Columns available in df_scada_formatted: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">df_scada_formatted</span><span class="o">.</span><span class="n">columns</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column wd_truth [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ws_truth [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ti_truth [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 3.337860099428269e-08
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Datatype &#39;datetime64[ns]&#39; not recognized. Not downsampling.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column pow_000 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0.00019531250018189894
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column pow_001 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0.00019531250018189894
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column pow_002 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0.00019531250018189894
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column pow_003 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0.00019531250018189894
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column pow_004 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0.00019531250018189894
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column pow_005 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0.00019531250018189894
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column pow_006 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0.00019531250018189894
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ws_000 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ws_001 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ws_002 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ws_003 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ws_004 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ws_005 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ws_006 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column wd_000 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column wd_001 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column wd_002 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column wd_003 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column wd_004 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column wd_005 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column wd_006 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ti_000 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.478195188475695e-08
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ti_001 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.478195188475695e-08
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ti_002 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 5.91278075390278e-08
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ti_003 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 5.91278075390278e-08
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ti_004 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 5.91278075390278e-08
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ti_005 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 5.91278075390278e-08
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column ti_006 [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.478195188475695e-08
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column is_operation_normal_000 [&#39;int64&#39;] was downsampled to bool.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column is_operation_normal_001 [&#39;int64&#39;] was downsampled to bool.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column is_operation_normal_002 [&#39;int64&#39;] was downsampled to bool.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column is_operation_normal_003 [&#39;int64&#39;] was downsampled to bool.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column is_operation_normal_004 [&#39;int64&#39;] was downsampled to bool.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column is_operation_normal_005 [&#39;int64&#39;] was downsampled to bool.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column is_operation_normal_006 [&#39;int64&#39;] was downsampled to bool.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 0
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Datatype &#39;datetime64[ns]&#39; not recognized. Not downsampling.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column WindSpeed_80m [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 9.155273446026513e-07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column WindDirection_80m [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 1.2207031261368684e-05
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Column TurbulenceIntensity_80m [&#39;float64&#39;] was downsampled to float32.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Max error: 2.95639037695139e-08
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Formatting dataframe...
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Columns available in df_scada_formatted: [&#39;wd_truth&#39;, &#39;ws_truth&#39;, &#39;ti_truth&#39;, &#39;time&#39;, &#39;pow_000&#39;, &#39;pow_001&#39;, &#39;pow_002&#39;, &#39;pow_003&#39;, &#39;pow_004&#39;, &#39;pow_005&#39;, &#39;pow_006&#39;, &#39;ws_000&#39;, &#39;ws_001&#39;, &#39;ws_002&#39;, &#39;ws_003&#39;, &#39;ws_004&#39;, &#39;ws_005&#39;, &#39;ws_006&#39;, &#39;wd_000&#39;, &#39;wd_001&#39;, &#39;wd_002&#39;, &#39;wd_003&#39;, &#39;wd_004&#39;, &#39;wd_005&#39;, &#39;wd_006&#39;, &#39;ti_000&#39;, &#39;ti_001&#39;, &#39;ti_002&#39;, &#39;ti_003&#39;, &#39;ti_004&#39;, &#39;ti_005&#39;, &#39;ti_006&#39;, &#39;is_operation_normal_000&#39;, &#39;is_operation_normal_001&#39;, &#39;is_operation_normal_002&#39;, &#39;is_operation_normal_003&#39;, &#39;is_operation_normal_004&#39;, &#39;is_operation_normal_005&#39;, &#39;is_operation_normal_006&#39;].
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="step-2-filter-the-data-for-outliers">
+<h1><strong>Step 2</strong>: Filter the data for outliers<a class="headerlink" href="#step-2-filter-the-data-for-outliers" title="Link to this heading">#</a></h1>
+<p>We apply a number of filtering operations here, like the removal of NaN wind speed/power measurements, negative wind speed/power measurements, irregularly high wind speed/power measurements, sensor-stuck type of faults, self-flagged faults (i.e., internal turbine status flags), and filtering based on deviations from the median windspeed-power curve.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># # **Step 4**: Deal with wind-speed power curve filtering</span>
+<span class="k">def</span> <span class="nf">filter_by_ws_pow_curve</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">plot_figures</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_figures</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_bokeh_for_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="c1"># Load the FLORIS model for the wind farm. This is not used for anything</span>
+    <span class="c1"># besides plotting the floris-predicted wind speed-power curve on top</span>
+    <span class="c1"># of the actual data.</span>
+    <span class="n">fm</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">load_floris</span><span class="p">()</span>
+
+    <span class="c1"># Downsample data. Not necessary here, but can be useful if we have 1 Hz</span>
+    <span class="c1"># data available. Namely, it&#39;s hard to detect outliers on such a high</span>
+    <span class="c1"># resolution. Instead, we are better off downsampling the data to 60s or</span>
+    <span class="c1"># even 600s and filter the data based on decisions there. The following</span>
+    <span class="c1"># downsampled dataframe should then be inserted into the wind speed power</span>
+    <span class="c1"># curve filtering class. Mapping the filtering back to the high-resolution</span>
+    <span class="c1"># data is done by a couple lines of code as found at the end of this</span>
+    <span class="c1"># script.</span>
+    <span class="c1">#</span>
+    <span class="c1"># df_movavg, data_indices_mapping = top.df_movingaverage(</span>
+    <span class="c1">#     df_in=df_1s,</span>
+    <span class="c1">#     cols_angular=[</span>
+    <span class="c1">#         c for c in df_1s.columns if (</span>
+    <span class="c1">#             (&quot;vane_&quot; in c) or</span>
+    <span class="c1">#             (&quot;yaw_&quot; in c) or</span>
+    <span class="c1">#             (&quot;wd_&quot; in c) or</span>
+    <span class="c1">#             (&quot;direction&quot; in c)</span>
+    <span class="c1">#         )</span>
+    <span class="c1">#     ],</span>
+    <span class="c1">#     window_width=td(seconds=600),</span>
+    <span class="c1">#     calc_median_min_max_std=False,</span>
+    <span class="c1">#     return_index_mapping=True,</span>
+    <span class="c1"># )</span>
+
+    <span class="c1"># Create output directory</span>
+    <span class="k">if</span> <span class="n">plot_figures</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">save_figures</span><span class="p">:</span>
+            <span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+            <span class="n">figure_save_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s2">&quot;postprocessed&quot;</span><span class="p">,</span> <span class="s2">&quot;figures&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">figure_save_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">use_bokeh_for_plots</span><span class="p">:</span>
+                <span class="c1"># Produce Bokeh figures directly to notebook</span>
+                <span class="n">output_notebook</span><span class="p">()</span>
+
+    <span class="c1"># Initialize the wind speed power curve filtering class</span>
+    <span class="n">flasc_filter</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">FlascFilter</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="c1"># Apply a set of logic filters on the turbine measurements</span>
+    <span class="n">n_turbines</span> <span class="o">=</span> <span class="n">dfm</span><span class="o">.</span><span class="n">get_num_turbines</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_turbines</span><span class="p">):</span>
+        <span class="c1"># Filter for NaN wind speed or power productions</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_condition</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;ws_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+                <span class="o">|</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+            <span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wind speed and/or power is NaN&quot;</span><span class="p">,</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Filter for numerical issues</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_condition</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;ws_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1.0e-6</span><span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wind speed below zero&quot;</span><span class="p">,</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Filter for numerical issues</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_condition</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1.0e-6</span><span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Power below zero&quot;</span><span class="p">,</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Filter for numerical issues</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_condition</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;ws_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wind speed above 50 m/s&quot;</span><span class="p">,</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Filter for numerical issues: note, make sure power is in kW</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_condition</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">30e3</span><span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Power above 30 MW&quot;</span><span class="p">,</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Filter for power production is zero above cut-in wind speeds</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_condition</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;ws_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">4.0</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Power below 1 kW while wind speed above 4 m/s&quot;</span><span class="p">,</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Other common filters here are based on turbine-specific/OEM-specific flags. For example,</span>
+        <span class="c1"># a &#39;run counter&#39; may indicate how many seconds of a 10-minute period the turbine was</span>
+        <span class="c1"># reporting valid measurements. By filtering for the condition that that value is 600, or</span>
+        <span class="c1"># above 590, you should be able to quickly identify a large part of faulty measurements.</span>
+        <span class="c1"># Similarly, you may want to look for &#39;turbineOK&#39; and &#39;normal_operation&#39; flag of the</span>
+        <span class="c1"># turbine.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Additionally, if you have blade pitch angle measurements, you may be able to filter</span>
+        <span class="c1"># for outliers by looking when blade pitch angles exceed, e.g., 70 degrees. These filter</span>
+        <span class="c1"># steps very much depend on the dataset that you have access to.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Another useful variable is &#39;power setpoint&#39;, if that is available. You can use this</span>
+        <span class="c1"># to detect and then filter for turbine curtailment (i.e., turbine setpoint lower</span>
+        <span class="c1"># than available power on purpose). Same thing goes for derating codes, signifying</span>
+        <span class="c1"># particular derating/curtailment behavior, power mode signals, alarm signals.</span>
+        <span class="c1">#</span>
+        <span class="c1"># In this case, we have an operational_status flag. If that has a &#39;False&#39; value, then we</span>
+        <span class="c1"># mark those measurements as faulty.</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_condition</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;is_operation_normal_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Self-flagged (is_operation_normal==False)&quot;</span><span class="p">,</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Filter for sensor-stuck faults</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_sensor_stuck_faults</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;wd_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">),</span> <span class="s2">&quot;ws_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)],</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">n_consecutive_measurements</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">stddev_threshold</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+            <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Flag curtailment by marking measurements with a high wind speed but</span>
+        <span class="c1"># lower power production as faulty.</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_condition</span><span class="p">(</span>
+            <span class="n">condition</span><span class="o">=</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;ws_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">10.2</span><span class="p">)</span>
+                <span class="o">&amp;</span> <span class="p">(</span><span class="n">flasc_filter</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;pow_</span><span class="si">{:03d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="mf">3200.0</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Curtailment: wind speed above 10.2 m/s but power below 3200 kW&quot;</span><span class="p">,</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Now filter iteratively by deviations from the median power curve.</span>
+        <span class="c1"># Common reason for measurements with a low wind speed but a high power</span>
+        <span class="c1"># production (i.e., to the left of the mean curve) is icing or dirt on the</span>
+        <span class="c1"># wind speed sensor, or generally a the wind speed sensor being obstructed</span>
+        <span class="c1"># in some way.</span>
+        <span class="n">flasc_filter</span><span class="o">.</span><span class="n">filter_by_power_curve</span><span class="p">(</span>
+            <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+            <span class="n">ws_deadband</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+            <span class="n">pow_deadband</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span>
+            <span class="n">cutoff_ws</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span>
+            <span class="n">m_pow_rb</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># An additional filtering step we may consider here is removing all measurements</span>
+        <span class="c1"># directly after a NaN. The reasoning behind this is that the wind farm flow</span>
+        <span class="c1"># may still be affected by an outlier/odd turbine behavior the 10 minutes</span>
+        <span class="c1"># after that problem was solved, due to wake propagation delays.</span>
+        <span class="c1"># Note that this doubles the number of NaNs in your dataset and thereby decreases</span>
+        <span class="c1"># the useful data pool. In this example, we decide not to filter for that.</span>
+
+        <span class="k">if</span> <span class="n">plot_figures</span><span class="p">:</span>
+            <span class="c1"># If true, uses Bokeh for plotting library. Benefits are that it can save</span>
+            <span class="c1"># figures as an interactive .html file, for future exploring.</span>
+            <span class="k">if</span> <span class="n">use_bokeh_for_plots</span><span class="p">:</span>
+                <span class="n">p_ws_pow</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">plot_filters_custom_scatter_bokeh</span><span class="p">(</span>
+                    <span class="n">x_col</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ws_</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">y_col</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;pow_</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Wind speed power curve of WTG </span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Wind speed (m/s)&quot;</span><span class="p">,</span>
+                    <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Power production (kW)&quot;</span><span class="p">,</span>
+                    <span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">save_figures</span><span class="p">:</span>
+                    <span class="n">fout</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">figure_save_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ws_power_</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.html&quot;</span><span class="p">)</span>
+                    <span class="n">output_file</span><span class="p">(</span><span class="n">fout</span><span class="p">)</span>
+                    <span class="n">save</span><span class="p">(</span><span class="n">p_ws_pow</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Interactive figure saved to &#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">fout</span><span class="p">)</span><span class="si">:</span><span class="s2">s</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">show</span><span class="p">(</span><span class="n">p_ws_pow</span><span class="p">)</span>
+
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">plot_postprocessed_in_ws_power_curve</span><span class="p">(</span><span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="n">fm</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">save_figures</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">figure_save_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ws_pow_postprocessed_</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="n">p_filters_time</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">plot_filters_in_time_bokeh</span><span class="p">(</span><span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">save_figures</span><span class="p">:</span>
+                    <span class="n">fout</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">figure_save_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;filters_over_time_</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.html&quot;</span><span class="p">)</span>
+                    <span class="n">output_file</span><span class="p">(</span><span class="n">fout</span><span class="p">)</span>
+                    <span class="n">save</span><span class="p">(</span><span class="n">p_filters_time</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Interactive figure saved to &#39;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">fout</span><span class="p">)</span><span class="si">:</span><span class="s2">s</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">show</span><span class="p">(</span><span class="n">p_filters_time</span><span class="p">)</span>
+
+                <span class="c1"># # Plot and save pitch measurements [not available in example dataset]</span>
+                <span class="c1"># p_ws_pitch = flasc_filter.plot_filters_custom_scatter_bokeh(</span>
+                <span class="c1">#     x_col=f&quot;ws_{ti:03d}&quot;,</span>
+                <span class="c1">#     y_col=f&quot;blade_pitch_{ti:03d}&quot;,</span>
+                <span class="c1">#     xlabel=&quot;Wind speed (m/s)&quot;,</span>
+                <span class="c1">#     ylabel=&quot;Blade pitch angle (deg)&quot;,</span>
+                <span class="c1">#     title=f&quot;Wind speed vs blade pitch angle for WTG {ti:03d}&quot;,</span>
+                <span class="c1">#     ti=ti,</span>
+                <span class="c1"># )</span>
+
+                <span class="c1"># if save_figures:</span>
+                <span class="c1">#     fout = os.path.join(figure_save_path, f&quot;ws_pitch_{ti:03d}.html&quot;)</span>
+                <span class="c1">#     output_file(fout)</span>
+                <span class="c1">#     save(p_ws_pitch)</span>
+                <span class="c1">#     print(f&quot;Interactive figure saved to &#39;{os.path.relpath(fout):s}&#39;.&quot;)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     show(p_ws_pitch)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Plot and save data for current dataframe</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">plot_filters_in_ws_power_curve</span><span class="p">(</span><span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="n">fm</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">save_figures</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">figure_save_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ws_pow_</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">))</span>
+
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">plot_postprocessed_in_ws_power_curve</span><span class="p">(</span><span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="n">fm</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">save_figures</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">figure_save_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ws_pow_postprocessed_</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">plot_filters_in_time</span><span class="p">(</span><span class="n">ti</span><span class="o">=</span><span class="n">ti</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">save_figures</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">figure_save_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;filters_over_time_</span><span class="si">{</span><span class="n">ti</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot_figures</span><span class="p">:</span>
+        <span class="c1"># Plot farm-averaged power curve based on the data (useful to e.g., feed</span>
+        <span class="c1"># into FLORIS when not provided by OEM)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">plot_farm_mean_power_curve</span><span class="p">(</span><span class="n">fm</span><span class="o">=</span><span class="n">fm</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_figures</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">figure_save_path</span><span class="p">,</span> <span class="s2">&quot;median_farm_power_curves.png&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Get filtered dataframe and power curve</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+    <span class="n">df_pow_curve</span> <span class="o">=</span> <span class="n">flasc_filter</span><span class="o">.</span><span class="n">pw_curve_df</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">df_pow_curve</span>
+
+
+<span class="n">df_scada_filtered</span><span class="p">,</span> <span class="n">df_pow_curve</span> <span class="o">=</span> <span class="n">filter_by_ws_pow_curve</span><span class="p">(</span>
+    <span class="n">df</span><span class="o">=</span><span class="n">df_scada_formatted</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+    <span class="n">plot_figures</span><span class="o">=</span><span class="n">plot_figures</span><span class="p">,</span>
+    <span class="n">save_figures</span><span class="o">=</span><span class="n">save_figures</span><span class="p">,</span>
+    <span class="n">use_bokeh_for_plots</span><span class="o">=</span><span class="n">use_bokeh_plotting_library</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/flasc/flasc/flasc/data_processing/filtering.py:70: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;nan&#39; has dtype incompatible with bool, please explicitly cast to a compatible dtype first.
+  df.loc[cond, cols] = None  # Delete measurements
+<span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 0.015 % to 0.015 %. Reason: &#39;Wind speed and/or power is NaN&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 0.015 % to 0.319 %. Reason: &#39;Wind speed below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 0.319 % to 0.319 %. Reason: &#39;Power below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 0.319 % to 0.319 %. Reason: &#39;Wind speed above 50 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 0.319 % to 0.319 %. Reason: &#39;Power above 30 MW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 0.319 % to 0.340 %. Reason: &#39;Power below 1 kW while wind speed above 4 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 0.340 % to 6.262 %. Reason: &#39;Self-flagged (is_operation_normal==False)&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 6.262 % to 6.401 %. Reason: &#39;Sensor-stuck fault&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 6.401 % to 6.448 %. Reason: &#39;Curtailment: wind speed above 10.2 m/s but power below 3200 kW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:16</span> Faulty measurements for WTG 000 increased from 6.448 % to 6.558 %. Reason: &#39;Mean power curve outlier&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/flasc/flasc/flasc/data_processing/filtering.py:70: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;nan&#39; has dtype incompatible with bool, please explicitly cast to a compatible dtype first.
+  df.loc[cond, cols] = None  # Delete measurements
+<span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 0.015 % to 0.015 %. Reason: &#39;Wind speed and/or power is NaN&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 0.015 % to 0.292 %. Reason: &#39;Wind speed below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 0.292 % to 0.294 %. Reason: &#39;Power below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 0.294 % to 0.294 %. Reason: &#39;Wind speed above 50 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 0.294 % to 0.294 %. Reason: &#39;Power above 30 MW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 0.294 % to 0.309 %. Reason: &#39;Power below 1 kW while wind speed above 4 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 0.309 % to 4.590 %. Reason: &#39;Self-flagged (is_operation_normal==False)&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 4.590 % to 4.697 %. Reason: &#39;Sensor-stuck fault&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 4.697 % to 4.746 %. Reason: &#39;Curtailment: wind speed above 10.2 m/s but power below 3200 kW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:17</span> Faulty measurements for WTG 001 increased from 4.746 % to 4.888 %. Reason: &#39;Mean power curve outlier&#39;.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/flasc/flasc/flasc/data_processing/filtering.py:70: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;nan&#39; has dtype incompatible with bool, please explicitly cast to a compatible dtype first.
+  df.loc[cond, cols] = None  # Delete measurements
+<span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 0.015 % to 0.015 %. Reason: &#39;Wind speed and/or power is NaN&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 0.015 % to 0.294 %. Reason: &#39;Wind speed below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 0.294 % to 0.294 %. Reason: &#39;Power below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 0.294 % to 0.294 %. Reason: &#39;Wind speed above 50 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 0.294 % to 0.294 %. Reason: &#39;Power above 30 MW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 0.294 % to 0.298 %. Reason: &#39;Power below 1 kW while wind speed above 4 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 0.298 % to 2.142 %. Reason: &#39;Self-flagged (is_operation_normal==False)&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 2.142 % to 2.184 %. Reason: &#39;Sensor-stuck fault&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 2.184 % to 5.287 %. Reason: &#39;Curtailment: wind speed above 10.2 m/s but power below 3200 kW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:18</span> Faulty measurements for WTG 002 increased from 5.287 % to 5.368 %. Reason: &#39;Mean power curve outlier&#39;.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/flasc/flasc/flasc/data_processing/filtering.py:70: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;nan&#39; has dtype incompatible with bool, please explicitly cast to a compatible dtype first.
+  df.loc[cond, cols] = None  # Delete measurements
+<span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 0.015 % to 0.015 %. Reason: &#39;Wind speed and/or power is NaN&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 0.015 % to 0.328 %. Reason: &#39;Wind speed below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 0.328 % to 0.328 %. Reason: &#39;Power below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 0.328 % to 0.328 %. Reason: &#39;Wind speed above 50 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 0.328 % to 0.328 %. Reason: &#39;Power above 30 MW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 0.328 % to 0.336 %. Reason: &#39;Power below 1 kW while wind speed above 4 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 0.336 % to 2.558 %. Reason: &#39;Self-flagged (is_operation_normal==False)&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 2.558 % to 2.666 %. Reason: &#39;Sensor-stuck fault&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 2.666 % to 2.715 %. Reason: &#39;Curtailment: wind speed above 10.2 m/s but power below 3200 kW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:19</span> Faulty measurements for WTG 003 increased from 2.715 % to 2.858 %. Reason: &#39;Mean power curve outlier&#39;.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/flasc/flasc/flasc/data_processing/filtering.py:70: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;nan&#39; has dtype incompatible with bool, please explicitly cast to a compatible dtype first.
+  df.loc[cond, cols] = None  # Delete measurements
+<span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 0.015 % to 0.015 %. Reason: &#39;Wind speed and/or power is NaN&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 0.015 % to 0.330 %. Reason: &#39;Wind speed below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 0.330 % to 0.330 %. Reason: &#39;Power below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 0.330 % to 0.330 %. Reason: &#39;Wind speed above 50 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 0.330 % to 0.330 %. Reason: &#39;Power above 30 MW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 0.330 % to 0.336 %. Reason: &#39;Power below 1 kW while wind speed above 4 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 0.336 % to 3.194 %. Reason: &#39;Self-flagged (is_operation_normal==False)&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 3.194 % to 3.289 %. Reason: &#39;Sensor-stuck fault&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 3.289 % to 3.342 %. Reason: &#39;Curtailment: wind speed above 10.2 m/s but power below 3200 kW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:20</span> Faulty measurements for WTG 004 increased from 3.342 % to 3.454 %. Reason: &#39;Mean power curve outlier&#39;.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/flasc/flasc/flasc/data_processing/filtering.py:70: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;nan&#39; has dtype incompatible with bool, please explicitly cast to a compatible dtype first.
+  df.loc[cond, cols] = None  # Delete measurements
+<span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 0.015 % to 0.015 %. Reason: &#39;Wind speed and/or power is NaN&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 0.015 % to 0.326 %. Reason: &#39;Wind speed below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 0.326 % to 0.326 %. Reason: &#39;Power below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 0.326 % to 0.326 %. Reason: &#39;Wind speed above 50 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 0.326 % to 0.326 %. Reason: &#39;Power above 30 MW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 0.326 % to 0.330 %. Reason: &#39;Power below 1 kW while wind speed above 4 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 0.330 % to 2.433 %. Reason: &#39;Self-flagged (is_operation_normal==False)&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 2.433 % to 2.588 %. Reason: &#39;Sensor-stuck fault&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 2.588 % to 5.239 %. Reason: &#39;Curtailment: wind speed above 10.2 m/s but power below 3200 kW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:21</span> Faulty measurements for WTG 005 increased from 5.239 % to 5.323 %. Reason: &#39;Mean power curve outlier&#39;.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/flasc/flasc/flasc/data_processing/filtering.py:70: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value &#39;nan&#39; has dtype incompatible with bool, please explicitly cast to a compatible dtype first.
+  df.loc[cond, cols] = None  # Delete measurements
+<span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 0.015 % to 0.015 %. Reason: &#39;Wind speed and/or power is NaN&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 0.015 % to 0.323 %. Reason: &#39;Wind speed below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 0.323 % to 0.323 %. Reason: &#39;Power below zero&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 0.323 % to 0.323 %. Reason: &#39;Wind speed above 50 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 0.323 % to 0.323 %. Reason: &#39;Power above 30 MW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 0.323 % to 0.343 %. Reason: &#39;Power below 1 kW while wind speed above 4 m/s&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 0.343 % to 4.499 %. Reason: &#39;Self-flagged (is_operation_normal==False)&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 4.499 % to 4.571 %. Reason: &#39;Sensor-stuck fault&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 4.571 % to 4.613 %. Reason: &#39;Curtailment: wind speed above 10.2 m/s but power below 3200 kW&#39;.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Green">2024-12-02 22:59:22</span> Faulty measurements for WTG 006 increased from 4.613 % to 4.735 %. Reason: &#39;Mean power curve outlier&#39;.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/flasc/flasc/flasc/data_processing/filtering.py:1197: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`). Consider using `matplotlib.pyplot.close()`.
+  _, ax = plt.subplots(figsize=(13, 7))
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<img alt="../../_images/f43e7be7e9bab89890e9dc8e7336595bff71fdfcacd0df27291e916a44cc165a.png" src="../../_images/f43e7be7e9bab89890e9dc8e7336595bff71fdfcacd0df27291e916a44cc165a.png" />
+<img alt="../../_images/f4e3dc105e880eb129fef4529bae2c5721490b6019fb1e51d44312449f0d91de.png" src="../../_images/f4e3dc105e880eb129fef4529bae2c5721490b6019fb1e51d44312449f0d91de.png" />
+<img alt="../../_images/09ff7bef9eb2fb807827d0bff05138d34f24c1b8bdfd3d5973326851532073e2.png" src="../../_images/09ff7bef9eb2fb807827d0bff05138d34f24c1b8bdfd3d5973326851532073e2.png" />
+<img alt="../../_images/2d5eb6ed7786c7199550035493d5dc56204445d6266f01da1d554157e4fd8197.png" src="../../_images/2d5eb6ed7786c7199550035493d5dc56204445d6266f01da1d554157e4fd8197.png" />
+<img alt="../../_images/da08fc175dea30fd67ebb228032567db643ecfe28e7cb0cfaaea891f97845f70.png" src="../../_images/da08fc175dea30fd67ebb228032567db643ecfe28e7cb0cfaaea891f97845f70.png" />
+<img alt="../../_images/595c9283740833103ab5c42d4b14a4b4d74b5acad5a31afd7e53d40e6bf6b128.png" src="../../_images/595c9283740833103ab5c42d4b14a4b4d74b5acad5a31afd7e53d40e6bf6b128.png" />
+<img alt="../../_images/d361abcb0db09d76494089fc4dccf12915d8bc2482951d58a9f2a42302c25bd7.png" src="../../_images/d361abcb0db09d76494089fc4dccf12915d8bc2482951d58a9f2a42302c25bd7.png" />
+<img alt="../../_images/d2510c1b3b371aceeb284240e0a7a2efa03cf1e7954d649ed596b35ea7caf418.png" src="../../_images/d2510c1b3b371aceeb284240e0a7a2efa03cf1e7954d649ed596b35ea7caf418.png" />
+<img alt="../../_images/ec21bfbb9cee6102c0ede4c854bf531bfa35e85614413b3677a81c261120c9b2.png" src="../../_images/ec21bfbb9cee6102c0ede4c854bf531bfa35e85614413b3677a81c261120c9b2.png" />
+<img alt="../../_images/ed1a9423acf0c32c86e487f4f8210719fab57d6ab2b434799ff5f2677581213f.png" src="../../_images/ed1a9423acf0c32c86e487f4f8210719fab57d6ab2b434799ff5f2677581213f.png" />
+<img alt="../../_images/bf2365578c2bc77b300e6c03e976d910cdb76739ffdd12e3b596f4c81a5e1235.png" src="../../_images/bf2365578c2bc77b300e6c03e976d910cdb76739ffdd12e3b596f4c81a5e1235.png" />
+<img alt="../../_images/0c8d293e32839abeaa0c28fbefed9ce4c0f2403b9e19477df552c934e7becc0b.png" src="../../_images/0c8d293e32839abeaa0c28fbefed9ce4c0f2403b9e19477df552c934e7becc0b.png" />
+<img alt="../../_images/209a27d8eb8e5e900cfae775061be104bf0e74ee098f01a04256e4db3060c4a0.png" src="../../_images/209a27d8eb8e5e900cfae775061be104bf0e74ee098f01a04256e4db3060c4a0.png" />
+<img alt="../../_images/ee1473aead145c8254ada9cf2c7d20edb1b5bae999bb90d6c3c8521200631096.png" src="../../_images/ee1473aead145c8254ada9cf2c7d20edb1b5bae999bb90d6c3c8521200631096.png" />
+<img alt="../../_images/75466d196863977e6ec68903030d64a05b5b167422e847a98a61f1b018ae3158.png" src="../../_images/75466d196863977e6ec68903030d64a05b5b167422e847a98a61f1b018ae3158.png" />
+<img alt="../../_images/365981bc8e7310e4cd0552680a3df43777cd5f655ab781ac4f64ae90c9205264.png" src="../../_images/365981bc8e7310e4cd0552680a3df43777cd5f655ab781ac4f64ae90c9205264.png" />
+<img alt="../../_images/d1fe349e405b16d3c28eed3035d0df45f370270d032e5582eeba0d78e1ab3c46.png" src="../../_images/d1fe349e405b16d3c28eed3035d0df45f370270d032e5582eeba0d78e1ab3c46.png" />
+<img alt="../../_images/d9012de6ab8ba0fcb3831c907adc9c1280555042768edbea24c3b84588ba0c63.png" src="../../_images/d9012de6ab8ba0fcb3831c907adc9c1280555042768edbea24c3b84588ba0c63.png" />
+<img alt="../../_images/d686e4ca6aff2fc34e6ed52d992af7f5d45135c89772afcd1efabba87351a118.png" src="../../_images/d686e4ca6aff2fc34e6ed52d992af7f5d45135c89772afcd1efabba87351a118.png" />
+<img alt="../../_images/a998ff28a8b1007036a1e38ce4b84b6d53c7786ca6681beaaa8fee9e75c1c2fd.png" src="../../_images/a998ff28a8b1007036a1e38ce4b84b6d53c7786ca6681beaaa8fee9e75c1c2fd.png" />
+<img alt="../../_images/2fdac5c71004e67e0abee057bb8de6990eb03d97455ffefba2593437857e8812.png" src="../../_images/2fdac5c71004e67e0abee057bb8de6990eb03d97455ffefba2593437857e8812.png" />
+<img alt="../../_images/1072a186ac03c8f3538e89a940f6b26e55357bb24d7a573a7b5d94e4315fb90d.png" src="../../_images/1072a186ac03c8f3538e89a940f6b26e55357bb24d7a573a7b5d94e4315fb90d.png" />
+</div>
+</div>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="step-3-plot-faults-vs-the-layout">
+<h1><strong>Step 3</strong>: Plot faults vs. the layout<a class="headerlink" href="#step-3-plot-faults-vs-the-layout" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_faults_vs_layout</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">fi</span><span class="p">,</span> <span class="n">turbine_weights</span> <span class="o">=</span> <span class="n">load_floris</span><span class="p">()</span>
+
+    <span class="n">layout_x</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">layout_x</span>
+    <span class="n">layout_y</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">layout_y</span>
+
+    <span class="n">num_turbines</span> <span class="o">=</span> <span class="n">dfm</span><span class="o">.</span><span class="n">get_num_turbines</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">fault_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_turbines</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_turbines</span><span class="p">):</span>
+        <span class="n">fault_ratio</span><span class="p">[</span><span class="n">ti</span><span class="p">]</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">df_get_no_faulty_measurements</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ti</span><span class="p">)</span> <span class="o">/</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Plot layout and colormap</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_turbines</span><span class="p">):</span>
+        <span class="n">clr</span> <span class="o">=</span> <span class="p">[</span><span class="n">fault_ratio</span><span class="p">[</span><span class="n">ti</span><span class="p">],</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">fault_ratio</span><span class="p">[</span><span class="n">ti</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">layout_x</span><span class="p">[</span><span class="n">ti</span><span class="p">],</span>
+            <span class="n">layout_y</span><span class="p">[</span><span class="n">ti</span><span class="p">],</span>
+            <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+            <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">clr</span><span class="p">,</span>
+            <span class="n">markeredgewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="n">layout_x</span><span class="p">[</span><span class="n">ti</span><span class="p">]</span> <span class="o">+</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="n">layout_y</span><span class="p">[</span><span class="n">ti</span><span class="p">],</span>
+            <span class="s2">&quot;T</span><span class="si">%03d</span><span class="s2"> (</span><span class="si">%.1f%%</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ti</span><span class="p">,</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">fault_ratio</span><span class="p">[</span><span class="n">ti</span><span class="p">])</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">),</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s2">&quot;postprocessed&quot;</span><span class="p">,</span> <span class="s2">&quot;figures&quot;</span><span class="p">)</span>
+    <span class="n">fig_out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;faults_by_layout.png&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saving figure to </span><span class="si">{:s}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fig_out</span><span class="p">))</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fig_out</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+
+<span class="n">plot_faults_vs_layout</span><span class="p">(</span><span class="n">df_scada_filtered</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Saving figure to /home/runner/work/flasc/flasc/docs/examples/01_raw_data_processing/postprocessed/figures/faults_by_layout.png.
+</pre></div>
+</div>
+<img alt="../../_images/5c842e86ede414ef1074a0488224a40e05708cb7e5ec69fbf1a3739f3ee5128c.png" src="../../_images/5c842e86ede414ef1074a0488224a40e05708cb7e5ec69fbf1a3739f3ee5128c.png" />
+</div>
+</div>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="save-postprocessed-data-to-a-local-file">
+<h1><strong>Save postprocessed data</strong> to a local file<a class="headerlink" href="#save-postprocessed-data-to-a-local-file" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">fout</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s2">&quot;postprocessed&quot;</span><span class="p">,</span> <span class="s2">&quot;df_scada_600s_wspowfiltered.pkl&quot;</span><span class="p">)</span>
+<span class="n">df_scada_filtered</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">fout</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File saved to &#39;</span><span class="si">{:s}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">fout</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>File saved to &#39;postprocessed/df_scada_600s_wspowfiltered.pkl&#39;.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Print all (remaining) figures</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./examples/01_raw_data_processing"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#"><strong>Import dependencies</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-initial-data-pulldown"><strong>Step 0</strong>: Initial data pulldown</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-format-to-common-flasc-format"><strong>Step 1</strong>: Format to common FLASC format</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-filter-the-data-for-outliers"><strong>Step 2</strong>: Filter the data for outliers</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-plot-faults-vs-the-layout"><strong>Step 3</strong>: Plot faults vs. the layout</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#save-postprocessed-data-to-a-local-file"><strong>Save postprocessed data</strong> to a local file</a></li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By National Renewable Energy Laboratory
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -76,7 +76,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_turbines';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines" href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html" />
+    <link rel="next" title="flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines" href="flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines.html" />
     <link rel="prev" title="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine" href="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="python"/>
@@ -200,7 +200,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../total_uplift.html">Total uplift</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing</a></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Data Processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../examples/01_raw_data_processing/03_northing_calibration_hoger.html">Northing Calibration in FLASC</a></li>
+
+
+
+
+
+
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Energy Ratio</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../examples/03_energy_ratio/00_demo_energy_ratio_syntax.html">Demonstrate energy ratio syntax</a></li>
 
@@ -268,6 +279,8 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
 <li class="toctree-l4 current active"><a class="current reference internal" href="#">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines_in_radius</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
@@ -292,6 +305,10 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.northing_offset_change_hoger.html">flasc.data_processing.northing_offset_change_hoger</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.northing_offset_change_hoger.homogenize_hoger.html">flasc.data_processing.northing_offset_change_hoger.homogenize_hoger</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -329,6 +346,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="flasc.utilities.floris_tools.html">flasc.utilities.floris_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.estimate_ws_with_floris.html">flasc.utilities.floris_tools.estimate_ws_with_floris</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
@@ -660,11 +678,11 @@ should be used to calculate the column average.</p></li>
       </div>
     </a>
     <a class="right-next"
-       href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html"
+       href="flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</p>
+        <p class="prev-next-title">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

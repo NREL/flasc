@@ -200,7 +200,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../total_uplift.html">Total uplift</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../licensing.html">Licensing</a></li>
 </ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Data Processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../examples/01_raw_data_processing/03_northing_calibration_hoger.html">Northing Calibration in FLASC</a></li>
+
+
+
+
+
+
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Energy Ratio</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../examples/03_energy_ratio/00_demo_energy_ratio_syntax.html">Demonstrate energy ratio syntax</a></li>
 
@@ -268,6 +279,8 @@
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines_in_radius</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
@@ -292,6 +305,10 @@
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.northing_offset_change_hoger.html">flasc.data_processing.northing_offset_change_hoger</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="flasc.data_processing.northing_offset_change_hoger.homogenize_hoger.html">flasc.data_processing.northing_offset_change_hoger.homogenize_hoger</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -329,6 +346,7 @@
 <li class="toctree-l3 current active has-children"><a class="current reference internal" href="#">flasc.utilities.floris_tools</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.estimate_ws_with_floris.html">flasc.utilities.floris_tools.estimate_ws_with_floris</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
@@ -577,6 +595,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.interpolate_floris_from_df_approx"><code class="docutils literal notranslate"><span class="pre">interpolate_floris_from_df_approx()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.calc_floris_approx_table"><code class="docutils literal notranslate"><span class="pre">calc_floris_approx_table()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table"><code class="docutils literal notranslate"><span class="pre">add_gaussian_blending_to_floris_approx_table()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.estimate_ws_with_floris"><code class="docutils literal notranslate"><span class="pre">estimate_ws_with_floris()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.get_turbs_in_radius"><code class="docutils literal notranslate"><span class="pre">get_turbs_in_radius()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical"><code class="docutils literal notranslate"><span class="pre">get_all_impacting_turbines_geometrical()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.get_upstream_turbs_floris"><code class="docutils literal notranslate"><span class="pre">get_upstream_turbs_floris()</span></code></a></li>
@@ -607,25 +626,28 @@
 <tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.calc_floris_approx_table.html#flasc.utilities.floris_tools.calc_floris_approx_table" title="flasc.utilities.floris_tools.calc_floris_approx_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_floris_approx_table</span></code></a></p></td>
 <td><p>Calculate the FLORIS approximate table from a FlorisModel object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_all_dependent_turbines.html#flasc.utilities.floris_tools.get_all_dependent_turbines" title="flasc.utilities.floris_tools.get_all_dependent_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_dependent_turbines</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.estimate_ws_with_floris.html#flasc.utilities.floris_tools.estimate_ws_with_floris" title="flasc.utilities.floris_tools.estimate_ws_with_floris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_ws_with_floris</span></code></a></p></td>
+<td><p>Estimate the wind speed at the turbine locations using a FLORIS model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_all_dependent_turbines.html#flasc.utilities.floris_tools.get_all_dependent_turbines" title="flasc.utilities.floris_tools.get_all_dependent_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_dependent_turbines</span></code></a></p></td>
 <td><p>Get all dependent turbines for each turbine in the farm.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines.html#flasc.utilities.floris_tools.get_all_impacting_turbines" title="flasc.utilities.floris_tools.get_all_impacting_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_impacting_turbines</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines.html#flasc.utilities.floris_tools.get_all_impacting_turbines" title="flasc.utilities.floris_tools.get_all_impacting_turbines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_impacting_turbines</span></code></a></p></td>
 <td><p>Get all impacting turbines for each turbine in the farm.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html#flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical" title="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_impacting_turbines_geometrical</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html#flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical" title="flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_impacting_turbines_geometrical</span></code></a></p></td>
 <td><p>Get all impacting turbines using a simple geometric model.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html#flasc.utilities.floris_tools.get_dependent_turbines_by_wd" title="flasc.utilities.floris_tools.get_dependent_turbines_by_wd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dependent_turbines_by_wd</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html#flasc.utilities.floris_tools.get_dependent_turbines_by_wd" title="flasc.utilities.floris_tools.get_dependent_turbines_by_wd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dependent_turbines_by_wd</span></code></a></p></td>
 <td><p>Get dependent turbines for a test turbine for each wind direction.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_turbs_in_radius.html#flasc.utilities.floris_tools.get_turbs_in_radius" title="flasc.utilities.floris_tools.get_turbs_in_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_turbs_in_radius</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_turbs_in_radius.html#flasc.utilities.floris_tools.get_turbs_in_radius" title="flasc.utilities.floris_tools.get_turbs_in_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_turbs_in_radius</span></code></a></p></td>
 <td><p>Find turbines within a certain radius of a turbine.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_upstream_turbs_floris.html#flasc.utilities.floris_tools.get_upstream_turbs_floris" title="flasc.utilities.floris_tools.get_upstream_turbs_floris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_upstream_turbs_floris</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.get_upstream_turbs_floris.html#flasc.utilities.floris_tools.get_upstream_turbs_floris" title="flasc.utilities.floris_tools.get_upstream_turbs_floris"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_upstream_turbs_floris</span></code></a></p></td>
 <td><p>Use FLORIS to determine which turbines are operating in freestream flow.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html#flasc.utilities.floris_tools.interpolate_floris_from_df_approx" title="flasc.utilities.floris_tools.interpolate_floris_from_df_approx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate_floris_from_df_approx</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html#flasc.utilities.floris_tools.interpolate_floris_from_df_approx" title="flasc.utilities.floris_tools.interpolate_floris_from_df_approx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate_floris_from_df_approx</span></code></a></p></td>
 <td><p>Interpolate FLORIS predictions from a precalculated table of solutions.</p></td>
 </tr>
 </tbody>
@@ -857,6 +879,38 @@ deviations to the left and to the right of the evaluation.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flasc.utilities.floris_tools.estimate_ws_with_floris">
+<span class="sig-prename descclassname"><span class="pre">flasc.utilities.floris_tools.</span></span><span class="sig-name descname"><span class="pre">estimate_ws_with_floris</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_scada</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame"><span class="pre">FlascDataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FlorisModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame"><span class="pre">FlascDataFrame</span></a></span></span><a class="reference internal" href="../_modules/flasc/utilities/floris_tools.html#estimate_ws_with_floris"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flasc.utilities.floris_tools.estimate_ws_with_floris" title="Link to this definition">#</a></dt>
+<dd><p>Estimate the wind speed at the turbine locations using a FLORIS model.</p>
+<p>This function estimates the wind speed at the turbine locations using a FLORIS model.
+The approach follows the example from the RES wind-up method <cite>add_ws_est_one_ttype</cite>
+(<a class="github reference external" href="https://github.com/resgroup/wind-up/blob/main/wind_up/ws_est.py">resgroup/wind-up</a>) by Alex Clerc.
+However, in this implementation, FLORIS provides the power curves directly rather
+than their being learned from data.  In this way, the estimated wind speed is
+the speed which would cause FLORIS to predict a power matched to the SCADA data.
+This will be especially useful in model fitting to avoid any error on un-waked turbines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_scada</strong> (<em>pd.DataFrame</em><em> | </em><a class="reference internal" href="flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame"><em>FlascDataFrame</em></a>) -- Pandas DataFrame with the SCADA data.</p></li>
+<li><p><strong>fm</strong> (<em>FlorisModel</em>) -- FLORIS model object.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Print warnings and information to the console. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Pandas DataFrame with the estimated wind speed</dt><dd><p>columns added.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame | <a class="reference internal" href="flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame" title="flasc.flasc_dataframe.FlascDataFrame">FlascDataFrame</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1177,6 +1231,7 @@ ordered by magnitude of impact.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.interpolate_floris_from_df_approx"><code class="docutils literal notranslate"><span class="pre">interpolate_floris_from_df_approx()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.calc_floris_approx_table"><code class="docutils literal notranslate"><span class="pre">calc_floris_approx_table()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table"><code class="docutils literal notranslate"><span class="pre">add_gaussian_blending_to_floris_approx_table()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.estimate_ws_with_floris"><code class="docutils literal notranslate"><span class="pre">estimate_ws_with_floris()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.get_turbs_in_radius"><code class="docutils literal notranslate"><span class="pre">get_turbs_in_radius()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical"><code class="docutils literal notranslate"><span class="pre">get_all_impacting_turbines_geometrical()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flasc.utilities.floris_tools.get_upstream_turbs_floris"><code class="docutils literal notranslate"><span class="pre">get_upstream_turbs_floris()</span></code></a></li>

@@ -38,6 +38,8 @@ flasc.data\_processing.dataframe\_manipulations
       set_wd_by_all_turbines
       set_wd_by_radius_from_turbine
       set_wd_by_turbines
+      set_wd_by_upstream_turbines
+      set_wd_by_upstream_turbines_in_radius
       set_ws_by_all_turbines
       set_ws_by_n_closest_upstream_turbines
       set_ws_by_turbines
