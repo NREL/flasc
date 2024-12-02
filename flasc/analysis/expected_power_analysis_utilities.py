@@ -281,20 +281,22 @@ def _null_and_sync_covariance(
     return df_cov
 
 
-def _fill_cov_null(
+def _fill_cov_with_var(
     df_cov: pl.DataFrame,
     test_cols: List[str],
+    fill_all: bool = True,
 ) -> pl.DataFrame:
-    """Fill null values in covariance according to strategy.
+    """Fill covariance terms with the product of the square root of the variances.
 
-    Fill the null values in the covariance matrix with the product
-    of the square root of the variances of the corresponding test columns.  Set
-    the number of points to the minimum of the number of points for the two
-    corresponding test columns.
+    Fill the null (or all) values in the covariance matrix with the product
+    of the square root of the variances of the corresponding test columns.
+
+    Leave the number of points as is (the number of shared points between the two test columns).
 
     Args:
         df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
         test_cols (List[str]): A list of column names to calculate the covariance of
+        fill_all (bool): If True, fill all values of cov, regardless of whether or not missing/Null
 
     Returns:
         pl.DataFrame: A polars dataframe with the null values filled according to the strategy.
@@ -315,13 +317,17 @@ def _fill_cov_null(
             n_col = f"count_{t1}_{t2}"
             var_1_col = f"cov_{t1}_{t1}"
             var_2_col = f"cov_{t2}_{t2}"
-            n_1_col = f"count_{t1}_{t1}"
-            n_2_col = f"count_{t2}_{t2}"
+            # n_1_col = f"count_{t1}_{t1}"
+            # n_2_col = f"count_{t2}_{t2}"
 
             # For the rows where cov_col is null, fill the cov_col with the product of the square
             # root of the variances of the two test columns and the n_col with the minimum of the
             # number of points for the two test columns
             df_cov = df_cov.with_columns(null_map=pl.col(cov_col).is_null())
+
+            # If fill_all is true, set null_map True for all rows
+            if fill_all:
+                df_cov = df_cov.with_columns(pl.lit(True).alias("null_map"))
 
             with pl.Config(tbl_cols=-1):
                 print(cov_col)
@@ -334,12 +340,13 @@ def _fill_cov_null(
                 .alias(cov_col)
             )
 
-            df_cov = df_cov.with_columns(
-                pl.when(pl.col("null_map"))
-                .then(pl.min_horizontal(n_1_col, n_2_col))
-                .otherwise(pl.col(n_col))
-                .alias(n_col)
-            )
+            # Leave n_col as is (number of joint points)
+            # df_cov = df_cov.with_columns(
+            #     pl.when(pl.col("null_map"))
+            #     .then(pl.min_horizontal(n_1_col, n_2_col))
+            #     .otherwise(pl.col(n_col))
+            #     .alias(n_col)
+            # )
 
             # For any rows where n_col is 0 or null, set n_col and cov_col to null
             df_cov = df_cov.with_columns(

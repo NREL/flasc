@@ -14,7 +14,7 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _add_wd_ws_bins,
     _bin_and_group_dataframe_expected_power,
     _compute_covariance,
-    _fill_cov_null,
+    _fill_cov_with_var,
     _get_num_points_pair,
     _null_and_sync_covariance,
     _synchronize_mean_power_cov_nulls,
@@ -393,7 +393,7 @@ def test_cov_against_var():
     )
 
 
-def test_fill_cov_null():
+def test_fill_cov_with_var_dont_fill_all():
     """Test the fill_cov_null function."""
     test_df = pl.DataFrame(
         {
@@ -421,17 +421,52 @@ def test_fill_cov_null():
             "cov_pow_001_pow_000": [1, 1],
             "cov_pow_001_pow_001": [4, 4],
             "count_pow_000_pow_000": [1, 2],
-            "count_pow_000_pow_001": [3, 2],  #  Note updated value
+            "count_pow_000_pow_001": [3, 4],  # Note values not updated here
             "count_pow_001_pow_000": [5, 6],
             "count_pow_001_pow_001": [7, 8],
         }
     )
 
-    filled_df = _fill_cov_null(test_df, test_cols=["pow_000", "pow_001"])
+    filled_df = _fill_cov_with_var(test_df, test_cols=["pow_000", "pow_001"], fill_all=False)
 
-    # with pl.Config(tbl_cols=-1):
-    #     print(expected_df)
-    #     print(filled_df)
+    assert_frame_equal(filled_df, expected_df, check_row_order=False, check_dtype=False)
+
+
+def test_fill_cov_with_var_fill_all():
+    """Test the fill_cov_null function."""
+    test_df = pl.DataFrame(
+        {
+            "wd_bin": [0, 1],
+            "ws_bin": [0, 0],
+            "df_name": ["baseline"] * 2,
+            "cov_pow_000_pow_000": [4, 4],
+            "cov_pow_000_pow_001": [1, None],
+            "cov_pow_001_pow_000": [1, 1],
+            "cov_pow_001_pow_001": [4, 9],
+            "count_pow_000_pow_000": [1, 2],
+            "count_pow_000_pow_001": [3, 4],
+            "count_pow_001_pow_000": [5, 6],
+            "count_pow_001_pow_001": [7, 8],
+        }
+    )
+
+    expected_df = pl.DataFrame(
+        {
+            "wd_bin": [0, 1],
+            "ws_bin": [0, 0],
+            "df_name": ["baseline"] * 2,
+            "cov_pow_000_pow_000": [4, 4],
+            "cov_pow_000_pow_001": [4, 6],  # Note filled values
+            "cov_pow_001_pow_000": [4, 6],  # Note filled values
+            "cov_pow_001_pow_001": [4, 9],
+            "count_pow_000_pow_000": [1, 2],
+            "count_pow_000_pow_001": [3, 4],  # Note values not updated here
+            "count_pow_001_pow_000": [5, 6],  # Note values not updated here
+            "count_pow_001_pow_001": [7, 8],
+        }
+    )
+
+    filled_df = _fill_cov_with_var(test_df, test_cols=["pow_000", "pow_001"], fill_all=True)
 
     assert_frame_equal(filled_df, expected_df, check_row_order=False, check_dtype=False)
 

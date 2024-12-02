@@ -15,7 +15,7 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _add_wd_ws_bins,
     _bin_and_group_dataframe_expected_power,
     _compute_covariance,
-    _fill_cov_null,
+    _fill_cov_with_var,
     _null_and_sync_covariance,
     _synchronize_mean_power_cov_nulls,
     _synchronize_nulls,
@@ -323,7 +323,7 @@ def _total_uplift_expected_power_with_standard_error(
 
     # If filling missing covariance terms, do it now
     if fill_cov_with_var:
-        df_cov = _fill_cov_null(df_cov, test_cols=test_cols)
+        df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols)
 
     # If only using the variance, zero out the covariance terms
     if variance_only:
