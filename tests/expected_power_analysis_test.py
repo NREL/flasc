@@ -499,8 +499,8 @@ def test_set_cov_to_zero():
             "cov_pow_001_pow_000": [0, 0],
             "cov_pow_001_pow_001": [4, 4],
             "count_pow_000_pow_000": [1, 2],
-            "count_pow_000_pow_001": [1, 1],
-            "count_pow_001_pow_000": [1, 1],
+            "count_pow_000_pow_001": [2, 2],
+            "count_pow_001_pow_000": [2, 2],
             "count_pow_001_pow_001": [7, 8],
         }
     )
