@@ -147,7 +147,7 @@ def _synchronize_nulls(
     return df_
 
 
-def _get_num_points(
+def _get_num_points_pair(
     df_: pl.DataFrame,
     test_cols: List[str],
     bin_cols_with_df_name: List[str],
@@ -212,7 +212,9 @@ def _compute_covariance(
     df_cov = df_.group_by(bin_cols_with_df_name).agg(cov_exprs)
 
     # Get the number of points for each pair
-    df_n = _get_num_points(df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name)
+    df_n = _get_num_points_pair(
+        df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
+    )
 
     # Join the number of points to the covariance matrix
     df_cov = df_cov.join(df_n, on=bin_cols_with_df_name, how="left")

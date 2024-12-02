@@ -15,7 +15,7 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _bin_and_group_dataframe_expected_power,
     _compute_covariance,
     _fill_cov_null,
-    _get_num_points,
+    _get_num_points_pair,
     _null_and_sync_covariance,
     _synchronize_mean_power_cov_nulls,
     _synchronize_nulls,
@@ -273,7 +273,7 @@ def test_total_uplift_expected_power_with_bootstrapping():
     )
 
 
-def test__get_num_points():
+def test__get_num_points_pair():
     test_df = pl.DataFrame(
         {
             "wd_bin": [0, 0, 0, 1, 1, 1],
@@ -285,7 +285,7 @@ def test__get_num_points():
         }
     )
 
-    df_count = _get_num_points(
+    df_count = _get_num_points_pair(
         test_df, ["pow_000", "pow_001", "pow_002"], ["wd_bin", "ws_bin", "df_name"]
     )
 
