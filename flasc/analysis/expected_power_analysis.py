@@ -258,8 +258,9 @@ def _total_uplift_expected_power_with_standard_error(
     df_freq_pl: pl.DataFrame = None,
     percentiles: List[float] = [2.5, 97.5],
     remove_any_null_turbine_bins: bool = False,
-    variance_only: bool = False,
-    fill_cov_with_var: bool = False,
+    set_cov_to_zero_or_var: str = "zero",
+    # variance_only: bool = False,
+    # fill_cov_with_var: bool = False,
 ) -> Dict[str, Dict[str, float]]:
     """Calculate the total uplift in expected power with standard error.
 
@@ -286,19 +287,13 @@ def _total_uplift_expected_power_with_standard_error(
             Defaults to [2.5, 97.5].
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
-        variance_only (bool): Only use the variance of turbine powers and not turbine-turbine
-            covariances. Defaults to False.
-        fill_cov_with_var (bool): Fill all missing covariance terms with the product of the
-            square root of the variances. Defaults to False.
+        set_cov_to_zero_or_var (str): Set the covariance to zero or product of variances.
+            Can be "zero" or "var". Defaults to "zero".
+
 
     Returns:
         Dict[str, Dict[str, float]]: A dictionary containing the uplift results with standard error.
     """
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_bin)
-    #     print(df_sum)
-    #     print(uplift_results)
-
     # Get the bin cols without df_name
     bin_cols_without_df_name = [c for c in bin_cols_in if c != "df_name"]
     bin_cols_with_df_name = bin_cols_in + ["df_name"]
@@ -321,13 +316,24 @@ def _total_uplift_expected_power_with_standard_error(
         df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
     )
 
-    # If filling missing covariance terms, do it now
-    if fill_cov_with_var:
-        df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols)
-
-    # If only using the variance, zero out the covariance terms
-    if variance_only:
+    # In current version of code, covarariances are either set to 0 or set to
+    # product of variances
+    if set_cov_to_zero_or_var == "zero":
         df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
+    elif set_cov_to_zero_or_var == "var":
+        df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols, fill_all=True)
+    else:
+        raise ValueError(
+            f"set_cov_to_zero_or_var must be 'zero' or 'var', not {set_cov_to_zero_or_var}"
+        )
+
+    # # If filling missing covariance terms, do it now
+    # if fill_cov_with_var:
+    #     df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols)
+
+    # # If only using the variance, zero out the covariance terms
+    # if variance_only:
+    #     df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
 
     # Apply Null values to covariance and sync across uplift pairs
     df_cov = _null_and_sync_covariance(
@@ -336,9 +342,6 @@ def _total_uplift_expected_power_with_standard_error(
         uplift_pairs=uplift_pairs,
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
-
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_cov)
 
     # Bin and group the dataframe
     df_bin = _bin_and_group_dataframe_expected_power(
@@ -364,6 +367,11 @@ def _total_uplift_expected_power_with_standard_error(
             pl.all_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols])
         )
 
+    # Remove rows where all of the test_cols are null
+    df_bin = df_bin.filter(
+        pl.any_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols])
+    )
+
     # Join the covariance dataframe to df_bin
     df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
 
@@ -388,13 +396,13 @@ def _total_uplift_expected_power_with_standard_error(
         )
     )
 
-    # If any of the cov_cols are null, set pow_farm_var to null
-    df_bin = df_bin.with_columns(
-        pl.when(pl.all_horizontal([pl.col(c).is_not_null() for c in cov_cols]))
-        .then(pl.col("pow_farm_var"))
-        .otherwise(None)
-        .alias("pow_farm_var")
-    )
+    # # If any of the cov_cols are null, set pow_farm_var to null
+    # df_bin = df_bin.with_columns(
+    #     pl.when(pl.all_horizontal([pl.col(c).is_not_null() for c in cov_cols]))
+    #     .then(pl.col("pow_farm_var"))
+    #     .otherwise(None)
+    #     .alias("pow_farm_var")
+    # )
 
     # with pl.Config(tbl_cols=-1):
     #     print(df_bin)
