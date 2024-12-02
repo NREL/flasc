@@ -17,9 +17,9 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _fill_cov_with_var,
     _get_num_points_pair,
     _null_and_sync_covariance,
+    _set_cov_to_zero,
     _synchronize_mean_power_cov_nulls,
     _synchronize_nulls,
-    _zero_cov,
 )
 
 
@@ -471,7 +471,7 @@ def test_fill_cov_with_var_fill_all():
     assert_frame_equal(filled_df, expected_df, check_row_order=False, check_dtype=False)
 
 
-def test_zero_cov():
+def test_set_cov_to_zero():
     """Test the zero_cov function."""
     test_df = pl.DataFrame(
         {
@@ -505,7 +505,7 @@ def test_zero_cov():
         }
     )
 
-    zero_cov_df = _zero_cov(test_df, test_cols=["pow_000", "pow_001"])
+    zero_cov_df = _set_cov_to_zero(test_df, test_cols=["pow_000", "pow_001"])
 
     assert_frame_equal(zero_cov_df, expected_df, check_row_order=False, check_dtype=False)
 

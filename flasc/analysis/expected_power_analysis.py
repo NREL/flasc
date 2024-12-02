@@ -17,9 +17,9 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _compute_covariance,
     _fill_cov_with_var,
     _null_and_sync_covariance,
+    _set_cov_to_zero,
     _synchronize_mean_power_cov_nulls,
     _synchronize_nulls,
-    _zero_cov,
 )
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 from flasc.logging_manager import LoggingManager
@@ -327,7 +327,7 @@ def _total_uplift_expected_power_with_standard_error(
 
     # If only using the variance, zero out the covariance terms
     if variance_only:
-        df_cov = _zero_cov(df_cov, test_cols=test_cols)
+        df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
 
     # Apply Null values to covariance and sync across uplift pairs
     df_cov = _null_and_sync_covariance(

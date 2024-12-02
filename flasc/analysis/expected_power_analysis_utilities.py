@@ -366,7 +366,7 @@ def _fill_cov_with_var(
     return df_cov
 
 
-def _zero_cov(
+def _set_cov_to_zero(
     df_cov: pl.DataFrame,
     test_cols: List[str],
 ) -> pl.DataFrame:
