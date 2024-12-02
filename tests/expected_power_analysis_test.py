@@ -687,6 +687,7 @@ def test_uncertain_intervals():
         ws_min=0.5,
         use_standard_error=False,
         N=10,
+        remove_any_null_turbine_bins=True,
     )
 
     epao_standard_zero = total_uplift_expected_power(
@@ -701,6 +702,7 @@ def test_uncertain_intervals():
         ws_min=0.5,
         use_standard_error=True,
         set_cov_to_zero_or_var="zero",
+        remove_any_null_turbine_bins=True,
     )
 
     epao_standard_var = total_uplift_expected_power(
@@ -715,6 +717,7 @@ def test_uncertain_intervals():
         ws_min=0.5,
         use_standard_error=True,
         set_cov_to_zero_or_var="var",
+        remove_any_null_turbine_bins=True,
     )
 
     print("Bootstrapping")
