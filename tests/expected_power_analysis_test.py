@@ -18,7 +18,7 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _get_num_points_pair,
     _null_and_sync_covariance,
     _set_cov_to_zero,
-    _synchronize_mean_power_cov_nulls,
+    _synchronize_cov_nulls_back_to_mean,
     _synchronize_nulls,
 )
 
@@ -41,6 +41,51 @@ def load_data():
             "pow_000": [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
             "pow_001": [20.0, 30.0, np.nan, np.nan, 10.0, 10.0, 10.0],
         }
+    )
+
+    a_in = AnalysisInput([df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=3)
+
+    return a_in
+
+
+def load_repeated_data():
+    df_base = pd.DataFrame(
+        {
+            "wd": [270, 270.0, 270.0, 270.0, 280.0, 280.0, 280.0, 290.0],
+            "ws": [8.0, 8.0, 8.0, 9.0, 8.0, 8.0, 9.0, 8.0],
+            "pow_000": [10.0, 20.0, np.nan, 10.0, np.nan, 10.0, np.nan, 10.0],
+            "pow_001": [10.0, 20.0, np.nan, 10.0, 10.0, 20.0, np.nan, 10.0],
+        }
+    )
+
+    df_wake_steering = pd.DataFrame(
+        {
+            "wd": [270, 270.0, 280.0, 280.0, 280.0, 290.0, 290.0],
+            "ws": [8.0, 8.0, 8.0, 8.0, 9.0, 8.0, 8.0],
+            "pow_000": [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
+            "pow_001": [20.0, 30.0, np.nan, np.nan, 10.0, 10.0, 10.0],
+        }
+    )
+
+    # Set df_base to repeat, once with all pow columns -1 and once with
+    #  all pow columns +2 to add variance
+    df_base_1 = df_base.copy()
+    df_base_1["pow_000"] = df_base_1["pow_000"] - 1
+    df_base_1["pow_001"] = df_base_1["pow_001"] - 1
+    df_base_2 = df_base.copy()
+    df_base_2["pow_000"] = df_base_2["pow_000"] + 1
+    df_base_2["pow_001"] = df_base_2["pow_001"] + 1
+    df_base = pd.concat([df_base, df_base_1, df_base_2], ignore_index=True)
+
+    # Repeat for df_wake_steering
+    df_wake_steering_1 = df_wake_steering.copy()
+    df_wake_steering_1["pow_000"] = df_wake_steering_1["pow_000"] - 1
+    df_wake_steering_1["pow_001"] = df_wake_steering_1["pow_001"] - 1
+    df_wake_steering_2 = df_wake_steering.copy()
+    df_wake_steering_2["pow_000"] = df_wake_steering_2["pow_000"] + 1
+    df_wake_steering_2["pow_001"] = df_wake_steering_2["pow_001"] + 1
+    df_wake_steering = pd.concat(
+        [df_wake_steering, df_wake_steering_1, df_wake_steering_2], ignore_index=True
     )
 
     a_in = AnalysisInput([df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=3)
@@ -510,7 +555,7 @@ def test_set_cov_to_zero():
     assert_frame_equal(zero_cov_df, expected_df, check_row_order=False, check_dtype=False)
 
 
-def test_synchronize_mean_power_cov_nulls():
+def test_synchronize_cov_nulls_back_to_mean():
     test_df_bin = pl.DataFrame(
         {
             "wd_bin": [0, 0, 1, 1],
@@ -543,9 +588,14 @@ def test_synchronize_mean_power_cov_nulls():
         }
     )
 
-    df_res = _synchronize_mean_power_cov_nulls(
+    # Join the covariance dataframe to df_bin
+    test_df_bin = test_df_bin.join(test_df_cov, on=["wd_bin", "ws_bin", "df_name"], how="left")
+    expected_df_bin = expected_df_bin.join(
+        test_df_cov, on=["wd_bin", "ws_bin", "df_name"], how="left"
+    )
+
+    df_res = _synchronize_cov_nulls_back_to_mean(
         df_bin=test_df_bin,
-        df_cov=test_df_cov,
         test_cols=["pow_000", "pow_001"],
     )
 
@@ -553,7 +603,7 @@ def test_synchronize_mean_power_cov_nulls():
 
 
 def test_total_uplift_expected_power_with_standard_error():
-    a_in = load_data()
+    a_in = load_repeated_data()
 
     uplift_results = _total_uplift_expected_power_with_standard_error(
         df_=a_in.get_df(),

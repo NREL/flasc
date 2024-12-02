@@ -219,6 +219,11 @@ def _compute_covariance(
     # Join the number of points to the covariance matrix
     df_cov = df_cov.join(df_n, on=bin_cols_with_df_name, how="left")
 
+    # Enforce that each ws/wd bin combination has to appear in all dataframes
+    bin_cols_without_df_name = [c for c in bin_cols_with_df_name if c != "df_name"]
+    num_df = df_["df_name"].n_unique()
+    df_cov = df_cov.filter(pl.count().over(bin_cols_without_df_name) == num_df)
+
     return df_cov
 
 
@@ -400,9 +405,8 @@ def _set_cov_to_zero(
     return df_cov
 
 
-def _synchronize_mean_power_cov_nulls(
+def _synchronize_cov_nulls_back_to_mean(
     df_bin: pl.DataFrame,
-    df_cov: pl.DataFrame,
     test_cols: List[str],
 ) -> pl.DataFrame:
     """For each row, for any turbine with a null var or cov, null mean power.
@@ -413,7 +417,6 @@ def _synchronize_mean_power_cov_nulls(
     Args:
         df_bin (pl.DataFrame): A polars dataframe with the mean and variance of the test
             columns grouped by bin columns.
-        df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
         test_cols (List[str]): A list of column names to calculate the covariance of
 
     Returns:
@@ -432,7 +435,7 @@ def _synchronize_mean_power_cov_nulls(
 
         # Get a mask for the rows where any of the cov_cols are null
         # using the horizontal or operator
-        mask = df_cov.select(
+        mask = df_bin.select(
             pl.any_horizontal([pl.col(c).is_null() for c in cov_cols]).alias("mask")
         )
 

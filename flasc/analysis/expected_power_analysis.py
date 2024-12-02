@@ -18,7 +18,7 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _fill_cov_with_var,
     _null_and_sync_covariance,
     _set_cov_to_zero,
-    _synchronize_mean_power_cov_nulls,
+    _synchronize_cov_nulls_back_to_mean,
     _synchronize_nulls,
 )
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
@@ -311,10 +311,16 @@ def _total_uplift_expected_power_with_standard_error(
         ws_max=ws_max,
     )
 
+    with pl.Config(tbl_cols=-1):
+        print(df_)
+
     # Compute the covariance frame
     df_cov = _compute_covariance(
         df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
     )
+
+    with pl.Config(tbl_cols=-1):
+        print(df_cov)
 
     # In current version of code, covarariances are either set to 0 or set to
     # product of variances
@@ -326,6 +332,9 @@ def _total_uplift_expected_power_with_standard_error(
         raise ValueError(
             f"set_cov_to_zero_or_var must be 'zero' or 'var', not {set_cov_to_zero_or_var}"
         )
+
+    with pl.Config(tbl_cols=-1):
+        print(df_cov)
 
     # # If filling missing covariance terms, do it now
     # if fill_cov_with_var:
@@ -343,6 +352,9 @@ def _total_uplift_expected_power_with_standard_error(
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
 
+    with pl.Config(tbl_cols=-1):
+        print(df_cov)
+
     # Bin and group the dataframe
     df_bin = _bin_and_group_dataframe_expected_power(
         df_=df_,
@@ -350,8 +362,17 @@ def _total_uplift_expected_power_with_standard_error(
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
 
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
+
+    # Join the covariance dataframe to df_bin
+    df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
+
     # Synchronize any null values in the covariance back to df_bin
-    df_bin = _synchronize_mean_power_cov_nulls(df_bin=df_bin, df_cov=df_cov, test_cols=test_cols)
+    df_bin = _synchronize_cov_nulls_back_to_mean(df_bin=df_bin, test_cols=test_cols)
+
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
 
     # Synchronize the null values
     df_bin = _synchronize_nulls(
@@ -371,9 +392,6 @@ def _total_uplift_expected_power_with_standard_error(
     df_bin = df_bin.filter(
         pl.any_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols])
     )
-
-    # Join the covariance dataframe to df_bin
-    df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
 
     # with pl.Config(tbl_cols=-1):
     #     print(df_bin)
@@ -410,9 +428,6 @@ def _total_uplift_expected_power_with_standard_error(
     # Determine the weighting of the ws/wd bins
     df_bin, df_freq_pl = add_bin_weights(df_bin, df_freq_pl, bin_cols_without_df_name, weight_by)
 
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_bin)
-
     # Normalize the weight column over the values in df_name column and compute
     # the weighted farm power and weighted var per bin
     df_bin = df_bin.with_columns(weight=pl.col("weight") / pl.col("weight").sum().over("df_name"))
@@ -421,9 +436,6 @@ def _total_uplift_expected_power_with_standard_error(
     df_bin = df_bin.with_columns(weighted_farm_power=pl.col("pow_farm") * pl.col("weight"))
     # .with_columns(weighted_power=pl.col("pow_farm") * pl.col("weight"),
     # weighted_power_var=pl.col("pow_farm_var") * pl.col("weight")**2)
-
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
 
     # Now compute uplifts
     uplift_results = {}
@@ -534,8 +546,9 @@ def total_uplift_expected_power(
     N: int = 1,
     percentiles: List[float] = [2.5, 97.5],
     remove_any_null_turbine_bins: bool = False,
-    variance_only: bool = False,
-    fill_cov_with_var: bool = False,
+    set_cov_to_zero_or_var: str = "zero",
+    # variance_only: bool = False,
+    # fill_cov_with_var: bool = False,
 ) -> ExpectedPowerAnalysisOutput:
     """Calculate the total uplift in energy production using expected power methods.
 
@@ -565,10 +578,8 @@ def total_uplift_expected_power(
             Defaults to [2.5, 97.5].
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
-        variance_only (bool): Only use the variance of turbine powers and not turbine-turbine
-            covariances. Defaults to False.
-        fill_cov_with_var (bool): Fill all missing covariance terms with the product of the
-            square root of the variances. Defaults to False.
+        set_cov_to_zero_or_var (str): Set the covariance to zero or product of variances.
+            Can be "zero" or "var". Defaults to "zero".
 
     Returns:
         ExpectedPowerAnalysisOutput: An object containing the uplift results and
@@ -637,9 +648,10 @@ def total_uplift_expected_power(
     if use_standard_error and N != 1:
         raise ValueError("N must be 1 when use_standard_error is True")
 
-    # Raise an error if both variance_only and fill_cov_with_var are True
-    if variance_only and fill_cov_with_var:
-        raise ValueError("variance_only and fill_cov_with_var cannot both be True")
+    # # Raise an error if both variance_only and fill_cov_with_var are True
+    # May need to reinclude in the future but disabled for now
+    # if variance_only and fill_cov_with_var:
+    #     raise ValueError("variance_only and fill_cov_with_var cannot both be True")
 
     # Set up the column names for the wind speed and test cols
 
@@ -716,8 +728,7 @@ def total_uplift_expected_power(
             df_freq_pl=df_freq_pl,
             percentiles=percentiles,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
-            variance_only=variance_only,
-            fill_cov_with_var=fill_cov_with_var,
+            set_cov_to_zero_or_var=set_cov_to_zero_or_var,
         )
 
     # Create the output object
