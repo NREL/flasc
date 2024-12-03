@@ -467,7 +467,7 @@ def test_fill_cov_with_var_dont_fill_all():
             "cov_pow_001_pow_000": [1, 1],
             "cov_pow_001_pow_001": [4, 4],
             "count_pow_000_pow_000": [1, 2],
-            "count_pow_000_pow_001": [3, 4],  # Note values not updated here
+            "count_pow_000_pow_001": [3, 2],  # Note values are updated here too as min
             "count_pow_001_pow_000": [5, 6],
             "count_pow_001_pow_001": [7, 8],
         }
@@ -502,12 +502,18 @@ def test_fill_cov_with_var_fill_all():
             "ws_bin": [0, 0],
             "df_name": ["baseline"] * 2,
             "cov_pow_000_pow_000": [4, 4],
-            "cov_pow_000_pow_001": [4, 6],  # Note filled values
-            "cov_pow_001_pow_000": [4, 6],  # Note filled values
+            "cov_pow_000_pow_001": [
+                None,
+                6,
+            ],  # Note filled values (None because count goes below 2)
+            "cov_pow_001_pow_000": [
+                None,
+                6,
+            ],  # Note filled values (None because count goes below 2)
             "cov_pow_001_pow_001": [4, 9],
             "count_pow_000_pow_000": [1, 2],
-            "count_pow_000_pow_001": [3, 4],  # Note values not updated here
-            "count_pow_001_pow_000": [5, 6],  # Note values not updated here
+            "count_pow_000_pow_001": [None, 2],  # Note values updated here to minimum
+            "count_pow_001_pow_000": [None, 2],  # Note values updated here to minimum
             "count_pow_001_pow_001": [7, 8],
         }
     )

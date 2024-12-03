@@ -378,12 +378,10 @@ def _total_uplift_expected_power_with_standard_error(
     # # Synchronize any null values in the covariance back to df_bin
     # df_bin = _synchronize_cov_nulls_back_to_mean(df_bin=df_bin, test_cols=test_cols)
 
+    # Set to null any mean values associated with null variance by row/turbine
     df_bin = _synchronize_var_nulls_back_to_mean(df_bin=df_bin, test_cols=test_cols)
 
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
-
-    # Synchronize the null values in the mean columns
+    # Synchronize the null values in the mean columns across uplift pairs
     df_bin = _synchronize_nulls(
         df_bin=df_bin,
         sync_cols=[f"{col}_mean" for col in test_cols],

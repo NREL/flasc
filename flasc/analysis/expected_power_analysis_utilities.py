@@ -322,8 +322,8 @@ def _fill_cov_with_var(
             n_col = f"count_{t1}_{t2}"
             var_1_col = f"cov_{t1}_{t1}"
             var_2_col = f"cov_{t2}_{t2}"
-            # n_1_col = f"count_{t1}_{t1}"
-            # n_2_col = f"count_{t2}_{t2}"
+            n_1_col = f"count_{t1}_{t1}"
+            n_2_col = f"count_{t2}_{t2}"
 
             # For the rows where cov_col is null, fill the cov_col with the product of the square
             # root of the variances of the two test columns and the n_col with the minimum of the
@@ -334,10 +334,6 @@ def _fill_cov_with_var(
             if fill_all:
                 df_cov = df_cov.with_columns(pl.lit(True).alias("null_map"))
 
-            with pl.Config(tbl_cols=-1):
-                print(cov_col)
-                print(df_cov)
-
             df_cov = df_cov.with_columns(
                 pl.when(pl.col("null_map"))
                 .then((pl.col(var_1_col).sqrt() * pl.col(var_2_col).sqrt()))
@@ -345,19 +341,20 @@ def _fill_cov_with_var(
                 .alias(cov_col)
             )
 
-            # Leave n_col as is (number of joint points)
-            # df_cov = df_cov.with_columns(
-            #     pl.when(pl.col("null_map"))
-            #     .then(pl.min_horizontal(n_1_col, n_2_col))
-            #     .otherwise(pl.col(n_col))
-            #     .alias(n_col)
-            # )
-
-            # For any rows where n_col is 0 or null, set n_col and cov_col to null
+            # Num points as the minimum between the values of the two variances
             df_cov = df_cov.with_columns(
-                pl.when(pl.col(n_col) == 0).then(None).otherwise(pl.col(n_col)).alias(n_col)
+                pl.when(pl.col("null_map"))
+                .then(pl.min_horizontal(n_1_col, n_2_col))
+                .otherwise(pl.col(n_col))
+                .alias(n_col)
             )
 
+            # For any rows where n_col is < 2 set n_col to null
+            df_cov = df_cov.with_columns(
+                pl.when(pl.col(n_col) < 2).then(None).otherwise(pl.col(n_col)).alias(n_col)
+            )
+
+            # Wherever n_col is null, set cov_col to null
             df_cov = df_cov.with_columns(
                 pl.when(pl.col(n_col).is_null())
                 .then(None)
