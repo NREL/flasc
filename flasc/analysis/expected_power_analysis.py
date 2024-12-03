@@ -317,8 +317,8 @@ def _total_uplift_expected_power_with_standard_error(
         df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
     )
 
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_cov)
+    with pl.Config(tbl_cols=-1):
+        print(df_cov)
 
     # In current version of code, covarariances are either set to 0 or set to
     # product of variances
@@ -368,8 +368,8 @@ def _total_uplift_expected_power_with_standard_error(
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
 
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_bin)
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
 
     # Join the covariance dataframe to df_bin
     df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
@@ -463,8 +463,20 @@ def _total_uplift_expected_power_with_standard_error(
         # pow_farm_var
         df_sub = df_sub.pivot(
             on="df_name",
-            index=bin_cols_without_df_name + ["weight"],
+            index=bin_cols_without_df_name,  # + ["weight"],
         )
+
+        # Assign the weight column to be the mean of weight_[uplift_pair[0]]
+        # and weight_[uplift_pair[1]]
+        df_sub = df_sub.with_columns(
+            weight=(pl.col(f"weight_{uplift_pair[0]}") + pl.col(f"weight_{uplift_pair[1]}")) / 2
+        )
+
+        # Remove the weight_pair columns
+        df_sub = df_sub.drop([f"weight_{uplift_pair[0]}", f"weight_{uplift_pair[1]}"])
+
+        with pl.Config(tbl_cols=-1):
+            print(df_sub)
 
         # Compute the expected power ratio per bin
         df_sub = df_sub.with_columns(
