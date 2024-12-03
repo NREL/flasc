@@ -559,6 +559,7 @@ def total_uplift_expected_power(
     percentiles: List[float] = [2.5, 97.5],
     remove_any_null_turbine_bins: bool = False,
     set_cov_to_zero_or_var: str = "zero",
+    use_cov_when_available: bool = False,
     # variance_only: bool = False,
     # fill_cov_with_var: bool = False,
 ) -> ExpectedPowerAnalysisOutput:
@@ -592,6 +593,8 @@ def total_uplift_expected_power(
             and of the test turbines is null.  Defaults to False.
         set_cov_to_zero_or_var (str): Set the covariance to zero or product of variances.
             Can be "zero" or "var". Defaults to "zero".
+        use_cov_when_available (bool): Use the covariance terms when available. If True,
+            set_cov_to_zero_or_var must be 'var'.  Defaults to False.
 
     Returns:
         ExpectedPowerAnalysisOutput: An object containing the uplift results and
@@ -741,6 +744,7 @@ def total_uplift_expected_power(
             percentiles=percentiles,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
             set_cov_to_zero_or_var=set_cov_to_zero_or_var,
+            use_cov_when_available=use_cov_when_available,
         )
 
     # Create the output object
