@@ -35,6 +35,8 @@ class ExpectedPowerAnalysisOutput:
         N: int = 1,
         percentiles: list = [2.5, 97.5],
         remove_any_null_turbine_bins: bool = False,
+        set_cov_to_zero_or_var: str = "zero",
+        use_cov_when_available: bool = False,
     ) -> None:
         """Init the object with the results of the uplift analysis."""
         self.uplift_results = uplift_results
@@ -59,3 +61,5 @@ class ExpectedPowerAnalysisOutput:
         self.N = N
         self.percentiles = percentiles
         self.remove_any_null_turbine_bins = remove_any_null_turbine_bins
+        self.set_cov_to_zero_or_var = set_cov_to_zero_or_var
+        self.use_cov_when_available = use_cov_when_available

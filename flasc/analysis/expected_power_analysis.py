@@ -769,6 +769,8 @@ def total_uplift_expected_power(
         N=N,
         percentiles=percentiles,
         remove_any_null_turbine_bins=remove_any_null_turbine_bins,
+        set_cov_to_zero_or_var=set_cov_to_zero_or_var,
+        use_cov_when_available=use_cov_when_available,
     )
 
     # Return the object
