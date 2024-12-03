@@ -18,8 +18,8 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _fill_cov_with_var,
     _null_and_sync_covariance,
     _set_cov_to_zero,
-    _synchronize_cov_nulls_back_to_mean,
     _synchronize_nulls,
+    _synchronize_var_nulls_back_to_mean,
 )
 from flasc.data_processing.dataframe_manipulations import df_reduce_precision
 from flasc.logging_manager import LoggingManager
@@ -133,11 +133,6 @@ def _total_uplift_expected_power_single(
             df_sum.filter(pl.col("df_name") == uplift_pair[1])["weighted_power"].to_numpy()[0]
             / df_sum.filter(pl.col("df_name") == uplift_pair[0])["weighted_power"].to_numpy()[0]
         )
-
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_bin)
-    #     print(df_sum)
-    #     print(uplift_results)
 
     return df_bin, df_sum, uplift_results
 
@@ -259,6 +254,7 @@ def _total_uplift_expected_power_with_standard_error(
     percentiles: List[float] = [2.5, 97.5],
     remove_any_null_turbine_bins: bool = False,
     set_cov_to_zero_or_var: str = "zero",
+    use_cov_when_available: bool = False,
     # variance_only: bool = False,
     # fill_cov_with_var: bool = False,
 ) -> Dict[str, Dict[str, float]]:
@@ -289,6 +285,8 @@ def _total_uplift_expected_power_with_standard_error(
             and of the test turbines is null.  Defaults to False.
         set_cov_to_zero_or_var (str): Set the covariance to zero or product of variances.
             Can be "zero" or "var". Defaults to "zero".
+        use_cov_when_available (bool): Use the covariance terms when available. If True,
+            set_cov_to_zero_or_var must be 'var'.  Defaults to False.
 
 
     Returns:
@@ -311,30 +309,38 @@ def _total_uplift_expected_power_with_standard_error(
         ws_max=ws_max,
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_)
 
     # Compute the covariance frame
     df_cov = _compute_covariance(
         df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_cov)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_cov)
 
     # In current version of code, covarariances are either set to 0 or set to
     # product of variances
     if set_cov_to_zero_or_var == "zero":
-        df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
+        if use_cov_when_available:
+            raise ValueError(
+                "use_cov_when_available cannot be True when set_cov_to_zero_or_var is 'zero'"
+            )
+        else:
+            df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
     elif set_cov_to_zero_or_var == "var":
-        df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols, fill_all=True)
+        if use_cov_when_available:
+            df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols, fill_all=False)
+        else:
+            df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols, fill_all=True)
     else:
         raise ValueError(
             f"set_cov_to_zero_or_var must be 'zero' or 'var', not {set_cov_to_zero_or_var}"
         )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_cov)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_cov)
 
     # # If filling missing covariance terms, do it now
     # if fill_cov_with_var:
@@ -352,8 +358,8 @@ def _total_uplift_expected_power_with_standard_error(
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_cov)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_cov)
 
     # Bin and group the dataframe
     df_bin = _bin_and_group_dataframe_expected_power(
@@ -362,14 +368,17 @@ def _total_uplift_expected_power_with_standard_error(
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
+    # with pl.Config(tbl_cols=-1):
+    #     print(df_bin)
 
     # Join the covariance dataframe to df_bin
     df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
 
-    # Synchronize any null values in the covariance back to df_bin
-    df_bin = _synchronize_cov_nulls_back_to_mean(df_bin=df_bin, test_cols=test_cols)
+    # DROPPING THIS AS REDUNDANT TO COPYING BACK NULL VARIANCE TO MEAN
+    # # Synchronize any null values in the covariance back to df_bin
+    # df_bin = _synchronize_cov_nulls_back_to_mean(df_bin=df_bin, test_cols=test_cols)
+
+    df_bin = _synchronize_var_nulls_back_to_mean(df_bin=df_bin, test_cols=test_cols)
 
     with pl.Config(tbl_cols=-1):
         print(df_bin)

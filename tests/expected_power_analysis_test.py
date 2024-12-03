@@ -18,8 +18,9 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _get_num_points_pair,
     _null_and_sync_covariance,
     _set_cov_to_zero,
-    _synchronize_cov_nulls_back_to_mean,
     _synchronize_nulls,
+    # _synchronize_cov_nulls_back_to_mean,
+    _synchronize_var_nulls_back_to_mean,
 )
 
 
@@ -555,7 +556,7 @@ def test_set_cov_to_zero():
     assert_frame_equal(zero_cov_df, expected_df, check_row_order=False, check_dtypes=False)
 
 
-def test_synchronize_cov_nulls_back_to_mean():
+def test__synchronize_var_nulls_back_to_mean():
     test_df_bin = pl.DataFrame(
         {
             "wd_bin": [0, 0, 1, 1],
@@ -583,8 +584,8 @@ def test_synchronize_cov_nulls_back_to_mean():
             "wd_bin": [0, 0, 1, 1],
             "ws_bin": [0, 1, 0, 1],
             "df_name": ["baseline", "baseline", "baseline", "baseline"],
-            "pow_000_mean": [1, 2, None, None],
-            "pow_001_mean": [5, 6, None, 8],
+            "pow_000_mean": [1, 2, 3, None],
+            "pow_001_mean": [5, 6, 7, 8],
         }
     )
 
@@ -594,12 +595,59 @@ def test_synchronize_cov_nulls_back_to_mean():
         test_df_cov, on=["wd_bin", "ws_bin", "df_name"], how="left"
     )
 
-    df_res = _synchronize_cov_nulls_back_to_mean(
+    df_res = _synchronize_var_nulls_back_to_mean(
         df_bin=test_df_bin,
         test_cols=["pow_000", "pow_001"],
     )
 
     assert_frame_equal(df_res, expected_df_bin, check_row_order=False, check_dtypes=False)
+
+
+# def test_synchronize_cov_nulls_back_to_mean():
+#     test_df_bin = pl.DataFrame(
+#         {
+#             "wd_bin": [0, 0, 1, 1],
+#             "ws_bin": [0, 1, 0, 1],
+#             "df_name": ["baseline", "baseline", "baseline", "baseline"],
+#             "pow_000_mean": [1, 2, 3, 4],
+#             "pow_001_mean": [5, 6, 7, 8],
+#         }
+#     )
+
+#     test_df_cov = pl.DataFrame(
+#         {
+#             "wd_bin": [0, 0, 1, 1],
+#             "ws_bin": [0, 1, 0, 1],
+#             "df_name": ["baseline", "baseline", "baseline", "baseline"],
+#             "cov_pow_000_pow_000": [1, 2, 3, None],
+#             "cov_pow_000_pow_001": [5, 6, None, 8],
+#             "cov_pow_001_pow_000": [9, 10, 11, 12],
+#             "cov_pow_001_pow_001": [13, 14, 15, 16],
+#         }
+#     )
+
+#     expected_df_bin = pl.DataFrame(
+#         {
+#             "wd_bin": [0, 0, 1, 1],
+#             "ws_bin": [0, 1, 0, 1],
+#             "df_name": ["baseline", "baseline", "baseline", "baseline"],
+#             "pow_000_mean": [1, 2, None, None],
+#             "pow_001_mean": [5, 6, None, 8],
+#         }
+#     )
+
+#     # Join the covariance dataframe to df_bin
+#     test_df_bin = test_df_bin.join(test_df_cov, on=["wd_bin", "ws_bin", "df_name"], how="left")
+#     expected_df_bin = expected_df_bin.join(
+#         test_df_cov, on=["wd_bin", "ws_bin", "df_name"], how="left"
+#     )
+
+#     df_res = _synchronize_cov_nulls_back_to_mean(
+#         df_bin=test_df_bin,
+#         test_cols=["pow_000", "pow_001"],
+#     )
+
+#     assert_frame_equal(df_res, expected_df_bin, check_row_order=False, check_dtypes=False)
 
 
 def test_total_uplift_expected_power_with_standard_error():
