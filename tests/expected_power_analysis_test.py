@@ -721,9 +721,25 @@ def test_center_uplift_identical():
         use_standard_error=True,
     )
 
+    epao_standard_fill_with_var = total_uplift_expected_power(
+        a_in=a_in,
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        test_turbines=[0, 1],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        use_standard_error=True,
+        set_cov_to_zero_or_var="var",
+        use_cov_when_available=True,
+    )
+
     assert epao_single.uplift_results["scada_uplift"] == 1.1
     assert epao_boot.uplift_results["scada_uplift"]["energy_uplift_ctr"] == 1.1
     assert epao_standard.uplift_results["scada_uplift"]["energy_uplift_ctr"] == 1.1
+    assert epao_standard_fill_with_var.uplift_results["scada_uplift"]["energy_uplift_ctr"] == 1.1
 
 
 def test_uncertain_intervals():
@@ -741,7 +757,7 @@ def test_uncertain_intervals():
         ws_min=0.5,
         use_standard_error=False,
         N=10,
-        remove_any_null_turbine_bins=True,
+        remove_any_null_turbine_bins=False,
     )
 
     epao_standard_zero = total_uplift_expected_power(
@@ -756,7 +772,7 @@ def test_uncertain_intervals():
         ws_min=0.5,
         use_standard_error=True,
         set_cov_to_zero_or_var="zero",
-        remove_any_null_turbine_bins=True,
+        remove_any_null_turbine_bins=False,
     )
 
     epao_standard_var = total_uplift_expected_power(
@@ -771,7 +787,7 @@ def test_uncertain_intervals():
         ws_min=0.5,
         use_standard_error=True,
         set_cov_to_zero_or_var="var",
-        remove_any_null_turbine_bins=True,
+        remove_any_null_turbine_bins=False,
     )
 
     print("Bootstrapping")
