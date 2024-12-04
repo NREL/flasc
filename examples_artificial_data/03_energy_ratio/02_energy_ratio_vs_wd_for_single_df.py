@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from flasc.analysis import energy_ratio as er
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities import floris_tools as fsatools
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
@@ -67,11 +67,11 @@ if __name__ == "__main__":
     df = dfm.set_pow_ref_by_turbines(df, turbine_numbers=[0, 6])
 
     # # Initialize energy ratio object for the dataframe
-    er_in = EnergyRatioInput([df], ["baseline"])
+    a_in = AnalysisInput([df], ["baseline"])
 
     # Get energy ratio without uncertainty quantification
     er_out = er.compute_energy_ratio(
-        er_in,
+        a_in,
         test_turbines=[1],
         use_predefined_ref=True,
         use_predefined_wd=True,
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # Get energy ratio with uncertainty quantification
     # using N=20 bootstrap samples and 5-95 percent conf. bounds.
     er_out = er.compute_energy_ratio(
-        er_in,
+        a_in,
         test_turbines=[1],
         use_predefined_ref=True,
         use_predefined_wd=True,
@@ -107,9 +107,9 @@ if __name__ == "__main__":
 
     # Get energy ratio with uncertainty quantification
     # using N=20 bootstrap samples and without block bootstrapping.
-    er_in_noblocks = EnergyRatioInput([df], ["baseline"], num_blocks=len(df))
+    a_in_noblocks = AnalysisInput([df], ["baseline"], num_blocks=len(df))
     er_out = er.compute_energy_ratio(
-        er_in_noblocks,
+        a_in_noblocks,
         test_turbines=[1],
         use_predefined_ref=True,
         use_predefined_wd=True,

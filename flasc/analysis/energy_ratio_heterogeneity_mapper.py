@@ -9,7 +9,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 
 from flasc.analysis import energy_ratio as er
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.logging_manager import LoggingManager
 
@@ -20,9 +20,9 @@ logger = logger_manager.logger  # Obtain the reusable logger
 # Standalone function to easily extract energy ratios for narrow wind direction bin
 def _get_energy_ratio(df, ti, wd_bins, ws_range):
     # Calculate energy ratios
-    er_in = EnergyRatioInput([df], ["data"])
+    a_in = AnalysisInput([df], ["data"])
     return er.compute_energy_ratio(
-        er_in,
+        a_in,
         test_turbines=[ti],
         use_predefined_ref=True,
         use_predefined_wd=True,
