@@ -253,8 +253,7 @@ def _total_uplift_expected_power_with_standard_error(
     df_freq_pl: pl.DataFrame = None,
     percentiles: List[float] = [2.5, 97.5],
     remove_any_null_turbine_bins: bool = False,
-    set_cov_to_zero_or_var: str = "zero",
-    use_cov_when_available: bool = False,
+    cov_terms: str = "zero",
     # variance_only: bool = False,
     # fill_cov_with_var: bool = False,
 ) -> Dict[str, Dict[str, float]]:
@@ -283,10 +282,11 @@ def _total_uplift_expected_power_with_standard_error(
             Defaults to [2.5, 97.5].
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
-        set_cov_to_zero_or_var (str): Set the covariance to zero or product of variances.
-            Can be "zero" or "var". Defaults to "zero".
-        use_cov_when_available (bool): Use the covariance terms when available. If True,
-            set_cov_to_zero_or_var must be 'var'.  Defaults to False.
+        cov_terms (str): Use directly computed covariance terms, or fill with zeros or variances.
+            Can be "zero", "var" or "cov".  If "zero" all covariance terms are set to zero.  if
+            "var" all covariance terms are set to the product of the variances.  If "cov" the
+            covariance terms are used as is with missing terms set to product of the
+            variances.  Defaults to "zero".
 
 
     Returns:
@@ -322,22 +322,14 @@ def _total_uplift_expected_power_with_standard_error(
 
     # In current version of code, covarariances are either set to 0 or set to
     # product of variances
-    if set_cov_to_zero_or_var == "zero":
-        if use_cov_when_available:
-            raise ValueError(
-                "use_cov_when_available cannot be True when set_cov_to_zero_or_var is 'zero'"
-            )
-        else:
-            df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
-    elif set_cov_to_zero_or_var == "var":
-        if use_cov_when_available:
-            df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols, fill_all=False)
-        else:
-            df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols, fill_all=True)
+    if cov_terms == "zero":
+        df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
+    elif cov_terms == "var":
+        df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols, fill_all=True)
+    elif cov_terms == "cov":
+        df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols, fill_all=False)
     else:
-        raise ValueError(
-            f"set_cov_to_zero_or_var must be 'zero' or 'var', not {set_cov_to_zero_or_var}"
-        )
+        raise ValueError(f"cov_terms must be 'zero', 'var' or 'cov', not {cov_terms}")
 
     # with pl.Config(tbl_cols=-1):
     #     print(df_cov)
@@ -568,8 +560,7 @@ def total_uplift_expected_power(
     N: int = 1,
     percentiles: List[float] = [2.5, 97.5],
     remove_any_null_turbine_bins: bool = False,
-    set_cov_to_zero_or_var: str = "zero",
-    use_cov_when_available: bool = False,
+    cov_terms: str = "zero",
     # variance_only: bool = False,
     # fill_cov_with_var: bool = False,
 ) -> ExpectedPowerAnalysisOutput:
@@ -601,10 +592,11 @@ def total_uplift_expected_power(
             Defaults to [2.5, 97.5].
         remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
             and of the test turbines is null.  Defaults to False.
-        set_cov_to_zero_or_var (str): Set the covariance to zero or product of variances.
-            Can be "zero" or "var". Defaults to "zero".
-        use_cov_when_available (bool): Use the covariance terms when available. If True,
-            set_cov_to_zero_or_var must be 'var'.  Defaults to False.
+        cov_terms (str): Use directly computed covariance terms, or fill with zeros or variances.
+            Can be "zero", "var" or "cov".  If "zero" all covariance terms are set to zero.  if
+            "var" all covariance terms are set to the product of the variances.  If "cov" the
+            covariance terms are used as is with missing terms set to product of the
+            variances.  Defaults to "zero".
 
     Returns:
         ExpectedPowerAnalysisOutput: An object containing the uplift results and
@@ -753,8 +745,7 @@ def total_uplift_expected_power(
             df_freq_pl=df_freq_pl,
             percentiles=percentiles,
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
-            set_cov_to_zero_or_var=set_cov_to_zero_or_var,
-            use_cov_when_available=use_cov_when_available,
+            cov_terms=cov_terms,
         )
 
     # Create the output object
@@ -781,8 +772,7 @@ def total_uplift_expected_power(
         N=N,
         percentiles=percentiles,
         remove_any_null_turbine_bins=remove_any_null_turbine_bins,
-        set_cov_to_zero_or_var=set_cov_to_zero_or_var,
-        use_cov_when_available=use_cov_when_available,
+        cov_terms=cov_terms,
     )
 
     # Return the object

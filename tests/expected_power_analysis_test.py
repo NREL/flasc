@@ -732,8 +732,7 @@ def test_center_uplift_identical():
         wd_min=0.5,
         ws_min=0.5,
         use_standard_error=True,
-        set_cov_to_zero_or_var="var",
-        use_cov_when_available=True,
+        cov_terms="var",
     )
 
     assert epao_single.uplift_results["scada_uplift"] == 1.1
@@ -771,7 +770,7 @@ def test_uncertain_intervals():
         wd_min=0.5,
         ws_min=0.5,
         use_standard_error=True,
-        set_cov_to_zero_or_var="zero",
+        cov_terms="zero",
         remove_any_null_turbine_bins=False,
     )
 
@@ -786,7 +785,7 @@ def test_uncertain_intervals():
         wd_min=0.5,
         ws_min=0.5,
         use_standard_error=True,
-        set_cov_to_zero_or_var="var",
+        cov_terms="var",
         remove_any_null_turbine_bins=False,
     )
 
