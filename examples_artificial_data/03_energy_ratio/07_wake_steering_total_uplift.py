@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from flasc import FlascDataFrame
-from flasc.analysis import total_uplift as tup
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis import total_uplift_power_ratio as tup
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_binned_mean_and_ci
 
@@ -155,12 +155,12 @@ if __name__ == "__main__":
     )
 
     # Calculate the uplift on the non-noisy data
-    er_in = EnergyRatioInput(
+    a_in = AnalysisInput(
         [df_baseline, df_wakesteering], ["baseline", "wake_steering"], num_blocks=1
     )
 
-    total_uplift_result = tup.compute_total_uplift(
-        er_in,
+    total_uplift_result = tup.total_uplift_power_ratio(
+        a_in,
         ref_turbines=[0],
         test_turbines=[2],
         use_predefined_wd=True,
@@ -173,12 +173,12 @@ if __name__ == "__main__":
     uplift_non_noisy = total_uplift_result["uplift"]["energy_uplift_ctr_pc"]
 
     # Calculate the uplift on the noisy data
-    er_in = EnergyRatioInput(
+    a_in = AnalysisInput(
         [df_baseline_noisy, df_wakesteering_noisy], ["baseline", "wake_steering"], num_blocks=1
     )
 
-    total_uplift_result_noisy = tup.compute_total_uplift(
-        er_in,
+    total_uplift_result_noisy = tup.total_uplift_power_ratio(
+        a_in,
         ref_turbines=[0],
         test_turbines=[2],
         use_predefined_wd=True,
@@ -191,21 +191,21 @@ if __name__ == "__main__":
     uplift_noisy = total_uplift_result_noisy["uplift"]["energy_uplift_ctr_pc"]
     print("=======Total Uplift======")
     print(
-        f"The uplift calculated using the compute_total_uplift module "
+        f"The uplift calculated using the total_uplift_power_ratio module "
         f" is {uplift_non_noisy:.3}% in the"
         f" non-noisy data and {uplift_noisy:.3}% in the noisy data"
     )
 
     # Recompute using bootstrapping to understand uncertainty bounds
     # Calculate the uplift on the non-noisy data
-    er_in = EnergyRatioInput(
+    a_in = AnalysisInput(
         [df_baseline, df_wakesteering],
         ["baseline", "wake_steering"],
         num_blocks=df_baseline.shape[0],  # Use N blocks to do non-block boostrapping
     )
 
-    total_uplift_result = tup.compute_total_uplift(
-        er_in,
+    total_uplift_result = tup.total_uplift_power_ratio(
+        a_in,
         ref_turbines=[0],
         test_turbines=[2],
         use_predefined_wd=True,
@@ -220,14 +220,14 @@ if __name__ == "__main__":
     uplift_non_noisy_ub = total_uplift_result["uplift"]["energy_uplift_ub_pc"]
 
     # Calculate the uplift on the noisy data
-    er_in = EnergyRatioInput(
+    a_in = AnalysisInput(
         [df_baseline_noisy, df_wakesteering_noisy],
         ["baseline", "wake_steering"],
         num_blocks=df_baseline.shape[0],  # Use N blocks to do non-block boostrapping
     )
 
-    total_uplift_result_noisy = tup.compute_total_uplift(
-        er_in,
+    total_uplift_result_noisy = tup.total_uplift_power_ratio(
+        a_in,
         ref_turbines=[0],
         test_turbines=[2],
         use_predefined_wd=True,

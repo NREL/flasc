@@ -8,7 +8,7 @@ from floris.flow_visualization import visualize_cut_plane
 from floris.utilities import wrap_360
 
 from flasc.analysis import energy_ratio as er
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 
@@ -69,7 +69,7 @@ def _calculate_energy_ratios(df, test_turbines, aligned_wd, N=1):
     df = dfm.filter_df_by_ws(df, [6, 10])
 
     # Finally, construct the energy ratio input with the dataframe
-    er_in = EnergyRatioInput([df], ["baseline"])
+    a_in = AnalysisInput([df], ["baseline"])
 
     # Now, we calculate the energy ratio for each turbine for the one wind
     # direction and wind speed bin. We save those values to
@@ -78,7 +78,7 @@ def _calculate_energy_ratios(df, test_turbines, aligned_wd, N=1):
     for ti in test_turbines:
         # Get energy ratios
         er_out = er.compute_energy_ratio(
-            er_in,
+            a_in,
             test_turbines=[ti],
             use_predefined_ref=True,
             use_predefined_wd=True,
