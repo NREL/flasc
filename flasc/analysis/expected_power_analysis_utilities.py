@@ -232,65 +232,6 @@ def _compute_covariance(
     return df_cov
 
 
-def _null_and_sync_covariance(
-    df_cov: pl.DataFrame,
-    test_cols: List[str],
-    uplift_pairs: List[List[str]],
-    bin_cols_without_df_name: List[str] = ["wd_bin", "ws_bin"],
-) -> pl.DataFrame:
-    """Apply null values to the covariance matrix and synchronize across uplift pairs.
-
-    Args:
-        df_cov (pl.DataFrame): A polars dataframe with the covariance matrix
-        test_cols (List[str]): A list of column names to calculate the covariance of
-        uplift_pairs (List[List[str]]): A list of the df_name values to copy the nans from
-        bin_cols_without_df_name (List[str]): A list of column names to bin the dataframes by.
-            Defaults to ["wd_bin", "ws_bin"].
-
-    Returns:
-        pl.DataFrame: A polars dataframe with the null values applied and synchronized across
-            uplift pairs.
-    """
-    # Get the names of all the covariance and num_points columns
-    cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
-    n_cols = [f"count_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
-
-    # Convert all NaN to None
-    df_cov = df_cov.fill_nan(None)
-
-    # Loop over cov_cols and n_cols
-    for cov_col, n_col in zip(cov_cols, n_cols):
-        # Wherever n_col 0, 1  set the corresponding cov_col to NaN
-        df_cov = df_cov.with_columns(
-            pl.when(pl.col(n_col) < 2)  # | pl.col(n_col).is_null())
-            .then(None)
-            .otherwise(pl.col(cov_col))
-            .alias(cov_col)
-        )
-
-        # Wherever n_col is null, set cov_col to null
-        df_cov = df_cov.with_columns(
-            pl.when(pl.col(n_col).is_null()).then(None).otherwise(pl.col(cov_col)).alias(cov_col)
-        )
-
-        # Wherever n_col is 0, set to null
-        df_cov = df_cov.with_columns(
-            pl.when(pl.col(n_col) == 0).then(None).otherwise(pl.col(n_col)).alias(n_col)
-        )
-
-    # Now sync across df_names
-    sync_cols = cov_cols + n_cols
-
-    df_cov = _synchronize_nulls(
-        df_bin=df_cov,
-        sync_cols=sync_cols,
-        uplift_pairs=uplift_pairs,
-        bin_cols_without_df_name=bin_cols_without_df_name,
-    )
-
-    return df_cov
-
-
 def _fill_cov_with_var(
     df_cov: pl.DataFrame,
     test_cols: List[str],

@@ -16,7 +16,6 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _bin_and_group_dataframe_expected_power,
     _compute_covariance,
     _fill_cov_with_var,
-    _null_and_sync_covariance,
     _set_cov_to_zero,
     _synchronize_nulls,
     _synchronize_var_nulls_back_to_mean,
@@ -309,19 +308,16 @@ def _total_uplift_expected_power_with_standard_error(
         ws_max=ws_max,
     )
 
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_)
-
     # Compute the covariance frame
     df_cov = _compute_covariance(
         df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_cov)
-
-    # In current version of code, covarariances are either set to 0 or set to
-    # product of variances
+    # There are three options for the covariance terms used to compute uncertainty.
+    # 1. Zero out all covariance terms ("zero"), leave only variance
+    # 2. Fill all covariance terms with the product of the variances ("var")
+    # 3. Use the covariance terms as is, with missing terms filled with
+    #    the product of the variances ("cov")
     if cov_terms == "zero":
         df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
     elif cov_terms == "var":
@@ -331,28 +327,6 @@ def _total_uplift_expected_power_with_standard_error(
     else:
         raise ValueError(f"cov_terms must be 'zero', 'var' or 'cov', not {cov_terms}")
 
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_cov)
-
-    # # If filling missing covariance terms, do it now
-    # if fill_cov_with_var:
-    #     df_cov = _fill_cov_with_var(df_cov, test_cols=test_cols)
-
-    # # If only using the variance, zero out the covariance terms
-    # if variance_only:
-    #     df_cov = _set_cov_to_zero(df_cov, test_cols=test_cols)
-
-    # Apply Null values to covariance and sync across uplift pairs
-    df_cov = _null_and_sync_covariance(
-        df_cov=df_cov,
-        test_cols=test_cols,
-        uplift_pairs=uplift_pairs,
-        bin_cols_without_df_name=bin_cols_without_df_name,
-    )
-
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_cov)
-
     # Bin and group the dataframe
     df_bin = _bin_and_group_dataframe_expected_power(
         df_=df_,
@@ -360,23 +334,21 @@ def _total_uplift_expected_power_with_standard_error(
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
-
     # Join the covariance dataframe to df_bin
     df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
-
-    # DROPPING THIS AS REDUNDANT TO COPYING BACK NULL VARIANCE TO MEAN
-    # # Synchronize any null values in the covariance back to df_bin
-    # df_bin = _synchronize_cov_nulls_back_to_mean(df_bin=df_bin, test_cols=test_cols)
 
     # Set to null any mean values associated with null variance by row/turbine
     df_bin = _synchronize_var_nulls_back_to_mean(df_bin=df_bin, test_cols=test_cols)
 
-    # Synchronize the null values in the mean columns across uplift pairs
+    # Get the names of all the mean, covariance and num_points columns
+    mean_cols = [f"{col}_mean" for col in test_cols]
+    cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
+    n_cols = [f"count_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
+
+    # Synchronize the null values in the mean and all the cov columns across the pairs
     df_bin = _synchronize_nulls(
         df_bin=df_bin,
-        sync_cols=[f"{col}_mean" for col in test_cols],
+        sync_cols=mean_cols + cov_cols + n_cols,
         uplift_pairs=uplift_pairs,
         bin_cols_without_df_name=bin_cols_without_df_name,
     )
@@ -392,19 +364,6 @@ def _total_uplift_expected_power_with_standard_error(
         pl.any_horizontal([pl.col(f"{c}_mean").is_not_null() for c in test_cols])
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_bin)
-
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_bin)
-
-    # Get the names of all the covariance and num_points columns
-    cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
-    n_cols = [f"count_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
-
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_bin)
-
     # Compute the farm power
     df_bin = df_bin.with_columns(pow_farm=pl.sum_horizontal([f"{c}_mean" for c in test_cols]))
 
@@ -416,17 +375,6 @@ def _total_uplift_expected_power_with_standard_error(
         )
     )
 
-    # # If any of the cov_cols are null, set pow_farm_var to null
-    # df_bin = df_bin.with_columns(
-    #     pl.when(pl.all_horizontal([pl.col(c).is_not_null() for c in cov_cols]))
-    #     .then(pl.col("pow_farm_var"))
-    #     .otherwise(None)
-    #     .alias("pow_farm_var")
-    # )
-
-    # with pl.Config(tbl_cols=-1):
-    #     print(df_bin)
-
     # Determine the weighting of the ws/wd bins
     df_bin, df_freq_pl = add_bin_weights(df_bin, df_freq_pl, bin_cols_without_df_name, weight_by)
 
@@ -436,8 +384,6 @@ def _total_uplift_expected_power_with_standard_error(
 
     # Add the weighted farm power column
     df_bin = df_bin.with_columns(weighted_farm_power=pl.col("pow_farm") * pl.col("weight"))
-    # .with_columns(weighted_power=pl.col("pow_farm") * pl.col("weight"),
-    # weighted_power_var=pl.col("pow_farm_var") * pl.col("weight")**2)
 
     # Now compute uplifts
     uplift_results = {}
