@@ -177,15 +177,6 @@ def _get_num_points_pair(
 
         df_n = df_n.join(df_n_sub, on=bin_cols_with_df_name, how="left")
 
-    # Set all zero values to null for the count columns to avoid later divide by zeros
-    for c1, c2 in col_pairs:
-        df_n = df_n.with_columns(
-            pl.when(pl.col(f"count_{c1}_{c2}") == 0)
-            .then(None)
-            .otherwise(pl.col(f"count_{c1}_{c2}"))
-            .alias(f"count_{c1}_{c2}")
-        )
-
     # Sort by bin_cols_with_df_name
     df_n = df_n.sort(bin_cols_with_df_name)
 
@@ -295,18 +286,13 @@ def _fill_cov_with_var(
                 .alias(n_col)
             )
 
-            # For any rows where n_col is < 2 set n_col to null
-            df_cov = df_cov.with_columns(
-                pl.when(pl.col(n_col) < 2).then(None).otherwise(pl.col(n_col)).alias(n_col)
-            )
-
-            # Wherever n_col is null, set cov_col to null
-            df_cov = df_cov.with_columns(
-                pl.when(pl.col(n_col).is_null())
-                .then(None)
-                .otherwise(pl.col(cov_col))
-                .alias(cov_col)
-            )
+            # # Wherever n_col is null, set cov_col to null
+            # df_cov = df_cov.with_columns(
+            #     pl.when(pl.col(n_col).is_null())
+            #     .then(None)
+            #     .otherwise(pl.col(cov_col))
+            #     .alias(cov_col)
+            # )
 
     # Remove the null_map column if exists
     if "null_map" in df_cov.columns:
@@ -385,46 +371,3 @@ def _synchronize_var_nulls_back_to_mean(
         )
 
     return df_bin
-
-
-# REMOVING THIS FUNCTION AS TOO STRICT
-# def _synchronize_cov_nulls_back_to_mean(
-#     df_bin: pl.DataFrame,
-#     test_cols: List[str],
-# ) -> pl.DataFrame:
-#     """For each row, for any turbine with a null var or cov, null mean power.
-
-#     For each row, if there are any turbines in df_cov with undefined variances or covariances
-#       (because count < 2), then the mean power for those turbines would get set to Null as well.
-
-#     Args:
-#         df_bin (pl.DataFrame): A polars dataframe with the mean and variance of the test
-#             columns grouped by bin columns.
-#         test_cols (List[str]): A list of column names to calculate the covariance of
-
-#     Returns:
-#         pl.DataFrame: Update df_bin dataframe
-#     """
-#     n_test_cols = len(test_cols)
-#     all_cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
-
-#     # Loop over all combinations of test columns for the mean column
-#     for t1_idx in range(n_test_cols):
-#         t1 = test_cols[t1_idx]
-#         t1_mean_col = f"{t1}_mean"
-
-#         # Get a list of cov_cols that include the present turbine
-#         cov_cols = [c for c in all_cov_cols if t1 in c]
-
-#         # Get a mask for the rows where any of the cov_cols are null
-#         # using the horizontal or operator
-#         mask = df_bin.select(
-#             pl.any_horizontal([pl.col(c).is_null() for c in cov_cols]).alias("mask")
-#         )
-
-#         # Set the mean power to null for the rows where the mask is true
-#         df_bin = df_bin.with_columns(
-#             pl.when(mask["mask"]).then(None).otherwise(pl.col(t1_mean_col)).alias(t1_mean_col)
-#         )
-
-#     return df_bin

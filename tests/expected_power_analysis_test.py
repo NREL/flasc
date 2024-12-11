@@ -530,22 +530,26 @@ def test_fill_cov_with_var_fill_all():
             "df_name": ["baseline"] * 2,
             "cov_pow_000_pow_000": [4, 4],
             "cov_pow_000_pow_001": [
-                None,
+                4,
                 6,
-            ],  # Note filled values (None because count goes below 2)
+            ],  # Note filled values
             "cov_pow_001_pow_000": [
-                None,
+                4,
                 6,
             ],  # Note filled values (None because count goes below 2)
             "cov_pow_001_pow_001": [4, 9],
             "count_pow_000_pow_000": [1, 2],
-            "count_pow_000_pow_001": [None, 2],  # Note values updated here to minimum
-            "count_pow_001_pow_000": [None, 2],  # Note values updated here to minimum
+            "count_pow_000_pow_001": [1, 2],  # Note values updated here to minimum
+            "count_pow_001_pow_000": [1, 2],  # Note values updated here to minimum
             "count_pow_001_pow_001": [7, 8],
         }
     )
 
     filled_df = _fill_cov_with_var(test_df, test_cols=["pow_000", "pow_001"], fill_all=True)
+
+    with pl.Config(tbl_cols=-1):
+        print(test_df)
+        print(filled_df)
 
     assert_frame_equal(filled_df, expected_df, check_row_order=False, check_dtypes=False)
 
