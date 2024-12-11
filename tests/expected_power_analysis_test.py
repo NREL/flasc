@@ -1,3 +1,5 @@
+from itertools import product
+
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -16,7 +18,6 @@ from flasc.analysis.expected_power_analysis_utilities import (
     _compute_covariance,
     _fill_cov_with_var,
     _get_num_points_pair,
-    _null_and_sync_covariance,
     _set_cov_to_zero,
     _synchronize_nulls,
     # _synchronize_cov_nulls_back_to_mean,
@@ -237,6 +238,61 @@ def test_synchronize_nulls():
     )
 
 
+def test_synchronize_nulls_with_cov():
+    a_in = load_data()
+
+    df_ = _add_wd_ws_bins(
+        df_=a_in.get_df(),
+        wd_cols=["wd"],
+        ws_cols=["ws"],
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+    )
+
+    # Compute the covariance frame
+    test_cols = ["pow_000", "pow_001"]
+    bin_cols_with_df_name = ["wd_bin", "ws_bin", "df_name"]
+    df_cov = _compute_covariance(
+        df_, test_cols=test_cols, bin_cols_with_df_name=bin_cols_with_df_name
+    )
+
+    df_bin = _bin_and_group_dataframe_expected_power(
+        df_=df_,
+        test_cols=["pow_000", "pow_001"],
+    )
+
+    # Join the covariance dataframe to df_bin
+    df_bin = df_bin.join(df_cov, on=bin_cols_with_df_name, how="left")
+
+    # Sort df_ by wd_bin and ws_bin and df_name
+    df_bin = df_bin.sort(["wd_bin", "ws_bin", "df_name"])
+
+    # Get the names of all the mean, covariance and num_points columns
+    mean_cols = [f"{col}_mean" for col in test_cols]
+    cov_cols = [f"cov_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
+    n_cols = [f"count_{t1}_{t2}" for t1, t2 in product(test_cols, test_cols)]
+
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
+
+    # Synchronize the null values
+    df_bin = _synchronize_nulls(
+        df_bin,
+        sync_cols=mean_cols + cov_cols + n_cols,
+        uplift_pairs=[["baseline", "wake_steering"]],
+    )
+
+    with pl.Config(tbl_cols=-1):
+        print(df_bin)
+
+    # Assert the nan is copied over
+    np.testing.assert_array_equal(
+        df_bin["cov_pow_000_pow_000"].to_numpy(),
+        np.array([50.0, 0.0, np.nan, np.nan, np.nan, np.nan]),
+    )
+
+
 def test_total_uplift_expected_power_single():
     a_in = load_data()
 
@@ -311,7 +367,7 @@ def test_total_uplift_expected_power_with_bootstrapping():
     )
 
 
-def test__get_num_points_pair():
+def test_get_num_points_pair():
     test_df = pl.DataFrame(
         {
             "wd_bin": [0, 0, 0, 1, 1, 1],
@@ -385,32 +441,6 @@ def test_compute_covariance():
     # with pl.Config(tbl_cols=-1):
     #     print(test_df)
     #     print(df_cov)
-
-
-def test_null_and_sync_covariance():
-    df_cov = pl.DataFrame(
-        {
-            "wd_bin": [0, 0, 0, 0],
-            "ws_bin": [0, 1, 0, 1],
-            "df_name": ["baseline", "baseline", "wake_steering", "wake_steering"],
-            "cov_pow_000_pow_000": [1, 2, 3, 4],
-            "cov_pow_000_pow_001": [5, 6, 7, 8],
-            "cov_pow_001_pow_000": [9, 10, 11, 12],
-            "cov_pow_001_pow_001": [13, 14, 15, 16],
-            "count_pow_000_pow_000": [0, 2, 2, 2],
-            "count_pow_000_pow_001": [2, 2, 2, 2],
-            "count_pow_001_pow_000": [2, 2, 2, 2],
-            "count_pow_001_pow_001": [2, 2, 2, None],
-        }
-    )
-    df_cov = _null_and_sync_covariance(
-        df_cov=df_cov,
-        test_cols=["pow_000", "pow_001"],
-        uplift_pairs=[["baseline", "wake_steering"]],
-    )
-
-    np.testing.assert_allclose(df_cov["cov_pow_000_pow_000"].to_numpy(), [np.nan, 2, np.nan, 4])
-    np.testing.assert_allclose(df_cov["cov_pow_001_pow_001"].to_numpy(), [13, np.nan, 15, np.nan])
 
 
 def test_cov_against_var():
@@ -559,7 +589,7 @@ def test_set_cov_to_zero():
     assert_frame_equal(zero_cov_df, expected_df, check_row_order=False, check_dtypes=False)
 
 
-def test__synchronize_var_nulls_back_to_mean():
+def test_synchronize_var_nulls_back_to_mean():
     test_df_bin = pl.DataFrame(
         {
             "wd_bin": [0, 0, 1, 1],
@@ -604,53 +634,6 @@ def test__synchronize_var_nulls_back_to_mean():
     )
 
     assert_frame_equal(df_res, expected_df_bin, check_row_order=False, check_dtypes=False)
-
-
-# def test_synchronize_cov_nulls_back_to_mean():
-#     test_df_bin = pl.DataFrame(
-#         {
-#             "wd_bin": [0, 0, 1, 1],
-#             "ws_bin": [0, 1, 0, 1],
-#             "df_name": ["baseline", "baseline", "baseline", "baseline"],
-#             "pow_000_mean": [1, 2, 3, 4],
-#             "pow_001_mean": [5, 6, 7, 8],
-#         }
-#     )
-
-#     test_df_cov = pl.DataFrame(
-#         {
-#             "wd_bin": [0, 0, 1, 1],
-#             "ws_bin": [0, 1, 0, 1],
-#             "df_name": ["baseline", "baseline", "baseline", "baseline"],
-#             "cov_pow_000_pow_000": [1, 2, 3, None],
-#             "cov_pow_000_pow_001": [5, 6, None, 8],
-#             "cov_pow_001_pow_000": [9, 10, 11, 12],
-#             "cov_pow_001_pow_001": [13, 14, 15, 16],
-#         }
-#     )
-
-#     expected_df_bin = pl.DataFrame(
-#         {
-#             "wd_bin": [0, 0, 1, 1],
-#             "ws_bin": [0, 1, 0, 1],
-#             "df_name": ["baseline", "baseline", "baseline", "baseline"],
-#             "pow_000_mean": [1, 2, None, None],
-#             "pow_001_mean": [5, 6, None, 8],
-#         }
-#     )
-
-#     # Join the covariance dataframe to df_bin
-#     test_df_bin = test_df_bin.join(test_df_cov, on=["wd_bin", "ws_bin", "df_name"], how="left")
-#     expected_df_bin = expected_df_bin.join(
-#         test_df_cov, on=["wd_bin", "ws_bin", "df_name"], how="left"
-#     )
-
-#     df_res = _synchronize_cov_nulls_back_to_mean(
-#         df_bin=test_df_bin,
-#         test_cols=["pow_000", "pow_001"],
-#     )
-
-#     assert_frame_equal(df_res, expected_df_bin, check_row_order=False, check_dtypes=False)
 
 
 def test_total_uplift_expected_power_with_standard_error():
