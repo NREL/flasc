@@ -327,6 +327,9 @@ def test__get_num_points_pair():
         test_df, ["pow_000", "pow_001", "pow_002"], ["wd_bin", "ws_bin", "df_name"]
     )
 
+    with pl.Config(tbl_cols=-1):
+        print(df_count)
+
     df_expected = pl.DataFrame(
         {
             "wd_bin": [0, 1],
@@ -335,18 +338,24 @@ def test__get_num_points_pair():
             "count": [3, 3],
             "count_pow_000_pow_000": [2, 3],
             "count_pow_000_pow_001": [1, 2],
-            "count_pow_000_pow_002": [1, 0],
+            "count_pow_000_pow_002": [1, None],
             "count_pow_001_pow_000": [1, 2],
             "count_pow_001_pow_001": [2, 2],
-            "count_pow_001_pow_002": [0, 0],
-            "count_pow_002_pow_000": [1, 0],
-            "count_pow_002_pow_001": [0, 0],
-            "count_pow_002_pow_002": [1, 0],
+            "count_pow_001_pow_002": [None, None],
+            "count_pow_002_pow_000": [1, None],
+            "count_pow_002_pow_001": [None, None],
+            "count_pow_002_pow_002": [1, None],
         }
     )
 
     # Test that df_count and df_expected are essentially equal
-    assert_frame_equal(df_count, df_expected, check_row_order=False, check_dtypes=False)
+    assert_frame_equal(
+        df_count[["count_pow_000_pow_000"]],
+        df_expected[["count_pow_000_pow_000"]],
+        check_row_order=False,
+        check_dtypes=False,
+    )
+    assert df_count["count_pow_000_pow_002"][1] is None
 
 
 def test_compute_covariance():

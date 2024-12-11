@@ -177,8 +177,14 @@ def _get_num_points_pair(
 
         df_n = df_n.join(df_n_sub, on=bin_cols_with_df_name, how="left")
 
-    # Fill nulls to 0
-    df_n = df_n.fill_null(0)
+    # Set all zero values to null for the count columns to avoid later divide by zeros
+    for c1, c2 in col_pairs:
+        df_n = df_n.with_columns(
+            pl.when(pl.col(f"count_{c1}_{c2}") == 0)
+            .then(None)
+            .otherwise(pl.col(f"count_{c1}_{c2}"))
+            .alias(f"count_{c1}_{c2}")
+        )
 
     # Sort by bin_cols_with_df_name
     df_n = df_n.sort(bin_cols_with_df_name)
