@@ -413,8 +413,8 @@ def _total_uplift_expected_power_with_standard_error(
         # Remove the weight_pair columns
         df_sub = df_sub.drop([f"weight_{uplift_pair[0]}", f"weight_{uplift_pair[1]}"])
 
-        with pl.Config(tbl_cols=-1):
-            print(df_sub)
+        # with pl.Config(tbl_cols=-1):
+        #     print(df_sub)
 
         # Compute the expected power ratio per bin
         df_sub = df_sub.with_columns(
@@ -459,8 +459,8 @@ def _total_uplift_expected_power_with_standard_error(
             )
         )
 
-        with pl.Config(tbl_cols=-1):
-            print(df_sub)
+        # with pl.Config(tbl_cols=-1):
+        #     print(df_sub)
 
         # The total uplift is the sum of the weighted expected power ratio and the weighted
         #  variance of the expected power ratio
