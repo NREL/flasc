@@ -166,12 +166,6 @@ def test_bin_and_group_dataframe_expected_power():
         df_["pow_001_mean"].to_numpy(), np.array([15.0, 25.0, 15.0, np.nan, 10.0, 10.0])
     )
 
-    with pl.Config(tbl_cols=-1):
-        print(df_)
-
-    np.testing.assert_array_equal(
-        df_["pow_000_var"].to_numpy(), np.array([50.0, 0.0, np.nan, 0.0, np.nan, 0.0])
-    )
     np.testing.assert_array_equal(df_["pow_000_count"].to_numpy(), np.array([2, 2, 1, 2, 1, 2]))
     np.testing.assert_array_equal(df_["pow_001_count"].to_numpy(), np.array([2, 2, 2, 0, 1, 2]))
 
@@ -217,8 +211,6 @@ def test_synchronize_nulls():
             "df_name": ["hypothetical"],
             "pow_000_mean": [np.nan],
             "pow_001_mean": [np.nan],
-            "pow_000_var": [np.nan],
-            "pow_001_var": [np.nan],
             "pow_000_count": [1],
             "pow_001_count": [1],
             "count": [1],
@@ -429,14 +421,10 @@ def test_cov_against_var():
         bin_cols_with_df_name=["wd_bin", "ws_bin", "df_name"],
     )
 
-    df_bin = _bin_and_group_dataframe_expected_power(
-        df_=test_df,
-        test_cols=["pow_000"],
-    )
+    # Manually compute the variance of the pow_000 column
+    man_var = test_df["pow_000"].var()
 
-    np.testing.assert_almost_equal(
-        df_cov["cov_pow_000_pow_000"].to_numpy(), df_bin["pow_000_var"].to_numpy()
-    )
+    np.testing.assert_almost_equal(df_cov["cov_pow_000_pow_000"].to_numpy(), man_var)
 
 
 def test_fill_cov_with_var_dont_fill_all():

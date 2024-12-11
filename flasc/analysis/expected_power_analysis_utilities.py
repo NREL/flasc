@@ -75,7 +75,6 @@ def _bin_and_group_dataframe_expected_power(
         # # Compute the mean and standard deviation of each of test_cols
         .agg(
             [pl.mean(c).alias(f"{c}_mean") for c in test_cols]
-            + [pl.var(c).alias(f"{c}_var") for c in test_cols]
             + [pl.count(c).alias(f"{c}_count") for c in test_cols]
             + [pl.len().alias("count")]
         )
