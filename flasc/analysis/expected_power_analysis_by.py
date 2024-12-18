@@ -135,30 +135,35 @@ class _total_uplift_expected_power_by_:
             a_in_sub = AnalysisInput(df_list_sub, df_names, num_blocks)
 
             # Run the analysis
-            epao = total_uplift_expected_power(
-                a_in=a_in_sub,
-                uplift_pairs=uplift_pairs,
-                uplift_names=uplift_names,
-                test_turbines=test_turbines,
-                wd_turbines=wd_turbines,
-                ws_turbines=ws_turbines,
-                use_predefined_wd=use_predefined_wd,
-                use_predefined_ws=use_predefined_ws,
-                wd_step=wd_step,
-                wd_min=wd_min,
-                wd_max=wd_max,
-                ws_step=ws_step,
-                ws_min=ws_min,
-                ws_max=ws_max,
-                bin_cols_in=bin_cols_in,
-                weight_by=weight_by,
-                df_freq=df_freq,
-                use_standard_error=use_standard_error,
-                N=N,
-                percentiles=percentiles,
-                remove_any_null_turbine_bins=remove_any_null_turbine_bins,
-                cov_terms=cov_terms,
-            )
+            try:
+                epao = total_uplift_expected_power(
+                    a_in=a_in_sub,
+                    uplift_pairs=uplift_pairs,
+                    uplift_names=uplift_names,
+                    test_turbines=test_turbines,
+                    wd_turbines=wd_turbines,
+                    ws_turbines=ws_turbines,
+                    use_predefined_wd=use_predefined_wd,
+                    use_predefined_ws=use_predefined_ws,
+                    wd_step=wd_step,
+                    wd_min=wd_min,
+                    wd_max=wd_max,
+                    ws_step=ws_step,
+                    ws_min=ws_min,
+                    ws_max=ws_max,
+                    bin_cols_in=bin_cols_in,
+                    weight_by=weight_by,
+                    df_freq=df_freq,
+                    use_standard_error=use_standard_error,
+                    N=N,
+                    percentiles=percentiles,
+                    remove_any_null_turbine_bins=remove_any_null_turbine_bins,
+                    cov_terms=cov_terms,
+                )
+
+            # If a value error is raised simply continue
+            except ValueError:
+                continue
 
             # Loop over the uplift pairs
             for up_idx, uplift_name in enumerate(uplift_names):

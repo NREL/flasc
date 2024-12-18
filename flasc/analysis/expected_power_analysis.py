@@ -375,6 +375,10 @@ def _total_uplift_expected_power_with_standard_error(
         )
     )
 
+    # Check if df_bin has any rows
+    if df_bin.shape[0] == 0:
+        raise ValueError("No rows in df_bin after filtering")
+
     # Determine the weighting of the ws/wd bins
     df_bin, df_freq_pl = add_bin_weights(df_bin, df_freq_pl, bin_cols_without_df_name, weight_by)
 
