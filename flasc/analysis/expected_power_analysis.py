@@ -477,6 +477,10 @@ def _total_uplift_expected_power_with_standard_error(
             result_dict["energy_uplift_var"]
         )
 
+        result_dict["energy_uplift_ctr_pc"] = (result_dict["energy_uplift_ctr"] - 1) * 100
+        result_dict["energy_uplift_lb_pc"] = (result_dict["energy_uplift_lb"] - 1) * 100
+        result_dict["energy_uplift_ub_pc"] = (result_dict["energy_uplift_ub"] - 1) * 100
+
         result_dict["df"] = df_sub
 
         uplift_results[uplift_name] = result_dict
