@@ -102,10 +102,8 @@ class FlascDataFrame(DataFrame):
         """Return the number of turbines in the dataset."""
         self.check_flasc_format()
 
-        nt = 0
-        while ("pow_%03d" % nt) in self.columns:
-            nt += 1
-        return nt
+        # Count how many columns in df_columns are of the form 'pow_###'
+        return sum(len(c) == 7 and c[:4] == "pow_" and c[4:].isdigit() for c in self.columns)
 
     def check_flasc_format(self):
         """Raise an error if the data is not in FLASC format."""
