@@ -119,9 +119,9 @@ class _total_uplift_expected_power_by_:
         w_bins = df_[f"{wd_or_ws}_bin"].unique().sort().to_numpy()
 
         # Initialize the results arrays
-        energy_uplift_ctr = np.zeros((len(uplift_pairs), len(w_bins)))
-        energy_uplift_lb = np.zeros((len(uplift_pairs), len(w_bins)))
-        energy_uplift_ub = np.zeros((len(uplift_pairs), len(w_bins)))
+        energy_uplift_ctr_pc = np.zeros((len(uplift_pairs), len(w_bins)))
+        energy_uplift_lb_pc = np.zeros((len(uplift_pairs), len(w_bins)))
+        energy_uplift_ub_pc = np.zeros((len(uplift_pairs), len(w_bins)))
 
         # Loop over the wind (dir/speed) bins
         for w_idx, w_bin in enumerate(w_bins):
@@ -157,14 +157,14 @@ class _total_uplift_expected_power_by_:
 
             # Loop over the uplift pairs
             for up_idx, uplift_name in enumerate(uplift_names):
-                energy_uplift_ctr[up_idx, w_idx] = epao.uplift_results[uplift_name][
-                    "energy_uplift_ctr"
+                energy_uplift_ctr_pc[up_idx, w_idx] = epao.uplift_results[uplift_name][
+                    "energy_uplift_ctr_pc"
                 ]
-                energy_uplift_lb[up_idx, w_idx] = epao.uplift_results[uplift_name][
-                    "energy_uplift_lb"
+                energy_uplift_lb_pc[up_idx, w_idx] = epao.uplift_results[uplift_name][
+                    "energy_uplift_lb_pc"
                 ]
-                energy_uplift_ub[up_idx, w_idx] = epao.uplift_results[uplift_name][
-                    "energy_uplift_ub"
+                energy_uplift_ub_pc[up_idx, w_idx] = epao.uplift_results[uplift_name][
+                    "energy_uplift_ub_pc"
                 ]
 
         # Store the inputs
@@ -194,9 +194,9 @@ class _total_uplift_expected_power_by_:
 
         # Store the results
         self.w_bins = w_bins
-        self.energy_uplift_ctr = energy_uplift_ctr
-        self.energy_uplift_lb = energy_uplift_lb
-        self.energy_uplift_ub = energy_uplift_ub
+        self.energy_uplift_ctr_pc = energy_uplift_ctr_pc
+        self.energy_uplift_lb_pc = energy_uplift_lb_pc
+        self.energy_uplift_ub_pc = energy_uplift_ub_pc
 
     def plot(self, ax=None, color_dict={}) -> Tuple[plt.Figure, plt.Axes]:
         """Plot the results.
@@ -230,14 +230,14 @@ class _total_uplift_expected_power_by_:
             # Plot the results
             ax.plot(
                 self.w_bins,
-                100 * (self.energy_uplift_ctr[up_idx] - 1.0),
+                self.energy_uplift_ctr_pc[up_idx],
                 label=uplift_name,
                 color=color_dict[uplift_name],
             )
             ax.fill_between(
                 self.w_bins,
-                100 * (self.energy_uplift_lb[up_idx] - 1.0),
-                100 * (self.energy_uplift_ub[up_idx] - 1.0),
+                self.energy_uplift_lb_pc[up_idx],
+                self.energy_uplift_ub_pc[up_idx],
                 color=color_dict[uplift_name],
                 alpha=0.2,
             )
@@ -245,6 +245,7 @@ class _total_uplift_expected_power_by_:
         ax.grid(True)
         # ax.set_xlabel(f"{self.wd_or_ws}_bin")
         ax.set_ylabel("Energy Uplift (%)")
+        ax.axhline(0, color="black", linestyle="--")
         ax.legend()
         return fig, ax
 
