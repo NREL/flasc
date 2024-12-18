@@ -61,3 +61,14 @@ class ExpectedPowerAnalysisOutput:
         self.percentiles = percentiles
         self.remove_any_null_turbine_bins = remove_any_null_turbine_bins
         self.cov_terms = cov_terms
+
+    def _return_uplift_string(self):
+        return (
+            f"{self.uplift_results['scada_uplift']['energy_uplift_ctr_pc']:0.2f}%, ("
+            f"{self.uplift_results['scada_uplift']['energy_uplift_lb_pc']:0.2f}% - "
+            f"{self.uplift_results['scada_uplift']['energy_uplift_ub_pc']:0.2f}%)"
+        )
+
+    def print_uplift(self):
+        """Print the uplift results."""
+        print(self._return_uplift_string())
