@@ -230,14 +230,14 @@ class _total_uplift_expected_power_by_:
             # Plot the results
             ax.plot(
                 self.w_bins,
-                self.energy_uplift_ctr[up_idx],
+                100 * (self.energy_uplift_ctr[up_idx] - 1.0),
                 label=uplift_name,
                 color=color_dict[uplift_name],
             )
             ax.fill_between(
                 self.w_bins,
-                self.energy_uplift_lb[up_idx],
-                self.energy_uplift_ub[up_idx],
+                100 * (self.energy_uplift_lb[up_idx] - 1.0),
+                100 * (self.energy_uplift_ub[up_idx] - 1.0),
                 color=color_dict[uplift_name],
                 alpha=0.2,
             )
