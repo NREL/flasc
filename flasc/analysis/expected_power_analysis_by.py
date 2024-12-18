@@ -119,14 +119,19 @@ class _total_uplift_expected_power_by_:
         w_bins = df_[f"{wd_or_ws}_bin"].unique().sort().to_numpy()
 
         # Initialize the results arrays
-        energy_uplift_ctr_pc = np.zeros((len(uplift_pairs), len(w_bins)))
-        energy_uplift_lb_pc = np.zeros((len(uplift_pairs), len(w_bins)))
-        energy_uplift_ub_pc = np.zeros((len(uplift_pairs), len(w_bins)))
+        energy_uplift_ctr_pc = np.zeros((len(uplift_pairs), len(w_bins))) * np.nan
+        energy_uplift_lb_pc = np.zeros((len(uplift_pairs), len(w_bins))) * np.nan
+        energy_uplift_ub_pc = np.zeros((len(uplift_pairs), len(w_bins))) * np.nan
 
         # Loop over the wind (dir/speed) bins
         for w_idx, w_bin in enumerate(w_bins):
             # Make a subset a_in
             df_list_sub = [d[d[f"{wd_or_ws}_bin"] == w_bin] for d in df_list]
+
+            # If the subset is empty, or has less than num_blocks rows, skip
+            if any([len(d) < num_blocks for d in df_list_sub]):
+                continue
+
             a_in_sub = AnalysisInput(df_list_sub, df_names, num_blocks)
 
             # Run the analysis
