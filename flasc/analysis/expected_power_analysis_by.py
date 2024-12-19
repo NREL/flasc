@@ -110,10 +110,16 @@ class _total_uplift_expected_power_by_:
             ws_max=ws_max,
         )
 
+        # Save the schema to be sure exact datatypes reused when polars dataframe reconstructed
+        schema = df_.schema.copy()
+
+        # Make a single pandas version
+        df_pandas = df_.to_pandas()
+
         # Convert df_ back into a list of pandas dataframes for subsetting
         df_list = []
         for df_name in df_names:
-            df_list.append(df_.filter(df_["df_name"] == df_name).to_pandas())
+            df_list.append(df_pandas[df_pandas["df_name"] == df_name])
 
         # Get a sorted list of unique values of wd_bin within df_
         w_bins = df_[f"{wd_or_ws}_bin"].unique().sort().to_numpy()
@@ -132,7 +138,7 @@ class _total_uplift_expected_power_by_:
             if any([len(d) < num_blocks for d in df_list_sub]):
                 continue
 
-            a_in_sub = AnalysisInput(df_list_sub, df_names, num_blocks)
+            a_in_sub = AnalysisInput(df_list_sub, df_names, num_blocks, schema_overrides=schema)
 
             # Run the analysis
             try:
