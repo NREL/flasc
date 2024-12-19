@@ -5,6 +5,7 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 from flasc.analysis.analysis_input import AnalysisInput
 from flasc.analysis.expected_power_analysis import total_uplift_expected_power
@@ -115,6 +116,9 @@ class _total_uplift_expected_power_by_:
 
         # Make a single pandas version
         df_pandas = df_.to_pandas()
+
+        # Save this full version
+        self.df_pandas = df_pandas
 
         # Convert df_ back into a list of pandas dataframes for subsetting
         df_list = []
@@ -259,11 +263,85 @@ class _total_uplift_expected_power_by_:
             )
 
         ax.grid(True)
-        # ax.set_xlabel(f"{self.wd_or_ws}_bin")
+
+        if self.wd_or_ws == "wd":
+            ax.set_xlabel("Wind Direction (Deg)")
+        else:
+            ax.set_xlabel("Wind Speed (m/s)")
+
         ax.set_ylabel("Energy Uplift (%)")
         ax.axhline(0, color="black", linestyle="--")
         ax.legend()
         return fig, ax
+
+    def plot_with_distributions(
+        self, axarr=None, color_dict={}
+    ) -> Tuple[plt.Figure, List[plt.Axes]]:
+        """Plot the results with histograms and distributions.
+
+        Args:
+            axarr (List[plt.Axes]): An existing list of matplotlib Axes objects to plot on.
+                Defaults to None.
+            color_dict (Dict): A dictionary of uplift names and colors.  Defaults to {}.
+
+        Returns:
+            Tuple[plt.Figure, List[plt.Axes]]: A tuple containing the matplotlib Figure
+                and list of Axes objects.
+
+        """
+        # If axarr is None, create a new figure
+        if axarr is None:
+            fig, axarr = plt.subplots(3, 1, figsize=(7.0, 10.0))
+        else:
+            # Get the figure from the ax
+            fig = axarr[0].get_figure()
+
+        ## AXIS 0 is the UPLIFT
+        # Plot the normal results on the top
+        self.plot(ax=axarr[0], color_dict=color_dict)
+
+        # Remove the x-label from axarr[0]
+        axarr[0].set_xlabel("")
+
+        if self.wd_or_ws == "wd":
+            x_var = "wd_bin"
+            y_var = "ws_bin"
+            x_label = "Wind Direction (Deg)"
+            y_label = "Wind Speed (m/s)"
+        else:
+            x_var = "ws_bin"
+            y_var = "wd_bin"
+            x_label = "Wind Speed (m/s)"
+            y_label = "Wind Direction (Deg)"
+
+        ## AXIS 1 is histogram
+        # df_bin_counts = self.df_pandas.groupby([x_var]).size().reset_index(name='count')
+        sns.histplot(
+            data=self.df_pandas, x=x_var, ax=axarr[1], bins=sorted(self.df_pandas[x_var].unique())
+        )
+        axarr[1].set_ylabel("Count")
+
+        ## AXIS 2 is the DISTRIBUTIONS as scatter plot
+        # Count the values in wd_bin, ws_bin in self.df_pandas
+        df_bin_counts = (
+            self.df_pandas.groupby(["wd_bin", "ws_bin"]).size().reset_index(name="count")
+        )
+
+        # Plot the distributions on the bottom
+        sns.scatterplot(
+            data=df_bin_counts,
+            x=x_var,
+            y=y_var,
+            size="count",
+            hue="count",
+            ax=axarr[2],
+            legend=True,
+            color="k",
+        )
+        axarr[2].set_xlabel(x_label)
+        axarr[2].set_ylabel(y_label)
+
+        return fig, axarr
 
 
 class total_uplift_expected_power_by_wd(_total_uplift_expected_power_by_):
@@ -354,20 +432,6 @@ class total_uplift_expected_power_by_wd(_total_uplift_expected_power_by_):
             cov_terms=cov_terms,
         )
 
-    def plot(self, ax=None, color_dict={}) -> Tuple[plt.Figure, plt.Axes]:
-        """Plot the results.
-
-        Args:
-            ax (plt.Axes): An existing matplotlib Axes object to plot on.  Defaults to None.
-            color_dict (Dict): A dictionary of uplift names and colors.  Defaults to {}.
-
-        Returns:
-            Tuple[plt.Figure, plt.Axes]: A tuple containing the matplotlib Figure and Axes objects.
-
-        """
-        fig, ax = super().plot(ax=ax, color_dict=color_dict)
-        ax.set_xlabel("Wind Direction (Deg)")
-
 
 class total_uplift_expected_power_by_ws(_total_uplift_expected_power_by_):
     """Compute total uplift expected power by wind speed."""
@@ -456,17 +520,3 @@ class total_uplift_expected_power_by_ws(_total_uplift_expected_power_by_):
             remove_any_null_turbine_bins=remove_any_null_turbine_bins,
             cov_terms=cov_terms,
         )
-
-    def plot(self, ax=None, color_dict={}) -> Tuple[plt.Figure, plt.Axes]:
-        """Plot the results.
-
-        Args:
-            ax (plt.Axes): An existing matplotlib Axes object to plot on.  Defaults to None.
-            color_dict (Dict): A dictionary of uplift names and colors.  Defaults to {}.
-
-        Returns:
-            Tuple[plt.Figure, plt.Axes]: A tuple containing the matplotlib Figure and Axes objects.
-
-        """
-        fig, ax = super().plot(ax=ax, color_dict=color_dict)
-        ax.set_xlabel("Wind Speed (m/s)")
