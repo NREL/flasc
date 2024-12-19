@@ -53,6 +53,7 @@ class AnalysisInput:
         df_list_in: List[pd.DataFrame | FlascDataFrame],
         df_names: List[str],
         num_blocks: int = 10,
+        schema_overrides: dict = None,
     ) -> None:
         """Initialize the AnalysisInput class.
 
@@ -62,10 +63,15 @@ class AnalysisInput:
             df_names (List[str]): A list of names for the dataframes
             num_blocks (int): The number of blocks to use for the energy ratio calculation.
                 Defaults to 10.
+            schema_overrides (dict): A dictionary of schema overrides to use when converting
+                the dataframes to polars. Defaults to None.
         """
         # Reduce precision if needed and convert to polars
         df_list = [
-            pl.from_pandas(df_reduce_precision(df, allow_convert_to_integer=False))
+            pl.from_pandas(
+                df_reduce_precision(df, allow_convert_to_integer=False),
+                schema_overrides=schema_overrides,
+            )
             for df in df_list_in
         ]
 
