@@ -398,7 +398,7 @@ def _total_uplift_expected_power_with_standard_error(
         # Limit the columns to bin_cols_without_df_name, df_name, weight, pow_farm, pow_farm_var
         df_sub = df_sub.select(
             bin_cols_without_df_name
-            + ["df_name", "weight", "weighted_farm_power", "pow_farm", "pow_farm_var"]
+            + ["df_name", "weight", "count", "weighted_farm_power", "pow_farm", "pow_farm_var"]
         )
 
         # Keep bin_cols_without_df_name, weight as the index, pivot df_name across pow_farm,
@@ -416,6 +416,11 @@ def _total_uplift_expected_power_with_standard_error(
 
         # Remove the weight_pair columns
         df_sub = df_sub.drop([f"weight_{uplift_pair[0]}", f"weight_{uplift_pair[1]}"])
+
+        # Compute the combined count column
+        df_sub = df_sub.with_columns(
+            count=(pl.col(f"count_{uplift_pair[0]}") + pl.col(f"count_{uplift_pair[1]}"))
+        )
 
         # with pl.Config(tbl_cols=-1):
         #     print(df_sub)
@@ -484,6 +489,7 @@ def _total_uplift_expected_power_with_standard_error(
         result_dict["energy_uplift_ctr_pc"] = (result_dict["energy_uplift_ctr"] - 1) * 100
         result_dict["energy_uplift_lb_pc"] = (result_dict["energy_uplift_lb"] - 1) * 100
         result_dict["energy_uplift_ub_pc"] = (result_dict["energy_uplift_ub"] - 1) * 100
+        result_dict["count"] = df_sub["count"].sum()
 
         result_dict["df"] = df_sub
 
