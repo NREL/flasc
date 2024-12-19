@@ -13,7 +13,7 @@ from scipy import optimize as opt, stats as spst
 
 from flasc import FlascDataFrame
 from flasc.analysis import energy_ratio as er
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.data_processing import dataframe_manipulations as dfm
 from flasc.logging_manager import LoggingManager
 from flasc.utilities import floris_tools as ftools
@@ -87,13 +87,13 @@ class bias_estimation(LoggingManager):
 
     # Private methods
 
-    def _load_er_input_for_wd_bias(
+    def _load_a_input_for_wd_bias(
         self,
         wd_bias,
     ):
-        """Load EnergyRatioInput objects with bias.
+        """Load AnalysisInput objects with bias.
 
-        This function initializes an instance of the EnergyRatioInput
+        This function initializes an instance of the AnalysisInput
         where the dataframe is shifted by wd_bias for each test turbine.
         This facilitates the calculation of the energy ratios under this
         hypothesized wind direction bias. Additionally, the FLORIS predictions
@@ -117,8 +117,8 @@ class bias_estimation(LoggingManager):
         """
         self.logger.info("  Constructing energy table for wd_bias of %.2f deg." % wd_bias)
 
-        er_in_test_turbine_list_scada = []
-        er_in_test_turbine_list_floris = []
+        a_in_test_turbine_list_scada = []
+        a_in_test_turbine_list_floris = []
 
         # Derive dataframe that covers all test_turbines
         df_cor_all = self.df.copy()
@@ -149,12 +149,12 @@ class bias_estimation(LoggingManager):
             df_fm = df_fm_all[valid_entries].copy().reset_index(drop=True)
 
             # Initialize SCADA analysis class and add dataframes
-            er_in_test_turbine_list_scada.append(EnergyRatioInput([df_cor], ["Measured data"]))
-            er_in_test_turbine_list_floris.append(EnergyRatioInput([df_fm], ["FLORIS prediction"]))
+            a_in_test_turbine_list_scada.append(AnalysisInput([df_cor], ["Measured data"]))
+            a_in_test_turbine_list_floris.append(AnalysisInput([df_fm], ["FLORIS prediction"]))
 
         # Save to self
-        self.er_in_test_turbine_list_scada = er_in_test_turbine_list_scada
-        self.er_in_test_turbine_list_floris = er_in_test_turbine_list_floris
+        self.a_in_test_turbine_list_scada = a_in_test_turbine_list_scada
+        self.a_in_test_turbine_list_floris = a_in_test_turbine_list_floris
 
     def _get_energy_ratios_allbins(
         self,
@@ -229,7 +229,7 @@ class bias_estimation(LoggingManager):
             wd_mask = [0.0, 360.0]
 
         self.logger.info("    Initializing energy ratio inputs.")
-        self._load_er_input_for_wd_bias(wd_bias=wd_bias)
+        self._load_a_input_for_wd_bias(wd_bias=wd_bias)
 
         for ii, ti in enumerate(self.test_turbines):
             self.logger.info(
@@ -239,7 +239,7 @@ class bias_estimation(LoggingManager):
 
             er_out_test_turbine_list_scada.append(
                 er.compute_energy_ratio(
-                    self.er_in_test_turbine_list_scada[ii],
+                    self.a_in_test_turbine_list_scada[ii],
                     ref_turbines=None,
                     test_turbines=[ti],
                     use_predefined_ref=True,
@@ -258,7 +258,7 @@ class bias_estimation(LoggingManager):
 
             er_out_test_turbine_list_floris.append(
                 er.compute_energy_ratio(
-                    self.er_in_test_turbine_list_floris[ii],
+                    self.a_in_test_turbine_list_floris[ii],
                     ref_turbines=None,
                     test_turbines=[ti],
                     use_predefined_ref=True,

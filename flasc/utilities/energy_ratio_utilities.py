@@ -377,7 +377,7 @@ def filter_any_nulls(
     )
 
 
-def check_compute_energy_ratio_inputs(
+def check_compute_analysis_inputs(
     df_,
     ref_turbines,
     test_turbines,
@@ -406,7 +406,7 @@ def check_compute_energy_ratio_inputs(
     """Check the inputs to compute_energy_ratio.
 
     Check inputs to compute_energy_ratio. Inputs reflect inputs to compute_energy_ratio,
-    with exception of df_, which is passed directly instead of er_in.
+    with exception of df_, which is passed directly instead of a_in.
 
     All the inputs of compute_energy_ratio are checked for validity. This function does not
     check every input, although they are all accepted.

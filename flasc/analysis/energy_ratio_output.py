@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.utilities.energy_ratio_utilities import (
     add_wd_bin,
     add_ws_bin,
@@ -28,7 +28,7 @@ class EnergyRatioOutput:
     def __init__(
         self,
         df_result: pd.DataFrame,
-        er_in: EnergyRatioInput,
+        a_in: AnalysisInput,
         df_freq: pd.DataFrame,
         ref_cols: List[str],
         test_cols: List[str],
@@ -51,7 +51,7 @@ class EnergyRatioOutput:
 
         Args:
             df_result (pd.DataFrame): The energy ratio results.
-            er_in (EnergyRatioInput): The energy table used in the energy ratio calculation.
+            a_in (AnalysisInput): The energy table used in the energy ratio calculation.
             df_freq (pd.DataFrame): Weights used for bins.
             ref_cols (List[str]): The column names of the reference turbines.
             test_cols (List[str]): The column names of the test wind turbines.
@@ -80,9 +80,9 @@ class EnergyRatioOutput:
         """
         self.df_result = df_result
         self.df_freq = df_freq
-        self.df_names = er_in.df_names
+        self.df_names = a_in.df_names
         self.num_df = len(self.df_names)
-        self.er_in = er_in
+        self.a_in = a_in
         self.ref_cols = ref_cols
         self.test_cols = test_cols
         self.wd_cols = wd_cols
@@ -539,7 +539,7 @@ class EnergyRatioOutput:
     def _compute_ws_counts(self):
         """Compute the ws bin counts."""
         # Temporary copy of energy table
-        df_ = self.er_in.get_df()
+        df_ = self.a_in.get_df()
 
         # Filter df_ to remove null values
         null_filter = filter_all_nulls if self.remove_all_nulls else filter_any_nulls
