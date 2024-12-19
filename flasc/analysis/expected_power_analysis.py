@@ -737,3 +737,101 @@ def total_uplift_expected_power(
 
     # Return the object
     return epao
+
+
+def total_uplift_expected_power_sweep_ws_min(
+    a_in: AnalysisInput,
+    uplift_pairs: List[Tuple[str, str]],
+    uplift_names: List[str],
+    test_turbines: List[int],
+    wd_turbines: List[int] = None,
+    ws_turbines: List[int] = None,
+    use_predefined_wd: bool = False,
+    use_predefined_ws: bool = False,
+    wd_step: float = 2.0,
+    wd_min: float = 0.0,
+    wd_max: float = 360.0,
+    ws_step: float = 1.0,
+    ws_min: float = 0.0,
+    ws_max: float = 50.0,
+    bin_cols_in: List[str] = ["wd_bin", "ws_bin"],
+    weight_by: str = "min",  # min or sum
+    df_freq: pd.DataFrame = None,
+    use_standard_error: bool = True,
+    N: int = 1,
+    percentiles: List[float] = [2.5, 97.5],
+    remove_any_null_turbine_bins: bool = False,
+    cov_terms: str = "zero",
+    n_step: int = 10,
+):
+    """Perform a sweep over the ws_min parameter.
+
+    Args:
+        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze
+        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name
+            values to compare
+        uplift_names (List[str]): A list of names for the uplift results
+        test_turbines (List[int]): A list of turbine indices to test
+        wd_turbines (List[int]): A list of turbine indices for wind direction. Defaults to None.
+        ws_turbines (List[int]): A list of turbine indices for wind speed. Defaults to None.
+        use_predefined_wd (bool): Use predefined wind direction. Defaults to False.
+        use_predefined_ws (bool): Use predefined wind speed. Defaults to False.
+        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
+        wd_min (float): The minimum wind direction value. Defaults to 0.0.
+        wd_max (float): The maximum wind direction value. Defaults to 360.0.
+        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
+        ws_min (float): The minimum wind speed value. Defaults to 0.0.
+        ws_max (float): The maximum wind speed value. Defaults to 50.0.
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
+            Defaults to ["wd_bin", "ws_bin"].
+        weight_by (str): The method to weight the bins. Defaults to "min".
+        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin. Defaults to None.
+        use_standard_error (bool): Use standard error for the uplift calculation. Defaults to True.
+        N (int): The number of bootstrap samples. Defaults to 1.
+        percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
+            Defaults to [2.5, 97.5].
+        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
+            and of the test turbines is null.  Defaults to False.
+        cov_terms (str): Use directly computed covariance terms, or fill with zeros or variances.
+            Can be "zero", "var" or "cov".  If "zero" all covariance terms are set to zero.  if
+            "var" all covariance terms are set to the product of the variances.  If "cov" the
+            covariance terms are used as is with missing terms set to product of the
+            variances.  Defaults to "zero".
+        n_step (int): The number of steps to perform the sweep over.  Defaults to 10.
+
+    Returns:
+        None
+    """
+    # Get the min_steps to try
+    ws_min_values = np.linspace(ws_min, ws_min + ws_step, n_step)
+
+    # Loop over these values
+    for ws_min_loop in ws_min_values:
+        epao = total_uplift_expected_power(
+            a_in=a_in,
+            uplift_pairs=uplift_pairs,
+            uplift_names=uplift_names,
+            test_turbines=test_turbines,
+            wd_turbines=wd_turbines,
+            ws_turbines=ws_turbines,
+            use_predefined_wd=use_predefined_wd,
+            use_predefined_ws=use_predefined_ws,
+            wd_step=wd_step,
+            wd_min=wd_min,
+            wd_max=wd_max,
+            ws_step=ws_step,
+            ws_min=ws_min_loop,
+            ws_max=ws_max,
+            bin_cols_in=bin_cols_in,
+            weight_by=weight_by,
+            df_freq=df_freq,
+            use_standard_error=use_standard_error,
+            N=N,
+            percentiles=percentiles,
+            remove_any_null_turbine_bins=remove_any_null_turbine_bins,
+            cov_terms=cov_terms,
+        )
+
+        # Yield the results
+        out_string = epao._return_uplift_string()
+        print(f"ws_min: {ws_min_loop:.2f} --- {out_string}")
