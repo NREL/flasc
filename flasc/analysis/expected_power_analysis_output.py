@@ -67,6 +67,7 @@ class ExpectedPowerAnalysisOutput:
             f"{self.uplift_results['scada_uplift']['energy_uplift_ctr_pc']:0.2f}%, ("
             f"{self.uplift_results['scada_uplift']['energy_uplift_lb_pc']:0.2f}% - "
             f"{self.uplift_results['scada_uplift']['energy_uplift_ub_pc']:0.2f}%)"
+            f" -- N={self.uplift_results['scada_uplift']['count']}"
         )
 
     def print_uplift(self):
