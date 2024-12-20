@@ -25,7 +25,7 @@ flasc.utilities.energy\_ratio\_utilities
       add_ws_bin
       bin_and_group_dataframe
       bin_column
-      check_compute_energy_ratio_inputs
+      check_compute_analysis_inputs
       cut
       filter_all_nulls
       filter_any_nulls

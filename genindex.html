@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,8 +26,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="_static/documentation_options.js?v=30a733bc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
@@ -204,7 +204,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <li class="toctree-l1"><a class="reference internal" href="energy_ratio.html">Energy ratio analysis</a></li>
 
-<li class="toctree-l1"><a class="reference internal" href="total_uplift.html">Total uplift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="energy_change.html">Calculating the change in energy production</a></li>
 <li class="toctree-l1"><a class="reference internal" href="licensing.html">Licensing</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Data Processing</span></p>
@@ -238,6 +238,11 @@ window.addEventListener("load", () => mermaid.run());
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.analysis_input.html">flasc.analysis.analysis_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.analysis_input.generate_block_list.html">flasc.analysis.analysis_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.analysis_input.AnalysisInput.html">flasc.analysis.analysis_input.AnalysisInput</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
 </ul>
@@ -247,7 +252,6 @@ window.addEventListener("load", () => mermaid.run());
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio_input.generate_block_list.html">flasc.analysis.energy_ratio_input.generate_block_list</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
 </ul>
 </details></li>
@@ -255,8 +259,25 @@ window.addEventListener("load", () => mermaid.run());
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis.html">flasc.analysis.expected_power_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power.html">flasc.analysis.expected_power_analysis.total_uplift_expected_power</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min.html">flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_by.html">flasc.analysis.expected_power_analysis_by</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_output.html">flasc.analysis.expected_power_analysis_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput.html">flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html">flasc.analysis.expected_power_analysis_utilities</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift_power_ratio.html">flasc.analysis.total_uplift_power_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift_power_ratio.compute_total_uplift.html">flasc.analysis.total_uplift_power_ratio.compute_total_uplift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio.html">flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio</a></li>
 </ul>
 </details></li>
 </ul>
@@ -344,7 +365,7 @@ window.addEventListener("load", () => mermaid.run());
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
@@ -403,9 +424,14 @@ window.addEventListener("load", () => mermaid.run());
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -562,17 +588,19 @@ window.addEventListener("load", () => mermaid.run());
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#flasc.analysis.expected_power_analysis_utilities._add_wd_ws_bins">_add_wd_ws_bins() (in module flasc.analysis.expected_power_analysis_utilities)</a>
+</li>
       <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._attrs">_attrs (flasc.flasc_dataframe.FlascDataFrame attribute)</a>
 </li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#flasc.analysis.expected_power_analysis_utilities._bin_and_group_dataframe_expected_power">_bin_and_group_dataframe_expected_power() (in module flasc.analysis.expected_power_analysis_utilities)</a>
+</li>
       <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._cache">_cache (flasc.flasc_dataframe.FlascDataFrame attribute)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#flasc.analysis.expected_power_analysis_utilities._compute_covariance">_compute_covariance() (in module flasc.analysis.expected_power_analysis_utilities)</a>
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio.html#flasc.analysis.energy_ratio._compute_energy_ratio_bootstrap">_compute_energy_ratio_bootstrap() (in module flasc.analysis.energy_ratio)</a>
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio.html#flasc.analysis.energy_ratio._compute_energy_ratio_single">_compute_energy_ratio_single() (in module flasc.analysis.energy_ratio)</a>
-</li>
-      <li><a href="_autosummary/flasc.analysis.total_uplift.html#flasc.analysis.total_uplift._compute_total_uplift_bootstrap">_compute_total_uplift_bootstrap() (in module flasc.analysis.total_uplift)</a>
-</li>
-      <li><a href="_autosummary/flasc.analysis.total_uplift.html#flasc.analysis.total_uplift._compute_total_uplift_single">_compute_total_uplift_single() (in module flasc.analysis.total_uplift)</a>
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput._compute_ws_counts">_compute_ws_counts() (flasc.analysis.energy_ratio_output.EnergyRatioOutput method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_output.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput._compute_ws_counts">[1]</a>
 </li>
@@ -586,6 +614,8 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.utilities.floris_tools.html#flasc.utilities.floris_tools._fi_set_ws_wd_ti">_fi_set_ws_wd_ti() (in module flasc.utilities.floris_tools)</a>
 </li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#flasc.analysis.expected_power_analysis_utilities._fill_cov_with_var">_fill_cov_with_var() (in module flasc.analysis.expected_power_analysis_utilities)</a>
+</li>
       <li><a href="_autosummary/flasc.data_processing.find_sensor_faults.html#flasc.data_processing.find_sensor_faults._find_sensor_stuck_single_timearray">_find_sensor_stuck_single_timearray() (in module flasc.data_processing.find_sensor_faults)</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._get_all_unique_flags">_get_all_unique_flags() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._get_all_unique_flags">[1]</a>
@@ -596,14 +626,16 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.data_processing.northing_offset_change_hoger.html#flasc.data_processing.northing_offset_change_hoger._get_leaves_and_knots">_get_leaves_and_knots() (in module flasc.data_processing.northing_offset_change_hoger)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">_get_mean_power_curves() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#flasc.analysis.expected_power_analysis_utilities._get_num_points_pair">_get_num_points_pair() (in module flasc.analysis.expected_power_analysis_utilities)</a>
 </li>
       <li><a href="_autosummary/flasc.utilities.utilities.html#flasc.utilities.utilities._interpolate_with_max_gap">_interpolate_with_max_gap() (in module flasc.utilities.utilities)</a>
 </li>
-      <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_er_input_for_wd_bias">_load_er_input_for_wd_bias() (flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation method)</a>, <a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_er_input_for_wd_bias">[1]</a>
+      <li><a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_a_input_for_wd_bias">_load_a_input_for_wd_bias() (flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation method)</a>, <a href="_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html#flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation._load_a_input_for_wd_bias">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._metadata">_metadata (flasc.flasc_dataframe.FlascDataFrame attribute)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame._metadata">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame._mgr">_mgr (flasc.flasc_dataframe.FlascDataFrame attribute)</a>
@@ -618,6 +650,8 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves">_reset_mean_power_curves() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves">[1]</a>
 </li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput.html#flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput._return_uplift_string">_return_uplift_string() (flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput method)</a>, <a href="_autosummary/flasc.analysis.expected_power_analysis_output.html#flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput._return_uplift_string">[1]</a>
+</li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations._set_col_by_n_closest_upstream_turbines">_set_col_by_n_closest_upstream_turbines() (in module flasc.data_processing.dataframe_manipulations)</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations._set_col_by_radius_from_turbine">_set_col_by_radius_from_turbine() (in module flasc.data_processing.dataframe_manipulations)</a>
@@ -628,9 +662,27 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.data_processing.dataframe_manipulations.html#flasc.data_processing.dataframe_manipulations._set_col_by_upstream_turbines_in_radius">_set_col_by_upstream_turbines_in_radius() (in module flasc.data_processing.dataframe_manipulations)</a>
 </li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#flasc.analysis.expected_power_analysis_utilities._set_cov_to_zero">_set_cov_to_zero() (in module flasc.analysis.expected_power_analysis_utilities)</a>
+</li>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._set_legend_alpha_to_one">_set_legend_alpha_to_one() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter._set_legend_alpha_to_one">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.data_processing.northing_offset_change_hoger.html#flasc.data_processing.northing_offset_change_hoger._shorth_mode">_shorth_mode() (in module flasc.data_processing.northing_offset_change_hoger)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#flasc.analysis.expected_power_analysis_utilities._synchronize_nulls">_synchronize_nulls() (in module flasc.analysis.expected_power_analysis_utilities)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#flasc.analysis.expected_power_analysis_utilities._synchronize_var_nulls_back_to_mean">_synchronize_var_nulls_back_to_mean() (in module flasc.analysis.expected_power_analysis_utilities)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_by.html#flasc.analysis.expected_power_analysis_by._total_uplift_expected_power_by_">_total_uplift_expected_power_by_ (class in flasc.analysis.expected_power_analysis_by)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis.html#flasc.analysis.expected_power_analysis._total_uplift_expected_power_single">_total_uplift_expected_power_single() (in module flasc.analysis.expected_power_analysis)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis.html#flasc.analysis.expected_power_analysis._total_uplift_expected_power_with_bootstrapping">_total_uplift_expected_power_with_bootstrapping() (in module flasc.analysis.expected_power_analysis)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis.html#flasc.analysis.expected_power_analysis._total_uplift_expected_power_with_standard_error">_total_uplift_expected_power_with_standard_error() (in module flasc.analysis.expected_power_analysis)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.total_uplift_power_ratio.html#flasc.analysis.total_uplift_power_ratio._total_uplift_power_ratio_bootstrap">_total_uplift_power_ratio_bootstrap() (in module flasc.analysis.total_uplift_power_ratio)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.total_uplift_power_ratio.html#flasc.analysis.total_uplift_power_ratio._total_uplift_power_ratio_single">_total_uplift_power_ratio_single() (in module flasc.analysis.total_uplift_power_ratio)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -646,10 +698,10 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.add_power_test.html#flasc.utilities.energy_ratio_utilities.add_power_test">add_power_test() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.add_power_test">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.add_reflected_rows.html#flasc.utilities.energy_ratio_utilities.add_reflected_rows">add_reflected_rows() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.add_reflected_rows">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.add_wd.html#flasc.utilities.energy_ratio_utilities.add_wd">add_wd() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.add_wd">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.add_wd_bin.html#flasc.utilities.energy_ratio_utilities.add_wd_bin">add_wd_bin() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.add_wd_bin">[1]</a>
@@ -657,6 +709,8 @@ window.addEventListener("load", () => mermaid.run());
       <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.add_ws.html#flasc.utilities.energy_ratio_utilities.add_ws">add_ws() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.add_ws">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.add_ws_bin.html#flasc.utilities.energy_ratio_utilities.add_ws_bin">add_ws_bin() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.add_ws_bin">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.analysis_input.AnalysisInput.html#flasc.analysis.analysis_input.AnalysisInput">AnalysisInput (class in flasc.analysis.analysis_input)</a>, <a href="_autosummary/flasc.analysis.analysis_input.html#flasc.analysis.analysis_input.AnalysisInput">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -686,7 +740,7 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.utilities.circular_statistics.calculate_wd_statistics.html#flasc.utilities.circular_statistics.calculate_wd_statistics">calculate_wd_statistics() (in module flasc.utilities.circular_statistics)</a>, <a href="_autosummary/flasc.utilities.circular_statistics.html#flasc.utilities.circular_statistics.calculate_wd_statistics">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html#flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs">check_compute_energy_ratio_inputs() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs">[1]</a>
+      <li><a href="_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs.html#flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs">check_compute_analysis_inputs() (in module flasc.utilities.energy_ratio_utilities)</a>, <a href="_autosummary/flasc.utilities.energy_ratio_utilities.html#flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.check_flasc_format">check_flasc_format() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.check_flasc_format">[1]</a>
 </li>
@@ -694,7 +748,7 @@ window.addEventListener("load", () => mermaid.run());
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html#flasc.analysis.total_uplift.compute_total_uplift">compute_total_uplift() (in module flasc.analysis.total_uplift)</a>, <a href="_autosummary/flasc.analysis.total_uplift.html#flasc.analysis.total_uplift.compute_total_uplift">[1]</a>
+      <li><a href="_autosummary/flasc.analysis.total_uplift_power_ratio.compute_total_uplift.html#flasc.analysis.total_uplift_power_ratio.compute_total_uplift">compute_total_uplift() (in module flasc.analysis.total_uplift_power_ratio)</a>, <a href="_autosummary/flasc.analysis.total_uplift_power_ratio.html#flasc.analysis.total_uplift_power_ratio.compute_total_uplift">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime">convert_time_to_datetime() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.convert_time_to_datetime">[1]</a>
 </li>
@@ -758,6 +812,8 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.utilities.floris_tools.estimate_ws_with_floris.html#flasc.utilities.floris_tools.estimate_ws_with_floris">estimate_ws_with_floris() (in module flasc.utilities.floris_tools)</a>, <a href="_autosummary/flasc.utilities.floris_tools.html#flasc.utilities.floris_tools.estimate_ws_with_floris">[1]</a>
 </li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput.html#flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput">ExpectedPowerAnalysisOutput (class in flasc.analysis.expected_power_analysis_output)</a>, <a href="_autosummary/flasc.analysis.expected_power_analysis_output.html#flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput">[1]</a>
+</li>
       <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format">export_to_windup_format() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.export_to_windup_format">[1]</a>
 </li>
   </ul></td>
@@ -798,6 +854,13 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       </ul></li>
       <li>
+    flasc.analysis.analysis_input
+
+      <ul>
+        <li><a href="_autosummary/flasc.analysis.analysis_input.html#module-flasc.analysis.analysis_input">module</a>
+</li>
+      </ul></li>
+      <li>
     flasc.analysis.energy_ratio
 
       <ul>
@@ -826,10 +889,38 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       </ul></li>
       <li>
-    flasc.analysis.total_uplift
+    flasc.analysis.expected_power_analysis
 
       <ul>
-        <li><a href="_autosummary/flasc.analysis.total_uplift.html#module-flasc.analysis.total_uplift">module</a>
+        <li><a href="_autosummary/flasc.analysis.expected_power_analysis.html#module-flasc.analysis.expected_power_analysis">module</a>
+</li>
+      </ul></li>
+      <li>
+    flasc.analysis.expected_power_analysis_by
+
+      <ul>
+        <li><a href="_autosummary/flasc.analysis.expected_power_analysis_by.html#module-flasc.analysis.expected_power_analysis_by">module</a>
+</li>
+      </ul></li>
+      <li>
+    flasc.analysis.expected_power_analysis_output
+
+      <ul>
+        <li><a href="_autosummary/flasc.analysis.expected_power_analysis_output.html#module-flasc.analysis.expected_power_analysis_output">module</a>
+</li>
+      </ul></li>
+      <li>
+    flasc.analysis.expected_power_analysis_utilities
+
+      <ul>
+        <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#module-flasc.analysis.expected_power_analysis_utilities">module</a>
+</li>
+      </ul></li>
+      <li>
+    flasc.analysis.total_uplift_power_ratio
+
+      <ul>
+        <li><a href="_autosummary/flasc.analysis.total_uplift_power_ratio.html#module-flasc.analysis.total_uplift_power_ratio">module</a>
 </li>
       </ul></li>
       <li>
@@ -839,6 +930,8 @@ window.addEventListener("load", () => mermaid.run());
         <li><a href="_autosummary/flasc.data_processing.html#module-flasc.data_processing">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     flasc.data_processing.dataframe_manipulations
 
@@ -860,8 +953,6 @@ window.addEventListener("load", () => mermaid.run());
         <li><a href="_autosummary/flasc.data_processing.filtering.html#module-flasc.data_processing.filtering">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     flasc.data_processing.find_sensor_faults
 
@@ -972,7 +1063,7 @@ window.addEventListener("load", () => mermaid.run());
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.analysis.energy_ratio_input.generate_block_list.html#flasc.analysis.energy_ratio_input.generate_block_list">generate_block_list() (in module flasc.analysis.energy_ratio_input)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_input.html#flasc.analysis.energy_ratio_input.generate_block_list">[1]</a>
+      <li><a href="_autosummary/flasc.analysis.analysis_input.generate_block_list.html#flasc.analysis.analysis_input.generate_block_list">generate_block_list() (in module flasc.analysis.analysis_input)</a>, <a href="_autosummary/flasc.analysis.analysis_input.html#flasc.analysis.analysis_input.generate_block_list">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.generate_floris_hetmap">generate_floris_hetmap() (flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.generate_floris_hetmap">[1]</a>
 </li>
@@ -988,7 +1079,7 @@ window.addEventListener("load", () => mermaid.run());
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html#flasc.analysis.energy_ratio_input.EnergyRatioInput.get_df">get_df() (flasc.analysis.energy_ratio_input.EnergyRatioInput method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_input.html#flasc.analysis.energy_ratio_input.EnergyRatioInput.get_df">[1]</a>
+      <li><a href="_autosummary/flasc.analysis.analysis_input.AnalysisInput.html#flasc.analysis.analysis_input.AnalysisInput.get_df">get_df() (flasc.analysis.analysis_input.AnalysisInput method)</a>, <a href="_autosummary/flasc.analysis.analysis_input.html#flasc.analysis.analysis_input.AnalysisInput.get_df">[1]</a>
 
       <ul>
         <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.get_df">(flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter.get_df">[1]</a>
@@ -1062,6 +1153,8 @@ window.addEventListener("load", () => mermaid.run());
       <ul>
         <li><a href="_autosummary/flasc.analysis.html#module-flasc.analysis">flasc.analysis</a>
 </li>
+        <li><a href="_autosummary/flasc.analysis.analysis_input.html#module-flasc.analysis.analysis_input">flasc.analysis.analysis_input</a>
+</li>
         <li><a href="_autosummary/flasc.analysis.energy_ratio.html#module-flasc.analysis.energy_ratio">flasc.analysis.energy_ratio</a>
 </li>
         <li><a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#module-flasc.analysis.energy_ratio_heterogeneity_mapper">flasc.analysis.energy_ratio_heterogeneity_mapper</a>
@@ -1070,7 +1163,15 @@ window.addEventListener("load", () => mermaid.run());
 </li>
         <li><a href="_autosummary/flasc.analysis.energy_ratio_output.html#module-flasc.analysis.energy_ratio_output">flasc.analysis.energy_ratio_output</a>
 </li>
-        <li><a href="_autosummary/flasc.analysis.total_uplift.html#module-flasc.analysis.total_uplift">flasc.analysis.total_uplift</a>
+        <li><a href="_autosummary/flasc.analysis.expected_power_analysis.html#module-flasc.analysis.expected_power_analysis">flasc.analysis.expected_power_analysis</a>
+</li>
+        <li><a href="_autosummary/flasc.analysis.expected_power_analysis_by.html#module-flasc.analysis.expected_power_analysis_by">flasc.analysis.expected_power_analysis_by</a>
+</li>
+        <li><a href="_autosummary/flasc.analysis.expected_power_analysis_output.html#module-flasc.analysis.expected_power_analysis_output">flasc.analysis.expected_power_analysis_output</a>
+</li>
+        <li><a href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html#module-flasc.analysis.expected_power_analysis_utilities">flasc.analysis.expected_power_analysis_utilities</a>
+</li>
+        <li><a href="_autosummary/flasc.analysis.total_uplift_power_ratio.html#module-flasc.analysis.total_uplift_power_ratio">flasc.analysis.total_uplift_power_ratio</a>
 </li>
         <li><a href="_autosummary/flasc.data_processing.html#module-flasc.data_processing">flasc.data_processing</a>
 </li>
@@ -1129,6 +1230,8 @@ window.addEventListener("load", () => mermaid.run());
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_by.html#flasc.analysis.expected_power_analysis_by._total_uplift_expected_power_by_.plot">plot() (flasc.analysis.expected_power_analysis_by._total_uplift_expected_power_by_ method)</a>
+</li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput.plot_energy_ratios">plot_energy_ratios() (flasc.analysis.energy_ratio_output.EnergyRatioOutput method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_output.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput.plot_energy_ratios">[1]</a>
 
       <ul>
@@ -1143,10 +1246,10 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time">plot_filters_in_time() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh">plot_filters_in_time_bokeh() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve">plot_filters_in_ws_power_curve() (flasc.data_processing.filtering.FlascFilter method)</a>, <a href="_autosummary/flasc.data_processing.filtering.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve">[1]</a>
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_graphs">plot_graphs() (flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_graphs">[1]</a>
@@ -1159,6 +1262,10 @@ window.addEventListener("load", () => mermaid.run());
 </li>
       <li><a href="_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput.plot_uplift">plot_uplift() (flasc.analysis.energy_ratio_output.EnergyRatioOutput method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_output.html#flasc.analysis.energy_ratio_output.EnergyRatioOutput.plot_uplift">[1]</a>
 </li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_by.html#flasc.analysis.expected_power_analysis_by._total_uplift_expected_power_by_.plot_with_distributions">plot_with_distributions() (flasc.analysis.expected_power_analysis_by._total_uplift_expected_power_by_ method)</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput.html#flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput.print_uplift">print_uplift() (flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput method)</a>, <a href="_autosummary/flasc.analysis.expected_power_analysis_output.html#flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput.print_uplift">[1]</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1167,7 +1274,7 @@ window.addEventListener("load", () => mermaid.run());
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.utilities.tuner_utilities.html#flasc.utilities.tuner_utilities.replicate_nan_values">replicate_nan_values() (in module flasc.utilities.tuner_utilities)</a>, <a href="_autosummary/flasc.utilities.tuner_utilities.replicate_nan_values.html#flasc.utilities.tuner_utilities.replicate_nan_values">[1]</a>
 </li>
-      <li><a href="_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html#flasc.analysis.energy_ratio_input.EnergyRatioInput.resample_energy_table">resample_energy_table() (flasc.analysis.energy_ratio_input.EnergyRatioInput method)</a>, <a href="_autosummary/flasc.analysis.energy_ratio_input.html#flasc.analysis.energy_ratio_input.EnergyRatioInput.resample_energy_table">[1]</a>
+      <li><a href="_autosummary/flasc.analysis.analysis_input.AnalysisInput.html#flasc.analysis.analysis_input.AnalysisInput.resample_energy_table">resample_energy_table() (flasc.analysis.analysis_input.AnalysisInput method)</a>, <a href="_autosummary/flasc.analysis.analysis_input.html#flasc.analysis.analysis_input.AnalysisInput.resample_energy_table">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1226,6 +1333,20 @@ window.addEventListener("load", () => mermaid.run());
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/flasc.flasc_dataframe.FlascDataFrame.html#flasc.flasc_dataframe.FlascDataFrame.to_feather">to_feather() (flasc.flasc_dataframe.FlascDataFrame method)</a>, <a href="_autosummary/flasc.flasc_dataframe.html#flasc.flasc_dataframe.FlascDataFrame.to_feather">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis.html#flasc.analysis.expected_power_analysis.total_uplift_expected_power">total_uplift_expected_power() (in module flasc.analysis.expected_power_analysis)</a>, <a href="_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power.html#flasc.analysis.expected_power_analysis.total_uplift_expected_power">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_by.html#flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd">total_uplift_expected_power_by_wd (class in flasc.analysis.expected_power_analysis_by)</a>, <a href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd.html#flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd">[1]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_by.html#flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min">total_uplift_expected_power_by_wd_shift_ws_min() (in module flasc.analysis.expected_power_analysis_by)</a>, <a href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min.html#flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis_by.html#flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws">total_uplift_expected_power_by_ws (class in flasc.analysis.expected_power_analysis_by)</a>, <a href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws.html#flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.expected_power_analysis.html#flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min">total_uplift_expected_power_sweep_ws_min() (in module flasc.analysis.expected_power_analysis)</a>, <a href="_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min.html#flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min">[1]</a>
+</li>
+      <li><a href="_autosummary/flasc.analysis.total_uplift_power_ratio.html#flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio">total_uplift_power_ratio() (in module flasc.analysis.total_uplift_power_ratio)</a>, <a href="_autosummary/flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio.html#flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1292,8 +1413,8 @@ By National Renewable Energy Laboratory
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>

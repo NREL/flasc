@@ -9,14 +9,6 @@ flasc.analysis.energy\_ratio\_input
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-      :nosignatures:
-   
-      generate_block_list
-   
    
 
    

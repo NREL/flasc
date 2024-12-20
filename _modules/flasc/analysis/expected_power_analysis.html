@@ -1,0 +1,1540 @@
+
+<!DOCTYPE html>
+
+
+<html lang="python" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>flasc.analysis.expected_power_analysis &#8212; FLASC</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=30a733bc"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-3PMGTE1H70"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-3PMGTE1H70');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/flasc/analysis/expected_power_analysis';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="python"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
+    <img src="../../../_static/curve.png" class="logo__image only-dark pst-js-only" alt="FLASC - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    FLASC documentation
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">User Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../flasc_data_format.html">FLASC data format</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../../energy_ratio.html">Energy ratio analysis</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../../energy_change.html">Calculating the change in energy production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../licensing.html">Licensing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Data Processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_raw_data_processing/03_northing_calibration_hoger.html">Northing Calibration in FLASC</a></li>
+
+
+
+
+
+
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Energy Ratio</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_energy_ratio/00_demo_energy_ratio_syntax.html">Demonstrate energy ratio syntax</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_energy_ratio/01_demo_energy_ratio_options.html">Demonstrate energy ratio options</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">API Documentation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.flasc_dataframe.html">flasc.flasc_dataframe</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/flasc.flasc_dataframe.FlascDataFrame.html">flasc.flasc_dataframe.FlascDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.analysis_input.html">flasc.analysis.analysis_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.analysis_input.generate_block_list.html">flasc.analysis.analysis_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.analysis_input.AnalysisInput.html">flasc.analysis.analysis_input.AnalysisInput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html">flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_output.html">flasc.analysis.energy_ratio_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis.html">flasc.analysis.expected_power_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power.html">flasc.analysis.expected_power_analysis.total_uplift_expected_power</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min.html">flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis_by.html">flasc.analysis.expected_power_analysis_by</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis_output.html">flasc.analysis.expected_power_analysis_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput.html">flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/flasc.analysis.expected_power_analysis_utilities.html">flasc.analysis.expected_power_analysis_utilities</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift_power_ratio.html">flasc.analysis.total_uplift_power_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift_power_ratio.compute_total_uplift.html">flasc.analysis.total_uplift_power_ratio.compute_total_uplift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio.html">flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.html">flasc.data_processing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.html">flasc.data_processing.dataframe_manipulations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_drop_nan_rows.html">flasc.data_processing.dataframe_manipulations.df_drop_nan_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing.html">flasc.data_processing.dataframe_manipulations.df_find_and_fill_data_gaps_with_missing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_reduce_precision.html">flasc.data_processing.dataframe_manipulations.df_reduce_precision</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_find_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates.html">flasc.data_processing.dataframe_manipulations.df_sort_and_fix_duplicates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_ti.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_wd.html">flasc.data_processing.dataframe_manipulations.filter_df_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.filter_df_by_ws.html">flasc.data_processing.dataframe_manipulations.filter_df_by_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_column_mean.html">flasc.data_processing.dataframe_manipulations.get_column_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.get_num_turbines.html">flasc.data_processing.dataframe_manipulations.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.is_day_or_night.html">flasc.data_processing.dataframe_manipulations.is_day_or_night</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color.html">flasc.data_processing.dataframe_manipulations.plot_sun_altitude_with_day_night_color</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_pow_ref_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ti_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine.html">flasc.data_processing.dataframe_manipulations.set_wd_by_radius_from_turbine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_wd_by_upstream_turbines_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_all_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_n_closest_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius.html">flasc.data_processing.dataframe_manipulations.set_ws_by_upstream_turbines_in_radius</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation.html">flasc.data_processing.energy_ratio_wd_bias_estimation.bias_estimation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.html">flasc.data_processing.filtering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.df_get_no_faulty_measurements.html">flasc.data_processing.filtering.df_get_no_faulty_measurements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html">flasc.data_processing.filtering.df_mark_turbdata_as_faulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html">flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html">flasc.data_processing.filtering.FlascFilter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.find_sensor_faults.html">flasc.data_processing.find_sensor_faults</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults.html">flasc.data_processing.find_sensor_faults.find_sensor_stuck_faults</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.northing_offset.html">flasc.data_processing.northing_offset</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency.html">flasc.data_processing.northing_offset.crosscheck_northing_offset_consistency</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.northing_offset_change_hoger.html">flasc.data_processing.northing_offset_change_hoger</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.northing_offset_change_hoger.homogenize_hoger.html">flasc.data_processing.northing_offset_change_hoger.homogenize_hoger</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.html">flasc.data_processing.time_operations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_downsample.html">flasc.data_processing.time_operations.df_downsample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_movingaverage.html">flasc.data_processing.time_operations.df_movingaverage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.df_resample_by_interpolation.html">flasc.data_processing.time_operations.df_resample_by_interpolation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.data_processing.time_operations.flatten_cols.html">flasc.data_processing.time_operations.flatten_cols</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.html">flasc.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.html">flasc.utilities.circular_statistics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.calc_wd_mean_radial.html">flasc.utilities.circular_statistics.calc_wd_mean_radial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.circular_statistics.calculate_wd_statistics.html">flasc.utilities.circular_statistics.calculate_wd_statistics</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.html">flasc.utilities.energy_ratio_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_bin_weights.html">flasc.utilities.energy_ratio_utilities.add_bin_weights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_ref.html">flasc.utilities.energy_ratio_utilities.add_power_ref</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_power_test.html">flasc.utilities.energy_ratio_utilities.add_power_test</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_reflected_rows.html">flasc.utilities.energy_ratio_utilities.add_reflected_rows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd.html">flasc.utilities.energy_ratio_utilities.add_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_wd_bin.html">flasc.utilities.energy_ratio_utilities.add_wd_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws.html">flasc.utilities.energy_ratio_utilities.add_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.html">flasc.utilities.floris_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table.html">flasc.utilities.floris_tools.add_gaussian_blending_to_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.calc_floris_approx_table.html">flasc.utilities.floris_tools.calc_floris_approx_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.estimate_ws_with_floris.html">flasc.utilities.floris_tools.estimate_ws_with_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_dependent_turbines.html">flasc.utilities.floris_tools.get_all_dependent_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines.html">flasc.utilities.floris_tools.get_all_impacting_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical.html">flasc.utilities.floris_tools.get_all_impacting_turbines_geometrical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_dependent_turbines_by_wd.html">flasc.utilities.floris_tools.get_dependent_turbines_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_turbs_in_radius.html">flasc.utilities.floris_tools.get_turbs_in_radius</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.get_upstream_turbs_floris.html">flasc.utilities.floris_tools.get_upstream_turbs_floris</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.floris_tools.interpolate_floris_from_df_approx.html">flasc.utilities.floris_tools.interpolate_floris_from_df_approx</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.lookup_table_tools.html">flasc.utilities.lookup_table_tools</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant.html">flasc.utilities.lookup_table_tools.get_yaw_angles_interpolant</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.html">flasc.utilities.optimization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.estimate_ti.html">flasc.utilities.optimization.estimate_ti</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.find_timeshift_between_dfs.html">flasc.utilities.optimization.find_timeshift_between_dfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.optimization.match_y_curves_by_offset.html">flasc.utilities.optimization.match_y_curves_by_offset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.html">flasc.utilities.tuner_utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.nested_get.html">flasc.utilities.tuner_utilities.nested_get</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.nested_set.html">flasc.utilities.tuner_utilities.nested_set</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.replicate_nan_values.html">flasc.utilities.tuner_utilities.replicate_nan_values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.tuner_utilities.resim_floris.html">flasc.utilities.tuner_utilities.resim_floris</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.html">flasc.utilities.utilities</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.estimate_dt.html">flasc.utilities.utilities.estimate_dt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.get_num_turbines.html">flasc.utilities.utilities.get_num_turbines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities.interp_with_max_gap.html">flasc.utilities.utilities.interp_with_max_gap</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.html">flasc.utilities.utilities_examples</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.load_floris_artificial.html">flasc.utilities.utilities_examples.load_floris_artificial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/flasc.utilities.utilities_examples.load_floris_smarteole.html">flasc.utilities.utilities_examples.load_floris_smarteole</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/NREL/flasc/issues/new?title=Issue%20on%20page%20%2F_modules/flasc/analysis/expected_power_analysis.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for flasc.analysis.expected_power_analysis</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Analyze SCADA data using expected power methods.&quot;&quot;&quot;</span>
+
+<span class="c1"># This module contains functions for computing the total wind farm energy uplift between two modes</span>
+<span class="c1"># of control (e.g., wind farm control and baseline control) using methods described in the report:</span>
+<span class="c1">#</span>
+<span class="c1"># Kanev, S., &quot;AWC Validation Methodology,&quot;&quot; TNO 2020 R11300, Tech. rep., TNO, Petten,</span>
+<span class="c1"># The Netherlands, 2020. https://resolver.tno.nl/uuid:fdae4c94-fbcc-4337-b49f-5a39c93ef2cf.</span>
+<span class="c1">#</span>
+<span class="c1"># Specifically, this module computes the total uplift along with the confidence interval of the</span>
+<span class="c1"># total uplift estimate by implementing Equations 4.11 - 4.29 in the abovementioned report. To</span>
+<span class="c1"># determine total energy for the two control modes being compared, the expected wind farm power</span>
+<span class="c1"># is computed for each wind direction/wind speed bin. This is done by summing the expected power</span>
+<span class="c1"># of each individual turbine for the bin. Note that by computing expected power at the turbine</span>
+<span class="c1"># level before summing, the method does not require that all test turbines are operating normally</span>
+<span class="c1"># at each timestamp. Therefore, fewer timestamps need to be discarded than for total uplift methods</span>
+<span class="c1"># that require all test turbines to be operating normally at each timestamp, such as the energy</span>
+<span class="c1"># ratio-based approach. Total wind farm energy is then computed by summing the expected farm power</span>
+<span class="c1"># values weighted by their frequencies of occurrence over all wind condition bins. However, because</span>
+<span class="c1"># the test turbine power values in this method are not normalized by the power of reference</span>
+<span class="c1"># turbines, the method may be more sensitive to wind speed variations within bins and other</span>
+<span class="c1"># atmospheric conditions aside from wind speed or direction that are not controlled for.</span>
+<span class="c1">#</span>
+<span class="c1"># The module provides two approaches for quantifying uncertainty in the total uplift. First,</span>
+<span class="c1"># bootstrapping can be used to estimate uncertainty by randomly resampling the input data with</span>
+<span class="c1"># replacement and computing the resulting uplift for many iterations. The second option computes</span>
+<span class="c1"># uncertainty in the total uplift following the approach in the abovementioned TNO report by</span>
+<span class="c1"># propagating the standard errors of the expected wind farm power in each wind condition bin for</span>
+<span class="c1"># the two control modes. Benefits of the method of propagating standard errors include an analytic</span>
+<span class="c1"># expression for calculating uncertainty, rather than replying on the empirical bootstrapping</span>
+<span class="c1"># approach, and higher computational efficiency compared to bootstrapping, which relies on</span>
+<span class="c1"># computing the uplift for many different iterations. Some drawbacks of the method include the need</span>
+<span class="c1"># to linearize the formula for total uplift to permit the standard error to be calculated,</span>
+<span class="c1"># resulting in an approximation of the uncertainty, as well as challenges with computing the</span>
+<span class="c1"># required variances and covariances of wind turbine power in bins with very little data.</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">polars</span> <span class="k">as</span> <span class="nn">pl</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="kn">from</span> <span class="nn">flasc.analysis.analysis_input</span> <span class="kn">import</span> <span class="n">AnalysisInput</span>
+<span class="kn">from</span> <span class="nn">flasc.analysis.expected_power_analysis_output</span> <span class="kn">import</span> <span class="n">ExpectedPowerAnalysisOutput</span>
+<span class="kn">from</span> <span class="nn">flasc.analysis.expected_power_analysis_utilities</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_add_wd_ws_bins</span><span class="p">,</span>
+    <span class="n">_bin_and_group_dataframe_expected_power</span><span class="p">,</span>
+    <span class="n">_compute_covariance</span><span class="p">,</span>
+    <span class="n">_fill_cov_with_var</span><span class="p">,</span>
+    <span class="n">_set_cov_to_zero</span><span class="p">,</span>
+    <span class="n">_synchronize_nulls</span><span class="p">,</span>
+    <span class="n">_synchronize_var_nulls_back_to_mean</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">flasc.data_processing.dataframe_manipulations</span> <span class="kn">import</span> <span class="n">df_reduce_precision</span>
+<span class="kn">from</span> <span class="nn">flasc.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingManager</span>
+<span class="kn">from</span> <span class="nn">flasc.utilities.energy_ratio_utilities</span> <span class="kn">import</span> <span class="n">add_bin_weights</span>
+
+<span class="n">logger_manager</span> <span class="o">=</span> <span class="n">LoggingManager</span><span class="p">()</span>  <span class="c1"># Instantiate LoggingManager</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logger_manager</span><span class="o">.</span><span class="n">logger</span>  <span class="c1"># Obtain the reusable logger</span>
+
+
+<div class="viewcode-block" id="_total_uplift_expected_power_single">
+<a class="viewcode-back" href="../../../_autosummary/flasc.analysis.expected_power_analysis.html#flasc.analysis.expected_power_analysis._total_uplift_expected_power_single">[docs]</a>
+<span class="k">def</span> <span class="nf">_total_uplift_expected_power_single</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">test_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">uplift_pairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="n">uplift_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">wd_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">wd_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">360.0</span><span class="p">,</span>
+    <span class="n">ws_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ws_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">ws_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+    <span class="n">bin_cols_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">],</span>
+    <span class="n">weight_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>  <span class="c1"># min or sum</span>
+    <span class="n">df_freq_pl</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">remove_any_null_turbine_bins</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the total uplift in expected power for a single run.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): A polars dataframe, exported from a_in.get_df()</span>
+<span class="sd">        test_cols (List[str]): A list of column names to include when computing total uplift.</span>
+<span class="sd">        wd_cols (List[str]): A list of column names for determining the reference wind direction.</span>
+<span class="sd">        ws_cols (List[str]): A list of column names for determining the reference wind speed.</span>
+<span class="sd">        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to</span>
+<span class="sd">            compare.</span>
+<span class="sd">        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.</span>
+<span class="sd">        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.</span>
+<span class="sd">        wd_min (float): The minimum wind direction value. Defaults to 0.0.</span>
+<span class="sd">        wd_max (float): The maximum wind direction value. Defaults to 360.0.</span>
+<span class="sd">        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.</span>
+<span class="sd">        ws_min (float): The minimum wind speed value. Defaults to 0.0.</span>
+<span class="sd">        ws_max (float): The maximum wind speed value. Defaults to 50.0.</span>
+<span class="sd">        bin_cols_in (List[str]): A list of column names to bin the dataframes by.</span>
+<span class="sd">            Defaults to [&quot;wd_bin&quot;, &quot;ws_bin&quot;].</span>
+<span class="sd">        weight_by (str): The method used to weight the bins when computing total energy if df_freq</span>
+<span class="sd">            is None (&quot;min&quot; or &quot;sum&quot;). If &quot;min&quot;, the minimum number of points in a bin over all</span>
+<span class="sd">            dataframes is used. If, &quot;sum&quot;, the sum of the points over all dataframes is used.</span>
+<span class="sd">            Defaults to &quot;min&quot;.</span>
+<span class="sd">        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins</span>
+<span class="sd">            where any of the test turbines is null.  Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[pl.DataFrame, pl.DataFrame, Dict[str, float]]: A tuple containing the binned</span>
+<span class="sd">            dataframe, the summed dataframe, and the uplift results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the bin cols without df_name</span>
+    <span class="n">bin_cols_without_df_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">bin_cols_in</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="s2">&quot;df_name&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Add the wd and ws bins</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">_add_wd_ws_bins</span><span class="p">(</span>
+        <span class="n">df_</span><span class="p">,</span>
+        <span class="n">wd_cols</span><span class="o">=</span><span class="n">wd_cols</span><span class="p">,</span>
+        <span class="n">ws_cols</span><span class="o">=</span><span class="n">ws_cols</span><span class="p">,</span>
+        <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+        <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_min</span><span class="p">,</span>
+        <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_max</span><span class="p">,</span>
+        <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+        <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_min</span><span class="p">,</span>
+        <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_max</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Bin and group the dataframe</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">_bin_and_group_dataframe_expected_power</span><span class="p">(</span>
+        <span class="n">df_</span><span class="o">=</span><span class="n">df_</span><span class="p">,</span>
+        <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span>
+        <span class="n">bin_cols_without_df_name</span><span class="o">=</span><span class="n">bin_cols_without_df_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Synchronize the null values</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">_synchronize_nulls</span><span class="p">(</span>
+        <span class="n">df_bin</span><span class="o">=</span><span class="n">df_bin</span><span class="p">,</span>
+        <span class="n">sync_cols</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">_mean&quot;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">test_cols</span><span class="p">],</span>
+        <span class="n">uplift_pairs</span><span class="o">=</span><span class="n">uplift_pairs</span><span class="p">,</span>
+        <span class="n">bin_cols_without_df_name</span><span class="o">=</span><span class="n">bin_cols_without_df_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Remove rows where any of the test columns are null (if remove_any_null_turbine_bins is True)</span>
+    <span class="k">if</span> <span class="n">remove_any_null_turbine_bins</span><span class="p">:</span>
+        <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">all_horizontal</span><span class="p">([</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_mean&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">test_cols</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Compute the farm power</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pow_farm</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">sum_horizontal</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_mean&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">test_cols</span><span class="p">]))</span>
+
+    <span class="c1"># Determine the weighting of the ws/wd bins</span>
+    <span class="n">df_bin</span><span class="p">,</span> <span class="n">df_freq_pl</span> <span class="o">=</span> <span class="n">add_bin_weights</span><span class="p">(</span><span class="n">df_bin</span><span class="p">,</span> <span class="n">df_freq_pl</span><span class="p">,</span> <span class="n">bin_cols_without_df_name</span><span class="p">,</span> <span class="n">weight_by</span><span class="p">)</span>
+
+    <span class="c1"># Normalize the weight column over the values in df_name column</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+        <span class="n">weight</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="s2">&quot;df_name&quot;</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">weighted_power</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;pow_farm&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">))</span>
+
+    <span class="n">df_sum</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="s2">&quot;df_name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># Compute the uplift for each uplift_pair</span>
+    <span class="n">uplift_results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">uplift_pair</span><span class="p">,</span> <span class="n">uplift_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">uplift_pairs</span><span class="p">,</span> <span class="n">uplift_names</span><span class="p">):</span>
+        <span class="c1"># Get the ratio of weighted_power</span>
+        <span class="n">uplift_results</span><span class="p">[</span><span class="n">uplift_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">df_sum</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;df_name&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">uplift_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="s2">&quot;weighted_power&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="o">/</span> <span class="n">df_sum</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;df_name&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="s2">&quot;weighted_power&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_bin</span><span class="p">,</span> <span class="n">df_sum</span><span class="p">,</span> <span class="n">uplift_results</span></div>
+
+
+
+<div class="viewcode-block" id="_total_uplift_expected_power_with_bootstrapping">
+<a class="viewcode-back" href="../../../_autosummary/flasc.analysis.expected_power_analysis.html#flasc.analysis.expected_power_analysis._total_uplift_expected_power_with_bootstrapping">[docs]</a>
+<span class="k">def</span> <span class="nf">_total_uplift_expected_power_with_bootstrapping</span><span class="p">(</span>
+    <span class="n">a_in</span><span class="p">:</span> <span class="n">AnalysisInput</span><span class="p">,</span>
+    <span class="n">test_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">uplift_pairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="n">uplift_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">wd_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">wd_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">360.0</span><span class="p">,</span>
+    <span class="n">ws_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ws_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">ws_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+    <span class="n">bin_cols_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">],</span>
+    <span class="n">weight_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>  <span class="c1"># min or sum</span>
+    <span class="n">df_freq_pl</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">remove_any_null_turbine_bins</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">percentiles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the total uplift in expected power using bootstrapping to quantify uncertainty.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze.</span>
+<span class="sd">        test_cols (List[str]): A list of column names to include when computing total uplift.</span>
+<span class="sd">        wd_cols (List[str]): A list of column names for determining the reference wind direction.</span>
+<span class="sd">        ws_cols (List[str]): A list of column names for determining the reference wind speed.</span>
+<span class="sd">        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to</span>
+<span class="sd">            compare.</span>
+<span class="sd">        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.</span>
+<span class="sd">        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.</span>
+<span class="sd">        wd_min (float): The minimum wind direction value. Defaults to 0.0.</span>
+<span class="sd">        wd_max (float): The maximum wind direction value. Defaults to 360.0.</span>
+<span class="sd">        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.</span>
+<span class="sd">        ws_min (float): The minimum wind speed value. Defaults to 0.0.</span>
+<span class="sd">        ws_max (float): The maximum wind speed value. Defaults to 50.0.</span>
+<span class="sd">        bin_cols_in (List[str]): A list of column names to bin the dataframes by.</span>
+<span class="sd">            Defaults to [&quot;wd_bin&quot;, &quot;ws_bin&quot;].</span>
+<span class="sd">        weight_by (str): The method used to weight the bins when computing total energy if df_freq</span>
+<span class="sd">            is None (&quot;min&quot; or &quot;sum&quot;). If &quot;min&quot;, the minimum number of points in a bin over all</span>
+<span class="sd">            dataframes is used. If, &quot;sum&quot;, the sum of the points over all dataframes is used.</span>
+<span class="sd">            Defaults to &quot;min&quot;.</span>
+<span class="sd">        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins</span>
+<span class="sd">            where any of the test turbines is null.  Defaults to False.</span>
+<span class="sd">        N (int): The number of bootstrap samples. Defaults to 1.</span>
+<span class="sd">        percentiles (List[float]): The lower and upper percentiles for quantifying uncertainty in</span>
+<span class="sd">            total uplift. Defaults to [2.5, 97.5].</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[pl.DataFrame, pl.DataFrame, Dict[str, Dict[str, float]]]: A tuple containing the</span>
+<span class="sd">             binned dataframe, the summed dataframe, and the uplift results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">uplift_single_outs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_total_uplift_expected_power_single</span><span class="p">(</span>
+            <span class="n">a_in</span><span class="o">.</span><span class="n">resample_energy_table</span><span class="p">(</span><span class="n">perform_resample</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)),</span>
+            <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span>
+            <span class="n">wd_cols</span><span class="o">=</span><span class="n">wd_cols</span><span class="p">,</span>
+            <span class="n">ws_cols</span><span class="o">=</span><span class="n">ws_cols</span><span class="p">,</span>
+            <span class="n">uplift_pairs</span><span class="o">=</span><span class="n">uplift_pairs</span><span class="p">,</span>
+            <span class="n">uplift_names</span><span class="o">=</span><span class="n">uplift_names</span><span class="p">,</span>
+            <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+            <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_min</span><span class="p">,</span>
+            <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_max</span><span class="p">,</span>
+            <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+            <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_min</span><span class="p">,</span>
+            <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_max</span><span class="p">,</span>
+            <span class="n">bin_cols_in</span><span class="o">=</span><span class="n">bin_cols_in</span><span class="p">,</span>
+            <span class="n">weight_by</span><span class="o">=</span><span class="n">weight_by</span><span class="p">,</span>
+            <span class="n">df_freq_pl</span><span class="o">=</span><span class="n">df_freq_pl</span><span class="p">,</span>
+            <span class="n">remove_any_null_turbine_bins</span><span class="o">=</span><span class="n">remove_any_null_turbine_bins</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Add in the statistics</span>
+    <span class="n">bootstrap_uplift_result</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">uplift_name</span> <span class="ow">in</span> <span class="n">uplift_names</span><span class="p">:</span>
+        <span class="n">uplift_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">uplift_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">uplift_single_outs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">uplift_name</span><span class="p">]</span>
+
+        <span class="n">uplift_central</span> <span class="o">=</span> <span class="n">uplift_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">uplift_lb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">uplift_values</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">uplift_ub</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">uplift_values</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+
+        <span class="n">bootstrap_uplift_result</span><span class="p">[</span><span class="n">uplift_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;energy_uplift_ctr&quot;</span><span class="p">:</span> <span class="n">uplift_central</span><span class="p">,</span>
+            <span class="s2">&quot;energy_uplift_lb&quot;</span><span class="p">:</span> <span class="n">uplift_lb</span><span class="p">,</span>
+            <span class="s2">&quot;energy_uplift_ub&quot;</span><span class="p">:</span> <span class="n">uplift_ub</span><span class="p">,</span>
+            <span class="s2">&quot;energy_uplift_ctr_pc&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">uplift_central</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="s2">&quot;energy_uplift_lb_pc&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">uplift_lb</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="s2">&quot;energy_uplift_ub_pc&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">uplift_ub</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">uplift_single_outs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">uplift_single_outs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">bootstrap_uplift_result</span></div>
+
+
+
+<div class="viewcode-block" id="_total_uplift_expected_power_with_standard_error">
+<a class="viewcode-back" href="../../../_autosummary/flasc.analysis.expected_power_analysis.html#flasc.analysis.expected_power_analysis._total_uplift_expected_power_with_standard_error">[docs]</a>
+<span class="k">def</span> <span class="nf">_total_uplift_expected_power_with_standard_error</span><span class="p">(</span>
+    <span class="n">df_</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">test_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">ws_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">uplift_pairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="n">uplift_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">wd_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">wd_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">wd_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">360.0</span><span class="p">,</span>
+    <span class="n">ws_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ws_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">ws_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+    <span class="n">bin_cols_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">],</span>
+    <span class="n">weight_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>  <span class="c1"># min or sum</span>
+    <span class="n">df_freq_pl</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">percentiles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">],</span>
+    <span class="n">remove_any_null_turbine_bins</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">cov_terms</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate total uplift by propagating standard errors.</span>
+
+<span class="sd">    Calculate the total uplift in expected power with uncertainty quantified by propagating</span>
+<span class="sd">    bin-level standard errors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_ (pl.DataFrame): A polars dataframe, exported from a_in.get_df()</span>
+<span class="sd">        test_cols (List[str]): A list of column names to include when computing total uplift.</span>
+<span class="sd">        wd_cols (List[str]): A list of column names for determining the reference wind direction.</span>
+<span class="sd">        ws_cols (List[str]): A list of column names for determining the reference wind speed.</span>
+<span class="sd">        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name values to</span>
+<span class="sd">            compare.</span>
+<span class="sd">        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.</span>
+<span class="sd">        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.</span>
+<span class="sd">        wd_min (float): The minimum wind direction value. Defaults to 0.0.</span>
+<span class="sd">        wd_max (float): The maximum wind direction value. Defaults to 360.0.</span>
+<span class="sd">        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.</span>
+<span class="sd">        ws_min (float): The minimum wind speed value. Defaults to 0.0.</span>
+<span class="sd">        ws_max (float): The maximum wind speed value. Defaults to 50.0.</span>
+<span class="sd">        bin_cols_in (List[str]): A list of column names to bin the dataframes by.</span>
+<span class="sd">            Defaults to [&quot;wd_bin&quot;, &quot;ws_bin&quot;].</span>
+<span class="sd">        weight_by (str): The method used to weight the bins when computing total energy if df_freq</span>
+<span class="sd">            is None (&quot;min&quot; or &quot;sum&quot;). If &quot;min&quot;, the minimum number of points in a bin over all</span>
+<span class="sd">            dataframes is used. If, &quot;sum&quot;, the sum of the points over all dataframes is used.</span>
+<span class="sd">            Defaults to &quot;min&quot;.</span>
+<span class="sd">        df_freq_pl (pl.DataFrame): A polars dataframe with the frequency of each bin.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        percentiles (List[float]): The lower and upper percentiles for quantifying uncertainty in</span>
+<span class="sd">            total uplift. Defaults to [2.5, 97.5].</span>
+<span class="sd">        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins</span>
+<span class="sd">            where any of the test turbines is null.  Defaults to False.</span>
+<span class="sd">        cov_terms (str): The approach for determining the power covariance terms betweens pairs of</span>
+<span class="sd">            test turbines whe computing uncertainty. Can be &quot;zero&quot;, &quot;var&quot; or &quot;cov&quot;. If &quot;zero&quot; all</span>
+<span class="sd">            covariance terms are set to zero. If &quot;var&quot; all covariance terms are set to the product</span>
+<span class="sd">            of the square root of the variances of each individual turbine. If &quot;cov&quot; the computed</span>
+<span class="sd">            covariance terms are used as is when enough data are present in a bin, with missing</span>
+<span class="sd">            terms set to the product of the square root of the individual turbine variances.</span>
+<span class="sd">            Defaults to &quot;zero&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Dict[str, float]]: A dictionary containing the uplift results with standard error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the bin cols without df_name</span>
+    <span class="n">bin_cols_without_df_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">bin_cols_in</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="s2">&quot;df_name&quot;</span><span class="p">]</span>
+    <span class="n">bin_cols_with_df_name</span> <span class="o">=</span> <span class="n">bin_cols_in</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;df_name&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Add the wd and ws bins</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">_add_wd_ws_bins</span><span class="p">(</span>
+        <span class="n">df_</span><span class="p">,</span>
+        <span class="n">wd_cols</span><span class="o">=</span><span class="n">wd_cols</span><span class="p">,</span>
+        <span class="n">ws_cols</span><span class="o">=</span><span class="n">ws_cols</span><span class="p">,</span>
+        <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+        <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_min</span><span class="p">,</span>
+        <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_max</span><span class="p">,</span>
+        <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+        <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_min</span><span class="p">,</span>
+        <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_max</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Compute the covariance frame</span>
+    <span class="n">df_cov</span> <span class="o">=</span> <span class="n">_compute_covariance</span><span class="p">(</span>
+        <span class="n">df_</span><span class="p">,</span> <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span> <span class="n">bin_cols_with_df_name</span><span class="o">=</span><span class="n">bin_cols_with_df_name</span>
+    <span class="p">)</span>
+
+    <span class="c1"># There are three options for the covariance terms used to compute uncertainty.</span>
+    <span class="c1"># 1. Zero out all covariance terms (&quot;zero&quot;), leave only variance</span>
+    <span class="c1"># 2. Fill all covariance terms with the product of the variances (&quot;var&quot;)</span>
+    <span class="c1"># 3. Use the covariance terms as is, with missing terms filled with</span>
+    <span class="c1">#    the product of the variances (&quot;cov&quot;)</span>
+    <span class="k">if</span> <span class="n">cov_terms</span> <span class="o">==</span> <span class="s2">&quot;zero&quot;</span><span class="p">:</span>
+        <span class="n">df_cov</span> <span class="o">=</span> <span class="n">_set_cov_to_zero</span><span class="p">(</span><span class="n">df_cov</span><span class="p">,</span> <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cov_terms</span> <span class="o">==</span> <span class="s2">&quot;var&quot;</span><span class="p">:</span>
+        <span class="n">df_cov</span> <span class="o">=</span> <span class="n">_fill_cov_with_var</span><span class="p">(</span><span class="n">df_cov</span><span class="p">,</span> <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span> <span class="n">fill_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cov_terms</span> <span class="o">==</span> <span class="s2">&quot;cov&quot;</span><span class="p">:</span>
+        <span class="n">df_cov</span> <span class="o">=</span> <span class="n">_fill_cov_with_var</span><span class="p">(</span><span class="n">df_cov</span><span class="p">,</span> <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span> <span class="n">fill_all</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cov_terms must be &#39;zero&#39;, &#39;var&#39; or &#39;cov&#39;, not </span><span class="si">{</span><span class="n">cov_terms</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Bin and group the dataframe</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">_bin_and_group_dataframe_expected_power</span><span class="p">(</span>
+        <span class="n">df_</span><span class="o">=</span><span class="n">df_</span><span class="p">,</span>
+        <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span>
+        <span class="n">bin_cols_without_df_name</span><span class="o">=</span><span class="n">bin_cols_without_df_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Join the covariance dataframe to df_bin</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_cov</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">bin_cols_with_df_name</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Set to null any mean values associated with null variance by row/turbine</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">_synchronize_var_nulls_back_to_mean</span><span class="p">(</span><span class="n">df_bin</span><span class="o">=</span><span class="n">df_bin</span><span class="p">,</span> <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">)</span>
+
+    <span class="c1"># Get the names of all the mean, covariance and num_points columns</span>
+    <span class="n">mean_cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">_mean&quot;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">test_cols</span><span class="p">]</span>
+    <span class="n">cov_cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cov_</span><span class="si">{</span><span class="n">t1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">t2</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="n">test_cols</span><span class="p">,</span> <span class="n">test_cols</span><span class="p">)]</span>
+    <span class="n">n_cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;count_</span><span class="si">{</span><span class="n">t1</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">t2</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="n">test_cols</span><span class="p">,</span> <span class="n">test_cols</span><span class="p">)]</span>
+
+    <span class="c1"># Synchronize the null values in the mean and all the cov columns across the pairs</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">_synchronize_nulls</span><span class="p">(</span>
+        <span class="n">df_bin</span><span class="o">=</span><span class="n">df_bin</span><span class="p">,</span>
+        <span class="n">sync_cols</span><span class="o">=</span><span class="n">mean_cols</span> <span class="o">+</span> <span class="n">cov_cols</span> <span class="o">+</span> <span class="n">n_cols</span><span class="p">,</span>
+        <span class="n">uplift_pairs</span><span class="o">=</span><span class="n">uplift_pairs</span><span class="p">,</span>
+        <span class="n">bin_cols_without_df_name</span><span class="o">=</span><span class="n">bin_cols_without_df_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Remove rows where any of the test columns are null (if remove_any_null_turbine_bins is True)</span>
+    <span class="k">if</span> <span class="n">remove_any_null_turbine_bins</span><span class="p">:</span>
+        <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">all_horizontal</span><span class="p">([</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_mean&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">test_cols</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Remove rows where all of the test_cols are null</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">pl</span><span class="o">.</span><span class="n">any_horizontal</span><span class="p">([</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_mean&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_not_null</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">test_cols</span><span class="p">])</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Compute the farm power</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">pow_farm</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">sum_horizontal</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_mean&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">test_cols</span><span class="p">]))</span>
+
+    <span class="c1"># Computed the expected farm power variance as the sum of cov_cols / n_cols</span>
+    <span class="c1"># This is equation 4.16</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+        <span class="n">pow_farm_var</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">sum_horizontal</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span> <span class="o">/</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cov_cols</span><span class="p">,</span> <span class="n">n_cols</span><span class="p">)]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Check if df_bin has any rows</span>
+    <span class="k">if</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No rows in df_bin after filtering&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Determine the weighting of the ws/wd bins</span>
+    <span class="n">df_bin</span><span class="p">,</span> <span class="n">df_freq_pl</span> <span class="o">=</span> <span class="n">add_bin_weights</span><span class="p">(</span><span class="n">df_bin</span><span class="p">,</span> <span class="n">df_freq_pl</span><span class="p">,</span> <span class="n">bin_cols_without_df_name</span><span class="p">,</span> <span class="n">weight_by</span><span class="p">)</span>
+
+    <span class="c1"># Normalize the weight column over the values in df_name column and compute</span>
+    <span class="c1"># the weighted farm power and weighted var per bin</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="s2">&quot;df_name&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Add the weighted farm power column</span>
+    <span class="n">df_bin</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span><span class="n">weighted_farm_power</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;pow_farm&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Now compute uplifts</span>
+    <span class="n">uplift_results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">uplift_pair</span><span class="p">,</span> <span class="n">uplift_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">uplift_pairs</span><span class="p">,</span> <span class="n">uplift_names</span><span class="p">):</span>
+        <span class="c1"># Subset the dataframe to the uplift_pair in consideration</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_bin</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;df_name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_in</span><span class="p">(</span><span class="n">uplift_pair</span><span class="p">))</span>
+
+        <span class="c1"># Limit the columns to bin_cols_without_df_name, df_name, weight, pow_farm, pow_farm_var</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">bin_cols_without_df_name</span>
+            <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;df_name&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;weighted_farm_power&quot;</span><span class="p">,</span> <span class="s2">&quot;pow_farm&quot;</span><span class="p">,</span> <span class="s2">&quot;pow_farm_var&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Keep bin_cols_without_df_name, weight as the index, pivot df_name across pow_farm,</span>
+        <span class="c1"># pow_farm_var</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span>
+            <span class="n">on</span><span class="o">=</span><span class="s2">&quot;df_name&quot;</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">bin_cols_without_df_name</span><span class="p">,</span>  <span class="c1"># + [&quot;weight&quot;],</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Assign the weight column to be the mean of weight_[uplift_pair[0]]</span>
+        <span class="c1"># and weight_[uplift_pair[1]]</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="n">weight</span><span class="o">=</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;weight_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;weight_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Remove the weight_pair columns</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;weight_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;weight_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Compute the combined count column</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="n">count</span><span class="o">=</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;count_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;count_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Compute the expected power ratio per bin</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="n">expected_power_ratio</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pow_farm_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pow_farm_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Compute the total expected power ratio (note this is not computed by</span>
+        <span class="c1">#  combining the expected power ratios)</span>
+        <span class="n">farm_power_0</span> <span class="o">=</span> <span class="n">df_sub</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;weighted_farm_power_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">farm_power_1</span> <span class="o">=</span> <span class="n">df_sub</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;weighted_farm_power_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">total_expected_power_ratio</span> <span class="o">=</span> <span class="n">farm_power_1</span> <span class="o">/</span> <span class="n">farm_power_0</span>
+
+        <span class="c1"># Compute the variance of the expected power ratio per bin</span>
+        <span class="c1"># This is equation 4.22</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="n">expected_power_ratio_var</span><span class="o">=</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pow_farm_var_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;expected_power_ratio&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                    <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pow_farm_var_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pow_farm_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Compute the weighted variance of the expected power ratio</span>
+        <span class="c1"># This is equation 4.29 pre-summation</span>
+        <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+            <span class="n">weighted_expected_power_ratio_var</span><span class="o">=</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pow_farm_var_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                    <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pow_farm_var_</span><span class="si">{</span><span class="n">uplift_pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">total_expected_power_ratio</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="o">*</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="n">farm_power_0</span><span class="o">**</span><span class="mi">2</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># The total uplift is the sum of the weighted expected power ratio and the weighted</span>
+        <span class="c1">#  variance of the expected power ratio</span>
+        <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_ctr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_expected_power_ratio</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_var&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_sub</span><span class="p">[</span><span class="s2">&quot;weighted_expected_power_ratio_var&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="c1"># Add the confidence intervals</span>
+        <span class="n">z_value</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">percentiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_lb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_ctr&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_var&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_ub&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_ctr&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_var&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_ctr_pc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_ctr&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_lb_pc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_lb&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_ub_pc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;energy_uplift_ub&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_sub</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_sub</span>
+
+        <span class="n">uplift_results</span><span class="p">[</span><span class="n">uplift_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_dict</span>
+
+    <span class="k">return</span> <span class="n">uplift_results</span></div>
+
+
+
+<div class="viewcode-block" id="total_uplift_expected_power">
+<a class="viewcode-back" href="../../../_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power.html#flasc.analysis.expected_power_analysis.total_uplift_expected_power">[docs]</a>
+<span class="k">def</span> <span class="nf">total_uplift_expected_power</span><span class="p">(</span>
+    <span class="n">a_in</span><span class="p">:</span> <span class="n">AnalysisInput</span><span class="p">,</span>
+    <span class="n">uplift_pairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="n">uplift_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">test_turbines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">wd_turbines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ws_turbines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_predefined_wd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_predefined_ws</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">wd_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">wd_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">wd_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">360.0</span><span class="p">,</span>
+    <span class="n">ws_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ws_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">ws_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+    <span class="n">bin_cols_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">],</span>
+    <span class="n">weight_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>  <span class="c1"># min or sum</span>
+    <span class="n">df_freq</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_standard_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">percentiles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">],</span>
+    <span class="n">remove_any_null_turbine_bins</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">cov_terms</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExpectedPowerAnalysisOutput</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the total uplift in energy production using expected power methods.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze.</span>
+<span class="sd">        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name</span>
+<span class="sd">            values to compare.</span>
+<span class="sd">        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.</span>
+<span class="sd">        test_turbines (List[int]): A list of turbine indices to include when computing total</span>
+<span class="sd">            uplift.</span>
+<span class="sd">        wd_turbines (List[int]): A list of turbine indices for determining the reference wind</span>
+<span class="sd">            direction. Defaults to None.</span>
+<span class="sd">        ws_turbines (List[int]): A list of turbine indices for determining the reference wind</span>
+<span class="sd">            speed. Defaults to None.</span>
+<span class="sd">        use_predefined_wd (bool): Use predefined wind direction. Defaults to False.</span>
+<span class="sd">        use_predefined_ws (bool): Use predefined wind speed. Defaults to False.</span>
+<span class="sd">        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.</span>
+<span class="sd">        wd_min (float): The minimum wind direction value. Defaults to 0.0.</span>
+<span class="sd">        wd_max (float): The maximum wind direction value. Defaults to 360.0.</span>
+<span class="sd">        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.</span>
+<span class="sd">        ws_min (float): The minimum wind speed value. Defaults to 0.0.</span>
+<span class="sd">        ws_max (float): The maximum wind speed value. Defaults to 50.0.</span>
+<span class="sd">        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to</span>
+<span class="sd">            [&quot;wd_bin&quot;, &quot;ws_bin&quot;].</span>
+<span class="sd">        weight_by (str): The method used to weight the bins when computing total energy if df_freq</span>
+<span class="sd">            is None (&quot;min&quot; or &quot;sum&quot;). If &quot;min&quot;, the minimum number of points in a bin over all</span>
+<span class="sd">            dataframes is used. If, &quot;sum&quot;, the sum of the points over all dataframes is used.</span>
+<span class="sd">            Defaults to &quot;min&quot;.</span>
+<span class="sd">        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin. Defaults to None.</span>
+<span class="sd">        use_standard_error (bool): If True, uncertainty in the total uplift is quantified by</span>
+<span class="sd">            propagating bin-level standard errors. If False, bootstrapping is used.</span>
+<span class="sd">            Defaults to True.</span>
+<span class="sd">        N (int): The number of bootstrap samples. If use_standard_error is True, N must be 1.</span>
+<span class="sd">            Defaults to 1.</span>
+<span class="sd">        percentiles (List[float]): The lower and upper percentiles for quantifying uncertainty in</span>
+<span class="sd">            total uplift. Defaults to [2.5, 97.5].</span>
+<span class="sd">        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins</span>
+<span class="sd">            where any of the test turbines is null.  Defaults to False.</span>
+<span class="sd">        cov_terms (str): If use_standard_error is True, the approach for determining the power</span>
+<span class="sd">            covariance terms betweens pairs of test turbines whe computing uncertainty. Can be</span>
+<span class="sd">            &quot;zero&quot;, &quot;var&quot; or &quot;cov&quot;. If &quot;zero&quot; all covariance terms are set to zero. If &quot;var&quot; all</span>
+<span class="sd">            covariance terms are set to the product of the square root of the variances of each</span>
+<span class="sd">            individual turbine. If &quot;cov&quot; the computed covariance terms are used as is when enough</span>
+<span class="sd">            data are present in a bin, with missing terms set to the product of the square root of</span>
+<span class="sd">            the individual turbine variances. Defaults to &quot;zero&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ExpectedPowerAnalysisOutput: An object containing the uplift results and</span>
+<span class="sd">            analysis parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the polars dataframe from within the a_in</span>
+    <span class="n">df_</span> <span class="o">=</span> <span class="n">a_in</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+
+    <span class="c1"># Confirm that test_turbines is a list of ints or a numpy array of ints</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test_turbines</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test_turbines</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;test_turbines must be a list or numpy array of ints&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Confirm that test_turbines is not empty</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_turbines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;test_turbines cannot be empty&quot;</span><span class="p">)</span>
+
+    <span class="c1"># If use_predefined_wd is True, df_ must have a column named &#39;wd&#39;</span>
+    <span class="k">if</span> <span class="n">use_predefined_wd</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;wd&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;df_ must have a column named wd when use_predefined_wd is True&quot;</span><span class="p">)</span>
+        <span class="c1"># If wd_turbines supplied, warn user that it will be ignored</span>
+        <span class="k">if</span> <span class="n">wd_turbines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;wd_turbines will be ignored when use_predefined_wd is True&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># wd_turbine must be supplied</span>
+        <span class="k">if</span> <span class="n">wd_turbines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wd_turbines must be supplied when use_predefined_wd is False&quot;</span><span class="p">)</span>
+
+    <span class="c1"># If use_predefined_ws is True, df_ must have a column named &#39;ws&#39;</span>
+    <span class="k">if</span> <span class="n">use_predefined_ws</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;ws&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;df_ must have a column named ws when use_predefined_ws is True&quot;</span><span class="p">)</span>
+        <span class="c1"># If ws_turbines supplied, warn user that it will be ignored</span>
+        <span class="k">if</span> <span class="n">ws_turbines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;ws_turbines will be ignored when use_predefined_ws is True&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># ws_turbine must be supplied</span>
+        <span class="k">if</span> <span class="n">ws_turbines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ws_turbines must be supplied when use_predefined_ws is False&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Confirm the weight_by argument is valid</span>
+    <span class="k">if</span> <span class="n">weight_by</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;weight_by must be one of &quot;min&quot;, or &quot;sum&quot;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Confirm df_freq contains ws, wd and freq_val</span>
+    <span class="k">if</span> <span class="n">df_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;ws&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_freq</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;wd&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_freq</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;freq_val&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_freq</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;df_freq must have columns ws, wd and freq_val&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If df_freq is provided, confirm is consistent with ws/wd min max and</span>
+        <span class="c1"># prepare a polars table of weights</span>
+        <span class="c1"># Convert to polars dataframe</span>
+        <span class="n">df_freq_pl</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df_reduce_precision</span><span class="p">(</span><span class="n">df_freq</span><span class="p">,</span> <span class="n">allow_convert_to_integer</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+        <span class="c1"># Rename the columns</span>
+        <span class="n">df_freq_pl</span> <span class="o">=</span> <span class="n">df_freq_pl</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;ws&quot;</span><span class="p">:</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;wd&quot;</span><span class="p">:</span> <span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;freq_val&quot;</span><span class="p">:</span> <span class="s2">&quot;weight&quot;</span><span class="p">})</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df_freq_pl</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Check that if use_standard_error is True, than N = 1</span>
+    <span class="k">if</span> <span class="n">use_standard_error</span> <span class="ow">and</span> <span class="n">N</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;N must be 1 when use_standard_error is True&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Set up the column names for the wind speed and test cols</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_predefined_ws</span><span class="p">:</span>
+        <span class="n">ws_cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;ws_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ws_turbines</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ws_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ws&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_predefined_wd</span><span class="p">:</span>
+        <span class="n">wd_cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;wd_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">wd_turbines</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wd_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;wd&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Convert the numbered arrays to appropriate column names</span>
+    <span class="n">test_cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pow_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">test_turbines</span><span class="p">]</span>
+
+    <span class="c1"># If N = 1 AND use_standard_error if false, then use the single method</span>
+    <span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">use_standard_error</span><span class="p">:</span>
+        <span class="n">df_bin</span><span class="p">,</span> <span class="n">df_sum</span><span class="p">,</span> <span class="n">uplift_results</span> <span class="o">=</span> <span class="n">_total_uplift_expected_power_single</span><span class="p">(</span>
+            <span class="n">a_in</span><span class="o">.</span><span class="n">get_df</span><span class="p">(),</span>
+            <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span>
+            <span class="n">wd_cols</span><span class="o">=</span><span class="n">wd_cols</span><span class="p">,</span>
+            <span class="n">ws_cols</span><span class="o">=</span><span class="n">ws_cols</span><span class="p">,</span>
+            <span class="n">uplift_pairs</span><span class="o">=</span><span class="n">uplift_pairs</span><span class="p">,</span>
+            <span class="n">uplift_names</span><span class="o">=</span><span class="n">uplift_names</span><span class="p">,</span>
+            <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+            <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_min</span><span class="p">,</span>
+            <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_max</span><span class="p">,</span>
+            <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+            <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_min</span><span class="p">,</span>
+            <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_max</span><span class="p">,</span>
+            <span class="n">bin_cols_in</span><span class="o">=</span><span class="n">bin_cols_in</span><span class="p">,</span>
+            <span class="n">weight_by</span><span class="o">=</span><span class="n">weight_by</span><span class="p">,</span>
+            <span class="n">df_freq_pl</span><span class="o">=</span><span class="n">df_freq_pl</span><span class="p">,</span>
+            <span class="n">remove_any_null_turbine_bins</span><span class="o">=</span><span class="n">remove_any_null_turbine_bins</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">N</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">df_bin</span><span class="p">,</span> <span class="n">df_sum</span><span class="p">,</span> <span class="n">uplift_results</span> <span class="o">=</span> <span class="n">_total_uplift_expected_power_with_bootstrapping</span><span class="p">(</span>
+            <span class="n">a_in</span><span class="p">,</span>
+            <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span>
+            <span class="n">wd_cols</span><span class="o">=</span><span class="n">wd_cols</span><span class="p">,</span>
+            <span class="n">ws_cols</span><span class="o">=</span><span class="n">ws_cols</span><span class="p">,</span>
+            <span class="n">uplift_pairs</span><span class="o">=</span><span class="n">uplift_pairs</span><span class="p">,</span>
+            <span class="n">uplift_names</span><span class="o">=</span><span class="n">uplift_names</span><span class="p">,</span>
+            <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+            <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_min</span><span class="p">,</span>
+            <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_max</span><span class="p">,</span>
+            <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+            <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_min</span><span class="p">,</span>
+            <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_max</span><span class="p">,</span>
+            <span class="n">bin_cols_in</span><span class="o">=</span><span class="n">bin_cols_in</span><span class="p">,</span>
+            <span class="n">weight_by</span><span class="o">=</span><span class="n">weight_by</span><span class="p">,</span>
+            <span class="n">df_freq_pl</span><span class="o">=</span><span class="n">df_freq_pl</span><span class="p">,</span>
+            <span class="n">remove_any_null_turbine_bins</span><span class="o">=</span><span class="n">remove_any_null_turbine_bins</span><span class="p">,</span>
+            <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+            <span class="n">percentiles</span><span class="o">=</span><span class="n">percentiles</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">use_standard_error</span><span class="p">:</span>
+        <span class="n">uplift_results</span> <span class="o">=</span> <span class="n">_total_uplift_expected_power_with_standard_error</span><span class="p">(</span>
+            <span class="n">a_in</span><span class="o">.</span><span class="n">get_df</span><span class="p">(),</span>
+            <span class="n">test_cols</span><span class="o">=</span><span class="n">test_cols</span><span class="p">,</span>
+            <span class="n">wd_cols</span><span class="o">=</span><span class="n">wd_cols</span><span class="p">,</span>
+            <span class="n">ws_cols</span><span class="o">=</span><span class="n">ws_cols</span><span class="p">,</span>
+            <span class="n">uplift_pairs</span><span class="o">=</span><span class="n">uplift_pairs</span><span class="p">,</span>
+            <span class="n">uplift_names</span><span class="o">=</span><span class="n">uplift_names</span><span class="p">,</span>
+            <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+            <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_min</span><span class="p">,</span>
+            <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_max</span><span class="p">,</span>
+            <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+            <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_min</span><span class="p">,</span>
+            <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_max</span><span class="p">,</span>
+            <span class="n">bin_cols_in</span><span class="o">=</span><span class="n">bin_cols_in</span><span class="p">,</span>
+            <span class="n">weight_by</span><span class="o">=</span><span class="n">weight_by</span><span class="p">,</span>
+            <span class="n">df_freq_pl</span><span class="o">=</span><span class="n">df_freq_pl</span><span class="p">,</span>
+            <span class="n">percentiles</span><span class="o">=</span><span class="n">percentiles</span><span class="p">,</span>
+            <span class="n">remove_any_null_turbine_bins</span><span class="o">=</span><span class="n">remove_any_null_turbine_bins</span><span class="p">,</span>
+            <span class="n">cov_terms</span><span class="o">=</span><span class="n">cov_terms</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Create the output object</span>
+    <span class="n">epao</span> <span class="o">=</span> <span class="n">ExpectedPowerAnalysisOutput</span><span class="p">(</span>
+        <span class="n">uplift_results</span><span class="o">=</span><span class="n">uplift_results</span><span class="p">,</span>
+        <span class="n">a_in</span><span class="o">=</span><span class="n">a_in</span><span class="p">,</span>
+        <span class="n">test_turbines</span><span class="o">=</span><span class="n">test_turbines</span><span class="p">,</span>
+        <span class="n">wd_turbines</span><span class="o">=</span><span class="n">wd_turbines</span><span class="p">,</span>
+        <span class="n">ws_turbines</span><span class="o">=</span><span class="n">ws_turbines</span><span class="p">,</span>
+        <span class="n">use_predefined_wd</span><span class="o">=</span><span class="n">use_predefined_wd</span><span class="p">,</span>
+        <span class="n">use_predefined_ws</span><span class="o">=</span><span class="n">use_predefined_ws</span><span class="p">,</span>
+        <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+        <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_min</span><span class="p">,</span>
+        <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_max</span><span class="p">,</span>
+        <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+        <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_min</span><span class="p">,</span>
+        <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_max</span><span class="p">,</span>
+        <span class="n">bin_cols_in</span><span class="o">=</span><span class="n">bin_cols_in</span><span class="p">,</span>
+        <span class="n">weight_by</span><span class="o">=</span><span class="n">weight_by</span><span class="p">,</span>
+        <span class="n">df_freq</span><span class="o">=</span><span class="n">df_freq</span><span class="p">,</span>
+        <span class="n">uplift_pairs</span><span class="o">=</span><span class="n">uplift_pairs</span><span class="p">,</span>
+        <span class="n">uplift_names</span><span class="o">=</span><span class="n">uplift_names</span><span class="p">,</span>
+        <span class="n">use_standard_error</span><span class="o">=</span><span class="n">use_standard_error</span><span class="p">,</span>
+        <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+        <span class="n">percentiles</span><span class="o">=</span><span class="n">percentiles</span><span class="p">,</span>
+        <span class="n">remove_any_null_turbine_bins</span><span class="o">=</span><span class="n">remove_any_null_turbine_bins</span><span class="p">,</span>
+        <span class="n">cov_terms</span><span class="o">=</span><span class="n">cov_terms</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Return the object</span>
+    <span class="k">return</span> <span class="n">epao</span></div>
+
+
+
+<div class="viewcode-block" id="total_uplift_expected_power_sweep_ws_min">
+<a class="viewcode-back" href="../../../_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min.html#flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min">[docs]</a>
+<span class="k">def</span> <span class="nf">total_uplift_expected_power_sweep_ws_min</span><span class="p">(</span>
+    <span class="n">a_in</span><span class="p">:</span> <span class="n">AnalysisInput</span><span class="p">,</span>
+    <span class="n">uplift_pairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+    <span class="n">uplift_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">test_turbines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">wd_turbines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ws_turbines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_predefined_wd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_predefined_ws</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">wd_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">wd_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">wd_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">360.0</span><span class="p">,</span>
+    <span class="n">ws_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ws_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">ws_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+    <span class="n">bin_cols_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;wd_bin&quot;</span><span class="p">,</span> <span class="s2">&quot;ws_bin&quot;</span><span class="p">],</span>
+    <span class="n">weight_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span>  <span class="c1"># min or sum</span>
+    <span class="n">df_freq</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_standard_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">percentiles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">],</span>
+    <span class="n">remove_any_null_turbine_bins</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">cov_terms</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span>
+    <span class="n">n_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform a sweep over the ws_min parameter.</span>
+
+<span class="sd">    Perform a sweep over the ws_min parameter between the specified ws_min and ws_min + ws_step to</span>
+<span class="sd">    determine the sensitivity of the total uplift to ws_min. Prints the total uplift for each</span>
+<span class="sd">    ws_min considered.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze.</span>
+<span class="sd">        uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name</span>
+<span class="sd">            values to compare.</span>
+<span class="sd">        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.</span>
+<span class="sd">        test_turbines (List[int]): A list of turbine indices to include when computing total</span>
+<span class="sd">            uplift.</span>
+<span class="sd">        wd_turbines (List[int]): A list of turbine indices for determining the reference wind</span>
+<span class="sd">            direction. Defaults to None.</span>
+<span class="sd">        ws_turbines (List[int]): A list of turbine indices for determining the reference wind</span>
+<span class="sd">            speed. Defaults to None.</span>
+<span class="sd">        use_predefined_wd (bool): Use predefined wind direction. Defaults to False.</span>
+<span class="sd">        use_predefined_ws (bool): Use predefined wind speed. Defaults to False.</span>
+<span class="sd">        wd_step (float): The step size for the wind direction bins. Defaults to 2.0.</span>
+<span class="sd">        wd_min (float): The minimum wind direction value. Defaults to 0.0.</span>
+<span class="sd">        wd_max (float): The maximum wind direction value. Defaults to 360.0.</span>
+<span class="sd">        ws_step (float): The step size for the wind speed bins. Defaults to 1.0.</span>
+<span class="sd">        ws_min (float): The minimum wind speed value. Defaults to 0.0.</span>
+<span class="sd">        ws_max (float): The maximum wind speed value. Defaults to 50.0.</span>
+<span class="sd">        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to</span>
+<span class="sd">            [&quot;wd_bin&quot;, &quot;ws_bin&quot;].</span>
+<span class="sd">        weight_by (str): The method used to weight the bins when computing total energy if df_freq</span>
+<span class="sd">            is None (&quot;min&quot; or &quot;sum&quot;). If &quot;min&quot;, the minimum number of points in a bin over all</span>
+<span class="sd">            dataframes is used. If, &quot;sum&quot;, the sum of the points over all dataframes is used.</span>
+<span class="sd">            Defaults to &quot;min&quot;.</span>
+<span class="sd">        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        use_standard_error (bool): If True, uncertainty in the total uplift is quantified by</span>
+<span class="sd">            propagating bin-level standard errors. If False, bootstrapping is used.</span>
+<span class="sd">            Defaults to True.</span>
+<span class="sd">        N (int): The number of bootstrap samples. If use_standard_error is True, N must be 1.</span>
+<span class="sd">            Defaults to 1.</span>
+<span class="sd">        percentiles (List[float]): The lower and upper percentiles for quantifying uncertainty in</span>
+<span class="sd">            total uplift. Defaults to [2.5, 97.5].</span>
+<span class="sd">        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins</span>
+<span class="sd">            where any of the test turbines is null.  Defaults to False.</span>
+<span class="sd">        cov_terms (str): If use_standard_error is True, the approach for determining the power</span>
+<span class="sd">            covariance terms betweens pairs of test turbines whe computing uncertainty. Can be</span>
+<span class="sd">            &quot;zero&quot;, &quot;var&quot; or &quot;cov&quot;. If &quot;zero&quot; all covariance terms are set to zero. If &quot;var&quot; all</span>
+<span class="sd">            covariance terms are set to the product of the square root of the variances of each</span>
+<span class="sd">            individual turbine. If &quot;cov&quot; the computed covariance terms are used as is when enough</span>
+<span class="sd">            data are present in a bin, with missing terms set to the product of the square root of</span>
+<span class="sd">            the individual turbine variances. Defaults to &quot;zero&quot;.</span>
+<span class="sd">        n_step (int): The number of steps to perform the minimum wind speed sweep over.</span>
+<span class="sd">            Defaults to 10.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the min_steps to try</span>
+    <span class="n">ws_min_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">ws_min</span><span class="p">,</span> <span class="n">ws_min</span> <span class="o">+</span> <span class="n">ws_step</span><span class="p">,</span> <span class="n">n_step</span><span class="p">)</span>
+
+    <span class="c1"># Loop over these values</span>
+    <span class="k">for</span> <span class="n">ws_min_loop</span> <span class="ow">in</span> <span class="n">ws_min_values</span><span class="p">:</span>
+        <span class="n">epao</span> <span class="o">=</span> <span class="n">total_uplift_expected_power</span><span class="p">(</span>
+            <span class="n">a_in</span><span class="o">=</span><span class="n">a_in</span><span class="p">,</span>
+            <span class="n">uplift_pairs</span><span class="o">=</span><span class="n">uplift_pairs</span><span class="p">,</span>
+            <span class="n">uplift_names</span><span class="o">=</span><span class="n">uplift_names</span><span class="p">,</span>
+            <span class="n">test_turbines</span><span class="o">=</span><span class="n">test_turbines</span><span class="p">,</span>
+            <span class="n">wd_turbines</span><span class="o">=</span><span class="n">wd_turbines</span><span class="p">,</span>
+            <span class="n">ws_turbines</span><span class="o">=</span><span class="n">ws_turbines</span><span class="p">,</span>
+            <span class="n">use_predefined_wd</span><span class="o">=</span><span class="n">use_predefined_wd</span><span class="p">,</span>
+            <span class="n">use_predefined_ws</span><span class="o">=</span><span class="n">use_predefined_ws</span><span class="p">,</span>
+            <span class="n">wd_step</span><span class="o">=</span><span class="n">wd_step</span><span class="p">,</span>
+            <span class="n">wd_min</span><span class="o">=</span><span class="n">wd_min</span><span class="p">,</span>
+            <span class="n">wd_max</span><span class="o">=</span><span class="n">wd_max</span><span class="p">,</span>
+            <span class="n">ws_step</span><span class="o">=</span><span class="n">ws_step</span><span class="p">,</span>
+            <span class="n">ws_min</span><span class="o">=</span><span class="n">ws_min_loop</span><span class="p">,</span>
+            <span class="n">ws_max</span><span class="o">=</span><span class="n">ws_max</span><span class="p">,</span>
+            <span class="n">bin_cols_in</span><span class="o">=</span><span class="n">bin_cols_in</span><span class="p">,</span>
+            <span class="n">weight_by</span><span class="o">=</span><span class="n">weight_by</span><span class="p">,</span>
+            <span class="n">df_freq</span><span class="o">=</span><span class="n">df_freq</span><span class="p">,</span>
+            <span class="n">use_standard_error</span><span class="o">=</span><span class="n">use_standard_error</span><span class="p">,</span>
+            <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+            <span class="n">percentiles</span><span class="o">=</span><span class="n">percentiles</span><span class="p">,</span>
+            <span class="n">remove_any_null_turbine_bins</span><span class="o">=</span><span class="n">remove_any_null_turbine_bins</span><span class="p">,</span>
+            <span class="n">cov_terms</span><span class="o">=</span><span class="n">cov_terms</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Yield the results</span>
+        <span class="n">out_string</span> <span class="o">=</span> <span class="n">epao</span><span class="o">.</span><span class="n">_return_uplift_string</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ws_min: </span><span class="si">{</span><span class="n">ws_min_loop</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> --- </span><span class="si">{</span><span class="n">out_string</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By National Renewable Energy Laboratory
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

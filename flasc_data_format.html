@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,8 +27,8 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
@@ -39,10 +39,10 @@
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="_static/documentation_options.js?v=30a733bc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
@@ -197,7 +197,7 @@
 
 <li class="toctree-l1"><a class="reference internal" href="energy_ratio.html">Energy ratio analysis</a></li>
 
-<li class="toctree-l1"><a class="reference internal" href="total_uplift.html">Total uplift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="energy_change.html">Calculating the change in energy production</a></li>
 <li class="toctree-l1"><a class="reference internal" href="licensing.html">Licensing</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples Data Processing</span></p>
@@ -231,6 +231,11 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.html">flasc.analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.analysis_input.html">flasc.analysis.analysis_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.analysis_input.generate_block_list.html">flasc.analysis.analysis_input.generate_block_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.analysis_input.AnalysisInput.html">flasc.analysis.analysis_input.AnalysisInput</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio.html">flasc.analysis.energy_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio.compute_energy_ratio.html">flasc.analysis.energy_ratio.compute_energy_ratio</a></li>
 </ul>
@@ -240,7 +245,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio_input.html">flasc.analysis.energy_ratio_input</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio_input.generate_block_list.html">flasc.analysis.energy_ratio_input.generate_block_list</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio_input.EnergyRatioInput.html">flasc.analysis.energy_ratio_input.EnergyRatioInput</a></li>
 </ul>
 </details></li>
@@ -248,8 +252,25 @@
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.energy_ratio_output.EnergyRatioOutput.html">flasc.analysis.energy_ratio_output.EnergyRatioOutput</a></li>
 </ul>
 </details></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift.html">flasc.analysis.total_uplift</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift.compute_total_uplift.html">flasc.analysis.total_uplift.compute_total_uplift</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis.html">flasc.analysis.expected_power_analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power.html">flasc.analysis.expected_power_analysis.total_uplift_expected_power</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min.html">flasc.analysis.expected_power_analysis.total_uplift_expected_power_sweep_ws_min</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_by.html">flasc.analysis.expected_power_analysis_by</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd_shift_ws_min</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_wd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws.html">flasc.analysis.expected_power_analysis_by.total_uplift_expected_power_by_ws</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_output.html">flasc.analysis.expected_power_analysis_output</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput.html">flasc.analysis.expected_power_analysis_output.ExpectedPowerAnalysisOutput</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/flasc.analysis.expected_power_analysis_utilities.html">flasc.analysis.expected_power_analysis_utilities</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift_power_ratio.html">flasc.analysis.total_uplift_power_ratio</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift_power_ratio.compute_total_uplift.html">flasc.analysis.total_uplift_power_ratio.compute_total_uplift</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio.html">flasc.analysis.total_uplift_power_ratio.total_uplift_power_ratio</a></li>
 </ul>
 </details></li>
 </ul>
@@ -337,7 +358,7 @@
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.add_ws_bin.html">flasc.utilities.energy_ratio_utilities.add_ws_bin</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe.html">flasc.utilities.energy_ratio_utilities.bin_and_group_dataframe</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.bin_column.html">flasc.utilities.energy_ratio_utilities.bin_column</a></li>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_energy_ratio_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs.html">flasc.utilities.energy_ratio_utilities.check_compute_analysis_inputs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.cut.html">flasc.utilities.energy_ratio_utilities.cut</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.filter_all_nulls.html">flasc.utilities.energy_ratio_utilities.filter_all_nulls</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/flasc.utilities.energy_ratio_utilities.filter_any_nulls.html">flasc.utilities.energy_ratio_utilities.filter_any_nulls</a></li>
@@ -396,9 +417,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -778,18 +804,18 @@
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlascDataFrame in user (wide) format
    time  wind_speed_TB01  wind_speed_TB02  wind_speed_TB03  wind_dir_TB01  \
-0     0         8.607450         8.234464         9.217288     276.379721   
-1     1         8.793917         7.843345         9.347562     274.929685   
-2     2         8.277465         7.808006         9.415628     278.395673   
-3     3         8.987878         7.528790         9.211836     271.373961   
-4     4         8.321817         8.364671         9.455288     277.420619   
+0     0         8.838788         8.069930         9.328942     275.769285   
+1     1         8.673366         7.613421         9.417112     276.895545   
+2     2         8.711681         8.105754         9.404215     278.466379   
+3     3         8.636019         7.552899         8.625285     272.706048   
+4     4         8.039878         8.477551         8.535534     278.866782   
 
    wind_dir_TB02  wind_dir_TB03  power_TB01  power_TB02  power_TB03  
-0     276.106506     276.782860  637.710520  558.349282  783.085901  
-1     275.953957     279.902751  680.059672  482.507342  816.761021  
-2     271.197443     275.760611  567.142345  476.014837  834.733548  
-3     271.923122     276.544749  726.058312  426.752023  781.697220  
-4     276.605194     278.716924  576.307836  585.256896  845.326018  
+0     274.396009     277.679265  690.523054  525.544228  811.889857  
+1     276.394423     277.954246  652.473784  441.305750  835.128258  
+2     279.813806     278.877254  661.158885  532.574442  831.701890  
+3     278.092330     275.650476  644.081483  430.864843  641.682649  
+4     278.963621     271.376366  519.694896  609.272080  621.859287  
 </pre></div>
 </div>
 </div>
@@ -819,44 +845,44 @@
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlascDataFrame in FLASC format
    time    ws_000    ws_001    ws_002      wd_000      wd_001      wd_002  \
-0     0  8.607450  8.234464  9.217288  276.379721  276.106506  276.782860   
-1     1  8.793917  7.843345  9.347562  274.929685  275.953957  279.902751   
+0     0  8.838788  8.069930  9.328942  275.769285  274.396009  277.679265   
+1     1  8.673366  7.613421  9.417112  276.895545  276.394423  277.954246   
 
       pow_000     pow_001     pow_002  
-0  637.710520  558.349282  783.085901  
-1  680.059672  482.507342  816.761021  
+0  690.523054  525.544228  811.889857  
+1  652.473784  441.305750  835.128258  
 
 
 
 FlascDataFrame in user (wide) format
    time  wind_speed_TB01  wind_speed_TB02  wind_speed_TB03  wind_dir_TB01  \
-0     0         8.607450         8.234464         9.217288     276.379721   
-1     1         8.793917         7.843345         9.347562     274.929685   
+0     0         8.838788         8.069930         9.328942     275.769285   
+1     1         8.673366         7.613421         9.417112     276.895545   
 
    wind_dir_TB02  wind_dir_TB03  power_TB01  power_TB02  power_TB03  
-0     276.106506     276.782860  637.710520  558.349282  783.085901  
-1     275.953957     279.902751  680.059672  482.507342  816.761021  
+0     274.396009     277.679265  690.523054  525.544228  811.889857  
+1     276.394423     277.954246  652.473784  441.305750  835.128258  
 
 
 
 FlascDataFrame in FLASC format
    time    ws_000    ws_001    ws_002      wd_000      wd_001      wd_002  \
-0     0  8.607450  8.234464  9.217288  276.379721  276.106506  276.782860   
-1     1  8.793917  7.843345  9.347562  274.929685  275.953957  279.902751   
+0     0  8.838788  8.069930  9.328942  275.769285  274.396009  277.679265   
+1     1  8.673366  7.613421  9.417112  276.895545  276.394423  277.954246   
 
       pow_000     pow_001     pow_002  
-0  637.710520  558.349282  783.085901  
-1  680.059672  482.507342  816.761021  
+0  690.523054  525.544228  811.889857  
+1  652.473784  441.305750  835.128258  
 
 
 FlascDataFrame in user (wide) format
    time  wind_speed_TB01  wind_speed_TB02  wind_speed_TB03  wind_dir_TB01  \
-0     0         8.607450         8.234464         9.217288     276.379721   
-1     1         8.793917         7.843345         9.347562     274.929685   
+0     0         8.838788         8.069930         9.328942     275.769285   
+1     1         8.673366         7.613421         9.417112     276.895545   
 
    wind_dir_TB02  wind_dir_TB03  power_TB01  power_TB02  power_TB03  
-0     276.106506     276.782860  637.710520  558.349282  783.085901  
-1     275.953957     279.902751  680.059672  482.507342  816.761021  
+0     274.396009     277.679265  690.523054  525.544228  811.889857  
+1     276.394423     277.954246  652.473784  441.305750  835.128258  
 </pre></div>
 </div>
 </div>
@@ -890,17 +916,17 @@ FlascDataFrame in user (wide) format
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     time          channel       value
-0       0  wind_speed_TB01    8.607450
-1       1  wind_speed_TB01    8.793917
-2       2  wind_speed_TB01    8.277465
-3       3  wind_speed_TB01    8.987878
-4       4  wind_speed_TB01    8.321817
+0       0  wind_speed_TB01    8.838788
+1       1  wind_speed_TB01    8.673366
+2       2  wind_speed_TB01    8.711681
+3       3  wind_speed_TB01    8.636019
+4       4  wind_speed_TB01    8.039878
 ..    ...              ...         ...
-175    15       power_TB03  692.491596
-176    16       power_TB03  817.112577
-177    17       power_TB03  666.316341
-178    18       power_TB03  850.458819
-179    19       power_TB03  755.592663
+175    15       power_TB03  703.383056
+176    16       power_TB03  737.727581
+177    17       power_TB03  832.348231
+178    18       power_TB03  710.618400
+179    19       power_TB03  632.350726
 
 [180 rows x 3 columns]
 </pre></div>
@@ -923,11 +949,11 @@ FlascDataFrame in user (wide) format
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlascDataFrame in user (long) format
    time          channel     value
-0     0  wind_speed_TB01  8.607450
-1     1  wind_speed_TB01  8.793917
-2     2  wind_speed_TB01  8.277465
-3     3  wind_speed_TB01  8.987878
-4     4  wind_speed_TB01  8.321817
+0     0  wind_speed_TB01  8.838788
+1     1  wind_speed_TB01  8.673366
+2     2  wind_speed_TB01  8.711681
+3     3  wind_speed_TB01  8.636019
+4     4  wind_speed_TB01  8.039878
 </pre></div>
 </div>
 </div>
@@ -948,19 +974,19 @@ FlascDataFrame in user (wide) format
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>FlascDataFrame in FLASC format
    time     pow_000     pow_001     pow_002      wd_000      wd_001  \
-0     0  637.710520  558.349282  783.085901  276.379721  276.106506   
-1     1  680.059672  482.507342  816.761021  274.929685  275.953957   
+0     0  690.523054  525.544228  811.889857  275.769285  274.396009   
+1     1  652.473784  441.305750  835.128258  276.895545  276.394423   
 
        wd_002    ws_000    ws_001    ws_002  
-0  276.782860  8.607450  8.234464  9.217288  
-1  279.902751  8.793917  7.843345  9.347562  
+0  277.679265  8.838788  8.069930  9.328942  
+1  277.954246  8.673366  7.613421  9.417112  
 
 
 
 FlascDataFrame in user (long) format
    time     channel       value
-0     0  power_TB01  637.710520
-1     0  power_TB02  558.349282
+0     0  power_TB01  690.523054
+1     0  power_TB02  525.544228
 </pre></div>
 </div>
 </div>
@@ -981,35 +1007,35 @@ FlascDataFrame in user (long) format
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                       raw_ActivePowerMean  raw_YawAngleMean  \
 TimeStamp_StartFormat                                          
-0                               637.710520        276.379721   
-1                               680.059672        274.929685   
-2                               567.142345        278.395673   
-3                               726.058312        271.373961   
-4                               576.307836        277.420619   
+0                               690.523054        275.769285   
+1                               652.473784        276.895545   
+2                               661.158885        278.466379   
+3                               644.081483        272.706048   
+4                               519.694896        278.866782   
 
                        raw_WindSpeedMean TurbineName  PitchAngleMean  \
 TimeStamp_StartFormat                                                  
-0                               8.607450         000               0   
-1                               8.793917         000               0   
-2                               8.277465         000               0   
-3                               8.987878         000               0   
-4                               8.321817         000               0   
+0                               8.838788         000               0   
+1                               8.673366         000               0   
+2                               8.711681         000               0   
+3                               8.636019         000               0   
+4                               8.039878         000               0   
 
                        GenRpmMean  raw_ShutdownDuration  ActivePowerMean  \
 TimeStamp_StartFormat                                                      
-0                            1000                     0       637.710520   
-1                            1000                     0       680.059672   
-2                            1000                     0       567.142345   
-3                            1000                     0       726.058312   
-4                            1000                     0       576.307836   
+0                            1000                     0       690.523054   
+1                            1000                     0       652.473784   
+2                            1000                     0       661.158885   
+3                            1000                     0       644.081483   
+4                            1000                     0       519.694896   
 
                        WindSpeedMean  YawAngleMean  ShutdownDuration  
 TimeStamp_StartFormat                                                 
-0                           8.607450    276.379721                 0  
-1                           8.793917    274.929685                 0  
-2                           8.277465    278.395673                 0  
-3                           8.987878    271.373961                 0  
-4                           8.321817    277.420619                 0  
+0                           8.838788    275.769285                 0  
+1                           8.673366    276.895545                 0  
+2                           8.711681    278.466379                 0  
+3                           8.636019    272.706048                 0  
+4                           8.039878    278.866782                 0  
 </pre></div>
 </div>
 </div>
@@ -1139,8 +1165,8 @@ By National Renewable Energy Laboratory
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>
