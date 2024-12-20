@@ -1,5 +1,38 @@
 """Analyze SCADA data using expected power methods."""
 
+# This module contains functions for computing the total wind farm energy uplift between two modes
+# of control (e.g., wind farm control and baseline control) using methods described in the report:
+#
+# Kanev, S., "AWC Validation Methodology,"" TNO 2020 R11300, Tech. rep., TNO, Petten,
+# The Netherlands, 2020. https://resolver.tno.nl/uuid:fdae4c94-fbcc-4337-b49f-5a39c93ef2cf.
+#
+# Specifically, this module computes the total uplift along with the confidence interval of the
+# total uplift estimate by implementing Equations 4.11 - 4.29 in the abovementioned report. To
+# determine total energy for the two control modes being compared, the expected wind farm power
+# is computed for each wind direction/wind speed bin. This is done by summing the expected power
+# of each individual turbine for the bin. Note that by computing expected power at the turbine
+# level before summing, the method does not require that all test turbines are operating normally
+# at each timestamp. Therefore, fewer timestamps need to be discarded than for total uplift methods
+# that require all test turbines to be operating normally at each timestamp, such as the energy
+# ratio-based approach. Total wind farm energy is then computed by summing the expected farm power
+# values weighted by their frequencies of occurrence over all wind condition bins. However, because
+# the test turbine power values in this method are not normalized by the power of reference
+# turbines, the method may be more sensitive to wind speed variations within bins and other
+# atmospheric conditions aside from wind speed or direction that are not controlled for.
+#
+# The module provides two approaches for quantifying uncertainty in the total uplift. First,
+# bootstrapping can be used to estimate uncertainty by randomly resampling the input data with
+# replacement and computing the resulting uplift for many iterations. The second option computes
+# uncertainty in the total uplift following the approach in the abovementioned TNO report by
+# propagating the standard errors of the expected wind farm power in each wind condition bin for
+# the two control modes. Benefits of the method of propagating standard errors include an analytic
+# expression for calculating uncertainty, rather than replying on the empirical bootstrapping
+# approach, and higher computational efficiency compared to bootstrapping, which relies on
+# computing the uplift for many different iterations. Some drawbacks of the method include the need
+# to linearize the formula for total uplift to permit the standard error to be calculated,
+# resulting in an approximation of the uncertainty, as well as challenges with computing the
+# required variances and covariances of wind turbine power in bins with very little data.
+
 import warnings
 from itertools import product
 from typing import Dict, List, Tuple
