@@ -7,6 +7,7 @@ from floris import FlorisModel
 from flasc.utilities.floris_tools import (
     add_gaussian_blending_to_floris_approx_table,
     calc_floris_approx_table,
+    estimate_ws_with_floris,
     get_dependent_turbines_by_wd,
     interpolate_floris_from_df_approx,
 )
@@ -151,3 +152,43 @@ class TestFlorisTools(unittest.TestCase):
         # Test the limit_number
         dep = get_dependent_turbines_by_wd(fi, 2, np.array([226]), limit_number=1)
         self.assertEqual(dep[0], [1])
+
+    def test_estimate_ws_with_floris(self):
+        # Load FLORIS object
+        fm, _ = load_floris()
+
+        # Set as two turbine layout
+        fm.set(layout_x=[0.0, 0.0], layout_y=[0.0, 500.0])
+
+        # Create a sample SCADA dataframe
+        df_scada = pd.DataFrame(
+            {
+                "ws_000": [0.5, 8.5, 20.0],
+                "ws_001": [8.0, 8.5, 9.0],
+                "pow_000": [100.0, 100.0, 100.0],
+                "pow_001": [1000.0, 1000.0, 1000.0],
+            }
+        )
+
+        # Estimate wind speed using FLORIS
+        df_estimated = estimate_ws_with_floris(df_scada, fm)
+
+        # Check if the estimated wind speed columns are added
+        self.assertTrue("ws_est_000" in df_estimated.columns)
+        self.assertTrue("ws_est_001" in df_estimated.columns)
+
+        # Check if the estimated wind speed gain columns are added
+        self.assertTrue("ws_est_gain_000" in df_estimated.columns)
+        self.assertTrue("ws_est_gain_001" in df_estimated.columns)
+
+        # Check that the third element of ws_est_000 are
+        # unchanged from ws_000
+        self.assertTrue(
+            np.all(df_estimated["ws_est_000"].values[[2]] == df_scada["ws_000"].values[[2]])
+        )
+
+        # Check the the middle element of ws_est_000 is less than from ws_000
+        self.assertTrue(df_estimated["ws_est_000"].values[1] < df_scada["ws_000"].values[1])
+
+        # Check that estimated middle value for turbine 1 is greater that that of turbine 0
+        self.assertTrue(df_estimated["ws_est_001"].values[1] > df_estimated["ws_est_000"].values[1])

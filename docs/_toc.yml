@@ -15,7 +15,7 @@ parts:
     # - file: data_processing
     - file: flasc_data_format
     - file: energy_ratio
-    - file: total_uplift
+    - file: energy_change
     - file: licensing
 
   # - caption: Developer Reference
@@ -23,10 +23,12 @@ parts:
   #   - file: contributing
   #   - file: development
   #   - file: testing
-
-  - caption: Examples
+  - caption: Examples Data Processing
     chapters:
-    # - file: flascdataframe
+    - file: examples/01_raw_data_processing/03_northing_calibration_hoger
+
+  - caption: Examples Energy Ratio
+    chapters:
     - file: examples/03_energy_ratio/00_demo_energy_ratio_syntax
     - file: examples/03_energy_ratio/01_demo_energy_ratio_options
 

@@ -5,7 +5,7 @@ import seaborn as sns
 
 from flasc import FlascDataFrame
 from flasc.analysis import energy_ratio as er
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.utilities.utilities_examples import load_floris_artificial as load_floris
 from flasc.visualization import plot_binned_mean_and_ci
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     color_palette = sns.color_palette("Paired", 4)[::-1]
 
     # Initialize the energy ratio input object
-    er_in = EnergyRatioInput(
+    a_in = AnalysisInput(
         [df_baseline, df_wakesteering, df_baseline_noisy, df_wakesteering_noisy],
         ["Baseline", "WakeSteering", "Baseline (Noisy)", "WakeSteering (Noisy)"],
     )
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     # With respect to reference turbine [0]
     # datasets with uncertainty quantification using 50 bootstrap samples
     er_out = er.compute_energy_ratio(
-        er_in,
+        a_in,
         test_turbines=[2],
         use_predefined_ref=True,
         use_predefined_wd=True,

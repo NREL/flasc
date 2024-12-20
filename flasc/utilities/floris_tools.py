@@ -1,16 +1,20 @@
 """Utility functions that use FlorisModels."""
 
+from __future__ import annotations
+
 import copy
 from time import perf_counter as timerpc
+from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from floris import TimeSeries, WindTIRose
+from floris import FlorisModel, TimeSeries, WindTIRose
 from floris.utilities import wrap_360
 from scipy import interpolate
 from scipy.stats import norm
 
+from flasc import FlascDataFrame
 from flasc.logging_manager import LoggingManager
 from flasc.utilities import utilities as fsut
 
@@ -421,9 +425,9 @@ def calc_floris_approx_table(
                 :, tindex
             ]
             solutions_dict["wd_{:03d}".format(tindex)] = fm.wind_directions
-            solutions_dict[
-                "ti_{:03d}".format(tindex)
-            ] = fm.core.flow_field.turbulence_intensity_field[:, tindex]
+            solutions_dict["ti_{:03d}".format(tindex)] = (
+                fm.core.flow_field.turbulence_intensity_field[:, tindex]
+            )
     df_approx = pd.DataFrame(solutions_dict)
 
     logger.info("Finished calculating the FLORIS solutions for the dataframe.")
@@ -501,6 +505,92 @@ def add_gaussian_blending_to_floris_approx_table(df_fi_approx, wd_std=3.0, pdf_c
     )
 
     return df_fi_approx_gauss
+
+
+def estimate_ws_with_floris(
+    df_scada: Union[pd.DataFrame, FlascDataFrame],
+    fm: FlorisModel,
+    verbose: bool = False,
+) -> Union[pd.DataFrame, FlascDataFrame]:
+    """Estimate the wind speed at the turbine locations using a FLORIS model.
+
+    This function estimates the wind speed at the turbine locations using a FLORIS model.
+    The approach follows the example from the RES wind-up method `add_ws_est_one_ttype`
+    (https://github.com/resgroup/wind-up/blob/main/wind_up/ws_est.py) by Alex Clerc.
+    However, in this implementation, FLORIS provides the power curves directly rather
+    than their being learned from data.  In this way, the estimated wind speed is
+    the speed which would cause FLORIS to predict a power matched to the SCADA data.
+    This will be especially useful in model fitting to avoid any error on un-waked turbines.
+
+    Args:
+        df_scada (pd.DataFrame | FlascDataFrame): Pandas DataFrame with the SCADA data.
+        fm (FlorisModel): FLORIS model object.
+        verbose (bool, optional): Print warnings and information to the console. Defaults to False.
+
+    Returns:
+        pd.DataFrame | FlascDataFrame: Pandas DataFrame with the estimated wind speed
+            columns added.
+    """
+    # To allow that turbine types might not be the same, loop over all turbines
+    for ti in range(fm.n_turbines):
+        if verbose:
+            logger.info(f"Estimating wind speed for turbine {ti} of {fm.n_turbines}.")
+
+        # Get the power curve for this turbine from FLORIS
+        ws_pc = fm.core.farm.turbine_definitions[ti]["power_thrust_table"]["wind_speed"]
+        pow_pc = fm.core.farm.turbine_definitions[ti]["power_thrust_table"]["power"]
+
+        # Take the diff of the power curve
+        pow_pc_diff = np.diff(pow_pc)
+
+        # If first entry is not positive, remove it from ws_pc and pow_pc, loop until not true
+        while pow_pc_diff[0] <= 0:
+            ws_pc = ws_pc[1:]
+            pow_pc = pow_pc[1:]
+            pow_pc_diff = np.diff(pow_pc)
+
+        # Find the first point where the diff is not positive and remove it and all following points
+        if np.any(pow_pc_diff <= 0):
+            idx = np.where(pow_pc_diff <= 0)[0][0]
+            ws_pc = ws_pc[: idx + 1]
+            pow_pc = pow_pc[: idx + 1]
+            pow_pc_diff = np.diff(pow_pc)
+
+        # Identify certain quantities for establishing the estimator and blend schedule
+        rated_power = np.max(pow_pc)
+
+        # Following the gain scheduling approach of `add_ws_est_one_ttype`
+        # define the gain via four wind speeds, however, more deterministically since
+        # driven by FLORIS
+        # ws0 (zero wind speed) is the wind speed at which partial power dependence begins
+        # ws1 (10% of rated) is the wind speed at which full power dependence begins
+        # ws2 (90% of rated) is the wind speed at which full power dependence ends
+        # ws3 (90% of rated + 0.5 m/s) is the wind speed at which partial power dependence ends
+        ws0 = 0
+        ws1 = float(np.interp(rated_power * 0.1, pow_pc, ws_pc))
+        ws2 = float(np.interp(rated_power * 0.9, pow_pc, ws_pc))
+        ws3 = ws2 + 0.5
+
+        # For starters make simple gain schedule
+        ws_est_gain_x = [ws0, ws1, ws2, ws3]
+        ws_est_gain_y = [0, 1, 1, 0]
+
+        ws_est_gain = np.interp(df_scada["ws_{:03d}".format(ti)], ws_est_gain_x, ws_est_gain_y)
+        ws_est_gain = np.clip(ws_est_gain, 0, 1)
+
+        # Now estimate wind speed from power
+        ws_est_from_pow = np.interp(df_scada["pow_{:03d}".format(ti)], pow_pc, ws_pc)
+        ws_est = (
+            ws_est_gain * ws_est_from_pow + (1.0 - ws_est_gain) * df_scada["ws_{:03d}".format(ti)]
+        )
+
+        # Add the estimated wind speed to the dataframe
+        df_scada["ws_est_{:03d}".format(ti)] = ws_est
+
+        # Store the gain as well, at least for now
+        df_scada["ws_est_gain_{:03d}".format(ti)] = ws_est_gain
+
+    return df_scada
 
 
 # TODO Is this function in the right module?
