@@ -39,10 +39,8 @@ def get_num_turbines(df):
     Returns:
        int: Number of turbines in the dataframe
     """
-    nt = 0
-    while ("pow_%03d" % nt) in df.columns:
-        nt += 1
-    return nt
+    # Count how many columns in df_columns are of the form 'pow_###'
+    return sum(len(c) == 7 and c[:4] == "pow_" and c[4:].isdigit() for c in df.columns)
 
 
 def interp_with_max_gap(x, xp, fp, max_gap, kind, wrap_around_360=False):
