@@ -1,4 +1,4 @@
-"""Expected power analysis by wind direction or wind speed."""
+"""Module for performing expected power analyses by wind direction or wind speed."""
 
 from typing import List, Tuple
 
@@ -43,17 +43,21 @@ class _total_uplift_expected_power_by_:
         remove_any_null_turbine_bins: bool = False,
         cov_terms: str = "zero",
     ):
-        """Calculates total uplift expected power by wind direction.
+        """Calculates total uplift using expected power methods by wind direction or wind speed.
 
         Args:
-        wd_or_ws (str): The column name to bin the dataframes by.  Can be "wd" or "ws".
-        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze
+        wd_or_ws (str): The column name to bin the dataframes and compute total uplift by.
+            Can be "wd" or "ws".
+        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze.
         uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name
-            values to compare
-        uplift_names (List[str]): A list of names for the uplift results
-        test_turbines (List[int]): A list of turbine indices to test
-        wd_turbines (List[int]): A list of turbine indices for wind direction. Defaults to None.
-        ws_turbines (List[int]): A list of turbine indices for wind speed. Defaults to None.
+            values to compare.
+        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.
+        test_turbines (List[int]): A list of turbine indices to include when computing total
+            uplift.
+        wd_turbines (List[int]): A list of turbine indices for determining the reference wind
+            direction. Defaults to None.
+        ws_turbines (List[int]): A list of turbine indices for determining the reference wind
+            speed. Defaults to None.
         use_predefined_wd (bool): Use predefined wind direction. Defaults to False.
         use_predefined_ws (bool): Use predefined wind speed. Defaults to False.
         wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
@@ -62,21 +66,30 @@ class _total_uplift_expected_power_by_:
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
-            Defaults to ["wd_bin", "ws_bin"].
-        weight_by (str): The method to weight the bins. Defaults to "min".
-        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin. Defaults to None.
-        use_standard_error (bool): Use standard error for the uplift calculation. Defaults to True.
-        N (int): The number of bootstrap samples. Defaults to 1.
-        percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
-            Defaults to [2.5, 97.5].
-        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
-            and of the test turbines is null.  Defaults to False.
-        cov_terms (str): Use directly computed covariance terms, or fill with zeros or variances.
-            Can be "zero", "var" or "cov".  If "zero" all covariance terms are set to zero.  if
-            "var" all covariance terms are set to the product of the variances.  If "cov" the
-            covariance terms are used as is with missing terms set to product of the
-            variances.  Defaults to "zero".
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to
+            ["wd_bin", "ws_bin"].
+        weight_by (str): The method used to weight the bins when computing total energy if df_freq
+            is None ("min" or "sum"). If "min", the minimum number of points in a bin over all
+            dataframes is used. If, "sum", the sum of the points over all dataframes is used.
+            Defaults to "min".
+        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin.
+            Defaults to None.
+        use_standard_error (bool): If True, uncertainty in the total uplift is quantified by
+            propagating bin-level standard errors. If False, bootstrapping is used.
+            Defaults to True.
+        N (int): The number of bootstrap samples. If use_standard_error is True, N must be 1.
+            Defaults to 1.
+        percentiles (List[float]): The lower and upper percentiles for quantifying uncertainty in
+            total uplift. Defaults to [2.5, 97.5].
+        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins
+            where any of the test turbines is null.  Defaults to False.
+        cov_terms (str): If use_standard_error is True, the approach for determining the power
+            covariance terms betweens pairs of test turbines whe computing uncertainty. Can be
+            "zero", "var" or "cov". If "zero" all covariance terms are set to zero. If "var" all
+            covariance terms are set to the product of the square root of the variances of each
+            individual turbine. If "cov" the computed covariance terms are used as is when enough
+            data are present in a bin, with missing terms set to the product of the square root of
+            the individual turbine variances. Defaults to "zero".
         """
         # wd_or_ws must be either "wd" or "ws"
         if wd_or_ws not in ["wd", "ws"]:
@@ -221,7 +234,7 @@ class _total_uplift_expected_power_by_:
     def plot(
         self, ax=None, color_dict={}, overwrite_label=None, plot_unc=True
     ) -> Tuple[plt.Figure, plt.Axes]:
-        """Plot the results.
+        """Plot the total uplift results by wind direction or wind speed.
 
         Args:
             ax (plt.Axes): An existing matplotlib Axes object to plot on.  Defaults to None.
@@ -299,7 +312,10 @@ class _total_uplift_expected_power_by_:
     def plot_with_distributions(
         self, axarr=None, color_dict={}
     ) -> Tuple[plt.Figure, List[plt.Axes]]:
-        """Plot the results with histograms and distributions.
+        """Plot results by wind direction or wind speed with histograms and distributions.
+
+        Plot the total uplift results by wind direction or wind speed with accompanying histograms
+        and distributions of wind speed or wind direction.
 
         Args:
             axarr (List[plt.Axes]): An existing list of matplotlib Axes objects to plot on.
@@ -367,7 +383,7 @@ class _total_uplift_expected_power_by_:
 
 
 class total_uplift_expected_power_by_wd(_total_uplift_expected_power_by_):
-    """Compute total uplift expected power by wind direction."""
+    """Compute total uplift using expected power methods by wind direction."""
 
     def __init__(
         self,
@@ -394,16 +410,19 @@ class total_uplift_expected_power_by_wd(_total_uplift_expected_power_by_):
         remove_any_null_turbine_bins: bool = False,
         cov_terms: str = "zero",
     ) -> None:
-        """Calculates total uplift expected power by wind direction.
+        """Calculates total uplift using expected power methods by wind direction.
 
         Args:
-        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze
+        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze.
         uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name
-            values to compare
-        uplift_names (List[str]): A list of names for the uplift results
-        test_turbines (List[int]): A list of turbine indices to test
-        wd_turbines (List[int]): A list of turbine indices for wind direction. Defaults to None.
-        ws_turbines (List[int]): A list of turbine indices for wind speed. Defaults to None.
+            values to compare.
+        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.
+        test_turbines (List[int]): A list of turbine indices to include when computing total
+            uplift.
+        wd_turbines (List[int]): A list of turbine indices for determining the reference wind
+            direction. Defaults to None.
+        ws_turbines (List[int]): A list of turbine indices for determining the reference wind
+            speed. Defaults to None.
         use_predefined_wd (bool): Use predefined wind direction. Defaults to False.
         use_predefined_ws (bool): Use predefined wind speed. Defaults to False.
         wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
@@ -412,21 +431,30 @@ class total_uplift_expected_power_by_wd(_total_uplift_expected_power_by_):
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
-            Defaults to ["wd_bin", "ws_bin"].
-        weight_by (str): The method to weight the bins. Defaults to "min".
-        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin. Defaults to None.
-        use_standard_error (bool): Use standard error for the uplift calculation. Defaults to True.
-        N (int): The number of bootstrap samples. Defaults to 1.
-        percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
-            Defaults to [2.5, 97.5].
-        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
-            and of the test turbines is null.  Defaults to False.
-        cov_terms (str): Use directly computed covariance terms, or fill with zeros or variances.
-            Can be "zero", "var" or "cov".  If "zero" all covariance terms are set to zero.  if
-            "var" all covariance terms are set to the product of the variances.  If "cov" the
-            covariance terms are used as is with missing terms set to product of the
-            variances.  Defaults to "zero".
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to
+            ["wd_bin", "ws_bin"].
+        weight_by (str): The method used to weight the bins when computing total energy if df_freq
+            is None ("min" or "sum"). If "min", the minimum number of points in a bin over all
+            dataframes is used. If, "sum", the sum of the points over all dataframes is used.
+            Defaults to "min".
+        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin.
+            Defaults to None.
+        use_standard_error (bool): If True, uncertainty in the total uplift is quantified by
+            propagating bin-level standard errors. If False, bootstrapping is used.
+            Defaults to True.
+        N (int): The number of bootstrap samples. If use_standard_error is True, N must be 1.
+            Defaults to 1.
+        percentiles (List[float]): The lower and upper percentiles for quantifying uncertainty in
+            total uplift. Defaults to [2.5, 97.5].
+        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins
+            where any of the test turbines is null.  Defaults to False.
+        cov_terms (str): If use_standard_error is True, the approach for determining the power
+            covariance terms betweens pairs of test turbines whe computing uncertainty. Can be
+            "zero", "var" or "cov". If "zero" all covariance terms are set to zero. If "var" all
+            covariance terms are set to the product of the square root of the variances of each
+            individual turbine. If "cov" the computed covariance terms are used as is when enough
+            data are present in a bin, with missing terms set to the product of the square root of
+            the individual turbine variances. Defaults to "zero".
         """
         super().__init__(
             wd_or_ws="wd",
@@ -456,7 +484,7 @@ class total_uplift_expected_power_by_wd(_total_uplift_expected_power_by_):
 
 
 class total_uplift_expected_power_by_ws(_total_uplift_expected_power_by_):
-    """Compute total uplift expected power by wind speed."""
+    """Compute total uplift using expected power methods by wind speed."""
 
     def __init__(
         self,
@@ -483,16 +511,19 @@ class total_uplift_expected_power_by_ws(_total_uplift_expected_power_by_):
         remove_any_null_turbine_bins: bool = False,
         cov_terms: str = "zero",
     ) -> None:
-        """Calculates total uplift expected power by wind direction.
+        """Calculates total uplift using expected power methods by wind speed.
 
         Args:
-        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze
+        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze.
         uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name
-            values to compare
-        uplift_names (List[str]): A list of names for the uplift results
-        test_turbines (List[int]): A list of turbine indices to test
-        wd_turbines (List[int]): A list of turbine indices for wind direction. Defaults to None.
-        ws_turbines (List[int]): A list of turbine indices for wind speed. Defaults to None.
+            values to compare.
+        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.
+        test_turbines (List[int]): A list of turbine indices to include when computing total
+            uplift.
+        wd_turbines (List[int]): A list of turbine indices for determining the reference wind
+            direction. Defaults to None.
+        ws_turbines (List[int]): A list of turbine indices for determining the reference wind
+            speed. Defaults to None.
         use_predefined_wd (bool): Use predefined wind direction. Defaults to False.
         use_predefined_ws (bool): Use predefined wind speed. Defaults to False.
         wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
@@ -501,21 +532,30 @@ class total_uplift_expected_power_by_ws(_total_uplift_expected_power_by_):
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
-            Defaults to ["wd_bin", "ws_bin"].
-        weight_by (str): The method to weight the bins. Defaults to "min".
-        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin. Defaults to None.
-        use_standard_error (bool): Use standard error for the uplift calculation. Defaults to True.
-        N (int): The number of bootstrap samples. Defaults to 1.
-        percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
-            Defaults to [2.5, 97.5].
-        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
-            and of the test turbines is null.  Defaults to False.
-        cov_terms (str): Use directly computed covariance terms, or fill with zeros or variances.
-            Can be "zero", "var" or "cov".  If "zero" all covariance terms are set to zero.  if
-            "var" all covariance terms are set to the product of the variances.  If "cov" the
-            covariance terms are used as is with missing terms set to product of the
-            variances.  Defaults to "zero".
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to
+            ["wd_bin", "ws_bin"].
+        weight_by (str): The method used to weight the bins when computing total energy if df_freq
+            is None ("min" or "sum"). If "min", the minimum number of points in a bin over all
+            dataframes is used. If, "sum", the sum of the points over all dataframes is used.
+            Defaults to "min".
+        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin.
+            Defaults to None.
+        use_standard_error (bool): If True, uncertainty in the total uplift is quantified by
+            propagating bin-level standard errors. If False, bootstrapping is used.
+                Defaults to True.
+        N (int): The number of bootstrap samples. If use_standard_error is True, N must be 1.
+            Defaults to 1.
+        percentiles (List[float]): The lower and upper percentiles for quantifying uncertainty in
+            total uplift. Defaults to [2.5, 97.5].
+        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins
+            where any of the test turbines is null.  Defaults to False.
+        cov_terms (str): If use_standard_error is True, the approach for determining the power
+            covariance terms betweens pairs of test turbines whe computing uncertainty. Can be
+            "zero", "var" or "cov". If "zero" all covariance terms are set to zero. If "var" all
+            covariance terms are set to the product of the square root of the variances of each
+            individual turbine. If "cov" the computed covariance terms are used as is when enough
+            data are present in a bin, with missing terms set to the product of the square root of
+            the individual turbine variances. Defaults to "zero".
         """
         super().__init__(
             wd_or_ws="ws",
@@ -570,16 +610,23 @@ def total_uplift_expected_power_by_wd_shift_ws_min(
     n_step: int = 10,
     ax=None,
 ):
-    """Calculate total uplift expected power by wind direction, shifting the wind speed minimum.
+    """Calculate total uplift by wind direction for different minimum wind speed values.
+
+    Calculate total uplift using expected power methods by wind direction for different wind speed
+    minimum ws_min values. Plots total uplift as a function of wind direction for each choice of
+    ws_min.
 
     Args:
-        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze
+        a_in (AnalysisInput): An AnalysisInput object containing the dataframes to analyze.
         uplift_pairs (List[Tuple[str, str]]): A list of tuples containing the df_name
-            values to compare
-        uplift_names (List[str]): A list of names for the uplift results
-        test_turbines (List[int]): A list of turbine indices to test
-        wd_turbines (List[int]): A list of turbine indices for wind direction. Defaults to None.
-        ws_turbines (List[int]): A list of turbine indices for wind speed. Defaults to None.
+            values to compare.
+        uplift_names (List[str]): A list of names for the uplift results for each uplift pair.
+        test_turbines (List[int]): A list of turbine indices to include when computing total
+            uplift.
+        wd_turbines (List[int]): A list of turbine indices for determining the reference wind
+            direction. Defaults to None.
+        ws_turbines (List[int]): A list of turbine indices for determining the reference wind
+            speed. Defaults to None.
         use_predefined_wd (bool): Use predefined wind direction. Defaults to False.
         use_predefined_ws (bool): Use predefined wind speed. Defaults to False.
         wd_step (float): The step size for the wind direction bins. Defaults to 2.0.
@@ -588,22 +635,32 @@ def total_uplift_expected_power_by_wd_shift_ws_min(
         ws_step (float): The step size for the wind speed bins. Defaults to 1.0.
         ws_min (float): The minimum wind speed value. Defaults to 0.0.
         ws_max (float): The maximum wind speed value. Defaults to 50.0.
-        bin_cols_in (List[str]): A list of column names to bin the dataframes by.
-            Defaults to ["wd_bin", "ws_bin"].
-        weight_by (str): The method to weight the bins. Defaults to "min".
-        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin. Defaults to None.
-        use_standard_error (bool): Use standard error for the uplift calculation. Defaults to True.
-        N (int): The number of bootstrap samples. Defaults to 1.
-        percentiles (List[float]): The percentiles to calculate for the bootstrap samples.
-            Defaults to [2.5, 97.5].
-        remove_any_null_turbine_bins (bool): When computing farm power, remove any bins where
-            and of the test turbines is null.  Defaults to False.
-        cov_terms (str): Use directly computed covariance terms, or fill with zeros or variances.
-            Can be "zero", "var" or "cov".  If "zero" all covariance terms are set to zero.  if
-            "var" all covariance terms are set to the product of the variances.  If "cov" the
-            covariance terms are used as is with missing terms set to product of the
-            variances.  Defaults to "zero".
-        n_step (int): The number of steps to shift the wind speed minimum. Defaults to 10.
+        bin_cols_in (List[str]): A list of column names to bin the dataframes by. Defaults to
+            ["wd_bin", "ws_bin"].
+        weight_by (str): The method used to weight the bins when computing total energy if df_freq
+            is None ("min" or "sum"). If "min", the minimum number of points in a bin over all
+            dataframes is used. If, "sum", the sum of the points over all dataframes is used.
+            Defaults to "min".
+        df_freq (pd.DataFrame): A pandas dataframe with the frequency of each bin.
+            Defaults to None.
+        use_standard_error (bool): If True, uncertainty in the total uplift is quantified by
+            propagating bin-level standard errors. If False, bootstrapping is used.
+                Defaults to True.
+        N (int): The number of bootstrap samples. If use_standard_error is True, N must be 1.
+            Defaults to 1.
+        percentiles (List[float]): The lower and upper percentiles for quantifying uncertainty in
+            total uplift. Defaults to [2.5, 97.5].
+        remove_any_null_turbine_bins (bool): If True, when computing farm power, remove any bins
+            where any of the test turbines is null.  Defaults to False.
+        cov_terms (str): If use_standard_error is True, the approach for determining the power
+            covariance terms betweens pairs of test turbines whe computing uncertainty. Can be
+            "zero", "var" or "cov". If "zero" all covariance terms are set to zero. If "var" all
+            covariance terms are set to the product of the square root of the variances of each
+            individual turbine. If "cov" the computed covariance terms are used as is when enough
+            data are present in a bin, with missing terms set to the product of the square root of
+            the individual turbine variances. Defaults to "zero".
+        n_step (int): The number of steps to perform the minimum wind speed sweep over.
+            Defaults to 10.
         ax (plt.Axes): An existing matplotlib Axes object to plot on.  Defaults to None.
     """
     # Get the min_steps to try

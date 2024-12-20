@@ -1,4 +1,4 @@
-"""Output module for expected power anlaysis."""
+"""Output module for expected power analysis methods."""
 
 import pandas as pd
 
@@ -6,7 +6,7 @@ from flasc.analysis.analysis_input import AnalysisInput
 
 
 class ExpectedPowerAnalysisOutput:
-    """Store the results of the energy ratio calculations.
+    """Store the results of the expected power analysis calculations.
 
     Additionally provide convenient methods for plotting and saving the results.
     """
