@@ -15,7 +15,7 @@ parts:
     # - file: data_processing
     - file: flasc_data_format
     - file: energy_ratio
-    - file: total_uplift
+    - file: energy_change
     - file: licensing
 
   # - caption: Developer Reference
