@@ -11,8 +11,8 @@ import numpy as np
 import polars as pl
 
 import flasc.utilities.floris_tools as ftools
-from flasc.analysis import energy_ratio as er, total_uplift as tup
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis import energy_ratio as er, total_uplift_power_ratio as tup
+from flasc.analysis.analysis_input import AnalysisInput
 from flasc.utilities.energy_ratio_utilities import add_power_ref, add_power_test
 from flasc.utilities.tuner_utilities import replicate_nan_values, resim_floris
 
@@ -244,10 +244,10 @@ def sweep_wd_std_for_er(
         df_floris = add_power_test(df_floris, test_cols)
 
         # Compare the energy ratio to SCADA
-        er_in = EnergyRatioInput([df_scada, df_floris.to_pandas()], ["SCADA", "FLORIS"])
+        a_in = AnalysisInput([df_scada, df_floris.to_pandas()], ["SCADA", "FLORIS"])
 
         er_out = er.compute_energy_ratio(
-            er_in,
+            a_in,
             ref_turbines=ref_turbines,
             test_turbines=test_turbines,
             # use_predefined_ref=use_predefined_ref,
@@ -403,12 +403,12 @@ def sweep_deflection_parameter_for_total_uplift(
     df_scada_wakesteering = df_scada_wakesteering.to_pandas()
 
     # Compare the scada uplift
-    er_in = EnergyRatioInput(
+    a_in = AnalysisInput(
         [df_scada_baseline, df_scada_wakesteering], ["Baseline [SCADA]", "Controlled [SCADA]"]
     )
 
-    scada_uplift_result = tup.compute_total_uplift(
-        er_in,
+    scada_uplift_result = tup.total_uplift_power_ratio(
+        a_in,
         test_turbines=test_turbines,
         use_predefined_ref=True,
         use_predefined_wd=True,
@@ -453,13 +453,13 @@ def sweep_deflection_parameter_for_total_uplift(
         df_floris_wakesteering = add_power_test(df_floris_wakesteering, test_cols)
 
         # Calculate the FLORIS uplift
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_floris_baseline.to_pandas(), df_floris_wakesteering.to_pandas()],
             ["Baseline [FLORIS]", "Controlled [FLORIS]"],
         )
 
-        scada_uplift_result = tup.compute_total_uplift(
-            er_in,
+        scada_uplift_result = tup.total_uplift_power_ratio(
+            a_in,
             test_turbines=test_turbines,
             use_predefined_ref=True,
             use_predefined_wd=True,
