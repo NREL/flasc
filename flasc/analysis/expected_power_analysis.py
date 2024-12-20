@@ -259,8 +259,6 @@ def _total_uplift_expected_power_with_standard_error(
     percentiles: List[float] = [2.5, 97.5],
     remove_any_null_turbine_bins: bool = False,
     cov_terms: str = "zero",
-    # variance_only: bool = False,
-    # fill_cov_with_var: bool = False,
 ) -> Dict[str, Dict[str, float]]:
     """Calculate total uplift by propagating standard errors.
 
@@ -300,7 +298,6 @@ def _total_uplift_expected_power_with_standard_error(
             covariance terms are used as is when enough data are present in a bin, with missing
             terms set to the product of the square root of the individual turbine variances.
             Defaults to "zero".
-
 
     Returns:
         Dict[str, Dict[str, float]]: A dictionary containing the uplift results with standard error.
@@ -436,19 +433,11 @@ def _total_uplift_expected_power_with_standard_error(
             count=(pl.col(f"count_{uplift_pair[0]}") + pl.col(f"count_{uplift_pair[1]}"))
         )
 
-        # with pl.Config(tbl_cols=-1):
-        #     print(df_sub)
-
         # Compute the expected power ratio per bin
         df_sub = df_sub.with_columns(
             expected_power_ratio=pl.col(f"pow_farm_{uplift_pair[1]}")
             / pl.col(f"pow_farm_{uplift_pair[0]}")
         )
-
-        # # Compute the weighted expected power ratio
-        # df_sub = df_sub.with_columns(
-        #     weighted_expected_power_ratio=pl.col("expected_power_ratio") * pl.col("weight")
-        # )
 
         # Compute the total expected power ratio (note this is not computed by
         #  combining the expected power ratios)
@@ -481,9 +470,6 @@ def _total_uplift_expected_power_with_standard_error(
                 / farm_power_0**2
             )
         )
-
-        # with pl.Config(tbl_cols=-1):
-        #     print(df_sub)
 
         # The total uplift is the sum of the weighted expected power ratio and the weighted
         #  variance of the expected power ratio
@@ -535,8 +521,6 @@ def total_uplift_expected_power(
     percentiles: List[float] = [2.5, 97.5],
     remove_any_null_turbine_bins: bool = False,
     cov_terms: str = "zero",
-    # variance_only: bool = False,
-    # fill_cov_with_var: bool = False,
 ) -> ExpectedPowerAnalysisOutput:
     """Calculate the total uplift in energy production using expected power methods.
 
@@ -649,11 +633,6 @@ def total_uplift_expected_power(
     # Check that if use_standard_error is True, than N = 1
     if use_standard_error and N != 1:
         raise ValueError("N must be 1 when use_standard_error is True")
-
-    # # Raise an error if both variance_only and fill_cov_with_var are True
-    # May need to reinclude in the future but disabled for now
-    # if variance_only and fill_cov_with_var:
-    #     raise ValueError("variance_only and fill_cov_with_var cannot both be True")
 
     # Set up the column names for the wind speed and test cols
 

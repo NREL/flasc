@@ -353,7 +353,6 @@ class _total_uplift_expected_power_by_:
             y_label = "Wind Direction (Deg)"
 
         ## AXIS 1 is histogram
-        # df_bin_counts = self.df_pandas.groupby([x_var]).size().reset_index(name='count')
         sns.histplot(
             data=self.df_pandas, x=x_var, ax=axarr[1], bins=sorted(self.df_pandas[x_var].unique())
         )

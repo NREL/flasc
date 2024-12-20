@@ -286,14 +286,6 @@ def _fill_cov_with_var(
                 .alias(n_col)
             )
 
-            # # Wherever n_col is null, set cov_col to null
-            # df_cov = df_cov.with_columns(
-            #     pl.when(pl.col(n_col).is_null())
-            #     .then(None)
-            #     .otherwise(pl.col(cov_col))
-            #     .alias(cov_col)
-            # )
-
     # Remove the null_map column if exists
     if "null_map" in df_cov.columns:
         df_cov = df_cov.drop("null_map")
