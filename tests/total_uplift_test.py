@@ -2,8 +2,8 @@ import unittest
 
 import pandas as pd
 
-from flasc.analysis import total_uplift as tup
-from flasc.analysis.energy_ratio_input import EnergyRatioInput
+from flasc.analysis import total_uplift_power_ratio as tup
+from flasc.analysis.analysis_input import AnalysisInput
 
 
 class TestTotalUplift(unittest.TestCase):
@@ -29,12 +29,12 @@ class TestTotalUplift(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
         )
 
-        total_uplift_result = tup.compute_total_uplift(
-            er_in,
+        total_uplift_result = tup.total_uplift_power_ratio(
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -83,6 +83,66 @@ class TestTotalUplift(unittest.TestCase):
             total_uplift_result["uplift"]["energy_uplift_ctr_pc"], 47.22222222, places=4
         )
 
+    def test_compute_total_uplift(self):
+        # compute_total_uplift is the old name for total_uplift_power_ratio, test that
+        # it can be used as total_uplift_power_ratio
+        # Test the returned energy ratio assuming alternative weightings of the wind speed bins
+        df_base = pd.DataFrame(
+            {
+                "wd": [270, 270.0, 270.0, 270.0, 272.0],
+                "ws": [7.0, 8.0, 8.0, 8.0, 8.0],
+                "pow_000": [1.0, 1.0, 1.0, 1.0, 10.0],
+                "pow_001": [1.0, 1.0, 1.0, 1.0, 10.0],
+            }
+        )
+
+        df_wake_steering = pd.DataFrame(
+            {
+                "wd": [270, 270.0, 270.0, 270.0, 272.0],
+                "ws": [7.0, 7.0, 8.0, 8.0, 8.0],
+                "pow_000": [1.0, 1.0, 1.0, 1.0, 20.0],
+                "pow_001": [2.0, 2.0, 1.0, 1.0, 30.0],
+            }
+        )
+
+        a_in = AnalysisInput(
+            [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=1
+        )
+
+        total_uplift_result = tup.total_uplift_power_ratio(
+            a_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min=269.0,
+            wd_step=2.0,
+            ws_min=0.5,  # Make sure bin labels land on whole numbers
+            weight_by="min",
+            uplift_pairs=["baseline", "wake_steering"],
+            uplift_names=["uplift"],
+        )
+
+        total_uplift_result_2 = tup.compute_total_uplift(
+            a_in,
+            ref_turbines=[0],
+            test_turbines=[1],
+            use_predefined_wd=True,
+            use_predefined_ws=True,
+            wd_min=269.0,
+            wd_step=2.0,
+            ws_min=0.5,  # Make sure bin labels land on whole numbers
+            weight_by="min",
+            uplift_pairs=["baseline", "wake_steering"],
+            uplift_names=["uplift"],
+        )
+
+        self.assertAlmostEqual(
+            total_uplift_result["uplift"]["energy_uplift_ctr"],
+            total_uplift_result_2["uplift"]["energy_uplift_ctr"],
+            places=4,
+        )
+
     def test_total_uplift_bootstrap(self):
         # Test the ability to compute the total uplift in energy production with bootstrapping
         # Confirm the "central" answer is deterministic and that the upper and lower bounds
@@ -108,12 +168,12 @@ class TestTotalUplift(unittest.TestCase):
             }
         )
 
-        er_in = EnergyRatioInput(
+        a_in = AnalysisInput(
             [df_base, df_wake_steering], ["baseline", "wake_steering"], num_blocks=df_base.shape[0]
         )
 
-        total_uplift_result_1 = tup.compute_total_uplift(
-            er_in,
+        total_uplift_result_1 = tup.total_uplift_power_ratio(
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,
@@ -127,8 +187,8 @@ class TestTotalUplift(unittest.TestCase):
             N=10,
         )
 
-        total_uplift_result_2 = tup.compute_total_uplift(
-            er_in,
+        total_uplift_result_2 = tup.total_uplift_power_ratio(
+            a_in,
             ref_turbines=[0],
             test_turbines=[1],
             use_predefined_wd=True,

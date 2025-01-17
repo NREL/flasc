@@ -346,6 +346,12 @@ def test_n_turbines():
     with pytest.raises(ValueError):
         df.n_turbines
 
+    # For backwards compatibility, check that get_num_turbines in utilities returns the same result
+    from flasc.utilities.utilities import get_num_turbines
+
+    df = FlascDataFrame(test_wide_dict, channel_name_map=test_channel_name_map)
+    assert get_num_turbines(df) == 2
+
 
 def test_export_to_windup_format():
     example_data = [1.1, 2.1, 3.1]
