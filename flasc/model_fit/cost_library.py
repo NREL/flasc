@@ -2,7 +2,6 @@
 
 from typing import List
 
-import numpy as np
 import pandas as pd
 from floris import FlorisModel
 
@@ -105,6 +104,7 @@ def turbine_power_error(
     df_error = (df_scada[turbine_columns] - df_floris[turbine_columns]) ** 2
 
     return df_error.sum().sum()
+
 
 def turbine_power_error_abs(
     df_scada: pd.DataFrame | FlascDataFrame,
