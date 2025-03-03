@@ -2,6 +2,7 @@
 
 from typing import List
 
+import numpy as np
 import pandas as pd
 from floris import FlorisModel
 
@@ -102,6 +103,32 @@ def turbine_power_error(
     turbine_columns = [f"pow_{i:03d}" for i in range(df_scada.n_turbines)]
 
     df_error = (df_scada[turbine_columns] - df_floris[turbine_columns]) ** 2
+
+    return df_error.sum().sum()
+
+def turbine_power_error_abs(
+    df_scada: pd.DataFrame | FlascDataFrame,
+    df_floris: pd.DataFrame | FlascDataFrame,
+    fm_: FlorisModel,
+    turbine_groupings: List = None,
+):
+    """Evaluate error with respect to turbine power.
+
+    Args:
+        df_scada (pd.DataFrame): SCADA data
+        df_floris (pd.DataFrame): FLORIS data
+        fm_ (FlorisModel): FLORIS model (Unused but required for compatibility)
+        turbine_groupings (List): List of turbine groupings.  Defaults to None.
+            In None case, assumes pow_ref and pow_test are already identified (note
+            this can be challenging to effect within FLORIS resimulation results).
+
+    Returns:
+        float: Overall wake losses squared error
+
+    """
+    turbine_columns = [f"pow_{i:03d}" for i in range(df_scada.n_turbines)]
+
+    df_error = (df_scada[turbine_columns] - df_floris[turbine_columns]).abs()
 
     return df_error.sum().sum()
 
