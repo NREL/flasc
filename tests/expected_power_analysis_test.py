@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 from polars.testing import assert_frame_equal
+from pytest import approx
 
 from flasc.analysis.analysis_input import AnalysisInput
 from flasc.analysis.expected_power_analysis import (
@@ -810,4 +811,30 @@ def test_uncertain_intervals():
     assert (
         epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_ub"]
         >= epao_standard_var.uplift_results["scada_uplift"]["energy_uplift_ctr"]
+    )
+
+
+def test_expected_power_var_cov_option():
+    """Test uplift center and variance using cov option when dropping rows with missing vars."""
+    a_in = load_data()
+
+    epao_standard_cov_or_var = total_uplift_expected_power(
+        a_in=a_in,
+        uplift_pairs=[("baseline", "wake_steering")],
+        uplift_names=["scada_uplift"],
+        test_turbines=[0, 1],
+        use_predefined_wd=True,
+        use_predefined_ws=True,
+        wd_step=1.0,
+        wd_min=0.5,
+        ws_min=0.5,
+        use_standard_error=True,
+        cov_terms="cov",
+    )
+
+    expected_uplift_var = (25 + 100 * (35 / 30) ** 2) / (30**2)
+
+    assert epao_standard_cov_or_var.uplift_results["scada_uplift"]["energy_uplift_ctr"] == 7 / 6
+    assert epao_standard_cov_or_var.uplift_results["scada_uplift"]["energy_uplift_var"] == approx(
+        expected_uplift_var
     )
