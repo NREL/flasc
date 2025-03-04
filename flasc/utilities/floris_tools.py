@@ -702,18 +702,18 @@ def get_all_impacting_turbines_geometrical(
                 y = (y0 + D[ii]) + (x - x0) * wake_slope
                 if isinstance(y, (float, np.float64, np.float32)):
                     if x < (x0 + 0.01):
-                        y = -np.Inf
+                        y = -np.inf
                 else:
-                    y[x < x0 + 0.01] = -np.Inf
+                    y[x < x0 + 0.01] = -np.inf
                 return y
 
             def yw_lower(x):
                 y = (y0 - D[ii]) - (x - x0) * wake_slope
                 if isinstance(y, (float, np.float64, np.float32)):
                     if x < (x0 + 0.01):
-                        y = -np.Inf
+                        y = -np.inf
                 else:
-                    y[x < x0 + 0.01] = -np.Inf
+                    y[x < x0 + 0.01] = -np.inf
                 return y
 
             def is_in_wake(xt, yt):
@@ -804,18 +804,18 @@ def get_upstream_turbs_floris(fm, wd_step=0.1, wake_slope=0.10, plot_lines=False
                 y = (y0 + D[ii]) + (x - x0) * wake_slope
                 if isinstance(y, (float, np.float64, np.float32)):
                     if x < (x0 + 0.01):
-                        y = -np.Inf
+                        y = -np.inf
                 else:
-                    y[x < x0 + 0.01] = -np.Inf
+                    y[x < x0 + 0.01] = -np.inf
                 return y
 
             def yw_lower(x):
                 y = (y0 - D[ii]) - (x - x0) * wake_slope
                 if isinstance(y, (float, np.float64, np.float32)):
                     if x < (x0 + 0.01):
-                        y = -np.Inf
+                        y = -np.inf
                 else:
-                    y[x < x0 + 0.01] = -np.Inf
+                    y[x < x0 + 0.01] = -np.inf
                 return y
 
             def is_in_wake(xt, yt):
