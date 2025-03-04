@@ -16,33 +16,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
-  <!-- So that users can add custom icons -->
-  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="_static/documentation_options.js?v=30a733bc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
@@ -78,7 +75,6 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="python"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -94,8 +90,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -103,6 +110,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -110,8 +118,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -129,8 +137,7 @@
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -160,17 +167,21 @@
     
     
     <img src="_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
-    <img src="_static/curve.png" class="logo__image only-dark pst-js-only" alt="FLASC - Home"/>
+    <script>document.write(`<img src="_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button></div>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -417,14 +428,9 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -585,16 +591,24 @@
 
 
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
 
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
 <button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
@@ -771,7 +785,7 @@ often inconsequently sampled. One can also specify a maximum time gap for
 data interpolation. If no data is available for a time period longer than
 max_gap, the data will be assigned a <code class="docutils literal notranslate"><span class="pre">NaN</span></code> value.</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flasc.time_operations</span> <span class="kn">import</span> <span class="n">df_resample_by_interpolation</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">flasc.time_operations</span><span class="w"> </span><span class="kn">import</span> <span class="n">df_resample_by_interpolation</span>
 <span class="n">df_res</span> <span class="o">=</span> <span class="n">df_resample_by_interpolation</span><span class="p">(</span>
      <span class="n">df</span><span class="p">,</span>
      <span class="n">time_array</span><span class="p">,</span>
@@ -856,7 +870,14 @@ The script will also plot the timestamps for which the faulty conditions
 are met. For example, the figure below shows two weeks in which the turbine
 flagged a lot of its own operation as faulty, being the 22nd and 23rd week
 of 2019:</p>
-<a class="reference internal image-reference" href="images/example_02_basic_filtering.png"><img alt="alternate text" class="align-center" src="images/example_02_basic_filtering.png" /></a>
+<a class="reference internal image-reference" href="images/example_02_basic_filtering.png"><img alt="alternate text" class="align-center" src="images/example_02_basic_filtering.png" />
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/runner/work/flasc/flasc/docs/data_processing.rst</span>, line 164)</p>
+<p>Cannot scale image!
+  Could not get size from &quot;images/example_02_basic_filtering.png&quot;:
+  [Errno 2] No such file or directory: 'images/example_02_basic_filtering.png'</p>
+</aside>
+</a>
 </section>
 <section id="a-03-check-sensor-stuck-faults-py">
 <h3>a_03_check_sensor_stuck_faults.py<a class="headerlink" href="#a-03-check-sensor-stuck-faults-py" title="Link to this heading">#</a></h3>
@@ -877,7 +898,14 @@ for this are <code class="docutils literal notranslate"><span class="pre">ws</sp
 filtering class that can identify the nominal turbine wind-speed power curve
 and remove outliers. Outliers can be simply faulty sensor measurements, but
 can also be periods of curtailment and periods of turbine maintenance.</p>
-<a class="reference internal image-reference" href="images/example_04_wspowcurve_filtering.png"><img alt="alternate text" class="align-center" src="images/example_04_wspowcurve_filtering.png" /></a>
+<a class="reference internal image-reference" href="images/example_04_wspowcurve_filtering.png"><img alt="alternate text" class="align-center" src="images/example_04_wspowcurve_filtering.png" />
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/runner/work/flasc/flasc/docs/data_processing.rst</span>, line 195)</p>
+<p>Cannot scale image!
+  Could not get size from &quot;images/example_04_wspowcurve_filtering.png&quot;:
+  [Errno 2] No such file or directory: 'images/example_04_wspowcurve_filtering.png'</p>
+</aside>
+</a>
 <p>There are two main ways of detecting and removing outliers. The first method
 is by adding &quot;windows&quot; in which measurements must be located. This can be
 done by:</p>
@@ -920,7 +948,14 @@ in the filtering process. Generally, we strongly recommend users to use
 </pre></div>
 </div>
 </div></blockquote>
-<a class="reference internal image-reference" href="images/example_04_wspowcurve_filtering_streamlit.png"><img alt="alternate text" class="align-center" src="images/example_04_wspowcurve_filtering_streamlit.png" /></a>
+<a class="reference internal image-reference" href="images/example_04_wspowcurve_filtering_streamlit.png"><img alt="alternate text" class="align-center" src="images/example_04_wspowcurve_filtering_streamlit.png" />
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/runner/work/flasc/flasc/docs/data_processing.rst</span>, line 249)</p>
+<p>Cannot scale image!
+  Could not get size from &quot;images/example_04_wspowcurve_filtering_streamlit.png&quot;:
+  [Errno 2] No such file or directory: 'images/example_04_wspowcurve_filtering_streamlit.png'</p>
+</aside>
+</a>
 <p>Using this GUI, the user can analyze specific turbines, interactively add or
 remove filter windows, and adjust settings to the filtering method based on
 deviations from the median power curve. The user can also analyze specific
@@ -1017,12 +1052,26 @@ largest wake deficit occurs, which is the common method in the literature,
 yet more inclusive since it considers all wake interactions over the wind
 rose for the northing calibration. Here are the energy ratio curves
 prior to northing calibration:</p>
-<a class="reference internal image-reference" href="images/example_07a_northing_calibration_pre.png"><img alt="alternate text" class="align-center" src="images/example_07a_northing_calibration_pre.png" /></a>
+<a class="reference internal image-reference" href="images/example_07a_northing_calibration_pre.png"><img alt="alternate text" class="align-center" src="images/example_07a_northing_calibration_pre.png" />
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/runner/work/flasc/flasc/docs/data_processing.rst</span>, line 359)</p>
+<p>Cannot scale image!
+  Could not get size from &quot;images/example_07a_northing_calibration_pre.png&quot;:
+  [Errno 2] No such file or directory: 'images/example_07a_northing_calibration_pre.png'</p>
+</aside>
+</a>
 <p>After evaluating a large range of possible bias corrections on the wind
 direction signal of a turbine, we find the value which best aligns the
 energy ratios. The energy ratios with the calibrated wind direction
 signal are shown in the next figure:</p>
-<a class="reference internal image-reference" href="images/example_07a_northing_calibration_post.png"><img alt="alternate text" class="align-center" src="images/example_07a_northing_calibration_post.png" /></a>
+<a class="reference internal image-reference" href="images/example_07a_northing_calibration_post.png"><img alt="alternate text" class="align-center" src="images/example_07a_northing_calibration_post.png" />
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/runner/work/flasc/flasc/docs/data_processing.rst</span>, line 369)</p>
+<p>Cannot scale image!
+  Could not get size from &quot;images/example_07a_northing_calibration_post.png&quot;:
+  [Errno 2] No such file or directory: 'images/example_07a_northing_calibration_post.png'</p>
+</aside>
+</a>
 <p>Note that this method can be used for each turbine individually. However,
 a simpler and faster method exists: once the first turbine's wind
 direction has been calibrated to true north, it is fairly easy to calibrate
@@ -1056,7 +1105,14 @@ below for completeness. For more
 information how the subtleties about calculating the energy ratio,
 and the various lower-level choices that must be made to do so, please see
 the example and documentation surrounding the energy ratio analysis suite.</p>
-<a class="reference internal image-reference" href="images/example_07a_northing_calibration_post.png"><img alt="alternate text" class="align-center" src="images/example_07a_northing_calibration_post.png" /></a>
+<a class="reference internal image-reference" href="images/example_07a_northing_calibration_post.png"><img alt="alternate text" class="align-center" src="images/example_07a_northing_calibration_post.png" />
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/runner/work/flasc/flasc/docs/data_processing.rst</span>, line 411)</p>
+<p>Cannot scale image!
+  Could not get size from &quot;images/example_07a_northing_calibration_post.png&quot;:
+  [Errno 2] No such file or directory: 'images/example_07a_northing_calibration_post.png'</p>
+</aside>
+</a>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference external" href="index.html">Return to table of contents</a></p>
@@ -1102,8 +1158,7 @@ the example and documentation surrounding the energy ratio analysis suite.</p>
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -1178,8 +1233,8 @@ By National Renewable Energy Laboratory
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

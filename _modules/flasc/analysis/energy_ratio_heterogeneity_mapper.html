@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../../_static/documentation_options.js?v=30a733bc"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
@@ -85,7 +82,6 @@ window.addEventListener("load", () => mermaid.run());
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="python"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -101,8 +97,19 @@ window.addEventListener("load", () => mermaid.run());
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -110,6 +117,7 @@ window.addEventListener("load", () => mermaid.run());
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -117,8 +125,8 @@ window.addEventListener("load", () => mermaid.run());
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -136,8 +144,7 @@ window.addEventListener("load", () => mermaid.run());
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -167,17 +174,21 @@ window.addEventListener("load", () => mermaid.run());
     
     
     <img src="../../../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
-    <img src="../../../_static/curve.png" class="logo__image only-dark pst-js-only" alt="FLASC - Home"/>
+    <script>document.write(`<img src="../../../_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button></div>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -424,14 +435,9 @@ window.addEventListener("load", () => mermaid.run());
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -527,16 +533,24 @@ window.addEventListener("load", () => mermaid.run());
 
 
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
 
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
 
 </div></div>
       
@@ -565,18 +579,18 @@ window.addEventListener("load", () => mermaid.run());
   <h1>Source code for flasc.analysis.energy_ratio_heterogeneity_mapper</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Module to calculate and visualize the heterogeneity in the inflow wind speed.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">scipy.spatial._qhull</span>
-<span class="kn">from</span> <span class="nn">floris.utilities</span> <span class="kn">import</span> <span class="n">wrap_360</span>
-<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_pdf</span> <span class="kn">import</span> <span class="n">PdfPages</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">LinearNDInterpolator</span><span class="p">,</span> <span class="n">NearestNDInterpolator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.spatial._qhull</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">floris.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">wrap_360</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_pdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">PdfPages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearNDInterpolator</span><span class="p">,</span> <span class="n">NearestNDInterpolator</span>
 
-<span class="kn">from</span> <span class="nn">flasc.analysis</span> <span class="kn">import</span> <span class="n">energy_ratio</span> <span class="k">as</span> <span class="n">er</span>
-<span class="kn">from</span> <span class="nn">flasc.analysis.analysis_input</span> <span class="kn">import</span> <span class="n">AnalysisInput</span>
-<span class="kn">from</span> <span class="nn">flasc.data_processing</span> <span class="kn">import</span> <span class="n">dataframe_manipulations</span> <span class="k">as</span> <span class="n">dfm</span>
-<span class="kn">from</span> <span class="nn">flasc.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flasc.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">energy_ratio</span> <span class="k">as</span> <span class="n">er</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flasc.analysis.analysis_input</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnalysisInput</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flasc.data_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataframe_manipulations</span> <span class="k">as</span> <span class="n">dfm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flasc.logging_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggingManager</span>
 
 <span class="n">logger_manager</span> <span class="o">=</span> <span class="n">LoggingManager</span><span class="p">()</span>  <span class="c1"># Instantiate LoggingManager</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logger_manager</span><span class="o">.</span><span class="n">logger</span>  <span class="c1"># Obtain the reusable logger</span>
@@ -585,7 +599,7 @@ window.addEventListener("load", () => mermaid.run());
 <span class="c1"># Standalone function to easily extract energy ratios for narrow wind direction bin</span>
 <div class="viewcode-block" id="_get_energy_ratio">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper._get_energy_ratio">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_energy_ratio</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">wd_bins</span><span class="p">,</span> <span class="n">ws_range</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_energy_ratio</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">wd_bins</span><span class="p">,</span> <span class="n">ws_range</span><span class="p">):</span>
     <span class="c1"># Calculate energy ratios</span>
     <span class="n">a_in</span> <span class="o">=</span> <span class="n">AnalysisInput</span><span class="p">([</span><span class="n">df</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">er</span><span class="o">.</span><span class="n">compute_energy_ratio</span><span class="p">(</span>
@@ -611,7 +625,7 @@ window.addEventListener("load", () => mermaid.run());
 <span class="c1"># derived from upstream turbine&#39;s power measurements</span>
 <div class="viewcode-block" id="heterogeneity_mapper">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper">[docs]</a>
-<span class="k">class</span> <span class="nc">heterogeneity_mapper</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">heterogeneity_mapper</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for calculating and visualizing the heterogeneity in the inflow wind speed.</span>
 
 <span class="sd">    This class is useful to calculate the energy ratios of a set</span>
@@ -624,7 +638,7 @@ window.addEventListener("load", () => mermaid.run());
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Private functions</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_raw</span><span class="p">,</span> <span class="n">fm</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_raw</span><span class="p">,</span> <span class="n">fm</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the heterogeneity_mapper class.</span>
 
 <span class="sd">        Args:</span>
@@ -640,7 +654,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="heterogeneity_mapper._process_single_wd">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper._process_single_wd">[docs]</a>
-    <span class="k">def</span> <span class="nf">_process_single_wd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wd</span><span class="p">,</span> <span class="n">wd_bin_width</span><span class="p">,</span> <span class="n">ws_range</span><span class="p">,</span> <span class="n">df_upstream</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_single_wd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wd</span><span class="p">,</span> <span class="n">wd_bin_width</span><span class="p">,</span> <span class="n">ws_range</span><span class="p">,</span> <span class="n">df_upstream</span><span class="p">):</span>
         <span class="c1"># In this function, we calculate the energy ratios of all upstream</span>
         <span class="c1"># turbines for a single wind direction bin and single wind speed bin.</span>
         <span class="c1"># The difference in energy ratios between different upstream turbines</span>
@@ -706,7 +720,7 @@ window.addEventListener("load", () => mermaid.run());
     <span class="c1"># Public functions</span>
 <div class="viewcode-block" id="heterogeneity_mapper.estimate_heterogeneity">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.estimate_heterogeneity">[docs]</a>
-    <span class="k">def</span> <span class="nf">estimate_heterogeneity</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">estimate_heterogeneity</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">df_upstream</span><span class="p">,</span>
         <span class="n">wd_array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">360.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">),</span>
@@ -734,7 +748,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="heterogeneity_mapper.plot_graphs">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_graphs">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">],</span> <span class="n">pdf_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">],</span> <span class="n">pdf_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the energy ratios for all upstream turbines for each wind direction bin.</span>
 
 <span class="sd">        Args:</span>
@@ -794,7 +808,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="heterogeneity_mapper.generate_floris_hetmap">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.generate_floris_hetmap">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_floris_hetmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_floris_hetmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a dataframe for a FLORIS heterogeneous map.</span>
 
 <span class="sd">        Returns:</span>
@@ -846,7 +860,7 @@ window.addEventListener("load", () => mermaid.run());
     <span class="c1"># # Visualization</span>
 <div class="viewcode-block" id="heterogeneity_mapper.plot_layout">
 <a class="viewcode-back" href="../../../_autosummary/flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.html#flasc.analysis.energy_ratio_heterogeneity_mapper.heterogeneity_mapper.plot_layout">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">],</span> <span class="n">plot_background_flow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pdf_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">],</span> <span class="n">plot_background_flow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pdf_save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the layout of the wind farm with the inflow wind speed heterogeneity.</span>
 
 <span class="sd">        Args:</span>
@@ -1054,8 +1068,8 @@ By National Renewable Energy Laboratory
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>

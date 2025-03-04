@@ -15,33 +15,30 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!--
-    this give us a css class that will be invisible only if js is disabled
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=a3416100" />
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../../../_static/documentation_options.js?v=30a733bc"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
@@ -85,7 +82,6 @@ window.addEventListener("load", () => mermaid.run());
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="python"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -101,8 +97,19 @@ window.addEventListener("load", () => mermaid.run());
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -110,6 +117,7 @@ window.addEventListener("load", () => mermaid.run());
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search this book..."
          aria-label="Search this book..."
          autocomplete="off"
@@ -117,8 +125,8 @@ window.addEventListener("load", () => mermaid.run());
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -136,8 +144,7 @@ window.addEventListener("load", () => mermaid.run());
       
         
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -167,17 +174,21 @@ window.addEventListener("load", () => mermaid.run());
     
     
     <img src="../../../_static/curve.png" class="logo__image only-light" alt="FLASC - Home"/>
-    <img src="../../../_static/curve.png" class="logo__image only-dark pst-js-only" alt="FLASC - Home"/>
+    <script>document.write(`<img src="../../../_static/curve.png" class="logo__image only-dark" alt="FLASC - Home"/>`);</script>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button></div>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         
@@ -424,14 +435,9 @@ window.addEventListener("load", () => mermaid.run());
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
-      <div class="sidebar-primary-item">
-<div id="ethical-ad-placement"
-      class="flat"
-      data-ea-publisher="readthedocs"
-      data-ea-type="readthedocs-sidebar"
-      data-ea-manual="true">
-</div></div>
   </div>
+  
+  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -527,16 +533,24 @@ window.addEventListener("load", () => mermaid.run());
 
 
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
 
 
-<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-</button>
+  </button>
+`);
+</script>
 
 </div></div>
       
@@ -565,21 +579,21 @@ window.addEventListener("load", () => mermaid.run());
   <h1>Source code for flasc.data_processing.filtering</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Implement filtering class and functions for FLASC data.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.legend</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="n">Legend</span>
-<span class="kn">from</span> <span class="nn">bokeh.palettes</span> <span class="kn">import</span> <span class="n">Category20_20</span> <span class="k">as</span> <span class="n">palette</span>
-<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">ColumnDataSource</span><span class="p">,</span> <span class="n">figure</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.legend</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Legend</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.palettes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Category20_20</span> <span class="k">as</span> <span class="n">palette</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bokeh.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnDataSource</span><span class="p">,</span> <span class="n">figure</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
 
-<span class="kn">from</span> <span class="nn">flasc.data_processing</span> <span class="kn">import</span> <span class="n">dataframe_manipulations</span> <span class="k">as</span> <span class="n">dfm</span>
-<span class="kn">from</span> <span class="nn">flasc.data_processing.find_sensor_faults</span> <span class="kn">import</span> <span class="n">find_sensor_stuck_faults</span>
-<span class="kn">from</span> <span class="nn">flasc.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingManager</span>
-<span class="kn">from</span> <span class="nn">flasc.utilities</span> <span class="kn">import</span> <span class="n">utilities</span> <span class="k">as</span> <span class="n">flascutils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flasc.data_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataframe_manipulations</span> <span class="k">as</span> <span class="n">dfm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flasc.data_processing.find_sensor_faults</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_sensor_stuck_faults</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flasc.logging_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggingManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flasc.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">utilities</span> <span class="k">as</span> <span class="n">flascutils</span>
 
 <span class="n">logger_manager</span> <span class="o">=</span> <span class="n">LoggingManager</span><span class="p">()</span>  <span class="c1"># Instantiate LoggingManager</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logger_manager</span><span class="o">.</span><span class="n">logger</span>  <span class="c1"># Obtain the reusable logger</span>
@@ -587,7 +601,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="df_get_no_faulty_measurements">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.df_get_no_faulty_measurements.html#flasc.data_processing.filtering.df_get_no_faulty_measurements">[docs]</a>
-<span class="k">def</span> <span class="nf">df_get_no_faulty_measurements</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">turbine</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">df_get_no_faulty_measurements</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">turbine</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the number of faulty measurements for a specific turbine.</span>
 
 <span class="sd">    Args:</span>
@@ -613,7 +627,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="df_mark_turbdata_as_faulty">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.df_mark_turbdata_as_faulty.html#flasc.data_processing.filtering.df_mark_turbdata_as_faulty">[docs]</a>
-<span class="k">def</span> <span class="nf">df_mark_turbdata_as_faulty</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">turbine_list</span><span class="p">,</span> <span class="n">exclude_columns</span><span class="o">=</span><span class="p">[]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">df_mark_turbdata_as_faulty</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">turbine_list</span><span class="p">,</span> <span class="n">exclude_columns</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mark turbine data as faulty based on a condition.</span>
 
 <span class="sd">    Args:</span>
@@ -645,7 +659,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter">[docs]</a>
-<span class="k">class</span> <span class="nc">FlascFilter</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FlascFilter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implement filtering class for SCADA data.</span>
 
 <span class="sd">    This class allows a user to filter turbine data based on the</span>
@@ -661,7 +675,7 @@ window.addEventListener("load", () => mermaid.run());
 <span class="sd">           per power bin.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">turbine_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">turbine_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the class.</span>
 
 <span class="sd">        Args:</span>
@@ -683,7 +697,7 @@ window.addEventListener("load", () => mermaid.run());
     <span class="c1"># Private methods</span>
 <div class="viewcode-block" id="FlascFilter._get_all_unique_flags">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._get_all_unique_flags">[docs]</a>
-    <span class="k">def</span> <span class="nf">_get_all_unique_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_all_unique_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns all unique flags in the dataframe.</span>
 
 <span class="sd">        Private function that grabs all the unique filter flags</span>
@@ -707,7 +721,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter._reset_mean_power_curves">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._reset_mean_power_curves">[docs]</a>
-    <span class="k">def</span> <span class="nf">_reset_mean_power_curves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ws_bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">25.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reset_mean_power_curves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ws_bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">25.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)):</span>
         <span class="c1"># If uninitialized, create an empty dataframe with NaNs</span>
         <span class="n">pw_curve_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="nb">zip</span><span class="p">(</span>
@@ -726,7 +740,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter._get_mean_power_curves">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._get_mean_power_curves">[docs]</a>
-    <span class="k">def</span> <span class="nf">_get_mean_power_curves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">turbine_subset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_mean_power_curves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">turbine_subset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the mean power production in bins of the wind speed.</span>
 
 <span class="sd">        Calculates the mean power production in bins of the wind speed,</span>
@@ -796,7 +810,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter._set_legend_alpha_to_one">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter._set_legend_alpha_to_one">[docs]</a>
-    <span class="k">def</span> <span class="nf">_set_legend_alpha_to_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lgd</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">Legend</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_legend_alpha_to_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lgd</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">Legend</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the alpha value of the provided Legend object to be 1.</span>
 
 <span class="sd">        Args:</span>
@@ -814,7 +828,7 @@ window.addEventListener("load", () => mermaid.run());
     <span class="c1"># Public methods</span>
 <div class="viewcode-block" id="FlascFilter.reset_filters">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.reset_filters">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset all filter variables and assume all data is clean.&quot;&quot;&quot;</span>
         <span class="c1"># Copy the original, unfiltered dataframe from self</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df_initial</span>
@@ -837,7 +851,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.filter_by_condition">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.filter_by_condition">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_by_condition</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_by_condition</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">condition</span><span class="p">,</span>
         <span class="n">label</span><span class="p">,</span>
@@ -935,7 +949,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.filter_by_sensor_stuck_faults">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.filter_by_sensor_stuck_faults">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_by_sensor_stuck_faults</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_by_sensor_stuck_faults</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
         <span class="n">ti</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1018,7 +1032,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.filter_by_power_curve">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.filter_by_power_curve">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_by_power_curve</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_by_power_curve</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ti</span><span class="p">,</span>
         <span class="n">m_ws_lb</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
@@ -1198,7 +1212,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.filter_by_floris_power_curve">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.filter_by_floris_power_curve">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_by_floris_power_curve</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_by_floris_power_curve</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fm</span><span class="p">,</span>
         <span class="n">ti</span><span class="p">,</span>
@@ -1373,7 +1387,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.get_df">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.get_df">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the filtered dataframe to the user.</span>
 
 <span class="sd">        Returns:</span>
@@ -1388,7 +1402,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.get_power_curve">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.get_power_curve">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_power_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calculate_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_power_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calculate_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the turbine estimated mean power curves to the user.</span>
 
 <span class="sd">        Args:</span>
@@ -1412,7 +1426,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.plot_farm_mean_power_curve">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_farm_mean_power_curve">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_farm_mean_power_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_farm_mean_power_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot mean of all turbines&#39; power curves and show individual curves.</span>
 
 <span class="sd">        Also estimate</span>
@@ -1469,7 +1483,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.plot_filters_custom_scatter">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_filters_custom_scatter</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_filters_custom_scatter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">x_col</span><span class="p">,</span> <span class="n">y_col</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Wind speed (m/s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Power (kW)&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the filtered data in a scatter plot.</span>
@@ -1543,7 +1557,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.plot_filters_custom_scatter_bokeh">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_custom_scatter_bokeh">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_filters_custom_scatter_bokeh</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_filters_custom_scatter_bokeh</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ti</span><span class="p">,</span>
         <span class="n">x_col</span><span class="p">,</span>
@@ -1646,7 +1660,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.plot_filters_in_ws_power_curve">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_ws_power_curve">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_filters_in_ws_power_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_filters_in_ws_power_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot faulty data in the wind speed power curve.</span>
 
 <span class="sd">        Plot the wind speed power curve and connect each faulty datapoint</span>
@@ -1718,7 +1732,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.plot_postprocessed_in_ws_power_curve">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_postprocessed_in_ws_power_curve">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_postprocessed_in_ws_power_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_postprocessed_in_ws_power_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the postprocessed data in the wind speed power curve.</span>
 
 <span class="sd">        Plot the wind speed power curve and mark faulty data according to</span>
@@ -1800,7 +1814,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.plot_filters_in_time">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_filters_in_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_filters_in_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the filtered data in time.</span>
 
 <span class="sd">        Generate bar plot where each week of data is gathered and its</span>
@@ -1847,7 +1861,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="FlascFilter.plot_filters_in_time_bokeh">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.FlascFilter.html#flasc.data_processing.filtering.FlascFilter.plot_filters_in_time_bokeh">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_filters_in_time_bokeh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_filters_in_time_bokeh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the filtered data in time.</span>
 
 <span class="sd">        Generate bar plot where each week of data is gathered and its</span>
@@ -1920,7 +1934,7 @@ window.addEventListener("load", () => mermaid.run());
 
 <div class="viewcode-block" id="filter_df_by_faulty_impacting_turbines">
 <a class="viewcode-back" href="../../../_autosummary/flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines.html#flasc.data_processing.filtering.filter_df_by_faulty_impacting_turbines">[docs]</a>
-<span class="k">def</span> <span class="nf">filter_df_by_faulty_impacting_turbines</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">df_impacting_turbines</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">filter_df_by_faulty_impacting_turbines</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">df_impacting_turbines</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign faulty measurements based on upstream turbines faults.</span>
 
 <span class="sd">    Assigns a turbine&#39;s measurement to NaN for each timestamp for which any of the turbines</span>
@@ -2084,8 +2098,8 @@ By National Renewable Energy Laboratory
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
   </footer>
