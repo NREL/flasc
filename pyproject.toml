@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "bokeh>=2, <4",
-    "floris @ git+https://github.com/NREL/FLORIS.git@develop",
+    "floris~=4.3",
     "feather-format~=0.0",
     "ipympl~=0.9",
     "matplotlib~=3.8",
