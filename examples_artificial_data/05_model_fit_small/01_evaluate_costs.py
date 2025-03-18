@@ -3,6 +3,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
+from flasc.model_fit.cost_library import turbine_power_error_abs
 from flasc.model_fit.model_fit import ModelFit
 
 # Load the data from previous example
@@ -16,19 +17,13 @@ parameter = data["parameter"]
 we_value_original = data["we_value_original"]
 we_value_set = data["we_value_set"]
 
-# Define a cost function that checks the RMSE between the power of the second turbine
-# Note function has to accept fmodel but does not have to use it
 
-
-def cost_function(df_scada, df_floris, fmodel):
-    return np.sqrt(np.mean((df_scada["pow_001"].values - df_floris["pow_001"].values) ** 2))
-
-
-# Now pass the above cost function to the ModelFit class
+# Set up the ModelFit object with the data and FLORIS model
+# Use the absolute turbine power error as cost function
 mf = ModelFit(
     df,
     fm_default,
-    cost_function,
+    turbine_power_error_abs,
 )
 
 # Evaluate the model
@@ -40,12 +35,12 @@ n_steps = 10
 param_result = []
 cost_result = []
 for i, param_value in enumerate(np.arange(0.01, 0.07, 0.01)):
-    print(f"Evaluating cost function for parameter value {param_value} ({i+1}/{n_steps})")
+    print(f"Evaluating cost function for parameter value {param_value} ({i + 1}/{n_steps})")
     fm_default.set_param(parameter, param_value)
     mf = ModelFit(
         df,
         fm_default,
-        cost_function,
+        turbine_power_error_abs,
     )
     cost_value = mf.evaluate_floris()
 
