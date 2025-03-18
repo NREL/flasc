@@ -1,7 +1,7 @@
 import pickle
 
 import numpy as np
-from floris import TimeSeries
+from floris import TimeSeries, UncertainFlorisModel
 
 from flasc.model_fit.model_fit import ModelFit
 from flasc.utilities.utilities_examples import load_floris_artificial
@@ -14,9 +14,16 @@ N = 200  # Number of data points
 wd_std = 3.0  # Standard deviation of wind direction in for uncertain model
 we_value_set = 0.03  # Wake expansion value that will be the used to generate the test data
 
+# Resolution parameters
+# These are used in the UncertainFlorisModel
+ws_resolution = 0.25
+wd_resolution = 2.0
+
 # Get default FLORIS model
 fm_default, _ = load_floris_artificial(wake_model="jensen")
-ufm_default, _ = load_floris_artificial(wake_model="jensen", wd_std=wd_std)
+ufm_default = UncertainFlorisModel(
+    fm_default.copy(), wd_std=wd_std, ws_resolution=ws_resolution, wd_resolution=wd_resolution
+)
 
 # Set a simple two turbine layout
 layout_x = [0.0, 126.0 * 6.0]
