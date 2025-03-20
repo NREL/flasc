@@ -1,7 +1,9 @@
 import pickle
 
+import matplotlib.pyplot as plt
 import numpy as np
 from floris import TimeSeries
+from floris.layout_visualization import plot_turbine_labels, plot_turbine_points
 
 from flasc.model_fit.model_fit import ModelFit
 from flasc.utilities.utilities_examples import load_floris_artificial
@@ -11,14 +13,14 @@ Use wd_std = 3 in every case. """
 
 # Parameters
 N = 1000  # Number of data points
-wd_std = 3.0  # Standard deviation of wind direction in for uncertain model
+wd_std = 3.0  # Standard deviation of wind direction for uncertain model
 D = 126.0  # Rotor diameter of 5MW
 
 # Get FLORIS models for different wake models, use default parameters
 fm_jensen, _ = load_floris_artificial(wake_model="jensen", wd_std=wd_std)
 fm_gch, _ = load_floris_artificial(wake_model="gch", wd_std=wd_std)
 fm_emg, _ = load_floris_artificial(wake_model="emgauss", wd_std=wd_std)
-fm_turbo, _ = load_floris_artificial(wake_model="turbopark", wd_std=wd_std)
+fm_turbo, _ = load_floris_artificial(wake_model="turboparkgauss", wd_std=wd_std)
 
 # Use a farm with 14 turbines in a non-gridded layout
 layout_x = [
@@ -60,11 +62,10 @@ fm_gch.set(layout_x=layout_x, layout_y=layout_y)
 fm_emg.set(layout_x=layout_x, layout_y=layout_y)
 fm_turbo.set(layout_x=layout_x, layout_y=layout_y)
 
-# # Show the layout (Just while setting up)
-# fig, ax = plt.subplots()
-# plot_turbine_points(fm_jensen, ax)
-# plot_turbine_labels(fm_jensen, ax)
-# plt.show()
+# Show the layout (Just while setting up)
+fig, ax = plt.subplots()
+plot_turbine_points(fm_jensen, ax)
+plot_turbine_labels(fm_jensen, ax)
 
 
 # Generate a random series of wind speeds and directions with wind directions
@@ -139,3 +140,5 @@ with open("farm_data.pkl", "wb") as f:
         },
         f,
     )
+
+plt.show()
