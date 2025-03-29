@@ -6,7 +6,7 @@ from flasc.model_fit.model_fit import ModelFit
 
 
 def opt_optuna(
-    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False
+    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False, seed=None
 ) -> dict:
     """Optimize the model parameters using Optuna.
 
@@ -35,7 +35,10 @@ def opt_optuna(
         return mf.set_parameter_and_evaluate(parameter_values, turbine_groupings)
 
     # Run the optimization
-    study = optuna.create_study()
+    if seed is not None:
+        study = optuna.create_study()
+    else:
+        study = optuna.create_study(sampler=optuna.samplers.TPESampler(seed=seed))
 
     # Seed the initial value
     init_dict = {}
@@ -122,10 +125,10 @@ def opt_optuna_with_wd_std(
 
 # Temporarily alias the old function names for continutity with older codes, will eventually remove
 def atomic_opt_optuna(
-    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False
+    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False, seed=None
 ) -> dict:
     """Alias to opt_optuna."""
-    return opt_optuna(mf, n_trials, timeout, turbine_groupings, verbose)
+    return opt_optuna(mf, n_trials, timeout, turbine_groupings, verbose, seed)
 
 
 def opt_optuna_with_unc(

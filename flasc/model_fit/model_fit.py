@@ -72,11 +72,12 @@ class ModelFit:
 
         # Get the number of turbines and confirm that
         # the dataframe and floris model have the same number of turbines
-        self.n_turbines = dfm.get_num_turbines(self.df)
+        n_turbines_data = dfm.get_num_turbines(self.df)
 
-        if self.n_turbines != self.fmodel.n_turbines:
-            raise ValueError(
-                "The number of turbines in the dataframe and the Floris model do not match."
+        if n_turbines_data != self.fmodel.n_turbines:
+            print(
+                "WARNING: The number of turbines in the dataframe and the "
+                "Floris model do not match."
             )
 
         # Check that the cost function has 3 inputs, the SCADA dataframe, the FLORIS dataframe,
