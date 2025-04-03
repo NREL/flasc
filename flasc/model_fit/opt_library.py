@@ -6,7 +6,12 @@ from flasc.model_fit.model_fit import ModelFit
 
 
 def opt_optuna(
-    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, seed=None, verbose=False,
+    mf: ModelFit,
+    n_trials=100,
+    timeout=None,
+    turbine_groupings=None,
+    seed=None,
+    verbose=False,
 ) -> dict:
     """Optimize the model parameters using Optuna.
 
@@ -38,8 +43,7 @@ def opt_optuna(
 
     # Run the optimization
     study = optuna.create_study(
-        sampler=optuna.samplers.TPESampler(seed=seed),
-        study_name="ModelFit"
+        sampler=optuna.samplers.TPESampler(seed=seed), study_name="ModelFit"
     )
 
     # Seed the initial value
