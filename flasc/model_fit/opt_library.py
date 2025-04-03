@@ -6,7 +6,7 @@ from flasc.model_fit.model_fit import ModelFit
 
 
 def opt_optuna(
-    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, verbose=False, seed=None
+    mf: ModelFit, n_trials=100, timeout=None, turbine_groupings=None, seed=None, verbose=False,
 ) -> dict:
     """Optimize the model parameters using Optuna.
 
@@ -16,6 +16,8 @@ def opt_optuna(
         timeout: Timeout for the optimization. Defaults to None.
         turbine_groupings (Dict[str, Tuple], optional): Dictionary of turbine groupings.
             Defaults to None.
+        seed: Seed for the random number generator. Defaults to None, in which case a random seed
+            will be used.
         verbose: Whether to print out the optimization process. Defaults to False.
 
     Returns:
@@ -35,10 +37,10 @@ def opt_optuna(
         return mf.set_parameter_and_evaluate(parameter_values, turbine_groupings)
 
     # Run the optimization
-    if seed is not None:
-        study = optuna.create_study()
-    else:
-        study = optuna.create_study(sampler=optuna.samplers.TPESampler(seed=seed))
+    study = optuna.create_study(
+        sampler=optuna.samplers.TPESampler(seed=seed),
+        study_name="ModelFit"
+    )
 
     # Seed the initial value
     init_dict = {}
