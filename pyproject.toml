@@ -41,6 +41,7 @@ dependencies = [
     "res-wind-up~=0.1",
     "optuna~=4.0",
     "scikit-learn~=1.5",
+    "great_tables~=0.17",
 ]
 
 [project.optional-dependencies]
