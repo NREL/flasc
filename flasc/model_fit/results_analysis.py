@@ -11,7 +11,7 @@ from flasc.flasc_dataframe import FlascDataFrame
 
 
 class ResultsAnalysis:
-    """Analyze results
+    """Analyze results.
 
     Description
     """
@@ -62,7 +62,8 @@ class ResultsAnalysis:
         # Check that self.df_scada.n_turbines == floris_powers[0].shape[1]
         if self.df_scada.n_turbines != floris_powers[0].shape[1]:
             raise ValueError(
-                "The number of turbines in df_scada must match the number of columns in the power tables"
+                "The number of turbines in df_scada must match the number of columns in the power "
+                "tables."
             )
 
         # Save the number of turbines
@@ -126,7 +127,7 @@ class ResultsAnalysis:
     # Plot the error distributions in absolute
     def plot_error_abs(self, ax=None):
         """Plot the error distributions in absolute.
-        
+
         Args:
             ax: Axes to plot on. If None, create a new figure.
         """
@@ -140,9 +141,9 @@ class ResultsAnalysis:
         )
 
     # Generate the table of median errors
-    def table_error_median(self, dict_model_names={}, dict_calibration_names={},decimals=1):
+    def table_error_median(self, dict_model_names={}, dict_calibration_names={}, decimals=1):
         """Generate a table of median errors.
-        
+
         Args:
             dict_model_names: Dictionary of model names to replace in the table.
             dict_calibration_names: Dictionary of calibration names to replace in the table.
@@ -168,8 +169,6 @@ class ResultsAnalysis:
         result_table = result_table.pivot(
             index="model", columns="calibration", values="error"
         ).reset_index()
-
-        
 
         gt_table = (
             GT(result_table)
