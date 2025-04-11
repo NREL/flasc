@@ -11,7 +11,7 @@ from flasc.flasc_dataframe import FlascDataFrame
 
 
 class ResultsAnalysis:
-    """Analyze results
+    """Analyze results.
 
     Description
     """
@@ -62,7 +62,8 @@ class ResultsAnalysis:
         # Check that self.df_scada.n_turbines == floris_powers[0].shape[1]
         if self.df_scada.n_turbines != floris_powers[0].shape[1]:
             raise ValueError(
-                "The number of turbines in df_scada must match the number of columns in the power tables"
+                "The number of turbines in df_scada must match the number of columns in the power "
+                "tables."
             )
 
         # Save the number of turbines
