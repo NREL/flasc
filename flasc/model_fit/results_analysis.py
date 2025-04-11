@@ -126,7 +126,7 @@ class ResultsAnalysis:
     # Plot the error distributions in absolute
     def plot_error_abs(self, ax=None):
         """Plot the error distributions in absolute.
-        
+
         Args:
             ax: Axes to plot on. If None, create a new figure.
         """
@@ -140,20 +140,34 @@ class ResultsAnalysis:
         )
 
     # Generate the table of median errors
-    def table_error_median(self, dict_model_names={}, dict_calibration_names={},decimals=1):
-        """Generate a table of median errors.
-        
+    def table_result(
+        self, dict_model_names={}, dict_calibration_names={}, decimals=1, calculation="median"
+    ):
+        """Generate a summary table of the errors.
+
         Args:
             dict_model_names: Dictionary of model names to replace in the table.
             dict_calibration_names: Dictionary of calibration names to replace in the table.
             decimals: Number of decimals to display in the table.
+            calculation: Type of calculation to perform. Options are 'median' or 'mean' or 'std'
 
         Returns:
             GT table of median errors
         """
-        result_table = (
-            self.df_full_table.groupby(["model", "calibration"]).error.median().reset_index()
-        )
+        if calculation == "mean":
+            result_table = (
+                self.df_full_table.groupby(["model", "calibration"]).error.mean().reset_index()
+            )
+        elif calculation == "std":
+            result_table = (
+                self.df_full_table.groupby(["model", "calibration"]).error.std().reset_index()
+            )
+        elif calculation == "median":
+            result_table = (
+                self.df_full_table.groupby(["model", "calibration"]).error.median().reset_index()
+            )
+        else:
+            raise ValueError("calculation must be 'median', 'mean', or 'std'")
 
         # If dict_model_names is not empty, replace the model names
         if dict_model_names:
@@ -169,11 +183,9 @@ class ResultsAnalysis:
             index="model", columns="calibration", values="error"
         ).reset_index()
 
-        
-
         gt_table = (
             GT(result_table)
-            .tab_header(title="Median Turbine Error (kW)")
+            .tab_header(title=f"{calculation.capitalize()} Turbine Error (kW)")
             .cols_move_to_start(columns=["model"] + cal_levels)
             .fmt_number(columns=cal_levels, decimals=decimals)
         )
