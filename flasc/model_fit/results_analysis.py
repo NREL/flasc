@@ -108,6 +108,9 @@ class ResultsAnalysis:
         # Add the error column
         self.df_full_table["error"] = self.df_full_table["scada"] - self.df_full_table["floris"]
 
+        # Add the absolute error column
+        self.df_full_table["error_abs"] = self.df_full_table["error"].abs()
+
     # Plot the error distributions
     def plot_error(self, ax=None):
         """Plot the error distributions.
@@ -140,9 +143,14 @@ class ResultsAnalysis:
             showfliers=False,
         )
 
-    # Generate the table of median errors
-    def table_result(
-        self, dict_model_names={}, dict_calibration_names={}, decimals=1, calculation="median"
+    # Generate the table of statistics of turbine error
+    def table_turbine_error(
+        self,
+        dict_model_names={},
+        dict_calibration_names={},
+        decimals=1,
+        calculation="median",
+        use_abs=False,
     ):
         """Generate a summary table of the errors.
 
@@ -151,21 +159,33 @@ class ResultsAnalysis:
             dict_calibration_names: Dictionary of calibration names to replace in the table.
             decimals: Number of decimals to display in the table.
             calculation: Type of calculation to perform. Options are 'median' or 'mean' or 'std'
+            use_abs: If True, use absolute error instead of raw error.
 
         Returns:
             GT table of median errors
         """
+        if use_abs:
+            error_term = "error_abs"
+            title_suffix = " (absolute)"
+        else:
+            error_term = "error"
+            title_suffix = ""
+
         if calculation == "mean":
             result_table = (
-                self.df_full_table.groupby(["model", "calibration"]).error.mean().reset_index()
+                self.df_full_table.groupby(["model", "calibration"])[error_term]
+                .mean()
+                .reset_index()
             )
         elif calculation == "std":
             result_table = (
-                self.df_full_table.groupby(["model", "calibration"]).error.std().reset_index()
+                self.df_full_table.groupby(["model", "calibration"])[error_term].std().reset_index()
             )
         elif calculation == "median":
             result_table = (
-                self.df_full_table.groupby(["model", "calibration"]).error.median().reset_index()
+                self.df_full_table.groupby(["model", "calibration"])[error_term]
+                .median()
+                .reset_index()
             )
         else:
             raise ValueError("calculation must be 'median', 'mean', or 'std'")
@@ -181,12 +201,83 @@ class ResultsAnalysis:
 
         # Pivot to table
         result_table = result_table.pivot(
-            index="model", columns="calibration", values="error"
+            index="model", columns="calibration", values=error_term
         ).reset_index()
 
         gt_table = (
             GT(result_table)
-            .tab_header(title=f"{calculation.capitalize()} Turbine Error (kW)")
+            .tab_header(title=f"{calculation.capitalize()} Turbine Error (kW)" + title_suffix)
+            .cols_move_to_start(columns=["model"] + cal_levels)
+            .fmt_number(columns=cal_levels, decimals=decimals)
+        )
+        return gt_table
+
+    # Generate the table of median errors
+    def table_farm_energy(
+        self,
+        dict_model_names={},
+        dict_calibration_names={},
+        decimals=1,
+        use_pchange=False,
+    ):
+        """Generate a summary table of the errors.
+
+        Args:
+            dict_model_names: Dictionary of model names to replace in the table.
+            dict_calibration_names: Dictionary of calibration names to replace in the table.
+            decimals: Number of decimals to display in the table.
+            use_pchange: If True, express results in percent change
+
+        Returns:
+            GT table of median errors
+        """
+        # First compute the SCADA total energy
+        # First see what the SCADA result is (same in every case)
+        scada_table = self.df_full_table.groupby(["model", "calibration"])["scada"].sum() / 6e6  #
+        scada_table = scada_table.reset_index()
+
+        # Make sure there is only one unique value of the 'scada' column
+        if scada_table['scada'].nunique() != 1:
+            raise ValueError("There should be only one unique value of the 'scada' column")
+
+        scada_result = scada_table["scada"].values[0]
+        print(f"SCADA RESULT: {scada_result:.2f} GWh")
+
+        # Now compute the result table
+        result_table = self.df_full_table.groupby(["model", "calibration"]).floris.sum() / 6e6
+        
+        # If using p_change
+        if use_pchange:
+            result_table = result_table - scada_result
+            result_table = result_table / scada_result * 100
+        
+        result_table = result_table.reset_index()
+
+
+
+        # If dict_model_names is not empty, replace the model names
+        if dict_model_names:
+            result_table["model"] = result_table["model"].map(dict_model_names)
+        # If dict_calibration_names is not empty, replace the calibration names
+        if dict_calibration_names:
+            result_table["calibration"] = result_table["calibration"].map(dict_calibration_names)
+
+        cal_levels = list(result_table.calibration.unique())
+
+        # Pivot to table
+        result_table = result_table.pivot(
+            index="model", columns="calibration", values="floris"
+        ).reset_index()
+
+        # Get ready the table
+        if use_pchange:
+            table_sub_title = "Percent Change From SCADA (%)"
+        else:
+            table_sub_title = f"GWh (SCADA: {scada_result:.2f} GWh)"
+
+        gt_table = (
+            GT(result_table)
+            .tab_header(title="Total Energy Production", subtitle=table_sub_title)
             .cols_move_to_start(columns=["model"] + cal_levels)
             .fmt_number(columns=cal_levels, decimals=decimals)
         )
