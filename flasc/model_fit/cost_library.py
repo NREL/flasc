@@ -81,7 +81,7 @@ def farm_power_error(
     return error.sum()
 
 
-def turbine_power_error(
+def turbine_power_error_sq(
     df_scada: pd.DataFrame | FlascDataFrame,
     df_floris: pd.DataFrame | FlascDataFrame,
     fm_: FlorisModel,
@@ -101,11 +101,11 @@ def turbine_power_error(
         float: Overall wake losses squared error
 
     """
-    turbine_columns = [f"pow_{i:03d}" for i in range(df_scada.n_turbines)]
+    turbine_columns = [c for c in df_scada.columns if c[:4] == "pow_" and c[4:].isdigit()]
 
     df_error = (df_scada[turbine_columns] - df_floris[turbine_columns]) ** 2
 
-    return df_error.sum().sum()
+    return df_error.mean().mean()
 
 
 def turbine_power_error_abs(
@@ -128,11 +128,11 @@ def turbine_power_error_abs(
         float: Overall wake losses squared error
 
     """
-    turbine_columns = [f"pow_{i:03d}" for i in range(df_scada.n_turbines)]
+    turbine_columns = [c for c in df_scada.columns if c[:4] == "pow_" and c[4:].isdigit()]
 
     df_error = (df_scada[turbine_columns] - df_floris[turbine_columns]).abs()
 
-    return df_error.sum().sum()
+    return df_error.mean().mean()
 
 
 def expected_turbine_power_error(
