@@ -237,7 +237,7 @@ class ResultsAnalysis:
         scada_table = scada_table.reset_index()
 
         # Make sure there is only one unique value of the 'scada' column
-        if scada_table['scada'].nunique() != 1:
+        if scada_table["scada"].nunique() != 1:
             raise ValueError("There should be only one unique value of the 'scada' column")
 
         scada_result = scada_table["scada"].values[0]
@@ -245,15 +245,13 @@ class ResultsAnalysis:
 
         # Now compute the result table
         result_table = self.df_full_table.groupby(["model", "calibration"]).floris.sum() / 6e6
-        
+
         # If using p_change
         if use_pchange:
             result_table = result_table - scada_result
             result_table = result_table / scada_result * 100
-        
+
         result_table = result_table.reset_index()
-
-
 
         # If dict_model_names is not empty, replace the model names
         if dict_model_names:
