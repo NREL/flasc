@@ -74,7 +74,8 @@ class FlascDataFrame(DataFrame):
     @property
     def in_flasc_format(self):
         """Return True if the data is in FLASC format, False otherwise."""
-        if ("time" in self.columns) and ("pow_000" in self.columns):
+        pow_columns = [c for c in df_scada.columns if c[:4] == "pow_" and c[4:].isdigit()]
+        if ("time" in self.columns and len(pow_cols) > 0):
             return True
         else:
             return False
