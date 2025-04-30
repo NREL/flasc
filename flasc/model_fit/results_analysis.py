@@ -25,6 +25,7 @@ class ResultsAnalysis:
         floris_calibrations: list,
         split_columns: list[str] = [],
         dt: float = 600.0,  # seconds
+        turbine_subset: list[int] = None,
     ):
         """Initialize the ResultsAnalysis object.
 
@@ -35,6 +36,8 @@ class ResultsAnalysis:
             floris_calibrations: List of calibration settings for each model
             split_columns: Columns in df_scada to potentially split the results analysis on
             dt: Time step in seconds. Default is 600 seconds (10 minutes).
+            turbine_subset: List of turbines to include in the analysis.
+                If None, all turbines are included.
         """
         # Make sure df_scada has simple indices
         df_scada = df_scada.reset_index(drop=True)
@@ -77,6 +80,9 @@ class ResultsAnalysis:
         # Save the time step
         self.dt = dt
 
+        # Save the conversion from kw*dt to MW-h
+        self.to_mwh = (dt / 3600.0) * 1e-3
+
         # Check that split columns is a list
         if not isinstance(split_columns, list):
             raise ValueError("split_columns must be a list")
@@ -96,6 +102,22 @@ class ResultsAnalysis:
         self.n_turbines = self.df_scada.n_turbines
         self.n_findex = self.df_scada.shape[0]
 
+        # If turbine_subset is None, use all turbines
+        if turbine_subset is None:
+            self.turbine_subset = list(range(self.n_turbines))
+        else:
+            # Check that turbine_subset is a list
+            if not isinstance(turbine_subset, list):
+                raise ValueError("turbine_subset must be a list")
+
+            # Check that turbine_subset is in the range of turbines
+            for turbine in turbine_subset:
+                if turbine < 0 or turbine >= self.n_turbines:
+                    raise ValueError(f"{turbine} not in range of turbines")
+
+            # Save the turbine subset
+            self.turbine_subset = turbine_subset
+
         # Save the FLORIS inputs
         self.floris_powers = floris_powers
         self.floris_models = floris_models
@@ -107,7 +129,7 @@ class ResultsAnalysis:
         # Generate the large table for computing grouped statistics
         df_list = []
         for floris_case in range(self.n_floris_cases):
-            for t in range(self.n_turbines):
+            for t in self.turbine_subset:
                 scada_data = self.df_scada[self.power_column_names[t]].values
                 floris_data = self.floris_powers[floris_case][:, t]
 
@@ -373,7 +395,7 @@ class ResultsAnalysis:
         """
         # First compute the SCADA total energy
         # First see what the SCADA result is (same in every case)
-        scada_table = _df_full_table.groupby(["model", "calibration"])["scada"].sum() / 6e6  #
+        scada_table = _df_full_table.groupby(["model", "calibration"])["scada"].sum() * self.to_mwh
         scada_table = scada_table.reset_index()
 
         # Make sure there is only one unique value of the 'scada' column
@@ -384,7 +406,7 @@ class ResultsAnalysis:
         print(f"SCADA RESULT: {scada_result:.2f} GWh")
 
         # Now compute the result table
-        result_table = _df_full_table.groupby(["model", "calibration"]).floris.sum() / 6e6
+        result_table = _df_full_table.groupby(["model", "calibration"]).floris.sum() * self.to_mwh
 
         # If using p_change
         if use_pchange:
