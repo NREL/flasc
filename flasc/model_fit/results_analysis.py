@@ -130,6 +130,7 @@ class ResultsAnalysis:
         df_list = []
         for floris_case in range(self.n_floris_cases):
             for t in self.turbine_subset:
+                time = self.df_scada["time"].values
                 scada_data = self.df_scada[self.power_column_names[t]].values
                 floris_data = self.floris_powers[floris_case][:, t]
 
