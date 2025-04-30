@@ -82,6 +82,7 @@ class ResultsAnalysis:
         df_list = []
         for floris_case in range(self.n_floris_cases):
             for t in range(self.n_turbines):
+                time = self.df_scada["time"].values
                 scada_data = self.df_scada[self.power_column_names[t]].values
                 floris_data = self.floris_powers[floris_case][:, t]
 
@@ -94,6 +95,7 @@ class ResultsAnalysis:
 
                 df_temp = pd.DataFrame(
                     {
+                        "time": time,
                         "scada": scada_data,
                         "floris": floris_data,
                         "turbine": t,
@@ -101,6 +103,10 @@ class ResultsAnalysis:
                         "calibration": calibration,
                     }
                 )
+
+                # Make sure time is UTC
+                df_temp["time"] = pd.to_datetime(df_temp["time"], utc=True)
+
                 df_list.append(df_temp)
         self.df_full_table = pd.concat(df_list, ignore_index=True)
         self.df_full_table = self.df_full_table.reset_index(drop=True)
