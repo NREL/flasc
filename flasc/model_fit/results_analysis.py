@@ -81,7 +81,7 @@ class ResultsAnalysis:
         self.dt = dt
 
         # Save the conversion from kw*dt to MW-h
-        self.to_mwh = (dt / 3600.0) * 1e-3
+        self.kw_dt_to_mwh = (dt / 3600.0) * 1e-6
 
         # Check that split columns is a list
         if not isinstance(split_columns, list):
@@ -397,7 +397,9 @@ class ResultsAnalysis:
         """
         # First compute the SCADA total energy
         # First see what the SCADA result is (same in every case)
-        scada_table = _df_full_table.groupby(["model", "calibration"])["scada"].sum() * self.to_mwh
+        scada_table = (
+            _df_full_table.groupby(["model", "calibration"])["scada"].sum() * self.kw_dt_to_mwh
+        )
         scada_table = scada_table.reset_index()
 
         # Make sure there is only one unique value of the 'scada' column
@@ -408,7 +410,9 @@ class ResultsAnalysis:
         print(f"SCADA RESULT: {scada_result:.2f} GWh")
 
         # Now compute the result table
-        result_table = _df_full_table.groupby(["model", "calibration"]).floris.sum() * self.to_mwh
+        result_table = (
+            _df_full_table.groupby(["model", "calibration"]).floris.sum() * self.kw_dt_to_mwh
+        )
 
         # If using p_change
         if use_pchange:
