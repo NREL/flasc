@@ -23,7 +23,7 @@ For technical questions or concerns, please email paul.fleming@nrel.gov.
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
-## Part of the WETO Stack
+## WETO software
 
 FLASC is primarily developed with the support of the U.S. Department of Energy and is part of the [WETO Software Stack](https://nrel.github.io/WETOStack). For more information and other integrated modeling software, see:
 - [Portfolio Overview](https://nrel.github.io/WETOStack/portfolio_analysis/overview.html)
