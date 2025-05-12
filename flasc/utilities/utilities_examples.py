@@ -94,12 +94,12 @@ def load_floris_artificial(wake_model="gch", wd_std=0.0, cosine_exponent=None):
 
     # Add uncertainty
     if wd_std > 0.01:
-        unc_options = {
-            "std_wd": wd_std,  # Standard deviation for inflow wind direction (deg)
-            "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
-            "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
-        }
-        fm = UncertainFlorisModel(fm, unc_options=unc_options)
+        # unc_options = {
+        #     "std_wd": wd_std,  # Standard deviation for inflow wind direction (deg)
+        #     "pmf_res": 1.0,  # Resolution over which to calculate angles (deg)
+        #     "pdf_cutoff": 0.995,  # Probability density function cut-off (-)
+        # }
+        fm = UncertainFlorisModel(fm.core.as_dict(), wd_std=wd_std)
 
     # Add turbine weighing terms. These are typically used to distinguish
     # between turbines of interest and neighboring farms. This is particularly
