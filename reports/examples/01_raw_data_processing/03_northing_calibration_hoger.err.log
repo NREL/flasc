@@ -30,8 +30,8 @@ nbclient.exceptions.CellTimeoutError: A cell timed out while it was being execut
 The message was: Cell execution timed out.
 Here is a preview of the cell contents:
 -------------------
-['def estimate_biases_with_reference_wd(df_scada, fm, wd_ref):', '    # Now use this knowledge to estimate bias for every turbine', '    num_turbines = len(fm.layout_x)', '    wd_bias_list = np.zeros(num_turbines)', '']
+['def get_bias_for_single_turbine(', '    df, fm, ti, opt_search_range=[-180.0, 180.0], plot=True, figure_save_path=None', '):', '    print("Initializing wd bias estimator object for turbine %03d..." % ti)', '']
 ...
-['    return wd_bias_list', '', '', 'wd_bias_list = estimate_biases_with_reference_wd(df_scada_homogenized, fm, wd_ref)', 'print("Wind direction biases: {}".format(wd_bias_list))']
+['print("WD bias for first clean turbine: {:.3f} deg".format(wd_bias))', '', '# Now calculate the northing-bias-corrected wind direction for this', '#  turbine and call it our reference', 'wd_ref = wrap_360(df_scada_homogenized["wd_{:03d}".format(first_clean_turbid)] - wd_bias)']
 -------------------
 
