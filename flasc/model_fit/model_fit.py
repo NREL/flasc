@@ -36,6 +36,7 @@ class ModelFit:
         parameter_name_list: List[str] = [],
         parameter_range_list: List[List] | List[Tuple] = [],
         parameter_index_list: List[int] = [],
+        yaw_angles: np.ndarray | None = None,
     ):
         """Initialize the ModelFit class.
 
@@ -51,6 +52,7 @@ class ModelFit:
             parameter_range_list (List[List] | List[Tuple]): List of parameter ranges.  If None, no
                 ranges are provided.  Defaults to None.
             parameter_index_list (List[int], optional): List of parameter indices. Defaults to None.
+            yaw_angles (np.ndarray | None, optional): Array of yaw angles. Defaults to None.
         """
         # Save the dataframe as a FlascDataFrame
         self.df = FlascDataFrame(df)
@@ -79,6 +81,22 @@ class ModelFit:
                 "WARNING: The number of turbines in the dataframe and the "
                 "Floris model do not match."
             )
+
+        # If yaw angles are provided, check that they are the same length as the number of turbines
+        if yaw_angles is not None:
+            if yaw_angles.ndim != 2:
+                raise ValueError("yaw_angles must be a 2D array.")
+            if yaw_angles.shape[0] != len(self.df):
+                raise ValueError(
+                    "yaw_angles must have the same length as the number of rows in df."
+                )
+            if yaw_angles.shape[1] != self.df.n_turbines:
+                raise ValueError(
+                    "yaw_angles must have the same num cols as the number of turbines."
+                )
+            self.yaw_angles = yaw_angles
+        else:
+            self.yaw_angles = None
 
         # Check that the cost function has 3 inputs, the SCADA dataframe, the FLORIS dataframe,
         # and the FLORIS model
@@ -236,6 +254,10 @@ class ModelFit:
             turbulence_intensities=turbulence_intensities,
             **kwargs,
         )
+
+        # if yaw angles are not None, set the yaw angles
+        if self.yaw_angles is not None:
+            self.fmodel.set(yaw_angles=self.yaw_angles)
 
         # Run the model
         self.fmodel.run()
